@@ -129,7 +129,7 @@
                       <p>
                         <img :title="item.plateNo" :alt="item.plateNo" :src="item.imagePath">
                       </p>
-                      <div class="gcck_rh_ft"><i class="vl_icon gcck_sxt"></i>{{item.deviceName}}</div>
+                      <div class="gcck_rh_ft"><i class="vl_icon gcck_sxt"></i>{{item.subStoragePath}}</div>
                       <div><i class="vl_icon gcck_cl"></i>{{item.plateNo}}</div>
                       <div><i class="vl_icon gcck_sj"></i>{{item.snapTime}}</div>
                     </div>
@@ -353,7 +353,7 @@ export default {
       getDeviceSnapImagesPage({
         where: {
           deviceIds: dId,
-          startTime: formatDate(new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd 00:00:00'),
+          startTime: formatDate(new Date(), 'yyyy-MM-dd 00:00:00'),
           endTime: formatDate(new Date(), 'yyyy-MM-dd 23:59:59')
         },
         pageNum: 1,

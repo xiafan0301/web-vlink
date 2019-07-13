@@ -41,7 +41,7 @@
           type="daterange"
           range-separator="-"
           value-format="yyyy-MM-dd"
-          format="yy/MM/dd"
+          format="yyyy-MM-dd"
           :picker-options="pickerOptions"
           start-placeholder="开始日期"
           end-placeholder="结束日期">
@@ -880,17 +880,18 @@ export default {
       }
     }
   }
-
+ 
+ 
   .vl_judge_tc {
-.Breadc{
-  position: absolute;
-  top: 0px;
-  width: 100%;
-  height: 50px;
-  left: 0px;
-}
+    .Breadc{
+      position: absolute;
+      top: 0px;
+      width: 100%;
+      height: 50px;
+      left: 0px;
+    }
     position: relative;
-    padding-top: 50px;
+   
     width: 100%;
     height: 100%;
     .camera-select {
@@ -907,13 +908,13 @@ export default {
       }
     }
     .hideleft.vl_j_left{
-      margin-left: -3rem;
+      margin-left: -272px;
     }
     .vl_j_left {
       position: relative;
       z-index: 11;
       float: left;
-      width: 3rem;
+      width: 272px;
       padding-top: 24px;
       height: 100%;
       // margin-left: 0.2rem;
@@ -1023,7 +1024,7 @@ export default {
       .vl_jtc_search {
         width: 100%;
         height: auto;
-        padding: 0 .2rem;
+        padding: 0 20px;
         padding-top: .4rem;
         // .el-input__inner {
         //   height: .4rem!important;
@@ -1068,7 +1069,7 @@ export default {
     }
     .vl_j_right {
       display: inline-block;
-      width: calc(100% - 3rem);
+      width: calc(100% - 272px);
       height: calc(100% - 5px);
       position: relative;
       #tcMap {
@@ -1309,6 +1310,9 @@ export default {
 }
 </style>
 <style lang="scss" scoped="scoped">
+ .vl_judge_tc{
+    padding-top: 50px;
+  }
 .hideleft {
   .insetLeft2 {
     transform: rotate(180deg);

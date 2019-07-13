@@ -88,7 +88,7 @@
                   <i class="vl_icon vl_icon_portrait_02" title="定位当前选中区域" @click="setFitV(index)"></i>
                 </div>
                 <ul>
-                  <li>
+                  <li title="选择矩形范围内的设备">
                     <div
                       :class="{'sd-opts-sed': item.drawActiveType === 1 }"
                       @click="selDrawType(1, index)"
@@ -96,7 +96,7 @@
                       <span class="sd-opts-icon sd-opts-icon1"></span>
                     </div>
                   </li>
-                  <li>
+                  <li title="选择圆形范围内的设备">
                     <div
                       :class="{'sd-opts-sed': item.drawActiveType === 2 }"
                       @click="selDrawType(2, index)"
@@ -104,7 +104,7 @@
                       <span class="sd-opts-icon sd-opts-icon2"></span>
                     </div>
                   </li>
-                  <li>
+                  <li title="选择折线100米范围内的设备">
                     <div
                       :class="{'sd-opts-sed': item.drawActiveType === 3 }"
                       @click="selDrawType(3, index)"
@@ -112,7 +112,7 @@
                       <span class="sd-opts-icon sd-opts-icon3"></span>
                     </div>
                   </li>
-                  <li>
+                  <li title="选择多边形范围内的设备">
                     <div
                       :class="{'sd-opts-sed': item.drawActiveType === 4 }"
                       @click="selDrawType(4, index)"
@@ -120,7 +120,7 @@
                       <span class="sd-opts-icon sd-opts-icon4"></span>
                     </div>
                   </li>
-                  <li>
+                  <li title="选择10公里圆形范围内的设备">
                     <div
                       :class="{'sd-opts-sed': item.drawActiveType === 5 }"
                       @click="selDrawType(5, index)"
@@ -129,6 +129,13 @@
                     </div>
                   </li>
                 </ul>
+                <p class="tips">
+                  <span v-if="item.drawActiveType === 1">在地图上按住鼠标左键拖动鼠标框选，松开鼠标完成选择</span>
+                  <span v-else-if="item.drawActiveType === 2">在地图上按住鼠标左键选择圆心，拖动鼠标作为半径，松开鼠标完成选择</span>
+                  <span v-else-if="item.drawActiveType === 3">在地图上鼠标左键选择两个或两个以上点形成折线，双击或右键完成选择</span>
+                  <span v-else-if="item.drawActiveType === 4">在地图上鼠标左键选择三个或三个以上点形成封闭区域，双击或右键完成选择</span>
+                  <span v-else-if="item.drawActiveType === 5">在地图上鼠标左键选择圆心，形成10公里大小的圆形区域</span>
+                </p>
               </div>
               <!-- 选择时间 -->
               <div class="select_date">
@@ -165,7 +172,7 @@
           <!-- 按钮 -->
           <div class="search_btn">
             <el-button @click="resetLeftMenu">重置</el-button>
-            <el-button type="primary" @click="submitData">确定</el-button>
+            <el-button type="primary" :loading="submitLoading" @click="submitData">确定</el-button>
           </div>
         </vue-scroll>
       </div>
@@ -344,6 +351,7 @@ import {
 import { getGroupAllList } from "@/views/index/api/api.control.js";
 import { validatePersonNum, validateInteger } from "@/utils/validator.js";
 import { random14, objDeepCopy } from "@/utils/util.js";
+import { constants } from "crypto";
 
 export default {
   data() {
@@ -362,6 +370,8 @@ export default {
         sex: null,
         age: null
       },
+      submitLoading: false, // 提交loading
+      getDetailLoading: false,
       cameraPhotoList: [],
       startDateOptArr: [
         {
@@ -712,9 +722,11 @@ export default {
         ...this.qyryfxFrom,
         deviceAndTimeList: deviceAndTimeList
       };
+      this.submitLoading = true; // 打开加载效果
       postShotNumArea(queryParams)
         .then(res => {
           if (res && res.data) {
+            this.submitLoading = false; // 关闭加载效果
             if (res.data.length) {
               this.clearMarkList(); // 清除地图标记
               this.setMarks(res.data, false);
@@ -723,6 +735,7 @@ export default {
               this.setMarks();
             }
           } else {
+            this.submitLoading = false; // 关闭加载效果
             this.clearMarkList(); // 清除地图标记
             this.setMarks();
           }
@@ -730,6 +743,7 @@ export default {
         .catch(() => {
           this.clearMarkList(); // 清除地图标记
           this.setMarks();
+          this.submitLoading = false; // 关闭加载效果
         });
     },
     /** 点击摄像头查看此摄像头抓拍详情信息 */
@@ -946,6 +960,7 @@ export default {
         // event.obj 为绘制出来的覆盖物对象
         let _sid = random14();
         this.drawClear(this.currenDrawobj);
+        // console.log('监听鼠标');
         //  return
         let drawActive = this.drawObj[this.currenDrawobj].drawActiveType; // 获取到当前要画的图形
         if (drawActive === 1) {
@@ -969,9 +984,9 @@ export default {
           this.drawObj[this.currenDrawobj].polygon["sid"] = _sid;
           // this.drawPolygonMark(_sid, event.obj);
         } else if (drawActive === 5) {
-          this.drawObj[this.currenDrawobj].circle10km[_sid] = {};
-          this.drawObj[this.currenDrawobj].circle10km[_sid].obj = event.obj;
-          this.drawObj[this.currenDrawobj].circle10km["sid"] = _sid;
+          // this.drawObj[this.currenDrawobj].circle10km[_sid] = {};
+          // this.drawObj[this.currenDrawobj].circle10km[_sid].obj = event.obj;
+          // this.drawObj[this.currenDrawobj].circle10km["sid"] = _sid;
         }
         // this.mouseTool.close(false);
         // this.amap.setDefaultCursor();
@@ -1007,7 +1022,6 @@ export default {
         this.drawObj[ind].polygon = {};
       }
       if (this.drawObj[ind].circle10km) {
-        // console.log('进来清理了吗');
         for (let k in this.drawObj[ind].circle10km) {
           this.drawClearDo(this.drawObj[ind].circle10km[k]);
         }
@@ -1032,18 +1046,18 @@ export default {
     },
     setFitV(ind) {
       this.getArea(ind);
-      this.amap.setFitView(this.areaList[ind]);
-      console.log("定位数组", this.areaList);
+      this.$nextTick(() => {
+        this.amap.setFitView(this.areaList[ind]);
+      });
     },
     getArea(ind) {
       // 矩形
       const curInd = this.drawObj[ind].drawActiveType;
-      // const sid =
       if (curInd === 1) {
         if (this.areaList.length < ind + 1) {
-          this.areaList.push(
-            this.drawObj[ind].rectangle[this.drawObj[ind].rectangle.sid].obj
-          );
+          this.areaList[ind] = this.drawObj[ind].rectangle[
+            this.drawObj[ind].rectangle.sid
+          ].obj;
         } else {
           this.areaList.splice(
             ind,
@@ -1055,9 +1069,9 @@ export default {
       // 圆形
       if (curInd === 2) {
         if (this.areaList.length < ind + 1) {
-          this.areaList.push(
-            this.drawObj[ind].circle[this.drawObj[ind].circle.sid].obj
-          );
+          this.areaList[ind] = this.drawObj[ind].circle[
+            this.drawObj[ind].circle.sid
+          ].obj;
         } else {
           this.areaList.splice(
             ind,
@@ -1069,9 +1083,9 @@ export default {
       // 线
       if (curInd === 3) {
         if (this.areaList.length < ind + 1) {
-          this.areaList.push(
-            this.drawObj[ind].polyline[this.drawObj[ind].polyline.sid].obj
-          );
+          this.areaList[ind] = this.drawObj[ind].polyline[
+            this.drawObj[ind].polyline.sid
+          ].obj;
         } else {
           this.areaList.splice(
             ind,
@@ -1083,9 +1097,9 @@ export default {
       // 多边形
       if (curInd === 4) {
         if (this.areaList.length < ind + 1) {
-          this.areaList.push(
-            this.drawObj[ind].polygon[this.drawObj[ind].polygon.sid].obj
-          );
+          this.areaList[ind] = this.drawObj[ind].polygon[
+            this.drawObj[ind].polygon.sid
+          ].obj;
         } else {
           this.areaList.splice(
             ind,
@@ -1096,9 +1110,9 @@ export default {
       }
       if (curInd === 5) {
         if (this.areaList.length < ind + 1) {
-          this.areaList.push(
-            this.drawObj[ind].circle10km[this.drawObj[ind].circle10km.sid].obj
-          );
+          this.areaList[ind] = this.drawObj[ind].circle10km[
+            this.drawObj[ind].circle10km.sid
+          ].obj;
         } else {
           this.areaList.splice(
             ind,
@@ -1276,6 +1290,7 @@ export default {
       }
     },
     selDrawType(drawType, index) {
+      // const old = this.drawObj[index].drawActiveType;
       if (this.drawObj[index].drawActiveType === drawType) {
         this.drawObj[index].drawActiveType = 0;
         this.mouseTool.close(false);
@@ -1285,6 +1300,7 @@ export default {
         this.drawObj[index].drawActiveType = drawType; // 当前要画的图形类别
         this.currenDrawobj = index; // 确定当前的时间区域
       }
+      // console.log("点击干掉", this.drawObj[this.currenDrawobj].drawActiveType);
       if (drawType === 1) {
         // 矩形
         this.drawRectangle();
@@ -1299,6 +1315,9 @@ export default {
         this.drawPolygon();
       } else if (drawType === 5) {
         // 多边形
+        // if (old === 3) {
+        //   console.log("点击干掉", 123);
+        // }
         this.drawCircle10km();
       }
     },
@@ -1647,11 +1666,11 @@ export default {
     },
     drawCircle10km() {
       this.amap.setDefaultCursor("crosshair");
-       
       this.amap.on("click", this.drawCircle10kmClick);
     },
     drawCircle10kmClick(e) {
-      // e.lnglat.getLng()+','+e.lnglat.getLat()
+      this.drawClear(this.currenDrawobj);
+      this.mouseTool.close(false);
       let circle = new AMap.Circle({
         center: e.lnglat,
         radius: 1000 * 10, //半径
@@ -1668,13 +1687,11 @@ export default {
       circle.setMap(this.amap);
       // 缩放地图到合适的视野级别
       this.amap.setFitView([circle]);
-      // let _sid = random14();
-      // this.drawObj[this.currenDrawobj].circle10km[_sid] = {};
-      // this.drawObj[this.currenDrawobj].circle10km[_sid].obj = circle;
-      // this.amap.setDefaultCursor();
-      // this.drawObj[this.currenDrawobj].drawActiveType = 0;
+      let _sid = random14();
+      this.drawObj[this.currenDrawobj].circle10km[_sid] = {};
+      this.drawObj[this.currenDrawobj].circle10km[_sid].obj = circle;
+      this.drawObj[this.currenDrawobj].circle10km["sid"] = _sid;
       this.amap.off("click", this.drawCircle10kmClick);
-      // this.drawCircle10kmMark(_sid, circle);
     },
     drawCircle10kmEditor(sid) {
       if (this.drawObj.circle10km[sid]) {
@@ -1745,7 +1762,7 @@ export default {
       }
     },
     selSubmit(index) {
-      this.submitLoading = true;
+      this.getDetailLoading = true;
       let dObj = {},
         bObj = {};
       if (this.listDevice && this.listDevice.length > 0) {
@@ -1754,6 +1771,9 @@ export default {
           // 矩形
           if (this.drawObj[index].rectangle) {
             for (let k in this.drawObj[index].rectangle) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].rectangle[k];
               if (
                 so.obj &&
@@ -1766,6 +1786,9 @@ export default {
           // 圆形
           if (this.drawObj[index].circle) {
             for (let k in this.drawObj[index].circle) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].circle[k];
               if (
                 so.obj &&
@@ -1778,8 +1801,10 @@ export default {
           // 线
           if (this.drawObj[index].polyline) {
             for (let k in this.drawObj[index].polyline) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].polyline[k];
-              console.log("线", so);
               if (
                 window.AMap.GeometryUtil.distanceToLine(
                   new window.AMap.LngLat(o.longitude, o.latitude),
@@ -1793,6 +1818,9 @@ export default {
           // 多边形
           if (this.drawObj[index].polygon) {
             for (let k in this.drawObj[index].polygon) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].polygon[k];
               if (
                 so.obj &&
@@ -1804,6 +1832,9 @@ export default {
           }
           if (this.drawObj[index].circle10km) {
             for (let k in this.drawObj[index].circle10km) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].circle10km[k];
               if (
                 so.obj &&
@@ -1821,6 +1852,9 @@ export default {
           // 矩形
           if (this.drawObj[index].rectangle) {
             for (let k in this.drawObj[index].rectangle) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].rectangle[k];
               if (
                 so.obj &&
@@ -1833,6 +1867,9 @@ export default {
           // 圆形
           if (this.drawObj[index].circle) {
             for (let k in this.drawObj[index].circle) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].circle[k];
               if (
                 so.obj &&
@@ -1845,6 +1882,9 @@ export default {
           // 线
           if (this.drawObj[index].polyline) {
             for (let k in this.drawObj[index].polyline) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].polyline[k];
               if (
                 window.AMap.GeometryUtil.distanceToLine(
@@ -1859,6 +1899,9 @@ export default {
           // 多边形
           if (this.drawObj[index].polygon) {
             for (let k in this.drawObj[index].polygon) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].polygon[k];
               if (
                 so.obj &&
@@ -1870,6 +1913,9 @@ export default {
           }
           if (this.drawObj[index].circle10km) {
             for (let k in this.drawObj[index].circle10km) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].circle10km[k];
               if (
                 so.obj &&
@@ -2236,6 +2282,9 @@ export default {
               color: #333;
               background-color: #fafafa;
               border-bottom: 1px solid #d3d3d3;
+              > i {
+                cursor: pointer;
+              }
             }
             > ul {
               padding: 22px 0 18px 0;
@@ -2264,6 +2313,12 @@ export default {
                   }
                 }
               }
+            }
+            .tips {
+              font-size: 14px;
+              padding: 0 10px 10px 10px;
+              color: #999;
+              // margin: 0 auto;
             }
           }
           .sd-opts-icon {

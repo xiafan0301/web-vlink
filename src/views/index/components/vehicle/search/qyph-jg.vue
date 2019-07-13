@@ -6,7 +6,7 @@
         <vue-scroll>
           <div class="list-box">
             <div class="list-item" v-for="(item, index) in strucInfoList" :key="item.id" @click="showStrucInfo(item, index)">
-              <img :src="item.vehicleDetailList[0].subStoragePath" alt="">
+              <img :src="item.vehicleDetailList[0] ? item.vehicleDetailList[0].subStoragePath : ''" alt="">
               <p class="time">车牌号:{{item.groupName}}</p>
               <p class="address">次数:{{item.totalNum}}</p>
             </div>
@@ -65,7 +65,7 @@
               </div>
               <div class="struc_cdi_line">
                 <p v-if="curInSur">该车牌信息已存在布控库中</p>
-                <el-button :disabled="curInSur" type="primary" size="mini">加入布控库</el-button>
+                <el-button :disabled="curInSur"  @click="gotoControl(sturcDetail)" type="primary" size="mini">加入布控库</el-button>
               </div>
             </div>
           </div>
@@ -83,7 +83,7 @@
               <i class="vl_icon vl_icon_control_09" v-else></i>
             </div>
           </div>
-          <div class="download_btn"><a download="视频" :href="videoUrl"></a>下载视频</div>
+          <div class="download_btn"><el-button @click="downloadVideo(sturcDetail.videoPath)"></el-button>下载视频</div>
         </div>
       </div>
       <div class="struc-list">
@@ -151,6 +151,17 @@
       this.getTheList();
     },
     methods: {
+      downloadVideo (path) {
+        var wind = window.open('path', 'newwindow', 'height=800, width=1100, top=100, left=100, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=n o, status=no');
+        let domA = document.createElement('a');
+        domA.setAttribute('download', '下载视频');
+        domA.setAttribute('href', path);
+        wind.document.body.appendChild(domA);
+        console.log(wind)
+      },
+      gotoControl (data){
+        this.$router.push({ name: 'control_library', query: {imgurl: data.url, plateNo: data.plateNo} })
+      },
       getTheList () {
         let params = this.$route.query;
         params.pageNum = this.pagination.pageNum;

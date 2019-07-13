@@ -86,15 +86,15 @@
             </div>
             <!-- 表单 -->
             <el-form :model="tzscMenuForm" ref="tzscMenuForm" :rules="rules">
-              <div class="selectDate">
+              <div class="selectDate date-comp">
                 <el-form-item label prop="selectDate">
                   <el-date-picker
                     class="width232"
                     v-model="tzscMenuForm.selectDate"
                     type="daterange"
-                    range-separator="-"
+                    range-separator="至"
                     value-format="yyyy-MM-dd"
-                    format="yy/MM/dd"
+                    format="yyyy-MM-dd"
                     :picker-options="pickerOptions"
                     start-placeholder="开始日期"
                     end-placeholder="结束日期"
@@ -271,19 +271,24 @@
                       :value="item.enumValue"
                     ></el-option>
                   </el-select>
-                </el-form-item> -->
+                </el-form-item>-->
               </div>
             </el-form>
             <!-- 按钮样式 -->
             <div class="btn_warp">
               <el-button class="reset_btn" @click="resetMenu">重置</el-button>
-              <el-button class="select_btn" :loading="getStrucInfoLoading" :disabled="characteristicAble" @click="getStrucInfo(true)">确定</el-button>
+              <el-button
+                class="select_btn"
+                :loading="getStrucInfoLoading"
+                :disabled="characteristicAble"
+                @click="getStrucInfo(true)"
+              >确定</el-button>
             </div>
           </div>
         </vue-scroll>
       </div>
       <!-- 通用的右边列表 -->
-      <div class="right_img_list">
+      <div class="right_img_list" v-if="strucInfoList.length > 0">
         <!-- 排序和结果 -->
         <div class="result_sort">
           <h3 class="result">检索结果（{{ total }}）</h3>
@@ -349,6 +354,13 @@
               ></el-pagination>
             </template>
           </vue-scroll>
+        </div>
+      </div>
+      <!-- 没有数据的情况 -->
+      <div v-else class="fnull">
+        <div>
+          <img src="../../../../../assets/img/null-content.png" alt />
+          {{noDataTips}}
         </div>
       </div>
     </div>
@@ -420,17 +432,26 @@
               </h2>
               <!-- 特征展示框 -->
               <div class="struc_cdi_box">
-                <div class="item" v-if="sturcDetail.plateColor">{{ '车牌颜色：' + sturcDetail.plateColor}}</div>
+                <div
+                  class="item"
+                  v-if="sturcDetail.plateColor"
+                >{{ '车牌颜色：' + sturcDetail.plateColor}}</div>
                 <div class="item" v-if="sturcDetail.plateNo">{{ sturcDetail.plateNo}}</div>
                 <!-- <div
                   class="item"
                   v-if="sturcDetail.plateReliability"
-                >{{sturcDetail.plateReliability}}</div> -->
+                >{{sturcDetail.plateReliability}}</div>-->
                 <div class="item" v-if="sturcDetail.vehicleBrand">{{ sturcDetail.vehicleBrand}}</div>
                 <div class="item" v-if="sturcDetail.vehicleClass">{{ sturcDetail.vehicleClass}}</div>
-                <div class="item" v-if="sturcDetail.vehicleColor">{{ '车辆颜色：' + sturcDetail.vehicleColor}}</div>
+                <div
+                  class="item"
+                  v-if="sturcDetail.vehicleColor"
+                >{{ '车辆颜色：' + sturcDetail.vehicleColor}}</div>
                 <div class="item" v-if="sturcDetail.vehicleModel">{{sturcDetail.vehicleModel}}</div>
-                <div class="item" v-if="sturcDetail.vehicleRoof">{{ '车顶(天窗)：' + sturcDetail.vehicleRoof}}</div>
+                <div
+                  class="item"
+                  v-if="sturcDetail.vehicleRoof"
+                >{{ '车顶(天窗)：' + sturcDetail.vehicleRoof}}</div>
                 <div class="item" v-if="sturcDetail.sunvisor">{{ '遮阳板：' + sturcDetail.sunvisor}}</div>
               </div>
               <!-- 车辆的信息栏 -->
@@ -645,7 +666,7 @@ export default {
       //     enumField: "年检标数量10个",
       //     enumValue: "年检标数量10个"
       //   }
-      // ], 
+      // ],
       characterTypes: [
         "plateClass", // 号牌类型
         "plateColor", // 车牌颜色
@@ -653,7 +674,7 @@ export default {
         "vehicleClass", // 汽车类型（越野啥的）
         "vehicleBrand", // 汽车型号
         "vehicleStyles", // 汽车的型号
-        "vehicleColor", // 汽车颜色
+        "vehicleColor" // 汽车颜色
         // "sunvisor", // 遮阳板
         // "descOfFrontItem", // 年检标数量
       ],
@@ -704,6 +725,7 @@ export default {
       },
       /* 检索结果变量 */
       strucInfoList: [],
+      noDataTips: "请在左侧输入查询条件",
       pageNum: 1,
       pageSize: 10,
       total: 0,
@@ -795,12 +817,12 @@ export default {
       this.vehicleClassOptions = this.dicFormater(44)[0].dictList;
       this.vehicleColorOptions = this.dicFormater(17)[0].dictList;
     },
-    getStrucInfo(isClick=false) {
+    getStrucInfo(isClick = false) {
       // 根据特征数组来获取到检索的结果
       this.$refs.tzscMenuForm.validate(valid => {
         if (valid) {
           if (isClick) {
-          this.getStrucInfoLoading = true; // 打开加载效果
+            this.getStrucInfoLoading = true; // 打开加载效果
           }
           if (this.selectCameraArr.length <= 0 && this.selectBayonetArr <= 0) {
             this.$message.warning("请选择至少一个卡口与摄像头");
@@ -818,24 +840,23 @@ export default {
           if (this.selectType === 2) {
             queryParams = {
               where: {
-              "startTime":
-                formatDate(this.tzscMenuForm.selectDate[0], "yyyy-MM-dd") +
-                " 00:00:00", // 开始时间
-              "endTime":
-                formatDate(this.tzscMenuForm.selectDate[1], "yyyy-MM-dd") +
-                " 23:59:59", // 结束时间
-              "deviceUid":
-                deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
-              "bayonetUid":
-                bayonetUidArr.length > 0 ? bayonetUidArr.join() : null, // 卡口标识
-              "plateClass": this.tzscMenuForm.licenseType || null, // 号牌类型
-              "plateColor": this.tzscMenuForm.licenseColor || null, // 号牌颜色
-              "vehicleClass": this.tzscMenuForm.carType || null, // 车辆类型
-              "vehicleColor": this.tzscMenuForm.carColor || null, // 车辆颜色
-              // "sunvisor": this.tzscMenuForm.sunVisor || null, // 遮阳板
-              // "descOfRearItem": this.tzscMenuForm.inspectionCount || null, // 年检标数量
-              "vehicleNumber": null, // 车牌号码
-              "vehicleModel": null, // 车辆型号
+                startTime:
+                  formatDate(this.tzscMenuForm.selectDate[0], "yyyy-MM-dd") +
+                  " 00:00:00", // 开始时间
+                endTime:
+                  formatDate(this.tzscMenuForm.selectDate[1], "yyyy-MM-dd") +
+                  " 23:59:59", // 结束时间
+                deviceUid: deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
+                bayonetUid:
+                  bayonetUidArr.length > 0 ? bayonetUidArr.join() : null, // 卡口标识
+                plateClass: this.tzscMenuForm.licenseType || null, // 号牌类型
+                plateColor: this.tzscMenuForm.licenseColor || null, // 号牌颜色
+                vehicleClass: this.tzscMenuForm.carType || null, // 车辆类型
+                vehicleColor: this.tzscMenuForm.carColor || null, // 车辆颜色
+                // "sunvisor": this.tzscMenuForm.sunVisor || null, // 遮阳板
+                // "descOfRearItem": this.tzscMenuForm.inspectionCount || null, // 年检标数量
+                vehicleNumber: null, // 车牌号码
+                vehicleModel: null // 车辆型号
               },
               pageNum: this.pageNum,
               pageSize: this.pageSize
@@ -843,17 +864,16 @@ export default {
           } else {
             // 自定义的特征
             queryParams = {
-               where: {
-              "startTime":
-                formatDate(this.tzscMenuForm.selectDate[0], "yyyy-MM-dd") +
-                " 00:00:00", // 开始时间
-              "endTime":
-                formatDate(this.tzscMenuForm.selectDate[1], "yyyy-MM-dd") +
-                " 23:59:59", // 结束时间
-              "deviceUid":
-                deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
-              "bayonetUid":
-                bayonetUidArr.length > 0 ? bayonetUidArr.join() : null // 卡口标识
+              where: {
+                startTime:
+                  formatDate(this.tzscMenuForm.selectDate[0], "yyyy-MM-dd") +
+                  " 00:00:00", // 开始时间
+                endTime:
+                  formatDate(this.tzscMenuForm.selectDate[1], "yyyy-MM-dd") +
+                  " 23:59:59", // 结束时间
+                deviceUid: deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
+                bayonetUid:
+                  bayonetUidArr.length > 0 ? bayonetUidArr.join() : null // 卡口标识
               },
               pageNum: this.pageNum,
               pageSize: this.pageSize
@@ -862,17 +882,18 @@ export default {
               return item.checked;
             });
             for (let i = 0; i < selectedArr.length; i++) {
-              if (selectedArr[i].plateClass) { // 号牌类型
-                queryParams['where'].plateClass = selectedArr[i].plateClass;
+              if (selectedArr[i].plateClass) {
+                // 号牌类型
+                queryParams["where"].plateClass = selectedArr[i].plateClass;
               }
               if (selectedArr[i].plateColor) {
-                queryParams['where'].plateColor = selectedArr[i].plateColor;
+                queryParams["where"].plateColor = selectedArr[i].plateColor;
               }
               if (selectedArr[i].vehicleClass) {
-                queryParams['where'].vehicleClass = selectedArr[i].vehicleClass;
+                queryParams["where"].vehicleClass = selectedArr[i].vehicleClass;
               }
               if (selectedArr[i].vehicleColor) {
-                queryParams['where'].vehicleColor = selectedArr[i].vehicleColor;
+                queryParams["where"].vehicleColor = selectedArr[i].vehicleColor;
               }
               // if (selectedArr[i].sunvisor) { // 遮阳板
               //   queryParams['where'].sunvisor = selectedArr[i].sunvisor;
@@ -880,14 +901,18 @@ export default {
               // if (selectedArr[i].descOfFrontItem) { // 年检标数量
               //   queryParams['where'].descOfRearItem = selectedArr[i].descOfFrontItem;
               // }
-              if (selectedArr[i].plateNo) { // 车牌
-                queryParams['where'].vehicleNumber = selectedArr[i].plateNo;
+              if (selectedArr[i].plateNo) {
+                // 车牌
+                queryParams["where"].vehicleNumber = selectedArr[i].plateNo;
               }
-              if (selectedArr[i].vehicleBrand) { // 车辆型号
-                queryParams['where'].vehicleModel = selectedArr[i].vehicleBrand;
+              if (selectedArr[i].vehicleBrand) {
+                // 车辆型号
+                queryParams["where"].vehicleModel = selectedArr[i].vehicleBrand;
               }
-              if (selectedArr[i].vehicleStyles) { // 车辆型号
-                queryParams['where'].vehicleModel = selectedArr[i].vehicleStyles;
+              if (selectedArr[i].vehicleStyles) {
+                // 车辆型号
+                queryParams["where"].vehicleModel =
+                  selectedArr[i].vehicleStyles;
               }
             }
           }
@@ -912,6 +937,7 @@ export default {
           getFeatureSearch(queryParams)
             .then(res => {
               this.getStrucInfoLoading = false; // 关闭加载效果
+              this.noDataTips = "暂无搜索结果";
               if (res.data && res.data.list) {
                 if (res.data.list.length > 0) {
                   this.strucInfoList = res.data.list;
@@ -929,6 +955,7 @@ export default {
               this.getStrucInfoLoading = false; // 关闭加载效果
               this.strucInfoList = []; // 清空搜索结果
               this.total = 0;
+              this.noDataTips = "暂无搜索结果";
             });
         } else {
           return false;
@@ -954,9 +981,10 @@ export default {
             this.getCharacterLoading = false;
             if (res.data) {
               const data = res.data[0];
-              if (data.descOfFrontItem) { // 过滤分号
-                data.descOfFrontItem = data.descOfFrontItem.replace(";","")
-              };
+              if (data.descOfFrontItem) {
+                // 过滤分号
+                data.descOfFrontItem = data.descOfFrontItem.replace(";", "");
+              }
               this.characteristicList = [];
               for (let key in data) {
                 for (let i = 0; i < this.characterTypes.length; i++) {
@@ -1460,7 +1488,7 @@ export default {
           }
           .color_blue {
             color: #fff;
-            background: #0C70F8;
+            background: #0c70f8;
           }
         }
       }
@@ -1632,6 +1660,33 @@ export default {
         }
       }
     }
+    // 没有数据的样式
+    .fnull {
+      text-align: center;
+      line-height: 48px;
+      font-size: 16px;
+      color: #666666;
+      -webkit-box-flex: 1;
+      -ms-flex: 1;
+      flex: 1;
+      height: 100%;
+      background: #fff;
+      margin: 24px 20px 20px 20px;
+      position: relative;
+      > div {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%); /* IE 9 */
+        -webkit-transform: translate(-50%, -50%); /* Safari and Chrome */
+        img {
+          display: block;
+          margin: auto;
+          padding-bottom: 10px;
+        }
+      }
+    }
     // 右边图片列表
     .right_img_list {
       -webkit-box-flex: 1;
@@ -1639,8 +1694,8 @@ export default {
       flex: 1;
       overflow: hidden;
       position: relative;
-      height: 100%;
       padding: 24px 20px 20px 20px;
+      height: 100%;
       // 检索结果与排序
       .result_sort {
         overflow: hidden;
