@@ -268,12 +268,12 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.storagePath" :class="{'active':isChoose}"   @click="bigImg(1)" />
+            <img :src="sturcDetail.storagePath" :class="{'active':isChoose}" class="bigImg" />
             <span>全景图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img struc_c_d_img_green">
-              <img :src="sturcDetail.subStoragePath" :class="{'active':isChoose2}"  @click="bigImg(2)" />
+              <img :src="sturcDetail.subStoragePath" :class="{'active':isChoose2}" class="bigImg"/>
               <span>抓拍图</span>
             </div>
             <div class="struc_c_d_info">

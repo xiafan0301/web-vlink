@@ -275,12 +275,12 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.storagePath" alt />
+            <img class="bigImg" :src="sturcDetail.storagePath" alt />
             <span>全景图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img struc_c_d_img_green">
-              <img :src="sturcDetail.subStoragePath" alt />
+              <img class="bigImg" :src="sturcDetail.subStoragePath" alt />
               <span>抓拍图</span>
             </div>
             <div class="struc_c_d_info">
