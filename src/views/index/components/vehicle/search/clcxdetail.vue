@@ -98,7 +98,7 @@
           <div class="flex1 bkt">
             <img
               :src="snapObj.storagePath"
-              class="spimg" @click="extendImg(snapObj.storagePath)"
+              class="spimg bigImg"  
              
             >
             
@@ -170,17 +170,17 @@
         </div>
       </div>
     </div>
-    <extendBig :url="bigurl" :open="openBig" @closeimg="openBig=false"></extendBig>
+    <!-- <extendBig :url="bigurl" :open="openBig" @closeimg="openBig=false"></extendBig> -->
   </div>
 </template>
 <script>
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
-import extendBig from '@/components/common/extendBig.vue';
+
 import { ScpGETstrucInfoList } from "@/views/index/api/api.search.js";
 import { getSnapDetail,getArchives } from "@/views/index/api/api.judge.js";
 import { dataList } from "@/utils/data.js";
 export default {
-  components: {vlBreadcrumb,extendBig},
+  components: {vlBreadcrumb},
   data() {
     return {
       urldata:JSON.parse(localStorage.getItem("searchD")),
@@ -255,9 +255,10 @@ export default {
     this.getArchives()
   },
   methods: {
-    extendImg(v){
-      this.openBig=true
-      this.bigurl=v
+    extendImgs(v){
+      this.extendImg(v)
+      // this.openBig=true
+      // this.bigurl=v
     },
     goToPage(v){
       if(v=="vehicle_search_lxwfdetail"){
