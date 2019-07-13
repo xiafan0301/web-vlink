@@ -183,7 +183,7 @@
               </div>
               <!-- 时间 -->
               <el-form-item>
-                <div class="time-search">
+                <div class="time-search date-comp">
                   <el-date-picker
                     v-model="data1"
                     type="daterange"
@@ -1017,7 +1017,7 @@ html {
 }
 .info-left {
   .el-date-editor .el-range-input {
-    font-size: 12px;
+    /* font-size: 12px; */
   }
 }
 .vehicle-info {

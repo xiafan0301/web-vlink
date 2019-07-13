@@ -86,13 +86,13 @@
             </div>
           </div>
           <!-- 时间 -->
-          <div class="time-search">
+          <div class="time-search date-comp">
             <el-date-picker
               v-model="searchData.time"
               type="daterange"
-              range-separator="-"
+              range-separator="至"
               value-format="yyyy-MM-dd"
-              format="yy/MM/dd"
+              format="yyyy-MM-dd"
               :picker-options="pickerOptions"
               start-placeholder="开始日期"
               end-placeholder="结束日期"

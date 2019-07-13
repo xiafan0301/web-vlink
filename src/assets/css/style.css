@@ -777,7 +777,14 @@
   height: 104px;
 }
 
-/* element-ui reset */
+/* element-ui 日期选择器el-date-picker reset */
+.date-comp .el-date-editor .el-range-separator {
+  width: 30px;
+  text-align: center;
+}
+.date-comp .el-date-editor .el-range-input {
+  width: 52%;
+}
 .el-date-editor .el-range-separator {
   width: 30px;
   text-align: center;
