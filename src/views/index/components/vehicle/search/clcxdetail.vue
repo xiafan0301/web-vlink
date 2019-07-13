@@ -98,7 +98,7 @@
           <div class="flex1 bkt">
             <img
               :src="snapObj.storagePath"
-              class="spimg"
+              class="spimg" @click="extendImg(snapObj.storagePath)"
              
             >
             
@@ -127,6 +127,7 @@
                   
                 </p>
               </div>
+              <a :href="snapObj.videoPath">下载视频</a>
               <!-- <span class="playSee" v-if="showimg" @click="showimg=!showimg">视频回放</span>
               <span class="playSee" v-if="!showimg" @click="showimg=!showimg">抓拍图</span> -->
             </div>
@@ -169,19 +170,23 @@
         </div>
       </div>
     </div>
+    <extendBig :url="bigurl" :open="openBig" @closeimg="openBig=false"></extendBig>
   </div>
 </template>
 <script>
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+import extendBig from '@/components/common/extendBig.vue';
 import { ScpGETstrucInfoList } from "@/views/index/api/api.search.js";
 import { getSnapDetail,getArchives } from "@/views/index/api/api.judge.js";
 import { dataList } from "@/utils/data.js";
 export default {
-  components: {vlBreadcrumb},
+  components: {vlBreadcrumb,extendBig},
   data() {
     return {
       urldata:JSON.parse(localStorage.getItem("searchD")),
       curImgIndex: 0,
+      bigurl:'',
+      openBig: false,
       showSim: false,
       showimg: true,
       playing: true,
@@ -250,6 +255,10 @@ export default {
     this.getArchives()
   },
   methods: {
+    extendImg(v){
+      this.openBig=true
+      this.bigurl=v
+    },
     goToPage(v){
       if(v=="vehicle_search_lxwfdetail"){
         this.$router.push({name:v , query:{
@@ -279,11 +288,11 @@ export default {
           // this.vehicleType = [...dic[0].dictList]; // 车辆类型
           let a = this.plateType.find(el=>el.enumField==this.detailData.numberType)
           let b = this.vehicleType.find(el=>el.enumField==this.detailData.vehicleType)
-          console.log(this.plateType);
-          console.log(b);
-          
-          this.detailData._vehicleType=a.enumValue
-          this.detailData._numberType=b.enumValue
+          // console.log(this.plateType);
+          // console.log(b);
+          //if(a)
+          this.detailData._vehicleType=a ? a.enumValue :''
+          this.detailData._numberType= b ? b.enumValue :''
         }
       })
     },

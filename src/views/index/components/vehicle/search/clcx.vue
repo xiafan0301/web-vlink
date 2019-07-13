@@ -133,7 +133,6 @@
       </el-table-column>
       <el-table-column
         prop="vehicleGroup"
-        sortable
         label="车辆类别">
       </el-table-column>
       <el-table-column
@@ -159,7 +158,7 @@
       请在左侧输入查询条件</div>
        
     </div>
-    <!-- <el-pagination
+    <el-pagination
       class="cum_pagination"
       @size-change="handleSizeChange"
       @current-change="onPageChange"
@@ -168,7 +167,7 @@
       :page-size="pagination.pageSize"
       layout="total, prev, pager, next, jumper"
       :total="pagination.total">
-    </el-pagination> -->
+    </el-pagination>
     </div>
      <!-- 地图选择 -->
     <!-- <el-dialog :visible.sync="dialogVisible" width="80%">
@@ -232,8 +231,7 @@ export default {
       allDevice:[],
       selectDevice:[],
       selectBayonet:[],
-      tableData: [
-      ],
+      tableData: [],
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       options: [],
       vehicleOptions: [],
@@ -260,7 +258,8 @@ export default {
     this.vehicleOptions= [...dic[0].dictList]
     let vd= JSON.parse(localStorage.getItem("searchD"))
     if(vd && this.$route.query.dateStart){
-      this.getSnapList(vd)
+      this.isNull=false;
+      //this.getSnapList(vd)
       this.ruleForm= {
         dateStart:this.$route.query.dateStart,
         dateEnd:this.$route.query.dateEnd,
@@ -273,7 +272,13 @@ export default {
         pageSize:10,
       }
       this.value1 = this.$route.query.areaIds?this.$route.query.areaIds.split(","):''
-      //this.select=this.$route.query.plateNo?this.$route.query.plateNo.substr(0,1):""
+      let da=  JSON.parse(localStorage.getItem("clcxData"))
+      let numb= JSON.parse(localStorage.getItem("clcxPage"))
+      this.totalData = da
+      this.pagination.total=da.length
+      this.pagination.pageNum = numb
+      this.tableData= this.totalData.slice((numb-1)*10,10*numb)
+     
     }
     
   },
@@ -335,7 +340,9 @@ export default {
     getSnapList(v){
       this.isload=true
       if(!this.ruleForm.dateStart || !this.ruleForm.dateEnd){
-        this.$message.error("请输入开始时间和结束时间!");
+        if(!document.querySelector('.el-message--info')){
+          this.$message.error("请输入开始时间和结束时间!");
+          }
         return
       }
       if(this.input5==1){
@@ -362,15 +369,22 @@ export default {
         if(res && res.data && res.data.length>0){
           this.isload=false
           // console.log(res.data);
-          // pagination: { total: 4, pageSize: 10, pageNum: 1 },
-          // this.pagination.total=res.data.total
-          // this.pagination.pageSize =res.data.pageNum
-          this.tableData= res.data
+          //pagination: { total: 4, pageSize: 10, pageNum: 1 },
+          this.pagination.total=res.data.length
+          this.pagination.pageNum=1
+          //this.tableData= res.data
+          this.totalData=res.data
+          this.tableData= this.totalData.slice(0,10)
           // console.log(this.tableData);
+          let localData= JSON.stringify(this.totalData)
+          localStorage.setItem('clcxData',localData)
+          localStorage.setItem('clcxPage',"1")
           
         }else{
            this.isload=false
-          this.$message.info("没有相关数据。");
+           if(!document.querySelector('.el-message--info')){
+             this.$message.info("没有相关数据。");
+          }
           this.tableData=[]
         }
       })
@@ -441,8 +455,10 @@ export default {
       //console.log(page);
       
       this.pagination.pageNum = page;
-      this.grounpOptions.pageNum=page
-      this.getSnapList()
+      localStorage.setItem('clcxPage',page)
+      this.tableData= this.totalData.slice((page-1)*10,10*page)
+      // this.grounpOptions.pageNum=page
+      // this.getSnapList()
     },
     handleSizeChange (val) {
       //i没有用到

@@ -289,13 +289,18 @@ export default {
       }
       
       if(!result){
-         this.$message.info("请输入正确的车牌号码。");
+        if(!document.querySelector('.el-message--info')){
+           this.$message.info("请输入正确的车牌号码。");
+        }
+        
          return;
       }
 
       this.getVehicleShot(pg);
       }else{
+        if(!document.querySelector('.el-message--info')){
          this.$message.info("请输入开始时间和车牌号码。");
+        }
       }
     },
     resetForm(v){
@@ -349,7 +354,10 @@ export default {
           // console.log(res);
           this.reselt = true;
           if (!res.data || res.data.length === 0) {
-            this.$message.info("抱歉，没有找到匹配结果");
+            if(!document.querySelector('.el-message--info')){
+           this.$message.info("抱歉，没有找到匹配结果");
+          }
+            
             this.evData=[]
             this.amap.clearMap();
             //this.searching = false;
