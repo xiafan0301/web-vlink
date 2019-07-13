@@ -1,9 +1,5 @@
 <template>
   <div class="point" style="position: relative;">
-    <!-- 地图图片显示开关 -->
-    <div class="map_pic_show">
-      <el-checkbox v-model="mapPicShow">显示抓拍图片</el-checkbox>
-    </div>
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
@@ -116,6 +112,7 @@
     </div>
     <!--地图操作按钮-->
     <ul class="map_rrt_u2">
+      <li @click="mapPicShow = !mapPicShow" style="font-size: 14px;" :style="{'color': mapPicShow ? '#0C70F8' : '#999'}">显示图片</li>
       <li @click="resetZoom"><i class="el-icon-aim"></i></li>
       <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
       <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
@@ -656,7 +653,7 @@
               this.showStrucInfo(obj, i)
             })
             path.push(_path);
-            let _content = `<div class="vl_icon vl_icon_sxt"></div>`
+            let _content = `<div class="vl_icon vl_icon_sxt"><p>${obj.shotTime}</p></div>`
             let point = new AMap.Marker({ // 添加自定义点标记
               map: this.amap,
               position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
@@ -738,8 +735,29 @@
   };
 </script>
 <style lang="scss">
- .clgj_map_show_pic {
+  #rightMap {
+    .vl_icon.vl_icon_sxt {
+      position: relative;
+      > p {
+        position: absolute; top: 10px; left: 98%;
+        width: auto;
+        word-break:keep-all; white-space:nowrap;
+        font-size: 12px; color: #fff;
+        background-color: rgba(0, 0, 0, 0.4);
+        border-radius: 2px;
+        padding: 2px 5px;
+      }
+    }
+  }
+  .clgj_map_show_pic {
     .vl_jtc_mk { display: block !important; }
+    &#rightMap {
+      .vl_icon.vl_icon_sxt {
+        > p {
+          display: none;
+        }
+      }
+    }
   }
 </style>
 
@@ -1455,10 +1473,11 @@
       width: 100%;
       position: absolute;
       color: #FFFFFF;
-      bottom: 8px;
+      bottom: 0;
       font-size: 12px;
       padding: 0 6px;
-      line-height: 20px;
+      line-height: 30px;
+      background-color: rgba(0, 0, 0, .4);
       > i {
         height: 20px;
         float: right;
