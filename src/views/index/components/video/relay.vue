@@ -251,7 +251,17 @@
             </span>
           </div>
           <div class="relay_task_mb" v-show="xjMoreInfo">
-            更多
+            <h3>选择设备：</h3>
+            <div class="task_mb_map">
+              <ul class="task_mb_mt">
+                <li @click="xjSelType = 1" :class="{'task_mb_mt_sed': xjSelType === 1}">地图选择</li>
+                <li @click="xjSelType = 2" :class="{'task_mb_mt_sed': xjSelType === 2}">列表选择</li>
+              </ul>
+              <div v-show="xjSelType === 1">
+
+              </div>
+            </div>
+            <div class="task_mb_d"></div>
           </div>
         </div>
       </div>
@@ -320,6 +330,7 @@ export default {
       xjVechicleType: 1, // 1上传图片  2输入车牌号
       xjPlateNo: '',
       xjMoreInfo: false,
+      xjSelType: 1, // 1地图选择  2列表选择
       uploadAcion: ajaxCtx.base + '/new',
       curImageUrl: '', // 当前上传的图片 人员
       curImageUrl2: '', // 当前上传的图片 车辆
@@ -600,15 +611,50 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.relay_task_mb {
+  border-top: 1px solid #eee;
+  > h3 {
+    color: #666;
+    padding-top: 10px;
+  }
+  > .task_mb_map {
+    border-radius:4px 4px 0px 0px;
+    border:1px solid rgba(211,211,211,1);
+    > .task_mb_mt {
+      border-bottom: 1px solid #eee;
+      overflow: hidden;
+      background-color: #FAFAFA;
+      > li {
+        float: left;
+        height: 40px; line-height: 40px;
+        margin: 0 20px;
+        border-bottom: 2px solid #FAFAFA;
+        cursor: pointer;
+        &.task_mb_mt_sed {
+          color: #0C70F8;
+          border-bottom-color: #0C70F8;
+          cursor: default;
+        }
+      }
+    }
+  }
+  > .task_mb_d {
+    
+  }
+}
 .relay_task_mm {
-  padding: 10px 0;
+  padding: 15px 0;
   color: #0C70F8;
-  > i {
-    padding-left: 5px;
-    color: #0C70F8;
-    font-size: 16px;
-    &.relay_task_mm_d2 {
-      transform: rotate(90deg);
+  > span {
+    display: inline-block;
+    cursor: pointer;
+    > i {
+      padding-left: 5px;
+      color: #0C70F8; font-size: 16px;
+      transition: all .4s ease-out;
+      &.relay_task_mm_d2 {
+        transform: rotate(180deg);
+      }
     }
   }
 }
