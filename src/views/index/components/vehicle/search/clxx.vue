@@ -24,7 +24,7 @@
             <el-date-picker
               v-model="searchData.time"
               type="daterange"
-              range-separator="-"
+              range-separator="至"
               value-format="yyyy-MM-dd"
               format="yyyy-MM-dd"
               :picker-options="pickerOptions"
