@@ -56,19 +56,19 @@
                 <el-option :label="'未知'" :value="'未知'"></el-option>
               </el-select>
             </el-form-item>
-            <!-- <el-form-item v-show="searchForm.type === 1">
+            <el-form-item v-show="searchForm.type === 1">
               <el-select style="width: 100%;" v-model="searchForm.eyeglass" placeholder="选择眼镜">
                 <el-option :label="'不限'" :value="'不限'"></el-option>
                 <el-option :label="'戴眼镜'" :value="'戴眼镜'"></el-option>
-                <el-option :label="'不戴眼镜'" :value="'不戴眼镜'"></el-option>
+                <el-option :label="'无眼镜'" :value="'无眼镜'"></el-option>
                 <el-option :label="'未知'" :value="'未知'"></el-option>
               </el-select>
-            </el-form-item> -->
+            </el-form-item>
             <el-form-item v-show="searchForm.type === 1">
               <el-select style="width: 100%;" v-model="searchForm.hat" placeholder="选择帽子">
                 <el-option :label="'不限'" :value="'不限'"></el-option>
                 <el-option :label="'戴帽子'" :value="'戴帽子'"></el-option>
-                <el-option :label="'不戴帽子'" :value="'不戴帽子'"></el-option>
+                <el-option :label="'未戴帽子'" :value="'未戴帽子'"></el-option>
                 <el-option :label="'未知'" :value="'未知'"></el-option>
               </el-select>
             </el-form-item>
@@ -260,6 +260,9 @@ export default {
         });
         if (this.searchForm.sex !== '不限') {
           params.where.sex = this.searchForm.sex;
+        }
+        if (this.searchForm.eyeglass !== '不限') {
+          params.where.glasses = this.searchForm.eyeglass;
         }
         if (this.searchForm.age !== '不限') {
           params.where.age = this.searchForm.age;
