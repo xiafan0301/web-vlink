@@ -36,7 +36,7 @@
             ></el-date-picker>
           </el-form-item>
           <el-form-item prop="_vehicleGroup" >
-            <el-select v-model="ruleForm._vehicleGroup" class="full"  multiple collapse-tags placeholder="全部车辆类别">
+            <el-select v-model="ruleForm._vehicleGroup" class="full"  multiple collapse-tags placeholder="全部车辆分组">
               <el-option
                 v-for="item in grounpOptions"
                 :key="item.uid"
@@ -46,7 +46,7 @@
             </el-select>
           </el-form-item>
           <el-form-item prop="vehicleClass">
-            <el-select v-model="ruleForm.vehicleClass"  class="full" placeholder="全部车辆类型">
+            <el-select v-model="ruleForm.vehicleClass"  class="full blankinput" placeholder="全部车辆类型">
               <el-option label="全部车辆类型" value=""></el-option>
               <el-option
                 v-for="item in vehicleOptions"
@@ -221,7 +221,7 @@ export default {
         dateStart:'',
         dateEnd:'',
         _vehicleGroup:'',
-        vehicleClass:'',
+        vehicleClass:null,
         include:1,
         _include:0,
         plateNo:'',
@@ -356,6 +356,7 @@ export default {
       this.ruleForm.vehicleGroup = this.ruleForm._vehicleGroup?this.ruleForm._vehicleGroup.join(","):''
       this.ruleForm.dateStart = this.ruleForm.dateStart.indexOf(":")>0?(this.ruleForm.dateStart):(this.ruleForm.dateStart +" 00:00:00")
       this.ruleForm.dateEnd = this.ruleForm.dateEnd.indexOf(":")>0?(this.ruleForm.dateEnd):(this.ruleForm.dateEnd+" 23:59:59")
+      this.ruleForm.vehicleClass = this.ruleForm.vehicleClass?this.ruleForm.vehicleClass:''
       let d = JSON.stringify(this.ruleForm)
       d = JSON.parse(d)
       d.plateNo= this.ruleForm.plateNo 
@@ -560,6 +561,11 @@ export default {
 .el-dialog__headerbtn{
   z-index: 1;
 }
+}
+.blankinput{
+  .el-input__inner{
+    color: #909399;
+  }
 }
 
 

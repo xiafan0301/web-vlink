@@ -18,7 +18,7 @@ export default {
   /* 提交成功后通过在父组件 emit mapSelectorEmit 事件获取所框选的东西 */
   
    
-
+  name:'extendBig',
   props: ['open', 'url'],
   data () {
     return {
