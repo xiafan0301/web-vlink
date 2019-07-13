@@ -139,10 +139,8 @@
           </div>
           <el-pagination
               class="cum_pagination"
-              v-if="false"
               @current-change="handleCurrentChange"
               :current-page.sync="pagination.pageNum"
-              :page-sizes="[100, 200, 300, 400]"
               :page-size="pagination.pageSize"
               layout="total, prev, pager, next, jumper"
               :total="pagination.total">
@@ -211,6 +209,7 @@ export default {
       isShowSelectList: false,
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       tableData: [],
+      tableDataAll: [],
       cities: [],
       defaultProps: {
         children: "children",
@@ -447,8 +446,13 @@ export default {
       this.isShowSelectList = !this.isShowSelectList;
     },
     handleCurrentChange (page) {
+      /* this.pagination.pageNum = page;
+      this.JfoGETCity() */
       this.pagination.pageNum = page;
-      this.JfoGETCity()
+      let ips = (this.pagination.pageNum - 1) * this.pagination.pageSize;
+      let ipe = ips + this.pagination.pageSize;
+      if (ipe > this.pagination.total) { ipe = this.pagination.total; }
+      this.tableData = this.tableDataAll.slice(ips, ipe);
     },
     JfoGETCity () {
       const params = {
@@ -466,7 +470,11 @@ export default {
       }
       JfoGETCity(params).then(res => {
         if (res) {
-          this.tableData = res.data;
+          // this.tableData = res.data;
+          this.pagination.pageNum = 1;
+          this.tableDataAll = res.data;
+          this.pagination.total = this.tableDataAll.length;
+          this.handleCurrentChange(1);
         }
       })
     }

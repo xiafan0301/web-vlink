@@ -218,13 +218,14 @@
           <div class="search-btn">
             <el-row :gutter="10">
               <el-col :span="12">
-                <el-button @click="resetSearch" class="full">重置</el-button>
+                <el-button style="width: auto;" @click="resetSearch" class="full">重置</el-button>
               </el-col>
               <el-col :span="12">
                 <el-button
                   type="primary"
                   :loading="searching"
                   @click="getVehicleDetail"
+                  style="width: auto;"
                   class="select_btn full"
                 >分析</el-button>
               </el-col>

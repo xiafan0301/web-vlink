@@ -108,10 +108,7 @@
           </div>
         </template>
         <template v-else>
-          <div class="not_content">
-            <img src="../../../../../assets/img/not-content.png" alt="">
-            <p style="color: #666666; margin-top: 30px;">抱歉，没有相关的结果!</p>
-          </div>
+          <div is="noResult" :isInitPage="isInitPage"></div>
         </template>
       </div>
     </div>
@@ -119,16 +116,18 @@
 </template>
 <script>
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+import noResult from '@/components/common/noResult.vue';
 import { checkPlateNumber } from '@/utils/validator.js';
 import { getShotDevice, getTailBehindList } from '@/views/index/api/api.judge.js'
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import { formatDate } from '@/utils/util.js';
 export default {
-  components: { vlBreadcrumb },
+  components: { vlBreadcrumb, noResult },
   data () {
     const startTime = new Date() - 24 * 60 * 60 *1000;
     return {
+      isInitPage: true, // 是否是初始化页面
       isShowDeviceTip: false, // 显示设备列表无数据提示
       deviceStartTime: null, // 起点设备抓拍时间
       searchForm: {
@@ -302,6 +301,7 @@ export default {
     },
     // 重置查询条件
     resetData (form) {
+      this.isInitPage = false;
       this.$refs[form].resetFields();
       this.dataList = [];
     },
@@ -311,21 +311,19 @@ export default {
       this.$refs[form].validate(valid => {
         if (valid) {
           if (!this.searchForm.plateNo) {
-            this.$message({
-              type: 'warning',
-              message: '请先设置目标车辆',
-              customClass: 'request_tip'
-            });
+            if (!document.querySelector('.el-message--info')) {
+              this.$message.info('请先设置目标车辆');
+            }
             return;
           };
           if (!this.searchForm.deviceCode) {
-            this.$message({
-              type: 'warning',
-              message: '请设置分析起点',
-              customClass: 'request_tip'
-            });
+            if (!document.querySelector('.el-message--info')) {
+              this.$message.info('请设置分析起点');
+            }
             return;
           };
+
+
           const vehicleType = this.searchForm.vehicleClass.join(',');
           const params = {
             deviceCode: this.searchForm.deviceCode,
@@ -338,8 +336,12 @@ export default {
           };
           getTailBehindList(params)
             .then(res => {
-              if (res && res.data) {
-                this.dataList = res.data;
+              if (res && res.data ) {
+                if (res.data.length > 0) {
+                  this.dataList = res.data;
+                } else {
+                  this.isInitPage = false;
+                }
               }
             })
         }
