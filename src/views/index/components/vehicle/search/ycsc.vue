@@ -266,12 +266,12 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.storagePath" alt />
+            <img :src="sturcDetail.storagePath" :class="{'active':isChoose}"   @click="bigImg(1)" />
             <span>全景图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img struc_c_d_img_green">
-              <img :src="sturcDetail.subStoragePath" alt />
+              <img :src="sturcDetail.subStoragePath" :class="{'active':isChoose2}"  @click="bigImg(2)" />
               <span>抓拍图</span>
             </div>
             <div class="struc_c_d_info">
@@ -401,6 +401,8 @@ import { objDeepCopy } from "../../../../../utils/util.js"; // 深拷贝方法
 export default {
   data() {
     return {
+      isChoose:false,
+      isChoose2:false,
       selectType: 1,
       sortType: 1, // 1为时间排序， 2为监控排序
       timeSortType: true, // true为时间降序， false为时间升序
@@ -542,6 +544,14 @@ export default {
     }
   },
   methods: {
+     bigImg(v){
+       if(v==1){
+          this.isChoose=!this.isChoose;
+       }else{
+          this.isChoose2=!this.isChoose2; 
+       }
+      
+    },
     /*重置菜单的数据 */
     resetMenu() {
       // 置空数据数量
@@ -1435,6 +1445,14 @@ export default {
             right: 0;
             bottom: 0;
             margin: auto;
+            transform: scale(1);         
+            transition: all ease 0.5s;
+          }
+          img.active{
+             transform: scale(3);          
+              position: absolute;           
+              z-index: 100;
+              left: 50%;
           }
           i {
             display: block;

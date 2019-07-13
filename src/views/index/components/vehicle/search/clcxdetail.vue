@@ -23,45 +23,45 @@
           </div> -->
           <div class="div">
              <label>车牌</label>
-            <span>{{detailData.plateno}}</span>
+            <span>{{detailData.plateNo}}</span>
            
           </div>
           <div class="div" v-if="detailData.color">
              <label>车身颜色</label>
-            <span>{{detailData.color}}色</span>
+            <span>{{detailData.vehicleColor}}色</span>
            
           </div>
           <div class="div">
-             <label>中文品牌</label>
-            <span>{{detailData.brand}}</span>
+             <label>号牌种类</label>
+            <span>{{detailData._numberType}}</span>
            
           </div>
           <div class="div">
-            <label>机动车状态</label>
-            <span>{{detailData.status}}</span>
+            <label>号牌颜色</label>
+            <span>{{detailData.numberColor}}</span>
             
           </div>
           <div class="div">
              <label>车辆类型</label>
-            <span>{{detailData.platetype}}</span>
+            <span>{{detailData._vehicleType}}</span>
            
           </div>
           <div class="div" v-if="detailData.owner">
              <label>车辆所有人</label>
-            <span>{{detailData.owner}}</span>
+            <span>{{detailData.ownerName}}</span>
            
           </div>
           <div class="div">
-            <label>年 款</label>
-            <span>{{detailData.model}}</span>
+            <label>车主身份证号</label>
+            <span>{{detailData.ownerIdCard}}</span>
             
           </div>
           <div class="div">
-            <label>核定载客</label>
-            <span>{{detailData.seatnumber}}人</span>
+            <label>车辆型号</label>
+            <span>{{detailData.vehicleModel}}人</span>
             
           </div>
-          <div class="div">
+          <!-- <div class="div">
             <label>使用性质</label>
             <span>{{detailData.usecharacter}}人</span>
             
@@ -70,7 +70,7 @@
             <label>有效期</label>
             <span>{{detailData.validuntil}}</span>
             
-          </div>
+          </div> -->
           <!-- <div class="div">
             <span>{{detailData.isSurveillance}}</span>
             <label>布控车辆</label>
@@ -98,7 +98,7 @@
           <div class="flex1 bkt">
             <img
               :src="snapObj.storagePath"
-              class="spimg"
+              class="spimg" @click="extendImg(snapObj.storagePath)"
              
             >
             
@@ -127,6 +127,7 @@
                   
                 </p>
               </div>
+              <a :href="snapObj.videoPath">下载视频</a>
               <!-- <span class="playSee" v-if="showimg" @click="showimg=!showimg">视频回放</span>
               <span class="playSee" v-if="!showimg" @click="showimg=!showimg">抓拍图</span> -->
             </div>
@@ -169,18 +170,23 @@
         </div>
       </div>
     </div>
+    <extendBig :url="bigurl" :open="openBig" @closeimg="openBig=false"></extendBig>
   </div>
 </template>
 <script>
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+import extendBig from '@/components/common/extendBig.vue';
 import { ScpGETstrucInfoList } from "@/views/index/api/api.search.js";
 import { getSnapDetail,getArchives } from "@/views/index/api/api.judge.js";
+import { dataList } from "@/utils/data.js";
 export default {
-  components: {vlBreadcrumb},
+  components: {vlBreadcrumb,extendBig},
   data() {
     return {
       urldata:JSON.parse(localStorage.getItem("searchD")),
       curImgIndex: 0,
+      bigurl:'',
+      openBig: false,
       showSim: false,
       showimg: true,
       playing: true,
@@ -227,7 +233,9 @@ export default {
           prevEl: ".swiper-button-prev"
         }
       },
-      detailData:{}
+      detailData:{},
+      plateType:[],
+      vehicleType:[],
 
     };
   },
@@ -236,12 +244,21 @@ export default {
     // let d= 
     
     // this.urldata=
-    console.log(this.urldata);
-    
+    //console.log(this.urldata);
+    let dic = this.dicFormater(dataList.vehicleType);
+    let dic1 = this.dicFormater(dataList.plateType);
+
+    this.plateType = [...dic1[0].dictList]; // 号牌类型
+    this.vehicleType = [...dic[0].dictList]; // 车辆类型
+
     this.getSnapDetail()
     this.getArchives()
   },
   methods: {
+    extendImg(v){
+      this.openBig=true
+      this.bigurl=v
+    },
     goToPage(v){
       if(v=="vehicle_search_lxwfdetail"){
         this.$router.push({name:v , query:{
@@ -267,6 +284,15 @@ export default {
         if(res && res.data){
           // console.log(res);
           this.detailData=res.data
+          // this.plateType = [...dic1[0].dictList]; // 号牌类型
+          // this.vehicleType = [...dic[0].dictList]; // 车辆类型
+          let a = this.plateType.find(el=>el.enumField==this.detailData.numberType)
+          let b = this.vehicleType.find(el=>el.enumField==this.detailData.vehicleType)
+          // console.log(this.plateType);
+          // console.log(b);
+          //if(a)
+          this.detailData._vehicleType=a ? a.enumValue :''
+          this.detailData._numberType= b ? b.enumValue :''
         }
       })
     },
