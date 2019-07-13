@@ -1,5 +1,9 @@
 <template>
-  <div class="point">
+  <div class="point" style="position: relative;">
+    <!-- 地图图片显示开关 -->
+    <div class="map_pic_show">
+      <el-checkbox v-model="mapPicShow">显示抓拍图片</el-checkbox>
+    </div>
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
@@ -80,7 +84,7 @@
         <div class="insetLeft" @click="hideLeft"></div>
       </div>
     </div>
-    <div :class="['right',{hide:!hideleft}]" id="rightMap"></div>
+    <div :class="['right',{hide:!hideleft}, {'clgj_map_show_pic': mapPicShow}]" id="rightMap"></div>
     <div class="reselt" v-if="reselt">
       <div class="plane insetPadding">
           <h3 class="title">分析结果</h3>
@@ -207,6 +211,8 @@
     components: {mapSelector},
     data() {
       return {
+        mapPicShow: false, // 地图图片显示开关
+
         loading: false,
         count: 10,
         totalAddressNum: 0,
@@ -670,7 +676,7 @@
           path: path,
           showDir: true,
           strokeColor: '#61C772',
-          strokeWeight: 6
+          strokeWeight: 10
         });
         this.markerLine.push(polyline);
         this.amap.add([polyline]);
@@ -731,7 +737,16 @@
     }
   };
 </script>
+<style lang="scss">
+ .clgj_map_show_pic {
+    .vl_jtc_mk { display: block !important; }
+  }
+</style>
+
 <style lang="scss" scoped>
+  .map_pic_show {
+    position: absolute; top: 65px; right: 20px; z-index: 100;
+  }
   .map_rrt_u2 {
     position: absolute; right: 30px;
     bottom: 30px;
@@ -1425,6 +1440,7 @@
     }
   }
   .vl_jtc_mk {
+    display: none;
     width: 218px;
     height: 122px;
     position: relative;

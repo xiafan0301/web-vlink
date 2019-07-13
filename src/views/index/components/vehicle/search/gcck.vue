@@ -353,7 +353,7 @@ export default {
       getDeviceSnapImagesPage({
         where: {
           deviceIds: dId,
-          startTime: formatDate(new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd 00:00:00'),
+          startTime: formatDate(new Date(), 'yyyy-MM-dd 00:00:00'),
           endTime: formatDate(new Date(), 'yyyy-MM-dd 23:59:59')
         },
         pageNum: 1,

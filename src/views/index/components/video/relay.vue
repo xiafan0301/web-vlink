@@ -243,7 +243,9 @@
                 </div>
               </div>
             </div>
-            <div class="relay_task_mtr"></div>
+            <div class="relay_task_mtr">
+              <div v-show="false"></div>
+            </div>
           </div>
           <div class="relay_task_mm">
             <span @click="xjMoreInfo = !xjMoreInfo">
@@ -257,8 +259,18 @@
                 <li @click="xjSelType = 1" :class="{'task_mb_mt_sed': xjSelType === 1}">地图选择</li>
                 <li @click="xjSelType = 2" :class="{'task_mb_mt_sed': xjSelType === 2}">列表选择</li>
               </ul>
-              <div v-show="xjSelType === 1">
-
+              <div class="mb_map_map" v-show="xjSelType === 1">
+                <div class="mb_map_map_l">
+                  <div class="mb_map_map_lt">
+                    已选设备（12）
+                    <span>移除设备</span>
+                  </div>
+                </div>
+                <div class="mb_map_map_r">
+                  <div>可选设备(300)</div>
+                  <div>
+                  </div>
+                </div>
               </div>
             </div>
             <div class="task_mb_d"></div>
@@ -267,7 +279,7 @@
       </div>
       <div class="relay_task_b">
         <el-button size="small" type="primary">&nbsp;&nbsp;&nbsp;&nbsp;确&nbsp;&nbsp;定&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
-        <el-button size="small">&nbsp;&nbsp;&nbsp;&nbsp;取&nbsp;&nbsp;消&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
+        <el-button size="small" @click="pageType = 1">&nbsp;&nbsp;&nbsp;&nbsp;取&nbsp;&nbsp;消&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
       </div>
     </div>
     <!--历史记录弹窗-->
@@ -611,6 +623,16 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.mb_map_map {
+  overflow: hidden;
+  .mb_map_map_l {
+    float: left;
+    width: 250px;
+  }
+  .mb_map_map_r {
+    margin-left: 250px;
+  }
+}
 .relay_task_mb {
   border-top: 1px solid #eee;
   > h3 {
@@ -639,7 +661,7 @@ export default {
     }
   }
   > .task_mb_d {
-    
+
   }
 }
 .relay_task_mm {
@@ -720,8 +742,11 @@ export default {
 .relay_task_mtr {
   margin-left: 270px;
   height: 330px;
-  border-radius:4px 4px 0px 0px;
-  border:1px solid rgba(211,211,211,1);
+  > div {
+    width: 100%; height: 100%;
+    border-radius:4px 4px 0px 0px;
+    border:1px solid rgba(211,211,211,1);
+  }
 }
 .relay_task {
   position: relative;
