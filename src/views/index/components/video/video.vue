@@ -17,9 +17,9 @@
       <li>
         <router-link :to="{name: 'video_signList'}">查看标记</router-link>
       </li>
-      <li>
+      <!-- <li>
         <router-link :to="{name: 'video_videotape'}">录像记录</router-link>
-      </li>
+      </li> -->
       <li>
         <router-link :to="{name: 'video_download'}">下载记录</router-link>
       </li>
