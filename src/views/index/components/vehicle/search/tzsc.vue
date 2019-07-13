@@ -346,9 +346,8 @@
                 @size-change="handleSizeChange"
                 @current-change="onPageChange"
                 :current-page.sync="pageNum"
-                :page-sizes="[100, 200, 300, 400]"
                 :page-size="pageSize"
-                layout="total, prev, pager, next, jumper"
+                layout="total, prev, pager, next"
                 :total="total"
                 class="cum_pagination"
               ></el-pagination>

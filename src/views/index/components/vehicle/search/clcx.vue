@@ -165,7 +165,7 @@
       :current-page.sync="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
       :page-size="pagination.pageSize"
-      layout="total, prev, pager, next, jumper"
+      layout="total, prev, pager, next"
       :total="pagination.total">
     </el-pagination>
     </div>
@@ -359,7 +359,9 @@ export default {
       this.ruleForm.vehicleClass = this.ruleForm.vehicleClass?this.ruleForm.vehicleClass:''
       let d = JSON.stringify(this.ruleForm)
       d = JSON.parse(d)
-      d.plateNo= this.ruleForm.plateNo 
+      d.plateNo= this.ruleForm.plateNo;
+      d.pageNum = this.pagination.pageNum;
+      d.pageSize = this.pagination.pageSize;
       if(v){
         d=v
       }else{
@@ -367,15 +369,16 @@ export default {
       }
       getSnapList(d).then(res=>{
          this.isNull=false
-        if(res && res.data && res.data.length>0){
+        if(res && res.data){
           this.isload=false
           // console.log(res.data);
           //pagination: { total: 4, pageSize: 10, pageNum: 1 },
           this.pagination.total=res.data.length
-          this.pagination.pageNum=1
+          // this.pagination.pageNum=1
           //this.tableData= res.data
-          this.totalData=res.data
-          this.tableData= this.totalData.slice(0,10)
+          // this.totalData=res.data
+          this.pagination.total = res.data.total;
+          this.tableData= res.data.list;
           // console.log(this.tableData);
           let localData= JSON.stringify(this.totalData)
           localStorage.setItem('clcxData',localData)
@@ -388,7 +391,9 @@ export default {
           }
           this.tableData=[]
         }
-      })
+      }).catch(() => {
+        this.isload=false
+      });
     },
     // hideMap(){
     //   this.dialogVisible=false
@@ -456,10 +461,10 @@ export default {
       //console.log(page);
       
       this.pagination.pageNum = page;
-      localStorage.setItem('clcxPage',page)
-      this.tableData= this.totalData.slice((page-1)*10,10*page)
+      // localStorage.setItem('clcxPage',page)
+      // this.tableData= this.totalData.slice((page-1)*10,10*page)
       // this.grounpOptions.pageNum=page
-      // this.getSnapList()
+      this.getSnapList()
     },
     handleSizeChange (val) {
       //i没有用到
