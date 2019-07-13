@@ -1,6 +1,6 @@
 <template>
   <el-dialog
-  class="struc_detail_dialog"
+  class="struc_detail_dialog dddbig"
     :visible.sync="strucDetailDialog"
     :show-close="false"
     
@@ -56,9 +56,11 @@ export default {
 }
 </script>
 <style lang="scss" paged>
-
+.dddbig .el-dialog{
+  background: none;
+}
   .imgbox{
-    height: 80vh;
+    height: 90vh;
     width: 100%;
     display: flex;
     align-items: center; /*垂直居中*/
