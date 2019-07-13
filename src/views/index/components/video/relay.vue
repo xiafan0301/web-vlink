@@ -265,15 +265,20 @@
                     已选设备（12）
                     <span>移除设备</span>
                   </div>
+                  <div class="mb_map_map_lb"></div>
                 </div>
                 <div class="mb_map_map_r">
-                  <div>可选设备(300)</div>
+                  <h4>可选设备(300)</h4>
                   <div>
+                    <div style="width: 100%; height: 100%;" id="video_relay_xj_map"></div>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="task_mb_d"></div>
+            <div class="task_mb_d">
+              <span>备注说明：</span>
+              <el-input v-model="xjDesVal" style="width: 500px;" size="small" placeholder="请输入50字以内的备注说明"></el-input>
+            </div>
           </div>
         </div>
       </div>
@@ -312,7 +317,7 @@ import {mapXupuxian} from '@/config/config.js';
 import {videoTree} from '@/utils/video.tree.js';
 import videoEmpty from './videoEmpty.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
-import { apiAreaServiceDeviceList } from "@/views/index/api/api.base.js";
+import { apiAreaServiceDeviceList, getAllMonitorList, getAllBayonetList } from "@/views/index/api/api.base.js";
   import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList} from '@/views/index/api/api.judge.js'
 export default {
   components: {videoEmpty, flvplayer},
@@ -343,6 +348,13 @@ export default {
       xjPlateNo: '',
       xjMoreInfo: false,
       xjSelType: 1, // 1地图选择  2列表选择
+
+      xjMap: null,
+      listDevice: [], // 设备
+      listBayonet: [], // 卡口
+
+      xjDesVal: '',
+
       uploadAcion: ajaxCtx.base + '/new',
       curImageUrl: '', // 当前上传的图片 人员
       curImageUrl2: '', // 当前上传的图片 车辆
@@ -381,6 +393,27 @@ export default {
   watch: {
     showVideoTotal () {
       this.playersHandler(this.showVideoTotal);
+    },
+    xjMoreInfo (val) {
+      console.log(val);
+      if (val) {
+        if (this.xjSelType === 1) {
+          if (!this.xjMap) {
+            window.setTimeout(() => {
+              this.xjInitMap();
+            }, 200);
+          }
+        }
+      }
+    },
+    xjSelType (val) {
+      if (val === 1) {
+        if (!this.xjMap) {
+          window.setTimeout(() => {
+            this.xjInitMap();
+          }, 200);
+        }
+      }
     }
   },
   computed: {
@@ -399,6 +432,68 @@ export default {
     videoTree('videoListTree2');
   },
   methods: {
+
+    xjInitMap () {
+      let _this = this;
+      let _config = Object.assign({}, {
+        zoom: 11,
+        center: mapXupuxian.center,
+        zooms: [2, 18]
+      });
+      // console.log('_config', _config)
+      // 初始化地图
+      let map = new window.AMap.Map('video_relay_xj_map', _config);
+      map.setMapStyle('amap://styles/light');
+      // map.setMapStyle('amap://styles/a00b8c5653a6454dd8a6ec3b604ec50c');
+      // console.log('_config', _config)
+      _this.xjMap = map;
+      this.getListDevice();
+      this.getListBayonet();
+    },
+    // 设备
+    getListDevice () {
+      getAllMonitorList({ccode: mapXupuxian.adcode}).then(res => {
+        if (res) {
+          this.listDevice = res.data;
+          for (let i = 0; i < this.listDevice.length; i++) {
+            let _d = this.listDevice[i];
+            let sC = 'vl_icon_sxt';
+            if (_d.deviceStatus !== 1) { sC = 'vl_icon_sxt_dis'; }
+            this.doMark([_d.longitude, _d.latitude],
+              _d.deviceName, 'vl_icon ' + sC);
+          }
+        }
+      });
+    },
+    // 卡口
+    getListBayonet () {
+      getAllBayonetList({areaId: mapXupuxian.adcode}).then(res => {
+        if (res) {
+          this.listBayonet = res.data;
+          for (let i = 0; i < this.listBayonet.length; i++) {
+            let _d = this.listBayonet[i];
+            let sC = 'vl_icon_kk';
+            if (!_d.isEnabled) { sC = 'vl_icon_kk_dis'; }
+            this.doMark([_d.longitude, _d.latitude],
+              _d.bayonetName, 'vl_icon ' + sC);
+          }
+        }
+      });
+    },
+    // 
+    doMark (lnglat, title, sClass) {
+      // console.log('doMark', obj);
+      let marker = new window.AMap.Marker({ // 添加自定义点标记
+        map: this.xjMap,
+        position: lnglat, // 基点位置 [116.397428, 39.90923]
+        offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
+        draggable: false, // 是否可拖动
+        // extData: obj,
+        // 自定义点标记覆盖物内容
+        content: '<div title="' + title + '" class="map_icons ' + sClass + '"></div>'
+      });
+    },
+
     changePage (type) {
       this.pageType = type;
     },
@@ -628,9 +723,31 @@ export default {
   .mb_map_map_l {
     float: left;
     width: 250px;
+    > .mb_map_map_lt {
+      height: 40px; line-height: 40px;
+      padding: 0 10px 0 10px;
+      border-bottom: 1px solid #f2f2f2;
+      overflow: hidden;
+      > span {
+        float: right;
+        color: #999;
+      }
+    }
+    > .mb_map_map_lb {
+      width: 100%; height: 599px;
+    }
   }
   .mb_map_map_r {
     margin-left: 250px;
+    border-left: 1px solid rgba(242,242,242,1);
+    > h4 {
+      height: 40px; line-height: 40px;
+      padding-left: 20px;
+    }
+    > div {
+      position: relative;
+      height: 600px;
+    }
   }
 }
 .relay_task_mb {
@@ -661,7 +778,8 @@ export default {
     }
   }
   > .task_mb_d {
-
+    padding: 15px 0 8px 0;
+    > span { color: #666; }
   }
 }
 .relay_task_mm {
@@ -782,7 +900,7 @@ export default {
 .relay_main { width: 100%; height: 100%; }
 .relay_ul_list {
   height: 100%;
-  padding-bottom: 45px;
+  padding-bottom: 50px;
   border-top: 1px solid #eee;
   > ul {
     height: 100%;
@@ -854,8 +972,10 @@ export default {
 .relay_ul_btn {
   position: absolute; bottom: 0; left: 0;
   border-top: 1px solid #eee;
-  width: 100%; height: 44px; line-height: 44px;
+  padding-bottom: 2px;
+  width: 100%; height: 50px; line-height: 48px;
   text-align: center;
+  background-color: #fff;
 }
 </style>
 <style lang="scss">

@@ -207,18 +207,17 @@
               </div>
             </div>
             <!-- 分页器 -->
-            <!-- <template v-if="total > 0">
+            <template v-if="total > 0">
               <el-pagination
                 @size-change="handleSizeChange"
                 @current-change="onPageChange"
                 :current-page.sync="pageNum"
-                :page-sizes="[100, 200, 300, 400]"
                 :page-size="pageSize"
-                layout="total, prev, pager, next, jumper"
+                layout="total, prev, pager, next"
                 :total="total"
                 class="cum_pagination"
               ></el-pagination>
-            </template>-->
+            </template>
           </vue-scroll>
         </div>
       </div>
@@ -502,9 +501,10 @@ export default {
       },
       /* 检索结果变量 */
       strucInfoList: [],
+      strucInfoListAll: [],
       noDataTips: "请在左侧输入查询条件",
       pageNum: 1,
-      pageSize: 10,
+      pageSize: 20,
       total: 0,
       /* 检索详情弹窗变量 */
       swiperOption: {
@@ -627,8 +627,15 @@ export default {
               this.noDataTips = "暂无搜索结果";
               if (res.data) {
                 if (res.data.length > 0) {
-                  this.strucInfoList = res.data;
-                  this.total = res.data.length;
+                  // this.strucInfoList = res.data;
+                  this.strucInfoListAll = res.data;
+                  this.total = this.strucInfoListAll.length;
+                  this.onPageChange(1);
+                  /* if (this.total > this.pageSize) {
+                    this.strucInfoList = this.strucInfoListAll.slice(0, this.pageSize);
+                  } else {
+                    this.strucInfoList = this.strucInfoListAll;
+                  } */
                 } else {
                   this.strucInfoList = []; // 清空搜索结果
                   this.total = 0;
@@ -651,7 +658,10 @@ export default {
     },
     onPageChange(page) {
       this.pageNum = page;
-      this.getStrucInfo();
+      let ips = (this.pageNum - 1) * this.pageSize;
+      let ipe = ips + this.pageSize;
+      if (ipe > this.total) { ipe = this.total; }
+      this.strucInfoList = this.strucInfoListAll.slice(ips, ipe);
     },
     handleSizeChange(val) {
       this.pageNum = 1;
