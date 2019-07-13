@@ -4,7 +4,7 @@
     :visible.sync="strucDetailDialog"
     :show-close="false"
     
-    width="1180px"
+    width="90vh"
     >
      <div class="imgbox"  @click="closeImg" > 
 <img :src="img" alt=""class="img2">
@@ -69,7 +69,7 @@ export default {
 	  width: auto;
     height: auto;
      max-width: 100%;
-    max-height:80vh;
+    max-height:90vh;
     // display: block;
     // vertical-align: middle;
     // align-items: center;
