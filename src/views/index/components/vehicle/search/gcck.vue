@@ -234,7 +234,7 @@ export default {
         breadcrumbData: [
           {name: '车辆侦查', routerName: 'vehicle'},
           {name: '过车查看', routerName: 'vehicle_search_gcck', query: {'deviceIds': this.zpDeviceIds, bId: this.zpBId}},
-          {name: '全部抓拍'}
+          {name: '车辆详情'}
         ]
       });
       this.$router.push({name: 'vehicle_search_clcxdetail', query: {
