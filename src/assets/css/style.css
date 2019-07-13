@@ -1122,7 +1122,7 @@ html {
   display: flex;
   align-items: center; /*垂直居中*/
   justify-content: center; /*水平居中*/
-  animation: fadeIn 0.3s ease-out 0.3s both;
+  animation: fadeIn 0.3s ease-out 0.1s both;
   
 }
 .obox img {

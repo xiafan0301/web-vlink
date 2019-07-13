@@ -129,7 +129,7 @@
                       <p>
                         <img :title="item.plateNo" :alt="item.plateNo" :src="item.imagePath">
                       </p>
-                      <div class="gcck_rh_ft"><i class="vl_icon gcck_sxt"></i>{{item.deviceName}}</div>
+                      <div class="gcck_rh_ft"><i class="vl_icon gcck_sxt"></i>{{item.subStoragePath}}</div>
                       <div><i class="vl_icon gcck_cl"></i>{{item.plateNo}}</div>
                       <div><i class="vl_icon gcck_sj"></i>{{item.snapTime}}</div>
                     </div>
