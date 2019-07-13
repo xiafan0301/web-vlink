@@ -86,15 +86,15 @@
             </div>
             <!-- 表单 -->
             <el-form :model="tzscMenuForm" ref="tzscMenuForm" :rules="rules">
-              <div class="selectDate">
+              <div class="selectDate date-comp">
                 <el-form-item label prop="selectDate">
                   <el-date-picker
                     class="width232"
                     v-model="tzscMenuForm.selectDate"
                     type="daterange"
-                    range-separator="-"
+                    range-separator="至"
                     value-format="yyyy-MM-dd"
-                    format="yy/MM/dd"
+                    format="yyyy-MM-dd"
                     :picker-options="pickerOptions"
                     start-placeholder="开始日期"
                     end-placeholder="结束日期"

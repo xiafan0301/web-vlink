@@ -17,20 +17,22 @@
             <!-- 表单 -->
             <div class="form_warp">
               <el-form :model="mhscMenuForm" ref="mhscMenuForm" :rules="rules">
+                <div class="date-comp">
                 <el-form-item label prop="selectDate">
                   <el-date-picker
                     class="width232"
                     v-model="mhscMenuForm.selectDate"
                     type="daterange"
-                    range-separator="-"
+                    range-separator="至"
                     value-format="yyyy-MM-dd"
-                    format="yy/MM/dd"
+                    format="yyyy-MM-dd"
                     :picker-options="pickerOptions"
                     start-placeholder="开始日期"
                     end-placeholder="结束日期"
                     :clearable="false"
                   ></el-date-picker>
                 </el-form-item>
+                </div>
                 <!-- 选择设备 -->
                 <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
                 <div class="selected_device" @click="treeTabShow = true;">
