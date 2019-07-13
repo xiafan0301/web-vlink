@@ -48,17 +48,16 @@
             </div>
           </div>
 
-          <div class="left_time">
+          <div class="left_time date-comp">
             <el-date-picker
               placeholder="请选择日期"
               v-model="queryDate"
               :clearable="false"
               type="daterange"
-              range-separator="-"
+              range-separator="至"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
               value-format="timestamp"
-              align="right"
               :picker-options="pickerOptions">
             </el-date-picker>
           </div>
@@ -918,10 +917,10 @@ export default {
   //   padding-left: 0px;
   // }
   .el-date-editor {
-    .el-input__inner {
+    /* .el-input__inner {
       padding-left: 15px;
-    }
-    .el-range__icon {
+    } */
+    /* .el-range__icon {
       position: absolute;
       right: 3px;
       top: 2px;
@@ -930,7 +929,7 @@ export default {
       position: absolute;
       right: 3px;
       top: 2px;
-    }
+    } */
   }
   .el-input__prefix {
     right: 5px;
