@@ -348,7 +348,7 @@ export default {
           { name: '以图搜人' }
         ]
       });
-      this.$router.push({name: 'portrait_ytsr', query: { imgUrl: this.detailInfo.subStoragePath }});
+      this.$router.push({name: 'portrait_ytsr', query: { imgurl: this.detailInfo.subStoragePath }});
     },
     // 跳至轨迹分析页面
     skipPjfxPortraitPage () {
@@ -361,7 +361,7 @@ export default {
           { name: '轨迹分析' }
         ]
       });
-      this.$router.push({name: 'portrait_gjfx', query: { imgUrl: this.detailInfo.subStoragePath }});
+      this.$router.push({name: 'portrait_gjfx', query: { imgurl: this.detailInfo.subStoragePath }});
     },
     // 跳至落脚点分析页面
     skipLjdPortraitPage () {
@@ -374,7 +374,7 @@ export default {
           { name: '落脚点分析' }
         ]
       });
-      this.$router.push({name: 'portrait_ljd', query: { imgUrl: this.detailInfo.subStoragePath }});
+      this.$router.push({name: 'portrait_ljd', query: { imgurl: this.detailInfo.subStoragePath }});
     }
   }
 }

@@ -13,79 +13,84 @@
     </div>
 
     <div class="vl_ph_content">
-      <div class="mapbox" id="mapSelect"></div>
-      <div class="setPost">
-        <div>
-          <el-autocomplete
-            class="inline-input"
-            v-model="input3"
-            :fetch-suggestions="querySearch"
-            placeholder="请输入地名，快速定位地址"
-            value-key="name"
-            :trigger-on-focus="false"
-            @select="handleSelect"
-          ></el-autocomplete>
-          <!--<el-input placeholder="请输入地名，快速定位地址" v-model="input3" class="input-with-select">-->
-          <el-button slot="append" icon="el-icon-search" class="select_btn" @click="setCenter()"></el-button>
-          <!--</el-input>-->
-        </div>
-        <div style="width: 272px;height: calc(100% - 40px);padding-top: 20px;">
-          <vue-scroll>
-            <div class="search_main">
-              <div class="search_top">
-                <span  @click="addArea"><i class="el-icon-circle-plus-outline"></i>增加区域列表</span>
-              </div>
-              <!--区域选择-->
-              <div class="search_item" v-for="(item, index) in searchData" :key="item.id">
-                <div class="search_line_ts">
-                  <div class="title">
-                    <span class="red_star">抓拍区域:</span>
-                    <span>
+      <div :class="['right',{hide:!hideleft}]" id="mapSelect"></div>
+      <div :class="['left',{hide:hideleft}]">
+        <div class="plane">
+          <div class="setPost">
+            <div class="top_search_input">
+              <el-autocomplete
+                      class="inline-input"
+                      v-model="input3"
+                      :fetch-suggestions="querySearch"
+                      placeholder="请输入地名，快速定位地址"
+                      value-key="name"
+                      :trigger-on-focus="false"
+                      @select="handleSelect"
+              ></el-autocomplete>
+              <!--<el-input placeholder="请输入地名，快速定位地址" v-model="input3" class="input-with-select">-->
+              <el-button slot="append" icon="el-icon-search" class="select_btn" @click="setCenter()"></el-button>
+              <!--</el-input>-->
+            </div>
+            <div style="width: 272px;height: calc(100% - 40px);padding-top: 20px;">
+              <vue-scroll>
+                <div class="search_main">
+                  <div class="search_top">
+                    <span  @click="addArea"><i class="el-icon-circle-plus-outline"></i>增加区域列表</span>
+                  </div>
+                  <!--区域选择-->
+                  <div class="search_item" v-for="(item, index) in searchData" :key="item.id">
+                    <div class="search_line_ts">
+                      <div class="title">
+                        <span class="red_star">抓拍区域:</span>
+                        <span>
                       <i class="choose_btn el-icon-location-outline" @click="setFitV(index)" :class="{'not-active': !item.area}"></i>
                       <i class="choose_btn el-icon-delete" @click="clearArea(index)"></i>
                     </span>
-                  </div>
-                  <div class="drawBox">
-                    <div class="items">
-                      <span @click="clickTab('cut1', index)" :class="['cut1',{'hover':hover[index]=='cut1' && index === curDrawIndex}]"></span>
-                      <span @click="clickTab('cut2', index)"  :class="['cut2',{'hover':hover[index]=='cut2' && index === curDrawIndex}]"></span>
-                      <span @click="clickTab('cut3', index)"  :class="['cut3',{'hover':hover[index]=='cut3' && index === curDrawIndex}]"></span>
-                      <span @click="clickTab('cut4', index)"  :class="['cut4',{'hover':hover[index]=='cut4' && index === curDrawIndex}]"></span>
-                      <span @click="clickTab('cut5', index)"  :class="['cut5',{'hover':hover[index]=='cut5' && index === curDrawIndex}]"></span>
+                      </div>
+                      <div class="drawBox">
+                        <div class="items">
+                          <span @click="clickTab('cut1', index)" :class="['cut1',{'hover':hover[index]=='cut1' && index === curDrawIndex}]"></span>
+                          <span @click="clickTab('cut2', index)"  :class="['cut2',{'hover':hover[index]=='cut2' && index === curDrawIndex}]"></span>
+                          <span @click="clickTab('cut3', index)"  :class="['cut3',{'hover':hover[index]=='cut3' && index === curDrawIndex}]"></span>
+                          <span @click="clickTab('cut4', index)"  :class="['cut4',{'hover':hover[index]=='cut4' && index === curDrawIndex}]"></span>
+                          <span @click="clickTab('cut5', index)"  :class="['cut5',{'hover':hover[index]=='cut5' && index === curDrawIndex}]"></span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="search_line">
+                      <span class="time">开始</span>
+                      <el-date-picker
+                              v-model="item.startTime"
+                              style="width: 212px;"
+                              :picker-options="pickerOptions"
+                              type="datetime"
+                              value-format="timestamp"
+                              placeholder="选择日期时间">
+                      </el-date-picker>
+                    </div>
+                    <p class="red_star"></p>
+                    <div class="search_line">
+                      <span class="time">结束</span>
+                      <el-date-picker
+                              style="width: 212px;"
+                              :picker-options="pickerOptions1"
+                              v-model="item.endTime"
+                              value-format="timestamp"
+                              type="datetime"
+                              placeholder="选择日期时间">
+                      </el-date-picker>
                     </div>
                   </div>
+                  <!--按钮-->
+                  <div class="search_btn">
+                    <el-button @click="clearAllArea">重置</el-button>
+                    <el-button type="primary" @click="tcDiscuss">区域碰撞</el-button>
+                  </div>
                 </div>
-                <div class="search_line">
-                  <span class="time">开始</span>
-                  <el-date-picker
-                    v-model="item.startTime"
-                    style="width: 212px;"
-                    :picker-options="pickerOptions"
-                    type="datetime"
-                    value-format="timestamp"
-                    placeholder="选择日期时间">
-                  </el-date-picker>
-                </div>
-                <p class="red_star"></p>
-                <div class="search_line">
-                  <span class="time">结束</span>
-                  <el-date-picker
-                    style="width: 212px;"
-                    :picker-options="pickerOptions1"
-                    v-model="item.endTime"
-                    value-format="timestamp"
-                    type="datetime"
-                    placeholder="选择日期时间">
-                  </el-date-picker>
-                </div>
-              </div>
-              <!--按钮-->
-              <div class="search_btn">
-                <el-button @click="clearAllArea">重置</el-button>
-                <el-button type="primary" @click="tcDiscuss">区域碰撞</el-button>
-              </div>
+              </vue-scroll>
             </div>
-          </vue-scroll>
+          </div>
+          <div class="insetLeft" @click="hideLeft"></div>
         </div>
       </div>
       <!--地图操作按钮-->
@@ -118,6 +123,7 @@
     components: {vlBreadcrumb},
     data() {
       return {
+        hideleft: false,
         tipInfo: null,
         map: null,
         input3: null,
@@ -199,6 +205,9 @@
       this.getAllDevice();
     },
     methods: {
+      hideLeft() {
+        this.hideleft = !this.hideleft;
+      },
       mapZoomSet (val) {
         if (this.map) {
           this.map.setZoom(this.map.getZoom() + val);
@@ -652,6 +661,72 @@
   };
 </script>
 <style lang="scss" scoped>
+  .right.hide {
+    width: calc(100% - 272px);
+    height: 100%;
+    float: right;
+  }
+  .right {
+    width: 100%;
+    height: 100%;
+    float: right;
+  }
+  .left.hide {
+    margin-left: -272px;
+    transition: marginLeft 0.3s ease-in;
+    position: relative;
+    z-index: 2;
+    // animation: fadeOutLeft 0.4s ease-out 0.3s both;
+  }
+  .left {
+    position: relative;
+    width: 272px;
+    height: 100%;
+    background-color: #ffffff;
+    float: left;
+    z-index: 1;
+    margin-left: 0px;
+    /*box-shadow: 4px 0px 10px 0px #838383;*/
+    /*box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);*/
+    animation: fadeInLeft 0.4s ease-out 0.3s both;
+    transition: marginLeft 0.3s ease-in;
+    .plane {
+      padding: 10px;
+      position: relative;
+      height: 100%;
+    }
+    .line40 {
+      line-height: 40px;
+    }
+    .inset {
+      display: inline-block;
+      line-height: 40px;
+      font-style: normal;
+    }
+    .firstItem {
+      margin-bottom: 5px;
+    }
+  }
+  .insetLeft {
+    position: absolute;
+    right: -28px;
+    width: 25px;
+    height: 178px;
+    top: 50%;
+    margin-top: -89px;
+    display: inline-block;
+    background-repeat: no-repeat;
+    transform: rotate(180deg);
+    background-image: url(../../../../../assets/img/icons.png);
+    background-position: -380px -1269px;
+    cursor: pointer;
+  }
+  .hide {
+    .insetLeft {
+      transform: rotate(180deg);
+      background-position: -504px -1269px;
+    }
+  }
   .map_rrt_u2 {
     position: absolute; right: 30px;
     bottom: 30px;
@@ -695,9 +770,14 @@
     .setPost{
       position: absolute;
       left: 0px;
-      top: 10px;
+      top: 0px;
       width: 397px;
       height: calc(100% - 10px);
+      .top_search_input {
+        position: absolute;
+        left: 302px;
+        top: 30px;
+      }
       .inline-input {
         width: 336px;
       }

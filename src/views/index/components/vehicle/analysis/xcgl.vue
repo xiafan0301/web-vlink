@@ -21,12 +21,17 @@
             <i class="el-icon-arrow-down"></i>
             <!-- <i class="el-icon-arrow-up"></i> -->
             <div class="device_list" v-if="selectDeviceArr.length > 0">
+              <template v-if="checkAllTree">
+              <span>全部设备</span>
+              </template>
+              <template v-else>
               <span>{{ selectDeviceArr[0].label }}</span>
               <span
                 v-show="selectDeviceArr.length > 1"
                 title="展开选中的设备"
                 class="device_count"
               >+{{ selectDeviceArr.length - 1 }}</span>
+              </template>
             </div>
             <div class="no_device" v-else>选择设备</div>
             <!-- 树tab页面 -->
@@ -86,13 +91,13 @@
             </div>
           </div>
           <!-- 时间 -->
-          <div class="time-search">
+          <div class="time-search date-comp">
             <el-date-picker
               v-model="searchData.time"
               type="daterange"
-              range-separator="-"
+              range-separator="至"
               value-format="yyyy-MM-dd"
-              format="yy/MM/dd"
+              format="yyyy-MM-dd"
               :picker-options="pickerOptions"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
@@ -406,7 +411,10 @@ export default {
         children: "children",
         label: "label"
       },
-      exportLoading: false
+      exportLoading: false,
+      messageInfo: null,
+      notMessageInfo: null,
+      hoverActive: false,
     };
   },
   computed: {
@@ -656,6 +664,9 @@ export default {
     //查询
     getSearchData() {
       let params = {};
+      if(this.notMessageInfo) {
+        this.notMessageInfo.close()
+      }
       if (this.searchData.time && this.searchData.time.length > 0) {
         params["startDate"] =
           formatDate(this.searchData.time[0], "yyyy-MM-dd") + " 00:00:00";
@@ -698,7 +709,7 @@ export default {
             this.list = data;
             this.doubleDeviceList = objDeepCopy(data);
             if (!this.list.allRecords || this.list.allRecords.length <= 0) {
-              this.$message.info("搜索无结果");
+              this.notMessageInfo = this.$message.info("搜索无结果");
             }
             //获取全部时刻
             this.getData();
@@ -799,6 +810,12 @@ export default {
     },
     //选择时间段
     selectTime(val, index) {
+      if(this.messageInfo) {
+        this.messageInfo.close()
+      }
+      if(this.notMessageInfo) {
+        this.notMessageInfo.close()
+      }
       this.$set(this.timeSlot[index], "checked", !val.checked);
       if (val.value !== 0) {
         this.$set(this.timeSlot[0], "checked", false);
@@ -851,6 +868,9 @@ export default {
         }
       }
       this.getList();
+      if(this.messageInfo) {
+        this.messageInfo.close()
+      }
     },
     //获取数据
     getList() {
@@ -863,10 +883,10 @@ export default {
           let temp = result[result.length - 1];
           if (!i) {
             result.push([item]);
-            if (this.list[item.key] && this.list[item.key].length > 0) {
+            /* if (this.list[item.key] && this.list[item.key].length > 0) {
               this.$set(this.list[item.key][0], "timeSlot", "——");
               this.$set(this.list[item.key][0], "refTime", "——");
-            }
+            } */
           } else if (
             item.value % 1 === 0 &&
             item.value - temp[temp.length - 1].value == 1
@@ -874,10 +894,10 @@ export default {
             temp.push(item);
           } else {
             result.push([item]);
-            if (this.list[item.key] && this.list[item.key].length > 0) {
+            /* if (this.list[item.key] && this.list[item.key].length > 0) {
               this.$set(this.list[item.key][0], "timeSlot", "——");
               this.$set(this.list[item.key][0], "refTime", "——");
-            }
+            } */
           }
           this.deviceList.push(...this.list[item.key]);
         }
@@ -887,9 +907,34 @@ export default {
           this.deviceList,
           this.doubleDeviceList
         );
+        if(this.deviceList && this.deviceList.length > 0) {
+          for(let item of this.deviceList){
+            item['shotDate'] = new Date(item.shotTime).getTime()
+          }
+          this.deviceList.sort(this.sortTime)
+          this.$set(this.deviceList[0], "timeSlot", "——");
+          this.$set(this.deviceList[0], "refTime", "——");
+        }else {
+          this.messageInfo =this.$message.info("搜索无结果")
+        }
         this.getNDeviceList();
-        this.mapMark(this.nDeviceList, this.cameraMapMarkers);
+        
+        let devArr = objDeepCopy(this.nDeviceList);
+        devArr.sort(this.sortLength)
+        let maxDev = devArr[devArr.length -1]
+        /* this.nDeviceList.sort(this.sortLength)
+        this.maxDev = Math.max.apply(Math, this.nDeviceList.map((o) => {return o.data.length})) */
+        console.log("------------22222----------",this.nDeviceList)
+        this.mapMark(this.nDeviceList, this.cameraMapMarkers,maxDev);
       }
+    },
+    //排序
+    sortTime(a, b) {
+      return a.shotDate - b.shotDate;
+    },
+    //排序
+    sortLength(a, b) {
+      return a.data.length - b.data.length;
     },
     //获取设备列表
     getNDeviceList() {
@@ -920,9 +965,9 @@ export default {
       this.nDeviceList = [...dest];
     },
     // 地图标记
-    mapMark(data, aMarkers) {
+    mapMark(data, aMarkers, maxDev) {
       if (data && data.length > 0) {
-        let hoverWindow = null;
+        let hoverWindow = null, maxInfoWindow = null;
         let _this = this;
         for (let i = 0; i < data.length; i++) {
           let obj = data[i];
@@ -939,7 +984,17 @@ export default {
               // 多边形存在且不在多边形之中
               /*  selClass = "vl_close"; */
             }
-            let content = '<i class="vl_icon vl_icon_vehicle_04"></i>';
+            /* console.log("9999999999",obj.data.length,maxDev.data.length) */
+            if(obj.data.length == maxDev.data.length) {
+              obj['st'] = 'style="display:block!important"'
+            }else {
+              obj['st'] = ''
+            }
+            let content = '<div class="vl_icon vl_icon_vehicle_04 info-window">'+
+            '<div ' +obj.st+'  class="vl_map_hover">' +
+                '<div class="vl_map_hover_main">' +
+                _this.cameraInfo(obj) +
+                "</div></div>";
             let marker = new window.AMap.Marker({
               // 添加自定义点标记
               map: _this.map,
@@ -957,7 +1012,7 @@ export default {
             aMarkers.push(marker);
 
             // hover
-            marker.on("mouseover", function() {
+            /* marker.on("mouseover", function() {   
               let sContent =
                 '<div class="vl_map_hover">' +
                 '<div class="vl_map_hover_main">' +
@@ -970,25 +1025,43 @@ export default {
                 content: sContent
               });
               // aCenter = mEvent.target.F.position
-              hoverWindow.open(
-                _this.map,
-                new window.AMap.LngLat(obj.longitude, obj.latitude)
-              );
+              if(obj.data.length < maxDev.data.length) {
+                hoverWindow.open(
+                  _this.map,
+                  new window.AMap.LngLat(obj.longitude, obj.latitude)
+                );
+              }
               hoverWindow.on("close", function() {
-                console.log("infoWindow close");
-              });
+                  console.log("infoWindow close");
+                });
             });
             marker.on("mouseout", function() {
               if (hoverWindow) {
                 hoverWindow.close();
               }
-            });
+            }); */
           }
         }
 
         _this.map.setFitView(); // 执行定位
       }
     },
+    /* maxInfoWin(obj) {
+      console.log("999999999999",obj)
+      let sContent =
+                '<div class="vl_map_hover">' +
+                '<div class="vl_map_hover_main">' +
+                this.cameraInfo(obj) +
+                "</div>";
+      let infoWindow = new window.AMap.InfoWindow({
+                isCustom: true,
+                closeWhenClickMap: true,
+                offset: new window.AMap.Pixel(7, -24), // 相对于基点的偏移位置
+                content: sContent
+              });
+      // 打开弹窗
+      infoWindow.open(this.map, new window.AMap.LngLat(obj.longitude, obj.latitude));
+    }, */
     // 清除地图标记
     mapClearMarkers(aMarkers) {
       if (this.map && aMarkers && aMarkers.length > 0) {
@@ -1574,7 +1647,17 @@ export default {
     width: 100% !important; // vue-scroll样式重置
   }
   /* 地图标记 hover */
+  .info-window {
+    position: relative;
+    &:hover .vl_map_hover{
+      display: block!important;
+    }
+  }
   .vl_map_hover {
+    display: none;
+    position: absolute;
+    top: 24px;
+    right: 12px;
     .vl_map_hover_main {
       width: 178px;
       text-align: center;

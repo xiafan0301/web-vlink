@@ -52,7 +52,7 @@
                   <li v-for="(item, index) in boxList" :key="index + 'dd'">
                     <div style="">
                       <!-- <img src="../../../../assets/img/666.jpg" alt=""> -->
-                      <img :src="item.subStoragePath" alt="">
+                      <img class="bigImg" :src="item.subStoragePath" alt="">
                       <div>
                         <h4>检索资料</h4>
                         <div><i class="vl_icon rlcx_sj"></i>{{item.shotTime.substr(2, item.shotTime.length)}}</div>

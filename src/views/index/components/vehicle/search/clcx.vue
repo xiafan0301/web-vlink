@@ -15,7 +15,7 @@
           label-width="0px"
           class="demo-ruleForm"
         >
-          <el-form-item class="firstItem" prop="dateStart">
+          <el-form-item  prop="dateStart">
             <el-date-picker
               v-model="ruleForm.dateStart"
               type="date"
@@ -36,7 +36,7 @@
             ></el-date-picker>
           </el-form-item>
           <el-form-item prop="_vehicleGroup" >
-            <el-select v-model="ruleForm._vehicleGroup" class="full"  multiple collapse-tags placeholder="全部车辆类别">
+            <el-select v-model="ruleForm._vehicleGroup" class="full"  multiple collapse-tags placeholder="全部车辆分组">
               <el-option
                 v-for="item in grounpOptions"
                 :key="item.uid"
@@ -45,8 +45,8 @@
               ></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item prop="vehicleClass">
-            <el-select v-model="ruleForm.vehicleClass"  class="full" placeholder="全部车辆类型">
+          <el-form-item prop="vehicleClass" class="firstItem">
+            <el-select v-model="ruleForm.vehicleClass"  class="full blankinput" placeholder="全部车辆类型">
               <el-option label="全部车辆类型" value=""></el-option>
               <el-option
                 v-for="item in vehicleOptions"
@@ -58,7 +58,7 @@
           </el-form-item>
           
       
-          <el-form-item label="区域：" label-width="60px">
+          <el-form-item label="抓拍区域：" label-width="72px" class="firstItem">
             <!-- <el-radio-group v-model="input5" @change="changeTab"> -->
             <el-radio-group v-model="input5" @change="changeTab">
                <el-row :gutter="10">
@@ -78,7 +78,7 @@
             </el-input>
           </el-form-item>
           <el-form-item v-if="input5=='1'">
-            <el-select v-model="value1" multiple collapse-tags placeholder="全部地区" class="full">
+            <el-select v-model="value1" multiple collapse-tags placeholder="请选择" class="full">
             <el-option-group
               v-for="group in options"
               :key="group.areaName"
@@ -95,7 +95,7 @@
           <el-form-item prop="plateNo">
             <p class="carCold">车牌：<el-checkbox v-model="ruleForm._include">排除</el-checkbox></p>
             <el-input placeholder="请输入车牌号" v-model="ruleForm.plateNo" class="input-with-select">
-              <el-select v-model="select" slot="prepend" placeholder="">
+              <!-- <el-select v-model="select" slot="prepend" placeholder=""> -->
                <!-- <el-option v-for="item in pricecode" :label="item" :value="item"></el-option> -->
                <el-option v-for="(item, index) in pricecode" :label="item" :value="item" :key="'cph_' + index"></el-option>
               </el-select>
@@ -133,7 +133,6 @@
       </el-table-column>
       <el-table-column
         prop="vehicleGroup"
-        sortable
         label="车辆类别">
       </el-table-column>
       <el-table-column
@@ -159,16 +158,16 @@
       请在左侧输入查询条件</div>
        
     </div>
-    <!-- <el-pagination
+    <el-pagination
       class="cum_pagination"
       @size-change="handleSizeChange"
       @current-change="onPageChange"
       :current-page.sync="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
       :page-size="pagination.pageSize"
-      layout="total, prev, pager, next, jumper"
+      layout="total, prev, pager, next"
       :total="pagination.total">
-    </el-pagination> -->
+    </el-pagination>
     </div>
      <!-- 地图选择 -->
     <!-- <el-dialog :visible.sync="dialogVisible" width="80%">
@@ -210,7 +209,7 @@ export default {
             return time.getTime() > Date.now() || time.getTime() < threeMonths;
           }
         },
-        isNull:true,
+        isNull:false,
       pricecode:cityCode,
       input5: "1",
       dialogVisible: false,
@@ -222,7 +221,7 @@ export default {
         dateStart:'',
         dateEnd:'',
         _vehicleGroup:'',
-        vehicleClass:'',
+        vehicleClass:null,
         include:1,
         _include:0,
         plateNo:'',
@@ -232,8 +231,7 @@ export default {
       allDevice:[],
       selectDevice:[],
       selectBayonet:[],
-      tableData: [
-      ],
+      tableData: [],
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       options: [],
       vehicleOptions: [],
@@ -252,6 +250,14 @@ export default {
       ],
     }
   },
+   beforeRouteEnter(to, from, next) {
+     next(vm => {
+         // 通过 `vm` 访问组件实例
+           if (from.name == 'vehicle_menu' && to.name == 'vehicle_search_clcx') {//一定是从A进到B页面才刷新
+               vm.updataB(); 
+           }
+     })
+},
   mounted() {
     this.setDTime()
     this.getMapGETmonitorList()//查询行政区域
@@ -260,7 +266,8 @@ export default {
     this.vehicleOptions= [...dic[0].dictList]
     let vd= JSON.parse(localStorage.getItem("searchD"))
     if(vd && this.$route.query.dateStart){
-      this.getSnapList(vd)
+      this.isNull=false;
+      //this.getSnapList(vd)
       this.ruleForm= {
         dateStart:this.$route.query.dateStart,
         dateEnd:this.$route.query.dateEnd,
@@ -268,16 +275,30 @@ export default {
         vehicleClass:this.$route.query.vehicleClass,
         include:this.$route.query.include,
         _include:0,
-        plateNo:this.$route.query.plateNo?this.$route.query.plateNo.substr(1,10):"",
+        plateNo:this.$route.query.plateNo,
         pageNum:1,
         pageSize:10,
       }
       this.value1 = this.$route.query.areaIds?this.$route.query.areaIds.split(","):''
-      this.select=this.$route.query.plateNo?this.$route.query.plateNo.substr(0,1):""
+      let da=  JSON.parse(localStorage.getItem("clcxData"))
+      let numb= JSON.parse(localStorage.getItem("clcxPage"))
+      // this.totalData = da
+      // this.pagination.total=da.length
+      this.pagination.pageNum = numb
+      // this.tableData= this.totalData.slice((numb-1)*10,10*numb)
+     
     }
+    this.submitForm()
     
   },
   methods: {
+    updataB(){
+      //console.log(88888888888);
+      //this.isNull=true
+      this.tableData = [];
+      this.resetForm()
+      this.submitForm()
+    },
     //设置默认时间
     setDTime() {
       let date = new Date();
@@ -302,9 +323,10 @@ export default {
       }
       MapGETmonitorList(d).then(res=>{
         if(res && res.data){
-          
-          
           this.options.push(res.data)
+          res.data.areaTreeList.forEach(el=>{
+            this.value1.push(el.areaId)
+          })
         }
       })
     },
@@ -334,7 +356,9 @@ export default {
     getSnapList(v){
       this.isload=true
       if(!this.ruleForm.dateStart || !this.ruleForm.dateEnd){
-        this.$message.error("请输入开始时间和结束时间!");
+        if(!document.querySelector('.el-message--info')){
+          this.$message.error("请输入开始时间和结束时间!");
+          }
         return
       }
       if(this.input5==1){
@@ -348,9 +372,13 @@ export default {
       this.ruleForm.vehicleGroup = this.ruleForm._vehicleGroup?this.ruleForm._vehicleGroup.join(","):''
       this.ruleForm.dateStart = this.ruleForm.dateStart.indexOf(":")>0?(this.ruleForm.dateStart):(this.ruleForm.dateStart +" 00:00:00")
       this.ruleForm.dateEnd = this.ruleForm.dateEnd.indexOf(":")>0?(this.ruleForm.dateEnd):(this.ruleForm.dateEnd+" 23:59:59")
+      this.ruleForm.vehicleClass = this.ruleForm.vehicleClass?this.ruleForm.vehicleClass:''
+      this.ruleForm.pageNum =this.pagination.pageNum
       let d = JSON.stringify(this.ruleForm)
       d = JSON.parse(d)
-      d.plateNo= this.select+this.ruleForm.plateNo 
+      d.plateNo= this.ruleForm.plateNo;
+      d.pageNum = this.pagination.pageNum;
+      d.pageSize = this.pagination.pageSize;
       if(v){
         d=v
       }else{
@@ -358,21 +386,30 @@ export default {
       }
       getSnapList(d).then(res=>{
          this.isNull=false
-        if(res && res.data && res.data.length>0){
+        if(res && res.data && res.data.list.length>0){
           this.isload=false
           // console.log(res.data);
-          // pagination: { total: 4, pageSize: 10, pageNum: 1 },
-          // this.pagination.total=res.data.total
-          // this.pagination.pageSize =res.data.pageNum
-          this.tableData= res.data
+          //pagination: { total: 4, pageSize: 10, pageNum: 1 },
+          this.pagination.total=res.data.total
+          //this.pagination.pageNum=1
+          //this.tableData= res.data
+          this.totalData=res.data.list
+          this.tableData= this.totalData.slice(0,10)
           // console.log(this.tableData);
+          //let localData= JSON.stringify(this.totalData)
+          // localStorage.setItem('clcxData',localData)
+          // localStorage.setItem('clcxPage',"1")
           
         }else{
            this.isload=false
-          this.$message.info("没有相关数据。");
+           if(!document.querySelector('.el-message--info')){
+             this.$message.info("没有相关数据。");
+          }
           this.tableData=[]
         }
-      })
+      }).catch(() => {
+        this.isload=false
+      });
     },
     // hideMap(){
     //   this.dialogVisible=false
@@ -393,6 +430,12 @@ export default {
         p.forEach(element => {
           this.selectBayonet.push(element.uid)
         });
+      }
+      if(p.length==0 && v.length==0){
+        if(!document.querySelector('.el-message--info')){
+           this.$message.info("选择的区域没有设备，请重新选择区域");
+        }
+        return
       }
       this.selectValue="已选设备"+(this.selectDevice.length+this.selectBayonet.length)+"个"
       //this.selectDevice=v
@@ -421,7 +464,7 @@ export default {
     resetForm (){
       this.value1=null
       this.selectValue="已选设备0个",
-      this.select=""
+      // this.select=""
       this.ruleForm._vehicleGroup="" 
       this.ruleForm.vehicleClass="" 
       this.ruleForm.include="" 
@@ -440,7 +483,9 @@ export default {
       //console.log(page);
       
       this.pagination.pageNum = page;
-      this.grounpOptions.pageNum=page
+      // localStorage.setItem('clcxPage',page)
+      // this.tableData= this.totalData.slice((page-1)*10,10*page)
+      // this.grounpOptions.pageNum=page
       this.getSnapList()
     },
     handleSizeChange (val) {
@@ -508,7 +553,7 @@ export default {
   animation: fadeInLeft 0.4s ease-out 0.3s both;
   // transition: left 0.3s ease-in;
   .plane {
-    padding: 10px;
+    padding:20px 20px;
     position: relative;
     height: 100%;
   }
@@ -521,7 +566,7 @@ export default {
     font-style: normal;
   }
   .firstItem {
-    margin-bottom: 5px;
+    margin-bottom: 10px;
   }
 }
 .select_btn {
@@ -544,6 +589,13 @@ export default {
   z-index: 1;
 }
 }
-
+.blankinput{
+  .el-input__inner{
+    color: #909399;
+  }
+}
+.el-form-item__label{
+  padding-right: 0px;
+}
 
 </style>

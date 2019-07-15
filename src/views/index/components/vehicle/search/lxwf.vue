@@ -69,7 +69,7 @@
                   :class="{red:sou.vehicleColor}"
                   v-if="photoAnalysis.vehicleColor"
                 >车身颜色：{{photoAnalysis.vehicleColor}}</span>
-                <span
+                <!-- <span
                   @click="clickTabItem('vehicleBrand')"
                   :class="{red:sou.vehicleBrand}"
                   v-if="photoAnalysis.vehicleBrand"
@@ -78,7 +78,7 @@
                   @click="clickTabItem('vehicleRoof')"
                   :class="{red:sou.vehicleRoof}"
                   v-if="photoAnalysis.vehicleRoof"
-                >车顶{{photoAnalysis.vehicleRoof}}</span>
+                >车顶{{photoAnalysis.vehicleRoof}}</span> -->
                 <span
                   @click="clickTabItem('vehicleClass')"
                   :class="{red:sou.vehicleClass}"
@@ -183,7 +183,7 @@
               </div>
               <!-- 时间 -->
               <el-form-item>
-                <div class="time-search">
+                <div class="time-search date-comp">
                   <el-date-picker
                     v-model="data1"
                     type="daterange"
@@ -218,13 +218,14 @@
           <div class="search-btn">
             <el-row :gutter="10">
               <el-col :span="12">
-                <el-button @click="resetSearch" class="full">重置</el-button>
+                <el-button style="width: auto;" @click="resetSearch" class="full">重置</el-button>
               </el-col>
               <el-col :span="12">
                 <el-button
                   type="primary"
                   :loading="searching"
                   @click="getVehicleDetail"
+                  style="width: auto;"
                   class="select_btn full"
                 >分析</el-button>
               </el-col>
@@ -441,7 +442,17 @@ export default {
       return this.historyPicList.filter(x => x.checked);
     }
   },
+ beforeRouteEnter(to, from, next) {
+     next(vm => {
+         // 通过 `vm` 访问组件实例
+           if (from.name == 'vehicle_menu' && to.name == 'vehicle_search_lxwf') {//一定是从A进到B页面才刷新
+               vm.updataB();//updataB是本来写在mounted里面的各种东东
+           }
+     })
+},
+
   mounted() {
+    
     let dic = this.dicFormater(dataList.vehicleType);
     let dic1 = this.dicFormater(dataList.plateType);
     let dic2 = this.dicFormater(dataList.plateColor);
@@ -454,6 +465,12 @@ export default {
     this.setDTime();
   },
   methods: {
+    updataB(){
+      //console.log(88888888888);
+      this.isNull=true
+      this.regulationsList = [];
+      this.resetSearch()
+    },
     clickTabItem(v) {
       this.sou[v] = !this.sou[v];
       //if(this.sou[v])
@@ -483,6 +500,7 @@ export default {
       if (this.curImageUrl) {
         v.imgurl = this.curImageUrl;
       }
+      v.reload=false
       this.$router.push({ name: "vehicle_search_lxwfdetail", query: v });
     },
     // 上传图片
@@ -667,12 +685,12 @@ export default {
         if (this.sou.vehicleColor) {
           datas.vehicleColor = this.photoAnalysis.vehicleColor;
         }
-        if (this.sou.vehicleBrand) {
-          datas.vehicleBrand = this.photoAnalysis.vehicleBrand;
-        }
-        if (this.sou.vehicleRoof) {
-          datas.vehicleRoof = this.photoAnalysis.vehicleRoof;
-        }
+        // if (this.sou.vehicleBrand) {
+        //   datas.vehicleBrand = this.photoAnalysis.vehicleBrand;
+        // }
+        // if (this.sou.vehicleRoof) {
+        //   datas.vehicleRoof = this.photoAnalysis.vehicleRoof;
+        // }
         if (this.sou.vehicleClass) {
           datas.vehicleClass = this.photoAnalysis.vehicleClass;
         }
@@ -703,6 +721,8 @@ export default {
           sunvisor: this.tzscMenuForm.sunVisor
           // plateClass:this.input4,
         };
+        params.pageNum=this.pagination.pageNum
+        params.pageSize=this.pagination.pageSize
 
         this.getViolation(params);
       }
@@ -740,10 +760,11 @@ export default {
     handleSizeChange(val) {
       this.pagination.pageNum = 1;
       this.pagination.pageSize = val;
-      this.getTaskData();
+     // this.getTaskData();
     },
     onPageChange(page) {
       this.pagination.pageNum = page;
+      this.getVehicleDetail()
     },
 
     changeTab() {
@@ -1017,7 +1038,7 @@ html {
 }
 .info-left {
   .el-date-editor .el-range-input {
-    font-size: 12px;
+    /* font-size: 12px; */
   }
 }
 .vehicle-info {

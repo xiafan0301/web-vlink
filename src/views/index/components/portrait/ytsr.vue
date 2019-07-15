@@ -77,42 +77,47 @@
       </div>
     </div>
     <div class="vl_s_right">
-      <div class="vl_jig_right">
-        <div class="vl_jig_right_title">
-          <div class="vl_jr_t_item">
-            <span><span style="color: #333333">检索结果 </span> ({{strucInfoList.length}})</span>
-            <div :class="{'active-item': stucOrder < 3}" @click="timeOrderS">时间排序 <span><i :class="{'active': stucOrder === 2}" class="el-icon-caret-top"></i><i :class="{'active': stucOrder === 1}" class="el-icon-caret-bottom"></i></span></div>
+      <template v-if="strucInfoList && strucInfoList.length > 0">
+        <div class="vl_jig_right">
+          <div class="vl_jig_right_title">
+            <div class="vl_jr_t_item">
+              <span><span style="color: #333333">检索结果 </span> ({{strucInfoList.length}})</span>
+              <div :class="{'active-item': stucOrder < 3}" @click="timeOrderS">时间排序 <span><i :class="{'active': stucOrder === 2}" class="el-icon-caret-top"></i><i :class="{'active': stucOrder === 1}" class="el-icon-caret-bottom"></i></span></div>
+            </div>
+            <div class="vl_jr_t_item">
+              <div :class="{'active-item': stucOrder === 3}" @click="stucOrder = 3">监控排序</div>
+              <div :class="{'active-item': stucOrder === 4}" @click="stucOrder = 4" style="margin-left: .1rem;">相似度排序</div>
+            </div>
           </div>
-          <div class="vl_jr_t_item">
-            <div :class="{'active-item': stucOrder === 3}" @click="stucOrder = 3">监控排序</div>
-            <div :class="{'active-item': stucOrder === 4}" @click="stucOrder = 4" style="margin-left: .1rem;">相似度排序</div>
-          </div>
-        </div>
-        <div class="vl_jfo_event">
-          <vue-scroll>
-            <div class="vl_jfo_event_box clearfix">
-              <div class="vl_jfo_box_item" v-for="(item, index) in strucInfoList" :key="item.id" @click="showStrucInfo(item, index)">
-                <div class="vl_jfo_i_left"><img title="可以试着把我拖拽到左侧上传图片处" draggable="true" @dragstart="drag($event)" :src="item.subStoragePath" alt=""></div>
-                <div class="vl_jfo_i_right">
-                  <p>检索资料</p>
-                  <div class="vl_jfo_line" :title="item.shotTime"><i class="vl_icon vl_icon_retrieval_01"></i>{{item.shotTime}}</div>
-                  <div class="vl_jfo_line"><i class="vl_icon vl_icon_retrieval_02"></i>{{item.deviceName}}</div>
-                  <div class="vl_jfo_sim"><i class="vl_icon vl_icon_retrieval_03"></i>{{(item.semblance*1).toFixed(2)}}<span style="font-size: 12px;">%</span></div>
+          <div class="vl_jfo_event">
+            <vue-scroll>
+              <div class="vl_jfo_event_box clearfix">
+                <div class="vl_jfo_box_item" v-for="(item, index) in strucInfoList" :key="item.id" @click="showStrucInfo(item, index)">
+                  <div class="vl_jfo_i_left"><img title="可以试着把我拖拽到左侧上传图片处" draggable="true" @dragstart="drag($event)" :src="item.subStoragePath" alt=""></div>
+                  <div class="vl_jfo_i_right">
+                    <p>检索资料</p>
+                    <div class="vl_jfo_line" :title="item.shotTime"><i class="vl_icon vl_icon_retrieval_01"></i>{{item.shotTime}}</div>
+                    <div class="vl_jfo_line"><i class="vl_icon vl_icon_retrieval_02"></i>{{item.deviceName}}</div>
+                    <div class="vl_jfo_sim"><i class="vl_icon vl_icon_retrieval_03"></i>{{(item.semblance*1).toFixed(2)}}<span style="font-size: 12px;">%</span></div>
+                  </div>
                 </div>
               </div>
-            </div>
-            <el-pagination
-                v-show="pagination.total > 12"
-                style="text-align: center"
-                background
-                @current-change="handleCurrentChange"
-                :current-page="pagination.pageNum"
-                layout="prev, pager, next"
-                :total="pagination.total">
-            </el-pagination>
-          </vue-scroll>
+              <el-pagination
+                      v-show="pagination.total > 12"
+                      style="text-align: center"
+                      background
+                      @current-change="handleCurrentChange"
+                      :current-page="pagination.pageNum"
+                      layout="prev, pager, next"
+                      :total="pagination.total">
+              </el-pagination>
+            </vue-scroll>
+          </div>
         </div>
-      </div>
+      </template>
+      <template v-else>
+        <div is="noResult" :isInitPage="isInitPage"></div>
+      </template>
     </div>
     <!--历史记录弹窗-->
     <el-dialog
@@ -221,14 +226,16 @@
 </template>
 <script>
   import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+  import noResult from '@/components/common/noResult.vue';
   let AMap = window.AMap;
   import {ajaxCtx} from '@/config/config';
   import {ScpGETstrucInfoList, ScpGETdeviceListById, ScpGETretrievalHisById} from '../../api/api.search.js';
   import {JtcPUTAppendixsOrder, JtcPOSTAppendixInfo, JtcGETAppendixInfoList } from '../../api/api.judge'
   export default {
-    components: {vlBreadcrumb},
+    components: {vlBreadcrumb, noResult},
     data() {
       return {
+        isInitPage: true,
         targetType: 2,
         swiperOption: {
           slidesPerView: 10,
@@ -536,6 +543,7 @@
         this.devIdData = [];
         this.imgList = '';
         this.curImageUrl = '';
+        this.isInitPage = false;
       },
       tcDiscuss (boolean) {
         if (!this.imgList) {
@@ -603,6 +611,7 @@
 //            this.pagination.pageNum = res.data.pageNum;
             this.pagination.total = res.data.total;
             this.searching = false;
+            this.isInitPage = false;
           } else {
             this.searching = false;
           }

@@ -48,15 +48,15 @@
         </div>
         <div class="kaishi">
           <el-button style="width: 110px" @click="rester">重置</el-button>
-          <el-button type="primary" style="width: 110px" @click="search">统计</el-button>
+          <el-button type="primary" style="width: 110px" @click="search" :loading="searchLoading">查询</el-button>
         </div>
       </div>
-      <div class="ccrc_content_right" v-if="regulationsList.length > 0">
-        <div class="clearfix">
-          <div style="padding: 10px 0; float: right">
-            <el-button type="primary" style="width: 110px">导出</el-button>
-          </div>
-        </div>
+      <div class="ccrc_content_right" v-if="regulationsList.length > 0" v-loading="searchLoading">
+        <!--        <div class="clearfix">-->
+        <!--          <div style="padding: 10px 0; float: right">-->
+        <!--            <el-button type="primary" style="width: 110px">导出</el-button>-->
+        <!--          </div>-->
+        <!--        </div>-->
         <div class="ccrc_content_right_content">
           <div class="title">车辆登记信息</div>
           <div class="ccrc_content_right_table">
@@ -189,33 +189,33 @@
               <div class="struc_main">
                 <div v-show="strucCurTab === 1" class="struc_c_detail">
                   <div class="struc_c_d_qj struc_c_d_img">
-                    <img :src="sturcDetail.vehicleDto.subStoragePath" alt="">
+                    <img :src="sturcDetail.vehicleDto.subStoragePath" alt="" class="bigImg">
                     <span>抓拍图</span>
                   </div>
                   <div class="struc_c_d_box">
                     <div class="struc_c_d_qii struc_c_d_img">
-                      <img :src="sturcDetail.vehicleDto.storagePath" alt="">
+                      <img :src="sturcDetail.vehicleDto.storagePath" alt="" class="bigImg">
                       <span>全景图</span>
                     </div>
                     <div class="struc_c_d_info">
                       <h2>抓拍信息</h2>
                       <div class="struc_cdi_line">
-                        <span>{{sturcDetail.vehicleDto.shotTime}}<b>抓拍时间</b></span>
+                        <span><b>抓拍时间</b>{{sturcDetail.vehicleDto.shotTime}}</span>
                       </div>
                       <div class="struc_cdi_line">
-                        <span>{{sturcDetail.vehicleDto.deviceName}}<b>抓拍设备</b></span>
+                        <span><b>抓拍设备</b>{{sturcDetail.vehicleDto.deviceName}}</span>
                       </div>
                       <div class="struc_cdi_line">
-                        <span>{{sturcDetail.vehicleDto.address}}<b>抓拍地址</b></span>
+                        <span><b>抓拍地址</b>{{sturcDetail.vehicleDto.address}}</span>
                       </div>
                       <div class="struc_cdi_line">
-                        <span>{{sturcDetail.vehicleDto.plateNo}}<b>车牌号</b></span>
+                        <span><b>车牌号</b>{{sturcDetail.vehicleDto.plateNo}}</span>
                       </div>
                       <div class="struc_cdi_line">
-                        <span>{{sturcDetail.vehicleDto.vehicleColor + sturcDetail.vehicleDto.vehicleClass + sturcDetail.vehicleDto.vehicleStyles}}<b>特征</b></span>
+                        <span><b>特征</b>{{sturcDetail.vehicleDto.vehicleColor + sturcDetail.vehicleDto.vehicleClass + sturcDetail.vehicleDto.vehicleStyles}}</span>
                       </div>
                       <div class="struc_cdi_line">
-                        <span>{{sturcDetail.fakeReason}}<b>套牌依据</b></span>
+                        <span><b>套牌依据</b>{{sturcDetail.fakeReason}}</span>
                       </div>
                     </div>
                   </div>
@@ -225,7 +225,7 @@
                 </div>
                 <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
                   <div class="struc_c_d_qj struc_c_d_img">
-                    <img :src="sturcDetail.vehicleDto.subStoragePath" alt="">
+                    <img :src="sturcDetail.vehicleDto.subStoragePath" alt="" class="bigImg">
                     <span>抓拍图</span>
                   </div>
                   <div class="struc_c_d_box">
@@ -251,9 +251,10 @@
           </div>
         </div>
       </div>
-      <div class="not_content" v-else>
-        <img src="../../../../../assets/img/not-content.png" alt="">
-        <p style="color: #666666; margin-top: 30px;">抱歉，没有相关的结果!</p>
+      <div class="not_content" v-else v-loading="searchLoading">
+        <img src="../../../../../assets/img/null-content.png" alt="" v-show="showimgnull">
+        <img src="../../../../../assets/img/not-content.png" alt="" v-show="!showimgnull">
+        <p style="color: #666666; margin-top: 30px;">{{nodata}}</p>
       </div>
     </div>
   </div>
@@ -270,6 +271,8 @@ export default {
   data () {
     return {
       value1: '',
+      nodata: '请在左侧输入查询条件',
+      showimgnull: true,
       pickerOptions: {
       },
       searchData: {               //搜索参数
@@ -284,6 +287,7 @@ export default {
         pageSize: 10,
         total: 0
       },
+      searchLoading: false,
       currentPage: 1,
       sortTimeType: null, // 时间排序active
       sortMonitoryType: null, // 监控排序active
@@ -328,6 +332,24 @@ export default {
     }
   },
   methods: {
+    checkPlateNumber(value) {
+      let reg = /^([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})$/;
+      if (value) {
+        if (!reg.test(value)) {
+          if (!document.querySelector(".el-message")) {
+            this.$message.info("请正确输入车牌号码");
+          }
+          return false;
+        } else {
+          return true;
+        }
+      } else {
+        if (!document.querySelector(".el-message")) {
+          this.$message.info("请输入车牌号码");
+        }
+        return false;
+      }
+    },
     changval1 (val) {
       this.value2 = formatDate(val + 3*24*60*60*1000)
     },
@@ -345,11 +367,8 @@ export default {
     },
     //查询
     search() {
-      if(this.searchData.licensePlateNum) {
+      if (this.checkPlateNumber(this.searchData.licensePlateNum)) {
         this.getSearchData();
-      }else {
-        this.$message.error("请输入车牌号码");
-        return false;
       }
     },
     getSearchData() {
@@ -372,6 +391,7 @@ export default {
     },
     //获取车辆档案
     getVehicle(params) {
+      this.searchLoading = true;
       const query = {
         plateNo: params.plateNo
       }
@@ -381,23 +401,31 @@ export default {
         if(res && res.data) {
           this.vehicleArch = res.data
         }
+        this.searchLoading = false;
       }).catch(error => {
         console.log(error);
+        this.searchLoading = false;
       })
     },
     getViolationList(params) {
-      this.$_showLoading({text: '加载中...'})
+      this.searchLoading = true;
       delete(params.plateNo)
       JtcPOSTAppendtpInfo(params).then(res => {
         console.log("----getViolation----", params)
         if(res && res.data) {
           this.regulationsList = res.data.list
           this.pagination.total = res.data.total
-          this.$_hideLoading()
           console.log(this.regulationsList)
+          if (this.regulationsList.length === 0) {
+            this.nodata = "抱歉，没有相关结果"
+            this.showimgnull = false
+          }
         }
+        this.searchLoading = false;
       }).catch( error => {
         console.log(error);
+        this.searchLoading = false;
+
       })
     },
     /**
@@ -464,7 +492,7 @@ export default {
       this.setDTime();
       this.searchData.licensePlateNum = null
       this.regulationsList = []
-      this.search()
+      this.showimgnull = true
     },
     /**
      * 打开抓拍弹框
@@ -541,6 +569,7 @@ export default {
         .ccrc_content_right_content{
           background-color: white;
           box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
+          margin-top: 20px;
           .title{
             border-bottom: 1px solid #F2F2F2;
             padding: 20px;
@@ -875,7 +904,7 @@ export default {
                 > b {
                   color: #999;
                   font-weight: normal;
-                  padding-left: 18px;
+                  padding-right: 18px;
                 }
               }
             }

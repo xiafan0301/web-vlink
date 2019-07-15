@@ -48,30 +48,31 @@
             </div>
           </div>
 
-          <div class="left_time">
+          <div class="left_time date-comp">
             <el-date-picker
               placeholder="请选择日期"
               v-model="queryDate"
               :clearable="false"
               type="daterange"
-              range-separator="-"
+              range-separator="至"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
-              value-format="timestamp"
-              align="right"
+              value-format="yyyy-MM-dd"
+              format="yyyy-MM-dd"
+              @change="dateChange"
               :picker-options="pickerOptions">
             </el-date-picker>
           </div>
           <div class="left_time">
-            <el-select v-model="queryForm.startTime" placeholder="开始时间" style="width: 200px;">
+            <el-select v-model="queryForm.startTime" placeholder="开始时间" style="width: 216px;" @change="handleChangeStartTime">
               <el-option 
                 v-for="(item, index) in startTimeOptions" 
                 :key="index"
                 :label="item.label"
                 :value="item.value"
+                :disabled="item.disabled"
               >
               </el-option>
-              <!-- <i class="el-icon-time"></i> -->
             </el-select>
             <span class="left_time_separator">-</span>
             <el-select v-model="queryForm.endTime" placeholder="结束时间" style="width: 216px;">
@@ -80,16 +81,18 @@
                 :key="index"
                 :label="item.label"
                 :value="item.value"
+                :disabled="item.disabled"
               >
               </el-option>
             </el-select>
           </div>
           <div class="left_num">
-            <el-input class="left-none-border" v-model="queryForm.minShotTimes">
+            <el-input class="left-none-border" v-model="queryForm.minShotTimes" @blur="handleBlurShotTimes">
               <template slot="prepend">过车次数</template>
             </el-input>
             <span>次（范围2-100）</span>
           </div>
+          
           <el-select v-model="queryForm.vehicleTypes" placeholder="请选择车辆类型" style="width: 100%;" clearable multiple>
             <el-option
               v-for="item in carTypeList"
@@ -123,14 +126,18 @@
                 <el-table-column label="车牌号码" prop="vehicleNumber" show-overflow-tooltip></el-table-column>
                 <el-table-column label="车辆类型" prop="vehicleType">
                   <template slot-scope="scope">
-                    <span>{{ scope.row.vehicleType }}</span>
+                    <span>{{ scope.row.vehicleType ? scope.row.vehicleType : '-' }}</span>
                   </template>
                 </el-table-column>
                 <el-table-column label="过车次数" prop="shotTimes"></el-table-column>
+                <el-table-column label="布控库车辆" prop="isServeilled">
+                  <template slot-scope="scope">
+                    <span>{{ scope.row.isServeilled ? '是' : '否' }}</span>
+                  </template>
+                </el-table-column>
                 <el-table-column label="操作">
                   <template slot-scope="scope">
-                    <span class="operation_btn th-separator" @click="onOpenRecord(scope.row)">抓拍记录</span>
-                    <span class="operation_btn" @click="onOpenVehicleInfo(scope.row)">车辆信息</span>
+                    <span class="operation_btn" @click="onOpenRecord(scope.row)">抓拍记录</span>
                   </template>
                 </el-table-column>
               </el-table>
@@ -147,10 +154,7 @@
           </vue-scroll>
         </template>
         <template v-else>
-          <div class="not_content">
-            <img src="../../../../../assets/img/not-content.png" alt="">
-            <p style="color: #666666; margin-top: 30px;">抱歉，没有相关的结果!</p>
-          </div>
+          <div is="noResult" :isInitPage="isInitPage"></div>
         </template>
       </div>
     </div> 
@@ -165,84 +169,134 @@ import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import { objDeepCopy, formatDate, autoDownloadUrl } from "@/utils/util.js";
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+import noResult from '@/components/common/noResult.vue';
 export default {
-  components: { vlBreadcrumb },
+  components: { vlBreadcrumb, noResult },
   data () {
     return {
+      isInitPage: false, // 是否是初始化页面  因为初始化的时候就调了接口
       startTimeOptions: [
         {
           label: '19:00',
-          value: 19
+          value: 19,
+          disabled: false
         },
         {
           label: '20:00',
-          value: 20
+          value: 20,
+          disabled: false
         },
         {
           label: '21:00',
-          value: 21
+          value: 21,
+          disabled: false
         },
         {
           label: '22:00',
-          value: 22
+          value: 22,
+          disabled: false
         },
         {
           label: '23:00',
-          value: 23
+          value: 23,
+          disabled: false
         },
         {
           label: '24:00',
-          value: 24
+          value: 24,
+          disabled: false
+        },
+        {
+          label: '次日01:00',
+          value: 1,
+          disabled: false
+        },
+        {
+          label: '次日02:00',
+          value: 2,
+          disabled: false
+        },
+        {
+          label: '次日03:00',
+          value: 3,
+          disabled: false
+        },
+        {
+          label: '次日04:00',
+          value: 4,
+          disabled: false
+        },
+        {
+          label: '次日05:00',
+          value: 5,
+          disabled: false
+        },
+        {
+          label: '次日06:00',
+          value: 6,
+          disabled: false
         }
       ],
       endTimeOptions: [
         {
           label: '20:00',
-          value: 20
+          value: 20,
+          disabled: false
         },
         {
           label: '21:00',
-          value: 21
+          value: 21,
+          disabled: false
         },
         {
           label: '22:00',
-          value: 22
+          value: 22,
+          disabled: false
         },
         {
           label: '23:00',
-          value: 23
+          value: 23,
+          disabled: false
         },
         {
           label: '24:00',
-          value: 24
+          value: 24,
+          disabled: false
         },
         {
           label: '次日01:00',
-          value: 1
+          value: 1,
+          disabled: false
         },
         {
           label: '次日02:00',
-          value: 2
+          value: 2,
+          disabled: false
         },
         {
           label: '次日03:00',
-          value: 3
+          value: 3,
+          disabled: false
         },
         {
           label: '次日04:00',
-          value: 4
+          value: 4,
+          disabled: false
         },
         {
           label: '次日05:00',
-          value: 5
+          value: 5,
+          disabled: false
         },
         {
           label: '次日06:00',
-          value: 6
+          value: 6,
+          disabled: false
         },
         {
           label: '次日07:00',
-          value: 7
+          value: 7,
+          disabled: false
         }
       ],
       pickerOptions: {
@@ -261,7 +315,7 @@ export default {
         vehicleTypes: [],
         surveillanceIds: []
       },
-      queryDate: [(new Date() - (24 * 60 * 60 * 1000)), (new Date() - (24 * 60 * 60 * 1000))],
+      queryDate: null,
       // 选择设备的数据
       isIndeterminate: false, // 是否处于全选与全不选之间
       checkAllTree: false, // 树是否全选
@@ -295,6 +349,8 @@ export default {
   created () {
     if (this.$route.params.startDate) {
       this.handleQueryData();
+    } else {
+      this.setDTime();
     }
   },
   mounted() {
@@ -307,29 +363,49 @@ export default {
       this.handleSubmitData();
     }, 1000)
   },
-  watch: {
-    queryDate: {
-      handler (val) {
-        if (val && val[1] - val[0] > 2 * 24 * 60 *60 *1000) {
-          this.$message.error("最多选择3天")
-          this.$set(val, 1, val[0] + 2 * 24 * 60 *60 *1000)
-        }
-      },
-      deep: true
-    }
-  },
   methods: {
+    //设置默认时间
+    setDTime() {
+      let date = new Date();
+      let curDate = date.getTime();
+      let curS = 1 * 24 * 3600 * 1000;
+      let _s =
+        new Date(curDate - curS).getFullYear() +
+        "-" +
+        (new Date(curDate - curS).getMonth() + 1) +
+        "-" +
+        new Date(curDate - curS).getDate();
+      /* let _e =
+        date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate(); */
+      this.queryDate = [_s, _s];
+    },
+    //日期选择
+    dateChange(val) {
+      if (
+        new Date(val[1]).getTime() - new Date(val[0]).getTime() >=
+        3 * 24 * 3600 * 1000
+      ) {
+        if (!document.querySelector(".el-message")) {
+          this.$message.info(
+            "最大时间段为3天，超过开始时间3天（72小时）后的时间不可选择!"
+          );
+        }
+        this.setDTime();
+      }
+    },
     handleQueryData () {
-      // const cameraIds = this.$route.params.cameraIds.split(',');
-      // const bayonetIds = this.$route.params.bayonetIds.split(',');
-      const startDate = this.$route.params.startDate.split(' ');
-      const endDate = this.$route.params.endDate.split(' ');
+      const startDate = this.$route.params.startDate.split(' ')[0];
+      const endDate = this.$route.params.endDate.split(' ')[0];
+
+      this.queryDate = [startDate, endDate]
+
 
       const startTime = this.$route.params.startHour;
       const endTime = this.$route.params.endhour;
       const minShotTimes = this.$route.params.minShotTimes;
       const surveillanceIds = this.$route.params.surveillanceIds && this.$route.params.surveillanceIds.split(',');
       const vehicleTypes =  this.$route.params.vehicleTypes && this.$route.params.vehicleTypes.split(',');
+
 
       this.queryForm.startDate = startDate;
       this.queryForm.endDate = endDate;
@@ -338,6 +414,7 @@ export default {
       this.queryForm.minShotTimes = minShotTimes;
       this.queryForm.surveillanceIds = surveillanceIds;
       this.queryForm.vehicleTypes = vehicleTypes;
+
 
     },
     // 获取布控车辆
@@ -379,9 +456,7 @@ export default {
           this.cameraTree = this.getTreeList(camera);
           this.getLeafCountTree(this.cameraTree);
 
-          console.log('mmmm', this.$route.params.cameraIds)
           if (this.$route.params.cameraIds || this.$route.params.bayonetIds) {
-            console.log('asdasdasdasddddddddddddddddddddddds')
             const cameraIds = this.$route.params.cameraIds.split(',');
             const bayonetIds = this.$route.params.bayonetIds.split(',');
 
@@ -579,9 +654,23 @@ export default {
         this.queryForm.bayonetIds = bayonentIds.join(",");
       }
 
-      this.queryForm.startDate = this.queryDate && this.queryDate.length > 0 && formatDate(this.queryDate[0], 'yyyy-MM-dd')
-      this.queryForm.endDate = this.queryDate && this.queryDate.length > 0 && formatDate(this.queryDate[1], 'yyyy-MM-dd')
+      this.queryForm.startDate = this.queryDate[0];
+      this.queryForm.endDate = this.queryDate[1];
 
+
+      if (!this.validatorShotTimes(this.queryForm.minShotTimes)) {
+        this.searchLoading = false;
+        return false;
+      }
+
+      let isNextDay;
+      if (this.queryForm.startTime < 7) {
+        isNextDay = false;
+      } else {
+        if (this.queryForm.endTime <= 7) {
+          isNextDay = true;
+        }
+      }
       const params = {
         bayonetIds: this.queryForm.bayonetIds,
         cameraIds: this.queryForm.cameraIds,
@@ -592,7 +681,7 @@ export default {
         minShotTimes: parseInt(this.queryForm.minShotTimes),
         vehicleTypes: this.queryForm.vehicleTypes.length > 0 ? this.queryForm.vehicleTypes.join(',') : null,
         surveillanceIds: this.queryForm.surveillanceIds.length > 0 ? this.queryForm.surveillanceIds.join(',') : null,
-        isNextDay: this.queryForm.endTime && this.queryForm.endTime > 7 ? false : true,
+        isNextDay: isNextDay,
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
         order: 'desc',
@@ -600,7 +689,7 @@ export default {
       };
 
       this.searchStr = JSON.parse(JSON.stringify(params));
-
+      
       getNightVehicleList(params)
         .then(res => {
           if (res && res.data) {
@@ -631,8 +720,8 @@ export default {
         this.queryForm.bayonetIds = bayonentIds.join(",");
       }
 
-      this.queryForm.startDate = this.queryDate && this.queryDate.length > 0 && formatDate(this.queryDate[0], 'yyyy-MM-dd')
-      this.queryForm.endDate = this.queryDate && this.queryDate.length > 0 && formatDate(this.queryDate[1], 'yyyy-MM-dd')
+      this.queryForm.startDate = this.queryDate[0];
+      this.queryForm.endDate = this.queryDate[1];
 
       const data = {
         bayonetIds: this.queryForm.bayonetIds,
@@ -680,17 +769,17 @@ export default {
     /**
      * 查看车辆信息
      */
-    onOpenVehicleInfo (obj) {
-      this.searchStr['vehicleNumber'] = obj.vehicleNumber;
-      this.$store.commit('setBreadcrumbData', {
-        breadcrumbData: [
-          {name: '车辆侦查', routerName: 'vehicle'},
-          {name: '夜间行车分析', routerName: 'vehicle_search_ycxc', params: { ...this.searchStr }},
-          { name: '车辆详情' }
-        ]
-      });
-      this.$router.push({name: 'vehicle_search_clxx', query: {plateNo: obj.vehicleNumber}});
-    },
+    // onOpenVehicleInfo (obj) {
+    //   this.searchStr['vehicleNumber'] = obj.vehicleNumber;
+    //   this.$store.commit('setBreadcrumbData', {
+    //     breadcrumbData: [
+    //       {name: '车辆侦查', routerName: 'vehicle'},
+    //       {name: '夜间行车分析', routerName: 'vehicle_search_ycxc', params: { ...this.searchStr }},
+    //       { name: '车辆详情' }
+    //     ]
+    //   });
+    //   this.$router.push({name: 'vehicle_search_clxx', query: {plateNo: obj.vehicleNumber}});
+    // },
     /**
      * 分页赋值
      */
@@ -704,6 +793,39 @@ export default {
     indexMethod (index) {
       return index + 1 + 10 * (this.pagination.pageNum - 1);
     },
+    // 开始时间change
+    handleChangeStartTime (val) {
+      this.endTimeOptions.map((item) => {item.disabled = false;})
+      if (val) {
+        this.endTimeOptions.map(item => {
+          if (val < 19) { // 开始时间选择的次日
+            if (item.value > 7 || item.value <= val) { // 结束时间不是次日的不能选
+              item.disabled = true;
+            }
+          } else { // 开始时间选择的当日
+            if (item.value > 7 && item.value <= val) { // 结束时间不是当日的不能选
+              item.disabled = true;
+            }
+          }
+        })
+      }
+    },
+    // 过车次数 blur
+    handleBlurShotTimes () {
+      const time = this.queryForm.minShotTimes;
+      this.validatorShotTimes(time);
+    },
+    validatorShotTimes (val) {
+      let reg = /^[0-9]+$/;
+      if (!reg.test(val) || parseInt(val) < 2 || parseInt(val) > 100) {
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('请输入2-100之间的整数');
+        }
+        return false;
+      } else {
+       return true;
+      }
+    }
   }
 }
 </script>
@@ -721,12 +843,12 @@ export default {
     display: flex;
     position: relative;
     .the-left-search {
-      width: 272px;height: 100%;
+      width: 285px;height: 100%;
       background: #fff;
       box-shadow: 5px 0 10px #E5E7E7;
       animation: fadeInLeft .4s ease-out .3s both;
       .con_left{
-        width: 272px;
+        width: 285px;
         height: 100%;
         padding: 20px;
         > .left_time{
@@ -759,7 +881,7 @@ export default {
           display: flex;
           padding-bottom: 10px;
           .el-input{
-            width: 133px;
+            width: 145px;
           }
           > span{
             margin-left: 4px;
@@ -773,25 +895,12 @@ export default {
           .select_btn, .reset_btn {
             width: 110px;
           }
-          .select_btn {
-            // background-color: #0C70F8;
-            // color: #ffffff;
-            // &:hover {
-            //   background:#0466de;
-            //   color: #ffffff;
-            // }
-          }
-          .reset_btn {
-            // background-color: #ffffff;
-            // color: #666666;
-            // border-color: #DDDDDD;
-          }
         }
         // 选择设备下拉
         .selected_device {
           margin-bottom: 10px;
           position: relative;
-          width: 232px;
+          width: 245px;
           height: 40px;
           border: 1px solid #dcdfe6;
           border-radius: 4px;
@@ -826,7 +935,7 @@ export default {
             left: -1px;
             z-index: 100;
             background: #fff;
-            width: 232px;
+            width: 245px;
             height: 350px;
             border-radius: 4px;
             border: 1px solid #d3d3d3;
@@ -918,10 +1027,10 @@ export default {
   //   padding-left: 0px;
   // }
   .el-date-editor {
-    .el-input__inner {
+    /* .el-input__inner {
       padding-left: 15px;
-    }
-    .el-range__icon {
+    } */
+    /* .el-range__icon {
       position: absolute;
       right: 3px;
       top: 2px;
@@ -930,7 +1039,7 @@ export default {
       position: absolute;
       right: 3px;
       top: 2px;
-    }
+    } */
   }
   .el-input__prefix {
     right: 5px;

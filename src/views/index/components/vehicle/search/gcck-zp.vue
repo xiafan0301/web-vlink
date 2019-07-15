@@ -27,7 +27,7 @@
               </el-date-picker>
             </el-form-item>
             <el-form-item>
-              <el-select v-model="formInline.lb" placeholder="请选择车辆类别" style="width: 150px;">
+              <el-select v-model="formInline.lb" placeholder="请选择车辆分组" style="width: 150px;">
                 <el-option :label="'布控车辆'" :value="1"></el-option>
                 <el-option :label="'无牌车'" :value="2"></el-option>
                 <el-option v-for="(item, index) in lbList" :label="item.enumValue" :key="'dept-list-' + index" :value="item.uid"></el-option>
@@ -72,7 +72,7 @@
                       </div>
                     </div>
                     <div class="gcck_rbl_t com_ellipsis" :title="sitem.deviceName" style="color: #333;"><i class="vl_icon vl_icon_sm_cl"></i>{{sitem.plateNo}}</div>
-                    <div class="gcck_rbl_t com_ellipsis" :title="sitem.shotTime"><i class="vl_icon vl_icon_sm_sj"></i>{{sitem.snapTime}}</div>
+                    <div class="gcck_rbl_t com_ellipsis" :title="sitem.shotTime"><i class="vl_icon vl_icon_sm_sj"></i>{{sitem.shotTime}}</div>
                   </div>
                 </li>
               </ul>
