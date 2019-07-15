@@ -100,13 +100,13 @@
                         <p>选择区域</p>
                       </li>
                       <li>
-                        <i class="el-icon-aim"></i>
+                        <i class="el-icon-aim" @click="setMapStatus(3)"></i>
                       </li>
                       <li>
-                        <i class="el-icon-plus"></i>
+                        <i class="el-icon-plus" @click="setMapStatus(1)"></i>
                       </li>
                       <li>
-                        <i class="el-icon-minus"></i>
+                        <i class="el-icon-minus" @click="setMapStatus(2)"></i>
                       </li>
                     </ul>
                   </div>
@@ -298,13 +298,12 @@ export default {
           let o = this.listBayonet[i];
           for (let k in this.xjDrawPolygon) {
             let so = this.xjDrawPolygon[k];
-            if (so.obj && so.obj.contains(new window.AMap.LngLat(o.longitude, o.latitude))) {
-              // dObj[o.uid] = o;
+            if (so && so.contains(new window.AMap.LngLat(o.longitude, o.latitude))) {
               if (o.areaUid) {
                 if (!oList[o.areaUid]) { 
                   oList[o.areaUid] = {
                     id: o.areaUid,
-                    name: o.areaCname,
+                    name: o.areaName,
                     children: []
                   };
                 }
@@ -339,6 +338,17 @@ export default {
       } else {
         this.mouseTool.close(false);
         this.xjMap.setDefaultCursor();
+      }
+    },
+    setMapStatus (status) {
+      if (this.xjMap) {
+        if (status === 1) {
+          this.xjMap.setZoom(this.xjMap.getZoom() + 1);
+        } else if (status === 2) {
+          this.xjMap.setZoom(this.xjMap.getZoom() - 1);
+        } else if (status === 3) {
+          this.xjMap.setFitView();
+        }
       }
     },
     // 设备

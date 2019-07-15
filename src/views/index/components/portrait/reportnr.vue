@@ -17,7 +17,7 @@
             >{{item.label}}</li>
           </ul>
         </div>
-        <div class="vehicle_content_nr_box_right_bot">
+        <div class="vehicle_content_nr_box_right_bot" :class="{'active': selectIndex === 2 || selectIndex === 3}">
           <div class="cont" v-if="selectIndex === 1">
             <div class="top">
               最相似人员档案
@@ -54,7 +54,7 @@
             </div>
 
           </div>
-          <div class="cont1 cont" v-else-if="selectIndex === 0">
+          <div class="cont1" v-else-if="selectIndex === 0">
             <div>
               <div class="list-box">
                 <ul class="rlcx_r_list clearfix">
@@ -78,11 +78,65 @@
             </div>
 
           </div>
-          <div class="cont2 cont" v-else-if="selectIndex === 2">
-
+          <div class="cont2" v-else-if="selectIndex === 2">
+            <div class="cont2_map_box" v-show="reselt">
+              <div class="text">落脚点分析</div>
+              <div class="mes">
+                <el-collapse v-model="activeNames">
+                  <el-collapse-item title="创谷广告园(2次)" name="1">
+                    <div class="mes_cot">
+                      <div class="cot_1">
+                        <img src="../../../../../public/static/img/vis-eg.png">
+                        <div style="padding-left: 10px">
+                          <div style="background-color: #F6F6F6; padding: 0 8px"><i class="icon"></i>2018-12-27 15:46:07</div>
+                          <div class="subdata">
+                            <i class="vl_icon vl_icon_retrieval_03" style="height: 24px"></i>
+                            <b>99.12</b>%
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </el-collapse-item>
+                </el-collapse>
+              </div>
+            </div>
+            <div class="insetLeft2" @click="hideResult"></div>
+            <div id="container"></div>
           </div>
-          <div class="cont3 cont" v-else>
-
+          <div class="cont3 cont2" v-else>
+            <div class="cont2_map_box">
+              <div class="text">行人轨迹分析</div>
+              <div class="mes">
+                <el-collapse v-model="activeNames">
+                  <el-collapse-item title="创谷广告园(2次)" name="1">
+                    <div class="mes_cot">
+                      <div class="cot_1">
+                        <img src="../../../../../public/static/img/vis-eg.png">
+                        <div style="padding-left: 10px">
+                          <div style="background-color: #F6F6F6; padding: 0 8px"><i class="icon"></i>2018-12-27 15:46:07</div>
+                          <div class="subdata">
+                            <i class="vl_icon vl_icon_retrieval_03" style="height: 24px"></i>
+                            <b>99.12</b>%
+                          </div>
+                        </div>
+                      </div>
+                      <div style="margin: 15px 0; border-bottom: 1px solid #F2F2F2"></div>
+                      <div class="cot_1">
+                        <img src="../../../../../public/static/img/vis-eg.png">
+                        <div style="padding-left: 10px">
+                          <div style="background-color: #F6F6F6; padding: 0 8px"><i class="icon"></i>2018-12-27 15:46:07</div>
+                          <div class="subdata">
+                            <i class="vl_icon vl_icon_retrieval_03" style="height: 24px"></i>
+                            <b>99.12</b>%
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </el-collapse-item>
+                </el-collapse>
+              </div>
+            </div>
+            <div id="rightMap"></div>
           </div>
         </div>
       </div>
@@ -91,10 +145,17 @@
 </template>
 <script>
 import vehicleBreadcrumb from './breadcrumb.vue';
+import { mapXupuxian } from "@/config/config.js";
+import {PortraitPostPersonTrace} from "@/views/index/api/api.portrait.js";
 export default {
   components: {vehicleBreadcrumb},
   data () {
     return {
+      evData: [],
+      reselt: true,
+      amap: null,
+      markerPoint: [], // 地图点集合
+      activeNames: ['1'],
       tabList: [
         {
           label: "人员档案",
@@ -113,6 +174,9 @@ export default {
           value: 3
         }
       ],
+      map: null,
+      strucInfoList: [{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县兴隆路5号154(故障)","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":90,"shotTime":"2019-06-03 16:12:44","panoramaPath":"http://10.116.126.13/parastor300s/public/PRH259/f00000.jpg","feature":"粤PRH259；轿车；橘色；福特-福睿斯-2012","deviceId":null,"address":"溆浦县兴隆路5号","longitude":110.595111,"latitude":27.90289,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"龙潭镇神龙大酒店","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":94,"shotTime":"2019-06-09 01:29:16","panoramaPath":"http://10.116.126.13/parastor300s/public/PJH119/f00007.jpg","feature":"粤PRH259；轿车；橘色；福特-福睿斯-2012","deviceId":null,"address":"溆浦县龙潭镇神龙大酒店","longitude":110.542891,"latitude":27.411462,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"长沙创谷广告园44","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":90,"shotTime":"2019-06-10 11:41:04","panoramaPath":"http://10.116.126.13/parastor300s/public/PRH259/f00008.jpg","feature":"粤PRH259；轿车；橘色；福特-福睿斯-2012","deviceId":null,"address":"长沙市创谷广告软件园","longitude":112.973795,"latitude":28.094549,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县第一中学48","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":90,"shotTime":"2019-06-07 13:25:00","panoramaPath":"http://10.116.126.13/parastor300s/public/PYR682/f00026.jpg","feature":"粤P8A566；轿车；绿色；大众-捷达-2015","deviceId":null,"address":"溆浦县第一中学","longitude":110.612834,"latitude":27.910003,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县张家湾路口(故障)","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":94,"shotTime":"2019-06-06 09:28:55","panoramaPath":"http://10.116.126.13/parastor300s/public/PCS113/f00021.jpg","feature":"粤P8A566；轿车；绿色；大众-捷达-2015","deviceId":null,"address":"溆浦县张家湾路口","longitude":110.587558,"latitude":27.930365,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县气象局(故障)","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","feature":"粤P8A566；轿车；绿色；大众-捷达-2015","deviceId":null,"address":"溆浦县气象局","longitude":110.604443,"latitude":27.908643,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县张家湾路口(故障)","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":93,"shotTime":"2019-06-07 14:22:36","panoramaPath":"http://10.116.126.13/parastor300s/public/PHD376/f00039.jpg","feature":"粤P9E163；轿车；白色；现代-瑞纳-2016","deviceId":null,"address":"溆浦县张家湾路口","longitude":110.587558,"latitude":27.930365,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县兴隆路5号154(故障)","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":93,"shotTime":"2019-06-10 14:24:28","panoramaPath":"http://10.116.126.13/parastor300s/public/PHD376/f00042.jpg","feature":"粤P9E163；轿车；白色；现代-瑞纳-2016","deviceId":null,"address":"溆浦县兴隆路5号","longitude":110.595111,"latitude":27.90289,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县龙潭镇汽车站(故障)","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":93,"shotTime":"2019-06-03 04:30:08","panoramaPath":"http://10.116.126.13/parastor300s/public/PYR682/f00033.jpg","feature":"粤P9E163；轿车；白色；现代-瑞纳-2016","deviceId":null,"address":"溆浦县龙潭镇汽车站","longitude":110.539961,"latitude":27.411443,"cname":null,"uploadPath":null}],
+      sturcDetail: {vehicleDto:{},"id":null,"vehicleNumber": "粤PRH259","deviceCode":null,"structureType":null,"deviceName":"溆浦县政府41","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":90,"shotTime":"2019-06-10 19:29:55","panoramaPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","feature":"粤PRH259；轿车；橘色；福特-福睿斯-2012","deviceId":null,"address":"溆浦县警予东路169号","longitude":110.597638,"latitude":27.910355,"cname":null,"uploadPath":'http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg'},
       selectIndex: 1,
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       taskForm: {
@@ -133,9 +197,150 @@ export default {
   mounted () {
   },
   methods: {
+    hideResult () {
+      this.reselt = false;
+    },
     //tab切换
     selectTab(val) {
       this.selectIndex = val;
+      if ( val === 2) {
+        this.$nextTick(() => {
+          this.initMap()
+        })
+      }
+      if ( val === 3) {
+        this.$nextTick(() => {
+          this.renderMap()
+          this.submitForm(1)
+        })
+      }
+    },
+    /**
+     * 弹框地图初始化
+     */
+    initMap () {
+      // this.map.setZoomAndCenter(iZoom, aCenter);
+      let map = new window.AMap.Map('container', {
+        zoom: 14, // 级别
+        center: [this.sturcDetail.longitude, this.sturcDetail.latitude,], // 中心点坐标
+      });
+      map.setMapStyle('amap://styles/whitesmoke');
+      this.map = map;
+      this.drawPoint(this.sturcDetail)
+    },
+    /**
+     * 地图描点
+     */
+    drawPoint (data) {
+      console.log(data)
+      if (this.markerPoint) {
+        this.map.remove(this.markerPoint)
+      }
+      let _content = '<div class="vl_icon vl_icon_judge_02"></div>'
+      this.markerPoint = new window.AMap.Marker({ // 添加自定义点标记
+        map: this.map,
+        position: [data.longitude, data.latitude], // 基点位置 [116.397428, 39.90923]
+        offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+        draggable: false, // 是否可拖动
+        // 自定义点标记覆盖物内容
+        content: _content
+      });
+      this.map.setZoomAndCenter(16, [data.longitude, data.latitude]); // 自适应点位置
+      let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`
+      this.infoWindow = new window.AMap.InfoWindow({
+        map: this.map,
+        isCustom: true,
+        closeWhenClickMap: false,
+        position: [data.longitude, data.latitude],
+        offset: new window.AMap.Pixel(0, -70),
+        content: sConent
+      })
+    },
+    submitForm(v) {
+      if(v == 1){
+        let pg = {
+        }
+        pg['startTime'] = "2019-07-11 00:00:00";
+        pg['endTime'] = "2019-07-11 23:59:59";
+        pg['imageUrl'] = "http://file.aorise.org/vlink/image/cc78ae27-dca1-4291-85be-782941ae9ab2.jpg";
+        pg['areaUid']= "431224100,431224102,431224103,431224104,431224105,431224106,431224107,431224108"
+        this.getVehicleShot(pg);
+      }else{
+        this.$message.info("请上传图片");
+      }
+    },
+    getVehicleShot(d) {
+      this.searchLoading = true;
+      PortraitPostPersonTrace(d).then(res => {
+        if (res) {
+          if (!res.data || res.data.length === 0) {
+            this.$message.info("抱歉，没有找到匹配结果");
+            return false;
+          }
+          this.evData = res.data.list;
+          this.drawMapMarker(this.evData);
+        }
+      }).catch(() => {
+      });
+    },
+    drawMapMarker (data) {
+      let path = [];
+      for (let  i = 0; i < data.length; i++) {
+        let obj = data[i];
+        let _path = [obj.shotPlaceLongitude, obj.shotPlaceLatitude];
+        if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
+          let _sContent = `
+            <div class="vl_jtc_mk">
+              <img src="${obj.subStoragePath}"/>
+              <p>${obj.shotTime}</p>
+            </div>`;
+          // 窗体
+          let winInfo = new AMap.Marker({ // 添加自定义点标记
+            map: this.amap,
+            position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
+            offset: new AMap.Pixel(20, -80), // 相对于基点的偏移位置
+            draggable: false, // 是否可拖动
+            extData: obj,
+            content: _sContent
+          });
+          // winInfo.on('click', () => {
+          //   this.showStrucInfo(obj, i)
+          // })
+          path.push(_path);
+          let _content = `<div class="vl_icon vl_icon_sxt"></div>`
+          let point = new AMap.Marker({ // 添加自定义点标记
+            map: this.amap,
+            position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
+            offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+            draggable: false, // 是否可拖动
+            // 自定义点标记覆盖物内容
+            content: _content
+          });
+          this.markerPoint[i] = [point,winInfo];
+        }
+      }
+      this.amap.setFitView();
+      console.log(path)
+      this.drawLine(path);
+    }, // 覆盖物（窗体和checkbox
+    drawLine (path) {
+      var polyline = new AMap.Polyline({
+        path: path,
+        showDir: true,
+        strokeColor: '#61C772',
+        strokeWeight: 6
+      });
+      polyline.setMap(this.amap)
+      this.markerLine.push(polyline);
+      this.amap.add([polyline]);
+    }, // 画线
+    renderMap() {
+      let map = new window.AMap.Map("rightMap", {
+        zoom: 10,
+        center: mapXupuxian.center
+      });
+      map.setMapStyle("amap://styles/whitesmoke");
+      this.amap = map;
     },
   }
 }
@@ -156,6 +361,10 @@ export default {
       .vehicle_content_nr_box_right{
         height: 100%;
         width: calc(100% - 272px);
+        .active {
+          padding: 0 !important;
+          margin-left: 5px;
+        }
         .vehicle_content_nr_box_right_top{
           width: 100%;
           box-shadow:2px 3px 10px 0px rgba(131,131,131,0.28);
@@ -256,11 +465,12 @@ export default {
             .list-box {
               display: flex;
               flex-wrap: wrap;
+              min-width: 1180px;
+              overflow: auto;
               // justify-content: space-between;
               flex-flow: row wrap;
               // height: calc(100% - 45px);
               > .rlcx_r_list {
-                padding: 5px;
                 > li {
                   padding: 5px;
                   float: left;
@@ -302,9 +512,154 @@ export default {
               }
             }
           }
+          .cont2{
+            height: 100%;
+            position: relative;
+            #container{
+              height: 100%;
+              width: 100%;
+            }
+            .insetLeft2 {
+              position: absolute;
+              left: 339px;
+              width: 28px;
+              height: 178px;
+              z-index: 9999;
+              top: 50%;
+              margin-top: -89px;
+              display: inline-block;
+              background-repeat: no-repeat;
+              transform: rotate(180deg);
+              background-image: url(../../../../assets/img/icons.png);
+              background-position: -318px -1269px;
+              cursor: pointer;
+            }
+            .cont2_map_box{
+              height: 100%;
+              overflow: auto;
+              width: 340px;
+              background-color: white;
+              position: absolute;
+              z-index: 9999;
+              box-shadow:2px 3px 10px 0px rgba(131,131,131,0.28);
+              .text{
+                color: #333333;
+                font-weight: bold;
+                padding: 20px;
+                font-size: 16px;
+              }
+              .mes{
+                padding: 20px;
+                padding-top: 0;
+                /deep/ .el-collapse-item{
+                  border:1px solid rgba(211,211,211,1);
+                  margin-bottom: 10px;
+                }
+                /deep/ .el-collapse{
+                  border: 0;
+                }
+                /deep/ .el-collapse-item:last-child {
+                }
+                /deep/ .el-collapse-item__header{
+                  border: 0;
+                  background-color: #F6F6F6;
+                  height: 38px;
+                  padding-left: 10px;
+                  color: #333333;
+                  font-size: 14px;
+                }
+                /deep/ .el-collapse-item__content{
+                  padding-bottom: 0;
+                }
+                .mes_cot{
+                  padding: 10px;
+                  .cot_1{
+                    img{
+                      width: 92px;
+                      height: 92px;
+                    }
+                    >div{
+                      display: inline-block;
+                      vertical-align: top;
+                      .icon{
+                        background: url("../../../../assets/img/the-time.png") no-repeat;
+                        background-size: 15px 15px;
+                        display: inline-block;
+                        height: 19px;
+                        margin-right: 5px;
+                        width: 15px;
+                        vertical-align: middle;
+                      }
+                      .subdata{
+                        color: #0c70f8;
+                        line-height: 36px;
+                        padding-top: 5px;
+                        b{
+                          padding-left: 5px;
+                          font-size: 28px;
+
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          .cont3{
+            height: 100%;
+            position: relative;
+            #rightMap{
+              height: 100%;
+              width: 100%;
+            }
+          }
         }
       }
     }
   }
-
+</style>
+<style lang="scss">
+  .cap_info_win {
+    background: #FFFFFF;
+    padding: .18rem;
+    font-size: .14rem;
+    color: #666666;
+    position: relative;
+    &:after {
+      display: block;
+      content: '';
+      border: .1rem solid #FFFFFF;
+      border-color: #FFFFFF transparent transparent;
+      position: absolute;
+      bottom: -.2rem;
+      left: calc(50% - .05rem);
+    }
+  }
+  .vl_jtc_mk {
+    width: 218px;
+    height: 122px;
+    position: relative;
+    > img {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+    > p {
+      width: 100%;
+      position: absolute;
+      color: #FFFFFF;
+      bottom: 8px;
+      font-size: 12px;
+      padding: 0 6px;
+      line-height: 20px;
+      > i {
+        height: 20px;
+        float: right;
+        vertical-align: middle;
+      }
+    }
+  }
 </style>

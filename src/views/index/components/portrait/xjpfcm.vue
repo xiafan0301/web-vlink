@@ -73,7 +73,7 @@
                   </li>
                   <li>
                     <div
-                      title="选择折线100米范围内的设备"
+                      title="选择折线200米范围内的设备"
                       :class="{'sd-opts-sed': drawActiveType === 3 }"
                       @click="selDrawType(3)"
                     >
@@ -194,7 +194,7 @@
           <div class="map_rm" id="mapMap"></div>
           <div class="sd_search">
             <input type="text" placeholder="请输入地名，快速定位地址" autocomplete="off" class="sd_search_input" id="map-sd-search-input">
-            <span><i class="el-icon-search"></i></span>
+            <span @click="searchBtn"><i class="el-icon-search"></i></span>
           </div>
           <!-- 地图控制按钮（放大，缩小，定位） -->
           <div class="map_control">
@@ -317,7 +317,8 @@ export default {
       showTypes: "DB", //设备类型
       cameraIds: [], //摄像头
       bayonetIds: [], //卡口
-      area: []
+      area: [],
+      searchTip: {},      //地图搜索选择数据
     };
   },
   computed: {},
@@ -563,10 +564,16 @@ export default {
     },
     selectArea(e) {
       console.log(e);
+      this.searchTip = e;
       if (e.poi && e.poi.location) {
         this.amap.setZoom(15);
         this.amap.setCenter(e.poi.location);
       }
+    },
+    searchBtn() {
+      if(this.searchTip.poi && this.searchTip.poi.location) {
+        this.selectArea(this.searchTip)
+      }   
     },
     mapEvents() {
       let _this = this,

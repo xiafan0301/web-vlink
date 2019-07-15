@@ -18,20 +18,20 @@
             <div class="form_warp">
               <el-form :model="mhscMenuForm" ref="mhscMenuForm" :rules="rules">
                 <div class="date-comp">
-                <el-form-item label prop="selectDate">
-                  <el-date-picker
-                    class="width232"
-                    v-model="mhscMenuForm.selectDate"
-                    type="daterange"
-                    range-separator="至"
-                    value-format="yyyy-MM-dd"
-                    format="yyyy-MM-dd"
-                    :picker-options="pickerOptions"
-                    start-placeholder="开始日期"
-                    end-placeholder="结束日期"
-                    :clearable="false"
-                  ></el-date-picker>
-                </el-form-item>
+                  <el-form-item label prop="selectDate">
+                    <el-date-picker
+                      class="width232"
+                      v-model="mhscMenuForm.selectDate"
+                      type="daterange"
+                      range-separator="至"
+                      value-format="yyyy-MM-dd"
+                      format="yyyy-MM-dd"
+                      :picker-options="pickerOptions"
+                      start-placeholder="开始日期"
+                      end-placeholder="结束日期"
+                      :clearable="false"
+                    ></el-date-picker>
+                  </el-form-item>
                 </div>
                 <!-- 选择设备 -->
                 <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
@@ -153,7 +153,11 @@
             <!-- 按钮样式 -->
             <div class="btn_warp">
               <el-button class="reset_btn" @click="resetMenu">重置</el-button>
-              <el-button class="select_btn" :loading="getStrucInfoLoading" @click="getStrucInfo(true)">确定</el-button>
+              <el-button
+                class="select_btn"
+                :loading="getStrucInfoLoading"
+                @click="getStrucInfo(true)"
+              >确定</el-button>
             </div>
           </div>
         </vue-scroll>
@@ -275,27 +279,28 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img class="bigImg" :src="sturcDetail.storagePath" alt />
+            <img class="bigImg" title="点击放大图片" :src="sturcDetail.storagePath"  alt />
             <span>全景图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img struc_c_d_img_green">
-              <img class="bigImg" :src="sturcDetail.subStoragePath" alt />
+              <img class="bigImg" title="点击放大图片" :src="sturcDetail.subStoragePath" alt />
               <span>抓拍图</span>
             </div>
             <div class="struc_c_d_info">
-              <h2>
-                抓拍信息
-                <!-- <div class="vl_jfo_sim" v-show="showSim">
+              <vue-scroll>
+                <h2>
+                  抓拍信息
+                  <!-- <div class="vl_jfo_sim" v-show="showSim">
                   <i class="vl_icon vl_icon_retrieval_03"></i>
                   {{sturcDetail.semblance ? sturcDetail.semblance : 98.32}}
                   <span
                     style="font-size: 12px;"
                   >%</span>
-                </div>-->
-              </h2>
-              <!-- 特征展示框 -->
-              <!-- <div class="struc_cdi_box">
+                  </div>-->
+                </h2>
+                <!-- 特征展示框 -->
+                <!-- <div class="struc_cdi_box">
                 <div
                   class="item"
                   v-if="sturcDetail.plateReliability"
@@ -317,56 +322,69 @@
                   class="item"
                   v-if="sturcDetail.vehicleRoof"
                 >{{ '车顶(天窗)：' + sturcDetail.vehicleRoof}}</div>
-              </div> -->
-               <!-- 车辆的信息栏 -->
-              <div class="struc_cdi_line" v-if="sturcDetail.plateNo">
-                <p>
-                  <span class="key">车牌号码</span>
-                  <span class="val">{{sturcDetail.plateNo}}</span>
-                </p>
-              </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.plateClass || sturcDetail.plateClass === 0">
-                <p>
-                  <span class="key">车牌类型</span>
-                  <span class="val">{{dicFormater(45, sturcDetail.plateClass)}}</span>
-                </p>
-              </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.plateColor">
-                <p>
-                  <span class="key">车牌颜色</span>
-                  <span class="val">{{sturcDetail.plateColor}}</span>
-                </p>
-              </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.vehicleColor">
-                <p>
-                  <span class="key">车辆颜色</span>
-                  <span class="val">{{sturcDetail.vehicleColor}}</span>
-                </p>
-              </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.vehicleStyles">
-                <p>
-                  <span class="key">车辆型号</span>
-                  <span class="val">{{sturcDetail.vehicleStyles}}</span>
-                </p>
-              </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.shotTime">
-                <p>
-                  <span class="key">抓拍时间</span>
-                  <span class="val">{{sturcDetail.shotTime}}</span>
-                </p>
-              </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.deviceName">
-                <p>
-                  <span class="key">抓拍设备</span>
-                  <span class="val">{{sturcDetail.deviceName}}</span>
-                </p>
-              </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.address">
-                <p>
-                  <span class="key" title="抓拍地点">抓拍地点</span>
-                  <span class="val">{{sturcDetail.address}}</span>
-                </p>
-              </div>
+                </div>-->
+                <!-- 车辆的信息栏 -->
+                <div class="struc_cdi_line" v-if="sturcDetail.shotTime">
+                  <p>
+                    <span class="key">抓拍时间</span>
+                    <span class="val">{{sturcDetail.shotTime}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdi_line" v-if="sturcDetail.deviceName">
+                  <p>
+                    <span class="key">抓拍设备</span>
+                    <span class="val">{{sturcDetail.deviceName}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdi_line" v-if="sturcDetail.address">
+                  <p>
+                    <span class="key" title="抓拍地点">抓拍地点</span>
+                    <span class="val">{{sturcDetail.address}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdi_line" v-if="sturcDetail.plateNo">
+                  <p>
+                    <span class="key">车牌号码</span>
+                    <span class="val">{{sturcDetail.plateNo}}</span>
+                  </p>
+                </div>
+
+                <!-- 5个特征 -->
+                <div class="struc_cdi_line" v-if="sturcDetail.plateColor">
+                  <p>
+                    <span class="key">车牌颜色</span>
+                    <span class="val">{{sturcDetail.plateColor}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdi_line" v-if="sturcDetail.vehicleStyles">
+                  <p>
+                    <span class="key">车辆型号</span>
+                    <span class="val">{{sturcDetail.vehicleStyles}}</span>
+                  </p>
+                </div>
+
+                <div class="struc_cdi_line" v-if="sturcDetail.vehicleColor">
+                  <p>
+                    <span class="key">车辆颜色</span>
+                    <span class="val">{{sturcDetail.vehicleColor}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdi_line" v-if="sturcDetail.vehicleClass">
+                  <p>
+                    <span class="key">车辆类型</span>
+                    <span class="val">{{sturcDetail.vehicleClass}}</span>
+                  </p>
+                </div>
+                <div
+                  class="struc_cdi_line"
+                  v-if="sturcDetail.plateClass || sturcDetail.plateClass === 0"
+                >
+                  <p>
+                    <span class="key">号牌类型</span>
+                    <span class="val">{{dicFormater(45, sturcDetail.plateClass)}}</span>
+                  </p>
+                </div>
+              </vue-scroll>
             </div>
           </div>
         </div>
@@ -375,7 +393,7 @@
         </div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt />
+            <img :src="sturcDetail.subStoragePath" class="bigImg" title="点击放大图片" alt />
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
@@ -560,11 +578,6 @@ export default {
     this.getMonitorList();
     this.setDTime();
     this.vehicleBelongOptions = this.dicFormater(48)[0].dictList; // 获取车辆归属地
-    // 一进入页面就全选设备
-    this.$nextTick(() => {
-      this.checkAllTree = true;
-      this.handleCheckedAll(true);
-    });
     // 初始化地图
     let map = new AMap.Map("capMap", {
       center: [112.974691, 28.093846],
@@ -588,7 +601,7 @@ export default {
     });
   },
   methods: {
-    getStrucInfo(isClick=false) {
+    getStrucInfo(isClick = false) {
       // 根据特征数组来获取到检索的结果
       this.$refs.mhscMenuForm.validate(valid => {
         if (isClick) {
@@ -684,7 +697,9 @@ export default {
       this.pageNum = page;
       let ips = (this.pageNum - 1) * this.pageSize;
       let ipe = ips + this.pageSize;
-      if (ipe > this.total) { ipe = this.total; }
+      if (ipe > this.total) {
+        ipe = this.total;
+      }
       this.strucInfoList = this.strucInfoListAll.slice(ips, ipe);
     },
     handleSizeChange(val) {
@@ -774,6 +789,7 @@ export default {
       this.$nextTick(() => {
         this.checkAllTree = true;
         this.handleCheckedAll(true);
+        this.getStrucInfo();
       });
     },
     getMonitorList() {
@@ -785,11 +801,8 @@ export default {
           let camera = objDeepCopy(res.data.areaTreeList);
           let bayonet = objDeepCopy(res.data.areaTreeList);
           this.cameraTree = this.getTreeList(camera);
-          /* this.bayonetTree = this.getBayTreeList(bayonet); */
           this.getLeafCountTree(this.cameraTree);
-          /* this.getLeafCountTree(this.cameraTree, 'camera');
-          this.getLeafCountTree(this.bayonetTree, 'bayonet'); */
-          this.initCheckTree();
+          this.initCheckTree(); // 初始化全选设备
         }
       });
     },
@@ -1467,6 +1480,7 @@ export default {
           }
           .struc_c_d_info {
             width: calc(100% - 3.6rem);
+            height: 3.6rem;
             padding-left: 0.24rem;
             color: #333333;
             h2 {
