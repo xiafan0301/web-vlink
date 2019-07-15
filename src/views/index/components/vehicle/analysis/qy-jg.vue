@@ -74,19 +74,19 @@
             <div class="struc_c_d_info">
               <h2>抓拍信息</h2>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.shotTime}} <font>抓拍时间</font></span>
+                <span><font>车牌号码</font>{{sturcDetail.plateNo}}</span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.deviceName}} <font>抓拍设备</font></span>
+                <span><font>车辆特征</font>{{sturcDetail.vehicleColor}} {{sturcDetail.vehicleClass}} {{sturcDetail.vehicleBrand}} {{sturcDetail.vehicleStyles}}</span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.address}} <font>抓拍地址</font></span>
+                <span><font>抓拍设备</font>{{sturcDetail.deviceName}}</span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.plateNo}} <font>车牌号</font></span>
+                <span><font>抓拍时间</font>{{sturcDetail.shotTime}}</span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.vehicleColor}} {{sturcDetail.vehicleClass}} {{sturcDetail.vehicleBrand}} {{sturcDetail.vehicleStyles}} <font>特征</font></span>
+                <span><font>抓拍地址</font>{{sturcDetail.address}}</span>
               </div>
               <div class="struc_cdi_line"></div>
             </div>
@@ -664,19 +664,30 @@
                 line-height: .3rem;
                 margin-bottom: .08rem;
                 border: 1px solid #F2F2F2;
-                background: #FAFAFA;
                 color: #333333;
                 white-space: nowrap;
                 text-overflow: ellipsis;
                 border-radius:3px;
                 font-size: 12px;
                 overflow: hidden;
-                padding: 0 .1rem;
+                padding-right: .1rem;
                 margin-right: .08rem;
                 > i {
                   vertical-align: middle;
                   margin-left: .1rem;
                 }
+                > font {
+                  width: 75px;
+                  text-align: center;
+                  border-right: 1px solid #F2F2F2;
+                  color: #999999;
+                  background: #FAFAFA;
+                  display: inline-block;
+                  margin-right: .1rem;
+                }
+              }
+              p {
+                color: #999999;
               }
             }
           }
