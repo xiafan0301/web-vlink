@@ -334,8 +334,6 @@ export default {
             this.list.map(item => {
               item.taskWebParam = JSON.parse(item.taskWebParam);
             })
-
-            console.log(this.list)
           }
         })
         .catch(() => {})

@@ -27,7 +27,7 @@
           </div>
         </div>
         <div class="list-box">
-          <div class="list-item" v-for="(item, index) in dataList" :key="item.id" @click="onOpenDetail(item, index)">
+          <div class="list-item" v-for="item in dataList" :key="item.id" @click="onOpenDetail(item)">
             <img :src="item.subStoragePath" alt="">
             <p class="time"><i></i>{{item.shotTime}}</p>
             <p class="address"><i></i>抓拍设备:{{item.deviceName}}</p>
@@ -118,8 +118,8 @@
       <div class="struc-list">
         <swiper :options="swiperOption" ref="mySwiper">
           <!-- slides -->
-          <swiper-slide v-for="(item, index) in dataList" :key="index + 'isgm'">
-            <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
+          <swiper-slide v-for="(item, index) in allDataList" :key="index + 'isgm'">
+            <div class="swiper_img_item" :class="{'active': item.id === curImgIndex}" @click="imgListTap(item)">
               <img style="display: block; width: 100%; height: .88rem;" :src="item.subStoragePath" alt="">
             </div>
           </swiper-slide>
@@ -179,7 +179,8 @@ export default {
           prevEl: '.swiper-button-prev',
         },
       },
-      dataList: [],
+      dataList: [], // 分页抓拍记录
+      allDataList: [], // 所有的抓拍记录
       playing: false, // 视频播放是否
       queryObj: {}
     }
@@ -201,6 +202,7 @@ export default {
   },
   mounted () {
     this.getList();
+    this.getAllList();
   },
   methods: {
     // 播放视频
@@ -218,6 +220,21 @@ export default {
       });
       this.playing = !this.playing;
     },
+    // 获取所有的抓拍记录
+    getAllList () {
+      this.queryObj['vehicleNumber'] = this.$route.params.vehicleNumber;
+      this.queryObj['pageSize'] = 0;
+      this.queryObj['pageNum'] = this.pagination.pageNum;
+      this.queryObj['order'] = this.pagination.order;
+      this.queryObj['orderBy'] = this.pagination.orderBy;
+      getNightVehicleRecordList(this.queryObj)
+        .then(res => {
+          if (res && res.data) {
+            this.allDataList = res.data.list;
+          }
+        })
+        .catch(() => {})
+    },
     // 获取抓拍记录
     getList () {
       this.queryObj['vehicleNumber'] = this.$route.params.vehicleNumber;
@@ -225,7 +242,7 @@ export default {
       this.queryObj['pageNum'] = this.pagination.pageNum;
       this.queryObj['order'] = this.pagination.order;
       this.queryObj['orderBy'] = this.pagination.orderBy;
-      getNightVehicleRecordList( this.queryObj)
+      getNightVehicleRecordList(this.queryObj)
         .then(res => {
           if (res && res.data) {
             this.dataList = res.data.list;
@@ -328,10 +345,10 @@ export default {
     /**
      * 打开抓拍弹框
      */
-    onOpenDetail (obj, index) {
+    onOpenDetail (obj) {
       this.sturcDetail = obj;
       this.strucDetailDialog = true;
-      this.curImgIndex = index;
+      this.curImgIndex = obj.id;
       this.$nextTick(() => {
         this.initMap(obj);
       })
@@ -346,9 +363,9 @@ export default {
     /**
      * 图片切换
      */
-    imgListTap (obj, i) {
+    imgListTap (obj) {
       this.sturcDetail = {};
-      this.curImgIndex = i;
+      this.curImgIndex = obj.id;
       this.sturcDetail = obj;
       this.$nextTick(() => {
         this.initMap(obj);

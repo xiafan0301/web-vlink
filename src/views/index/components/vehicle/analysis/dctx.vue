@@ -209,7 +209,7 @@ export default {
   },
   mounted () {
     this.initMap();
-    this.onSearch();
+    // this.onSearch();
   },
   methods: {
     hideLeft() {
@@ -308,9 +308,12 @@ export default {
 
              
             marker.on('click', function () {
-              $($('#vehicle_mark' + idName).children()[0]).css('display', 'none');
-              $($('#vehicle_mark' + idName).children()[1]).css('display', 'block');
-              // $('vl_icon_map_hover_mark' + deviceType).css('display', 'block');
+              
+              $('#vehicle_mark' + idName).addClass('is_checked');
+
+              $($('.is_checked').children()[0]).css('display', 'none');
+
+              $($('is_checked').children()[1]).css('display', 'block !important');
               
 
               _this.recordDetail.recordList = [];
@@ -343,24 +346,27 @@ export default {
             strokeStyle: 'solid'
           });
 
-            polyline.on('mouseover', function () {
+          polyline.on('mouseover', function () {
+            polyline.setOptions({
+              strokeWeight: 10,
+              // extData: {
+              //   title: number
+              // },
+              strokeColor: '#41D459',
+            })
+          });
+        
+          polyline.on('mouseout', function () {
+            if (_this.currentSelectPolyline !== number) { // 当前选中的折线鼠标移开不消失选中的效果
               polyline.setOptions({
-                strokeWeight: 10,
-                strokeColor: '#41D459',
+                strokeWeight: 8,
+                strokeColor: '#D3D3D3',
               })
-            });
-          
-            polyline.on('mouseout', function () {
-              if (_this.currentSelectPolyline !== number) {
-                polyline.setOptions({
-                  strokeWeight: 8,
-                  strokeColor: '#D3D3D3',
-                })
-              }
-            });
+            }
+          });
 
 
-          _this.polylineObj[number] = polyline;
+          _this.polylineObj[number] = polyline; // 将折线都存储起来
 
           _this.map.add(polyline);
 
@@ -426,34 +432,34 @@ export default {
      */
     onSearch () {
       let arr = [];
-      // this.filterObj.vehicleNumberList.forEach(item => {
-      //   if (!reg.test(item.vehicleNumber)) {
-      //     this.hasError = true;
-      //   }
-      //   arr.push(item.vehicleNumber)
-      // });
+      this.filterObj.vehicleNumberList.forEach(item => {
+        if (!reg.test(item.vehicleNumber)) {
+          this.hasError = true;
+        }
+        arr.push(item.vehicleNumber)
+      });
 
-      // if (this.hasError) {
-      //   if (!document.querySelector('.el-message--info')) {
-      //     this.$message.info('请输入正确的车牌号码');
-      //   }
-      //   return;
-      // }
+      if (this.hasError) {
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('请输入正确的车牌号码');
+        }
+        return;
+      }
 
-      // this.filterObj.vehicleNumbers = arr.join(',');
+      this.filterObj.vehicleNumbers = arr.join(',');
 
-      // this.searchLoading = true;
+      this.searchLoading = true;
 
       const params = {
-        // startDate: formatDate(this.filterObj.startDate),
-        // endDate: formatDate(this.filterObj.endDate),
-        // vehicleNumbers: this.filterObj.vehicleNumbers,
-        startTime: '2019-07-13 00:00:00',
-        endTime: '2019-07-13 13:59:59',
-        vehicleNumbers: "湘LYV366,湘NF8988,湘NJM910,湘NJY056",
-        // order:"asc",
-        // pageNum: this.pagination.pageNum,
-        // pageSize: this.pagination.pageSize
+        startDate: formatDate(this.filterObj.startDate),
+        endDate: formatDate(this.filterObj.endDate),
+        vehicleNumbers: this.filterObj.vehicleNumbers,
+        // startTime: '2019-07-13 00:00:00',
+        // endTime: '2019-07-13 13:59:59',
+        // vehicleNumbers: "湘LYV366,湘NF8988,湘NJM910,湘NJY056",
+        order:"asc",
+        pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize
       };
 
       getMultiVehicleList(params)
@@ -943,14 +949,6 @@ export default {
       top: 0;
       display: none;
     }
-    // &:hover {
-    //   .mark_span {
-    //     display: none;
-    //   }
-    //   .mark_hover_span {
-    //     display: block;
-    //   }
-    // }
   }
 }
 .cap_info_win {
