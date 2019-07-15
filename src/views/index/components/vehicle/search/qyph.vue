@@ -697,7 +697,7 @@
       position: absolute;
       left: 0px;
       top: 0px;
-      width: 397px;
+      width: 272px;
       /*height: 100%;*/
       .top_search_input {
         position: absolute;
