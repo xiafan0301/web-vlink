@@ -299,7 +299,8 @@ export default {
           // 绘制线条
           let polyline = new window.AMap.Polyline({
             path: path,
-            strokeWeight: 4,
+            strokeWeight: 8,
+            showDir: true,
             strokeColor: '#61C772',
             strokeStyle: 'dashed'
           });

@@ -49,16 +49,16 @@
             <div class="struc_c_d_info">
               <h2>抓拍信息</h2>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.shotTime}} <font>抓拍时间</font></span>
+                <span><font>抓拍时间</font>{{sturcDetail.shotTime}}</span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.deviceName}} <font>抓拍设备</font></span>
+                <span><font>抓拍设备</font>{{sturcDetail.deviceName}}</span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.address}} <font>抓拍地址</font></span>
+                <span><font>抓拍地址</font>{{sturcDetail.address}}</span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.plateNo}} <font>车牌号</font></span>
+                <span><font>车牌号码</font>{{sturcDetail.plateNo}}</span>
               </div>
               <div class="struc_cdi_line">
                 <span>{{sturcDetail.vehicleColor}} {{sturcDetail.vehicleClass}} {{sturcDetail.vehicleBrand}} {{sturcDetail.vehicleStyles}} <font>特征</font></span>
@@ -160,7 +160,7 @@
         console.log(wind)
       },
       gotoControl (data){
-        this.$router.push({ name: 'control_library', query: {imgurl: data.url, plateNo: data.plateNo} })
+        this.$router.push({ name: 'control_create', query: {imgurl: data.subStoragePath, plateNo: data.plateNo} })
       },
       getTheList () {
         let params = this.$route.query;
