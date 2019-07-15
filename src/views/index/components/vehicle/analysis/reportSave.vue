@@ -103,8 +103,8 @@
             <el-table :data="yjcmList.allRecords">
               <el-table-column label="设备名称" prop="deviceName"></el-table-column>
               <el-table-column label="过车时间" prop="shotTime" show-overflow-tooltip></el-table-column>
-              <el-table-column label="时间间隔" prop="timeQuantum" show-overflow-tooltip></el-table-column>
-              <el-table-column label="参考时间" prop="timeSlot" show-overflow-tooltip></el-table-column>
+              <el-table-column label="时间间隔" prop="timeSlot" show-overflow-tooltip></el-table-column>
+              <el-table-column label="参考时间" prop="timeQuantum" show-overflow-tooltip></el-table-column>
             </el-table>
           </div>
         </div>
