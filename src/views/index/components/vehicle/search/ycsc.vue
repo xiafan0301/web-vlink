@@ -214,7 +214,7 @@
           </vue-scroll>
         </div>
       </div>
-       <!-- 没有数据的情况 -->
+      <!-- 没有数据的情况 -->
       <div v-else class="fnull">
         <div>
           <img src="../../../../../assets/img/null-content.png" alt />
@@ -268,12 +268,12 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.storagePath" :class="{'active':isChoose}" class="bigImg" />
+            <img :src="sturcDetail.storagePath" :class="{'active':isChoose}" class="bigImg" title="点击放大图片" />
             <span>全景图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img struc_c_d_img_green">
-              <img :src="sturcDetail.subStoragePath" :class="{'active':isChoose2}" class="bigImg"/>
+              <img :src="sturcDetail.subStoragePath" :class="{'active':isChoose2}" class="bigImg" title="点击放大图片"/>
               <span>抓拍图</span>
             </div>
             <div class="struc_c_d_info">
@@ -288,17 +288,18 @@
                 </div>-->
               </h2>
               <!-- 特征展示框 -->
-              <div class="struc_cdi_box">
+              <!-- <div class="struc_cdi_box">
+                <div
+                  class="item"
+                  v-if="sturcDetail.plateReliability"
+                >{{sturcDetail.plateReliability}}</div>
+                <div class="item" v-if="sturcDetail.vehicleBrand">{{ sturcDetail.vehicleBrand}}</div>
+                <div class="item" v-if="sturcDetail.sunvisor">{{ '遮阳板：' + sturcDetail.sunvisor}}</div>
                 <div
                   class="item"
                   v-if="sturcDetail.plateColor"
                 >{{ '车牌颜色：' + sturcDetail.plateColor}}</div>
                 <div class="item" v-if="sturcDetail.plateNo">{{ sturcDetail.plateNo}}</div>
-                <!-- <div
-                  class="item"
-                  v-if="sturcDetail.plateReliability"
-                >{{sturcDetail.plateReliability}}</div>-->
-                <div class="item" v-if="sturcDetail.vehicleBrand">{{ sturcDetail.vehicleBrand}}</div>
                 <div class="item" v-if="sturcDetail.vehicleClass">{{ sturcDetail.vehicleClass}}</div>
                 <div
                   class="item"
@@ -309,42 +310,75 @@
                   class="item"
                   v-if="sturcDetail.vehicleRoof"
                 >{{ '车顶(天窗)：' + sturcDetail.vehicleRoof}}</div>
-                <div class="item" v-if="sturcDetail.sunvisor">{{ '遮阳板：' + sturcDetail.sunvisor}}</div>
-              </div>
+              </div>-->
               <!-- 车辆的信息栏 -->
-              <div class="struc_cdi_line">
+              <div class="struc_cdi_line" v-if="sturcDetail.shotTime">
                 <p>
-                  <span class="val">{{sturcDetail.vehicleStyles}}</span>
-                  <span class="key">车辆型号</span>
-                </p>
-              </div>
-              <div class="struc_cdi_line">
-                <p>
-                  <span class="val">{{sturcDetail.shotTime}}</span>
                   <span class="key">抓拍时间</span>
+                  <span class="val">{{sturcDetail.shotTime}}</span>
                 </p>
               </div>
-              <div class="struc_cdi_line">
+              <div class="struc_cdi_line" v-if="sturcDetail.deviceName">
                 <p>
-                  <span class="val">{{sturcDetail.deviceName}}</span>
                   <span class="key">抓拍设备</span>
+                  <span class="val">{{sturcDetail.deviceName}}</span>
                 </p>
               </div>
-              <div class="struc_cdi_line">
+              <div class="struc_cdi_line" v-if="sturcDetail.address">
                 <p>
-                  <span class="val">{{sturcDetail.address}}</span>
                   <span class="key" title="抓拍地点">抓拍地点</span>
+                  <span class="val">{{sturcDetail.address}}</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line" v-if="sturcDetail.plateNo">
+                <p>
+                  <span class="key">车牌号码</span>
+                  <span class="val">{{sturcDetail.plateNo}}</span>
+                </p>
+              </div>
+              <!-- 5个特征 -->
+              <div class="struc_cdi_line" v-if="sturcDetail.plateColor">
+                <p>
+                  <span class="key">车牌颜色</span>
+                  <span class="val">{{sturcDetail.plateColor}}</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line" v-if="sturcDetail.vehicleStyles">
+                <p>
+                  <span class="key">车辆型号</span>
+                  <span class="val">{{sturcDetail.vehicleStyles}}</span>
+                </p>
+              </div>
+
+              <div class="struc_cdi_line" v-if="sturcDetail.vehicleColor">
+                <p>
+                  <span class="key">车辆颜色</span>
+                  <span class="val">{{sturcDetail.vehicleColor}}</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line" v-if="sturcDetail.vehicleClass">
+                <p>
+                  <span class="key">车辆类型</span>
+                  <span class="val">{{sturcDetail.vehicleClass}}</span>
+                </p>
+              </div>
+              <div
+                class="struc_cdi_line"
+                v-if="sturcDetail.plateClass || sturcDetail.plateClass === 0"
+              >
+                <p>
+                  <span class="key">号牌类型</span>
+                  <span class="val">{{dicFormater(45, sturcDetail.plateClass)}}</span>
                 </p>
               </div>
             </div>
           </div>
         </div>
         <div v-show="strucCurTab === 2" class="struc_c_address">
-          <!-- <div style="width: 100%; height: 100%;" id="capMap"></div> -->
         </div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt />
+            <img :src="sturcDetail.subStoragePath" class="bigImg" title="点击放大图片" alt />
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
@@ -762,10 +796,7 @@ export default {
           let camera = objDeepCopy(res.data.areaTreeList);
           let bayonet = objDeepCopy(res.data.areaTreeList);
           this.cameraTree = this.getTreeList(camera);
-          /* this.bayonetTree = this.getBayTreeList(bayonet); */
           this.getLeafCountTree(this.cameraTree);
-          /* this.getLeafCountTree(this.cameraTree, 'camera');
-          this.getLeafCountTree(this.bayonetTree, 'bayonet'); */
           this.initCheckTree(); // 初始化全选树节点
         }
       });
@@ -1600,15 +1631,12 @@ export default {
                 border-radius: 3px;
                 font-size: 12px;
                 overflow: hidden;
-                padding: 0 0.1rem;
+                padding-left: 0.1rem;
                 margin-right: 0.08rem;
                 .key {
                   color: #999999;
-                  padding-left: 10px;
-                }
-                .val {
-                  padding-right: 9px;
-                  position: relative;
+                  padding-right: 10px;
+                  display: inline-block;
                   &::before {
                     content: "";
                     width: 1px;
@@ -1618,6 +1646,12 @@ export default {
                     top: 1px;
                     background: #f2f2f2;
                   }
+                }
+                .val {
+                  display: inline-block;
+                  background: #fff;
+                  padding: 0 9px;
+                  position: relative;
                 }
               }
             }

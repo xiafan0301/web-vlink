@@ -52,7 +52,7 @@
               </el-col>
             </el-row>
           </el-form-item>
-          <el-form-item label="区域：" label-width="60px" prop="input5">
+          <el-form-item label="抓拍区域：" label-width="72px" prop="input5">
             <!-- <el-radio-group v-model="input5" @change="changeTab"> -->
             <el-radio-group v-model="ruleForm.input5" @change="changeTab">
                <el-row :gutter="10">
@@ -254,6 +254,12 @@ export default {
           this.selectBayonet.push(element.uid)
         });
       }
+      if(p.length==0 && v.length==0){
+        if(!document.querySelector('.el-message--info')){
+           this.$message.info("选择的区域没有设备，请重新选择区域");
+        }
+        return
+      }
       this.selectValue="已选设备"+(this.selectDevice.length+this.selectBayonet.length)+"个"
       //this.selectDevice=v
 
@@ -269,7 +275,7 @@ export default {
       // }
     },
     submitForm(v) {
-      let isP=/(^[A-Z0-9]{6}$)|(^[A-Z]{2}[A-Z0-9]{2}[A-Z0-9\u4E00-\u9FA5]{1}[A-Z0-9]{4}$)|(^[A-Z0-9]{5}[挂学警军港澳]{1}$)|(^[A-Z]{2}[0-9]{5}$)|(^(08|38){1}[A-Z0-9]{4}[A-Z0-9挂学警军港澳]{1}$)/
+      let isP=/([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})/
       let  result = isP.test(this.ruleForm.input3);
       if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data1.length>0 && this.ruleForm.input3){
       let pg={
@@ -549,7 +555,7 @@ export default {
   animation: fadeInLeft 0.4s ease-out 0.3s both;
   transition: marginLeft 0.3s ease-in;
   .plane {
-    padding: 10px;
+    padding: 20px;
     position: relative;
     height: 100%;
   }
@@ -660,6 +666,9 @@ export default {
   }
 }
 .ljd {
+  .el-date-editor .el-range-input{
+    font-size: 13px;
+  }
   .el-dialog__wrapper .el-dialog__body {
     padding: 0px;
   }
@@ -669,5 +678,8 @@ export default {
   .el-dialog__headerbtn {
     z-index: 1;
   }
+  .el-form-item__label{
+  padding-right: 0px;
+}
 }
 </style>

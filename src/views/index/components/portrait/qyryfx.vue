@@ -13,7 +13,7 @@
         <vue-scroll>
           <div class="left_top">
             <!-- 搜索 -->
-            <div class="search_wrap">
+            <!-- <div class="search_wrap">
               <el-input
                 class="width232"
                 v-model="searchCamera"
@@ -22,7 +22,7 @@
                 @focus="isSearchResult = true;"
                 id="map-sd-search-input"
               ></el-input>
-            </div>
+            </div> -->
             <!-- 搜索条件 -->
             <div class="search_condition">
               <div class="condition_title">设定分析条件</div>
@@ -366,9 +366,9 @@ export default {
       /*左边搜索表单变量 */
       searchCamera: "",
       qyryfxFrom: {
-        personGroupId: null,
+        personGroupId: "",
         sex: null,
-        age: null
+        age: ""
       },
       submitLoading: false, // 提交loading
       getDetailLoading: false,
@@ -605,9 +605,9 @@ export default {
       this.searchCamera = "";
       // 清空表单
       this.qyryfxFrom = {
-        personGroupId: null,
+        personGroupId: "",
         sex: null,
-        age: null
+        age: ""
       };
       // 清空选中的区域
       for (let i = 0; i < this.drawObj.length; i++) {
@@ -616,13 +616,7 @@ export default {
       // 初始化时间区域数组
       this.drawObj = [
         {
-          rectangle: {
-            /* 'id': {
-            marker: null, // 标记对象 (编辑、完成、删除等)
-            obj: null // 矩形图层对象
-            edtor: null // 编辑对象
-          } */
-          },
+          rectangle: {},
           circle: {},
           polyline: {},
           polygon: {},
@@ -674,6 +668,8 @@ export default {
         }
       ];
       this.totalData = [];
+      this.clearMarkList(); // 清除地图标记
+      this.setMarks();
       this.infoRightShow = false; // 关闭右边的菜单数据
     },
     /** 操作左边菜单方法 */
@@ -686,6 +682,8 @@ export default {
     /** 提交搜索摄像头抓拍记录 */
     submitData() {
       this.totalData = []; // 先清空数据
+      this.mouseTool.close(false);
+      this.amap.setDefaultCursor();
       for (let i = 0; i < this.drawObj.length; i++) {
         this.selSubmit(i);
       }
@@ -703,7 +701,6 @@ export default {
             ...deviceAndTimeList,
             {
               deviceIds: area.ad.map(item => item.uid).join(),
-              // deviceIds: "5",
               bayonetIds: area.ab.map(item => item.uid).join(),
               startTime: this.drawObj[j].startTime,
               endTime: this.drawObj[j].endTime
@@ -711,15 +708,10 @@ export default {
           ];
         }
       }
-      // 处理下拉框
-      if (this.qyryfxFrom.personGroupId) {
-        this.qyryfxFrom.personGroupId = this.qyryfxFrom.personGroupId.join();
-      }
-      if (this.qyryfxFrom.age) {
-        this.qyryfxFrom.age = this.qyryfxFrom.age.join();
-      }
       const queryParams = {
-        ...this.qyryfxFrom,
+        sex: this.qyryfxFrom.sex,
+        age: this.qyryfxFrom.age !== "" ? this.qyryfxFrom.age.join() : "",
+        personGroupId: this.qyryfxFrom.personGroupId !== "" ? this.qyryfxFrom.personGroupId.join() : "",
         deviceAndTimeList: deviceAndTimeList
       };
       this.submitLoading = true; // 打开加载效果
@@ -733,11 +725,13 @@ export default {
             } else {
               this.clearMarkList(); // 清除地图标记
               this.setMarks();
+              this.$message.warning('您选择的设备没有数据');
             }
           } else {
             this.submitLoading = false; // 关闭加载效果
             this.clearMarkList(); // 清除地图标记
             this.setMarks();
+            this.$message.warning('您选择的设备没有数据');
           }
         })
         .catch(() => {
@@ -748,21 +742,14 @@ export default {
     },
     /** 点击摄像头查看此摄像头抓拍详情信息 */
     clickGetCameraData(device) {
-      // console.log("总的摄像头数据", this.totalData);
-      // console.log("设备详情", device);
-      // 处理下拉框
-      if (this.qyryfxFrom.personGroupId) {
-        this.qyryfxFrom.personGroupId = this.qyryfxFrom.personGroupId.join();
-      }
-      if (this.qyryfxFrom.age) {
-        this.qyryfxFrom.age = this.qyryfxFrom.age.join();
-      }
       // 点击设备获取到人员的信息
       let queryParams;
       if (this.drawObj.length === 1) {
         // 只有一个时间区域
         queryParams = {
-          ...this.qyryfxFrom,
+          sex: this.qyryfxFrom.sex,
+          age: this.qyryfxFrom.age !== "" ? this.qyryfxFrom.age.join() : "",
+          personGroupId: this.qyryfxFrom.personGroupId !== "" ? this.qyryfxFrom.personGroupId.join() : "",
           deviceCode: device.viewClassCode,
           startTime: this.drawObj[0].startTime,
           endTime: this.drawObj[0].endTime
@@ -815,6 +802,10 @@ export default {
               const item = this.cameraPhotoList[i];
               if (item.detailList.length) {
                 item.currentIndex = item.detailList.length - 1;
+                item.detailList = item.detailList.map(item => {
+                  item.semblance = Number(item.semblance).toFixed(2); // 保留2位小数点
+                  return item;
+                });
               } else {
                 item.currentIndex = 0;
               }
@@ -2014,7 +2005,7 @@ export default {
     // 地图标记
     doMark(obj, device, sClass, init = true) {
       let marker;
-      if (!init) {
+      if (!init && device.shotNum > 0) {
         // 非初始化的状态
         let level;
         if (device.shotNum < 20) {
@@ -2040,10 +2031,10 @@ export default {
           // 自定义点标记覆盖物内容
           content: `<div class='qyryfx_vl_icon_wrap'> <div class="map_icons ${sClass}"></div> <div class='people_counts_l1 ${level}'> ${device.shotNum}人次 </div> </div>`
         });
-        this.currentClickDevice = device;
         let _this = this;
         // 给标记绑定一个点击事件
         marker.on("click", function() {
+          _this.currentClickDevice = device;
           _this.selectedDevice = obj;
           _this.clickGetCameraData(obj);
         });
@@ -2220,7 +2211,7 @@ export default {
       .left_top {
         width: 232px;
         margin: 0 20px;
-        padding: 20px 0;
+        padding-bottom: 20px;
         // 搜索框
         .search_wrap {
           position: relative;

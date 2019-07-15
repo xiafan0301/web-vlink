@@ -15,7 +15,7 @@
           label-width="0px"
           class="demo-ruleForm"
         >
-          <el-form-item class="firstItem" prop="dateStart">
+          <el-form-item  prop="dateStart">
             <el-date-picker
               v-model="ruleForm.dateStart"
               type="date"
@@ -45,7 +45,7 @@
               ></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item prop="vehicleClass">
+          <el-form-item prop="vehicleClass" class="firstItem">
             <el-select v-model="ruleForm.vehicleClass"  class="full blankinput" placeholder="全部车辆类型">
               <el-option label="全部车辆类型" value=""></el-option>
               <el-option
@@ -58,7 +58,7 @@
           </el-form-item>
           
       
-          <el-form-item label="区域：" label-width="60px">
+          <el-form-item label="抓拍区域：" label-width="72px" class="firstItem">
             <!-- <el-radio-group v-model="input5" @change="changeTab"> -->
             <el-radio-group v-model="input5" @change="changeTab">
                <el-row :gutter="10">
@@ -209,7 +209,7 @@ export default {
             return time.getTime() > Date.now() || time.getTime() < threeMonths;
           }
         },
-        isNull:true,
+        isNull:false,
       pricecode:cityCode,
       input5: "1",
       dialogVisible: false,
@@ -250,6 +250,14 @@ export default {
       ],
     }
   },
+   beforeRouteEnter(to, from, next) {
+     next(vm => {
+         // 通过 `vm` 访问组件实例
+           if (from.name == 'vehicle_menu' && to.name == 'vehicle_search_clcx') {//一定是从A进到B页面才刷新
+               vm.updataB(); 
+           }
+     })
+},
   mounted() {
     this.setDTime()
     this.getMapGETmonitorList()//查询行政区域
@@ -274,15 +282,23 @@ export default {
       this.value1 = this.$route.query.areaIds?this.$route.query.areaIds.split(","):''
       let da=  JSON.parse(localStorage.getItem("clcxData"))
       let numb= JSON.parse(localStorage.getItem("clcxPage"))
-      this.totalData = da
-      this.pagination.total=da.length
+      // this.totalData = da
+      // this.pagination.total=da.length
       this.pagination.pageNum = numb
-      this.tableData= this.totalData.slice((numb-1)*10,10*numb)
+      // this.tableData= this.totalData.slice((numb-1)*10,10*numb)
      
     }
+    this.submitForm()
     
   },
   methods: {
+    updataB(){
+      //console.log(88888888888);
+      //this.isNull=true
+      this.tableData = [];
+      this.resetForm()
+      this.submitForm()
+    },
     //设置默认时间
     setDTime() {
       let date = new Date();
@@ -357,6 +373,7 @@ export default {
       this.ruleForm.dateStart = this.ruleForm.dateStart.indexOf(":")>0?(this.ruleForm.dateStart):(this.ruleForm.dateStart +" 00:00:00")
       this.ruleForm.dateEnd = this.ruleForm.dateEnd.indexOf(":")>0?(this.ruleForm.dateEnd):(this.ruleForm.dateEnd+" 23:59:59")
       this.ruleForm.vehicleClass = this.ruleForm.vehicleClass?this.ruleForm.vehicleClass:''
+      this.ruleForm.pageNum =this.pagination.pageNum
       let d = JSON.stringify(this.ruleForm)
       d = JSON.parse(d)
       d.plateNo= this.ruleForm.plateNo;
@@ -369,20 +386,19 @@ export default {
       }
       getSnapList(d).then(res=>{
          this.isNull=false
-        if(res && res.data){
+        if(res && res.data && res.data.list.length>0){
           this.isload=false
           // console.log(res.data);
           //pagination: { total: 4, pageSize: 10, pageNum: 1 },
-          this.pagination.total=res.data.length
-          // this.pagination.pageNum=1
+          this.pagination.total=res.data.total
+          //this.pagination.pageNum=1
           //this.tableData= res.data
-          // this.totalData=res.data
-          this.pagination.total = res.data.total;
-          this.tableData= res.data.list;
+          this.totalData=res.data.list
+          this.tableData= this.totalData.slice(0,10)
           // console.log(this.tableData);
-          let localData= JSON.stringify(this.totalData)
-          localStorage.setItem('clcxData',localData)
-          localStorage.setItem('clcxPage',"1")
+          //let localData= JSON.stringify(this.totalData)
+          // localStorage.setItem('clcxData',localData)
+          // localStorage.setItem('clcxPage',"1")
           
         }else{
            this.isload=false
@@ -414,6 +430,12 @@ export default {
         p.forEach(element => {
           this.selectBayonet.push(element.uid)
         });
+      }
+      if(p.length==0 && v.length==0){
+        if(!document.querySelector('.el-message--info')){
+           this.$message.info("选择的区域没有设备，请重新选择区域");
+        }
+        return
       }
       this.selectValue="已选设备"+(this.selectDevice.length+this.selectBayonet.length)+"个"
       //this.selectDevice=v
@@ -531,7 +553,7 @@ export default {
   animation: fadeInLeft 0.4s ease-out 0.3s both;
   // transition: left 0.3s ease-in;
   .plane {
-    padding: 10px;
+    padding:20px 20px;
     position: relative;
     height: 100%;
   }
@@ -544,7 +566,7 @@ export default {
     font-style: normal;
   }
   .firstItem {
-    margin-bottom: 5px;
+    margin-bottom: 10px;
   }
 }
 .select_btn {
@@ -572,6 +594,8 @@ export default {
     color: #909399;
   }
 }
-
+.el-form-item__label{
+  padding-right: 0px;
+}
 
 </style>
