@@ -1,10 +1,10 @@
 <template>
   <div class="point">
-    <div class="breadcrumb_heaer">
-      <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像侦查</el-breadcrumb-item>
-        <el-breadcrumb-item>轨迹分析</el-breadcrumb-item>
-      </el-breadcrumb>
+    <div class="">
+      <div is="vlBreadcrumb"
+           :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
+            {name: '轨迹分析'}]">
+      </div>
     </div>
 
     <div :class="['left',{hide:hideleft}]">
@@ -18,7 +18,7 @@
         >
           <el-form-item>
             <el-upload
-                class="vl_jtc_upload gjfx_upload"
+                class="vl_jtc_upload_gjfx gjfx_upload"
                 multiple
                 :show-file-list="false"
                 accept="image/*"
@@ -51,7 +51,7 @@
               end-placeholder="结束日期">
             </el-date-picker>
           </el-form-item>
-          <el-form-item label="区域：" class="quyu" label-width="42px"  prop="input5">
+          <el-form-item label="抓拍区域：" class="quyu" label-width="68px"  prop="input5">
             <el-radio-group v-model="ruleForm.input5">
               <el-row :gutter="10">
                 <el-col :span="12">
@@ -66,16 +66,16 @@
             </el-radio-group>
           </el-form-item>
           <el-form-item v-if="ruleForm.input5=='1'" prop="value1">
-            <el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="请选择" class="full">
+            <el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="全部区域" class="full">
               <el-option-group
-                      v-for="group in options"
-                      :key="group.areaName"
-                      :label="group.areaName">
+                v-for="group in options"
+                :key="group.areaName"
+                :label="group.areaName">
                 <el-option
-                        v-for="item in group.areaTreeList"
-                        :key="item.areaId"
-                        :label="item.areaName"
-                        :value="item.areaId">
+                  v-for="item in group.areaTreeList"
+                  :key="item.areaId"
+                  :label="item.areaName"
+                  :value="item.areaId">
                 </el-option>
               </el-option-group>
             </el-select>
@@ -99,7 +99,7 @@
       </div>
     </div>
     <div :class="['right',{hide:!hideleft}]" id="rightMap"></div>
-    <div class="reselt" v-if="reselt">
+    <div class="reselt" v-if="reselt && showLeft">
       <div class="plane insetPadding">
         <h3 class="title">分析结果<p>共经过{{totalAddressNum}}个地方，出现{{totalMapNum}}次</p></h3>
         <!--<div class="sup_title">-->
@@ -121,7 +121,7 @@
                         </div>
                         <div class="info_right">
                           <p class="time"><i class="vl_icon vl_icon_retrieval_01"></i>{{sItem.shotTime.slice(-8)}}</p>
-                          <div><i class="vl_icon vl_icon_retrieval_03"></i>{{sItem.semblance}}%</div>
+                          <div><i class="vl_icon vl_icon_retrieval_03"></i>{{sItem.semblance ? (sItem.semblance * 1).toFixed(2) : '0.00'}}%</div>
                         </div>
                       </div>
                       <div :title="sItem.address" class="address"><i class="el-icon-location-outline"></i>{{sItem.address ? sItem.address : '无'}}</div>
@@ -163,7 +163,7 @@
               <span>抓拍图</span>
             </div>
             <div class="struc_c_d_info">
-              <h2>对比信息<div class="vl_jfo_sim"><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? sturcDetail.semblance : 98.32}}<span style="font-size: 12px;">%</span></div></h2>
+              <h2>对比信息<div class="vl_jfo_sim"><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? (sturcDetail.semblance * 1).toFixed(2) : '0.00'}}<span style="font-size: 12px;">%</span></div></h2>
               <div class="struc_cdi_line">
                 <span v-show="sturcDetail.age">{{sturcDetail.age}}</span>
                 <span v-show="sturcDetail.baby">{{sturcDetail.baby}}</span>
@@ -226,11 +226,52 @@
       </div>
     </el-dialog>
     <!-- D设备 B卡口  这里是设备和卡口 -->
-    <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :open="dialogVisible" :clear="selectMapClear" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div>
     <div id="capMap"></div>
+    <!--人工筛选-->
+    <el-dialog
+      title="人工筛选"
+      :visible.sync="filterDialog"
+      :close-on-click-modal="false"
+      width="900px">
+      <div style="height: 350px;">
+        <div style="height: 96%">
+          <vue-scroll>
+            <div class="plane_main">
+              <!--可以展开列表-->
+              <div class="infinite-list-wrapper">
+                <ul>
+                  <li class="p_main_list" :class="{'is_open': item.isOpen}" v-for="item in allLeftEvData" :key="item.id">
+                    <div class="p_main_head" @click="item.isOpen = !item.isOpen"><i :class="{'el-icon-caret-right': !item.isOpen, 'el-icon-caret-bottom': item.isOpen}"></i>{{item.label}}({{item.times}}次)</div>
+                    <div class="p_main_item p_main_dialog_item" v-for="(sItem, sIndex) in item.list" :key="sItem.id">
+                      <div class="info">
+                        <div class="info_left">
+                          <img :src="sItem.subStoragePath" alt="">
+                        </div>
+                        <div class="info_right">
+                          <p class="time"><i class="vl_icon vl_icon_retrieval_01"></i>{{sItem.shotTime.slice(-8)}}</p>
+                          <div><i class="vl_icon vl_icon_retrieval_03"></i>{{sItem.semblance ? (sItem.semblance * 1).toFixed(2) : '0.00'}}%</div>
+                        </div>
+                      </div>
+                      <div :title="sItem.address" class="address"><i class="el-icon-location-outline"></i>{{sItem.address ? sItem.address : '无'}}</div>
+                      <div class="del_icon el-icon-delete" @click.stop="delSitem(item, sItem, sIndex)"></div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </vue-scroll>
+        </div>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="filterDialog = false">取 消</el-button>
+        <el-button type="primary" @click="chooseOk">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
+  import vlBreadcrumb from '@/components/common/breadcrumb.vue';
   import mapSelector from '@/components/common/mapSelector.vue';
   import { mapXupuxian,ajaxCtx } from "@/config/config.js";
   import { objDeepCopy, random14 } from "@/utils/util.js";
@@ -239,9 +280,12 @@
   import { MapGETmonitorList } from "@/views/index/api/api.map.js";
   import { getAllBayonetList } from "@/views/index/api/api.base.js";
   export default {
-    components: {mapSelector},
+    components: {mapSelector, vlBreadcrumb},
     data() {
       return {
+        filterDialog: false,
+        showLeft: false,
+        selectMapClear: '',
         loading: false,
         count: 3,
         totalAddressNum: 0,
@@ -304,6 +348,7 @@
         },
         evData: [],
         leftEvData: [],
+        allLeftEvData: [],
         marks: [[], []],
         markerLine: [], // 地图线集合
         markerPoint: [], // 地图点集合
@@ -480,19 +525,17 @@
           if (this.pointData.bayonetList.length === 0 && this.pointData.deviceList.length === 0 && this.ruleForm.input5 === "2") {
             this.$message.info('选择的区域没有设备，请重新选择区域');
             return false;
-          } else if (this.ruleForm.input5 === "1" && this.ruleForm.value1.length === 0) {
-            this.$message.info('您没有选择区域，请点击下拉框选择镇');
-            return false;
           }
           pg['startTime'] = this.ruleForm.data1[0]+" 00:00:00";
           pg['endTime'] = this.ruleForm.data1[1]+" 23:59:59";
+//          pg['imageUrl'] = 'http://file.aorise.org/vlink/image/18c70cc3-424a-43fc-92ee-a6c6de4248f2.jpg';
           pg['imageUrl'] = this.ruleForm.input3;
-          if(this.ruleForm.input5 == "1" && this.ruleForm.value1.length!=0){
+          if(this.ruleForm.input5 == "1"){
             pg['areaIds']=this.ruleForm.value1.join(",")
           }
           if(this.ruleForm.input5 == "2"){
             pg['bayonetIds'] = this.pointData.bayonetList.map(y => {return y.uid}).join(',');
-            pg['deviceUid'] = this.pointData.deviceList.map(y => {return y.uid}).join(',');
+            pg['cameraIds'] = this.pointData.deviceList.map(y => {return y.uid}).join(',');
           }
           this.storeParam = objDeepCopy(pg);
           this.getVehicleShot(pg);
@@ -501,13 +544,16 @@
         }
       },
       resetForm(){
-        this.ruleForm= {
-          data1:null,
-          input3: null,
-          input5: "1",
-          value1: null,
+        this.ruleForm.input5 = '1';
+        this.ruleForm.input3 = '';
+        this.ruleForm.value1 = [];
+        this.selectMapClear = random14();
+        this.pointData = {
+          deviceList: [],
+          bayonetList: []
         }
-        //this.$refs[v].resetFields();
+        this.curChooseNum = '已选择0个设备';
+        this.setDTime ();
       },
       //查询行政区域
       getMapGETmonitorList(){
@@ -516,9 +562,6 @@
         }
         MapGETmonitorList(d).then(res=>{
           if(res && res.data){
-            res.data.areaTreeList.forEach(x => {
-              this.ruleForm.value1.push(x.areaId)
-            })
             this.options.push(res.data)
           }
         })
@@ -590,23 +633,29 @@
             res.data.list.forEach(x => {
               if(!dvIds.includes(x.deviceID)) {
                 this.totalAddressNum += 1;
+                dvIds.push(x.deviceID);
               }
             })
 
             //  重组数据，给左边列表使用
-            this.operData();
+            this.operData(true);
+            if (this.evData.length) {
+              this.filterDialog = true;
+            } else {
+              this.$message.info('抱歉，没有找到匹配结果')
+            }
             this.amap.clearMap();
-            this.drawMapMarker(this.evData);
           }
         }).catch(() => {
           this.searchLoading = false;
         });
       },
-      operData () {
+      operData (isAll) {
         this.leftEvData = [];
+        this.allLeftEvData = [];
         let keyArr = [];
         this.evData.forEach((x, index) => {
-          if (index <= this.count) {
+          if (index <= this.count && !isAll) {
             let key = x.shotTime.slice(0, 10);
             if (!keyArr.includes(key)) {
               keyArr.push(key);
@@ -619,8 +668,31 @@
               this.leftEvData.find(y => y.label === key).list.push(x);
               this.leftEvData.find(y => y.label === key).times += 1;
             }
+          } else {
+            let key = x.shotTime.slice(0, 10);
+            if (!keyArr.includes(key)) {
+              keyArr.push(key);
+              let obj = {label: key,isOpen: true};
+              obj.list = [];
+              obj.times = 1;
+              obj.list.push(x);
+              this.allLeftEvData.push(obj);
+            } else {
+              this.allLeftEvData.find(y => y.label === key).list.push(x);
+              this.allLeftEvData.find(y => y.label === key).times += 1;
+            }
           }
         })
+      },
+      delSitem (item, sItem, index) {
+        item.list.splice(index, 1);
+        this.evData.splice(this.evData.findIndex(x => x === sItem), 1);
+      },
+      chooseOk () {
+        this.showLeft = true;
+        this.filterDialog = false;
+        this.drawMapMarker(this.evData);
+        this.operData();
       },
       //查询所有的设备
       objSetItem (list, obj) {
@@ -931,6 +1003,7 @@
     overflow-x: hidden;
   }
   .plane_main {
+    min-height: 700px;
     .p_main_list {
       height: 40px;
       overflow: hidden;
@@ -1032,6 +1105,10 @@
             color: #0C70F8;
           }
         }
+      }
+      .p_main_dialog_item {
+        width: 33%;
+        display: inline-block;
       }
     }
     .is_open {
@@ -1161,10 +1238,14 @@
     .quyu {
       .el-form-item__label {
         padding: 0;
+        white-space: nowrap;
+      }
+      .el-radio__label {
+        padding: 0;
       }
     }
   }
-  .vl_jtc_upload {
+  .vl_jtc_upload_gjfx {
     text-align: center;
     .el-upload--picture-card {
       width: 100%;
