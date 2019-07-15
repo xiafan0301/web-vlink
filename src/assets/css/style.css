@@ -105,8 +105,8 @@
 .vl_icon_map_mark2, .vl_icon_map_mark22  { width: 43px;  height: 68px; background-position: -214px -171px; }
 .vl_icon_map_mark0 { width: 43px;  height: 68px; background-position: -275px -171px; } /* 摄像头 */
 .vl_icon_map_mark4 { width: 31px; height: 34px; background-position: -477px -196px; }
-.vl_icon_map_mark7 { width: 31px; height: 34px; background-position: -263px -1160px; } /* 摄像头 紫色 */
-.vl_icon_map_mark8 { width: 31px; height: 34px; background-position: -478px -1160px; }  /* 卡口 蓝色 */
+.vl_icon_map_mark7 { width: 40px; height: 57px; background-position: -263px -1160px; } /* 摄像头 紫色 */
+.vl_icon_map_mark8 { width: 40px; height: 57px; background-position: -478px -1160px; }  /* 卡口 蓝色 */
 .vl_icon_map_sxt_error { width: 43px; height: 68px; background-position: -402px -174px; }
 .vl_icon_map_hover_mark0 { width: 47px;  height: 68px; background-position: -609px -1160px;} /* 摄像头移上去效果 */
 .vl_icon_map_hover_mark1 { width: 47px;  height: 68px; background-position: -670px -1160px;} /* 卡口紫色移上去效果 **/
