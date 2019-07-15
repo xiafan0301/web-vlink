@@ -297,8 +297,9 @@ export default {
     };
   },
   mounted() {
-    if(this.$route.query.path){
-      this.curImageUrl= this.$route.query.path
+    if( this.$route.query.imgurl || this.$route.query.path){
+      let a =  this.$route.query.imgurl || this.$route.query.path ;
+      this.curImageUrl= a
     }
     
 
