@@ -1,14 +1,15 @@
 <template>
   <div class="driving-rules">
-    <div class="">
-      <div is="vlBreadcrumb" 
+    <div class>
+      <div
+        is="vlBreadcrumb"
         :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
-          {name: '行车规律分析'}]">
-      </div>
+          {name: '行车规律分析'}]"
+      ></div>
       <!-- <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
         <el-breadcrumb-item>行车规律分析</el-breadcrumb-item>
-      </el-breadcrumb> -->
+      </el-breadcrumb>-->
     </div>
     <div class="driving-rules-content">
       <!-- 搜索条件 -->
@@ -85,13 +86,13 @@
             </div>
           </div>
           <!-- 时间 -->
-          <div class="time-search">
+          <div class="time-search date-comp">
             <el-date-picker
               v-model="searchData.time"
               type="daterange"
-              range-separator="-"
+              range-separator="至"
               value-format="yyyy-MM-dd"
-              format="yy/MM/dd"
+              format="yyyy-MM-dd"
               :picker-options="pickerOptions"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
@@ -114,7 +115,7 @@
               :on-error="handleError"
             >
               <i v-if="uploading" class="el-icon-loading"></i>
-              <img v-else-if="curImageUrl" :src="curImageUrl">
+              <img v-else-if="curImageUrl" :src="curImageUrl" />
               <div v-else>
                 <i
                   style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
@@ -241,7 +242,7 @@
           :key="item.uid"
           @click="chooseHisPic(item)"
         >
-          <img :src="item.path" alt>
+          <img :src="item.path" alt />
         </div>
         <div style="clear: both;"></div>
       </vue-scroll>
@@ -263,10 +264,15 @@ import {
 } from "../../../api/api.judge.js";
 import { MapGETmonitorList } from "../../../api/api.map.js";
 import { getDrivingAnalysis, postExport } from "../../../api/api.analysis.js";
-import { random14, objDeepCopy, formatDate, autoDownloadUrl } from "../../../../../utils/util.js";
-import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+import {
+  random14,
+  objDeepCopy,
+  formatDate,
+  autoDownloadUrl
+} from "../../../../../utils/util.js";
+import vlBreadcrumb from "@/components/common/breadcrumb.vue";
 export default {
-  components: {vlBreadcrumb},
+  components: { vlBreadcrumb },
   data() {
     return {
       uploadAcion: ajaxCtx.base + "/new", //上传路径
@@ -314,49 +320,49 @@ export default {
           value: 0,
           checked: true,
           key: "allRecords",
-          timeQuantums: null,
+          timeQuantums: null
         },
         {
           label: "00:00 - 04:00",
           value: 1,
           checked: false,
           key: "period0_4Records",
-          timeQuantums: '00:00-04:00',
+          timeQuantums: "00:00-04:00"
         },
         {
           label: "04:00 - 08:00",
           value: 2,
           checked: false,
           key: "period4_8Records",
-          timeQuantums: '04:00-08:00',
+          timeQuantums: "04:00-08:00"
         },
         {
           label: "08:00 - 12:00",
           value: 3,
           checked: false,
           key: "period8_12Records",
-          timeQuantums: '08:00-12:00',
+          timeQuantums: "08:00-12:00"
         },
         {
           label: "12:00 - 16:00",
           value: 4,
           checked: false,
           key: "period12_16Records",
-          timeQuantums: '12:00-16:00',
+          timeQuantums: "12:00-16:00"
         },
         {
           label: "16:00 - 20:00",
           value: 5,
           checked: false,
           key: "period16_20Records",
-          timeQuantums: '16:00-20:00',
+          timeQuantums: "16:00-20:00"
         },
         {
           label: "20:00 - 24:00",
           value: 6,
           checked: false,
           key: "period20_24Records",
-          timeQuantums: '20:00-24:00',
+          timeQuantums: "20:00-24:00"
         }
       ],
       selectTimeList: [], //选中的时间段
@@ -401,6 +407,8 @@ export default {
         label: "label"
       },
       exportLoading: false,
+      messageInfo: null,
+      hoverActive: false,
     };
   },
   computed: {
@@ -427,10 +435,14 @@ export default {
       const isJPG = file.type === "image/jpeg" || file.type === "image/png";
       const isLt = file.size / 1024 / 1024 < 100;
       if (!isJPG) {
-        this.$message.error("只能上传 JPG / PNG 格式图片!");
+        if (!document.querySelector(".el-message")) {
+          this.$message.error("只能上传 JPG / PNG 格式图片!");
+        }
       }
       if (!isLt) {
-        this.$message.error("上传图片大小不能超过 100MB!");
+        if (!document.querySelector(".el-message")) {
+          this.$message.error("上传图片大小不能超过 100MB!");
+        }
       }
       this.uploading = true;
       return isJPG && isLt;
@@ -474,7 +486,9 @@ export default {
     //上传失败
     handleError() {
       this.uploading = false;
-      this.$message.error("上传失败");
+      if (!document.querySelector(".el-message")) {
+        this.$message.error("上传失败");
+      }
     },
     //获取上传记录
     showHistoryPic() {
@@ -544,16 +558,18 @@ export default {
         new Date(val[1]).getTime() - new Date(val[0]).getTime() >=
         3 * 24 * 3600 * 1000
       ) {
-        this.$message.error(
-          "最大时间段为3天，超过开始时间3天（72小时）后的时间不可选择!"
-        );
+        if (!document.querySelector(".el-message")) {
+          this.$message.info(
+            "最大时间段为3天，超过开始时间3天（72小时）后的时间不可选择!"
+          );
+        }
         this.setDTime();
       }
     },
     //重置
     resetSearch() {
       this.searchData.licensePlateNum = null;
-      this.searchData.licensePlateColor = '';
+      this.searchData.licensePlateColor = "";
       this.uploadFileList.splice(0, this.uploadFileList.length);
       this.imgData = null;
       this.curImageUrl = "";
@@ -569,44 +585,65 @@ export default {
       console.log("==================", this.searchData);
       /* this.emptyData(1); */
       let reg = /^([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})$/;
-      
-      if(this.selectIndex === 1) {
-        if(this.searchData.licensePlateNum && reg.test(this.searchData.licensePlateNum) && this.selectDeviceArr && this.selectDeviceArr.length > 0) {
+
+      if (this.selectIndex === 1) {
+        if (
+          this.searchData.licensePlateNum &&
+          reg.test(this.searchData.licensePlateNum) &&
+          this.selectDeviceArr &&
+          this.selectDeviceArr.length > 0
+        ) {
           this.getSearchData();
-        }else if(!this.searchData.licensePlateNum) {
-          this.$message.error("请输入车牌号码");
-          return false;  
-        }else if(!reg.test(this.searchData.licensePlateNum)) {
-          this.$message.error('请正确输入车牌号码');
+        } else if (!this.searchData.licensePlateNum) {
+          if (!document.querySelector(".el-message")) {
+            this.$message.info("请输入车牌号码");
+          }
           return false;
-        }else {
-          this.$message.error("请选择设备");
-          return false; 
+        } else if (!reg.test(this.searchData.licensePlateNum)) {
+          if (!document.querySelector(".el-message")) {
+            this.$message.info("请正确输入车牌号码");
+          }
+          return false;
+        } else {
+          if (!document.querySelector(".el-message")) {
+            this.$message.info("请选择设备");
+          }
+          return false;
         }
-      }else if(this.selectIndex === 0) {
-        if(this.imgData && this.selectDeviceArr && this.selectDeviceArr.length > 0) {
+      } else if (this.selectIndex === 0) {
+        if (
+          this.imgData &&
+          this.selectDeviceArr &&
+          this.selectDeviceArr.length > 0
+        ) {
           this.getSearchData();
-        }else if(!this.imgData) {
-          this.$message.error("请上传带车牌的清晰图片");
-          return false;  
-        }else {
-          this.$message.error("请选择设备");
-          return false; 
+        } else if (!this.imgData) {
+          if (!document.querySelector(".el-message")) {
+            this.$message.info("请上传带车牌的清晰图片");
+          }
+          return false;
+        } else {
+          if (!document.querySelector(".el-message")) {
+            this.$message.info("请选择设备");
+          }
+          return false;
         }
       }
     },
     //置空数据
     emptyData(val) {
-      if(val === 1) {
+      if (val === 1) {
         this.list = {};
         this.doubleDeviceList = {};
-        this.selectTimeList = [{
-          label: "全部时刻",
-          value: 0,
-          checked: true,
-          key: "allRecords",
-          timeQuantums: null,
-        }];
+        this.selectTimeList = [
+          {
+            label: "全部时刻",
+            value: 0,
+            checked: true,
+            key: "allRecords",
+            timeQuantums: null
+          }
+        ];
         this.$set(this.timeSlot[0], "checked", true);
         for (let i = 0; i < this.timeSlot.length; i++) {
           if (this.timeSlot[i].value !== 0) {
@@ -622,8 +659,10 @@ export default {
     getSearchData() {
       let params = {};
       if (this.searchData.time && this.searchData.time.length > 0) {
-        params["startDate"] = formatDate(this.searchData.time[0],'yyyy-MM-dd') + " 00:00:00";
-        params["endDate"] = formatDate(this.searchData.time[1],'yyyy-MM-dd') + " 23:59:59";
+        params["startDate"] =
+          formatDate(this.searchData.time[0], "yyyy-MM-dd") + " 00:00:00";
+        params["endDate"] =
+          formatDate(this.searchData.time[1], "yyyy-MM-dd") + " 23:59:59";
       }
       if (!this.checkAllTree) {
         if (this.selectCameraArr && this.selectCameraArr.length > 0) {
@@ -660,8 +699,8 @@ export default {
             let data = res.data;
             this.list = data;
             this.doubleDeviceList = objDeepCopy(data);
-            if(!this.list.allRecords || this.list.allRecords.length <= 0) {
-              this.$message.warning('搜索无结果')
+            if (!this.list.allRecords || this.list.allRecords.length <= 0) {
+              this.$message.info("搜索无结果");
             }
             //获取全部时刻
             this.getData();
@@ -677,10 +716,13 @@ export default {
     },
     //导出
     exportExcel() {
-      let params = {}, drivingDiscipline = {};
+      let params = {},
+        drivingDiscipline = {};
       if (this.searchData.time && this.searchData.time.length > 0) {
-        drivingDiscipline["startDate"] = formatDate(this.searchData.time[0],'yyyy-MM-dd') + " 00:00:00";
-        drivingDiscipline["endDate"] = formatDate(this.searchData.time[1],'yyyy-MM-dd') + " 23:59:59";
+        drivingDiscipline["startDate"] =
+          formatDate(this.searchData.time[0], "yyyy-MM-dd") + " 00:00:00";
+        drivingDiscipline["endDate"] =
+          formatDate(this.searchData.time[1], "yyyy-MM-dd") + " 23:59:59";
       }
       if (!this.checkAllTree) {
         if (this.selectCameraArr && this.selectCameraArr.length > 0) {
@@ -692,7 +734,7 @@ export default {
           drivingDiscipline["bayonentIds"] = bayonentIds.join("-");
         }
       }
-      if(this.selectTimeList && this.selectTimeList.length > 0) {
+      if (this.selectTimeList && this.selectTimeList.length > 0) {
         let timeQuantums = this.selectTimeList.map(res => res.timeQuantums);
         drivingDiscipline["timeQuantums"] = timeQuantums.join(",");
       }
@@ -709,17 +751,14 @@ export default {
       }
       params = {
         drivingDisciplineAnalysisQueryDto: drivingDiscipline,
-        viewType: 5,        //导出类型：1夜间行车；2车辆查询-抓拍次数；3连续违章-次数；4连续违章-详情；5-行车规律
-      }
+        viewType: 5 //导出类型：1夜间行车；2车辆查询-抓拍次数；3连续违章-次数；4连续违章-详情；5-行车规律
+      };
       this.exportLoading = true;
-      console.log(
-        "======export=====",
-        JSON.stringify(params)
-      );
+      console.log("======export=====", JSON.stringify(params));
       postExport(params)
         .then(res => {
           console.log("-------postExport------", res);
-          if(res && res.data) {
+          if (res && res.data) {
             autoDownloadUrl(res.data.fileUrl);
           }
           this.$nextTick(() => {
@@ -762,6 +801,9 @@ export default {
     },
     //选择时间段
     selectTime(val, index) {
+      if(this.messageInfo) {
+        this.messageInfo.close()
+      }
       this.$set(this.timeSlot[index], "checked", !val.checked);
       if (val.value !== 0) {
         this.$set(this.timeSlot[0], "checked", false);
@@ -803,16 +845,16 @@ export default {
           value: 0,
           checked: true,
           key: "allRecords",
-          timeQuantums: null,
+          timeQuantums: null
         }
       ];
       //全部时刻
-        this.$set(this.timeSlot[0], "checked", true);
-        for (let i = 0; i < this.timeSlot.length; i++) {
-          if (this.timeSlot[i].value !== 0) {
-            this.$set(this.timeSlot[i], "checked", false);
-          }
+      this.$set(this.timeSlot[0], "checked", true);
+      for (let i = 0; i < this.timeSlot.length; i++) {
+        if (this.timeSlot[i].value !== 0) {
+          this.$set(this.timeSlot[i], "checked", false);
         }
+      }
       this.getList();
     },
     //获取数据
@@ -820,16 +862,16 @@ export default {
       this.emptyData(2);
       let result = [];
       this.list = objDeepCopy(this.doubleDeviceList);
-      if(this.list.allRecords) {
+      if (this.list.allRecords) {
         for (let i = 0; i < this.selectTimeList.length; i++) {
           let item = this.selectTimeList[i];
           let temp = result[result.length - 1];
           if (!i) {
             result.push([item]);
-            if (this.list[item.key] && this.list[item.key].length > 0) {
+            /* if (this.list[item.key] && this.list[item.key].length > 0) {
               this.$set(this.list[item.key][0], "timeSlot", "——");
               this.$set(this.list[item.key][0], "refTime", "——");
-            }
+            } */
           } else if (
             item.value % 1 === 0 &&
             item.value - temp[temp.length - 1].value == 1
@@ -837,10 +879,10 @@ export default {
             temp.push(item);
           } else {
             result.push([item]);
-            if (this.list[item.key] && this.list[item.key].length > 0) {
+            /* if (this.list[item.key] && this.list[item.key].length > 0) {
               this.$set(this.list[item.key][0], "timeSlot", "——");
               this.$set(this.list[item.key][0], "refTime", "——");
-            }
+            } */
           }
           this.deviceList.push(...this.list[item.key]);
         }
@@ -850,9 +892,34 @@ export default {
           this.deviceList,
           this.doubleDeviceList
         );
+        if(this.deviceList && this.deviceList.length > 0) {
+          for(let item of this.deviceList){
+            item['shotDate'] = new Date(item.shotTime).getTime()
+          }
+          this.deviceList.sort(this.sortTime)
+          this.$set(this.deviceList[0], "timeSlot", "——");
+          this.$set(this.deviceList[0], "refTime", "——");
+        }else {
+          this.messageInfo =this.$message.info("搜索无数据")
+        }
         this.getNDeviceList();
-        this.mapMark(this.nDeviceList, this.cameraMapMarkers);
-      } 
+        
+        let devArr = objDeepCopy(this.nDeviceList);
+        devArr.sort(this.sortLength)
+        let maxDev = devArr[devArr.length -1]
+        /* this.nDeviceList.sort(this.sortLength)
+        this.maxDev = Math.max.apply(Math, this.nDeviceList.map((o) => {return o.data.length})) */
+        console.log("------------22222----------",this.nDeviceList)
+        this.mapMark(this.nDeviceList, this.cameraMapMarkers,maxDev);
+      }
+    },
+    //排序
+    sortTime(a, b) {
+      return a.shotDate - b.shotDate;
+    },
+    //排序
+    sortLength(a, b) {
+      return a.data.length - b.data.length;
     },
     //获取设备列表
     getNDeviceList() {
@@ -883,9 +950,9 @@ export default {
       this.nDeviceList = [...dest];
     },
     // 地图标记
-    mapMark(data, aMarkers) {
+    mapMark(data, aMarkers, maxDev) {
       if (data && data.length > 0) {
-        let hoverWindow = null;
+        let hoverWindow = null, maxInfoWindow = null;
         let _this = this;
         for (let i = 0; i < data.length; i++) {
           let obj = data[i];
@@ -900,9 +967,19 @@ export default {
               )
             ) {
               // 多边形存在且不在多边形之中
-             /*  selClass = "vl_close"; */
+              /*  selClass = "vl_close"; */
             }
-            let content = '<i class="vl_icon vl_icon_vehicle_04"></i>';
+            /* console.log("9999999999",obj.data.length,maxDev.data.length) */
+            if(obj.data.length == maxDev.data.length) {
+              obj['st'] = 'style="display:block!important"'
+            }else {
+              obj['st'] = ''
+            }
+            let content = '<div class="vl_icon vl_icon_vehicle_04 info-window">'+
+            '<div ' +obj.st+'  class="vl_map_hover">' +
+                '<div class="vl_map_hover_main">' +
+                _this.cameraInfo(obj) +
+                "</div></div>";
             let marker = new window.AMap.Marker({
               // 添加自定义点标记
               map: _this.map,
@@ -920,7 +997,7 @@ export default {
             aMarkers.push(marker);
 
             // hover
-            marker.on("mouseover", function() {
+            /* marker.on("mouseover", function() {   
               let sContent =
                 '<div class="vl_map_hover">' +
                 '<div class="vl_map_hover_main">' +
@@ -933,25 +1010,43 @@ export default {
                 content: sContent
               });
               // aCenter = mEvent.target.F.position
-              hoverWindow.open(
-                _this.map,
-                new window.AMap.LngLat(obj.longitude, obj.latitude)
-              );
+              if(obj.data.length < maxDev.data.length) {
+                hoverWindow.open(
+                  _this.map,
+                  new window.AMap.LngLat(obj.longitude, obj.latitude)
+                );
+              }
               hoverWindow.on("close", function() {
-                console.log("infoWindow close");
-              });
+                  console.log("infoWindow close");
+                });
             });
             marker.on("mouseout", function() {
               if (hoverWindow) {
                 hoverWindow.close();
               }
-            });
+            }); */
           }
         }
 
         _this.map.setFitView(); // 执行定位
       }
     },
+    /* maxInfoWin(obj) {
+      console.log("999999999999",obj)
+      let sContent =
+                '<div class="vl_map_hover">' +
+                '<div class="vl_map_hover_main">' +
+                this.cameraInfo(obj) +
+                "</div>";
+      let infoWindow = new window.AMap.InfoWindow({
+                isCustom: true,
+                closeWhenClickMap: true,
+                offset: new window.AMap.Pixel(7, -24), // 相对于基点的偏移位置
+                content: sContent
+              });
+      // 打开弹窗
+      infoWindow.open(this.map, new window.AMap.LngLat(obj.longitude, obj.latitude));
+    }, */
     // 清除地图标记
     mapClearMarkers(aMarkers) {
       if (this.map && aMarkers && aMarkers.length > 0) {
@@ -1537,7 +1632,17 @@ export default {
     width: 100% !important; // vue-scroll样式重置
   }
   /* 地图标记 hover */
+  .info-window {
+    position: relative;
+    &:hover .vl_map_hover{
+      display: block!important;
+    }
+  }
   .vl_map_hover {
+    display: none;
+    position: absolute;
+    top: 24px;
+    right: 12px;
     .vl_map_hover_main {
       width: 178px;
       text-align: center;

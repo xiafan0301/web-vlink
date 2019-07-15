@@ -101,15 +101,16 @@
 .vl_icon_map_001 { width: 20px; height: 19px; background-position: -321px -350px; }
 .vl_icon_map_mark6 { width: 43px; height: 68px; background-position: -340px -174px; }
 .vl_icon_map_mark3 { width: 43px;  height: 68px; background-position: -84px -171px; }
-.vl_icon_map_mark1 { width: 43px;  height: 68px; background-position: -149px -171px; }
+.vl_icon_map_mark1 { width: 43px;  height: 68px; background-position: -149px -171px; } /* 卡口--紫色 */
 .vl_icon_map_mark2, .vl_icon_map_mark22  { width: 43px;  height: 68px; background-position: -214px -171px; }
-.vl_icon_map_mark0 { width: 43px;  height: 68px; background-position: -275px -171px; }
+.vl_icon_map_mark0 { width: 43px;  height: 68px; background-position: -275px -171px; } /* 摄像头 */
 .vl_icon_map_mark4 { width: 31px; height: 34px; background-position: -477px -196px; }
 .vl_icon_map_sxt_error { width: 43px; height: 68px; background-position: -402px -174px; }
-.vl_icon_map_hover_mark0 { width: 47px;  height: 68px; background-position: -534px -1160px;}
-.vl_icon_map_hover_mark1 { width: 47px;  height: 68px; background-position: -619px -1160px;}
+.vl_icon_map_hover_mark0 { width: 47px;  height: 68px; background-position: -534px -1160px;} /* 摄像头移上去效果 */
+.vl_icon_map_hover_mark1 { width: 47px;  height: 68px; background-position: -619px -1160px;} /* 卡口紫色移上去效果 **/
 .vl_icon_map_hover_mark2{ width: 47px;  height: 68px; background-position: -787px -1163px;}
 .vl_icon_map_hover_mark3 { width: 47px;  height: 68px; background-position: -394px -260px;}
+/* .vl_icon_map_hover_mark5 { width: 47px;  height: 68px; background-position: -394px -260px;} */
 .vl_icon_map_mark_calling { width: 47px;  height: 68px; background-position: -394px -260px;}
 .vl_icon_map_calling0 { width: 32px;  height: 26px; background: url("../img/webrtc/webrtc11.png") no-repeat; }
 .vl_icon_map_calling1 { width: 32px;  height: 26px; background: url("../img/webrtc/webrtc04.png") no-repeat; }
@@ -143,7 +144,7 @@
 .vl_icon_control_06{ width: 24px; height: 28px; background-position: -202px -134px;}
 .vl_icon_control_07{width: 28px; height: 28px; background-position: -300px -134px;}
 .vl_icon_control_08{width: 28px; height: 28px; background-position: -350px -134px;}
-.vl_icon_control_09{width: 22px; height: 28px; background-position: -100px -132px;}
+.vl_icon_control_09{width: 20px; height: 25px; background-position: -100px -132px;}
 .vl_icon_control_10{width: 20px; height: 28px; background-position: -152px -134px;}
 .vl_icon_control_11{width: 24px; height: 28px; background-position: -250px -134px;}
 .vl_icon_control_12{width: 20px; height: 28px; background-position: -400px -134px;}
@@ -316,8 +317,8 @@
 .vl_icon2_006:hover { background-position: -717px -148px; }
 .vl_icon2_007 { background-position: -854px -38px; }
 .vl_icon2_007:hover { background-position: -853px -148px; }
-.vl_icon2_008 { background-position: -1400px -296px; }
-.vl_icon2_008:hover { background-position: -1400px -420px; }
+.vl_icon2_008 { background-position: -1396px -296px; }
+.vl_icon2_008:hover { background-position: -1395px -420px; }
 
 .vl_icon2_011 { background-position: -36px -293px; }
 .vl_icon2_011:hover { background-position: -35px -417px; }
@@ -346,6 +347,8 @@
 .vl_icon2_025 { background-position: -1126px -293px; }
 .vl_icon2_025:hover { background-position: -1125px -417px; }
 
+.vl_icon2_026 { background-position: -1260px -293px; }
+.vl_icon2_026:hover { background-position: -1259px -417px; }
 .vl_icon2_027 { background-position: -1398px -293px; }
 .vl_icon2_027:hover { background-position: -1397px -417px; }
 /**人像检索**/
@@ -775,7 +778,14 @@
   height: 104px;
 }
 
-/* element-ui reset */
+/* element-ui 日期选择器el-date-picker reset */
+.date-comp .el-date-editor .el-range-separator {
+  width: 30px;
+  text-align: center;
+}
+.date-comp .el-date-editor .el-range-input {
+  width: 52%;
+}
 .el-date-editor .el-range-separator {
   width: 30px;
   text-align: center;
@@ -1092,7 +1102,6 @@
     background-color: #0C70F8;
     border-color: #0C70F8;
 }
-
 /* th css style create by th */
 html {
     font-size: 100px;
@@ -1102,3 +1111,35 @@ html {
 @media screen and (min-width: 1440px) and (max-width: 1679px) {html {font-size: 80px;}}
 @media screen and (min-width: 1680px) and (max-width: 1919px) {html {font-size: 90px;}}
 @media screen and (min-width: 1920px) {html {font-size: 100px;} }
+
+
+.obox{
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  z-index: 9999;
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center; /*垂直居中*/
+  justify-content: center; /*水平居中*/
+  animation: fadeIn 0.3s ease-out 0.1s both;
+  
+}
+.obox img {
+  width: auto;
+  height: auto;
+   max-width: 100%;
+  max-height:100vh;
+ 
+}
+.dilage{
+  position: fixed;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  bottom: 0px;
+  z-index: 9998;
+  background: rgba(0, 0, 0, 0.6);
+  animation: fadeIn 0.2s ease-out 0.2s both;
+}

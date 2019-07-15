@@ -66,3 +66,4 @@ Vue.prototype.Trim = function (str, isGlobal) {
   }
   return result;
 };
+

@@ -17,20 +17,22 @@
             <!-- 表单 -->
             <div class="form_warp">
               <el-form :model="mhscMenuForm" ref="mhscMenuForm" :rules="rules">
+                <div class="date-comp">
                 <el-form-item label prop="selectDate">
                   <el-date-picker
                     class="width232"
                     v-model="mhscMenuForm.selectDate"
                     type="daterange"
-                    range-separator="-"
+                    range-separator="至"
                     value-format="yyyy-MM-dd"
-                    format="yy/MM/dd"
+                    format="yyyy-MM-dd"
                     :picker-options="pickerOptions"
                     start-placeholder="开始日期"
                     end-placeholder="结束日期"
                     :clearable="false"
                   ></el-date-picker>
                 </el-form-item>
+                </div>
                 <!-- 选择设备 -->
                 <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
                 <div class="selected_device" @click="treeTabShow = true;">
@@ -157,7 +159,7 @@
         </vue-scroll>
       </div>
       <!-- 通用的右边列表 -->
-      <div class="right_img_list">
+      <div class="right_img_list" v-if="strucInfoList.length > 0">
         <!-- 排序和结果 -->
         <div class="result_sort">
           <h3 class="result">检索结果（{{ total }}）</h3>
@@ -205,19 +207,25 @@
               </div>
             </div>
             <!-- 分页器 -->
-            <!-- <template v-if="total > 0">
+            <template v-if="total > 0">
               <el-pagination
                 @size-change="handleSizeChange"
                 @current-change="onPageChange"
                 :current-page.sync="pageNum"
-                :page-sizes="[100, 200, 300, 400]"
                 :page-size="pageSize"
-                layout="total, prev, pager, next, jumper"
+                layout="total, prev, pager, next"
                 :total="total"
                 class="cum_pagination"
               ></el-pagination>
-            </template>-->
+            </template>
           </vue-scroll>
+        </div>
+      </div>
+      <!-- 没有数据的情况 -->
+      <div v-else class="fnull">
+        <div>
+          <img src="../../../../../assets/img/null-content.png" alt />
+          {{noDataTips}}
         </div>
       </div>
     </div>
@@ -267,12 +275,12 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.storagePath" alt />
+            <img class="bigImg" :src="sturcDetail.storagePath" alt />
             <span>全景图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img struc_c_d_img_green">
-              <img :src="sturcDetail.subStoragePath" alt />
+              <img class="bigImg" :src="sturcDetail.subStoragePath" alt />
               <span>抓拍图</span>
             </div>
             <div class="struc_c_d_info">
@@ -493,8 +501,10 @@ export default {
       },
       /* 检索结果变量 */
       strucInfoList: [],
+      strucInfoListAll: [],
+      noDataTips: "请在左侧输入查询条件",
       pageNum: 1,
-      pageSize: 10,
+      pageSize: 20,
       total: 0,
       /* 检索详情弹窗变量 */
       swiperOption: {
@@ -614,10 +624,18 @@ export default {
           getVagueSearch(queryParams)
             .then(res => {
               this.getStrucInfoLoading = false; // 关闭加载效果
+              this.noDataTips = "暂无搜索结果";
               if (res.data) {
                 if (res.data.length > 0) {
-                  this.strucInfoList = res.data;
-                  this.total = res.data.length;
+                  // this.strucInfoList = res.data;
+                  this.strucInfoListAll = res.data;
+                  this.total = this.strucInfoListAll.length;
+                  this.onPageChange(1);
+                  /* if (this.total > this.pageSize) {
+                    this.strucInfoList = this.strucInfoListAll.slice(0, this.pageSize);
+                  } else {
+                    this.strucInfoList = this.strucInfoListAll;
+                  } */
                 } else {
                   this.strucInfoList = []; // 清空搜索结果
                   this.total = 0;
@@ -631,6 +649,7 @@ export default {
               this.getStrucInfoLoading = false; // 关闭加载效果
               this.strucInfoList = []; // 清空搜索结果
               this.total = 0;
+              this.noDataTips = "暂无搜索结果";
             });
         } else {
           return false;
@@ -639,7 +658,10 @@ export default {
     },
     onPageChange(page) {
       this.pageNum = page;
-      this.getStrucInfo();
+      let ips = (this.pageNum - 1) * this.pageSize;
+      let ipe = ips + this.pageSize;
+      if (ipe > this.total) { ipe = this.total; }
+      this.strucInfoList = this.strucInfoListAll.slice(ips, ipe);
     },
     handleSizeChange(val) {
       this.pageNum = 1;
@@ -1118,6 +1140,33 @@ export default {
           -moz-border-radius: 4px;
           border-radius: 4px;
           color: #ffffff;
+        }
+      }
+    }
+    // 没有数据的样式
+    .fnull {
+      text-align: center;
+      line-height: 48px;
+      font-size: 16px;
+      color: #666666;
+      -webkit-box-flex: 1;
+      -ms-flex: 1;
+      flex: 1;
+      height: 100%;
+      background: #fff;
+      margin: 24px 20px 20px 20px;
+      position: relative;
+      > div {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%); /* IE 9 */
+        -webkit-transform: translate(-50%, -50%); /* Safari and Chrome */
+        img {
+          display: block;
+          margin: auto;
+          padding-bottom: 10px;
         }
       }
     }

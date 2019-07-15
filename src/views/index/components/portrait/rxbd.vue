@@ -2,7 +2,7 @@
   <div class="vl_judge_tc">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">检索</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像侦查</el-breadcrumb-item>
         <el-breadcrumb-item>人像比对</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -69,7 +69,7 @@
           </div>
         </div>
       </div>
-      <el-button class="vl_judge_tc_btn" @click="beginComp" type="primary" :disabled="!this.curImageUrl || !this.curImageUrl2" :loading="compLoading">立即对比</el-button>
+      <el-button class="vl_judge_tc_btn" @click="beginComp" type="primary" :disabled="!this.curImageUrl || !this.curImageUrl2" :loading="compLoading">立即比对</el-button>
     </div>
     <!--历史记录弹窗-->
     <el-dialog
@@ -484,6 +484,9 @@
           width: 100%;
           height: 100%;
           background: none;
+          .el-upload--picture-card {
+            border: none;
+          }
           .el-upload {
             width: 100%;
             height: 100%;

@@ -17,20 +17,22 @@
             <!-- 表单 -->
             <div class="form_warp">
               <el-form :model="ytscMenuForm" ref="ytscMenuForm" :rules="rules">
+                <div class="date-comp">
                 <el-form-item prop="selectDate">
                   <el-date-picker
                     class="width232"
                     v-model="ytscMenuForm.selectDate"
                     type="daterange"
-                    range-separator="-"
+                    range-separator="至"
                     value-format="yyyy-MM-dd"
-                    format="yy/MM/dd"
+                    format="yyyy-MM-dd"
                     :picker-options="pickerOptions"
                     start-placeholder="开始日期"
                     end-placeholder="结束日期"
                     :clearable="false"
                   ></el-date-picker>
                 </el-form-item>
+                </div>
                 <!-- 选择设备 -->
                 <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
                 <div class="selected_device" @click="treeTabShow = true;">
@@ -144,7 +146,7 @@
         </vue-scroll>
       </div>
       <!-- 通用的右边列表 -->
-      <div class="right_img_list">
+      <div class="right_img_list" v-if="strucInfoList.length > 0">
         <!-- 排序和结果 -->
         <div class="result_sort">
           <h3 class="result">检索结果（{{ total }}）</h3>
@@ -212,6 +214,13 @@
           </vue-scroll>
         </div>
       </div>
+       <!-- 没有数据的情况 -->
+      <div v-else class="fnull">
+        <div>
+          <img src="../../../../../assets/img/null-content.png" alt />
+          {{noDataTips}}
+        </div>
+      </div>
     </div>
     <!--上传记录弹窗-->
     <el-dialog
@@ -259,12 +268,12 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.storagePath" alt />
+            <img :src="sturcDetail.storagePath" :class="{'active':isChoose}" class="bigImg" />
             <span>全景图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img struc_c_d_img_green">
-              <img :src="sturcDetail.subStoragePath" alt />
+              <img :src="sturcDetail.subStoragePath" :class="{'active':isChoose2}" class="bigImg"/>
               <span>抓拍图</span>
             </div>
             <div class="struc_c_d_info">
@@ -394,6 +403,8 @@ import { objDeepCopy } from "../../../../../utils/util.js"; // 深拷贝方法
 export default {
   data() {
     return {
+      isChoose:false,
+      isChoose2:false,
       selectType: 1,
       sortType: 1, // 1为时间排序， 2为监控排序
       timeSortType: true, // true为时间降序， false为时间升序
@@ -483,6 +494,7 @@ export default {
       },
       /* 检索结果变量 */
       strucInfoList: [],
+      noDataTips: "请在左侧输入查询条件",
       pageNum: 1,
       pageSize: 10,
       total: 0,
@@ -534,6 +546,14 @@ export default {
     }
   },
   methods: {
+     bigImg(v){
+       if(v==1){
+          this.isChoose=!this.isChoose;
+       }else{
+          this.isChoose2=!this.isChoose2; 
+       }
+      
+    },
     /*重置菜单的数据 */
     resetMenu() {
       // 置空数据数量
@@ -606,6 +626,7 @@ export default {
             getPhotoSearch(queryParams)
               .then(res => {
                 this.getStrucInfoLoading = false; // 关闭加载效果
+                this.noDataTips = "暂无搜索结果";
                 if (res.data && res.data.list) {
                   if (res.data.list.length > 0) {
                     this.strucInfoList = res.data.list;
@@ -623,6 +644,7 @@ export default {
                 this.getStrucInfoLoading = false; // 关闭加载效果
                 this.strucInfoList = []; // 清空搜索结果
                 this.total = 0;
+                this.noDataTips = "暂无搜索结果";
               });
           } else {
             return false;
@@ -1220,6 +1242,33 @@ export default {
         // border-bottom: 1px solid #d3d3d3;
       }
     }
+    // 没有数据的样式
+    .fnull {
+      text-align: center;
+      line-height: 48px;
+      font-size: 16px;
+      color: #666666;
+      -webkit-box-flex: 1;
+      -ms-flex: 1;
+      flex: 1;
+      height: 100%;
+      background: #fff;
+      margin: 24px 20px 20px 20px;
+      position: relative;
+      > div {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%); /* IE 9 */
+        -webkit-transform: translate(-50%, -50%); /* Safari and Chrome */
+        img {
+          display: block;
+          margin: auto;
+          padding-bottom: 10px;
+        }
+      }
+    }
     // 右边图片列表
     .right_img_list {
       -webkit-box-flex: 1;
@@ -1398,6 +1447,14 @@ export default {
             right: 0;
             bottom: 0;
             margin: auto;
+            transform: scale(1);         
+            transition: all ease 0.5s;
+          }
+          img.active{
+             transform: scale(3);          
+              position: absolute;           
+              z-index: 100;
+              left: 50%;
           }
           i {
             display: block;

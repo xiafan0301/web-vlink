@@ -858,19 +858,17 @@ export default {
       this.$refs[form].validate(valid => {
         if (valid) {
           if (!this.dialogImageUrl) {
-            this.$message({
-              type: 'error',
-              message: '请先上传车辆照片',
-              customClass: 'request_tip'
-            })
+            if (!document.querySelector('.el-message--info')) {
+              this.$message.info('请先上传车辆照片');
+            }
+           
             return;
           }
           if (this.carForm.groupList.length === 0) {
-            this.$message({
-              type: 'error',
-              message: '请先选择所属组',
-              customClass: 'request_tip'
-            })
+            if (!document.querySelector('.el-message--info')) {
+              this.$message.info('请先选择所属组');
+            }
+           
             return;
           }
           this.carForm.vehicleImagePath = this.dialogImageUrl;
@@ -905,19 +903,17 @@ export default {
       this.$refs[form].validate(valid => {
         if (valid) {
           if (!this.dialogImageUrl) {
-            this.$message({
-              type: 'error',
-              message: '请先上传车辆照片',
-              customClass: 'request_tip'
-            })
+            if (!document.querySelector('.el-message--info')) {
+              this.$message.info('请先上传车辆照片');
+            }
+           
             return;
           }
           if (this.carForm.groupList.length === 0) {
-            this.$message({
-              type: 'error',
-              message: '请先选择所属组',
-              customClass: 'request_tip'
-            })
+            if (!document.querySelector('.el-message--info')) {
+              this.$message.info('请先选择所属组');
+            }
+           
             return;
           }
           this.carForm.vehicleImagePath = this.dialogImageUrl;
@@ -1000,10 +996,14 @@ export default {
       const isLt4M = file.size / 1024 / 1024 < 4;
 
       if (!isJPG) {
-        this.$message.error('上传图片只能是 jpeg、jpg、png 格式!');
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('上传图片只能是 jpeg、jpg、png 格式!');
+        }
       }
       if (!isLt4M) {
-        this.$message.error('上传图片大小不能超过 4MB!');
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('上传图片大小不能超过 4MB!');
+        }
       }
       return isJPG && isLt4M;
     },
@@ -1174,7 +1174,9 @@ export default {
           this.$refs.vehicleImport.submit();
         })
       } else {
-        this.$message.warning('请先选择要导入的文件');
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('请先选择要导入的文件');
+        }
       }
     },
     handleChange (file, fileList) {
