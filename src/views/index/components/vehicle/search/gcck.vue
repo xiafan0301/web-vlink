@@ -99,16 +99,23 @@
             </ul>
           </div>
           <div class="vc_gcck_r" v-else-if="videoTotal === 0">
-            <p class="vc_gcck_r_empty">暂无设备，您可以选择查看其它摄像头或卡口</p>
+            <div class="vc_gcck_r_empty">
+              <div class="com_trans50_lt">
+                <img src="../../../../../assets/img/null-content.png" alt="">
+                <p>暂无设备，您可以选择查看其它摄像头或卡口</p>
+              </div>
+            </div>
           </div>
           <div class="vc_gcck_r" v-else>
-            <p class="vc_gcck_r_empty">选择左侧的摄像头或卡口进行查看</p>
+            <div class="vc_gcck_r_empty">
+              <div class="com_trans50_lt">
+                <img src="../../../../../assets/img/null-content.png" alt="">
+                <p>选择左侧的摄像头或卡口进行查看</p>
+              </div>
+            </div>
           </div>
         </div>
         <div class="vc_gcck_r_C" v-show="showType === 2">
-          <!-- <div class="vc_gcck_r">
-            <p class="vc_gcck_r_empty">选择左侧的摄像头或卡口进行查看</p>
-          </div> -->
           <div class="gcck_rh" style="overflow: auto;" v-if="zpDeviceIdsHis && picList.length > 0">
             <div>
               <div class="gcck_rh_tos">
@@ -141,13 +148,28 @@
             </div>
           </div>
           <div class="vc_gcck_r" v-else-if="zpDeviceIdsHis && picList.length <= 0">
-            <p class="vc_gcck_r_empty">暂无数据</p>
+            <div class="vc_gcck_r_empty">
+              <div class="com_trans50_lt">
+                <img src="../../../../../assets/img/null-content.png" alt="">
+                <p>暂无数据</p>
+              </div>
+            </div>
           </div>
           <div class="vc_gcck_r" v-else-if="!zpDeviceIdsHis && picCKEmpty">
-            <p class="vc_gcck_r_empty">该卡口没有摄像头</p>
+            <div class="vc_gcck_r_empty">
+              <div class="com_trans50_lt">
+                <img src="../../../../../assets/img/null-content.png" alt="">
+                <p>该卡口没有摄像头</p>
+              </div>
+            </div>
           </div>
           <div class="vc_gcck_r" v-else>
-            <p class="vc_gcck_r_empty">选择左侧的摄像头或卡口进行查看</p>
+            <div class="vc_gcck_r_empty">
+              <div class="com_trans50_lt">
+                <img src="../../../../../assets/img/null-content.png" alt="">
+                <p>选择左侧的摄像头或卡口进行查看</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -697,9 +719,13 @@ export default {
           }
         }
         > .vc_gcck_r_empty {
-          padding-top: 20px;
           text-align: center;
           color: #999;
+          height: 100%;
+          position: relative;
+          > div {
+            position: absolute;
+          }
         }
       }
     }
