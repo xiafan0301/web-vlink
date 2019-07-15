@@ -48,15 +48,15 @@
         </div>
         <div class="kaishi">
           <el-button style="width: 110px" @click="rester">重置</el-button>
-          <el-button type="primary" style="width: 110px" @click="search">统计</el-button>
+          <el-button type="primary" style="width: 110px" @click="search">查询</el-button>
         </div>
       </div>
       <div class="ccrc_content_right" v-if="regulationsList.length > 0">
-        <div class="clearfix">
-          <div style="padding: 10px 0; float: right">
-            <el-button type="primary" style="width: 110px">导出</el-button>
-          </div>
-        </div>
+<!--        <div class="clearfix">-->
+<!--          <div style="padding: 10px 0; float: right">-->
+<!--            <el-button type="primary" style="width: 110px">导出</el-button>-->
+<!--          </div>-->
+<!--        </div>-->
         <div class="ccrc_content_right_content">
           <div class="title">车辆登记信息</div>
           <div class="ccrc_content_right_table">
@@ -541,6 +541,7 @@ export default {
         .ccrc_content_right_content{
           background-color: white;
           box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
+          margin-top: 20px;
           .title{
             border-bottom: 1px solid #F2F2F2;
             padding: 20px;
