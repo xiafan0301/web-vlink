@@ -1,27 +1,25 @@
 <template>
   <div class="vl_judge_tc">
-    <div class="breadcrumb_heaer">
-      <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像侦查</el-breadcrumb-item>
-        <el-breadcrumb-item>以图搜人</el-breadcrumb-item>
-      </el-breadcrumb>
+    <div class="">
+      <div is="vlBreadcrumb"
+           :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
+            {name: '以图搜人'}]">
+      </div>
     </div>
     <div class="vl_j_left">
       <div class="vl_jtc_img_box">
         <div class="vl_jtc_upload_img" :style="{}" @drop="drop($event)" @dragover="allowDrop($event)">
           <el-upload
-                  :class="{'vl_jtc_upload': true}"
-                  :limit="3"
-                  multiple
-                  :show-file-list="false"
-                  accept="image/*"
-                  :action="uploadAcion"
-                  list-type="picture-card"
-                  @drop="drop($event)"
-                  :on-exceed="uploadPicExceed"
-                  :before-upload="beforeAvatarUpload"
-                  :on-success="uploadSucess"
-                  :on-error="handleError">
+              :class="{'vl_jtc_upload_ytsr': true}"
+              multiple
+              :show-file-list="false"
+              accept="image/*"
+              :action="uploadAcion"
+              list-type="picture-card"
+              @drop="drop($event)"
+              :before-upload="beforeAvatarUpload"
+              :on-success="uploadSucess"
+              :on-error="handleError">
             <i v-if="uploading" class="el-icon-loading"></i>
             <img v-else-if="curImageUrl" :src="curImageUrl">
             <div v-else>
@@ -33,22 +31,14 @@
           </el-upload>
           <p @click="showHistoryPic">从上传记录中选择</p>
         </div>
-        <div class="vl_jtc_img_list">
-          <div v-for="(item, index) in imgList" :key="item.id" :class="{'middle_img': index === 1}">
-            <img :src="item.path ? item.path : ''" alt="">
-            <div class="del_mask" v-show="item.path">
-              <i class="el-icon-delete" @click="delPic(index)"></i>
-            </div>
-          </div>
-        </div>
       </div>
       <div class="vl_jtc_search">
         <el-date-picker
           v-model="searchData.time"
           type="daterange"
-          range-separator="-"
+          range-separator="至"
           value-format="yyyy-MM-dd"
-          format="yy/MM/dd"
+          format="yyyy-MM-dd"
           :picker-options="pickerOptions"
           start-placeholder="开始日期"
           end-placeholder="结束日期">
@@ -107,7 +97,7 @@
                   <p>检索资料</p>
                   <div class="vl_jfo_line" :title="item.shotTime"><i class="vl_icon vl_icon_retrieval_01"></i>{{item.shotTime}}</div>
                   <div class="vl_jfo_line"><i class="vl_icon vl_icon_retrieval_02"></i>{{item.deviceName}}</div>
-                  <div class="vl_jfo_sim"><i class="vl_icon vl_icon_retrieval_03"></i>{{item.semblance}}<span style="font-size: 12px;">%</span></div>
+                  <div class="vl_jfo_sim"><i class="vl_icon vl_icon_retrieval_03"></i>{{(item.semblance*1).toFixed(2)}}<span style="font-size: 12px;">%</span></div>
                 </div>
               </div>
             </div>
@@ -169,7 +159,7 @@
               <span>全景图</span>
             </div>
             <div class="struc_c_d_info">
-              <h2>对比信息<div class="vl_jfo_sim" ><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? sturcDetail.semblance : '无'}}<span style="font-size: 12px;">%</span></div></h2>
+              <h2>对比信息<div class="vl_jfo_sim" ><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? (sturcDetail.semblance*1).toFixed(2) : '0.00'}}<span style="font-size: 12px;">%</span></div></h2>
               <div class="struc_cdi_line">
                 <span v-show="sturcDetail.age">{{sturcDetail.age}}</span>
                 <span v-show="sturcDetail.baby">{{sturcDetail.baby}}</span>
@@ -218,7 +208,7 @@
           <swiper-slide v-for="(item, index) in strucInfoList" :key="item.id">
             <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
               <img style="width: 100%; height: .88rem;" :src="item.subStoragePath" alt="">
-              <div class="vl_jfo_sim"><i class="vl_icon vl_icon_retrieval_05" :class="{'vl_icon_retrieval_06':  index === curImgIndex}"></i>{{item.semblance ? item.semblance : '无'}}<span style="font-size: 12px;">%</span></div>
+              <div class="vl_jfo_sim"><i class="vl_icon vl_icon_retrieval_05" :class="{'vl_icon_retrieval_06':  index === curImgIndex}"></i>{{item.semblance ? (item.semblance*1).toFixed(2) : '0.00'}}<span style="font-size: 12px;">%</span></div>
             </div>
           </swiper-slide>
           <div class="swiper-button-prev" slot="button-prev"></div>
@@ -230,11 +220,13 @@
   </div>
 </template>
 <script>
+  import vlBreadcrumb from '@/components/common/breadcrumb.vue';
   let AMap = window.AMap;
   import {ajaxCtx} from '@/config/config';
   import {ScpGETstrucInfoList, ScpGETdeviceListById, ScpGETretrievalHisById} from '../../api/api.search.js';
   import {JtcPUTAppendixsOrder, JtcPOSTAppendixInfo, JtcGETAppendixInfoList } from '../../api/api.judge'
   export default {
+    components: {vlBreadcrumb},
     data() {
       return {
         targetType: 2,
@@ -255,10 +247,8 @@
         mapData: [],
         searching: false,
         curImageUrl: '', // 当前上传的图片
-        curImgNum: 0, // 当前图片数量
         uploading: false, // 是否上传中
-        uploadFileList: [],
-        imgList: ['', '', ''],
+        imgList: '',
         historyPicList: [], // 上传历史记录
         loadingHis: false,
         cameraData: [],
@@ -297,7 +287,7 @@
         curVideoUrl: '',
         playing: false, // 视频播放是否
         historyPicDialog: false,
-        stucOrder: 2, // 1升序，2降序，3监控，4相似度
+        stucOrder: 4, // 1升序，2降序，3监控，4相似度
         strucInfoList: [], // 检索抓拍信息
         strucCurTab: 1,
         curImgIndex: 0,
@@ -322,9 +312,8 @@
                 if (res) {
                   this.searchData.time = [res.data.startTime, res.data.endTime];
                   this.searchData.minSemblance = res.data.minSemblance ? res.data.minSemblance : '';
-                  this.curImgNum = res.data.retrievalPicList.length;
                   res.data.retrievalPicList.forEach((x, index) => {
-                    this.imgList[index] = x;
+                    this.imgList = x;
                     if ((index + 1) === res.data.retrievalPicList.length) {
                       this.curImageUrl = x.path;
                     }
@@ -344,15 +333,13 @@
               filePathName: '带图' + Math.random(),
               path: this.$route.query.imgurl
             }
-            this.curImgNum++;
             JtcPOSTAppendixInfo(x).then(jRes => {
               if (jRes) {
                 x['uid'] = jRes.data;
                 console.log(x);
               }
             })
-            this.imgList[0] = x;
-            this.showCurImg();
+            this.imgList = x;
           }
         }
       })
@@ -374,26 +361,14 @@
           filePathName: '拖拽图片' + Math.random(),
           path: e.dataTransfer.getData("Text")
         }
-        if (this.curImgNum >= 3) {
-          if (!document.querySelector('.el-message--info')) {
-            this.$message.error('最多上传3张，请先删掉再上传');
-          }
-          return;
-        }
-        this.curImgNum++;
         JtcPOSTAppendixInfo(x).then(jRes => {
           if (jRes) {
             x['uid'] = jRes.data;
             console.log(x);
           }
         })
-        for (let i = 0; i < this.imgList.length; i++) {
-          if (!this.imgList[i]) {
-            this.imgList.splice(i, 1, x);
-            break;
-          }
-        }
-        this.showCurImg();
+        this.imgList = x;
+        this.curImageUrl = x.path;
       },
       allowDrop (e) {
         e.preventDefault();
@@ -434,11 +409,6 @@
       uploadSucess (response, file, fileList) {
         this.uploading = false;
         if (response && response.data) {
-          if (this.curImgNum >= 3) {
-            this.$message.error('最多上传3张，请先删掉再上传');
-            return;
-          }
-          this.curImgNum++;
           let oRes = response.data;
           if (oRes) {
             let x = {
@@ -463,36 +433,15 @@
                 console.log(x);
               }
             })
-            for (let i = 0; i < this.imgList.length; i++) {
-              if (!this.imgList[i]) {
-                this.imgList.splice(i, 1, x);
-                break;
-              }
-            }
-            this.showCurImg();
+            this.imgList = x;
+            this.curImageUrl = x.path;
           }
         }
-        this.uploadFileList = fileList;
         console.log(fileList)
       },
       handleError () {
         this.uploading = false;
         this.$message.error('上传失败')
-      },
-      delPic (index) {
-        this.curImgNum--;
-        if (this.uploadFileList.length > index) {
-          this.uploadFileList.splice(index, 1);
-        } else {
-          this.uploadFileList.splice(this.uploadFileList.length - 1, 1);
-        }
-        this.imgList.splice(index, 1, '');
-        console.log(this.uploadFileList, index);
-        if (this.curImgNum) {
-          this.showCurImg();
-        } else {
-          this.curImageUrl = '';
-        }
       },
       showHistoryPic () {
         this.loadingHis = true;
@@ -512,45 +461,21 @@
         })
       },
       chooseHisPic (item) {
-        if ((this.choosedHisPic.length + this.curImgNum) === 3 && !item.checked) {
-          this.$message.error('最多上传3个图片')
-        } else {
-          item.checked = !item.checked;
-        }
+        this.historyPicList.forEach(x => x.checked = false)
+        item.checked = true;
       },
       addHisToImg () {
         this.historyPicDialog = false;
         let _ids = [];
         this.choosedHisPic.forEach(x => {
-          this.curImgNum++;
           _ids.push(x.uid)
-          for (let i = 0; i < this.imgList.length; i++) {
-            if (!this.imgList[i]) {
-              this.imgList.splice(i, 1, x);
-              break;
-            }
-          }
+          this.imgList = x;
+          this.curImageUrl = x.path;
         })
         let _obj = {
           appendixInfoIds: _ids.join(',')
         }
         JtcPUTAppendixsOrder(_obj);
-        this.showCurImg();
-      },
-      showCurImg () {
-        if (this.imgList[this.curImgNum - 1].path && this.imgList[0].path) {
-          this.curImageUrl = this.imgList[this.curImgNum - 1].path;
-        } else {
-          if (this.curImgNum === 2) {
-            this.curImageUrl = this.imgList[2].path;
-          } else {
-            if (this.imgList[this.curImgNum - 1].path) {
-              this.curImageUrl = this.imgList[this.curImgNum - 1].path;
-            } else {
-              this.curImageUrl = this.imgList[2].path ? this.imgList[2].path : this.imgList[1].path;
-            }
-          }
-        }
       },
       setDTime () {
         let date = new Date();
@@ -609,15 +534,13 @@
         this.searchData.minSemblance = null;
         this.searchData.devIds = [];
         this.devIdData = [];
-        this.uploadFileList.splice(0, this.uploadFileList.length);
-        this.imgList = ['', '', ''];
+        this.imgList = '';
         this.curImageUrl = '';
-        this.curImgNum = 0;
       },
       tcDiscuss (boolean) {
-        if (this.curImgNum === 0) {
+        if (!this.imgList) {
           if (!document.querySelector('.el-message--info')) {
-            this.$message.info('请至少上传或选择一张图片')
+            this.$message.info('请上传图片')
           }
           return false;
         }
@@ -667,11 +590,7 @@
         if (devIds.length) {
           params.where['deviceIds'] = devIds.join(',');
         }
-        this.imgList.forEach(x => {
-          if (x) {
-            _ids.push(x.uid);
-          }
-        })
+        _ids.push(this.imgList.uid);
         if (_ids.length) {
           params.where['appendixIds'] = _ids.join(',');
         }
@@ -689,6 +608,7 @@
           }
         }).catch(() => {
           this.searching = false;
+          this.$_hideLoading();
         })
         console.log(this.searchData.time)
       },
@@ -725,19 +645,19 @@
         let _content = '<div class="vl_icon vl_icon_judge_02"></div>'
         this.markerPoint = new AMap.Marker({ // 添加自定义点标记
           map: this.amap,
-          position: [data.longitude, data.latitude], // 基点位置 [116.397428, 39.90923]
+          position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
           offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
           draggable: false, // 是否可拖动
           // 自定义点标记覆盖物内容
           content: _content
         });
-        this.amap.setZoomAndCenter(16, [data.longitude, data.latitude]); // 自适应点位置
+        this.amap.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
         let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`
         this.infoWindow = new AMap.InfoWindow({
           map: this.amap,
           isCustom: true,
           closeWhenClickMap: false,
-          position: [data.longitude, data.latitude],
+          position: [data.shotPlaceLongitude, data.shotPlaceLatitude],
           offset: new AMap.Pixel(0, -70),
           content: sConent
         })
@@ -824,7 +744,7 @@
         padding-bottom: 44px;
         .vl_jtc_upload_img {
           position: relative;
-          .vl_jtc_upload {
+          .vl_jtc_upload_ytsr {
             .el-upload--picture-card {
               width: 100%!important;
               padding-top: 100%!important;
@@ -931,19 +851,19 @@
         }
         .el-range-editor {
           width: 100%;
-          padding: 0;
-          > i {
+          /*padding: 0;*/
+          > .el-range__close-icon {
             display: none;
           }
           > input {
             width: 50%;
           }
-          .el-range-separator {
-            height: 40px;
-            line-height: 40px;
-            width: 10px;
-            padding: 0;
-          }
+          /*.el-range-separator {*/
+            /*height: 40px;*/
+            /*line-height: 40px;*/
+            /*width: 10px;*/
+            /*padding: 0;*/
+          /*}*/
         }
         button {
           width: 110px;

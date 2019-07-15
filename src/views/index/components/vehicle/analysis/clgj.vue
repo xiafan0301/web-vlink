@@ -1,10 +1,11 @@
 <template>
   <div class="point">
-    <div class="breadcrumb_heaer">
-      <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
-        <el-breadcrumb-item>车辆轨迹</el-breadcrumb-item>
-      </el-breadcrumb>
+    <div class="">
+      <div
+              is="vlBreadcrumb"
+              :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
+          {name: '车辆轨迹'}]"
+      ></div>
     </div>
 
     <div :class="['left',{hide:hideleft}]">
@@ -33,7 +34,7 @@
             <el-input placeholder="请输入车牌号" v-model="ruleForm.input3">
             </el-input>
           </el-form-item>
-          <el-form-item label="区域：" label-width="60px" prop="input5">
+          <el-form-item label="抓拍区域：" label-width="75px" style="white-space: nowrap;" prop="input5">
             <el-radio-group v-model="ruleForm.input5">
               <el-row :gutter="10">
                 <el-col :span="12">
@@ -48,7 +49,7 @@
             </el-radio-group>
           </el-form-item>
           <el-form-item v-if="ruleForm.input5=='1'" prop="value1">
-            <el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="请选择" class="full">
+            <el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="全部区域" class="full">
               <el-option-group
                 v-for="group in options"
                 :key="group.areaName"
@@ -196,6 +197,7 @@
   </div>
 </template>
 <script>
+  import vlBreadcrumb from "@/components/common/breadcrumb.vue";
   import mapSelector from '@/components/common/mapSelector.vue';
   import { mapXupuxian } from "@/config/config.js";
   import { objDeepCopy, random14 } from "@/utils/util.js";
@@ -204,7 +206,7 @@
   import { MapGETmonitorList } from "@/views/index/api/api.map.js";
   import { getAllBayonetList } from "@/views/index/api/api.base.js";
   export default {
-    components: {mapSelector},
+    components: {mapSelector, vlBreadcrumb},
     data() {
       return {
         loading: false,
@@ -436,13 +438,7 @@
                   this.$message.info('选择的区域没有设备，请重新选择区域');
                 }
                 return false;
-              } else if (this.ruleForm.input5 === "1" && this.ruleForm.value1.length === 0) {
-                if (!document.querySelector('.el-message--info')) {
-                  this.$message.info('您没有选择区域，请点击下拉框选择镇');
-                }
-                return false;
               }
-              console.log(this.ruleForm.data1);
               pg.where['startTime'] = this.ruleForm.data1[0]+" 00:00:00";
               pg.where['endTime'] = this.ruleForm.data1[1]+" 23:59:59";
               pg.where['vehicleNumber'] = this.ruleForm.input3;
@@ -469,9 +465,6 @@
         this.ruleForm.input5 = '1';
         this.ruleForm.input3 = '';
         this.ruleForm.value1 = [];
-        this.options[0].areaTreeList.forEach(x => {
-          this.ruleForm.value1.push(x.areaId)
-        })
         this.selectMapClear = random14();
         this.pointData = {
           deviceList: [],
@@ -491,9 +484,6 @@
         }
         MapGETmonitorList(d).then(res=>{
           if(res && res.data){
-            res.data.areaTreeList.forEach(x => {
-              this.ruleForm.value1.push(x.areaId)
-            })
             this.options.push(res.data)
           }
         })
@@ -1148,9 +1138,6 @@
             font-size: 12px;
             padding: 0 .1rem;
           }
-        }
-        .struc_c_d_qj {
-          margin-right: .3rem;
           &:before {
             display: block;
             content: '';
@@ -1178,6 +1165,13 @@
             -o-transform: rotate(-45deg);
             transform: rotate(-45deg);
             z-index: 99;
+          }
+        }
+        .struc_c_d_qj {
+          margin-right: .3rem;
+          &:before {
+            border: .5rem solid #50CC62;
+            border-color: transparent transparent #50CC62;
           }
         }
         .struc_c_d_box {

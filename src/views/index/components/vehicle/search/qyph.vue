@@ -1,10 +1,11 @@
 <template>
   <div class="vl_ph_main">
-    <div class="breadcrumb_heaer">
-      <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
-        <el-breadcrumb-item>区域徘徊</el-breadcrumb-item>
-      </el-breadcrumb>
+    <div class="">
+      <div
+              is="vlBreadcrumb"
+              :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
+          {name: '区域徘徊'}]"
+      ></div>
     </div>
 
     <div class="vl_ph_content">
@@ -29,8 +30,11 @@
               <!--区域选择-->
               <div class="search_line_ts">
                 <div class="title">
-                  <span class="red_star">区域:</span>
-                  <span class="choose_btn el-icon-location-outline" @click="setFitV" :class="{'not-active': !searchData.area}"></span>
+                  <span class="red_star">抓拍区域:</span>
+                  <span>
+                    <i class="choose_btn el-icon-location-outline" @click="setFitV" :class="{'not-active': !searchData.area}"></i>
+                    <i class="choose_btn el-icon-delete" @click="delDialog = true"></i>
+                  </span>
                 </div>
                 <div class="drawBox">
                   <div class="items">
@@ -94,11 +98,13 @@
   </div>
 </template>
 <script>
+  import vlBreadcrumb from "@/components/common/breadcrumb.vue";
   import { mapXupuxian } from "@/config/config.js";
   import {getAllDevice} from '../../../api/api.judge.js';
   import {getAllBayonetList} from '../../../api/api.base.js';
   import { objDeepCopy, formatDate} from '../../../../../utils/util.js';
   export default {
+    components: {vlBreadcrumb},
     data() {
       return {
         delDialog: false,
@@ -661,9 +667,11 @@
               padding-left: 10px;
               &:last-child {
                 text-align: right;
-                padding-right: 10px;
-                padding-top: 10px;
+                padding-top: 2px;
                 color: #999999;
+                i {
+                  margin-right: 10px;
+                }
               }
             }
             .choose_btn {

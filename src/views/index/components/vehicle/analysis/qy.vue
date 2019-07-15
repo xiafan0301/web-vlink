@@ -1,10 +1,15 @@
 <template>
   <div class="vl_ph_main">
-    <div class="breadcrumb_heaer">
-      <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
-        <el-breadcrumb-item>区域碰撞</el-breadcrumb-item>
-      </el-breadcrumb>
+    <div class="">
+      <!--<el-breadcrumb separator=">">-->
+        <!--<el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>-->
+        <!--<el-breadcrumb-item>区域碰撞</el-breadcrumb-item>-->
+      <!--</el-breadcrumb>-->
+      <div
+              is="vlBreadcrumb"
+              :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
+          {name: '区域碰撞'}]"
+      ></div>
     </div>
 
     <div class="vl_ph_content">
@@ -29,14 +34,16 @@
             <div class="search_main">
               <div class="search_top">
                 <span  @click="addArea"><i class="el-icon-circle-plus-outline"></i>增加区域列表</span>
-                <span  @click="clearAllArea"><i class="el-icon-delete"></i></span>
               </div>
               <!--区域选择-->
               <div class="search_item" v-for="(item, index) in searchData" :key="item.id">
                 <div class="search_line_ts">
                   <div class="title">
-                    <span class="red_star">区域:</span>
-                    <span class="choose_btn el-icon-location-outline" @click="setFitV(index)" :class="{'not-active': !item.area}"></span>
+                    <span class="red_star">抓拍区域:</span>
+                    <span>
+                      <i class="choose_btn el-icon-location-outline" @click="setFitV(index)" :class="{'not-active': !item.area}"></i>
+                      <i class="choose_btn el-icon-delete" @click="clearArea(index)"></i>
+                    </span>
                   </div>
                   <div class="drawBox">
                     <div class="items">
@@ -55,6 +62,7 @@
                     style="width: 212px;"
                     :picker-options="pickerOptions"
                     type="datetime"
+                    value-format="timestamp"
                     placeholder="选择日期时间">
                   </el-date-picker>
                 </div>
@@ -65,6 +73,7 @@
                     style="width: 212px;"
                     :picker-options="pickerOptions1"
                     v-model="item.endTime"
+                    value-format="timestamp"
                     type="datetime"
                     placeholder="选择日期时间">
                   </el-date-picker>
@@ -72,6 +81,7 @@
               </div>
               <!--按钮-->
               <div class="search_btn">
+                <el-button @click="clearAllArea">重置</el-button>
                 <el-button type="primary" @click="tcDiscuss">区域碰撞</el-button>
               </div>
             </div>
@@ -99,11 +109,13 @@
   </div>
 </template>
 <script>
+  import vlBreadcrumb from "@/components/common/breadcrumb.vue";
   import { mapXupuxian } from "@/config/config.js";
   import {getAllDevice} from '../../../api/api.judge.js';
   import {getAllBayonetList} from '../../../api/api.base.js';
   import { objDeepCopy, formatDate} from '../../../../../utils/util.js';
   export default {
+    components: {vlBreadcrumb},
     data() {
       return {
         tipInfo: null,
@@ -142,9 +154,9 @@
             let threeMonths = '';
             let start = '';
             if (parseFloat(m) >= 4) {
-              start = y + '-' + (m - 3) + '-' + d;
+              start = y + '-' + (m - 1) + '-' + d;
             } else {
-              start = (y - 1) + '-' + (m - 3 + 12) + '-' + d;
+              start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
             }
             threeMonths = new Date(start).getTime();
             return time.getTime() > Date.now() || time.getTime() < threeMonths;
@@ -159,9 +171,9 @@
             let threeMonths = '';
             let start = '';
             if (parseFloat(m) >= 4) {
-              start = y + '-' + (m - 3) + '-' + d;
+              start = y + '-' + (m - 1) + '-' + d;
             } else {
-              start = (y - 1) + '-' + (m - 3 + 12) + '-' + d;
+              start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
             }
             threeMonths = new Date(start).getTime();
             return time.getTime() > Date.now() || time.getTime() < threeMonths;
@@ -177,7 +189,6 @@
         clearAll: false,
       };
     },
-
     mounted() {
       this.renderMap();
       // this.setDTime();
@@ -252,9 +263,6 @@
           });
         }
         //return pois
-      },
-      setFitV () {
-        this.map.setFitView([this.searchData.area]);
       },
       setFitV (index) {
         this.map.setFitView([this.searchData[index].area]);
@@ -529,7 +537,7 @@
       setDTime () {
         let date = new Date();
         let curDate = date.getTime();
-        let curS = 3 * 24 * 3600 * 1000;
+        let curS = 1 * 24 * 3600 * 1000;
         let _s = new Date(curDate - curS).getFullYear() + '-' + (new Date(curDate - curS).getMonth() + 1) + '-' + new Date(curDate - curS).getDate();
         let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
         return {startTime: _s,endTime: _e}
@@ -622,6 +630,11 @@
                 this.$message.info('第' + (i + 1) + '个区域没有框选中设备，请重新选择第' + (i + 1) + '个区域');
               }
               return false;
+            } else if (this.searchData[i].endTime > this.searchData[i].startTime + 3 * 3600 * 24 * 1000 || this.searchData[i].endTime < this.searchData[i].startTime ) {
+              if (!document.querySelector('.el-message--info')) {
+                this.$message.info('结束时间必须大于开始时间并且区间小于三天');
+              }
+              return false;
             }
           }
           supQuery.where['dtoList'] = this.searchData.map((x, index) => {
@@ -709,13 +722,6 @@
             width: 50%;
             color: #0C70F8;
             cursor: pointer;
-            &:last-child {
-              text-align: right;
-              color: #CCCCCC;
-              &:hover {
-                color: #0C70F8;
-              }
-            }
           }
         }
         .search_btn {
@@ -749,9 +755,11 @@
               padding-left: 10px;
               &:last-child {
                 text-align: right;
-                padding-right: 10px;
-                padding-top: 10px;
+                padding-top: 2px;
                 color: #999999;
+                i{
+                  margin-right: 10px;
+                }
               }
             }
             .choose_btn {
