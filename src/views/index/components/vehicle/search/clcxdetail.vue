@@ -98,9 +98,7 @@
           <div class="flex1 bkt">
             <img
               :src="snapObj.storagePath"
-              class="spimg bigImg"  
-             
-            >
+              class="spimg bigImg"  >
             
           </div>
           <div class="flex1">

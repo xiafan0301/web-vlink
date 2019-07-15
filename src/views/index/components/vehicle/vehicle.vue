@@ -1,7 +1,10 @@
 <template>
   <div class="vl_vehicle clearfix">
     <div class="vc_content">
-      <router-view></router-view>
+      <keep-alive>
+      <router-view v-if="$route.meta.keepAlive"></router-view>
+      </keep-alive>
+      <router-view v-if="!$route.meta.keepAlive"></router-view>
     </div>
   </div>
 </template>

@@ -926,6 +926,7 @@ export default {
             _d.bayonetName, 'vl_icon ' + sC);
         }
       }
+      this.amap.setFitView();
     },
     // 
     doMark (lnglat, title, sClass) {

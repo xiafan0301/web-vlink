@@ -207,18 +207,17 @@
               </div>
             </div>
             <!-- 分页器 -->
-            <!-- <template v-if="total > 0">
+            <template v-if="total > 0">
               <el-pagination
                 @size-change="handleSizeChange"
                 @current-change="onPageChange"
                 :current-page.sync="pageNum"
-                :page-sizes="[100, 200, 300, 400]"
                 :page-size="pageSize"
-                layout="total, prev, pager, next, jumper"
+                layout="total, prev, pager, next"
                 :total="total"
                 class="cum_pagination"
               ></el-pagination>
-            </template>-->
+            </template>
           </vue-scroll>
         </div>
       </div>
@@ -276,12 +275,12 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.storagePath" alt />
+            <img class="bigImg" :src="sturcDetail.storagePath" alt />
             <span>全景图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img struc_c_d_img_green">
-              <img :src="sturcDetail.subStoragePath" alt />
+              <img class="bigImg" :src="sturcDetail.subStoragePath" alt />
               <span>抓拍图</span>
             </div>
             <div class="struc_c_d_info">
@@ -296,17 +295,18 @@
                 </div>-->
               </h2>
               <!-- 特征展示框 -->
-              <div class="struc_cdi_box">
+              <!-- <div class="struc_cdi_box">
+                <div
+                  class="item"
+                  v-if="sturcDetail.plateReliability"
+                >{{sturcDetail.plateReliability}}</div>
+                <div class="item" v-if="sturcDetail.vehicleBrand">{{ sturcDetail.vehicleBrand}}</div>
+                <div class="item" v-if="sturcDetail.sunvisor">{{ '遮阳板：' + sturcDetail.sunvisor}}</div>
                 <div
                   class="item"
                   v-if="sturcDetail.plateColor"
                 >{{ '车牌颜色：' + sturcDetail.plateColor}}</div>
                 <div class="item" v-if="sturcDetail.plateNo">{{ sturcDetail.plateNo}}</div>
-                <!-- <div
-                  class="item"
-                  v-if="sturcDetail.plateReliability"
-                >{{sturcDetail.plateReliability}}</div>-->
-                <div class="item" v-if="sturcDetail.vehicleBrand">{{ sturcDetail.vehicleBrand}}</div>
                 <div class="item" v-if="sturcDetail.vehicleClass">{{ sturcDetail.vehicleClass}}</div>
                 <div
                   class="item"
@@ -317,31 +317,54 @@
                   class="item"
                   v-if="sturcDetail.vehicleRoof"
                 >{{ '车顶(天窗)：' + sturcDetail.vehicleRoof}}</div>
-                <div class="item" v-if="sturcDetail.sunvisor">{{ '遮阳板：' + sturcDetail.sunvisor}}</div>
-              </div>
-              <!-- 车辆的信息栏 -->
-              <div class="struc_cdi_line">
+              </div> -->
+               <!-- 车辆的信息栏 -->
+              <div class="struc_cdi_line" v-if="sturcDetail.plateNo">
                 <p>
-                  <span class="val">{{sturcDetail.vehicleStyles}}</span>
+                  <span class="key">车牌号码</span>
+                  <span class="val">{{sturcDetail.plateNo}}</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line" v-if="sturcDetail.plateClass || sturcDetail.plateClass === 0">
+                <p>
+                  <span class="key">车牌类型</span>
+                  <span class="val">{{dicFormater(45, sturcDetail.plateClass)}}</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line" v-if="sturcDetail.plateColor">
+                <p>
+                  <span class="key">车牌颜色</span>
+                  <span class="val">{{sturcDetail.plateColor}}</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line" v-if="sturcDetail.vehicleColor">
+                <p>
+                  <span class="key">车辆颜色</span>
+                  <span class="val">{{sturcDetail.vehicleColor}}</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line" v-if="sturcDetail.vehicleStyles">
+                <p>
                   <span class="key">车辆型号</span>
+                  <span class="val">{{sturcDetail.vehicleStyles}}</span>
                 </p>
               </div>
-              <div class="struc_cdi_line">
+              <div class="struc_cdi_line" v-if="sturcDetail.shotTime">
                 <p>
-                  <span class="val">{{sturcDetail.shotTime}}</span>
                   <span class="key">抓拍时间</span>
+                  <span class="val">{{sturcDetail.shotTime}}</span>
                 </p>
               </div>
-              <div class="struc_cdi_line">
+              <div class="struc_cdi_line" v-if="sturcDetail.deviceName">
                 <p>
-                  <span class="val">{{sturcDetail.deviceName}}</span>
                   <span class="key">抓拍设备</span>
+                  <span class="val">{{sturcDetail.deviceName}}</span>
                 </p>
               </div>
-              <div class="struc_cdi_line">
+              <div class="struc_cdi_line" v-if="sturcDetail.address">
                 <p>
-                  <span class="val">{{sturcDetail.address}}</span>
                   <span class="key" title="抓拍地点">抓拍地点</span>
+                  <span class="val">{{sturcDetail.address}}</span>
                 </p>
               </div>
             </div>
@@ -502,9 +525,10 @@ export default {
       },
       /* 检索结果变量 */
       strucInfoList: [],
+      strucInfoListAll: [],
       noDataTips: "请在左侧输入查询条件",
       pageNum: 1,
-      pageSize: 10,
+      pageSize: 20,
       total: 0,
       /* 检索详情弹窗变量 */
       swiperOption: {
@@ -627,8 +651,15 @@ export default {
               this.noDataTips = "暂无搜索结果";
               if (res.data) {
                 if (res.data.length > 0) {
-                  this.strucInfoList = res.data;
-                  this.total = res.data.length;
+                  // this.strucInfoList = res.data;
+                  this.strucInfoListAll = res.data;
+                  this.total = this.strucInfoListAll.length;
+                  this.onPageChange(1);
+                  /* if (this.total > this.pageSize) {
+                    this.strucInfoList = this.strucInfoListAll.slice(0, this.pageSize);
+                  } else {
+                    this.strucInfoList = this.strucInfoListAll;
+                  } */
                 } else {
                   this.strucInfoList = []; // 清空搜索结果
                   this.total = 0;
@@ -651,7 +682,10 @@ export default {
     },
     onPageChange(page) {
       this.pageNum = page;
-      this.getStrucInfo();
+      let ips = (this.pageNum - 1) * this.pageSize;
+      let ipe = ips + this.pageSize;
+      if (ipe > this.total) { ipe = this.total; }
+      this.strucInfoList = this.strucInfoListAll.slice(ips, ipe);
     },
     handleSizeChange(val) {
       this.pageNum = 1;
@@ -1486,15 +1520,12 @@ export default {
                 border-radius: 3px;
                 font-size: 12px;
                 overflow: hidden;
-                padding: 0 0.1rem;
+                padding-left: 0.1rem;
                 margin-right: 0.08rem;
                 .key {
                   color: #999999;
-                  padding-left: 10px;
-                }
-                .val {
-                  padding-right: 9px;
-                  position: relative;
+                  padding-right: 10px;
+                  display: inline-block;
                   &::before {
                     content: "";
                     width: 1px;
@@ -1504,6 +1535,12 @@ export default {
                     top: 1px;
                     background: #f2f2f2;
                   }
+                }
+                .val {
+                  display: inline-block;
+                  background: #fff;
+                  padding: 0 9px;
+                  position: relative;
                 }
               }
             }
