@@ -318,7 +318,7 @@ export default {
       cameraIds: [], //摄像头
       bayonetIds: [], //卡口
       area: [],
-      searchTip: null,      //地图搜索选择数据
+      searchTip: {},      //地图搜索选择数据
     };
   },
   computed: {},
@@ -571,7 +571,7 @@ export default {
       }
     },
     searchBtn() {
-      if(this.searchTip) {
+      if(this.searchTip.poi && this.searchTip.poi.location) {
         this.selectArea(this.searchTip)
       }   
     },
