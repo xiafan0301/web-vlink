@@ -52,7 +52,7 @@
               </el-col>
             </el-row>
           </el-form-item>
-          <el-form-item label="区域：" label-width="60px" prop="input5">
+          <el-form-item label="抓拍区域：" label-width="72px" prop="input5">
             <!-- <el-radio-group v-model="input5" @change="changeTab"> -->
             <el-radio-group v-model="ruleForm.input5" @change="changeTab">
                <el-row :gutter="10">
@@ -678,5 +678,8 @@ export default {
   .el-dialog__headerbtn {
     z-index: 1;
   }
+  .el-form-item__label{
+  padding-right: 0px;
+}
 }
 </style>

@@ -143,8 +143,8 @@
                   <el-table :data="yjcmList.allRecords">
                     <el-table-column label="设备名称" prop="deviceName"></el-table-column>
                     <el-table-column label="过车时间" prop="shotTime" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="时间间隔" prop="timeQuantum" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="参考时间" prop="timeSlot" show-overflow-tooltip></el-table-column>
+                    <el-table-column label="时间间隔" prop="timeSlot" show-overflow-tooltip></el-table-column>
+                    <el-table-column label="参考时间" prop="timeQuantum" show-overflow-tooltip></el-table-column>
                   </el-table>
                 </div>
               </div>
@@ -256,7 +256,7 @@
                         </div>
                         <p class="tpc_list_fst com_ellipsis"><i class="vl_icon vl_icon_sm_sj"></i>&nbsp;&nbsp;{{ item.vehicleDto.shotTime }}</p>
                         <p class="com_ellipsis"><i class="vl_icon vl_icon_sm_sxt"></i>&nbsp;&nbsp;{{ item.vehicleDto.deviceName }}</p>
-                        <p class="com_ellipsis"><i class="vl_icon vl_icon_sm_sxt"></i>&nbsp;&nbsp;{{ item.fakeReason }}</p>
+                        <p class="com_ellipsis" style="color: #FA453A;"><i class="vl_icon tpc_fake_res"></i>&nbsp;&nbsp;{{ item.fakeReason }}</p>
                       </div>
                     </li>
                   </ul>
@@ -297,11 +297,18 @@
             <div class="vc_rep_cl" id="report_showtype_9">
               <div>
                 <h2>区域碰撞</h2>
-                <div>
+                <div v-if="clInfo && !searchLoading">
                   请前往
-                   <router-link :to="{name: 'vehicle_search_qy'}">
+                   <span @click="goToQypz" style="color: #0C70F8; cursor: pointer;">
                     区域碰撞
-                  </router-link>
+                  </span>
+                  进行操作查看
+                </div>
+                <div v-else>
+                  请前往
+                  <span>
+                    区域碰撞
+                  </span>
                   进行操作查看
                 </div>
               </div>
@@ -314,7 +321,7 @@
 </template>
 <script>
 import vehicleBreadcrumb from '../breadcrumb.vue';
-import {formatDate} from '@/utils/util.js';
+import {getDate, formatDate} from '@/utils/util.js';
 import {mapXupuxian} from '@/config/config.js';
 import {getVehicleInvestigationReport, JfoGETSurveillanceObject} from '@/views/index/api/api.judge.js';
 export default {
@@ -359,8 +366,26 @@ export default {
   mounted () {
     this.initClgjMap();
     this.initYjcmMap();
+    if (this.$route.query.pn && this.$route.query.st && this.$route.query.et) {
+      this.searchForm.plateNo = this.$route.query.pn;
+      this.searchForm.time = [getDate(this.$route.query.st), getDate(this.$route.query.et)];
+      this.searchSubmit();
+    } 
   },
   methods: {
+    goToQypz () {
+        // vehicle_search_qy
+      this.$store.commit('setBreadcrumbData', {
+        breadcrumbData: [
+          {name: '车辆侦查', routerName: 'vehicle'},
+          {name: '车辆侦察报告', routerName: 'vehicle_report', query: {pn: this.searchForm.plateNo, st: formatDate(this.searchForm.time[0], 'yyyy-MM-dd'), st: formatDate(this.searchForm.time[1], 'yyyy-MM-dd')}},
+          {name: '区域碰撞'}
+        ]
+      });
+      this.$router.push({name: 'vehicle_search_qy', query: {
+        breadcrumb: 2
+      }});
+    },
     // 湘AN8888 2019-07-01 00:00:00 2019-07-04 00:00:00
     searchSubmit () {
       this.searchLoading = true;
@@ -819,6 +844,7 @@ export default {
     border-color: #a0cfff;
   }
 }
+.tpc_fake_res { width: 14px; height: 15px; background-position: -863px -530px; }
 </style>
 <style lang="scss">
 .cl_report_gj {

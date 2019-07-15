@@ -553,7 +553,7 @@ export default {
   }
   > .relay_task_m {
     height: 100%;
-    padding: 40px 10px 70px 10px;
+    padding: 50px 10px 70px 10px;
     > div {
       height: 100%;
       padding: 10px;

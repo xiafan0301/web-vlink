@@ -134,11 +134,11 @@
                   <li v-for="(item, index) in picList" :key="'p_l_' + index">
                     <div>
                       <p>
-                        <img :title="item.plateNo" :alt="item.plateNo" :src="item.imagePath">
+                        <img class="bigImg" :title="item.plateNo" :alt="item.plateNo" :src="item.storagePath">
                       </p>
-                      <div class="gcck_rh_ft"><i class="vl_icon gcck_sxt"></i>{{item.subStoragePath}}</div>
-                      <div><i class="vl_icon gcck_cl"></i>{{item.plateNo}}</div>
-                      <div><i class="vl_icon gcck_sj"></i>{{item.snapTime}}</div>
+                      <div class="gcck_rh_ft"><i class="vl_icon vl_icon_sm_sxt"></i>{{item.subStoragePath}}</div>
+                      <div><i class="vl_icon vl_icon_sm_cl"></i>{{item.plateNo}}</div>
+                      <div><i class="vl_icon vl_icon_sm_sj"></i>{{item.snapTime}}</div>
                     </div>
                   </li>
                 </ul>
