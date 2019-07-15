@@ -2,7 +2,7 @@
   <div class="ljd point">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">人像</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像侦查</el-breadcrumb-item>
         <el-breadcrumb-item>落脚点分析</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -134,8 +134,8 @@
           <vue-scroll>
           <el-collapse v-model="activeNames" @change="handleChange">
             <el-collapse-item  v-for="(item,index) in evData" :key="index" :title="item.groupName+'（'+item.totalNum+'次）'" :name="index">
-              <div class="itembox" v-for="(v,d) in item.personDetailList" @click="onOpenDetail(v , item)">
-                <div class="imgInfo">
+              <div class="itembox" v-for="(v,d) in item.personDetailList">
+                <div class="imgInfo"  @click.stop="onOpenDetail(v , item)">
                    <img :src="v.subStoragePath" class="img">
                    <div>
                      <p class="timedata"><i class="el-icon-time"></i>{{v.shotTime}}</p>
@@ -144,7 +144,7 @@
                       <b v-if="v.semblance">{{(v.semblance*1).toFixed(2)}}</b>%
                     </span>
                    </div>
-                  <!-- <i class="del el-icon-delete" @click="delItem(d,index)"></i> -->
+                  <i class="del el-icon-delete" @click.stop="delItems(d,index)"></i>
                 </div>
               </div>
               
@@ -433,6 +433,12 @@ export default {
           this.selectBayonet.push(element.uid);
         });
       }
+      if(p.length==0 && v.length==0){
+        if(!document.querySelector('.el-message--info')){
+           this.$message.info("选择的区域没有设备，请重新选择区域");
+        }
+        return
+      }
       this.selectValue =
         "已选设备" +
         (this.selectDevice.length + this.selectBayonet.length) +
@@ -520,6 +526,18 @@ export default {
         }
       };
     },
+    //分析结果删除
+    delItems(d,index){ 
+      //this.chooseData.
+      let arr=this.evData[index].personDetailList
+      arr.splice(d, 1)
+      this.evData[index].totalNum -=1;
+      if(this.evData[index].totalNum==0){
+        this.evData.splice(index,1)
+      }
+      this.amap.clearMap();
+      this.drawMarkers(this.evData);
+    },
     //人工筛选删除
     delItem(d,index){ 
       //this.chooseData.
@@ -529,7 +547,6 @@ export default {
       if(this.chooseData[index].totalNum==0){
         this.chooseData.splice(index,1)
       }
-      
     },
     chooseOk(){
       this.reselt = true;
@@ -833,7 +850,7 @@ export default {
   animation: fadeInLeft 0.4s ease-out 0.3s both;
   transition: marginLeft 0.3s ease-in;
   .plane {
-    padding: 10px;
+    padding: 20px;
     position: relative;
     height: 100%;
   }
@@ -982,7 +999,7 @@ export default {
   }
     .itembox{
       
-        width: 33%;
+        width: 32.3%;
         margin-right: 1%;
         border: solid 1px rgba(211,211,211,1);
         padding: 10px 5px; 
@@ -1010,6 +1027,15 @@ export default {
   }
   }
 }
+.del{
+            position: absolute;
+            bottom: -10px;
+            right: -5px;
+            background: #999;
+            color: #ffffff;
+            padding: 4px;
+            cursor: pointer;
+          }
 .limitBox{
   height: 96%;
   .el-collapse-item{
@@ -1026,6 +1052,7 @@ export default {
   height: 100%;
 }
 .imgInfo{
+  position: relative;
   .timedata{
     padding: 2px 6px;
     display: inline-block;
@@ -1071,6 +1098,8 @@ export default {
 .choose{
   .el-collapse-item__content{
     display: flex;
+        flex-direction: row;
+    flex-wrap: wrap;
   }
 }
 .limitBox{
@@ -1135,6 +1164,9 @@ export default {
   }
 }
 .ljd {
+  .el-date-editor .el-range-input{
+    font-size: 13px;
+  }
   .insetIput.el-input--prefix .el-input__inner {
     padding-left: 90px;
   }

@@ -368,7 +368,7 @@
           <ul class="upload_box">
             <li>
               <p class="header">1、请下载导入模板，填写车辆信息。</p>
-              <div class="main_content download_box">
+              <div class="main_content download_box" @click="downloadModel">
                 <i class="vl_icon_manage_17 vl_icon"></i>
                 <span>下载模板</span>
               </div>
@@ -858,19 +858,17 @@ export default {
       this.$refs[form].validate(valid => {
         if (valid) {
           if (!this.dialogImageUrl) {
-            this.$message({
-              type: 'error',
-              message: '请先上传车辆照片',
-              customClass: 'request_tip'
-            })
+            if (!document.querySelector('.el-message--info')) {
+              this.$message.info('请先上传车辆照片');
+            }
+           
             return;
           }
           if (this.carForm.groupList.length === 0) {
-            this.$message({
-              type: 'error',
-              message: '请先选择所属组',
-              customClass: 'request_tip'
-            })
+            if (!document.querySelector('.el-message--info')) {
+              this.$message.info('请先选择所属组');
+            }
+           
             return;
           }
           this.carForm.vehicleImagePath = this.dialogImageUrl;
@@ -905,19 +903,17 @@ export default {
       this.$refs[form].validate(valid => {
         if (valid) {
           if (!this.dialogImageUrl) {
-            this.$message({
-              type: 'error',
-              message: '请先上传车辆照片',
-              customClass: 'request_tip'
-            })
+            if (!document.querySelector('.el-message--info')) {
+              this.$message.info('请先上传车辆照片');
+            }
+           
             return;
           }
           if (this.carForm.groupList.length === 0) {
-            this.$message({
-              type: 'error',
-              message: '请先选择所属组',
-              customClass: 'request_tip'
-            })
+            if (!document.querySelector('.el-message--info')) {
+              this.$message.info('请先选择所属组');
+            }
+           
             return;
           }
           this.carForm.vehicleImagePath = this.dialogImageUrl;
@@ -1000,10 +996,14 @@ export default {
       const isLt4M = file.size / 1024 / 1024 < 4;
 
       if (!isJPG) {
-        this.$message.error('上传图片只能是 jpeg、jpg、png 格式!');
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('上传图片只能是 jpeg、jpg、png 格式!');
+        }
       }
       if (!isLt4M) {
-        this.$message.error('上传图片大小不能超过 4MB!');
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('上传图片大小不能超过 4MB!');
+        }
       }
       return isJPG && isLt4M;
     },
@@ -1174,7 +1174,9 @@ export default {
           this.$refs.vehicleImport.submit();
         })
       } else {
-        this.$message.warning('请先选择要导入的文件');
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('请先选择要导入的文件');
+        }
       }
     },
     handleChange (file, fileList) {
@@ -1191,26 +1193,41 @@ export default {
         this.failNumber = res.data.result.failSize;
         this.showFailFile = false;
         this.importFinishDialog = true;
+        this.errorFile = null;
 
         this.getGroupList();
-      } else {
 
+      } else if(res.data.code === 1) {
+        this.importDialog = false;
+        this.successNumber = res.data.result.successSize;
+        this.failNumber = res.data.result.failSize;
+        this.showFailFile = true;
+        this.importFinishDialog = true;
+        // this.errorFile = res.data.result.errorFileUrl;
+        if (res.data.result.errorFileUrl) {
+          this.downloadErrorFile(res.data.result.errorFileUrl);
+        }
       }
     },
     // 下载错误文件
-    downloadErrorFile () {
+    downloadErrorFile (file) {
       // if (this.errorFile) {
-      //   autoDownloadUrl(this.errorFile);
-      //   if (this.delErrorFile) {
-      //     // 下载成功后删除动态模板
-      //     // this.timerError = setTimeout(() => {
-      //     //   deleteDownLoadFile(this.delErrorFile)
-      //     //   .then(res => {
-      //     //     console.log('res', res)
-      //     //   });
-      //     // }, 30000)
-      //   }
+        autoDownloadUrl(file);
+        // if (this.delErrorFile) {
+          // 下载成功后删除动态模板
+          // this.timerError = setTimeout(() => {
+          //   deleteDownLoadFile(this.delErrorFile)
+          //   .then(res => {
+          //     console.log('res', res)
+          //   });
+          // }, 30000)
+        // }
       // }
+    },
+    // 下载模板
+    downloadModel () {
+      const file = 'http://file.aorise.org/vlink/file/8dc4e25f-5f7b-4021-9a19-a58f8708b4fd.xls';
+      autoDownloadUrl(file)
     }
   }
 }

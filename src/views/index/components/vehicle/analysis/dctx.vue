@@ -3,9 +3,8 @@
     <div class="vc_gcck_bd">
       <div is="vlBreadcrumb" :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle'}, {name: '多车同行'}]"></div>
     </div>
-    <!-- <Breadcrumb :oData="[{name: '多车同行'}]"></Breadcrumb> -->
     <div class="the-bottom">
-      <div class="the-left-search">
+      <div class="the-left-search" :class="['left',{hide:hideleft}]">
         <div class="input-box">
           <vue-scroll>
             <div class="input-box-line">
@@ -53,140 +52,99 @@
           <el-button class="reset_btn" @click="onReset" :loading="resetLoading">重置</el-button>
           <el-button class="select_btn" type="primary" @click="onSearch" :loading="searchLoading">查询</el-button>
         </div>
+        <div class="insetLeft" @click="hideLeft"></div>
       </div>
-      <div class="the-right-result">
-        <template v-if="dataList.length > 0">
-          <div class="the-result-box-dctx">
+      <div class="the-right-result" :class="[{hide:!hideleft}]">
+        <div id="mapContainer"></div>
+        <ul class="top_ul">
+          <li v-for="(item, index) in dataList" :key="index">
+            <el-radio v-model="radioChecked" @change="handleRadio(index, item.vehicleNumber)" :label="index">车辆{{index + 1}}</el-radio>
+            <span class="line"></span>
+          </li>
+          <!-- <li v-for="(item, index) in dataList" :key="index">
+            <el-radio v-model="radioChecked" @change="handleRadio(index, item.vehicleNumber)" :label="index">车辆{{index + 1}}</el-radio>
+            <span class="line"></span>
+          </li> -->
+        </ul>
+
+        <div class="right_list" v-show="isShowRightContent">
+          <div class="top_content">
+            <p>
+              <i class="vl_icon vl_icon_v11"></i>
+              <span>{{recordDetail.deviceName}}</span>
+            </p>
+            <p>
+              <i class="vl_icon vl_icon_v11"></i>
+              <span>{{recordDetail.shotAddress}}</span>
+            </p>
+            <span class="close_btn el-icon-close" @click="closeRightBox"></span>
+            <div class="divide"></div>
+          </div>
+          <ul class="result_ul" v-show="recordDetail.recordList.length > 0">
             <vue-scroll>
-              <div class="list-box">
-                <div class="list-item" v-for="item in dataList" :key="item.id" @click="onOpenDetail(item)">
-                  <img :src="item.shotRecord.storagePath" alt="">
-                  <p class="time"><i></i>{{item.shotRecord.shotTime}}</p>
-                  <p class="address"><i></i>抓拍设备:{{item.shotRecord.deviceName}}</p>
+              <li v-for="(item, index) in recordDetail.recordList" :key="index">
+                <p>{{item.plateNo}}</p>
+                <div class="video_box">
+                  <img :src="item.storagePath" alt="">
+                  <div class="video_time">
+                    <span>{{item.shotTime}}</span>
+                    <i class="vl_icon vl_icon_control_09" @click="openVideo(item)"></i>
+                  </div>
                 </div>
-                <template v-if="pagination.total > 8">
-                  <el-pagination
-                    class="cum_pagination th-center-pagination"
-                    @current-change="onPageChange"
-                    :current-page.sync="pagination.pageNum"
-                    :page-size="pagination.pageSize"
-                    layout="prev, pager, next"
-                    :total="pagination.total">
-                  </el-pagination>
-                </template>
-              </div>
+              </li>
             </vue-scroll>
-          </div>
-        </template>
-        <template v-else>
-          <div class="not_content">
-            <img src="../../../../../assets/img/not-content.png" alt="">
-            <p style="color: #666666; margin-top: 30px;">抱歉，没有相关的结果!</p>
-          </div>
-        </template>
+          </ul>
+        </div>
       </div>
     </div>
-    <el-dialog
-        :visible.sync="strucDetailDialog"
-        class="struc_detail_dialog"
-        :close-on-click-modal="false"
-        top="4vh"
-        :show-close="false">
-      <div class="struc_tab">
-        <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">抓拍详情</span>
-        <span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>
-        <span :class="{'active': strucCurTab === 3}" @click="strucCurTab = 3">视频回放</span>
-        <i class="el-icon-close" @click="onCloseDetail"></i>
-      </div>
-      <div class="struc_main">
-        <div v-show="strucCurTab === 1" class="struc_c_detail">
-          <div class="struc_c_d_quanjing">
-            <div class="struc_c_d_qii struc_c_d_img" style="width: 600px">
-              <img :src="sturcDetail.storagePath" alt="">
-              <span>全景图</span>
-            </div>
-            <div class="struc_c_d_info" style="padding-left: 14px;">
-              <div class="th-dctx-tab">
-                <p class="line">
-                  <span>设备名称：</span>
-                  <span>{{ sturcDetail.deviceName }}</span>
-                </p>
-                <p class="line">
-                  <span>同行车辆（{{ vehicleList && vehicleList.length }}）</span>
-                </p>
-              </div>
-              <div class="struc_cdi_box">
-                <vue-scroll>
-                  <div v-for="(item, index) in vehicleList" :key="index + 'tjj'" class="vehicle-info-box">
-                    <div class="left">车辆{{ index + 1 }}</div>
-                    <div class="right">
-                      <p>{{ item.vehicleNumber }}</p>
-                      <p>
-                        <span>{{ item.vehicleBrand }}</span>
-                        <span>{{ item.vehicleColor }}</span>
-                        <span>{{ item.vehicleModel }}</span>
-                        <span>{{ item.vehicleStyles }}</span>
-                        <span>{{ item.peerTimes }}</span>
-                        <span>{{ item.plateColor }}</span>
-                        <span>{{ item.registrationInfo }}</span>
-                        <b>特征</b>
-                      </p>
-                    </div>
-                  </div>
-                </vue-scroll>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div v-show="strucCurTab === 2" class="struc_c_address">
-          <div id="container"></div>
-        </div>
-        <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
-          <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.storagePath" alt="">
-            <span>抓拍图</span>
-          </div>
-          <div class="struc_c_d_box">
-            <span class="th-video-text">视频回放</span>
-            <video id="capVideo" :src="sturcDetail.videoPath"></video>
-              <div class="play_btn" @click="videoTap" v-show="!playing">
-                <i class="vl_icon vl_icon_judge_01" v-if="playing"></i>
-                <i class="vl_icon vl_icon_control_09" v-else></i>
-              </div>
-          </div>
-          <a class="download_btn" target="_blank" download="视频" :href="sturcDetail.videoPath">下载视频</a>
+    <!-- 视频全屏放大 -->
+    <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
+      <video id="controlVideo" :src="videoDetail.videoPath" ></video>
+      <div @click="closeVideo" class="vl_icon vl_icon_event_23 close_icon"></div>
+      <div class="control_bottom">
+        <div>{{videoDetail.deviceName}}</div>
+        <div>
+          <span @click="playLargeVideo(false)" class="vl_icon vl_icon_judge_01" v-show="isPlaying"></span>
+          <span @click="playLargeVideo(true)" class="vl_icon vl_icon_control_09" v-show="!isPlaying"></span>
+          <span @click="playerCut" class="vl_icon vl_icon_control_07"></span>
+          <span><a download="视频" :href="videoDetail.videoPath" target="_blank" class="vl_icon vl_icon_event_26"></a></span>
         </div>
       </div>
-      <div class="struc-list">
-        <swiper :options="swiperOption" ref="mySwiper"> 
-          <!-- slides -->
-          <swiper-slide v-for="(item, index) in dataList" :key="index + 'isgm'">
-            <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item.shotRecord, index)">
-              <img style="display: block; width: 100%; height: .88rem;" :src="item.shotRecord.storagePath" alt="">
-            </div>
-          </swiper-slide>
-          <div class="swiper-button-prev" slot="button-prev"></div>
-          <div class="swiper-button-next" slot="button-next"></div>
-        </swiper>
+    </div>
+    <!-- 截屏 dialog -->
+    <el-dialog title="截屏" :visible.sync="cutDialogVisible" :center="false" :append-to-body="true" width="1000px">
+      <div style="text-align: center; padding-top: 30px;">
+        <canvas :id="flvplayerId + '_cut_canvas'"></canvas>
+      </div>
+      <div slot="footer" class="dialog-footer" style="padding: 0 0 20px 0;">
+        <el-button  @click="cutDialogVisible = false">取 消</el-button>&nbsp;&nbsp;&nbsp;&nbsp;
+        <el-button  type="priamry" @click="playerCutSave">保 存</el-button>
+        <a :id="flvplayerId + '_cut_a'" style="display: none;">保存</a>
       </div>
     </el-dialog>
   </div>
 </template>
 <script>
+import { testData } from './ws/testData.js';
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
-// import flvplayer from '@/components/common/flvplayer.vue';
-import { formatDate } from "@/utils/util.js";
+import { formatDate, random14 } from "@/utils/util.js";
 import { checkPlateNumber } from '@/utils/validator.js';
 import { getMultiVehicleList } from '@/views/index/api/api.judge.js';
 const overStartTime = new Date() - 24 * 60 * 60 *1000;
 const reg = /^(([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z](([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z][A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳使领]))$/;
 export default {
   components: {
-    // flvplayer,
     vlBreadcrumb
   },
   data () {
     return {
+      cutDialogVisible: false, // 截屏弹出框
+      showLarge: false, // 全屏显示
+      videoDetail: {}, // 播放视频的信息
+      isPlaying: false, // 是否播放视频
+      flvplayerId: 'flv_' + random14(),
+      isShowRightContent: false, // 是否显示右侧抓拍详情
+      radioChecked: -1,
       pickerStart: {
         disabledDate (time) {
           return time.getTime() > (new Date().getTime());
@@ -226,21 +184,19 @@ export default {
       },
       resetLoading: false,
       searchLoading: false,
-      swiperOption: {
-        slidesPerView: 10,
-        spaceBetween: 18,
-        slidesPerGroup: 10,
-        loop: false,
-        slideToClickedSlide: true,
-        loopFillGroupWithBlank: true,
-        navigation: {
-          nextEl: '.swiper-button-next',
-          prevEl: '.swiper-button-prev',
-        },
-      },
       dataList: [], // 查询结果列表数据
       hasError: false, // 是否符合查询条件
       playing: false, // 视频播放是否
+      polylineList: [], // 折线数组
+      polylineObj: {},
+      reselt: false,
+      hideleft: false,
+      recordDetail: { // 右侧抓拍的详情
+        deviceName: null,
+        shotAddress: null,
+        recordList : []
+      },
+      currentSelectPolyline: null
     }
   },
   watch: {
@@ -251,9 +207,16 @@ export default {
       _this.filterObj.endDate = formatDate(endTime);
     }
   },
+  mounted () {
+    this.initMap();
+    this.onSearch();
+  },
   methods: {
+    hideLeft() {
+      this.hideleft = !this.hideleft;
+    },
     // 播放视频
-      videoTap() {
+    videoTap() {
       // 播放视频
       let vDom = document.getElementById("capVideo");
       if (this.playing) {
@@ -271,47 +234,138 @@ export default {
      * 弹框地图初始化
      */
     initMap (obj) {
-      // this.map.setZoomAndCenter(iZoom, aCenter);
-      let map = new window.AMap.Map('container', {
-        zoom: 14, // 级别
+      let map = new window.AMap.Map('mapContainer', {
+        zoom: 18, // 级别
         center: [110.595111, 27.90289], // 中心点坐标
       });
       map.setMapStyle('amap://styles/whitesmoke');
       this.map = map;
-      this.drawPoint(obj)
+
+      // if (this.dataList.length > 0) {
+      //   this.dataList.map((item, index) => {
+      //     this.drawPoint(item.arrList, item.vehicleNumber, testData[0].vehicleNumber);
+      //   })
+      // }
     },
     /**
      * 地图描点
      */
-    drawPoint (data) {
-      console.log(data)
-      if (this.markerPoint) {
-        this.map.remove(this.markerPoint)
+    drawPoint (data, number, recordObj) {
+      if (data && data.length > 0) {
+        let _this = this, hoverWindow = null, path= [];
+
+        _this.map.setCenter([data[0].shotPlaceLongitude, data[0].shotPlaceLatitude])
+
+        for (let i = 0; i < data.length; i++) {
+
+          let obj = data[i];
+
+          if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
+            let offSet = [-20.5, -55], deviceType;
+
+            let longitude = null, latitude = null, detailDeviceName, detailShotAddress;
+
+           if (obj.isAllPassed) { // 全部车辆经过该设备
+             if (obj.bayonetId) { // 设备为卡口
+               deviceType = 1;
+             } else {
+               deviceType = 7;
+             }
+           } else {
+             if (obj.bayonetId) { // 设备为卡口
+               deviceType = 8;
+             } else {
+               deviceType = 0;
+             }
+           }
+
+            if (obj.bayonetId) { // 设备为卡口
+              longitude = obj.bayonetLongitude;
+              latitude = obj.bayonetLatitude;
+
+              detailDeviceName = obj.bayonetName;
+              detailShotAddress = obj.bayonetAddress;
+
+            } else { // 设备为摄像头
+              longitude = obj.shotPlaceLongitude;
+              latitude = obj.shotPlaceLatitude;
+
+              detailDeviceName = obj.deviceName;
+              detailShotAddress = obj.address;
+
+            }
+            let idName = obj.deviceID + '_' + number;
+
+            let marker = new window.AMap.Marker({
+              map: _this.map,
+              position: [longitude, latitude],
+              offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
+              draggable: false, // 是否可拖动
+              extData: '', // 用户自定义属性
+              // 自定义点标记覆盖物内容
+              content: '<div id="vehicle_mark'+ idName +'" class="icon_box"><span class="vl_icon mark_span vl_icon_map_mark'+ deviceType +'"></span><span class="vl_icon mark_hover_span vl_icon_map_hover_mark'+ deviceType +'"></span></div>'
+            });
+
+             
+            marker.on('click', function () {
+              $($('#vehicle_mark' + idName).children()[0]).css('display', 'none');
+              $($('#vehicle_mark' + idName).children()[1]).css('display', 'block');
+              // $('vl_icon_map_hover_mark' + deviceType).css('display', 'block');
+              
+
+              _this.recordDetail.recordList = [];
+              _this.isShowRightContent = true;
+              _this.recordDetail.deviceName = detailDeviceName;
+              _this.recordDetail.shotAddress = detailShotAddress;
+
+              if (recordObj) {
+                for (let i in recordObj) {
+                  if (obj.deviceID === i) {
+                    recordObj[i].map(item => {
+                      _this.recordDetail.recordList.push(item);
+                    })
+                  }
+                }
+              }
+            })
+
+            path.push(new window.AMap.LngLat(longitude, latitude));
+
+            _this.map.setZoom(13);
+            _this.map.setCenter([longitude, latitude]);
+          }
+          // 绘制线条
+          let polyline = new window.AMap.Polyline({
+            path: path,
+            showDir: true,
+            strokeWeight: 8,
+            strokeColor: '#D3D3D3',
+            strokeStyle: 'solid'
+          });
+
+            polyline.on('mouseover', function () {
+              polyline.setOptions({
+                strokeWeight: 10,
+                strokeColor: '#41D459',
+              })
+            });
+          
+            polyline.on('mouseout', function () {
+              if (_this.currentSelectPolyline !== number) {
+                polyline.setOptions({
+                  strokeWeight: 8,
+                  strokeColor: '#D3D3D3',
+                })
+              }
+            });
+
+
+          _this.polylineObj[number] = polyline;
+
+          _this.map.add(polyline);
+
+        }
       }
-      if (this.newMarker) {
-        this.map.remove(this.newMarker);
-        this.newMarker = null;
-      }
-      // let _infoWindow = null;
-      let _content = '<div class="vl_icon vl_icon_judge_02"></div>';
-      this.markerPoint = new window.AMap.Marker({ // 添加自定义点标记
-        map: this.map,
-        position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-        offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
-        draggable: false, // 是否可拖动
-        // 自定义点标记覆盖物内容
-        content: _content
-      });
-      this.map.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
-      let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`
-      this.newMarker = new window.AMap.InfoWindow({
-        map: this.map,
-        isCustom: true,
-        closeWhenClickMap: false,
-        position: [data.shotPlaceLongitude, data.shotPlaceLatitude],
-        offset: new window.AMap.Pixel(0, -70),
-        content: sConent
-      });
     },
     // 结束时间change
     handleEndTime (time) {
@@ -340,7 +394,9 @@ export default {
       if (number) {
         if (!reg.test(number)) {
           this.hasError = true;
-          this.$message.warning('请输入正确的车牌号码');
+          if (!document.querySelector('.el-message--info')) {
+            this.$message.info('请输入正确的车牌号码');
+          }
         } else {
           this.hasError = false;
         }
@@ -370,84 +426,166 @@ export default {
      */
     onSearch () {
       let arr = [];
-      this.filterObj.vehicleNumberList.forEach(item => {
-        if (!reg.test(item.vehicleNumber)) {
-          this.hasError = true;
-        }
-        arr.push(item.vehicleNumber)
-      });
+      // this.filterObj.vehicleNumberList.forEach(item => {
+      //   if (!reg.test(item.vehicleNumber)) {
+      //     this.hasError = true;
+      //   }
+      //   arr.push(item.vehicleNumber)
+      // });
 
-      if (this.hasError) {
-        this.$message.warning('请输入正确的车牌号码');
-        return;
-      }
+      // if (this.hasError) {
+      //   if (!document.querySelector('.el-message--info')) {
+      //     this.$message.info('请输入正确的车牌号码');
+      //   }
+      //   return;
+      // }
 
-      this.filterObj.vehicleNumbers = arr.join('-');
+      // this.filterObj.vehicleNumbers = arr.join(',');
 
-      this.searchLoading = true;
+      // this.searchLoading = true;
 
       const params = {
-        startDate: formatDate(this.filterObj.startDate),
-        endDate: formatDate(this.filterObj.endDate),
-        vehicleNumbers: this.filterObj.vehicleNumbers,
-        order:"asc",
-        pageNum: this.pagination.pageNum,
-        pageSize: this.pagination.pageSize
+        // startDate: formatDate(this.filterObj.startDate),
+        // endDate: formatDate(this.filterObj.endDate),
+        // vehicleNumbers: this.filterObj.vehicleNumbers,
+        startTime: '2019-07-13 00:00:00',
+        endTime: '2019-07-13 13:59:59',
+        vehicleNumbers: "湘LYV366,湘NF8988,湘NJM910,湘NJY056",
+        // order:"asc",
+        // pageNum: this.pagination.pageNum,
+        // pageSize: this.pagination.pageSize
       };
 
       getMultiVehicleList(params)
         .then(res => {
           if (res && res.data) {
             this.pagination.total = res.data.total;
-            this.dataList = res.data.list;
             this.searchLoading = false;
+            this.dataList = res.data;
+
+            this.dataList.map(item => {
+              this.drawPoint(item.shotRecords, item.vehicleNumber, item.deviceShotRecords);
+            })
           } else {
             this.searchLoading = false;
           }
         })
         .catch(() => {this.searchLoading = false;})
     },
-    /**
-     * 打开抓拍弹框
-     */
-    onOpenDetail (obj) {
-      if (obj.peerVehicleInfoDtoList && obj.peerVehicleInfoDtoList.length > 0) {
-        this.vehicleList = obj.peerVehicleInfoDtoList;
+    // 车辆单选框change
+    handleRadio (index, number) {
+      this.radioChecked = index;
+      for (let i in this.polylineObj) {
+        if (number === i ) {
+          this.currentSelectPolyline = i; // 当前选中的车辆
+          this.polylineObj[i].setOptions({
+            strokeWeight: 10,
+            strokeColor: '#41D459',
+          })
+        } else {
+          this.polylineObj[i].setOptions({
+            strokeWeight: 8,
+            strokeColor: '#D3D3D3',
+          })
+        }
       }
-      this.sturcDetail = obj.shotRecord;
-
+    },
+    // 关闭右侧弹出框
+    closeRightBox () {
+      this.isShowRightContent = false;
+      this.recordDetail = {
+        deviceName: null,
+        shotAddress: null,
+        recordList: []
+      };
+    },
+    // 点击视频播放按钮全屏播放视频
+    openVideo (obj) {
+      this.videoDetail = obj;
+      this.showLarge = true;
+    },
+    // 关闭视频
+    closeVideo () {
+      this.showLarge = false;
+      document.getElementById('controlVideo').pause();
+    },
+    // 播放视频
+    playLargeVideo (val) {
+       if (val) {
+        this.isPlaying = true;
+        document.getElementById('controlVideo').play();
+        this.handleVideoEnd();
+      } else {
+        this.isPlaying = false;
+        document.getElementById('controlVideo').pause();
+      }
+    },
+    // 监听视频是否已经播放结束
+    handleVideoEnd () {
+      let _this = this;
+      const obj = document.getElementById('controlVideo');
+      if (obj) {
+        obj.addEventListener('ended', () => { // 当视频播放结束后触发
+          _this.isPlaying = false;
+        });
+      }
+    },
+    // 截屏
+    playerCut () {
+      this.cutDialogVisible = true;
       this.$nextTick(() => {
-        this.initMap(obj.shotRecord);
-      })
-      this.strucDetailDialog = true;
-
+        let $video = $('#controlVideo');
+        let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
+        // console.log($video.width(), $video.height());
+        if ($canvas && $canvas.length > 0) {
+          // let w = 920, h = 540;
+          let w = $video.width(), h = $video.height();
+          if (w > 920) {
+            h = Math.floor(920 / w * h);
+            w = 920;
+          }
+          $canvas.attr({
+            width: w,
+            height: h,
+          });
+          // $video[0].crossOrigin = 'anonymous';
+          // video canvas 必须为原生对象
+          let ctx = $canvas[0].getContext('2d');
+          this.cutTime = new Date().getTime();
+          ctx.drawImage($video[0], 0, 0, w, h);
+        }
+      });
     },
-   
-    /**
-     * 关闭抓拍弹框
-     */
-    onCloseDetail () {
-      this.strucCurTab = 1;
-      this.strucDetailDialog = false;
-    },
-    /**
-     * 图片切换
-     */
-    imgListTap (obj, i) {
-      this.sturcDetail = {};
-      this.curImgIndex = i;
-      this.sturcDetail = obj;
-      this.$nextTick(() => {
-        this.initMap(obj);
-      })
-    },
-    /**
-     * 分页赋值
-     */
-    onPageChange (page) {
-      this.pagination.pageNum = page;
-      this.onSearch();
-    },
+    // 截屏保存
+    playerCutSave () {
+      let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
+      if ($canvas && $canvas.length > 0) {
+        console.log('$canvas[0]', $canvas[0])
+        let img = $canvas[0].toDataURL('image/png');
+        // img.crossOrigin  = '';
+        let filename = 'image_' + this.cutTime + '.png';
+        if('msSaveOrOpenBlob' in navigator){
+          // 兼容EDGE
+          let arr = img.split(',');
+          let mime = arr[0].match(/:(.*?);/)[1];
+          let bstr = atob(arr[1]);
+          let n = bstr.length;
+          let u8arr = new Uint8Array(n);
+          while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+          }
+          let blob = new Blob([u8arr], {type:mime});
+          window.navigator.msSaveOrOpenBlob(blob, filename);
+          return;
+        }
+        img.replace('image/png', 'image/octet-stream');
+        let saveLink = $('#' + this.flvplayerId + '_cut_a')[0];
+        saveLink.href = img;
+        saveLink.download = filename;
+        saveLink.click();
+        // console.log(base64);
+      }
+    }
   }
 }
 </script>
@@ -502,463 +640,317 @@ export default {
       }
     }
     .the-right-result {
-      width: calc(100% - 285px);  
       height: 100%;
-      margin-left: 13px;
-      // background: #F7F9F9;
-      padding: 15px 12px 25px 0;
-      overflow-y: hidden;
-      .the-result-box-dctx {
-        width: 100%;
+      position: relative;
+      #mapContainer {
         height: 100%;
-        // background: #F6F8F9;
-        .list-box {
+        width: 100%;
+      }
+      .top_ul {
+        width: auto;
+        box-shadow: 0px 12px 14px 0px rgba(148,148,148,0.4);
+        position: absolute;
+        top: 15px;
+        left: 20px;
+        // margin-left: -25%;
+        display: flex;
+        padding: 0 10px;
+        background-color: #FFFFFF;
+        >li {
+          height: 48px;
+          align-items: center;
           display: flex;
-          flex-wrap: wrap;
-          // justify-content: space-between;
-          flex-flow: row wrap;
-          // height: calc(100% - 45px);
-          .list-item {
-            width: 24%;
-            height: 344px;
-            padding: 15px;
-            margin-bottom: 15px;
-            background: #fff;
-            margin-left: 1.3%;
+          /deep/ .el-radio {
+            margin-right: 0;
+          }
+          /deep/ .is-checked {
+            color: #333333;
+          }
+          .line {
+            color: #999999;
+            width: 1px;
+            height: 32px;
+            display: inline-block;
+            background-color: #F2F2F2;
+            margin: 0 10px;
+          }
+          &:last-child {
+            .line {
+              display: none;
+            }
+          }
+        }
+      }
+      .right_list {
+        position: absolute;
+        right: 0;
+        top: 15px;
+        width: 258px;
+        height: calc(100% - 30px);
+        background-color: #FFFFFF;
+        padding: 15px 10px 0 10px;
+        color: #333333;
+        box-shadow: 0px 12px 14px 0px rgba(148,148,148,0.4);
+        .top_content {
+          position: relative;
+          >p {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            i {
+              margin-right: 5px;
+            }
+          }
+          .divide {
+            margin: 10px 0;
+            background-color: #F2F2F2;
+            height: 1px;
+            box-shadow:0px 12px 14px 0px rgba(148,148,148,0.4);
+          }
+          .close_btn {
+            position: absolute;
+            right: 0;
+            top: 0;
             cursor: pointer;
-            &:nth-child(4n - 3) {
-              margin-left: 0;
+            font-size: 20px;
+            color: #999999;
+          }
+        }
+        .result_ul {
+          height: calc(100% - 60px);
+          li {
+            margin-bottom: 10px;
+            &:last-child {
+              margin-bottom: 0;
             }
-            img {
-              display: inline-block;
+            >p {
+              color: #333333;
+              font-size: 12px;
+              font-weight: 600;
+            }
+            .video_box {
+              margin-top: 10px;
+              height: 122px;
               width: 100%;
-              height: calc(100% - 70px);
-            }
-            p {
-              font-size: 14px;
-              font-family: 'MicrosoftYaHei';
-              font-weight: 500;
-              color: #333;
-              i {
-                color: #999;
-                margin-right: 3px;
-                display: block;
-                width: 15px;
-                height: 15px;
+              position: relative;
+              >img {
+                width: 100%;
+                height: 100%;
+                border: 1px solid #000;
+                cursor: pointer;
               }
-            }
-            .time {
-              display: flex;
-              align-items: center;
-              padding: 10px 0 5px 0;
-              i {
-                background: url("../../../../../assets/img/the-time.png") no-repeat;
-                background-size: 15px 15px;
-              }
-            }
-            .address {
-              display: flex;
-              align-items: center;
-              text-overflow: ellipsis;
-              overflow: hidden;
-              white-space: nowrap;
-              i {
-                background: url("../../../../../assets/img/the-daynoint.png") no-repeat;
-                background-size: 15px 15px;
+              .video_time {
+                width: 100%;
+                position: absolute;
+                height: 30px;
+                bottom: 0;
+                display: flex;
+                align-items: center;
+                color: #fff;
+                justify-content: space-between;
+                background-color: #000;
+                opacity: 0.7;
+                >span {
+                  margin-left: 10px;
+                }
+                i {
+                  margin-right: 5px;
+                  cursor: pointer;
+                }
               }
             }
           }
         }
-        .th-center-pagination {
-          width: 100%;
-          text-align: center;
-          padding: 0 0 20px 0;
-        }
       }
     }
+  }
+  .the-right-result {
+    width: 100%;  
+  }
+  .the-right-result.hide {
+    width: calc(100% - 285px);
+    // height: calc(100% - 54px);
+    // float: right;
+  }
+  .left.hide {
+    margin-left: -272px;
+    transition: marginLeft 0.3s ease-in;
+    position: relative;
+    z-index: 2;
+    // animation: fadeOutLeft 0.4s ease-out 0.3s both;
+  }
+  .left {
+    position: relative;
+    width: 272px;
+    height: calc(100% - 54px);
+    background-color: #ffffff;
+    float: left;
+    z-index: 1;
+    margin-left: 0px;
+    box-shadow: 4px 0px 10px 0px #838383;
+    box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);
+    animation: fadeInLeft 0.4s ease-out 0.3s both;
+    transition: marginLeft 0.3s ease-in;
+    .plane {
+      padding: 10px;
+      position: relative;
+      height: 100%;
+    }
+    .line40 {
+      line-height: 40px;
+    }
+    .inset {
+      display: inline-block;
+      line-height: 40px;
+      font-style: normal;
+    }
+    .firstItem {
+      margin-bottom: 5px;
+    }
+  }
+  .insetLeft{
+    position: absolute;
+    right: -28px;
+    width: 25px;
+    height: 178px;
+    top: 50%;
+    margin-top: -89px;
+    display: inline-block;
+    background-repeat: no-repeat;
+    transform: rotate(180deg);
+    background-image: url(../../../../../assets/img/icons.png);
+    background-position: -380px -1269px;
+    cursor: pointer;
+  }
+  .hide {
+    .insetLeft {
+      transform: rotate(180deg);
+      background-position: -504px -1269px;
+    }
+    .insetLeft:hover{
+      transform: rotate(180deg);
+      background-position: -440px -1269px;
+    }
+    
+  }
+  .insetLeft:hover {
+    position: absolute;
+    right: -28px;
+    width: 28px;
+    height: 178px;
+    top: 50%;
+    margin-top: -89px;
+    display: inline-block;
+    background-repeat: no-repeat;
+    transform: rotate(180deg);
+    background-image: url(../../../../../assets/img/icons.png);
+    background-position: -318px -1269px;
+    cursor: pointer;
   }
   .reset_btn, .select_btn {
     width: 110px;
   }
 }
+/deep/.__view {
+  padding-right: 10px;
+}
+@media screen and (max-width: 1439px) { // 小屏幕
+  .top_ul {
+    left: 20px;
+  }
+}
+@media screen and (min-width: 1440px) { // 大屏幕
+  .top_ul {
+    // left: 40%;
+  }
+}
+.vl_j_fullscreen {
+  position: fixed;
+  width: 100% !important;
+  height: 100% !important;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  background: #000000;
+  z-index: 1111;
+  -webkit-transition: all .4s;
+  -moz-transition: all .4s;
+  -ms-transition: all .4s;
+  -o-transition: all .4s;
+  transition: all .4s;
+  > video {
+    width: 100%;
+    height: 100%;
+  }
+  > .control_bottom {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 48px;
+    background: rgba(0, 0, 0, .65);
+    > div {
+      float: left;
+      width: 50%;
+      height: 100%;
+      line-height: 48px;
+      text-align: right;
+      padding-right: 20px;
+      color: #FFFFFF;
+      &:first-child {
+        text-align: left;
+        padding-left: 20px;
+      }
+      > span {
+        display: inline-block;
+        height: 22px;
+        margin-left: 10px;
+        vertical-align: middle;
+        cursor: pointer;
+        a {
+          font-size: 25px;
+          text-decoration: none;
+          color: #ffffff;
+          vertical-align: top;
+        }
+      }
+    }
+  }
+}
+.close_icon {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  z-index: 1000;
+  cursor: pointer;
+}
 </style>
 
 
 <style lang="scss">
-.the-right-result .__view {
-  background-color: none;
-}
-.struc_detail_dialog {
-  .el-dialog {
-    max-width: 13.06rem;
-    width: 100%!important;
-  }
-  .el-dialog__header {
-    display: none;
-  }
-  .struc_tab {
-    height: 1.16rem;
-    padding: .3rem 0;
+#mapContainer {
+  .icon_box {
+    width: 43px;
+    height: 68px;
     position: relative;
-    color: #999999;
-    span {
-      display: inline-block;
-      margin-right: .55rem;
-      padding-bottom: .1rem;
-      cursor: pointer;
-    }
-    .active {
-      color: #0C70F8;
-      border-bottom: 2px solid #0C70F8;
-    }
-    i {
-      display: block;
-      position: absolute;
-      top: .3rem;
-      right: 0px;
-      cursor: pointer;
-    }
-  }
-  .struc_main {
-    width: 11.86rem;
-    height: 4.4rem;
-    margin: 0 auto;
-    border-bottom: 1px solid #F2F2F2;
-    .download_btn {
-      display: inline-block;
-      width:160px;height:40px;
-      background:rgba(246,248,249,1);
-      border:1px solid rgba(211,211,211,1);
-      border-radius:4px;
-      text-align: center;
-      line-height: 40px;
-      position: absolute;
-      top: 4.9rem;
-      right: 0.68rem;
-      text-decoration: none;
-      color: #B2B2B2;
-      cursor: pointer;
-      &:hover {
-        background-color: #FFFFFF;
-        border-color: #0C70F8;
-        color: #0C70F8;
-      }
-    }
-    .struc_c_detail {
-      width:  100%;
-      height: 3.6rem;
-      >div {
-        float: left;
-      }
-      .struc_c_d_img {
-        width: 3.6rem;
-        height: 3.6rem;
-        background: #EAEAEA;
-        position: relative;
-        img {
-          width: 100%;
-          height: auto;
-          max-height: 100%;
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          margin: auto;
-        }
-        i {
-          display: block;
-          position: absolute;
-          top: .1rem;
-          right: .1rem;
-          line-height: .26rem;
-          height: .26rem;
-          background: rgba(255, 255, 255, .8);
-          border-radius: .13rem;
-          font-style: normal;
-          color: #0C70F8;
-          font-size: 12px;
-          padding: 0 .1rem;
-        }
-      }
-      .struc_c_d_qj {
-        margin-right: .2rem;
-        &:before {
-          display: block;
-          content: '';
-          position: absolute;
-          top: -.5rem;
-          left: -.5rem;
-          transform: rotate(-45deg);
-          border: .5rem solid #50CC62;
-          border-color: transparent transparent #50CC62;
-          z-index: 9;
-        }
-        span {
-          display: block;
-          position: absolute;
-          top: .1rem;
-          left: .1rem;
-          width: .6rem;
-          height: .6rem;
-          text-align: center;
-          color: #FFFFFF;
-          font-size: .12rem;
-          -webkit-transform: rotate(-45deg);
-          -moz-transform: rotate(-45deg);
-          -ms-transform: rotate(-45deg);
-          -o-transform: rotate(-45deg);
-          transform: rotate(-45deg);
-          z-index: 99;
-        }
-      }
-      .struc_c_d_qii {
-        // margin-right: .3rem;
-        &:before {
-          display: block;
-          content: '';
-          position: absolute;
-          top: -.5rem;
-          left: -.5rem;
-          transform: rotate(-45deg);
-          border: .5rem solid #0c70f8;
-          border-color: transparent transparent #0C70F8;
-          z-index: 9;
-        }
-        span {
-          display: block;
-          position: absolute;
-          top: .1rem;
-          left: .1rem;
-          width: .6rem;
-          height: .6rem;
-          text-align: center;
-          color: #FFFFFF;
-          font-size: .12rem;
-          -webkit-transform: rotate(-45deg);
-          -moz-transform: rotate(-45deg);
-          -ms-transform: rotate(-45deg);
-          -o-transform: rotate(-45deg);
-          transform: rotate(-45deg);
-          z-index: 99;
-        }
-      }
-      // .struc_c_d_quanjing {
-
-      // }
-      .struc_c_d_box {
-        width: calc(100% - 3.9rem);
-      }
-      .struc_c_d_box, .struc_c_d_quanjing {
-        display: flex;
-        height: 3.6rem;
-        box-shadow: 0px 5px 16px 0px rgba(169,169,169,0.2);
-        border-radius: 1px;
-        position: relative;
-        overflow: hidden;
-        &:hover {
-          .play_btn {
-            display: block !important;
-          }
-        }
-        .play_btn {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          margin: auto;
-          background: rgba(0, 0, 0, 0.4);
-          width: 1rem;
-          height: 1rem;
-          text-align: center;
-          line-height: 1rem;
-          -webkit-border-radius: 50%;
-          -moz-border-radius: 50%;
-          border-radius: 50%;
-          cursor: pointer;
-          i {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            margin: auto;
-            height: 22px !important;
-          }
-        }
-        > video {
-          width: 100%;
-          height: 100%;
-          background-color: #E9E7E8;
-        }
-        &:before {
-          display: block;
-          content: '';
-          position: absolute;
-          top: -.5rem;
-          left: -.5rem;
-          -webkit-transform: rotate(-45deg);
-          transform: rotate(-45deg);
-          border: .5rem solid #0c70f8;
-          border-color: transparent transparent #0C70F8;
-          z-index: 9;
-        }
-        .th-video-text {
-          display: block;
-          position: absolute;
-          top: .08rem;
-          left: .08rem;
-          width: 0.8rem;
-          height: 0.8rem;
-          text-align: center;
-          color: #FFFFFF;
-          font-size: .12rem;
-          -webkit-transform: rotate(-45deg);
-          -moz-transform: rotate(-45deg);
-          -ms-transform: rotate(-45deg);
-          -o-transform: rotate(-45deg);
-          transform: rotate(-45deg);
-          z-index: 99;
-        }
-        > div {
-          float: left;
-        }
-        .struc_c_d_info {
-          width: calc(100% - 600px);
-          padding-left: .24rem;
-          color: #333333;
-          .th-dctx-tab {
-            padding: 8px 0 5px 0;
-            .line {
-              padding: 2px 0;
-              span {
-                display: inline-block;
-                &:nth-child(1) {
-                  color: #333;
-                  font-weight: 600;
-                }
-                &:nth-child(2) {
-                  color: #999;
-                }
-              }
-            }
-          }
-          .struc_cdi_box {
-            height: calc(100% - 75px);
-            .vehicle-info-box {
-              display: flex;
-              // width: 100%;
-              height: 60px;
-              background: #FAFAFA;
-              border: 1px solid #F2F2F2;
-              margin-top: 10px;
-              margin-right: .14rem;
-              &:nth-child(1) {
-                margin-top: 0;
-              }
-              .left {
-                width: 71px;
-                height: 60px;
-                line-height: 60px;
-                text-align: center;
-                border-right: 1px solid #F2F2F2;
-              }
-              .right {
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                padding: 0 8px;
-                color: #333;
-                p:nth-child(2) {
-                  padding-top: 2px;
-                  >span {
-                    margin-right: 5px;
-                  }
-                  b {
-                    // float: right;
-                    padding-left: 10px;
-                    color: #999;
-                    font-weight: normal;
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    .struc_c_address {
-      width:  100%;
+    .mark_span {
+      width: 100%;
       height: 100%;
-      #container {
-        width:  100%;
-        height: 100%;
-      }
     }
-  }
-  .struc-list {
-    width: 12.46rem;
-    margin: 0 auto;
-    padding: .44rem 0 .34rem 0;
-    .swiper-container {
-      padding: .02rem .5rem;
-      &:before {
-        display: block;
-        content: '';
-        width: .5rem;
-        height: 110%;
-        background: #FFFFFF;
-        position: absolute;
-        left: 0;
-        z-index: 9;
-        border: 1px solid #FFFFFF;
-      }
-      &:after {
-        display: block;
-        content: '';
-        width: .5rem;
-        height: 110%;
-        background: #FFFFFF;
-        position: absolute;
-        right: 0;
-        top: 0;
-        z-index: 9;
-        border: 1px solid #FFFFFF;
-      }
-      .swiper-button-next {
-        right:  0;
-      }
-      .swiper-button-prev {
-        left: 0;
-      }
-      .swiper-slide {
-        .swiper_img_item {
-          cursor: pointer;
-          border: 1px solid #FFFFFF;
-          padding: 2px;
-          .vl_jfo_sim {
-            font-size: .14rem;
-            height: .3rem;
-            margin-top: 0;
-            /*display: inline-block;*/
-            white-space: nowrap;
-            text-align: center;
-            color: #999999;
-            i {
-              margin-right: 0;
-            }
-          }
-        }
-        .active {
-          border-color: #0C70F8;
-          box-shadow: inset 0px 3px 3px #c8c8c8;
-          .vl_jfo_sim {
-            color: #0C70F8;
-          }
-        }
-      }
+    .mark_hover_span {
+      position: absolute;
+      left: 0px;
+      top: 0;
+      display: none;
     }
+    // &:hover {
+    //   .mark_span {
+    //     display: none;
+    //   }
+    //   .mark_hover_span {
+    //     display: block;
+    //   }
+    // }
   }
 }
 .cap_info_win {
