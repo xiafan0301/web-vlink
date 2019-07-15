@@ -298,13 +298,12 @@ export default {
           let o = this.listBayonet[i];
           for (let k in this.xjDrawPolygon) {
             let so = this.xjDrawPolygon[k];
-            if (so.obj && so.obj.contains(new window.AMap.LngLat(o.longitude, o.latitude))) {
-              // dObj[o.uid] = o;
+            if (so && so.contains(new window.AMap.LngLat(o.longitude, o.latitude))) {
               if (o.areaUid) {
                 if (!oList[o.areaUid]) { 
                   oList[o.areaUid] = {
                     id: o.areaUid,
-                    name: o.areaCname,
+                    name: o.areaName,
                     children: []
                   };
                 }
