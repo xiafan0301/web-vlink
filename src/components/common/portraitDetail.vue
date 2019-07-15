@@ -18,12 +18,12 @@
               <div class="struc_main" v-if="sturcDetail">
                 <div v-show="strucCurTab === 1" class="struc_c_detail">
                   <div class="struc_c_d_qj struc_c_d_img">
-                    <img :src="sturcDetail.storagePath" class="bigImg"  >
+                    <img :src="sturcDetail.subStoragePath" class="bigImg"  >
                     <span>抓拍图</span>
                   </div>
                   <div class="struc_c_d_box">
                     <div class="struc_c_d_qii struc_c_d_img"> 
-                      <img :src="sturcDetail.personStoragePath" class="bigImg" >
+                      <img :src="sturcDetail.storagePath" class="bigImg" >
                       <span>全景图</span>
                     </div>
                     <div class="struc_c_d_info">
@@ -40,12 +40,12 @@
                       <!-- <div class="struc_cdi_line">
                         <span><b>性别</b>{{sturcDetail.sex}}</span>
                       </div> -->
-                      <div class="struc_cdi_line" v-if="sturcDetail.semblance">
+                      <!-- <div class="struc_cdi_line" v-if="sturcDetail.semblance">
                         <span ><b>相似度</b>{{(sturcDetail.semblance*1).toFixed(2)}}%</span>
-                      </div>
+                      </div> -->
                       <div class="struc_cdi_line">
-                        <span v-if="sturcDetail.features"><b>特征</b>{{sturcDetail.features}}</span>
-                        <span v-else><b>特征</b>{{sturcDetail.sex+" "+(sturcDetail.age || "")+ " "+ (sturcDetail.baby || "")+ " " + (sturcDetail.bag || "")+ " " + (sturcDetail.bottomColor || "") +(sturcDetail.bottomType || "")+ " " + (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+ " "+(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")}}</span>
+                        <span class='tz' v-if="sturcDetail.features"><b>特征</b>{{sturcDetail.features}}</span>
+                        <span class="tz" v-else><b>特征</b>{{sturcDetail.sex+" "+(sturcDetail.age || "")+ " "+ (sturcDetail.baby || "")+ " " + (sturcDetail.bag || "")+ " " + (sturcDetail.bottomColor || "") +(sturcDetail.bottomType || "")+ " " + (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+ " "+(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")}}</span>
                       </div>
                       <div class="struc_cdi_line"></div>
                     </div>
@@ -515,8 +515,8 @@ export default {
                 /*position: relative;*/
                 max-width: 100%;
                 display: inline-block;
-                height: .4rem;
-                line-height: .4rem;
+                height: .5rem;
+                line-height: .5rem;
                 margin-bottom: .08rem;
                 border: 1px solid #F2F2F2;
                 background: #ffffff;
@@ -531,8 +531,8 @@ export default {
                 > b {
                   display :inline-block;
                    border-right: 1px solid #F2F2F2;
-                   height: .4rem;
-                  line-height: .4rem;
+                   height: .5rem;
+                  line-height: .5rem;
                   background: #FAFAFA;
                   color: #999;
                   font-weight: normal;
@@ -540,6 +540,20 @@ export default {
                   padding-left: 10px;
                   margin-right: 5px;
                 }
+              }
+              span.tz{
+                    white-space: normal;
+                    display: flex;
+                    overflow: auto;
+                    height: auto;
+                    align-items: center;
+                    line-height: 0.25rem;
+                    b{
+                      white-space: nowrap;
+                      display: inline-block;
+                      height: 0.5rem;
+                      line-height: 0.5rem;
+                    }
               }
             }
           }

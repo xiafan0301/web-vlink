@@ -24,7 +24,7 @@
             :hide-required-asterisk="true"
           >
             <!-- 搜索 -->
-            <el-form-item prop="address">
+            <!-- <el-form-item prop="address">
               <div class="search-wrap">
                 <el-input
                   class="width232"
@@ -34,11 +34,11 @@
                   id="map-sd-search-input"
                 ></el-input>
               </div>
-            </el-form-item>
+            </el-form-item> -->
             <!-- 下划线 -->
-            <el-form-item class="under-line">
+            <!-- <el-form-item class="under-line">
               <div class="line"></div>
-            </el-form-item>
+            </el-form-item> -->
             <!-- 任务名称 -->
             <el-form-item prop="taskName">
               <div class="task-name">
@@ -50,7 +50,7 @@
               <div class="sd-opts">
                 <div class="sd-opts-title">
                   <h4>区域选择</h4>
-                  <i class="vl_icon vl_icon_portrait_02" @click="setFitV"></i>
+                  <span class="location-btn el-icon-location-outline" @click="setFitV"></span>
                 </div>
                 <ul>
                   <li>
@@ -152,7 +152,7 @@
             <!-- 频次搜索 -->
             <el-form-item prop="frequency">
               <div class="frequency">
-                期间频次不少于&nbsp;
+                频次不少于&nbsp;
                 <el-input v-model="searchData.frequency" placeholder></el-input>&nbsp;次
               </div>
             </el-form-item>
@@ -192,6 +192,10 @@
         <!-- 地图信息 -->
         <div class="gis_content" id="gis_content">
           <div class="map_rm" id="mapMap"></div>
+          <div class="sd_search">
+            <input type="text" placeholder="请输入地名，快速定位地址" autocomplete="off" class="sd_search_input" id="map-sd-search-input">
+            <span><i class="el-icon-search"></i></span>
+          </div>
           <!-- 地图控制按钮（放大，缩小，定位） -->
           <div class="map_control">
             <ul class="map_rrt_u2">
@@ -1505,6 +1509,14 @@ export default {
           color: #333;
           background-color: #fafafa;
           border-bottom: 1px solid #d3d3d3;
+          .location-btn {
+            cursor: pointer;
+            font-size: 20px;
+            color: #999;
+            &:hover {
+              color: #0c70f8;
+            }
+          }
         }
         > ul {
           padding: 22px 0 18px 0;
@@ -1646,6 +1658,30 @@ export default {
             }
           }
         }
+        .sd_search {
+        position: absolute; top: 0.3rem; left: 0.3rem; z-index: 1000;
+        background-color: #fff;
+        overflow: hidden;
+        > .sd_search_input {
+          float: left;
+          width: 360px; height: 36px; line-height: 36px;
+          background:rgba(255,255,255,1);
+          box-shadow:0px 3px 10px 0px rgba(99,99,99,0.39);
+          border: 0;
+          padding: 0 15px;
+        }
+        > span {
+          float: left;
+          width: 60px; height: 36px; line-height: 36px;
+          background-color: #0C70F8;
+          cursor: pointer;
+          text-align: center;
+          > i {
+            position: relative; top: 2px;
+            color: #fff; font-size: 20px;
+          }
+        }
+      }
       }
     }
     //关闭按钮
@@ -1690,7 +1726,7 @@ export default {
   //频次
   .frequency {
     .el-input {
-      width: 104px;
+      width: 126px;
     }
   }
   //车牌颜色
