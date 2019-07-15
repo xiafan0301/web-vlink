@@ -733,11 +733,13 @@ export default {
             } else {
               this.clearMarkList(); // 清除地图标记
               this.setMarks();
+              this.$message.warning('您选择的设备没有数据');
             }
           } else {
             this.submitLoading = false; // 关闭加载效果
             this.clearMarkList(); // 清除地图标记
             this.setMarks();
+            this.$message.warning('您选择的设备没有数据');
           }
         })
         .catch(() => {
@@ -815,6 +817,10 @@ export default {
               const item = this.cameraPhotoList[i];
               if (item.detailList.length) {
                 item.currentIndex = item.detailList.length - 1;
+                item.detailList = item.detailList.map(item => {
+                  item.semblance = Number(item.semblance).toFixed(2); // 保留2位小数点
+                  return item;
+                });
               } else {
                 item.currentIndex = 0;
               }
@@ -2014,7 +2020,7 @@ export default {
     // 地图标记
     doMark(obj, device, sClass, init = true) {
       let marker;
-      if (!init) {
+      if (!init && device.shotNum > 0) {
         // 非初始化的状态
         let level;
         if (device.shotNum < 20) {
