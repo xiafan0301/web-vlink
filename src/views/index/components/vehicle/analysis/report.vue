@@ -144,7 +144,7 @@
                     <el-table-column label="设备名称" prop="deviceName"></el-table-column>
                     <el-table-column label="过车时间" prop="shotTime" show-overflow-tooltip></el-table-column>
                     <el-table-column label="时间间隔" prop="timeSlot" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="参考时间" prop="timeQuantum" show-overflow-tooltip></el-table-column>
+                    <el-table-column label="参考时间" prop="refTime" show-overflow-tooltip></el-table-column>
                   </el-table>
                 </div>
               </div>
@@ -206,19 +206,13 @@
                     <li>
                       <span>较常出没时间段：</span>
                       <div>
-                        <template v-for="(item, index) in yjcmjlList">
-                          <template v-if="index != 0">|</template>
-                          <span :key="'yjcmjl1_' + index">{{item.timeSegment}}</span>
-                        </template>
+                        <span>{{yjcmjlList.timeSegment}}</span>
                       </div>
                     </li>
                     <li>
                       <span>较常出没地点为：</span>
                       <div>
-                        <template v-for="(item, index) in yjcmjlList">
-                          <template v-if="index != 0">|</template>
-                          <span :key="'yjcmjl2_' + index">{{item.address}}</span>
-                        </template>
+                        <span>{{yjcmjlList.address}}</span>
                       </div>
                     </li>
                   </ul>
@@ -341,7 +335,7 @@ export default {
       rcList: [], // 入城记录
       ccList: [], // 出城记录
       yjcmList: {}, // 夜间出没记录
-      yjcmjlList: [],  // 夜间出没结论
+      yjcmjlList: {},  // 夜间出没结论
       yjcmHoverWindow: null,
       pfcmList: [], // 频繁出没分析
       txclList: [], // 同行车分析
