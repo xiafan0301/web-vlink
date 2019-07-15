@@ -81,12 +81,12 @@
         </div>
         <div class="kakou">
           <el-button style="width: 110px" @click="reset">重置</el-button>
-          <el-button type="primary" style="width: 110px" @click="tongji">统计</el-button>
+          <el-button type="primary" style="width: 110px" @click="tongji" :loading="searchLoading">查询</el-button>
         </div>
       </div>
       <div class="ccrc_content_right">
         <div class="ccrc_content_right_content">
-          <div class="ccrc_content_right_table">
+          <div class="ccrc_content_right_table" v-loading = "searchLoading">
             <el-table
                 :data="tableData"
                 style="width: 100%">
@@ -132,7 +132,7 @@
               <el-table-column
                   label="操作">
                 <template slot-scope="scope">
-                  <span class="operation_btn" @click="see">查看</span>
+                  <span class="operation_btn" @click="see(scope.row)">查看</span>
                 </template>
               </el-table-column>
             </el-table>
@@ -190,6 +190,7 @@ export default {
           }
         }
       },
+      searchLoading: false,
       kakou: [],
       v: '湘',
       lll: [],
@@ -433,8 +434,8 @@ export default {
       this.onlySurveillance = false
       this.getMonitorList()
     },
-    see () {
-      this.$router.push({name: 'vehicle_search_clxx'});
+    see (item) {
+      this.$router.push({name: 'vehicle_search_clxx', query: {plateNo: item.plateNo}});
     },
     hhh (val) {
       console.log(val)
@@ -455,6 +456,7 @@ export default {
       this.tableData = this.tableDataAll.slice(ips, ipe);
     },
     JfoGETCity () {
+      this.searchLoading = true;
       const params = {
         startTime: this.value1,
         endTime: this.value2,
@@ -476,7 +478,11 @@ export default {
           this.pagination.total = this.tableDataAll.length;
           this.handleCurrentChange(1);
         }
-      })
+        this.searchLoading = false;
+      }).catch(error => {
+        console.log(error );
+        this.searchLoading = false;
+      });
     }
   }
 }
