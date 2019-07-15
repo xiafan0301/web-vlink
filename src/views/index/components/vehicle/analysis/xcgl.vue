@@ -21,12 +21,17 @@
             <i class="el-icon-arrow-down"></i>
             <!-- <i class="el-icon-arrow-up"></i> -->
             <div class="device_list" v-if="selectDeviceArr.length > 0">
+              <template v-if="checkAllTree">
+              <span>全部设备</span>
+              </template>
+              <template v-else>
               <span>{{ selectDeviceArr[0].label }}</span>
               <span
                 v-show="selectDeviceArr.length > 1"
                 title="展开选中的设备"
                 class="device_count"
               >+{{ selectDeviceArr.length - 1 }}</span>
+              </template>
             </div>
             <div class="no_device" v-else>选择设备</div>
             <!-- 树tab页面 -->
@@ -408,6 +413,7 @@ export default {
       },
       exportLoading: false,
       messageInfo: null,
+      notMessageInfo: null,
       hoverActive: false,
     };
   },
@@ -658,6 +664,9 @@ export default {
     //查询
     getSearchData() {
       let params = {};
+      if(this.notMessageInfo) {
+        this.notMessageInfo.close()
+      }
       if (this.searchData.time && this.searchData.time.length > 0) {
         params["startDate"] =
           formatDate(this.searchData.time[0], "yyyy-MM-dd") + " 00:00:00";
@@ -700,7 +709,7 @@ export default {
             this.list = data;
             this.doubleDeviceList = objDeepCopy(data);
             if (!this.list.allRecords || this.list.allRecords.length <= 0) {
-              this.$message.info("搜索无结果");
+              this.notMessageInfo = this.$message.info("搜索无结果");
             }
             //获取全部时刻
             this.getData();
@@ -804,6 +813,9 @@ export default {
       if(this.messageInfo) {
         this.messageInfo.close()
       }
+      if(this.notMessageInfo) {
+        this.notMessageInfo.close()
+      }
       this.$set(this.timeSlot[index], "checked", !val.checked);
       if (val.value !== 0) {
         this.$set(this.timeSlot[0], "checked", false);
@@ -856,6 +868,9 @@ export default {
         }
       }
       this.getList();
+      if(this.messageInfo) {
+        this.messageInfo.close()
+      }
     },
     //获取数据
     getList() {
@@ -900,7 +915,7 @@ export default {
           this.$set(this.deviceList[0], "timeSlot", "——");
           this.$set(this.deviceList[0], "refTime", "——");
         }else {
-          this.messageInfo =this.$message.info("搜索无数据")
+          this.messageInfo =this.$message.info("搜索无结果")
         }
         this.getNDeviceList();
         
