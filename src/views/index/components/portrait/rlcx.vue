@@ -345,7 +345,7 @@ export default {
   }
 }
 .rlcx_r_list_empty {
-  background: url(../../../../assets/img/not-content.png) center center no-repeat;
+  background: url(../../../../assets/img/null-content.png) center center no-repeat;
 }
 .rlcx_main {
   height: 100%;
