@@ -21,7 +21,7 @@
           <h2>尾随车辆的特征信息</h2>
           <ul class="left_ul">
             <li>
-              <img :src="resultList.length > 0 && resultList[0].struVehicleDto.storagePath" alt="">
+              <img :src="resultList.length > 0 && resultList[0].struVehicleDto.storagePath" alt="" class="bigImg">
             </li>
             <li>
               <span>有无车牌：</span>

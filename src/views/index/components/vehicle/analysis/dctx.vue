@@ -4,7 +4,7 @@
       <div is="vlBreadcrumb" :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle'}, {name: '多车同行'}]"></div>
     </div>
     <div class="the-bottom">
-      <div class="the-left-search">
+      <div class="the-left-search" :class="['left',{hide:hideleft}]">
         <div class="input-box">
           <vue-scroll>
             <div class="input-box-line">
@@ -52,97 +52,43 @@
           <el-button class="reset_btn" @click="onReset" :loading="resetLoading">重置</el-button>
           <el-button class="select_btn" type="primary" @click="onSearch" :loading="searchLoading">查询</el-button>
         </div>
+        <div class="insetLeft" @click="hideLeft"></div>
       </div>
-      <div class="the-right-result">
+      <div class="the-right-result" :class="[{hide:!hideleft}]">
         <div id="mapContainer"></div>
         <ul class="top_ul">
           <li v-for="(item, index) in dataList" :key="index">
-            <el-radio v-model="radioChecked" @change="handleRadio(index, item.vehicleNumber)" :label="index">{{item.vehicleNumber}}</el-radio>
+            <el-radio v-model="radioChecked" @change="handleRadio(index, item.vehicleNumber)" :label="index">车辆{{index + 1}}</el-radio>
             <span class="line"></span>
           </li>
+          <!-- <li v-for="(item, index) in dataList" :key="index">
+            <el-radio v-model="radioChecked" @change="handleRadio(index, item.vehicleNumber)" :label="index">车辆{{index + 1}}</el-radio>
+            <span class="line"></span>
+          </li> -->
         </ul>
-        <div class="right_list">
+
+        <div class="right_list" v-show="isShowRightContent">
           <div class="top_content">
             <p>
               <i class="vl_icon vl_icon_v11"></i>
-              <span>雀园路口右1设备</span>
+              <span>{{recordDetail.deviceName}}</span>
             </p>
             <p>
               <i class="vl_icon vl_icon_v11"></i>
-              <span>长沙市天心区雀园路口</span>
+              <span>{{recordDetail.shotAddress}}</span>
             </p>
-            <span class="close_btn">关闭</span>
+            <span class="close_btn el-icon-close" @click="closeRightBox"></span>
             <div class="divide"></div>
           </div>
-          <ul class="result_ul">
+          <ul class="result_ul" v-show="recordDetail.recordList.length > 0">
             <vue-scroll>
-              <li>
-                <p>湘A12345</p>
+              <li v-for="(item, index) in recordDetail.recordList" :key="index">
+                <p>{{item.plateNo}}</p>
                 <div class="video_box">
-                  <img src="../../../../../assets/img/null-content.png" alt="">
+                  <img :src="item.storagePath" alt="">
                   <div class="video_time">
-                    <span>2018-12-12 12:12:12</span>
-                    <i class="vl_icon vl_icon_control_09"></i>
-                  </div>
-                </div>
-              </li>
-              <li>
-                <p>湘A12345</p>
-                <div class="video_box">
-                  <img src="../../../../../assets/img/null-content.png" alt="">
-                  <div class="video_time">
-                    <span>2018-12-12 12:12:12</span>
-                    <i class="vl_icon vl_icon_control_09"></i>
-                  </div>
-                </div>
-              </li>
-              <li>
-                <p>湘A12345</p>
-                <div class="video_box">
-                  <img src="../../../../../assets/img/null-content.png" alt="">
-                  <div class="video_time">
-                    <span>2018-12-12 12:12:12</span>
-                    <i class="vl_icon vl_icon_control_09"></i>
-                  </div>
-                </div>
-              </li>
-              <li>
-                <p>湘A12345</p>
-                <div class="video_box">
-                  <img src="../../../../../assets/img/null-content.png" alt="">
-                  <div class="video_time">
-                    <span>2018-12-12 12:12:12</span>
-                    <i class="vl_icon vl_icon_control_09"></i>
-                  </div>
-                </div>
-              </li>
-              <li>
-                <p>湘A12345</p>
-                <div class="video_box">
-                  <img src="../../../../../assets/img/null-content.png" alt="">
-                  <div class="video_time">
-                    <span>2018-12-12 12:12:12</span>
-                    <i class="vl_icon vl_icon_control_09"></i>
-                  </div>
-                </div>
-              </li>
-              <li>
-                <p>湘A12345</p>
-                <div class="video_box">
-                  <img src="../../../../../assets/img/null-content.png" alt="">
-                  <div class="video_time">
-                    <span>2018-12-12 12:12:12</span>
-                    <i class="vl_icon vl_icon_control_09"></i>
-                  </div>
-                </div>
-              </li>
-              <li>
-                <p>湘A12345</p>
-                <div class="video_box">
-                  <img src="../../../../../assets/img/null-content.png" alt="">
-                  <div class="video_time">
-                    <span>2018-12-12 12:12:12</span>
-                    <i class="vl_icon vl_icon_control_09"></i>
+                    <span>{{item.shotTime}}</span>
+                    <i class="vl_icon vl_icon_control_09" @click="openVideo(item)"></i>
                   </div>
                 </div>
               </li>
@@ -151,16 +97,37 @@
         </div>
       </div>
     </div>
-    <!-- <div class="icon_box">
-      <span class="vl_icon vl_icon_map_mark1 mark_span"></span>
-      <span class="vl_icon vl_icon_map_hover_mark1 mark__hover_span"></span>
-    </div> -->
+    <!-- 视频全屏放大 -->
+    <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
+      <video id="controlVideo" :src="videoDetail.videoPath" ></video>
+      <div @click="closeVideo" class="vl_icon vl_icon_event_23 close_icon"></div>
+      <div class="control_bottom">
+        <div>{{videoDetail.deviceName}}</div>
+        <div>
+          <span @click="playLargeVideo(false)" class="vl_icon vl_icon_judge_01" v-show="isPlaying"></span>
+          <span @click="playLargeVideo(true)" class="vl_icon vl_icon_control_09" v-show="!isPlaying"></span>
+          <span @click="playerCut" class="vl_icon vl_icon_control_07"></span>
+          <span><a download="视频" :href="videoDetail.videoPath" target="_blank" class="vl_icon vl_icon_event_26"></a></span>
+        </div>
+      </div>
+    </div>
+    <!-- 截屏 dialog -->
+    <el-dialog title="截屏" :visible.sync="cutDialogVisible" :center="false" :append-to-body="true" width="1000px">
+      <div style="text-align: center; padding-top: 30px;">
+        <canvas :id="flvplayerId + '_cut_canvas'"></canvas>
+      </div>
+      <div slot="footer" class="dialog-footer" style="padding: 0 0 20px 0;">
+        <el-button  @click="cutDialogVisible = false">取 消</el-button>&nbsp;&nbsp;&nbsp;&nbsp;
+        <el-button  type="priamry" @click="playerCutSave">保 存</el-button>
+        <a :id="flvplayerId + '_cut_a'" style="display: none;">保存</a>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
 import { testData } from './ws/testData.js';
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
-import { formatDate } from "@/utils/util.js";
+import { formatDate, random14 } from "@/utils/util.js";
 import { checkPlateNumber } from '@/utils/validator.js';
 import { getMultiVehicleList } from '@/views/index/api/api.judge.js';
 const overStartTime = new Date() - 24 * 60 * 60 *1000;
@@ -171,6 +138,12 @@ export default {
   },
   data () {
     return {
+      cutDialogVisible: false, // 截屏弹出框
+      showLarge: false, // 全屏显示
+      videoDetail: {}, // 播放视频的信息
+      isPlaying: false, // 是否播放视频
+      flvplayerId: 'flv_' + random14(),
+      isShowRightContent: false, // 是否显示右侧抓拍详情
       radioChecked: -1,
       pickerStart: {
         disabledDate (time) {
@@ -215,7 +188,15 @@ export default {
       hasError: false, // 是否符合查询条件
       playing: false, // 视频播放是否
       polylineList: [], // 折线数组
-      polylineObj: {}
+      polylineObj: {},
+      reselt: false,
+      hideleft: false,
+      recordDetail: { // 右侧抓拍的详情
+        deviceName: null,
+        shotAddress: null,
+        recordList : []
+      },
+      currentSelectPolyline: null
     }
   },
   watch: {
@@ -227,11 +208,13 @@ export default {
     }
   },
   mounted () {
-    this.dataList = testData;
     this.initMap();
-    console.log(testData)
+    this.onSearch();
   },
   methods: {
+    hideLeft() {
+      this.hideleft = !this.hideleft;
+    },
     // 播放视频
     videoTap() {
       // 播放视频
@@ -252,60 +235,104 @@ export default {
      */
     initMap (obj) {
       let map = new window.AMap.Map('mapContainer', {
-        zoom: 15, // 级别
+        zoom: 18, // 级别
         center: [110.595111, 27.90289], // 中心点坐标
       });
       map.setMapStyle('amap://styles/whitesmoke');
       this.map = map;
 
-      if (testData.length > 0) {
-        testData.map((item, index) => {
-          this.drawPoint(item.arrList, item.vehicleNumber, testData[0].vehicleNumber);
-        })
-      }
+      // if (this.dataList.length > 0) {
+      //   this.dataList.map((item, index) => {
+      //     this.drawPoint(item.arrList, item.vehicleNumber, testData[0].vehicleNumber);
+      //   })
+      // }
     },
     /**
      * 地图描点
      */
-    drawPoint (data, number, firstNumber) {
+    drawPoint (data, number, recordObj) {
       if (data && data.length > 0) {
         let _this = this, hoverWindow = null, path= [];
+
+        _this.map.setCenter([data[0].shotPlaceLongitude, data[0].shotPlaceLatitude])
+
         for (let i = 0; i < data.length; i++) {
-          
+
           let obj = data[i];
 
-          if (obj.bayonetLongitude > 0 && obj.bayonetLatitude > 0) {
+          if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
             let offSet = [-20.5, -55], deviceType;
-           let className = null;
+
+            let longitude = null, latitude = null, detailDeviceName, detailShotAddress;
+
            if (obj.isAllPassed) { // 全部车辆经过该设备
              if (obj.bayonetId) { // 设备为卡口
                deviceType = 1;
              } else {
-               deviceType = 2;
+               deviceType = 7;
              }
            } else {
              if (obj.bayonetId) { // 设备为卡口
-               deviceType = 3;
+               deviceType = 8;
              } else {
                deviceType = 0;
              }
            }
 
+            if (obj.bayonetId) { // 设备为卡口
+              longitude = obj.bayonetLongitude;
+              latitude = obj.bayonetLatitude;
+
+              detailDeviceName = obj.bayonetName;
+              detailShotAddress = obj.bayonetAddress;
+
+            } else { // 设备为摄像头
+              longitude = obj.shotPlaceLongitude;
+              latitude = obj.shotPlaceLatitude;
+
+              detailDeviceName = obj.deviceName;
+              detailShotAddress = obj.address;
+
+            }
+            let idName = obj.deviceID + '_' + number;
 
             let marker = new window.AMap.Marker({
               map: _this.map,
-              position: [obj.bayonetLongitude, obj.bayonetLatitude],
+              position: [longitude, latitude],
               offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
               draggable: false, // 是否可拖动
               extData: '', // 用户自定义属性
               // 自定义点标记覆盖物内容
-              // content: '<div id="vehicle' + obj.bayonetId + '"  title="'+ obj.bayonetName +'" class="vl_icon vl_icon_map_mark' + deviceType + '"></div>'
-              content: '<div class="icon_box" id="vehicle '+ obj.bayonetId +'"><span class="vl_icon mark_span vl_icon_map_mark '+ deviceType +'"></span><span class="vl_icon mark__hover_span vl_icon_map_hover_mark '+ deviceType +'"></span></div>'
+              content: '<div id="vehicle_mark'+ idName +'" class="icon_box"><span class="vl_icon mark_span vl_icon_map_mark'+ deviceType +'"></span><span class="vl_icon mark_hover_span vl_icon_map_hover_mark'+ deviceType +'"></span></div>'
             });
 
+             
+            marker.on('click', function () {
+              $($('#vehicle_mark' + idName).children()[0]).css('display', 'none');
+              $($('#vehicle_mark' + idName).children()[1]).css('display', 'block');
+              // $('vl_icon_map_hover_mark' + deviceType).css('display', 'block');
+              
 
-            path.push(new window.AMap.LngLat(obj.bayonetLongitude, obj.bayonetLatitude));
+              _this.recordDetail.recordList = [];
+              _this.isShowRightContent = true;
+              _this.recordDetail.deviceName = detailDeviceName;
+              _this.recordDetail.shotAddress = detailShotAddress;
 
+              if (recordObj) {
+                for (let i in recordObj) {
+                  if (obj.deviceID === i) {
+                    recordObj[i].map(item => {
+                      _this.recordDetail.recordList.push(item);
+                    })
+                  }
+                }
+              }
+            })
+
+            path.push(new window.AMap.LngLat(longitude, latitude));
+
+            _this.map.setZoom(13);
+            _this.map.setCenter([longitude, latitude]);
           }
           // 绘制线条
           let polyline = new window.AMap.Polyline({
@@ -316,23 +343,27 @@ export default {
             strokeStyle: 'solid'
           });
 
-          polyline.on('mouseover', function () {
-            polyline.setOptions({
-              strokeWeight: 10,
-              strokeColor: '#41D459',
-            })
-          });
-          polyline.on('mouseout', function () {
-            polyline.setOptions({
-              strokeWeight: 8,
-              strokeColor: '#D3D3D3',
-            })
-          });
+            polyline.on('mouseover', function () {
+              polyline.setOptions({
+                strokeWeight: 10,
+                strokeColor: '#41D459',
+              })
+            });
+          
+            polyline.on('mouseout', function () {
+              if (_this.currentSelectPolyline !== number) {
+                polyline.setOptions({
+                  strokeWeight: 8,
+                  strokeColor: '#D3D3D3',
+                })
+              }
+            });
 
 
           _this.polylineObj[number] = polyline;
 
           _this.map.add(polyline);
+
         }
       }
     },
@@ -395,39 +426,46 @@ export default {
      */
     onSearch () {
       let arr = [];
-      this.filterObj.vehicleNumberList.forEach(item => {
-        if (!reg.test(item.vehicleNumber)) {
-          this.hasError = true;
-        }
-        arr.push(item.vehicleNumber)
-      });
+      // this.filterObj.vehicleNumberList.forEach(item => {
+      //   if (!reg.test(item.vehicleNumber)) {
+      //     this.hasError = true;
+      //   }
+      //   arr.push(item.vehicleNumber)
+      // });
 
-      if (this.hasError) {
-        if (!document.querySelector('.el-message--info')) {
-          this.$message.info('请输入正确的车牌号码');
-        }
-        return;
-      }
+      // if (this.hasError) {
+      //   if (!document.querySelector('.el-message--info')) {
+      //     this.$message.info('请输入正确的车牌号码');
+      //   }
+      //   return;
+      // }
 
-      this.filterObj.vehicleNumbers = arr.join('-');
+      // this.filterObj.vehicleNumbers = arr.join(',');
 
-      this.searchLoading = true;
+      // this.searchLoading = true;
 
       const params = {
-        startDate: formatDate(this.filterObj.startDate),
-        endDate: formatDate(this.filterObj.endDate),
-        vehicleNumbers: this.filterObj.vehicleNumbers,
-        order:"asc",
-        pageNum: this.pagination.pageNum,
-        pageSize: this.pagination.pageSize
+        // startDate: formatDate(this.filterObj.startDate),
+        // endDate: formatDate(this.filterObj.endDate),
+        // vehicleNumbers: this.filterObj.vehicleNumbers,
+        startTime: '2019-07-13 00:00:00',
+        endTime: '2019-07-13 13:59:59',
+        vehicleNumbers: "湘LYV366,湘NF8988,湘NJM910,湘NJY056",
+        // order:"asc",
+        // pageNum: this.pagination.pageNum,
+        // pageSize: this.pagination.pageSize
       };
 
       getMultiVehicleList(params)
         .then(res => {
           if (res && res.data) {
             this.pagination.total = res.data.total;
-            this.dataList = res.data.list;
             this.searchLoading = false;
+            this.dataList = res.data;
+
+            this.dataList.map(item => {
+              this.drawPoint(item.shotRecords, item.vehicleNumber, item.deviceShotRecords);
+            })
           } else {
             this.searchLoading = false;
           }
@@ -439,6 +477,7 @@ export default {
       this.radioChecked = index;
       for (let i in this.polylineObj) {
         if (number === i ) {
+          this.currentSelectPolyline = i; // 当前选中的车辆
           this.polylineObj[i].setOptions({
             strokeWeight: 10,
             strokeColor: '#41D459',
@@ -450,31 +489,107 @@ export default {
           })
         }
       }
+    },
+    // 关闭右侧弹出框
+    closeRightBox () {
+      this.isShowRightContent = false;
+      this.recordDetail = {
+        deviceName: null,
+        shotAddress: null,
+        recordList: []
+      };
+    },
+    // 点击视频播放按钮全屏播放视频
+    openVideo (obj) {
+      this.videoDetail = obj;
+      this.showLarge = true;
+    },
+    // 关闭视频
+    closeVideo () {
+      this.showLarge = false;
+      document.getElementById('controlVideo').pause();
+    },
+    // 播放视频
+    playLargeVideo (val) {
+       if (val) {
+        this.isPlaying = true;
+        document.getElementById('controlVideo').play();
+        this.handleVideoEnd();
+      } else {
+        this.isPlaying = false;
+        document.getElementById('controlVideo').pause();
+      }
+    },
+    // 监听视频是否已经播放结束
+    handleVideoEnd () {
+      let _this = this;
+      const obj = document.getElementById('controlVideo');
+      if (obj) {
+        obj.addEventListener('ended', () => { // 当视频播放结束后触发
+          _this.isPlaying = false;
+        });
+      }
+    },
+    // 截屏
+    playerCut () {
+      this.cutDialogVisible = true;
+      this.$nextTick(() => {
+        let $video = $('#controlVideo');
+        let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
+        // console.log($video.width(), $video.height());
+        if ($canvas && $canvas.length > 0) {
+          // let w = 920, h = 540;
+          let w = $video.width(), h = $video.height();
+          if (w > 920) {
+            h = Math.floor(920 / w * h);
+            w = 920;
+          }
+          $canvas.attr({
+            width: w,
+            height: h,
+          });
+          // $video[0].crossOrigin = 'anonymous';
+          // video canvas 必须为原生对象
+          let ctx = $canvas[0].getContext('2d');
+          this.cutTime = new Date().getTime();
+          ctx.drawImage($video[0], 0, 0, w, h);
+        }
+      });
+    },
+    // 截屏保存
+    playerCutSave () {
+      let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
+      if ($canvas && $canvas.length > 0) {
+        console.log('$canvas[0]', $canvas[0])
+        let img = $canvas[0].toDataURL('image/png');
+        // img.crossOrigin  = '';
+        let filename = 'image_' + this.cutTime + '.png';
+        if('msSaveOrOpenBlob' in navigator){
+          // 兼容EDGE
+          let arr = img.split(',');
+          let mime = arr[0].match(/:(.*?);/)[1];
+          let bstr = atob(arr[1]);
+          let n = bstr.length;
+          let u8arr = new Uint8Array(n);
+          while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+          }
+          let blob = new Blob([u8arr], {type:mime});
+          window.navigator.msSaveOrOpenBlob(blob, filename);
+          return;
+        }
+        img.replace('image/png', 'image/octet-stream');
+        let saveLink = $('#' + this.flvplayerId + '_cut_a')[0];
+        saveLink.href = img;
+        saveLink.download = filename;
+        saveLink.click();
+        // console.log(base64);
+      }
     }
   }
 }
 </script>
 <style lang="scss" scoped>
-// .icon_box {
-//   position: relative;
-//   .mark_span {
-//     position: relative;
-//   }
-//   .mark__hover_span {
-//     position: absolute;
-//     left: 0px;
-//     top: 0;
-//     display: none;
-//   }
-//   &:hover {
-//     .mark_span {
-//       display: none;
-//     }
-//     .mark__hover_span {
-//       display: block;
-//     }
-//   }
-// }
 .vc_gcck_bd {
   position: absolute; top: 0; left: 0;
   width: 100%; height: 50px; line-height: 50px;
@@ -525,7 +640,6 @@ export default {
       }
     }
     .the-right-result {
-      width: calc(100% - 285px);  
       height: 100%;
       position: relative;
       #mapContainer {
@@ -533,13 +647,15 @@ export default {
         width: 100%;
       }
       .top_ul {
-        background-color: #FFFFFF;
-        box-shadow:0px 12px 14px 0px rgba(148,148,148,0.4);
+        width: auto;
+        box-shadow: 0px 12px 14px 0px rgba(148,148,148,0.4);
         position: absolute;
         top: 15px;
-        left: 25%;
+        left: 20px;
+        // margin-left: -25%;
         display: flex;
         padding: 0 10px;
+        background-color: #FFFFFF;
         >li {
           height: 48px;
           align-items: center;
@@ -569,7 +685,7 @@ export default {
         position: absolute;
         right: 0;
         top: 15px;
-        width:258px;
+        width: 258px;
         height: calc(100% - 30px);
         background-color: #FFFFFF;
         padding: 15px 10px 0 10px;
@@ -596,13 +712,17 @@ export default {
             right: 0;
             top: 0;
             cursor: pointer;
-            color: #0869EB;
+            font-size: 20px;
+            color: #999999;
           }
         }
         .result_ul {
           height: calc(100% - 60px);
           li {
             margin-bottom: 10px;
+            &:last-child {
+              margin-bottom: 0;
+            }
             >p {
               color: #333333;
               font-size: 12px;
@@ -644,6 +764,89 @@ export default {
       }
     }
   }
+  .the-right-result {
+    width: 100%;  
+  }
+  .the-right-result.hide {
+    width: calc(100% - 285px);
+    // height: calc(100% - 54px);
+    // float: right;
+  }
+  .left.hide {
+    margin-left: -272px;
+    transition: marginLeft 0.3s ease-in;
+    position: relative;
+    z-index: 2;
+    // animation: fadeOutLeft 0.4s ease-out 0.3s both;
+  }
+  .left {
+    position: relative;
+    width: 272px;
+    height: calc(100% - 54px);
+    background-color: #ffffff;
+    float: left;
+    z-index: 1;
+    margin-left: 0px;
+    box-shadow: 4px 0px 10px 0px #838383;
+    box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);
+    animation: fadeInLeft 0.4s ease-out 0.3s both;
+    transition: marginLeft 0.3s ease-in;
+    .plane {
+      padding: 10px;
+      position: relative;
+      height: 100%;
+    }
+    .line40 {
+      line-height: 40px;
+    }
+    .inset {
+      display: inline-block;
+      line-height: 40px;
+      font-style: normal;
+    }
+    .firstItem {
+      margin-bottom: 5px;
+    }
+  }
+  .insetLeft{
+    position: absolute;
+    right: -28px;
+    width: 25px;
+    height: 178px;
+    top: 50%;
+    margin-top: -89px;
+    display: inline-block;
+    background-repeat: no-repeat;
+    transform: rotate(180deg);
+    background-image: url(../../../../../assets/img/icons.png);
+    background-position: -380px -1269px;
+    cursor: pointer;
+  }
+  .hide {
+    .insetLeft {
+      transform: rotate(180deg);
+      background-position: -504px -1269px;
+    }
+    .insetLeft:hover{
+      transform: rotate(180deg);
+      background-position: -440px -1269px;
+    }
+    
+  }
+  .insetLeft:hover {
+    position: absolute;
+    right: -28px;
+    width: 28px;
+    height: 178px;
+    top: 50%;
+    margin-top: -89px;
+    display: inline-block;
+    background-repeat: no-repeat;
+    transform: rotate(180deg);
+    background-image: url(../../../../../assets/img/icons.png);
+    background-position: -318px -1269px;
+    cursor: pointer;
+  }
   .reset_btn, .select_btn {
     width: 110px;
   }
@@ -651,10 +854,105 @@ export default {
 /deep/.__view {
   padding-right: 10px;
 }
+@media screen and (max-width: 1439px) { // 小屏幕
+  .top_ul {
+    left: 20px;
+  }
+}
+@media screen and (min-width: 1440px) { // 大屏幕
+  .top_ul {
+    // left: 40%;
+  }
+}
+.vl_j_fullscreen {
+  position: fixed;
+  width: 100% !important;
+  height: 100% !important;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  background: #000000;
+  z-index: 1111;
+  -webkit-transition: all .4s;
+  -moz-transition: all .4s;
+  -ms-transition: all .4s;
+  -o-transition: all .4s;
+  transition: all .4s;
+  > video {
+    width: 100%;
+    height: 100%;
+  }
+  > .control_bottom {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 48px;
+    background: rgba(0, 0, 0, .65);
+    > div {
+      float: left;
+      width: 50%;
+      height: 100%;
+      line-height: 48px;
+      text-align: right;
+      padding-right: 20px;
+      color: #FFFFFF;
+      &:first-child {
+        text-align: left;
+        padding-left: 20px;
+      }
+      > span {
+        display: inline-block;
+        height: 22px;
+        margin-left: 10px;
+        vertical-align: middle;
+        cursor: pointer;
+        a {
+          font-size: 25px;
+          text-decoration: none;
+          color: #ffffff;
+          vertical-align: top;
+        }
+      }
+    }
+  }
+}
+.close_icon {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  z-index: 1000;
+  cursor: pointer;
+}
 </style>
 
 
 <style lang="scss">
+#mapContainer {
+  .icon_box {
+    width: 43px;
+    height: 68px;
+    position: relative;
+    .mark_span {
+      width: 100%;
+      height: 100%;
+    }
+    .mark_hover_span {
+      position: absolute;
+      left: 0px;
+      top: 0;
+      display: none;
+    }
+    // &:hover {
+    //   .mark_span {
+    //     display: none;
+    //   }
+    //   .mark_hover_span {
+    //     display: block;
+    //   }
+    // }
+  }
+}
 .cap_info_win {
   background: #FFFFFF;
   padding: .18rem;
