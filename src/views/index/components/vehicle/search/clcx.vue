@@ -58,7 +58,7 @@
           </el-form-item>
           
       
-          <el-form-item label="区域：" label-width="60px" class="firstItem">
+          <el-form-item label="抓拍区域：" label-width="72px" class="firstItem">
             <!-- <el-radio-group v-model="input5" @change="changeTab"> -->
             <el-radio-group v-model="input5" @change="changeTab">
                <el-row :gutter="10">
@@ -594,6 +594,8 @@ export default {
     color: #909399;
   }
 }
-
+.el-form-item__label{
+  padding-right: 0px;
+}
 
 </style>
