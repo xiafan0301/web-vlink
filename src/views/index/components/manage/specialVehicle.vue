@@ -78,14 +78,14 @@
           </el-form-item>
           <el-form-item class="operation_form_btn" style="width: 260px;">
             <el-button class="reset_btn" @click="exportVehicle">导出车辆</el-button>
-            <el-button class="select_btn" @click="searchData">查询</el-button>
+            <el-button class="select_btn" type="primary" @click="searchData">查询</el-button>
             <el-button class="reset_btn" @click="resetData('searchForm')">重置</el-button>
           </el-form-item>
         </el-form>
         <div class="divide"></div>
       </div>
       <div class="button_box">
-        <el-button class="select_btn" @click="showAddVehicleDialog('carForm', 'add')">新增车辆</el-button>
+        <el-button class="select_btn" type="primary" @click="showAddVehicleDialog('carForm', 'add')">新增车辆</el-button>
         <el-button class="reset_btn" @click="importVehicle">导入车辆</el-button>
         <el-button :class="[!isDisabled ? 'reset_btn' : 'disabled_btn']" :disabled="isDisabled" :loading="isDeleteVehicleLoading" @click="showDeleteVehicleDialog">删除车辆</el-button>
       </div>
@@ -290,10 +290,10 @@
               <el-form-item style="margin-left: 20px;">
                 <el-button class="reset_btn" style="width: 140px;" @click="cancelOperation('carForm')">取消</el-button>
                 <template v-if="isAddVehicle">
-                  <el-button :class="[isSubmitData ? 'select_btn' : 'disabled_btn']"  :loading="isVehicleLoading" @click="addVehicle('carForm')" style="width: 140px;">保存</el-button>
+                  <el-button :class="[isSubmitData ? 'select_btn' : 'disabled_btn']" type="primary" :loading="isVehicleLoading" @click="addVehicle('carForm')" style="width: 140px;">保存</el-button>
                 </template>
                 <template v-else>
-                  <el-button :class="[isSubmitData ? 'select_btn' : 'disabled_btn']"  :loading="isVehicleLoading" @click="updateVehicle('carForm')" style="width: 140px;">确定</el-button>
+                  <el-button :class="[isSubmitData ? 'select_btn' : 'disabled_btn']" type="primary" :loading="isVehicleLoading" @click="updateVehicle('carForm')" style="width: 140px;">确定</el-button>
                 </template>
               </el-form-item>
             </el-form>
@@ -367,14 +367,14 @@
         <p>请先下载模板文件并按要求填写相关信息，再上传进行批量新增</p>
           <ul class="upload_box">
             <li>
-              <p class="header">1、请下载导入模板，填写用户信息。</p>
+              <p class="header">1、请下载导入模板，填写车辆信息。</p>
               <div class="main_content download_box">
                 <i class="vl_icon_manage_17 vl_icon"></i>
                 <span>下载模板</span>
               </div>
             </li>
             <li>
-              <p class="header">2、上传已填写的用户信息表。</p>
+              <p class="header">2、上传已填写的车辆信息表。</p>
               <div class="main_content">
                 <el-upload
                   ref="vehicleImport"
@@ -427,8 +427,7 @@ import { autoDownloadUrl } from '@/utils/util.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import { getSpecialGroup, addSpecialVehicle, editSpecialVehicle, getSpecialVehicleDetail, 
   getSpecialVehicleList, addGroup, checkRename, editVeGroup, delGroup,
-  getVehicleBrand, getVehicleModel, moveoutGroup, vehicleImport, vehicleExport } from '@/views/index/api/api.manage.js';
-import { getVehicleByVehicleNumber } from '@/views/index/api/api.control.js';
+  getVehicleBrand, getVehicleModel, moveoutGroup, vehicleImport, vehicleExport, getReVehicleInfo } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {
@@ -657,6 +656,8 @@ export default {
       getSpecialVehicleList(params)
         .then(res => {
           if (res) {
+            
+
             this.vehicleList = res.data.list;
             this.pagination.total = res.data.total;
             this.vehicleList.map(item => {
@@ -689,7 +690,6 @@ export default {
                 }
               });
             });
-            console.log(this.vehicleList)
           }
         })
     },
@@ -722,17 +722,25 @@ export default {
        const params = {
         vehicleNumber: carIdNo
       };
-      getVehicleByVehicleNumber(params)
+      getReVehicleInfo(params)
         .then(res => {
-          if (res && res.data && res.data.length > 0) {
+          if (res && res.data) {
             this.isAddDisabled = true;
 
-            let carInfo = res.data[0];
+            let carInfo = res.data;
 
             let vehicleColor = carInfo.vehicleColor;
             let vehicleType = carInfo.vehicleType;
             let numberType = carInfo.numberType;
             let numberColor = carInfo.numberColor;
+
+            if (res.data.groupList.length > 0) {
+              res.data.groupList.map(item => {
+                if (item.uid !== this.activeId) {
+                  this.carForm.groupList.push(item.uid);
+                }
+              });
+            }
 
             this.fileList = carInfo.vehicleImagePath ? [{url: carInfo.vehicleImagePath}] : [];//回填图片
             this.dialogImageUrl = carInfo.vehicleImagePath;
@@ -740,6 +748,7 @@ export default {
             this.carForm.vehicleNumber = carInfo.vehicleNumber;
             this.carForm.desci = carInfo.desci;
             this.carForm.ownerIdType = carInfo.ownerIdType || null;
+
 
             this.carForm.vehicleColor = vehicleColor && vehicleColor.toString() || null;
             this.carForm.vehicleType = vehicleType && vehicleType.toString() || null;
@@ -849,19 +858,17 @@ export default {
       this.$refs[form].validate(valid => {
         if (valid) {
           if (!this.dialogImageUrl) {
-            this.$message({
-              type: 'error',
-              message: '请先上传车辆照片',
-              customClass: 'request_tip'
-            })
+            if (!document.querySelector('.el-message--info')) {
+              this.$message.info('请先上传车辆照片');
+            }
+           
             return;
           }
           if (this.carForm.groupList.length === 0) {
-            this.$message({
-              type: 'error',
-              message: '请先选择所属组',
-              customClass: 'request_tip'
-            })
+            if (!document.querySelector('.el-message--info')) {
+              this.$message.info('请先选择所属组');
+            }
+           
             return;
           }
           this.carForm.vehicleImagePath = this.dialogImageUrl;
@@ -896,19 +903,17 @@ export default {
       this.$refs[form].validate(valid => {
         if (valid) {
           if (!this.dialogImageUrl) {
-            this.$message({
-              type: 'error',
-              message: '请先上传车辆照片',
-              customClass: 'request_tip'
-            })
+            if (!document.querySelector('.el-message--info')) {
+              this.$message.info('请先上传车辆照片');
+            }
+           
             return;
           }
           if (this.carForm.groupList.length === 0) {
-            this.$message({
-              type: 'error',
-              message: '请先选择所属组',
-              customClass: 'request_tip'
-            })
+            if (!document.querySelector('.el-message--info')) {
+              this.$message.info('请先选择所属组');
+            }
+           
             return;
           }
           this.carForm.vehicleImagePath = this.dialogImageUrl;
@@ -991,10 +996,14 @@ export default {
       const isLt4M = file.size / 1024 / 1024 < 4;
 
       if (!isJPG) {
-        this.$message.error('上传图片只能是 jpeg、jpg、png 格式!');
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('上传图片只能是 jpeg、jpg、png 格式!');
+        }
       }
       if (!isLt4M) {
-        this.$message.error('上传图片大小不能超过 4MB!');
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('上传图片大小不能超过 4MB!');
+        }
       }
       return isJPG && isLt4M;
     },
@@ -1165,7 +1174,9 @@ export default {
           this.$refs.vehicleImport.submit();
         })
       } else {
-        this.$message.warning('请先选择要导入的文件');
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('请先选择要导入的文件');
+        }
       }
     },
     handleChange (file, fileList) {
@@ -1405,26 +1416,11 @@ export default {
       }
     }
   }
-  .select_btn {
-    background-color: #0C70F8;
-    color: #ffffff;
-  }
   .disabled_btn {
     background:rgba(242,242,242,1);
     border:1px solid rgba(211,211,211,1);
     border-radius:4px;
     color: #B2B2B2;
-  }
-  .reset_btn {
-    background-color: #ffffff;
-    color: #666666;
-    border-color: #DDDDDD;
-    &:hover {
-      background-color: #ffffff;
-      color: #0C70F8;
-      border-color: #0C70F8;
-
-    }
   }
 }
 .dialog_comp_vehicle {

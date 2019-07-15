@@ -3,7 +3,7 @@
     <div class="breadcrumb_heaer">
       <div is="vlBreadcrumb" 
         :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
-          {name: '车辆查询', routerName: 'vehicle_search_clcx'},
+          {name: '车辆查询', routerName: 'vehicle_search_clcx',query:urldata},
           {name: '过车详情'}]">
       </div>
       <!-- <el-breadcrumb separator=">">
@@ -23,45 +23,45 @@
           </div> -->
           <div class="div">
              <label>车牌</label>
-            <span>{{detailData.plateno}}</span>
+            <span>{{detailData.plateNo}}</span>
            
           </div>
           <div class="div" v-if="detailData.color">
              <label>车身颜色</label>
-            <span>{{detailData.color}}色</span>
+            <span>{{detailData.vehicleColor}}色</span>
            
           </div>
           <div class="div">
-             <label>中文品牌</label>
-            <span>{{detailData.brand}}</span>
+             <label>号牌种类</label>
+            <span>{{detailData._numberType}}</span>
            
           </div>
           <div class="div">
-            <label>机动车状态</label>
-            <span>{{detailData.status}}</span>
+            <label>号牌颜色</label>
+            <span>{{detailData.numberColor}}</span>
             
           </div>
           <div class="div">
              <label>车辆类型</label>
-            <span>{{detailData.platetype}}</span>
+            <span>{{detailData._vehicleType}}</span>
            
           </div>
           <div class="div" v-if="detailData.owner">
              <label>车辆所有人</label>
-            <span>{{detailData.owner}}</span>
+            <span>{{detailData.ownerName}}</span>
            
           </div>
           <div class="div">
-            <label>年 款</label>
-            <span>{{detailData.model}}</span>
+            <label>车主身份证号</label>
+            <span>{{detailData.ownerIdCard}}</span>
             
           </div>
           <div class="div">
-            <label>核定载客</label>
-            <span>{{detailData.seatnumber}}人</span>
+            <label>车辆型号</label>
+            <span>{{detailData.vehicleModel}}人</span>
             
           </div>
-          <div class="div">
+          <!-- <div class="div">
             <label>使用性质</label>
             <span>{{detailData.usecharacter}}人</span>
             
@@ -70,12 +70,12 @@
             <label>有效期</label>
             <span>{{detailData.validuntil}}</span>
             
-          </div>
+          </div> -->
           <!-- <div class="div">
             <span>{{detailData.isSurveillance}}</span>
             <label>布控车辆</label>
           </div> -->
-          <p class="blue" @click="goToPage('vehicle_search_lxwfdetail')">查看违章记录</p>
+          <el-button type="primary"  @click="goToPage('vehicle_search_lxwfdetail')" class="select_btn full">查看违章记录</el-button>
         </div>
       </div>
     </div>
@@ -83,7 +83,7 @@
       <div class="main">
         <div class="infobox">
           <div class="flex1 bkt mrg10">
-            <div>
+            <div v-if="snapObj.videoPath">
             <video id="capVideo"
               :src="snapObj.videoPath"
               class="spimg"
@@ -98,7 +98,7 @@
           <div class="flex1 bkt">
             <img
               :src="snapObj.storagePath"
-              class="spimg"
+              class="spimg bigImg"  
              
             >
             
@@ -127,6 +127,7 @@
                   
                 </p>
               </div>
+              <a :href="snapObj.videoPath">下载视频</a>
               <!-- <span class="playSee" v-if="showimg" @click="showimg=!showimg">视频回放</span>
               <span class="playSee" v-if="!showimg" @click="showimg=!showimg">抓拍图</span> -->
             </div>
@@ -169,17 +170,23 @@
         </div>
       </div>
     </div>
+    <!-- <extendBig :url="bigurl" :open="openBig" @closeimg="openBig=false"></extendBig> -->
   </div>
 </template>
 <script>
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+
 import { ScpGETstrucInfoList } from "@/views/index/api/api.search.js";
 import { getSnapDetail,getArchives } from "@/views/index/api/api.judge.js";
+import { dataList } from "@/utils/data.js";
 export default {
   components: {vlBreadcrumb},
   data() {
     return {
+      urldata:JSON.parse(localStorage.getItem("searchD")),
       curImgIndex: 0,
+      bigurl:'',
+      openBig: false,
       showSim: false,
       showimg: true,
       playing: true,
@@ -226,16 +233,33 @@ export default {
           prevEl: ".swiper-button-prev"
         }
       },
-      detailData:{}
+      detailData:{},
+      plateType:[],
+      vehicleType:[],
 
     };
   },
   mounted() {
     // this.tcDiscuss();
+    // let d= 
+    
+    // this.urldata=
+    //console.log(this.urldata);
+    let dic = this.dicFormater(dataList.vehicleType);
+    let dic1 = this.dicFormater(dataList.plateType);
+
+    this.plateType = [...dic1[0].dictList]; // 号牌类型
+    this.vehicleType = [...dic[0].dictList]; // 车辆类型
+
     this.getSnapDetail()
     this.getArchives()
   },
   methods: {
+    extendImgs(v){
+      this.extendImg(v)
+      // this.openBig=true
+      // this.bigurl=v
+    },
     goToPage(v){
       if(v=="vehicle_search_lxwfdetail"){
         this.$router.push({name:v , query:{
@@ -247,7 +271,8 @@ export default {
       }else{
         this.$router.push({name:v ,query:{
            plateNo:this.detailData.plateno,
-           imgurl:this.snapObj.storagePath
+           imgurl:this.snapObj.storagePath,
+           modelName:'车辆追踪'
         }});
       }
         
@@ -260,6 +285,15 @@ export default {
         if(res && res.data){
           // console.log(res);
           this.detailData=res.data
+          // this.plateType = [...dic1[0].dictList]; // 号牌类型
+          // this.vehicleType = [...dic[0].dictList]; // 车辆类型
+          let a = this.plateType.find(el=>el.enumField==this.detailData.numberType)
+          let b = this.vehicleType.find(el=>el.enumField==this.detailData.vehicleType)
+          // console.log(this.plateType);
+          // console.log(b);
+          //if(a)
+          this.detailData._vehicleType=a ? a.enumValue :''
+          this.detailData._numberType= b ? b.enumValue :''
         }
       })
     },
@@ -285,7 +319,6 @@ export default {
     },
     imgListTap(data, index) {
       this.curImgIndex = index;
-      console.log(index);
       this.snapObj = this.strucInfoList[index]
       // this.sturcDetail = data;
       //this.drawPoint(data);

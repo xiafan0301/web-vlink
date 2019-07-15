@@ -2,7 +2,7 @@
   <el-breadcrumb separator=">" class="vl_breadcrumb">
     <template v-for="(item, index) in bdData">
       <el-breadcrumb-item :key="'vl_db_' + index" v-if="item.routerName" 
-        :to="{ name: item.routerName, query: item.query }">{{item.name}}</el-breadcrumb-item>
+        :to="{ name: item.routerName, query: item.query, params: item.params }">{{item.name}}</el-breadcrumb-item>
       <el-breadcrumb-item :key="'vl_db_' + index" v-else>{{item.name}}</el-breadcrumb-item>
     </template>
   </el-breadcrumb>

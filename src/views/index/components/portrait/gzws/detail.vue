@@ -1,83 +1,90 @@
 <template>
   <div class="gzws_record">
-    <Breadcrumb :oData="[{name: '跟踪尾随', routerName: 'gzws_portrait'}, {name: '分析结果', routerName: 'gzws_result'}, {name: '尾随记录'}]"></Breadcrumb>
+    <div class="vc_gcck_bd">
+      <div is="vlBreadcrumb" 
+        :breadcrumbData="[
+          {name: '人像侦查', routerName: 'portrait_menu'},
+          {name: '跟踪尾随', routerName: 'gzws_portrait'},
+          {name: '分析结果', routerName: 'gzws_result', query: {id: $route.query.id}}, {name: '尾随记录'}]">
+      </div>
+    </div>
     <div class="content_box">
       <div class="left">
         <vue-scroll>
           <h2>尾随人员的特征信息</h2>
           <ul class="detail_ul">
             <li>
-              <img src="../../../../../assets/img/temp/vis-eg.png" alt="">
+              <img :src="detailInfo.subStoragePath" alt="">
             </li>
             <li>
               <span>性别：</span>
-              <span>红色</span>
+              <span>{{detailInfo.sex ? detailInfo.sex + '性' : '未知'}}</span>
             </li>
             <li>
               <span>年龄段：</span>
-              <span>少年</span>
+              <span>{{detailInfo.age ? detailInfo.age : '未知'}}</span>
             </li>
             <li>
               <span>发型：</span>
-              <span>你猜咯</span>
+              <span>{{detailInfo.hair ? detailInfo.hair : '未知'}}</span>
             </li>
             <li>
               <span>上身款式：</span>
-              <span>你猜咯</span>
+              <span>{{detailInfo.upperType ? detailInfo.upperType : '未知'}}</span>
             </li>
             <li>
               <span>上身纹理：</span>
-              <span>你猜咯</span>
+              <span>{{detailInfo.upperTexture ? detailInfo.upperTexture : '未知'}}</span>
             </li>
             <li>
               <span>上身颜色：</span>
-              <span>你猜咯</span>
+              <span>{{detailInfo.upperColor ? detailInfo.upperColor : '未知'}}</span>
             </li>
             <li>
               <span>下身款式：</span>
-              <span>你猜咯</span>
+              <span>{{detailInfo.bottomType ? detailInfo.bottomType : '未知'}}</span>
             </li>
             <li>
               <span>下身颜色：</span>
-              <span>你猜咯</span>
+              <span>{{detailInfo.bottomColor ? detailInfo.bottomColor : '未知'}}</span>
             </li>
             <li>
               <span>是否打伞：</span>
-              <span>你猜咯</span>
+              <span>{{detailInfo.umbrella ? detailInfo.umbrella : '未知'}}</span>
             </li>
             <li>
               <span>是否戴帽子：</span>
-              <span>你猜咯</span>
+              <span>{{detailInfo.hat ? detailInfo.hat : '未知'}}</span>
             </li>
             <li>
               <span>是否背包：</span>
-              <span>你猜咯</span>
+              <span>{{detailInfo.knapsack ? detailInfo.knapsack : '未知'}}</span>
             </li>
             <li>
               <span>是否拎东西：</span>
-              <span>你猜咯</span>
+              <span>{{detailInfo.bag ? detailInfo.bag : '未知'}}</span>
             </li>
             <li>
               <span>是否抱小孩：</span>
-              <span>你猜咯</span>
+              <span>{{detailInfo.baby ? detailInfo.baby : '未知'}}</span>
             </li>
             <li>
               <span>是否戴眼镜：</span>
-              <span>你猜咯</span>
+              <span>{{detailInfo.glasses ? detailInfo.glasses : '未知'}}</span>
             </li>
             <li>
               <span>是否戴口罩：</span>
-              <span>你猜咯</span>
+              <span>{{detailInfo.mask ? detailInfo.mask : '未知'}}</span>
             </li>
           </ul>
         </vue-scroll>
       </div>
       <div class="right">
         <div class="operation_box">
-          <p>人员布控</p>
-          <p>人脸检索</p>
-          <p>轨迹碰撞</p>
-          <p>落脚点分析</p>
+          <p @click="skipCreateControlPage">人员布控</p>
+          <p @click="skipYtsrPortraitPage">以图搜人</p>
+          <p @click="skipPjfxPortraitPage">轨迹分析</p>
+          <p @click="skipLjdPortraitPage">落脚点分析</p>
         </div>
         <div id="rightMap"></div>
       </div>
@@ -91,64 +98,57 @@
         <div>
           <span @click="playLargeVideo(false)" class="vl_icon vl_icon_judge_01" v-show="isPlaying"></span>
           <span @click="playLargeVideo(true)" class="vl_icon vl_icon_control_09" v-show="!isPlaying"></span>
-          <span @click="cutScreen" class="vl_icon vl_icon_control_07"></span>
+          <span @click="playerCut" class="vl_icon vl_icon_control_07"></span>
           <span><a download="视频" :href="videoDetail.videoPath" class="vl_icon vl_icon_event_26"></a></span>
         </div>
       </div>
     </div>
+    <!-- 截屏 dialog -->
+    <el-dialog title="截屏" :visible.sync="cutDialogVisible" :center="false" :append-to-body="true" width="1000px">
+      <div style="text-align: center; padding-top: 30px;">
+        <canvas :id="flvplayerId + '_cut_canvas'"></canvas>
+      </div>
+      <div slot="footer" class="dialog-footer" style="padding: 0 0 20px 0;">
+        <el-button  @click="cutDialogVisible = false">取 消</el-button>&nbsp;&nbsp;&nbsp;&nbsp;
+        <el-button  type="priamry" @click="playerCutSave">保 存</el-button>
+        <a :id="flvplayerId + '_cut_a'" style="display: none;">保存</a>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
-// import { testData } from './testData.js';
-import { getTailBehindDetail } from '@/views/index/api/api.judge.js';
-import Breadcrumb from '../breadcrumb.vue';
-import { formatESDate } from '@/utils/util.js';
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+import { random14 } from '@/utils/util.js';
 export default {
-  components: { Breadcrumb },
+  components: { vlBreadcrumb },
   data () {
     return {
+      cutDialogVisible: false, // 截屏弹出框
       showLarge: false, // 全屏显示
       videoDetail: {}, // 播放视频的信息
       isPlaying: false, // 是否播放视频
+      flvplayerId: 'flv_' + random14(),
       map: null,
-      // testData: testData,
-      resultList: [],
       marker: {},
+      detailInfo: {}
     }
   },
   mounted () {
-    this.initMap();
-    // setTimeout(() => {
-    //   this.getDetail();
-    // }, 500)
+    this.getDetail();
   },
   methods: {
     // 获取尾随车辆详情
     getDetail () {
-      const plateNo = this.$route.query.plateNo;
-      const dateStart = formatESDate(this.$route.query.dateStart);
-      const dateEnd = formatESDate(this.$route.query.dateEnd);
-      const plateNoTb = this.$route.query.plateNoTb;
-      const dateStartTb = formatESDate(this.$route.query.dateStartTb);
-      const params = {
-        plateNo,
-        dateStart,
-        dateEnd,
-        plateNoTb,
-        dateStartTb
-      };
-      getTailBehindDetail(params)
-        .then(res => {
-          if (res && res.data) {
-            console.log('res', res)
-            this.resultList = res.data;
-
-            this.mapMark(this.resultList)
-          }
-        })
+      if (this.$route.query.obj) {
+        this.detailInfo = JSON.parse(this.$route.query.obj);
+        
+        if (this.detailInfo.personRetrieveDetailDtoList.length > 0) {
+          this.initMap(this.detailInfo.personRetrieveDetailDtoList);
+        }
+      }
     },
     // 初始化地图
-    initMap () {
+    initMap (obj) {
       let _this = this;
       let map = new window.AMap.Map('rightMap', {
         zoom: 15, // 级别
@@ -157,6 +157,8 @@ export default {
       map.setMapStyle('amap://styles/whitesmoke');
 
       _this.map = map;
+
+      _this.mapMark(obj);
     },
     mapMark (data) {
       if (data && data.length > 0) {
@@ -167,8 +169,8 @@ export default {
           if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
             let offSet = [-20.5, -55];
             
-            let _idBtn = 'vlJtcPlayBtn' + obj.deviceID;
-            let _id = 'vlJtcVideo' + obj.deviceID;
+            let _idBtn = 'vlJtcPlayBtn' + i;
+            let _id = 'vlJtcVideo' + i;
 
             let marker = new window.AMap.Marker({
               map: _this.map,
@@ -177,19 +179,19 @@ export default {
               draggable: false, // 是否可拖动
               extData: '', // 用户自定义属性
               // 自定义点标记覆盖物内容
-              content: '<div id="vehicle' + obj.deviceID + '"  title="'+ obj.deviceName +'" class="vl_icon vl_icon_sxt"></div>'
+              content: '<div id="vehicle' + i + '"  title="'+ obj.deviceName +'" class="vl_icon vl_icon_sxt"></div>'
             });
   
             path.push(new window.AMap.LngLat(obj.shotPlaceLongitude, obj.shotPlaceLatitude));
 
             marker.on('mouseover', function () {
-              $('#vehicle' + obj.deviceID).addClass('vl_icon_map_hover_mark0');
+              $('#vehicle' + i ).addClass('vl_icon_map_hover_mark0');
 
               let sContent = "<div class='tip_box'><div class='select_target'><p class='select_p'>查询目标</p>"
-                    +"<img src="+ obj.subStoragePath +" /><div class='mongolia'>"
+                    +"<img src="+ obj.targetStoragePath +" /><div class='mongolia'>"
                     +"<span>"+ obj.shotTime +"</span><i id="+ _id +" class='vl_icon vl_icon_control_09'></i></div></div>"
-                    +"<div class='tail_vehicle'><p class='tail_p'>尾随车辆</p><img src="+ obj.subStoragePathTb +" />"
-                    +"<div class='mongolia'><span>"+ obj.shotTimeTb +"</span><i id="+ _idBtn +" class='vl_icon vl_icon_control_09'></i></div></div>"
+                    +"<div class='tail_vehicle'><p class='tail_p'>尾随车辆</p><img src="+ obj.peerStoragePath +" />"
+                    +"<div class='mongolia'><span>"+ obj.shotTime +"</span><i id="+ _idBtn +" class='vl_icon vl_icon_control_09'></i></div></div>"
                     +"<div class='divide'></div><div class='device_name'>"+ obj.deviceName +"</div></div>";
 
                 hoverWindow = new window.AMap.InfoWindow({
@@ -206,7 +208,7 @@ export default {
                 }, 500);
             });
             marker.on('mouseout', function () {
-              $('#vehicle' + obj.deviceID).removeClass('vl_icon_map_hover_mark0');
+              $('#vehicle' + obj.i).removeClass('vl_icon_map_hover_mark0');
             });
             _this.map.setZoom(13)
             // marker.setPosition([obj.shotPlaceLongitude, obj.shotPlaceLatitude]);
@@ -267,9 +269,113 @@ export default {
       }
     },
     // 截屏
-    cutScreen () {
-
+    playerCut () {
+      this.cutDialogVisible = true;
+      this.$nextTick(() => {
+        let $video = $('#controlVideo');
+        let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
+        // console.log($video.width(), $video.height());
+        if ($canvas && $canvas.length > 0) {
+          // let w = 920, h = 540;
+          let w = $video.width(), h = $video.height();
+          if (w > 920) {
+            h = Math.floor(920 / w * h);
+            w = 920;
+          }
+          $canvas.attr({
+            width: w,
+            height: h,
+          });
+          // $video[0].crossOrigin = 'anonymous';
+          // video canvas 必须为原生对象
+          let ctx = $canvas[0].getContext('2d');
+          this.cutTime = new Date().getTime();
+          ctx.drawImage($video[0], 0, 0, w, h);
+        }
+      });
     },
+    // 截屏保存
+    playerCutSave () {
+      let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
+      if ($canvas && $canvas.length > 0) {
+        console.log('$canvas[0]', $canvas[0])
+        let img = $canvas[0].toDataURL('image/png');
+        // img.crossOrigin  = '';
+        let filename = 'image_' + this.cutTime + '.png';
+        if('msSaveOrOpenBlob' in navigator){
+          // 兼容EDGE
+          let arr = img.split(',');
+          let mime = arr[0].match(/:(.*?);/)[1];
+          let bstr = atob(arr[1]);
+          let n = bstr.length;
+          let u8arr = new Uint8Array(n);
+          while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+          }
+          let blob = new Blob([u8arr], {type:mime});
+          window.navigator.msSaveOrOpenBlob(blob, filename);
+          return;
+        }
+        img.replace('image/png', 'image/octet-stream');
+        let saveLink = $('#' + this.flvplayerId + '_cut_a')[0];
+        saveLink.href = img;
+        saveLink.download = filename;
+        saveLink.click();
+        // console.log(base64);
+      }
+    },
+    // 跳至新建布控页面
+    skipCreateControlPage () {
+      this.$store.commit('setBreadcrumbData', {
+        breadcrumbData: [
+          {name: '人像侦查', routerName: 'portrait_menu'},
+          {name: '跟踪尾随', routerName: 'gzws_portrait'},
+          {name: '分析结果', routerName: 'gzws_result', query: { id: this.$route.query.id }},
+          {name: '尾随记录', query: { id: this.$route.query.id }},
+          { name: '新建布控' }
+        ]
+      });
+      this.$router.push({name: 'control_create', query: { imgurl: this.detailInfo.subStoragePath, modelName: '人员追踪' }});
+    },
+    // 跳至人像检索页面
+    skipYtsrPortraitPage () {
+      this.$store.commit('setBreadcrumbData', {
+        breadcrumbData: [
+          {name: '人像侦查', routerName: 'portrait_menu'},
+          {name: '跟踪尾随', routerName: 'gzws_portrait'},
+          {name: '分析结果', routerName: 'gzws_result', query: { id: this.$route.query.id }},
+          {name: '尾随记录', query: { id: this.$route.query.id }},
+          { name: '以图搜人' }
+        ]
+      });
+      this.$router.push({name: 'portrait_ytsr', query: { imgurl: this.detailInfo.subStoragePath }});
+    },
+    // 跳至轨迹分析页面
+    skipPjfxPortraitPage () {
+      this.$store.commit('setBreadcrumbData', {
+        breadcrumbData: [
+          {name: '人像侦查', routerName: 'portrait_menu'},
+          {name: '跟踪尾随', routerName: 'gzws_portrait'},
+          {name: '分析结果', routerName: 'gzws_result', query: { id: this.$route.query.id }},
+          {name: '尾随记录', query: { id: this.$route.query.id }},
+          { name: '轨迹分析' }
+        ]
+      });
+      this.$router.push({name: 'portrait_gjfx', query: { imgurl: this.detailInfo.subStoragePath }});
+    },
+    // 跳至落脚点分析页面
+    skipLjdPortraitPage () {
+      this.$store.commit('setBreadcrumbData', {
+        breadcrumbData: [
+          {name: '人像侦查', routerName: 'portrait_menu'},
+          {name: '跟踪尾随', routerName: 'gzws_portrait'},
+          {name: '分析结果', routerName: 'gzws_result', query: { id: this.$route.query.id }},
+          {name: '尾随记录', query: { id: this.$route.query.id }},
+          { name: '落脚点分析' }
+        ]
+      });
+      this.$router.push({name: 'portrait_ljd', query: { imgurl: this.detailInfo.subStoragePath }});
+    }
   }
 }
 </script>
@@ -342,6 +448,10 @@ export default {
 </style>
 
 <style lang="scss" scoped>
+.vc_gcck_bd {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 50px; line-height: 50px;
+}
 .gzws_record {
   height: 100%;
   .content_box {
@@ -355,7 +465,7 @@ export default {
       background-color: #ffffff;
       box-shadow:2px 3px 10px 0px rgba(131,131,131,0.28);
       padding: 20px;
-      >h2 {
+      h2 {
         color: #222222;
         font-weight: bold;
         font-size: 18px;

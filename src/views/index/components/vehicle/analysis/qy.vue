@@ -24,24 +24,22 @@
           <el-button slot="append" icon="el-icon-search" class="select_btn" @click="setCenter()"></el-button>
           <!--</el-input>-->
         </div>
-        <div style="width: 272px;height: calc(100% - 40px)">
+        <div style="width: 272px;height: calc(100% - 40px);padding-top: 20px;">
           <vue-scroll>
             <div class="search_main">
               <div class="search_top">
-                <span>区域列表</span>
-                <i class="el-icon-delete" @click="clearAllArea"></i>
-                <i class="el-icon-circle-plus-outline" @click="addArea"></i>
+                <span  @click="addArea"><i class="el-icon-circle-plus-outline"></i>增加区域列表</span>
+                <span  @click="clearAllArea"><i class="el-icon-delete"></i></span>
               </div>
               <!--区域选择-->
               <div class="search_item" v-for="(item, index) in searchData" :key="item.id">
-                <div class="search_line">
-                  <span class="red_star">区域:</span>
-                  <span @click="item.activeArea = true" class="choose_btn vl_icon vl_icon_041"></span>
-                  <span class="choose_btn el-icon-delete" @click="clearArea(index)"></span>
-                  <span class="choose_btn el-icon-location-outline" @click="setFitV(index)" :class="{'not-active': !item.area}"></span>
-                  <div class="drawBox" v-show="item.activeArea">
+                <div class="search_line_ts">
+                  <div class="title">
+                    <span class="red_star">区域:</span>
+                    <span class="choose_btn el-icon-location-outline" @click="setFitV(index)" :class="{'not-active': !item.area}"></span>
+                  </div>
+                  <div class="drawBox">
                     <div class="items">
-                      <span class="el-icon-arrow-left" @click="item.activeArea = false;"></span>
                       <span @click="clickTab('cut1', index)" :class="['cut1',{'hover':hover[index]=='cut1' && index === curDrawIndex}]"></span>
                       <span @click="clickTab('cut2', index)"  :class="['cut2',{'hover':hover[index]=='cut2' && index === curDrawIndex}]"></span>
                       <span @click="clickTab('cut3', index)"  :class="['cut3',{'hover':hover[index]=='cut3' && index === curDrawIndex}]"></span>
@@ -71,7 +69,6 @@
                     placeholder="选择日期时间">
                   </el-date-picker>
                 </div>
-                <el-divider></el-divider>
               </div>
               <!--按钮-->
               <div class="search_btn">
@@ -81,6 +78,12 @@
           </vue-scroll>
         </div>
       </div>
+      <!--地图操作按钮-->
+      <ul class="map_rrt_u2">
+        <li @click="resetZoom"><i class="el-icon-aim"></i></li>
+        <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
+        <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
+      </ul>
     </div>
 
     <el-dialog
@@ -103,6 +106,7 @@
   export default {
     data() {
       return {
+        tipInfo: null,
         map: null,
         input3: null,
         hover:{
@@ -184,6 +188,16 @@
       this.getAllDevice();
     },
     methods: {
+      mapZoomSet (val) {
+        if (this.map) {
+          this.map.setZoom(this.map.getZoom() + val);
+        }
+      },
+      resetZoom () {
+        if (this.map) {
+          this.map.setZoomAndCenter(14, mapXupuxian.center);
+        }
+      },
       querySearch(queryString, cb) {
         //this.seacher(queryString)
 
@@ -436,7 +450,7 @@
           var pois = result.poiList.pois;
           if(pois.length>0){
             let new_center=pois[0].location
-            _this.amap.setZoomAndCenter(16, new_center);
+            _this.map.setZoomAndCenter(16, new_center);
           }
 
           // for(var i = 0; i < pois.length; i++){
@@ -485,10 +499,18 @@
         this.searchData.forEach(x => {
           if (x.area) {
             this.map.remove(x.area);
+            x.area = null;
           }
           x.startTime = '';
           x.endTime = '';
         })
+        this.hover = {
+          0: null,
+            1: null,
+            2: null,
+            3: null,
+            4: null,
+        }
         this.pointData.splice(2);
         this.searchData.splice(2);
         this.mouseTool.close(false);
@@ -498,8 +520,8 @@
             {
               activeArea: false,
               area: null, // 区域
-              startTime: this.setDTime().startTime,
-              endTime:  this.setDTime().endTime,
+              startTime: '',
+              endTime:  '',
             }
         )
         this.pointData.push([]);
@@ -588,10 +610,20 @@
       },
       tcDiscuss () {
         let supQuery = {'where': {dtoList: []}};
-        if (this.searchData.find(x => !x.area || !x.startTime || !x.endTime)) {
-          this.$message.info('列表的每个区域跟起止时间都必须选择');
+        if (this.searchData.find((x, index) => !x.area || !x.startTime || !x.endTime)) {
+          if (!document.querySelector('.el-message--info')) {
+            this.$message.info('列表的每个区域跟起止时间都必须选择');
+          }
           return false;
-        } else {
+        } else  {
+          for (let i = 0; i < this.searchData.length; i++) {
+            if(this.pointData[i].length === 0) {
+              if (!document.querySelector('.el-message--info')) {
+                this.$message.info('第' + (i + 1) + '个区域没有框选中设备，请重新选择第' + (i + 1) + '个区域');
+              }
+              return false;
+            }
+          }
           supQuery.where['dtoList'] = this.searchData.map((x, index) => {
             let obj = {}
             obj['cameraIds'] = this.pointData[index].filter(x => x.dataType === 0).map(y => {return y.uid}).join(',');
@@ -607,6 +639,29 @@
   };
 </script>
 <style lang="scss" scoped>
+  .map_rrt_u2 {
+    position: absolute; right: 30px;
+    bottom: 30px;
+    margin-top: .2rem;
+    font-size: 26px;
+    background: #ffffff;
+    width: 78px;
+    padding: 0 10px;
+    > li {
+      line-height: 70px;
+      text-align: center;
+      cursor: pointer;
+      border-bottom: 1px solid #F2F2F2;
+      > i {
+        margin-top: 0;
+        display: inline-block;
+      }
+      color: #999999;
+      &:hover {
+        color: #0C70F8;
+      }
+    }
+  }
   .vl_ph_main {
     /*position: fixed;*/
     width: 100%;
@@ -627,91 +682,98 @@
     .setPost{
       position: absolute;
       left: 0px;
-      top: 0px;
-      width: 328px;
-      height: 100%;
+      top: 10px;
+      width: 397px;
+      height: calc(100% - 10px);
       .inline-input {
-        width: 272px;
+        width: 336px;
       }
       .select_btn {
         background-color: #0c70f8;
         color: #ffffff;
+        width: 64px;
+        position: absolute;
+        right: 0;
       }
       .search_main {
         width: 272px;
         min-height: 569px;
-        margin-top: 20px;
         background: #ffffff;
         .search_top {
           height: 48px;
           line-height: 48px;
-          color: #666666;
-          border-bottom: 1px solid #DCDCDC;
-          padding-right: 12px;
-          padding-left: 20px;
-          i {
-            float: right;
-            display: inline-block;
-            height: 48px;
-            line-height: 48px;
-            margin-left: 20px;
+          display: flex;
+          padding: 0 20px;
+          span {
+            display: block;
+            width: 50%;
+            color: #0C70F8;
             cursor: pointer;
+            &:last-child {
+              text-align: right;
+              color: #CCCCCC;
+              &:hover {
+                color: #0C70F8;
+              }
+            }
           }
         }
         .search_btn {
           text-align: center;
           /*margin-top: 255px;*/
         }
-        >p {
-          padding-left: 10px;
-          height: 10px;
-          line-height: 10px;
+        .search_item {
+          >p {
+            padding-left: 10px;
+            height: 10px;
+            line-height: 10px;
+          }
+          border-bottom: 1px solid #F2F2F2;
+          padding-bottom: 20px;
+          margin-bottom: 20px;
         }
-        .search_line {
-          position: relative;
-          height: 50px;
-          line-height: 50px;
-          padding-left: 20px;
-          color: #999999;
-          .el-range-editor {
-            > i {
-              display: none;
+        .search_line_ts {
+          width: 232px;
+          height: 106px;
+          margin: 0 auto;
+          margin-bottom: 10px;
+          border: 1px solid #D3D3D3;
+          .title {
+            height: 38px;
+            line-height: 38px;
+            border-bottom: 1px solid #D3D3D3;
+            display: flex;
+            span {
+              display: block;
+              width: 50%;
+              padding-left: 10px;
+              &:last-child {
+                text-align: right;
+                padding-right: 10px;
+                padding-top: 10px;
+                color: #999999;
+              }
+            }
+            .choose_btn {
+              cursor: pointer;
+              font-size: 20px;
+            }
+            .not-active {
+              cursor:not-allowed;
             }
           }
-          >span {
-            display: inline-block;
-            margin-right: 20px;
-            vertical-align: middle;
-          }
-          .choose_btn {
-            cursor: pointer;
-            font-size: 20px;
-          }
-          .not-active {
-            cursor:not-allowed;
-          }
-          .time {
-            width: 10px;
-            line-height: 20px;
-          }
           .drawBox{
-            position: absolute;
-            background: #ffffff;
-            left: 0;
-            top: 0;
-            padding: 0 10px 10px 10px;
             width: 100%;
-            animation: fadeInLeft .4s ease-out both;
+            padding-top: 10px;
             .items{
               padding-top: 0px;
               span{
                 display: inline-block;
-                width: 34px;
-                height: 34px;
+                width: 46px;
+                height: 46px;
                 text-align: center;
                 vertical-align: middle;
-                line-height: 34px;
-                border-right: solid 1px #eeeeee;
+                line-height: 46px;
                 cursor: pointer;
                 &:last-child{
                   border-right: none;
@@ -758,6 +820,27 @@
                 background-size: 80% 80%;
               }
             }
+          }
+        }
+        .search_line {
+          position: relative;
+          height: 50px;
+          line-height: 50px;
+          padding: 0 20px;
+          color: #999999;
+          .el-range-editor {
+            > i {
+              display: none;
+            }
+          }
+          >span {
+            display: inline-block;
+            margin-right: 10px;
+            vertical-align: middle;
+          }
+          .time {
+            width: 10px;
+            line-height: 20px;
           }
         }
       }

@@ -1,6 +1,12 @@
 <template>
   <div class="identy_container">
-    <Breadcrumb :oData="[{name: '身份核实'}]"></Breadcrumb>
+    <div class="vc_gcck_bd">
+      <div is="vlBreadcrumb" 
+        :breadcrumbData="[
+          {name: '人像侦查', routerName: 'portrait_menu'},
+          {name: '身份核实'}]">
+      </div>
+    </div>
     <div class="content_box">
       <div class="left">
         <vue-scroll>
@@ -41,18 +47,18 @@
               <span style="margin-left: 10px;">- 100</span>
             </el-form-item>
             <el-form-item prop="idNo">
-              <el-input placeholder="填写身份证信息" v-model="searchForm.idNo" type="text"></el-input>
+              <el-input placeholder=" 请填写证件号码" v-model="searchForm.idNo" type="text"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-button class="reset_btn" style="width: 100px;" @click="resetData('searchForm')">重置</el-button>
-              <el-button class="select_btn" style="width: 100px;" @click="searchData('searchForm')">查询</el-button>
+              <el-button class="reset_btn" @click="resetData('searchForm')">重置</el-button>
+              <el-button class="select_btn" type="primary" :loading="isSearchLoading" @click="searchData('searchForm')">查询</el-button>
             </el-form-item>
           </el-form>
         </vue-scroll>
       </div>
       <div class="right">
-        <vue-scroll>
-          <template v-if="dataList && dataList.length > 0">
+        <template v-if="dataList && dataList.length > 0">
+          <vue-scroll>
             <div class="content_top">
               <p>
                 <span>检索结果</span>
@@ -88,14 +94,11 @@
               layout="total, prev, pager, next, jumper"
               :total="pagination.total">
             </el-pagination>
-          </template>
-          <template v-else>
-            <div class="not_content">
-              <img src="../../../../../assets/img/not-content.png" alt="">
-              <p style="color: #666666; margin-top: 30px;">抱歉，没有相关的结果!</p>
-            </div>
-          </template>
-        </vue-scroll>
+          </vue-scroll>
+        </template>
+        <template v-else>
+          <div is="noResult" :isInitPage="isInitPage"></div>
+        </template>
       </div>
     </div>
     <!--历史记录弹窗-->
@@ -121,7 +124,7 @@
     <!--身份核实详情弹窗-->
     <el-dialog
       :visible.sync="identyDetailDialog"
-      class="struc_detail_dialog"
+      class="struc_detail_idendty_dialog"
       :close-on-click-modal="false"
       top="4vh"
       :show-close="false">
@@ -149,14 +152,14 @@
                   <span style="font-size: 12px;">%</span>
                 </div>
               </h2>
-              <div class="struc_cdi_line" v-show="sturcDetail.label">
-                <span>{{sturcDetail.label}}</span>
-              </div>
               <div class="struc_cdi_line" v-show="sturcDetail.birthDate">
                 <span>{{sturcDetail.birthDate}}</span>
               </div>
               <div class="struc_cdi_line" v-show="sturcDetail.idNo">
                 <span>{{sturcDetail.idNo}}<i class="vl_icon vl_icon_retrieval_08"></i></span>
+              </div>
+              <div class="struc_cdi_line" v-show="sturcDetail.label">
+                <span>{{sturcDetail.label}}</span>
               </div>
               <div class="struc_cdi_line" v-show="sturcDetail.remarks">
                 <span :title="sturcDetail.remarks" style="height: auto;white-space: normal">{{sturcDetail.remarks ? sturcDetail.remarks.length > 74 ? (sturcDetail.remarks.slice(0, 74) + '...') : sturcDetail.remarks : ''}}</span>
@@ -186,11 +189,12 @@
 </template>
 <script>
 import { ajaxCtx } from '@/config/config.js';
-import Breadcrumb from '../breadcrumb.vue';
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+import noResult from '@/components/common/noResult.vue';
 import { checkIdCard } from '@/utils/validator.js';
 import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcPUTAppendixsOrder, getIdNoList} from '@/views/index/api/api.judge.js';
 export default {
-  components: { Breadcrumb },
+  components: { vlBreadcrumb, noResult },
   data () {
     const validateSimilar = (rule, val, callback) => {
       if (val) {
@@ -205,6 +209,7 @@ export default {
       }
     }
     return {
+      isInitPage: true, // 是否是初始化页面
       identyDetailDialog: false, // 身份核实详情弹出框
       loadingHis: false, // 获取历史图片加载中
       historyPicDialog: false, // 历史图片弹出框
@@ -215,7 +220,7 @@ export default {
       uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
       isAddImgDisabled: false,
       searchForm: {
-        similarity: null, // 相似度
+        similarity: 85, // 相似度
         idNo: null // 身份证
       },
       searchRules: {
@@ -246,6 +251,7 @@ export default {
       sturcDetail: {}, // 身份核实详情
       dataList: [],
       queryImgPath: null, // 从其他模块传过来的图片
+      isSearchLoading: false, // 搜索条件加载中
     }
   },
   computed: {
@@ -279,11 +285,9 @@ export default {
         path: e.dataTransfer.getData("imgSrc")
       }
       if (this.curImgNum >= 3) {
-         this.$message({
-            type: 'warning',
-            message: '最多可同时对比三张图片',
-            customClass: 'request_tip'
-          });
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('最多可同时对比三张图片');
+        }
         return;
       }
       this.curImgNum ++;
@@ -321,11 +325,9 @@ export default {
     // 选择历史图片
     chooseHisPic (item) {
       if ((this.choosedHisPic.length + this.curImgNum) === 3 && !item.checked) {
-        this.$message({
-          type: 'warning',
-          message: '最多上传3张照片',
-          customClass: 'request_tip'
-        });
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('最多上传3张照片');
+        }
       } else {
         item.checked = !item.checked;
       }
@@ -355,7 +357,9 @@ export default {
     },
     // 上传图片
     uploadPicExceed () {
-      this.$message.warning('最多可同时对比三张图片');
+      if (!document.querySelector('.el-message--info')) {
+        this.$message.info('最多可同时对比三张图片');
+      }
     },
     uploadPicSuccess (res) {
       this.uploading = true;
@@ -363,7 +367,9 @@ export default {
         let oRes = res.data;
 
         if (this.curImgNum >= 3) {
-          this.$message.error('最多可同时对比三张图片');
+          if (!document.querySelector('.el-message--info')) {
+            this.$message.info('最多可同时对比三张图片');
+          }
           return;
         }
         this.curImgNum ++;
@@ -402,28 +408,33 @@ export default {
       const isLt4M = file.size / 1024 / 1024 < 4;
 
       if (!isJPG) {
-        this.$message.error('上传图片只能是 jpeg、jpg、png 格式!');
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('上传图片只能是 jpeg、jpg、png 格式!');
+        }
       }
       if (!isLt4M) {
-        this.$message.error('上传图片大小不能超过 4MB!');
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('上传图片大小不能超过 4MB!');
+        }
       }
       return isJPG && isLt4M;
     },
     // 重置查询条件
     resetData (form) {
+      this.isInitPage = false;
+      this.fileList = [];
+      this.curImageUrl = null;
       this.$refs[form].resetFields();
-      this.searchData();
+      // this.searchData('searchForm');
     },
     // 根据搜索条件进行查询
     searchData (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
           if (this.curImgNum === 0 && !this.searchForm.idNo) {
-            this.$message({
-              type: 'warning',
-              message: '请先选择要上传的图片或填写身份证信息',
-              customClass: 'request_tip'
-            });
+            if (!document.querySelector('.el-message--info')) {
+              this.$message.info('请先选择要上传的图片或填写身份证信息');
+            }
             return false;
           }
           const params = {
@@ -443,12 +454,17 @@ export default {
           if (_ids.length) {
             params['where.appendixIds'] = _ids.join(',');
           }
+          this.isSearchLoading = true;
           getIdNoList(params).then(res => {
-            if (res) {
-              console.log(res);
-              this.dataList = res.data.list;
-              this.pagination.pageNum = res.data.pageNum;
-              this.pagination.total = res.data.total;
+            if (res && res.data) {
+              this.isSearchLoading = false;
+              if (res.data.list.length > 0) {
+                this.dataList = res.data.list;
+                this.pagination.pageNum = res.data.pageNum;
+                this.pagination.total = res.data.total;
+              } else {
+                this.isInitPage = false;
+              }
             }
           })
         }
@@ -473,9 +489,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-// html {
-//   font-size: 100px;
-// }
+.vc_gcck_bd {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 50px; line-height: 50px;
+}
 .identy_container {
   height: 100%;
   .content_box {
@@ -681,22 +698,8 @@ export default {
       }
     }
   }
-  .reset_btn {
-    width: 110px;
-    background-color: #D3D3D3;
-    color: #666666;
-    border-radius: 4px;
-    &:hover {
-      background-color: #ffffff;
-      color: #0C70F8;
-      border-color: #0C70F8;
-    }
-  }
-  .select_btn {
-    width: 110px;
-    background-color: #0C70F8;
-    color: #ffffff;
-    border-radius: 4px;
+  .reset_btn, .select_btn {
+    width: 100px;
   }
 }
 .history-pic-dialog {
@@ -721,7 +724,7 @@ export default {
     }
   }
 }
-.struc_detail_dialog {
+.struc_detail_idendty_dialog {
   // width: 1000px;
   /deep/ .el-dialog {
     max-width: 13.06rem;

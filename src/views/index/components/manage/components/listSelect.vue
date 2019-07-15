@@ -115,6 +115,7 @@ export default {
     return {
       arrowActiveLeft: false, // 左侧展开箭头
       closeShow: false,
+      oneCloseShow: false, // 点击清除按钮
       hasCheckedRight: false, // 右侧可选设备有选中的
       hasCheckedLeft: false, // 左侧已有设备有选中的
       searchDeviceName: null // 设备名称
@@ -183,7 +184,7 @@ export default {
       if (val) {
         this.closeShow = false;
       } else {
-        if (this.closeShow) {
+        if (!this.oneCloseShow && !this.closeShow) {
           this.$emit('emitSearchData', val);
         }
       }
@@ -192,6 +193,7 @@ export default {
   methods: {
     // 清空搜索框
     onClear () {
+      this.oneCloseShow = true;
       this.closeShow = false;
       this.searchDeviceName = null;
       this.$emit('emitSearchData', this.searchDeviceName);
@@ -199,6 +201,7 @@ export default {
     // 搜索设备
     searchData () {
       if (this.searchDeviceName) {
+        this.oneCloseShow = false;
         this.closeShow = true;
       }
       this.$emit('emitSearchData', this.searchDeviceName);

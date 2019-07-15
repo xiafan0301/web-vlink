@@ -1,6 +1,13 @@
 <template>
 <div class="judge_content">
   <div class="vl_judge_tc">
+    <div class="Breadc">
+      <div is="vlBreadcrumb" 
+        :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
+          {name: '重点人群关注'}]">
+      </div>
+    </div>
+    
     <div :class="['vl_j_left',{hideleft:hideleft}]">
       <div class="vl_jtc_search" style="padding-top: 0;">
           <el-select class="full" v-model="searchData.portraitGroupId" placeholder="关注人群">
@@ -22,9 +29,9 @@
           <el-select class="full" v-model="searchData.ageGroup" placeholder="选择年龄段">
             <el-option
               v-for="item in ageGroupList"
-              :key="item.value"
+              :key="item.label"
               :label="item.label"
-              :value="item.value">
+              :value="item.label">
             </el-option>
           </el-select>
        
@@ -34,7 +41,7 @@
           type="daterange"
           range-separator="-"
           value-format="yyyy-MM-dd"
-          format="yy/MM/dd"
+          format="yyyy-MM-dd"
           :picker-options="pickerOptions"
           start-placeholder="开始日期"
           end-placeholder="结束日期">
@@ -54,6 +61,10 @@
               </el-row>
             </el-radio-group>
           <!-- </el-form-item> -->
+          <div v-if="input5==2" >
+            <el-input  v-model="selectValue" :disabled="true">
+            </el-input>
+          </div>
         <el-select 
           v-model="areaIds"
           class="camera-select full"
@@ -91,12 +102,13 @@
       <div class="vl_jfo_right" v-show="showVideoList">
         <div class="vl_jig_right_title">
           <span>{{curSXT.deviceName}}</span>
-          <span>抓拍{{curSXT.snapNum}}次</span>
+          <span>抓拍{{curSXT.shotNum}}次</span>
         </div>
         <vue-scroll>
           <div class="vl_jtc_mk" v-for="(item, index) in curVideo.videoList" :key="item.id">
-            <video :id="'vlJigVideo' + index" :src="item.snapVideo"></video>
-            <p>{{item.snapTime}}</p>
+            <p>{{item.shotTime}}</p>
+            <video :id="'vlJigVideo' + index" :src="item.videoPath"></video>
+            <p>{{item.shotTime}}</p>
             <div class="vl_jig_right_btn">
               <span class="vl_icon vl_icon_judge_01" @click="playVideo(index)" v-if="item.playing"></span>
               <span class="vl_icon vl_icon_control_09" @click="playVideo(index)" v-else></span>
@@ -212,13 +224,15 @@
 </template>
 <script>
 let AMap = window.AMap;
-import {getFocusList, JigGETAlarmSnapList, JfoGETEventList,getAllDevice } from "@/views/index/api/api.judge.js";
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+import {getFocusList, newGETAlarmSnapList, JfoGETEventList,getAllDevice } from "@/views/index/api/api.judge.js";
 import {MapGETmonitorList} from '../../api/api.map.js';
 import {getGroupListIsPortrait, getGroupListIsVehicle} from '../../api/api.control.js';
 import mapSelector from '@/components/common/mapSelector.vue';
 export default {
    components: {
-    mapSelector
+    mapSelector,
+    vlBreadcrumb
   },
   data() {
     return {
@@ -264,23 +278,16 @@ export default {
       pickerOptions: {
         disabledDate (time) {
           let date = new Date();
-          let y = date.getFullYear();
-          let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
-          let d = date.getDate();
-          let threeMonths = '';
-          let start = '';
-          if (parseFloat(d) >= 3) {
-            start = y + '-' + m + '-' + (d - 2);
-          } else {
-            let o =30
-            if(m==1 || m==3 || m==5 || m==7 || m==8 || m==10 || m==12){
-              o=31
-            }else if(m == 2){
-              o=28
-            }
-            start = (y - 1) + '-' + m + '-' + (m - 2 + o);
-          }
-          threeMonths = new Date(start).getTime();
+          let curDate = date.getTime();
+          let curS = 3 * 24 * 3600 * 1000;
+            let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
+          let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
+          let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
+          let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
+          let start = new Date(curDate - curS).getFullYear() +
+        "-" + _sm + "-" +_sd;
+          
+          let threeMonths = new Date(start).getTime();
           return time.getTime() > Date.now() || time.getTime() < threeMonths;
         }
       },
@@ -297,8 +304,8 @@ export default {
       showVideoList: false,
       curSXT: {
         deviceName: '',
-        snapNum: '',
-        snapTime: ''
+        shotNum: '',
+        // snapTime: ''
       }, // 显示的摄像头数据
       showLarge: false,
       showCut: false,
@@ -412,9 +419,10 @@ export default {
       let _s = new Date(curDate - curS).getFullYear() +
         "-" + _sm + "-" +_sd;
       let _e = date.getFullYear() + "-" + _em + "-" + _ed;
-      this.searchData.time = [_s, _e]
+      this.searchData.time = [_s, _s]
     },
     resetSearch () {
+      this.setDTime()
       this.searchData.type = null;
       this.searchData.portraitGroupId = '';
       this.searchData.sex = null;
@@ -565,19 +573,27 @@ export default {
       this.curSXT = data;
       this.showVideoList = true;
       const params = {
-        surveillanceId: this.curSXT.surveillanceId ? this.curSXT.surveillanceId : '',
-        deviceId: this.curSXT.deviceId,
-        dateStart: this.searchData.time ? this.searchData.time[0] : null,
-        dateEnd: this.searchData.time ? this.searchData.time[1] : null
+        personGroupId:this.searchData.portraitGroupId,
+        deviceCode:data.groupName,
+        sex:this.searchData.sex,
+        startTime :this.searchData.time?(this.searchData.time[0] + " 00:00:00"):null,
+        endTime :this.searchData.time?(this.searchData.time[1] + " 23:59:59"):null,
+        age:this.searchData.ageGroup,
+        // surveillanceId: this.curSXT.surveillanceId ? this.curSXT.surveillanceId : '',
+        // deviceId: this.curSXT.deviceId,
+        // dateStart: this.searchData.time ? this.searchData.time[0] : null,
+        // dateEnd: this.searchData.time ? this.searchData.time[1] : null
       }
       this.$_showLoading({target: '.__vuescroll'});
-      JigGETAlarmSnapList(params)
+      newGETAlarmSnapList(params)
           .then(res => {
             if (res) {
               this.curVideo.videoList = res.data.map(x => {
                 x.playing = false;
                 return x;
               });
+              console.log(this.curVideo);
+              
               this.$_hideLoading();
             }
           })
@@ -864,8 +880,18 @@ export default {
       }
     }
   }
-
+ 
+ 
   .vl_judge_tc {
+    .Breadc{
+      position: absolute;
+      top: 0px;
+      width: 100%;
+      height: 50px;
+      left: 0px;
+    }
+    position: relative;
+   
     width: 100%;
     height: 100%;
     .camera-select {
@@ -882,13 +908,13 @@ export default {
       }
     }
     .hideleft.vl_j_left{
-      margin-left: -3rem;
+      margin-left: -272px;
     }
     .vl_j_left {
       position: relative;
       z-index: 11;
       float: left;
-      width: 3rem;
+      width: 272px;
       padding-top: 24px;
       height: 100%;
       // margin-left: 0.2rem;
@@ -998,7 +1024,7 @@ export default {
       .vl_jtc_search {
         width: 100%;
         height: auto;
-        padding: 0 .2rem;
+        padding: 0 20px;
         padding-top: .4rem;
         // .el-input__inner {
         //   height: .4rem!important;
@@ -1043,7 +1069,7 @@ export default {
     }
     .vl_j_right {
       display: inline-block;
-      width: calc(100% - 3rem);
+      width: calc(100% - 272px);
       height: calc(100% - 5px);
       position: relative;
       #tcMap {
@@ -1284,6 +1310,9 @@ export default {
 }
 </style>
 <style lang="scss" scoped="scoped">
+ .vl_judge_tc{
+    padding-top: 50px;
+  }
 .hideleft {
   .insetLeft2 {
     transform: rotate(180deg);

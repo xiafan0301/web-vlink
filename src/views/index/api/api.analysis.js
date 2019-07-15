@@ -43,6 +43,19 @@ export function getDrivingAnalysis(data) {
     data
   })
 }
+/**
+ * postExport
+ * 导出接口
+ * @param {object} data
+ */
+export function postExport(data) {
+  return request({
+    url: '/export',
+    method: 'post',
+    mode: 'judge',
+    data
+  })
+}
 
 /*-------------------------- 特征搜车start -------------------------------*/
 /**
@@ -208,6 +221,18 @@ export function postPeopleTask(data) {
     method: 'post',
     mode: 'judge',
     data
+  })
+}
+/**
+ * getPeopleTaskDetail
+ * 行人同行分析任务详情
+ * @param {String} uid
+ */
+export function getPeopleTaskDetail(data) {
+  return request({
+    url: '/analysisTaskInfos/' + data,
+    method: 'get',
+    mode: 'judge'
   })
 }
 /*-------------------------- 区域人员分析 end -------------------------------*/

@@ -16,21 +16,28 @@
         <h4>请选择框选图形</h4>
         <ul>
           <li>
-            <div :class="{'sd_opts_sed': drawActiveType === 1 }" @click="selDrawType(1)"><span class="sd_opts_icon sd_opts_icon1"></span></div>
+            <div title="选择矩形范围内的设备" :class="{'sd_opts_sed': drawActiveType === 1 }" @click="selDrawType(1)"><span class="sd_opts_icon sd_opts_icon1"></span></div>
           </li>
           <li>
-            <div :class="{'sd_opts_sed': drawActiveType === 2 }" @click="selDrawType(2)"><span class="sd_opts_icon sd_opts_icon2"></span></div>
+            <div title="选择圆形范围内的设备" :class="{'sd_opts_sed': drawActiveType === 2 }" @click="selDrawType(2)"><span class="sd_opts_icon sd_opts_icon2"></span></div>
           </li>
           <li>
-            <div :class="{'sd_opts_sed': drawActiveType === 3 }" @click="selDrawType(3)"><span class="sd_opts_icon sd_opts_icon3"></span></div>
+            <div title="选择折线200米范围内的设备" :class="{'sd_opts_sed': drawActiveType === 3 }" @click="selDrawType(3)"><span class="sd_opts_icon sd_opts_icon3"></span></div>
           </li>
           <li>
-            <div :class="{'sd_opts_sed': drawActiveType === 4 }" @click="selDrawType(4)"><span class="sd_opts_icon sd_opts_icon4"></span></div>
+            <div title="选择多边形范围内的设备" :class="{'sd_opts_sed': drawActiveType === 4 }" @click="selDrawType(4)"><span class="sd_opts_icon sd_opts_icon4"></span></div>
           </li>
           <li>
-            <div :class="{'sd_opts_sed': drawActiveType === 5 }" @click="selDrawType(5)"><span class="sd_opts_icon sd_opts_icon5"></span></div>
+            <div title="选择10公里圆形范围内的设备" :class="{'sd_opts_sed': drawActiveType === 5 }" @click="selDrawType(5)"><span class="sd_opts_icon sd_opts_icon5"></span></div>
           </li>
         </ul>
+        <p>
+          <span v-if="drawActiveType === 1">在地图上按住鼠标左键拖动鼠标框选，松开鼠标完成选择</span>
+          <span v-else-if="drawActiveType === 2">在地图上按住鼠标左键选择圆心，拖动鼠标作为半径，松开鼠标完成选择</span>
+          <span v-else-if="drawActiveType === 3">在地图上鼠标左键选择两个或两个以上点形成折线，双击或右键完成选择</span>
+          <span v-else-if="drawActiveType === 4">在地图上鼠标左键选择三个或三个以上点形成封闭区域，双击或右键完成选择</span>
+          <span v-else-if="drawActiveType === 5">在地图上鼠标左键选择圆心，形成10公里大小的圆形区域</span>
+        </p>
       </div>
       <ul class="sd_fs">
         <li @click="setMapStatus(1)"><i class="el-icon-plus"></i></li>
@@ -45,7 +52,7 @@
   </el-dialog>
 </template>
 <script>
-import {getAllMonitorList, getAllBayonetList} from '@/views/index/api/api.base.js';
+import {getAllMonitorList, getAllBayonetList, getDeviceByBayonetUids} from '@/views/index/api/api.base.js';
 import {mapXupuxian} from '@/config/config.js';
 import {random14} from '@/utils/util.js';
 export default {
@@ -77,7 +84,10 @@ export default {
       mouseTool: null,
       drawType: 0,
 
+      mapEventActive: false,
+
       drawActiveType: null, // 
+      drawActive: false,
       drawObj: {
         rectangle: {
           /* 'id': {
@@ -102,9 +112,14 @@ export default {
       this.dialogVisible = true;
       if (this.amap) {
       } else {
-        setTimeout(() => {
-          this.initMap();
-        }, 200)
+        this.$nextTick(() => {
+          setTimeout(() => {
+            this.initMap();
+            if (!this.mapEventActive) {
+              this.mapEvents();
+            }
+          }, 100);
+        });
       }
     },
     clear () {
@@ -120,7 +135,6 @@ export default {
   },
   mounted () {
     this.getTreeList();
-    this.mapEvents();
   },
   methods: {
     initMap () {
@@ -147,9 +161,9 @@ export default {
 
       // 在地图中添加MouseTool插件
       this.mouseTool = new window.AMap.MouseTool(map);
-      this.mouseTool.on("draw", (event) => {
+      this.mouseTool.on('draw', (event) => {
         // event.obj 为绘制出来的覆盖物对象
-        // console.log('draw event', event);
+        console.log('draw event', event);
         let _sid = random14();
         //  return
         if (this.drawActiveType === 1) {
@@ -175,12 +189,14 @@ export default {
         this.mouseTool.close(false);
         this.amap.setDefaultCursor();
         this.drawActiveType = 0;
+        this.drawActive = false;
       });
 
       _this.setMarks();
     },
+    // 编辑 删除 完成事件
     mapEvents () {
-      let _this = this, nContent = $('body');
+      let _this = this, nContent = $('#' + this.sid);
       // el-icon-edit el-icon-close el-icon-check
       nContent.on('click', '.el-icon-close', function () {
         // 删除
@@ -257,15 +273,29 @@ export default {
       }
     },
     selectArea (e) {
-      console.log(e);
       if (e.poi && e.poi.location) {
         this.amap.setZoom(15);
         this.amap.setCenter(e.poi.location);
       }
     },
     selDrawType (drawType) {
+      // this.mouseTool.close(false);
+      if (this.drawActiveType === drawType) {
+        return false;
+      }
+      if (this.drawActive && this.drawActiveType > 0) {
+        if (!document.querySelector('.el-message--info')) {
+          this.$message({
+            showClose: true,
+            message: '请先完成当前绘制再选择其它绘制类型。',
+            type: 'info'
+          });
+        }
+        return false;
+      }
       this.drawType = drawType;
       this.drawActiveType = drawType;
+      this.drawActive = true;
       if (drawType === 1) { // 矩形
         this.drawRectangle();
       } else if (drawType === 2) { // 圆形
@@ -766,17 +796,39 @@ export default {
           }
         }
       }
-      let ad = [], ab = [];
+      let ad = [], ab = [], abIds = [];
       for (let k in dObj) { ad.push(dObj[k]); }
-      for (let k in bObj) { ab.push(bObj[k]); }
+      for (let k in bObj) { 
+        ab.push(bObj[k]);
+        abIds.push(k);
+      }
+      if (abIds && abIds.length > 0) {
+        getDeviceByBayonetUids(abIds).then(res => {
+          let bayonetDeviceList = [];
+          if (res && res.data) {
+            bayonetDeviceList = res.data;
+          }
+          this.$emit('mapSelectorEmit', {
+            deviceList: ad,
+            bayonetList: ab,
+            bayonetDeviceList: bayonetDeviceList
+          });
+          this.submitLoading = false;
+          this.dialogVisible = false;
+        }).catch(() => {
+          this.submitLoading = false;
+        });
+      } else {
+        this.$emit('mapSelectorEmit', {
+          deviceList: ad,
+          bayonetList: ab,
+          bayonetDeviceList: []
+        });
+        this.submitLoading = false;
+        this.dialogVisible = false;
+      }
       console.log('设备 ad', ad);
       console.log('卡口 ab', ab);
-      this.$emit('mapSelectorEmit', {
-        deviceList: ad,
-        bayonetList: ab
-      });
-      this.submitLoading = false;
-      this.dialogVisible = false;
     },
     drawClear () {
       // 矩形
@@ -858,14 +910,20 @@ export default {
     setMarks () {
       if (this.showTypes.indexOf('D') >= 0) {
         for (let i = 0; i < this.listDevice.length; i++) {
-          this.doMark([this.listDevice[i].longitude, this.listDevice[i].latitude],
-            this.listDevice[i].deviceName, 'vl_icon vl_icon_sxt');
+          let _d = this.listDevice[i];
+          let sC = 'vl_icon_sxt';
+          if (_d.deviceStatus !== 1) { sC = 'vl_icon_sxt_dis'; }
+          this.doMark([_d.longitude, _d.latitude],
+            _d.deviceName, 'vl_icon ' + sC);
         }
       }
       if (this.showTypes.indexOf('B') >= 0) {
         for (let i = 0; i < this.listBayonet.length; i++) {
-          this.doMark([this.listBayonet[i].longitude, this.listBayonet[i].latitude],
-            this.listBayonet[i].bayonetName, 'vl_icon vl_icon_kk');
+          let _d = this.listBayonet[i];
+          let sC = 'vl_icon_kk';
+          if (!_d.isEnabled) { sC = 'vl_icon_kk_dis'; }
+          this.doMark([_d.longitude, _d.latitude],
+            _d.bayonetName, 'vl_icon ' + sC);
         }
       }
     },
@@ -906,7 +964,7 @@ export default {
     color: #333;
   }
   > ul {
-    padding: 0 5px 5px 5px;
+    padding: 0 5px 0 5px;
     overflow: hidden;
     > li {
       padding: 5px;
@@ -922,6 +980,14 @@ export default {
           > .sd_opts_icon5 { background-image: url(../../assets/img/vehicle/cut5m.png); }
         }
       }
+    }
+  }
+  > p {
+    max-width: 320px;
+    padding: 0 10px 10px 10px;
+    margin: 0 auto;
+    > span {
+      color: #999; font-size: 12px;
     }
   }
 }

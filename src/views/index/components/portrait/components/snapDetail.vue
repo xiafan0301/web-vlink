@@ -17,12 +17,12 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt />
+            <img :src="sturcDetail.subStoragePath" class="bigImg"/>
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img">
-              <img :src="sturcDetail.storagePath" alt />
+              <img :src="sturcDetail.storagePath" class="bigImg" />
               <!-- <i>全景图</i> -->
             </div>
             <div class="struc_c_d_info">
@@ -271,13 +271,13 @@ export default {
     spinToControl() {
       this.$router.push({
         name: "control_create",
-        query: { path: this.sturcDetail.subStoragePath, modelType: 1 }
+        query: { imgurl: this.sturcDetail.subStoragePath, modelName: '人员追踪' }
       });
     },
     //跳转到落脚点分析页面
     spinToLJD() {
       this.$router.push({
-        name: "portrait_gjfx",
+        name: "portrait_ljd",
         query: { path: this.sturcDetail.subStoragePath }
       });
     },
@@ -285,7 +285,7 @@ export default {
     spinToGJFX() {
       this.$router.push({
         name: "portrait_gjfx",
-        query: { path: this.sturcDetail.subStoragePath }
+        query: { imgurl: this.sturcDetail.subStoragePath }
       });
     },
   }
@@ -334,10 +334,10 @@ export default {
         position: relative;
         text-decoration: none;
         text-align: center;
-        width: 1.1rem;
         height: 0.4rem;
         float: right !important;
         margin-top: 0.2rem;
+        padding: 0 0.12rem;
         background: rgba(246, 248, 249, 1);
         border: 1px solid rgba(211, 211, 211, 1);
         border-radius: 4px;

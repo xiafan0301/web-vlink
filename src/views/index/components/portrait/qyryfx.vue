@@ -85,10 +85,10 @@
               <div class="sd-opts">
                 <div class="sd-opts-title">
                   <h4>区域选择</h4>
-                  <i class="vl_icon vl_icon_portrait_02"></i>
+                  <i class="vl_icon vl_icon_portrait_02" title="定位当前选中区域" @click="setFitV(index)"></i>
                 </div>
                 <ul>
-                  <li>
+                  <li title="选择矩形范围内的设备">
                     <div
                       :class="{'sd-opts-sed': item.drawActiveType === 1 }"
                       @click="selDrawType(1, index)"
@@ -96,7 +96,7 @@
                       <span class="sd-opts-icon sd-opts-icon1"></span>
                     </div>
                   </li>
-                  <li>
+                  <li title="选择圆形范围内的设备">
                     <div
                       :class="{'sd-opts-sed': item.drawActiveType === 2 }"
                       @click="selDrawType(2, index)"
@@ -104,7 +104,7 @@
                       <span class="sd-opts-icon sd-opts-icon2"></span>
                     </div>
                   </li>
-                  <li>
+                  <li title="选择折线100米范围内的设备">
                     <div
                       :class="{'sd-opts-sed': item.drawActiveType === 3 }"
                       @click="selDrawType(3, index)"
@@ -112,7 +112,7 @@
                       <span class="sd-opts-icon sd-opts-icon3"></span>
                     </div>
                   </li>
-                  <li>
+                  <li title="选择多边形范围内的设备">
                     <div
                       :class="{'sd-opts-sed': item.drawActiveType === 4 }"
                       @click="selDrawType(4, index)"
@@ -120,9 +120,8 @@
                       <span class="sd-opts-icon sd-opts-icon4"></span>
                     </div>
                   </li>
-                  <li>
+                  <li title="选择10公里圆形范围内的设备">
                     <div
-                      style="cursor: not-allowed;"
                       :class="{'sd-opts-sed': item.drawActiveType === 5 }"
                       @click="selDrawType(5, index)"
                     >
@@ -130,6 +129,13 @@
                     </div>
                   </li>
                 </ul>
+                <p class="tips">
+                  <span v-if="item.drawActiveType === 1">在地图上按住鼠标左键拖动鼠标框选，松开鼠标完成选择</span>
+                  <span v-else-if="item.drawActiveType === 2">在地图上按住鼠标左键选择圆心，拖动鼠标作为半径，松开鼠标完成选择</span>
+                  <span v-else-if="item.drawActiveType === 3">在地图上鼠标左键选择两个或两个以上点形成折线，双击或右键完成选择</span>
+                  <span v-else-if="item.drawActiveType === 4">在地图上鼠标左键选择三个或三个以上点形成封闭区域，双击或右键完成选择</span>
+                  <span v-else-if="item.drawActiveType === 5">在地图上鼠标左键选择圆心，形成10公里大小的圆形区域</span>
+                </p>
               </div>
               <!-- 选择时间 -->
               <div class="select_date">
@@ -143,6 +149,7 @@
                     :picker-options="startDateOptArr[index]"
                     placeholder="开始时间"
                     class="width212px"
+                    @change="timeChange(index)"
                   ></el-date-picker>
                 </div>
                 <div class="time-search">
@@ -156,6 +163,7 @@
                     default-time="23:59:59"
                     placeholder="结束时间"
                     class="width212px"
+                    @change="timeChange(index, 'end')"
                   ></el-date-picker>
                 </div>
               </div>
@@ -164,7 +172,7 @@
           <!-- 按钮 -->
           <div class="search_btn">
             <el-button @click="resetLeftMenu">重置</el-button>
-            <el-button type="primary" @click="submitData">确定</el-button>
+            <el-button type="primary" :loading="submitLoading" @click="submitData">确定</el-button>
           </div>
         </vue-scroll>
       </div>
@@ -181,7 +189,6 @@
         <!-- 地图信息 -->
         <div class="gis_content" id="gis_content">
           <div class="map_rm" id="mapMap"></div>
-
           <!-- 地图控制按钮（放大，缩小，定位） -->
           <div class="map_control">
             <!-- 摄像头拍摄数量 -->
@@ -229,53 +236,56 @@
       <div class="info_right" v-show="infoRightShow">
         <div class="danger_people_wrap">
           <vue-scroll>
-            <h3 class="camera_name">{{ selectedDevice.deviceName }}（50次）</h3>
+            <h3 class="camera_name">
+              <span>{{ selectedDevice.deviceName }}</span>
+              &nbsp;
+              <span>{{'(' + currentClickDevice.shotNum + '次)'}}</span>
+              <i class="el-icon-close" @click="infoRightShow = false;" title="关闭"></i>
+            </h3>
             <div class="danger_people_list">
               <div
                 class="people_item"
                 v-for="(item, index) in cameraPhotoList"
                 :key="'people_item' + index"
               >
-                <!-- <div  v-for="(sItem, sIndex) in item.detailList"
-                    :key="'my_swiper' + sIndex">
-
-                <div class="swiper_contents" v-if="item.currentIndex === sIndex" >
-                  <div class="img_warp">
-                    <img :src="sItem.upPhotoUrl" alt />
-                  </div>
-                  <div class="similarity">
-                    <p class="similarity_count">{{sItem.semblance}}</p>
-                    <p class="similarity_title">相似度</p>
-                    <div class="select_time">
-                      <el-select
-                        v-model="searchCamera"
-                        @change="slideToIndex(index, searchCamera)"
-                        placeholder="请选择"
-                      >
-                        <el-option
-                          v-for="(gItem, gIndex) in item.detailList"
-                          :key="gIndex"
-                          :label="gIndex + 1"
-                          :value="gIndex"
-                        ></el-option>
-                      </el-select>
+                <div v-for="(sItem, sIndex) in item.detailList" :key="'my_swiper' + sIndex">
+                  <div class="swiper_contents" v-if="item.currentIndex === sIndex">
+                    <div class="img_warp">
+                      <img :src="sItem.upPhotoUrl" alt />
                     </div>
-                  </div>
-                  <div class="img_warp">
-                    <img :src="sItem.subStoragePath" alt />
-                  </div>
-                  <div class="people_message">
-                    <h2 class="name">{{item.name}}</h2>
-                    <div class="tips_wrap">
-                      <p class="tip">{{item.sex}}</p>
-                      <p class="tip">{{item.age}}</p>
+                    <div class="similarity">
+                      <p class="similarity_count">{{sItem.semblance}}</p>
+                      <p class="similarity_title">相似度</p>
+                      <div class="select_time">
+                        <el-select
+                          v-model="item.currentIndex"
+                          @change="slideToIndex(item.currentIndex, index)"
+                          placeholder="请选择"
+                        >
+                          <el-option
+                            v-for="(gItem, gIndex) in item.detailList"
+                            :key="gIndex"
+                            :label="item.shotTimes[gIndex]"
+                            :value="gIndex"
+                          ></el-option>
+                        </el-select>
+                      </div>
+                    </div>
+                    <div class="img_warp">
+                      <img :src="sItem.subStoragePath" alt />
+                    </div>
+                    <div class="people_message">
+                      <h2 class="name">{{item.name}}</h2>
+                      <div class="tips_wrap">
+                        <p class="tip">{{item.sex}}</p>
+                        <p class="tip">{{item.age}}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-                  <div @click="prev(index)" class="swiper-button-prev change_img"></div>
-                <div @click="next(index)" class="swiper-button-next change_img"></div>-->
-                <swiper :options="swiperOption" :ref="'mySwiper' + index" :id="'mySwiper' + index">
+                <div @click="prev(index)" class="swiper-button-prev change_img"></div>
+                <div @click="next(index)" class="swiper-button-next change_img"></div>
+                <!-- <swiper :options="swiperOption" :ref="'mySwiper' + index" :id="'mySwiper' + index">
                   <swiper-slide
                     v-for="(sItem, sIndex) in item.detailList"
                     :key="index + 'my_swiper' + sIndex"
@@ -316,7 +326,7 @@
                   </swiper-slide>
                   <div class="swiper-button-prev change_img" slot="button-prev"></div>
                   <div class="swiper-button-next change_img" slot="button-next"></div>
-                </swiper>
+                </swiper>-->
               </div>
             </div>
           </vue-scroll>
@@ -341,6 +351,7 @@ import {
 import { getGroupAllList } from "@/views/index/api/api.control.js";
 import { validatePersonNum, validateInteger } from "@/utils/validator.js";
 import { random14, objDeepCopy } from "@/utils/util.js";
+import { constants } from "crypto";
 
 export default {
   data() {
@@ -359,18 +370,22 @@ export default {
         sex: null,
         age: null
       },
+      submitLoading: false, // 提交loading
+      getDetailLoading: false,
       cameraPhotoList: [],
       startDateOptArr: [
         {
           disabledDate: time => {
             if (this.drawObj[0].endTime) {
               return (
-                time.getTime() > new Date(this.drawObj[0].endTime).getTime() ||
-                time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
+                time.getTime() > new Date(this.drawObj[0].endTime).getTime()
+                // ||
+                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
               );
             } else {
               return (
-                time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3 ||
+                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
+                // ||
                 time.getTime() > new Date().getTime()
               );
             }
@@ -388,7 +403,7 @@ export default {
               );
             } else {
               return (
-                time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3 ||
+                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3 ||
                 time.getTime() > new Date().getTime()
               );
             }
@@ -473,6 +488,8 @@ export default {
       // 选择地图
       drawType: 0,
       amap: null, // 地图对象
+      markerList: [], // 设备卡口标记的数组
+      areaList: [], // 点击定位的数组
       mouseTool: null,
       drawType: 0,
       currenDrawobj: 0, // 当前的时间区域
@@ -508,13 +525,14 @@ export default {
       showTypes: "DB", //设备类型
       totalData: [],
       selectedDevice: {}, // 当前选中的设备信息
+      currentClickDevice: {},
       swiper: null
     };
   },
   mounted() {
     //获取数据
     this.getTreeList();
-    this.mapEvents();
+    // this.mapEvents();
     //加载地图
     this.initMap();
     // 获取到监控人群分组
@@ -527,24 +545,60 @@ export default {
     });
   },
   methods: {
+    // 日期控制
+    timeChange(ind, type = "start") {
+      this.$nextTick(() => {
+        if (this.drawObj[ind].startTime && this.drawObj[ind].endTime) {
+          if (
+            new Date(this.drawObj[ind].endTime).getTime() -
+              new Date(this.drawObj[ind].startTime).getTime() >
+            3 * 24 * 3600 * 1000
+          ) {
+            this.$message.warning("最大选择时间段为三天");
+            if (type === "start") {
+              this.drawObj[ind].endTime = formatDate(
+                new Date(this.drawObj[ind].startTime).getTime() +
+                  3600 * 1000 * 24 * 3
+              );
+            } else {
+              this.drawObj[ind].startTime = formatDate(
+                new Date(this.drawObj[ind].endTime).getTime() -
+                  3600 * 1000 * 24 * 3
+              );
+            }
+          }
+        }
+      });
+    },
+    // 切换照片
     prev(val) {
       const ind = this.cameraPhotoList[val].detailList.length - 1;
       if (this.cameraPhotoList[val].currentIndex === 0) {
-        // this.$set(this.cameraPhotoList[val], 'currentIndex', ind);
-        this.cameraPhotoList[val].currentIndex = ind;
+        const obj = objDeepCopy(this.cameraPhotoList[val]);
+        obj.currentIndex = ind;
+        this.$set(this.cameraPhotoList, val, obj);
       } else {
-        this.cameraPhotoList[val].currentIndex =
-          this.cameraPhotoList[val].currentIndex - 1;
-
-        // this.$set(this.cameraPhotoList[val], 'currentIndex', this.cameraPhotoList[val].currentIndex - 1);
+        const obj = objDeepCopy(this.cameraPhotoList[val]);
+        obj.currentIndex = obj.currentIndex - 1;
+        this.$set(this.cameraPhotoList, val, obj);
       }
-      console.log("为什么不变呢", this.cameraPhotoList);
     },
-    slideToIndex(index, val) {
-      // this.$nextTick(() => {
-      //   console.log('swiper', this.$refs.mySwiper1);
-      // });
-      // this.$refs['mySwiper' + val].swiper.slideTo(index, 1000, false);
+    next(val) {
+      const ind = this.cameraPhotoList[val].detailList.length - 1;
+      if (this.cameraPhotoList[val].currentIndex === ind) {
+        const obj = objDeepCopy(this.cameraPhotoList[val]);
+        obj.currentIndex = 0;
+        this.$set(this.cameraPhotoList, val, obj);
+      } else {
+        const obj = objDeepCopy(this.cameraPhotoList[val]);
+        obj.currentIndex = obj.currentIndex + 1;
+        this.$set(this.cameraPhotoList, val, obj);
+      }
+    },
+    slideToIndex(val, ind) {
+      const obj = objDeepCopy(this.cameraPhotoList[ind]);
+      obj.currentIndex = val;
+      this.$set(this.cameraPhotoList, ind, obj);
     },
     /**重置左边菜单的方法 */
     resetLeftMenu() {
@@ -578,7 +632,8 @@ export default {
             " 00:00:00",
           endTime:
             formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
-            " 23:59:59"
+            " 23:59:59",
+          drawActiveType: 0 // 当前活跃的选中区域
         }
       ];
       this.startDateOptArr = [
@@ -586,12 +641,14 @@ export default {
           disabledDate: time => {
             if (this.drawObj[0].endTime) {
               return (
-                time.getTime() > new Date(this.drawObj[0].endTime).getTime() ||
-                time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
+                time.getTime() > new Date(this.drawObj[0].endTime).getTime()
+                // ||
+                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
               );
             } else {
               return (
-                time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3 ||
+                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
+                // ||
                 time.getTime() > new Date().getTime()
               );
             }
@@ -609,7 +666,7 @@ export default {
               );
             } else {
               return (
-                time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3 ||
+                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3 ||
                 time.getTime() > new Date().getTime()
               );
             }
@@ -645,8 +702,9 @@ export default {
           deviceAndTimeList = [
             ...deviceAndTimeList,
             {
-              deviceIds: area.ad.join(),
-              bayonetIds: area.ab.join(),
+              deviceIds: area.ad.map(item => item.uid).join(),
+              // deviceIds: "5",
+              bayonetIds: area.ab.map(item => item.uid).join(),
               startTime: this.drawObj[j].startTime,
               endTime: this.drawObj[j].endTime
             }
@@ -664,16 +722,29 @@ export default {
         ...this.qyryfxFrom,
         deviceAndTimeList: deviceAndTimeList
       };
-      console.log("检索摄像头", this.totalData);
+      this.submitLoading = true; // 打开加载效果
       postShotNumArea(queryParams)
         .then(res => {
-          if (res) {
-            this.setMarks(res.data);
-            console.log("对比", res.data);
-            console.log("dui", this.listDevice);
+          if (res && res.data) {
+            this.submitLoading = false; // 关闭加载效果
+            if (res.data.length) {
+              this.clearMarkList(); // 清除地图标记
+              this.setMarks(res.data, false);
+            } else {
+              this.clearMarkList(); // 清除地图标记
+              this.setMarks();
+            }
+          } else {
+            this.submitLoading = false; // 关闭加载效果
+            this.clearMarkList(); // 清除地图标记
+            this.setMarks();
           }
         })
-        .catch(() => {});
+        .catch(() => {
+          this.clearMarkList(); // 清除地图标记
+          this.setMarks();
+          this.submitLoading = false; // 关闭加载效果
+        });
     },
     /** 点击摄像头查看此摄像头抓拍详情信息 */
     clickGetCameraData(device) {
@@ -698,11 +769,42 @@ export default {
         };
       } else {
         // 根据设备的不同来查找时间段
-        // for (let i = 0; i < this.totalData.length; i++) {
-        //   const dataItem = this.totalData[i];
-        //   if (dataItem.ad.length) {
-        //   }
-        // }
+        const timeArr = [];
+        for (let i = 0; i < this.totalData.length; i++) {
+          const dataItem = this.totalData[i];
+          let isAd = false;
+          if (dataItem.ad.length > 0) {
+            for (let j = 0; j < dataItem.ad.length; j++) {
+              if (dataItem.ad[j].viewClassCode === device.viewClassCode) {
+                timeArr.push(i);
+                isAd = true;
+                break;
+              }
+            }
+          }
+          if (!isAd) {
+            for (let j = 0; j < dataItem.ab.length; j++) {
+              if (dataItem.ab[j].viewClassCode === device.viewClassCode) {
+                timeArr.push(i);
+                break;
+              }
+            }
+          }
+        }
+        queryParams = {
+          ...this.qyryfxFrom,
+          deviceCode: device.viewClassCode,
+          startTime: timeArr
+            .map(item => {
+              return this.drawObj[item].startTime;
+            })
+            .join(),
+          endTime: timeArr
+            .map(item => {
+              return this.drawObj[item].endTime;
+            })
+            .join()
+        };
       }
       getShotNumAreaDetail(queryParams)
         .then(res => {
@@ -738,13 +840,14 @@ export default {
           disabledDate: time => {
             if (this.drawObj[index].endTime) {
               return (
-                time.getTime() >
-                  new Date(this.drawObj[index].endTime).getTime() ||
-                time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
+                time.getTime() > new Date(this.drawObj[index].endTime).getTime()
+                //   ||
+                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
               );
             } else {
               return (
-                time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3 ||
+                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
+                // ||
                 time.getTime() > new Date().getTime()
               );
             }
@@ -763,7 +866,7 @@ export default {
               );
             } else {
               return (
-                time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3 ||
+                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3 ||
                 time.getTime() > new Date().getTime()
               );
             }
@@ -796,25 +899,25 @@ export default {
     },
     delArea(val, clearAll) {
       for (let item in this.drawObj[val]) {
-          switch (item) {
-            case "rectangle":
-              this.removeMarkers(1, this.drawObj[val][item].sid);
-              break;
-            case "circle":
-              this.removeMarkers(2, this.drawObj[val][item].sid);
-              break;
-            case "polyline":
-              this.removeMarkers(3, this.drawObj[val][item].sid);
-              break;
-            case "polygon":
-              this.removeMarkers(4, this.drawObj[val][item].sid);
-              break;
-            case "circle10km":
-              this.removeMarkers(5, this.drawObj[val][item].sid);
-              break;
-            default:
-              break;
-          }
+        switch (item) {
+          case "rectangle":
+            this.removeMarkers(1, this.drawObj[val][item].sid);
+            break;
+          case "circle":
+            this.removeMarkers(2, this.drawObj[val][item].sid);
+            break;
+          case "polyline":
+            this.removeMarkers(3, this.drawObj[val][item].sid);
+            break;
+          case "polygon":
+            this.removeMarkers(4, this.drawObj[val][item].sid);
+            break;
+          case "circle10km":
+            this.removeMarkers(5, this.drawObj[val][item].sid);
+            break;
+          default:
+            break;
+        }
       }
       if (!clearAll) {
         // 是否全部清除地图标记
@@ -855,38 +958,169 @@ export default {
       this.mouseTool = new window.AMap.MouseTool(map);
       this.mouseTool.on("draw", event => {
         // event.obj 为绘制出来的覆盖物对象
-        // console.log('draw event', event);
         let _sid = random14();
+        this.drawClear(this.currenDrawobj);
+        // console.log('监听鼠标');
         //  return
         let drawActive = this.drawObj[this.currenDrawobj].drawActiveType; // 获取到当前要画的图形
         if (drawActive === 1) {
           this.drawObj[this.currenDrawobj].rectangle[_sid] = {};
           this.drawObj[this.currenDrawobj].rectangle[_sid].obj = event.obj;
-          this.drawObj[this.currenDrawobj].rectangle['sid'] = _sid;
-          this.drawRectangleMark(_sid, event.obj);
+          this.drawObj[this.currenDrawobj].rectangle["sid"] = _sid;
+          // this.drawRectangleMark(_sid, event.obj);
         } else if (drawActive === 2) {
           this.drawObj[this.currenDrawobj].circle[_sid] = {};
           this.drawObj[this.currenDrawobj].circle[_sid].obj = event.obj;
-          this.drawObj[this.currenDrawobj].circle['sid'] = _sid;
-          this.drawCircleMark(_sid, event.obj);
+          this.drawObj[this.currenDrawobj].circle["sid"] = _sid;
+          // this.drawCircleMark(_sid, event.obj);
         } else if (drawActive === 3) {
           this.drawObj[this.currenDrawobj].polyline[_sid] = {};
           this.drawObj[this.currenDrawobj].polyline[_sid].obj = event.obj;
-          this.drawObj[this.currenDrawobj].polyline['sid'] = _sid;
-          this.drawPolylineMark(_sid, event.obj);
+          this.drawObj[this.currenDrawobj].polyline["sid"] = _sid;
+          // this.drawPolylineMark(_sid, event.obj);
         } else if (drawActive === 4) {
           this.drawObj[this.currenDrawobj].polygon[_sid] = {};
           this.drawObj[this.currenDrawobj].polygon[_sid].obj = event.obj;
-          this.drawObj[this.currenDrawobj].polygon['sid'] = _sid;
-          this.drawPolygonMark(_sid, event.obj);
+          this.drawObj[this.currenDrawobj].polygon["sid"] = _sid;
+          // this.drawPolygonMark(_sid, event.obj);
         } else if (drawActive === 5) {
-          this.drawObj[this.currenDrawobj].circle10km[_sid] = {};
-          this.drawObj[this.currenDrawobj].circle10km[_sid].obj = event.obj;
-          this.drawObj[this.currenDrawobj].circle10km['sid'] = _sid;
+          // this.drawObj[this.currenDrawobj].circle10km[_sid] = {};
+          // this.drawObj[this.currenDrawobj].circle10km[_sid].obj = event.obj;
+          // this.drawObj[this.currenDrawobj].circle10km["sid"] = _sid;
         }
-        this.mouseTool.close(false);
-        this.amap.setDefaultCursor();
+        // this.mouseTool.close(false);
+        // this.amap.setDefaultCursor();
       });
+    },
+    drawClear(ind) {
+      // 矩形
+      if (this.drawObj[ind].rectangle) {
+        for (let k in this.drawObj[ind].rectangle) {
+          this.drawClearDo(this.drawObj[ind].rectangle[k]);
+        }
+        this.drawObj[ind].rectangle = {};
+      }
+      // 圆形
+      if (this.drawObj[ind].circle) {
+        for (let k in this.drawObj[ind].circle) {
+          this.drawClearDo(this.drawObj[ind].circle[k]);
+        }
+        this.drawObj[ind].circle = {};
+      }
+      // 线
+      if (this.drawObj[ind].polyline) {
+        for (let k in this.drawObj[ind].polyline) {
+          this.drawClearDo(this.drawObj[ind].polyline[k]);
+        }
+        this.drawObj[ind].polyline = {};
+      }
+      // 多边形
+      if (this.drawObj[ind].polygon) {
+        for (let k in this.drawObj[ind].polygon) {
+          this.drawClearDo(this.drawObj[ind].polygon[k]);
+        }
+        this.drawObj[ind].polygon = {};
+      }
+      if (this.drawObj[ind].circle10km) {
+        for (let k in this.drawObj[ind].circle10km) {
+          this.drawClearDo(this.drawObj[ind].circle10km[k]);
+        }
+        this.drawObj[ind].circle10km = {};
+      }
+    },
+    drawClearDo(obj) {
+      if (obj.obj) {
+        this.amap.remove(obj.obj);
+        obj.obj = null;
+      }
+      if (obj.marker) {
+        this.amap.remove(obj.marker);
+        obj.marker = null;
+      }
+      if (obj.editor) {
+        obj.editor.close();
+        this.amap.remove(obj.editor);
+        obj.editor = null;
+      }
+      obj = null;
+    },
+    setFitV(ind) {
+      this.getArea(ind);
+      this.$nextTick(() => {
+        this.amap.setFitView(this.areaList[ind]);
+      });
+    },
+    getArea(ind) {
+      // 矩形
+      const curInd = this.drawObj[ind].drawActiveType;
+      if (curInd === 1) {
+        if (this.areaList.length < ind + 1) {
+          this.areaList[ind] = this.drawObj[ind].rectangle[
+            this.drawObj[ind].rectangle.sid
+          ].obj;
+        } else {
+          this.areaList.splice(
+            ind,
+            1,
+            this.drawObj[ind].rectangle[this.drawObj[ind].rectangle.sid].obj
+          );
+        }
+      }
+      // 圆形
+      if (curInd === 2) {
+        if (this.areaList.length < ind + 1) {
+          this.areaList[ind] = this.drawObj[ind].circle[
+            this.drawObj[ind].circle.sid
+          ].obj;
+        } else {
+          this.areaList.splice(
+            ind,
+            1,
+            this.drawObj[ind].circle[this.drawObj[ind].circle.sid].obj
+          );
+        }
+      }
+      // 线
+      if (curInd === 3) {
+        if (this.areaList.length < ind + 1) {
+          this.areaList[ind] = this.drawObj[ind].polyline[
+            this.drawObj[ind].polyline.sid
+          ].obj;
+        } else {
+          this.areaList.splice(
+            ind,
+            1,
+            this.drawObj[ind].polyline[this.drawObj[ind].polyline.sid].obj
+          );
+        }
+      }
+      // 多边形
+      if (curInd === 4) {
+        if (this.areaList.length < ind + 1) {
+          this.areaList[ind] = this.drawObj[ind].polygon[
+            this.drawObj[ind].polygon.sid
+          ].obj;
+        } else {
+          this.areaList.splice(
+            ind,
+            1,
+            this.drawObj[ind].polygon[this.drawObj[ind].polygon.sid].obj
+          );
+        }
+      }
+      if (curInd === 5) {
+        if (this.areaList.length < ind + 1) {
+          this.areaList[ind] = this.drawObj[ind].circle10km[
+            this.drawObj[ind].circle10km.sid
+          ].obj;
+        } else {
+          this.areaList.splice(
+            ind,
+            1,
+            this.drawObj[ind].circle10km[this.drawObj[ind].circle10km.sid].obj
+          );
+        }
+      }
     },
     mapEvents() {
       let _this = this,
@@ -895,7 +1129,6 @@ export default {
       nContent
         .on("click", ".el-icon-close", function() {
           // 删除
-          console.log("点击了这个方法");
           let nOpt = $(this).closest(".ms_marker_opt");
           let _sid = nOpt.attr("_sid"),
             _type = Number(nOpt.attr("_type"));
@@ -1057,8 +1290,17 @@ export default {
       }
     },
     selDrawType(drawType, index) {
-      this.currenDrawobj = index; // 确定当前的时间区域
-      this.drawObj[index].drawActiveType = drawType; // 当前要画的图形类别
+      // const old = this.drawObj[index].drawActiveType;
+      if (this.drawObj[index].drawActiveType === drawType) {
+        this.drawObj[index].drawActiveType = 0;
+        this.mouseTool.close(false);
+        this.amap.setDefaultCursor();
+        return;
+      } else {
+        this.drawObj[index].drawActiveType = drawType; // 当前要画的图形类别
+        this.currenDrawobj = index; // 确定当前的时间区域
+      }
+      // console.log("点击干掉", this.drawObj[this.currenDrawobj].drawActiveType);
       if (drawType === 1) {
         // 矩形
         this.drawRectangle();
@@ -1073,6 +1315,9 @@ export default {
         this.drawPolygon();
       } else if (drawType === 5) {
         // 多边形
+        // if (old === 3) {
+        //   console.log("点击干掉", 123);
+        // }
         this.drawCircle10km();
       }
     },
@@ -1368,28 +1613,27 @@ export default {
     },
     drawPolygonEditor(sid) {
       for (let i = 0; i < this.drawObj.length; i++) {
-
-      if (this.drawObj[i].polygon[sid]) {
-        let _this = this,
-          obj = this.drawObj[i].polygon[sid];
-        if (obj.editor) {
-          obj.editor.open();
-        } else {
-          var polyEditor = new window.AMap.PolyEditor(this.amap, obj.obj);
-          polyEditor.on("adjust", function(event) {
-            // event.target 即为编辑后的对象
-            // 需要重新定位marker
-            if (obj.marker) {
-              obj.marker.setPosition(
-                event.target.getPath()[event.target.getPath().length - 1]
-              );
-            }
-          });
-          obj.editor = polyEditor;
-          polyEditor.open();
+        if (this.drawObj[i].polygon[sid]) {
+          let _this = this,
+            obj = this.drawObj[i].polygon[sid];
+          if (obj.editor) {
+            obj.editor.open();
+          } else {
+            var polyEditor = new window.AMap.PolyEditor(this.amap, obj.obj);
+            polyEditor.on("adjust", function(event) {
+              // event.target 即为编辑后的对象
+              // 需要重新定位marker
+              if (obj.marker) {
+                obj.marker.setPosition(
+                  event.target.getPath()[event.target.getPath().length - 1]
+                );
+              }
+            });
+            obj.editor = polyEditor;
+            polyEditor.open();
+          }
+          break;
         }
-        break;
-      }
       }
     },
     drawPolygonMark(sid, obj) {
@@ -1414,8 +1658,10 @@ export default {
           "</div></div>"
       });
       this.zIndex += 1;
-      if (this.drawObj.polygon[sid]) {
-        this.drawObj.polygon[sid].marker = marker;
+      for (let i = 0; i < this.drawObj.length; i++) {
+        if (this.drawObj[i].polygon[sid]) {
+          this.drawObj[i].polygon[sid].marker = marker;
+        }
       }
     },
     drawCircle10km() {
@@ -1423,7 +1669,8 @@ export default {
       this.amap.on("click", this.drawCircle10kmClick);
     },
     drawCircle10kmClick(e) {
-      // e.lnglat.getLng()+','+e.lnglat.getLat()
+      this.drawClear(this.currenDrawobj);
+      this.mouseTool.close(false);
       let circle = new AMap.Circle({
         center: e.lnglat,
         radius: 1000 * 10, //半径
@@ -1443,10 +1690,8 @@ export default {
       let _sid = random14();
       this.drawObj[this.currenDrawobj].circle10km[_sid] = {};
       this.drawObj[this.currenDrawobj].circle10km[_sid].obj = circle;
-      this.amap.setDefaultCursor();
-      this.drawObj[this.currenDrawobj].drawActiveType = 0;
+      this.drawObj[this.currenDrawobj].circle10km["sid"] = _sid;
       this.amap.off("click", this.drawCircle10kmClick);
-      this.drawCircle10kmMark(_sid, circle);
     },
     drawCircle10kmEditor(sid) {
       if (this.drawObj.circle10km[sid]) {
@@ -1517,7 +1762,7 @@ export default {
       }
     },
     selSubmit(index) {
-      this.submitLoading = true;
+      this.getDetailLoading = true;
       let dObj = {},
         bObj = {};
       if (this.listDevice && this.listDevice.length > 0) {
@@ -1526,6 +1771,9 @@ export default {
           // 矩形
           if (this.drawObj[index].rectangle) {
             for (let k in this.drawObj[index].rectangle) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].rectangle[k];
               if (
                 so.obj &&
@@ -1538,6 +1786,9 @@ export default {
           // 圆形
           if (this.drawObj[index].circle) {
             for (let k in this.drawObj[index].circle) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].circle[k];
               if (
                 so.obj &&
@@ -1550,6 +1801,9 @@ export default {
           // 线
           if (this.drawObj[index].polyline) {
             for (let k in this.drawObj[index].polyline) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].polyline[k];
               if (
                 window.AMap.GeometryUtil.distanceToLine(
@@ -1564,6 +1818,9 @@ export default {
           // 多边形
           if (this.drawObj[index].polygon) {
             for (let k in this.drawObj[index].polygon) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].polygon[k];
               if (
                 so.obj &&
@@ -1575,6 +1832,9 @@ export default {
           }
           if (this.drawObj[index].circle10km) {
             for (let k in this.drawObj[index].circle10km) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].circle10km[k];
               if (
                 so.obj &&
@@ -1592,6 +1852,9 @@ export default {
           // 矩形
           if (this.drawObj[index].rectangle) {
             for (let k in this.drawObj[index].rectangle) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].rectangle[k];
               if (
                 so.obj &&
@@ -1604,6 +1867,9 @@ export default {
           // 圆形
           if (this.drawObj[index].circle) {
             for (let k in this.drawObj[index].circle) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].circle[k];
               if (
                 so.obj &&
@@ -1616,6 +1882,9 @@ export default {
           // 线
           if (this.drawObj[index].polyline) {
             for (let k in this.drawObj[index].polyline) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].polyline[k];
               if (
                 window.AMap.GeometryUtil.distanceToLine(
@@ -1630,6 +1899,9 @@ export default {
           // 多边形
           if (this.drawObj[index].polygon) {
             for (let k in this.drawObj[index].polygon) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].polygon[k];
               if (
                 so.obj &&
@@ -1641,6 +1913,9 @@ export default {
           }
           if (this.drawObj[index].circle10km) {
             for (let k in this.drawObj[index].circle10km) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].circle10km[k];
               if (
                 so.obj &&
@@ -1661,8 +1936,8 @@ export default {
         ab.push(bObj[k]);
       }
       this.totalData.push({
-          ad: ad,
-          ab: ab
+        ad: ad,
+        ab: ab
       });
     },
     getTreeList() {
@@ -1678,6 +1953,7 @@ export default {
       getAllMonitorList({ ccode: mapXupuxian.adcode }).then(res => {
         if (res) {
           this.listDevice = res.data;
+          this.setMarks(); // 初始化设备
         }
       });
     },
@@ -1686,71 +1962,110 @@ export default {
       getAllBayonetList({ areaId: mapXupuxian.adcode }).then(res => {
         if (res) {
           this.listBayonet = res.data;
+          this.setMarks(); // 初始化卡口
         }
       });
     },
     // D设备 B卡口
-    setMarks(deviceList) {
+    setMarks(deviceList = null, init = true) {
       // 展示设备和卡口
-      for (let i = 0; i < this.listDevice.length; i++) {
-        const listItem = this.listDevice[i];
-        for (let j = 0; j < deviceList.length; j++) {
-          const deviceItem = deviceList[j];
-          // if (
-          //   deviceItem.shotPlaceLongitude === listItem.longitude &&
-          //   deviceItem.shotPlaceLatitude === listItem.latitude
-          // ) {
-          this.doMark(listItem, deviceItem, "vl_icon vl_icon_sxt");
-          // }
+      if (init) {
+        // 初始化的时候展示所有的设备
+        for (let i = 0; i < this.listDevice.length; i++) {
+          this.doMark(this.listDevice[i], deviceList, "vl_icon vl_icon_sxt");
         }
-      }
-      for (let i = 0; i < this.listBayonet.length; i++) {
-        const listItem = this.listBayonet[i];
-        for (let j = 0; j < deviceList.length; j++) {
-          const deviceItem = deviceList[j];
-          if (
-            deviceItem.shotPlaceLongitude === listItem.longitude &&
-            deviceItem.shotPlaceLatitude === listItem.latitude
-          ) {
-            this.doMark(this.listBayonet[i], "vl_icon vl_icon_kk");
+        for (let i = 0; i < this.listBayonet.length; i++) {
+          this.doMark(this.listBayonet[i], deviceList, "vl_icon vl_icon_kk");
+        }
+        this.amap.setFitView();
+      } else {
+        for (let i = 0; i < this.listDevice.length; i++) {
+          const listItem = this.listDevice[i];
+          let flag = false;
+          for (let j = 0; j < deviceList.length; j++) {
+            const deviceItem = deviceList[j];
+            if (deviceItem.groupName === listItem.viewClassCode) {
+              this.doMark(listItem, deviceItem, "vl_icon vl_icon_sxt", false);
+              flag = true;
+              break;
+            }
+          }
+          if (!flag) {
+            this.doMark(this.listDevice[i], null, "vl_icon vl_icon_sxt");
+          }
+        }
+        for (let i = 0; i < this.listBayonet.length; i++) {
+          const listItem = this.listBayonet[i];
+          let flag = false;
+          for (let j = 0; j < deviceList.length; j++) {
+            const deviceItem = deviceList[j];
+            if (deviceItem.groupName === listItem.viewClassCode) {
+              this.doMark(listItem, deviceItem, "vl_icon vl_icon_kk", false);
+              flag = true;
+              break;
+            }
+          }
+          if (!flag) {
+            this.doMark(this.listBayonet[i], null, "vl_icon vl_icon_kk");
           }
         }
       }
-      this.amap.setFitView();
     },
     // 地图标记
-    doMark(obj, device, sClass) {
-      let level;
-      if (device.shotNum < 20) {
-        level = "level6";
-      } else if (device.shotNum <= 50 && device.shotNum >= 20) {
-        level = "level5";
-      } else if (device.shotNum <= 100 && device.shotNum >= 51) {
-        level = "level4";
-      } else if (device.shotNum <= 200 && device.shotNum >= 101) {
-        level = "level3";
-      } else if (device.shotNum <= 500 && device.shotNum >= 201) {
-        level = "level2";
-      } else if (device.shotNum > 500) {
-        level = "level1";
+    doMark(obj, device, sClass, init = true) {
+      let marker;
+      if (!init) {
+        // 非初始化的状态
+        let level;
+        if (device.shotNum < 20) {
+          level = "level6";
+        } else if (device.shotNum <= 50 && device.shotNum >= 20) {
+          level = "level5";
+        } else if (device.shotNum <= 100 && device.shotNum >= 51) {
+          level = "level4";
+        } else if (device.shotNum <= 200 && device.shotNum >= 101) {
+          level = "level3";
+        } else if (device.shotNum <= 500 && device.shotNum >= 201) {
+          level = "level2";
+        } else if (device.shotNum > 500) {
+          level = "level1";
+        }
+        marker = new window.AMap.Marker({
+          // 添加自定义点标记
+          map: this.amap,
+          position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+          offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
+          draggable: false, // 是否可拖动
+          // extData: obj,
+          // 自定义点标记覆盖物内容
+          content: `<div class='qyryfx_vl_icon_wrap'> <div class="map_icons ${sClass}"></div> <div class='people_counts_l1 ${level}'> ${device.shotNum}人次 </div> </div>`
+        });
+        this.currentClickDevice = device;
+        let _this = this;
+        // 给标记绑定一个点击事件
+        marker.on("click", function() {
+          _this.selectedDevice = obj;
+          _this.clickGetCameraData(obj);
+        });
+        this.markerList = [...this.markerList, marker];
+      } else {
+        marker = new window.AMap.Marker({
+          // 添加自定义点标记
+          map: this.amap,
+          position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+          offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
+          draggable: false, // 是否可拖动
+          // extData: obj,
+          // 自定义点标记覆盖物内容
+          content: `<div class="map_icons ${sClass}"></div>`
+        });
+        this.markerList = [...this.markerList, marker];
       }
-
-      let marker = new window.AMap.Marker({
-        // 添加自定义点标记
-        map: this.amap,
-        position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
-        offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
-        draggable: false, // 是否可拖动
-        // extData: obj,
-        // 自定义点标记覆盖物内容
-        content: `<div class='qyryfx_vl_icon_wrap'> <div class="map_icons ${sClass}"></div> <div class='people_counts_l1 ${level}'> ${device.shotNum}人次 </div> </div>`
-      });
-      console.log("数量", device.shotNum);
-      let _this = this;
-      marker.on("click", function() {
-        _this.selectedDevice = obj;
-        _this.clickGetCameraData(obj);
-      });
+    },
+    clearMarkList() {
+      for (let i = 0; i < this.markerList.length; i++) {
+        this.amap.remove(this.markerList[i]);
+      }
     }
   },
   beforeDestroy() {
@@ -1761,7 +2076,7 @@ export default {
   watch: {
     cameraPhotoList: {
       handler(newName, oldName) {
-        console.log("obj.a changed");
+        // console.log("obj.a changed");
       },
       immediate: true,
       deep: true
@@ -1967,6 +2282,9 @@ export default {
               color: #333;
               background-color: #fafafa;
               border-bottom: 1px solid #d3d3d3;
+              > i {
+                cursor: pointer;
+              }
             }
             > ul {
               padding: 22px 0 18px 0;
@@ -1995,6 +2313,12 @@ export default {
                   }
                 }
               }
+            }
+            .tips {
+              font-size: 14px;
+              padding: 0 10px 10px 10px;
+              color: #999;
+              // margin: 0 auto;
             }
           }
           .sd-opts-icon {
@@ -2182,6 +2506,16 @@ export default {
           color: #333333;
           border-bottom: 1px solid #d3d3d3;
           width: 428px;
+          position: relative;
+          > i {
+            position: absolute;
+            z-index: 10;
+            right: 0;
+            font-size: 16px;
+            top: 20px;
+            color: #999;
+            cursor: pointer;
+          }
         }
         .danger_people_list {
           padding-top: 28px;
@@ -2199,9 +2533,9 @@ export default {
             }
             .change_img {
               position: absolute;
-              top: 55px;
               width: 12px;
               height: 26px;
+              top: 80px;
               background: url("../../../../assets/img/icons.png") no-repeat;
               cursor: pointer;
             }

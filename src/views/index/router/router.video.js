@@ -22,11 +22,13 @@ export default {
     path: 'signList',
     name: 'video_signList',
     component: () => import('@/views/index/components/video/signList.vue')
-  }, {
+  },
+  /* {
     path: 'videotape',
     name: 'video_videotape',
     component: () => import('@/views/index/components/video/videotape.vue')
-  }, {
+  },  */
+  {
     path: 'download',
     name: 'video_download',
     component: () => import('@/views/index/components/video/download.vue')

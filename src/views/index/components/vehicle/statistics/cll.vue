@@ -8,10 +8,10 @@
     </div>
     <div class="con_box">
       <div class="con_left">
-        <el-radio-group v-model="queryForm.radio" class="left_type">
-          <el-radio :label="1">按卡口</el-radio>
+        <!-- <el-radio-group v-model="queryForm.radio" class="left_type">
+          <el-radio :label="1">按卡口</el-radio> -->
           <!-- <el-radio :label="6">按单位</el-radio> -->
-        </el-radio-group>
+        <!-- </el-radio-group> -->
         <el-select v-model="queryForm.bayonet" filterable placeholder="请选择卡口" style="width: 100%;">
           <el-option
             v-for="item in listBayonet"
@@ -45,7 +45,7 @@
             :value="item.value">
           </el-option>
         </el-select>
-        <el-input v-model="queryForm.warningNum" placeholder="请输入大于0的警戒数值"></el-input>
+        <el-input v-model.number="queryForm.warningNum" placeholder="请输入大于0的警戒数值" @blur="validationWarningNum"></el-input>
         <!-- 自定义报表类型 -->
         <div class="left_start" v-show="queryForm.statementType === 5">
           <span>开始</span>
@@ -81,8 +81,7 @@
               <i class="vl_icon vl_icon_vehicle_cll_03" @click="tabIndex = 3" :class="{'active': tabIndex === 3}" v-show="queryForm.statementType !== 5"></i>
             </div>
             <h1>({{dateTitle}})车流量统计</h1>
-            <div></div>
-            <!-- <el-button class="select_btn btn_100">导出</el-button> -->
+            <el-button class="select_btn btn_100" @click="exportExcel" :loading="loadingBtnExport">导出</el-button>
           </div>
           <div class="main_box" v-show="tabIndex === 1">
             <p>车流量（辆）</p>
@@ -91,6 +90,10 @@
           <div class="main_box" v-show="tabIndex === 2">
             <p>车流量（辆）</p>
             <div id="chartContainer2"></div>
+            <div v-if="this.chartData && this.chartData.length > 30" class="chart_time">
+              <span>{{beforeDate}}</span>
+              <span>{{afterDate}}</span>
+            </div>
           </div>
           <div class="main_box" v-show="tabIndex === 3">
             <el-table :data="bodyList">
@@ -112,7 +115,7 @@ let startTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() -
 let endTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() + (24 * 60 * 60 * 1000 - 1) - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss');//默认结束时间为开始时间后第三天
 import G2 from '@antv/g2';
 import { View } from '@antv/data-set';
-import {apiCarFlow} from '@/views/index/api/api.vehicle.js';
+import {apiCarFlow, exportExcel} from '@/views/index/api/api.vehicle.js';
 import {getAllBayonetListByName} from '@/views/index/api/api.vehicle.js';
 import {formatDate} from '@/utils/util.js';
 import {dataList} from '@/utils/data.js';
@@ -120,12 +123,12 @@ export default {
   data () {
     return {
       queryForm: {
-        radio: 1,
+        // radio: 1,
         carType: "",
         bayonet: {value: ''},
         // lane: null,
         statementType: 1,
-        warningNum: null,
+        warningNum: '',
         startTime: startTime,
         endTime: endTime
       },
@@ -148,6 +151,7 @@ export default {
       ],
       loading: false,
       loadingBtn: false,
+      loadingBtnExport: false,
       // 翻页数据
       currentPage: 1,
       pageSize: 10,
@@ -161,6 +165,9 @@ export default {
       isShowChart: false, // 选择卡口，点统计按钮后，显示右边统计图表
       headerList: [], // 表格头部数据
       bodyList: [], // 表格主体数据
+      //当时间间隔超过30天时，X轴 只取第一个，和最后一个现实
+      beforeDate: null,
+      afterDate: null
     }
   },
   computed: {
@@ -195,6 +202,46 @@ export default {
     this.getListBayonet();
   },
   methods: {
+    // 验证输入的警戒值
+    validationWarningNum () {
+      if (this.queryForm.warningNum !== '' && this.queryForm.warningNum <= 0) {
+        this.$message.warning('输入的警戒数值必须大于0');
+        this.queryForm.warningNum = '';
+      }
+    },
+    // 导出
+    exportExcel () {
+      let data = {
+        carFlowQueryDto: {
+          bayonetIds: this.queryForm.bayonet.value,
+          carType: this.queryForm.carType
+        },
+        viewType: 6
+      }
+      if (this.queryForm.statementType !== 5) {
+        data.carFlowQueryDto['reportType'] = this.queryForm.statementType
+      } else {
+        data.carFlowQueryDto['startTime'] = this.queryForm.startTime;
+        data.carFlowQueryDto['endTime'] = this.queryForm.endTime;
+      }
+      this.loadingBtnExport = true;
+      exportExcel(data).then(res => {
+        if (res && res.data) {
+          const eleA = document.getElementById('export_id');
+          if (eleA) {
+            document.body.removeChild(eleA);
+          }
+          let a = document.createElement('a');
+          a.setAttribute('href', res.data.fileUrl);
+          a.setAttribute('target', '_self');
+          a.setAttribute('id', 'export_id');
+          document.body.appendChild(a);
+          a.click();
+        }
+      }).finally(() => {
+        this.loadingBtnExport = false;
+      })
+    },
     getEndTime(time) {
       let startTime = new Date(this.queryForm.startTime).getTime() + 1 * 3600 * 24 * 1000;
       /* this.pickerOptions1 = {
@@ -240,22 +287,21 @@ export default {
         value: 'value', // value字段
       });
       // impute 补全列/补全字段
-      dv.transform({
-        type: 'impute',
-        field: '车流量1',       // 待补全字段
-        // groupBy: [ 'value' ], // 分组字段集（传空则不分组）
-        method: 'value',  // 补全常量
-        value: 120     // 补全字段值时执行的规则
-      });
+      // dv.transform({
+      //   type: 'impute',
+      //   field: '车流量1',       // 待补全字段
+      //   // groupBy: [ 'value' ], // 分组字段集（传空则不分组）
+      //   method: 'value',  // 补全常量
+      //   value: 1     // 补全字段值时执行的规则
+      // });
 
-      console.log(dv.rows, 'dv.rows')
-      let view2 = chart.view();
-      view2.source(dv, {});
+      // let view2 = chart.view();
+      // view2.source(dv, {});
       
-      chart.interval()
-      .position('date*车流量1') 
-      .color('#F2F2F2')
-      .size(30);
+      // chart.interval()
+      // .position('date*车流量1') 
+      // .color('#F2F2F2')
+      // .size(30);
       chart.source(dv, {});
       chart.axis('value', {
         title: null,
@@ -263,8 +309,6 @@ export default {
       });
       // 坐标轴刻度
       chart.scale('value', {
-        max: 120,
-        min: 0,
         alias: '车流量',
         tickCount: 7,
         title: {
@@ -272,7 +316,7 @@ export default {
         }
       });
 
-      chart.axis('车流量1', false);
+      // chart.axis('车流量1', false);
       chart.axis('date', {
         label: {
           textStyle: {
@@ -293,7 +337,7 @@ export default {
         htmlContent: function (title, items) {
           return `<div class="my_tooltip">
             <h1>${title}</h1>
-            <span><span>${items[1].name}：</span><span>${items[1].value}辆</span></span></div>`;
+            <span><span>${items[0].name}：</span><span>${items[0].value}辆</span></span></div>`;
         }
       });
       chart.legend(false);
@@ -302,17 +346,18 @@ export default {
       .color('l(270) 0:#0C70F8 1:#0D9DF4')
       .size(30);
 
-console.log("-----------------",dv.rows[0].date, this.queryForm.warningNum)
-      chart.guide().line({
-        top: true,
-        start: [dv.rows[0].date, this.queryForm.warningNum],
-        end: [dv.rows[dv.rows.length - 1].date, this.queryForm.warningNum],
-        lineStyle: {
-          stroke: '#ef5555',
-          lineWidth: 1,
-          lineDash: [3, 3]
-        },
-      });
+      if (this.queryForm.warningNum > 0) {
+        chart.guide().line({
+          top: true,
+          start: [dv.rows[0].date, this.queryForm.warningNum],
+          end: [dv.rows[dv.rows.length - 1].date, this.queryForm.warningNum],
+          lineStyle: {
+            stroke: '#ef5555',
+            lineWidth: 2,
+            lineDash: [3, 3]
+          },
+        });
+      }
 
       /* chart.line().position('date*warnNum').color('#ef5555'); */
       chart.render();
@@ -344,28 +389,30 @@ console.log("-----------------",dv.rows[0].date, this.queryForm.warningNum)
        
       // 坐标轴刻度
       chart.scale('value', {
-        max: 120,
-        min: 0,
         tickCount: 7,
         title: {
           offset: 50
         }
       });
-      chart.axis('date', {
-        label: {
-          textStyle: {
-            fill: '#999999',
-            fontSize: 12
+      if (this.chartData && this.chartData.length > 30) {
+        chart.axis('date', false);
+      } else {
+        chart.axis('date', {
+          label: {
+            textStyle: {
+              fill: '#999999',
+              fontSize: 12
+            }
+          },
+          tickLine: {
+            alignWithLabel: true,
+            length: 0
+          },
+          line: {
+            lineWidth: 0
           }
-        },
-        tickLine: {
-          alignWithLabel: true,
-          length: 0
-        },
-        line: {
-          lineWidth: 0
-        }
-      });
+        });
+      }
       chart.tooltip({
         useHtml: true,
         htmlContent: function (title, items) {
@@ -378,16 +425,18 @@ console.log("-----------------",dv.rows[0].date, this.queryForm.warningNum)
       chart.area().position('date*value').color('type', ['#007EFF']).shape('smooth').opacity(0.6);
       chart.line().position('date*value').color('type', ['#207BF1']).size(1).shape('smooth');
       chart.point().position('date*value').color('type', ['#207BF1']).size(2).shape('smooth');
-      chart.guide().line({
-        top: true,
-        start: [dv.rows[0].date, this.queryForm.warningNum],
-        end: [dv.rows[dv.rows.length -1].date, this.queryForm.warningNum],
-        lineStyle: {
-          stroke: '#ef5555',
-          lineWidth: 2,
-          lineDash: [3, 3]
-        },
-      });
+      if (this.queryForm.warningNum > 0) {
+        chart.guide().line({
+          top: true,
+          start: [dv.rows[0].date, this.queryForm.warningNum],
+          end: [dv.rows[dv.rows.length -1].date, this.queryForm.warningNum],
+          lineStyle: {
+            stroke: '#ef5555',
+            lineWidth: 2,
+            lineDash: [3, 3]
+          },
+        });
+      }
       /* chart.line().position('date*warnNum').color('#ef5555'); */
       chart.render();
       this.charts.chart2 = chart;
@@ -402,7 +451,7 @@ console.log("-----------------",dv.rows[0].date, this.queryForm.warningNum)
     // 重置查询表单
     resetQueryForm () {
       this.queryForm = {
-        radio: 1,
+        // radio: 1,
         carType: '',
         bayonet: {value: ''},
         // lane: null,
@@ -410,6 +459,10 @@ console.log("-----------------",dv.rows[0].date, this.queryForm.warningNum)
         warningNum: null,
         startTime: startTime,
         endTime: endTime
+      };
+      this.charts = {
+        chart1: null,
+        chart2: null  
       };
       this.isShowChart = false;
     },
@@ -448,7 +501,10 @@ console.log("-----------------",dv.rows[0].date, this.queryForm.warningNum)
               key['warnNum'] = this.queryForm.warningNum
             }
           }
-          if(this.queryForm.statementType === 3 || this.queryForm.statementType === 2 || this.queryForm.statementType === 5) {
+          const _startTime = new Date(this.queryForm.startTime).getTime();
+          const _endTime = new Date(this.queryForm.endTime).getTime();
+          const threeDays = 259199000;
+          if(this.queryForm.statementType === 3 || this.queryForm.statementType === 2 || (this.queryForm.statementType === 5 && (_endTime - _startTime) > threeDays)) {
             for(let item of this.chartData) {
               item['date'] = formatDate(item.date,'yy-MM-dd')
             }
@@ -458,6 +514,8 @@ console.log("-----------------",dv.rows[0].date, this.queryForm.warningNum)
             this.isShowChart = true;
             this.$nextTick(() => {
               this.drawChart2();
+              this.beforeDate = this.chartData[0].date;
+              this.afterDate = this.chartData[this.chartData.length - 1].date;
             })
           } else {
             this.charts = {
@@ -565,6 +623,17 @@ console.log("-----------------",dv.rows[0].date, this.queryForm.warningNum)
           }
           .el-table{
             margin-top: 20px;
+          }
+          .chart_time{
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            position: relative;
+            bottom: 50px;
+            > span{
+              font-size: 12px;
+              color: #999999;
+            }
           }
         }
       }
