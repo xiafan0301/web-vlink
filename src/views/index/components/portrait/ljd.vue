@@ -2,7 +2,7 @@
   <div class="ljd point">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像侦查</el-breadcrumb-item>
         <el-breadcrumb-item>落脚点分析</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
