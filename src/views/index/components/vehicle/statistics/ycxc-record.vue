@@ -27,7 +27,7 @@
           </div>
         </div>
         <div class="list-box">
-          <div class="list-item" v-for="item in dataList" :key="item.id" @click="onOpenDetail(item)">
+          <div class="list-item" v-for="(item, index) in dataList" :key="item.id" @click="onOpenDetail(item, index)">
             <img :src="item.subStoragePath" alt="">
             <p class="time"><i></i>{{item.shotTime}}</p>
             <p class="address"><i></i>抓拍设备:{{item.deviceName}}</p>
@@ -61,36 +61,36 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt="">
+            <img :src="sturcDetail.subStoragePath" alt="" class="bigImg">
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_qii struc_c_d_img">
-              <img :src="sturcDetail.storagePath" alt="">
+              <img :src="sturcDetail.storagePath" alt="" class="bigImg">
               <span>全景图</span>
             </div>
             <div class="struc_c_d_info">
               <h2>抓拍信息</h2>
                 <div class="struc_cdi_line" v-show="sturcDetail.snapTime">
-                <span>{{sturcDetail.snapTime}}<b>抓拍时间</b></span>
+                <span><b>抓拍时间：</b>{{sturcDetail.snapTime}}</span>
               </div>
               <div class="struc_cdi_line" v-show="sturcDetail.snapDevice">
-                <span>{{sturcDetail.snapDevice}}<b>抓拍设备</b></span>
+                <span><b>抓拍设备：</b>{{sturcDetail.snapDevice}}</span>
               </div>
               <div class="struc_cdi_line" v-show="sturcDetail.snapAddress">
-                <span>{{sturcDetail.snapAddress}}<b>抓拍地址</b></span>
+                <span><b>抓拍地址：</b>{{sturcDetail.snapAddress}}</span>
               </div>
               <div class="struc_cdi_line" v-show="sturcDetail.plateNo">
-                <span>{{sturcDetail.plateNo}}<b>车牌号</b></span>
+                <span><b>车牌号：</b>{{sturcDetail.plateNo}}</span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.vehicleBrand}}</span>
-                <span>{{sturcDetail.vehicleModel}}</span>
-                <span>{{sturcDetail.vehicleClass}}</span>
-                <span>{{sturcDetail.vehicleColor}}</span>
-                <span>{{sturcDetail.vehicleRoof}}</span>
-                <span>{{sturcDetail.vehicleStyles}}</span>
-                <span>{{sturcDetail.feature}}<b>特征</b></span>
+                <span v-show="sturcDetail.vehicleBrand">{{sturcDetail.vehicleBrand}}</span>
+                <span v-show="sturcDetail.vehicleModel">{{sturcDetail.vehicleModel}}</span>
+                <span v-show="sturcDetail.vehicleClass">{{sturcDetail.vehicleClass}}</span>
+                <span v-show="sturcDetail.vehicleColor">{{sturcDetail.vehicleColor}}</span>
+                <span v-show="sturcDetail.vehicleRoof">{{sturcDetail.vehicleRoof}}</span>
+                <span v-show="sturcDetail.vehicleStyles">{{sturcDetail.vehicleStyles}}</span>
+                <span v-show="sturcDetail.feature">{{sturcDetail.feature}}</span>
               </div>
               <div class="struc_cdi_line"></div>
             </div>
@@ -101,7 +101,7 @@
         </div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt="">
+            <img :src="sturcDetail.subStoragePath" alt="" class="bigImg">
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
@@ -328,10 +328,10 @@ export default {
     /**
      * 打开抓拍弹框
      */
-    onOpenDetail (obj) {
-
+    onOpenDetail (obj, index) {
       this.sturcDetail = obj;
       this.strucDetailDialog = true;
+      this.curImgIndex = index;
       this.$nextTick(() => {
         this.initMap(obj);
       })
@@ -729,7 +729,6 @@ export default {
               > b {
                 color: #999;
                 font-weight: normal;
-                padding-left: 18px;
               }
             }
           }
