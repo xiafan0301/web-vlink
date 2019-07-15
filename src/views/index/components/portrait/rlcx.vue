@@ -16,7 +16,7 @@
               end-placeholder="结束日期">
             </el-date-picker>
           </el-form-item>
-          <el-form-item label="区域：" label-width="55px">
+          <el-form-item label="抓拍区域：" label-width="80px">
             <el-radio-group v-model="searchForm.type" @change="areaTypeChanged">
               <el-radio :label="1">列表选择</el-radio>
               <el-radio :label="2" @click="alert(1)">地图选择</el-radio>
@@ -470,10 +470,10 @@ export default {
     padding-right: 5px;
   }
   .el-radio {
-    margin-right: 15px;
+    margin-right: 5px;
   }
   .el-radio__label {
-    padding-left: 5px;
+    padding-left: 0px;
   }
 }
 </style>
