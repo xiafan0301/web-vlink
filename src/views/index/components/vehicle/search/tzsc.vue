@@ -365,13 +365,9 @@
       </div>
       <!-- 没有数据的情况 -->
       <div v-else class="fnull">
-        <div v-if="isInit">
+        <div>
           <img src="../../../../../assets/img/null-content.png" alt />
-          <span>请在左侧输入查询条件</span>
-        </div>
-        <div v-else>
-          <img src="../../../../../assets/img/not-content.png" alt />
-          <span>抱歉，没有相关的结果!</span>
+          {{noDataTips}}
         </div>
       </div>
     </div>
@@ -458,61 +454,61 @@
                 >{{ '车顶(天窗)：' + sturcDetail.vehicleRoof}}</div>
               </div>-->
               <!-- 车辆的信息栏 -->
-              <div class="struc_cdi_line" v-if="sturcDetail.shotTime">
-                <p>
+              <div class="struc_cdi_line_tzsc" v-if="sturcDetail.shotTime">
+                <p class="line_content">
                   <span class="key">抓拍时间</span>
                   <span class="val">{{sturcDetail.shotTime}}</span>
                 </p>
               </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.deviceName">
-                <p>
+              <div class="struc_cdi_line_tzsc" v-if="sturcDetail.deviceName">
+                <p class="line_content">
                   <span class="key">抓拍设备</span>
                   <span class="val">{{sturcDetail.deviceName}}</span>
                 </p>
               </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.address">
-                <p>
+              <div class="struc_cdi_line_tzsc" v-if="sturcDetail.address">
+                <p class="line_content">
                   <span class="key" title="抓拍地点">抓拍地点</span>
                   <span class="val">{{sturcDetail.address}}</span>
                 </p>
               </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.plateNo">
-                <p>
+              <div class="struc_cdi_line_tzsc" v-if="sturcDetail.plateNo">
+                <p class="line_content">
                   <span class="key">车牌号码</span>
                   <span class="val">{{sturcDetail.plateNo}}</span>
                 </p>
               </div>
               <!-- 5个特征 -->
-              <div class="struc_cdi_line" v-if="sturcDetail.plateColor">
-                <p>
+              <div class="struc_cdi_line_tzsc" v-if="sturcDetail.plateColor">
+                <p class="line_content">
                   <span class="key">车牌颜色</span>
                   <span class="val">{{sturcDetail.plateColor}}</span>
                 </p>
               </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.vehicleStyles">
-                <p>
+              <div class="struc_cdi_line_tzsc" v-if="sturcDetail.vehicleStyles">
+                <p class="line_content">
                   <span class="key">车辆型号</span>
                   <span class="val">{{sturcDetail.vehicleStyles}}</span>
                 </p>
               </div>
 
-              <div class="struc_cdi_line" v-if="sturcDetail.vehicleColor">
-                <p>
+              <div class="struc_cdi_line_tzsc" v-if="sturcDetail.vehicleColor">
+                <p class="line_content">
                   <span class="key">车辆颜色</span>
                   <span class="val">{{sturcDetail.vehicleColor}}</span>
                 </p>
               </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.vehicleClass">
-                <p>
+              <div class="struc_cdi_line_tzsc" v-if="sturcDetail.vehicleClass">
+                <p class="line_content">
                   <span class="key">车辆类型</span>
                   <span class="val">{{sturcDetail.vehicleClass}}</span>
                 </p>
               </div>
               <div
-                class="struc_cdi_line"
+                class="struc_cdi_line_tzsc"
                 v-if="sturcDetail.plateClass || sturcDetail.plateClass === 0"
               >
-                <p>
+                <p class="line_content">
                   <span class="key">号牌类型</span>
                   <span class="val">{{dicFormater(45, sturcDetail.plateClass)}}</span>
                 </p>
@@ -749,7 +745,7 @@ export default {
       },
       /* 检索结果变量 */
       strucInfoList: [],
-      isInit: true, // 是否是初始化状态
+      noDataTips: "请在左侧输入查询条件",
       pageNum: 1,
       pageSize: 10,
       total: 0,
@@ -836,8 +832,9 @@ export default {
       // sunvisorOptions: [], // 遮阳板
       this.plateClassOptions = this.dicFormater(45)[0].dictList;
       this.plateColorOptions = this.dicFormater(46)[0].dictList;
+
       this.vehicleClassOptions = this.dicFormater(44)[0].dictList;
-      this.vehicleColorOptions = this.dicFormater(47)[0].dictList;
+      this.vehicleColorOptions = this.dicFormater(17)[0].dictList;
     },
     getStrucInfo(isClick = false) {
       // 根据特征数组来获取到检索的结果
@@ -955,7 +952,7 @@ export default {
           getFeatureSearch(queryParams)
             .then(res => {
               this.getStrucInfoLoading = false; // 关闭加载效果
-              this.isInit = false; // 页面初始化状态改变
+              this.noDataTips = "暂无搜索结果";
               if (res.data && res.data.list) {
                 if (res.data.list.length > 0) {
                   this.strucInfoList = res.data.list;
@@ -973,7 +970,7 @@ export default {
               this.getStrucInfoLoading = false; // 关闭加载效果
               this.strucInfoList = []; // 清空搜索结果
               this.total = 0;
-              this.isInit = false; // 页面初始化状态改变              
+              this.noDataTips = "暂无搜索结果";
             });
         } else {
           return false;
@@ -2030,8 +2027,8 @@ export default {
                 margin-left: 0.1rem;
               }
             }
-            .struc_cdi_line {
-              p {
+            .struc_cdi_line_tzsc {
+              .line_content {
                 max-width: 100%;
                 display: inline-block;
                 height: 0.3rem;
