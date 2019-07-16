@@ -29,9 +29,9 @@
           <el-select class="full" v-model="searchData.ageGroup" placeholder="选择年龄段">
             <el-option
               v-for="item in ageGroupList"
-              :key="item.label"
+              :key="item.value"
               :label="item.label"
-              :value="item.label">
+              :value="item.value">
             </el-option>
           </el-select>
        
@@ -260,17 +260,17 @@ export default {
       portraitGroupList: [],
       vehicleGroupList: [],
       focusType: [
-        {value: 0, label: '不限'},
+        {value: null, label: '不限'},
         {value: 1, label: '布控人员'},
         {value: 2, label: '布控车辆'}
       ],
       ageGroupList: [
-        {value: 0, label: '不限'},
-        {value: 1, label: '儿童'},
-        {value: 2, label: '少年'},
-        {value: 3, label: '青年'},
-        {value: 4, label: '中年'},
-        {value: 5, label: '老年'},
+        {value: null, label: '不限'},
+        {value: '儿童', label: '儿童'},
+        {value: '少年', label: '少年'},
+        {value: '青年', label: '青年'},
+        {value: '中年', label: '中年'},
+        {value: '老年', label: '老年'},
         // {value: 6, label: '50-70'},
         // {value: 7, label: '70-'}
       ],
@@ -452,8 +452,16 @@ export default {
         startTime: this.searchData.time[0] + " 00:00:00",
         endTime: this.searchData.time[1] + " 23:59:59" ,
         personGroupId: this.searchData.portraitGroupId || "" ,
-        sex: this.searchData.sex || "",
-        age: this.searchData.ageGroup || "" ,
+        // sex: this.searchData.sex || "",
+        // age: this.searchData.ageGroup || "" ,
+      }
+      console.log(this.searchData.ageGroup);
+      
+      if(this.searchData.sex){
+          params.sex=this.searchData.sex
+      }
+      if(this.searchData.ageGroup){
+           params.age=this.searchData.ageGroup
       }
       // for (let key in this.searchData) {
       //   if (this.searchData[key] && key !== 'time') {
