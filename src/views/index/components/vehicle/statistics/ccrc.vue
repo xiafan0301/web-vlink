@@ -62,7 +62,7 @@
         </div>
         <div class="cpai">
           <span style="display: inline-block; width: 42px;color: #999999">车牌：</span>
-          <el-checkbox v-model="unvehicleFlag"><span style="color: #999999">排除</span></el-checkbox>
+          <el-checkbox style="float: right;" v-model="unvehicleFlag"><span style="color: #999999">排除</span></el-checkbox>
         </div>
         <div class="kakou">
           <el-input placeholder="请输入内容" v-model="vehicleNumber" class="input-with-select">

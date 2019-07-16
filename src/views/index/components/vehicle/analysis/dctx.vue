@@ -303,17 +303,17 @@ export default {
               draggable: false, // 是否可拖动
               extData: '', // 用户自定义属性
               // 自定义点标记覆盖物内容
-              content: '<div id="vehicle_mark'+ idName +'" class="icon_box"><span class="vl_icon mark_span vl_icon_map_mark'+ deviceType +'"></span><span class="vl_icon mark_hover_span vl_icon_map_hover_mark'+ deviceType +'"></span></div>'
+              content: '<div id="vehicle_mark'+ idName +'" class="icon_box no_checked"><span class="vl_icon mark_span vl_icon_map_mark'+ deviceType +'"></span><span class="vl_icon mark_hover_span vl_icon_map_hover_mark'+ deviceType +'"></span></div>'
             });
 
              
             marker.on('click', function () {
-              
+
+              $('.icon_box').removeClass('is_checked');
+              $('.icon_box').addClass('no_checked');
+
+              $('#vehicle_mark' + idName).removeClass('no_checked');
               $('#vehicle_mark' + idName).addClass('is_checked');
-
-              $($('.is_checked').children()[0]).css('display', 'none');
-
-              $($('is_checked').children()[1]).css('display', 'block !important');
               
 
               _this.recordDetail.recordList = [];
@@ -451,21 +451,18 @@ export default {
       this.searchLoading = true;
 
       const params = {
-        startDate: formatDate(this.filterObj.startDate),
-        endDate: formatDate(this.filterObj.endDate),
-        vehicleNumbers: this.filterObj.vehicleNumbers,
+        startTime: formatDate(this.filterObj.startDate),
+        endTime: formatDate(this.filterObj.endDate),
+        vehicleNumbers: this.filterObj.vehicleNumbers
         // startTime: '2019-07-13 00:00:00',
         // endTime: '2019-07-13 13:59:59',
         // vehicleNumbers: "湘LYV366,湘NF8988,湘NJM910,湘NJY056",
-        order:"asc",
-        pageNum: this.pagination.pageNum,
-        pageSize: this.pagination.pageSize
       };
 
       getMultiVehicleList(params)
         .then(res => {
           if (res && res.data) {
-            this.pagination.total = res.data.total;
+            // this.pagination.total = res.data.total;
             this.searchLoading = false;
             this.dataList = res.data;
 
@@ -935,10 +932,27 @@ export default {
 
 <style lang="scss">
 #mapContainer {
+  .is_checked {
+    .mark_hover_span {
+      display: block;
+    }
+    .mark_span {
+      display: none;
+    }
+  }
+  .no_checked {
+    .mark_hover_span {
+      display: none;
+    }
+    .mark_span {
+      display: block;
+    }
+  }
   .icon_box {
     width: 43px;
     height: 68px;
     position: relative;
+    
     .mark_span {
       width: 100%;
       height: 100%;
@@ -947,7 +961,7 @@ export default {
       position: absolute;
       left: 0px;
       top: 0;
-      display: none;
+      // display: none;
     }
   }
 }

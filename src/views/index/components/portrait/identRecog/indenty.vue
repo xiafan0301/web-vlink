@@ -435,11 +435,13 @@ export default {
       this.fileList = [];
       this.curImageUrl = null;
       this.$refs[form].resetFields();
+      this.dataList = [];
     },
     // 根据搜索条件进行查询
     searchData (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
+          this.dataList = [];
           if (this.curImgNum === 0 && !this.searchForm.idNo) {
             if (!document.querySelector('.el-message--info')) {
               this.$message.info('请先选择要上传的图片或填写身份证信息');

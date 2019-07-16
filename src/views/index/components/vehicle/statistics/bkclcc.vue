@@ -37,7 +37,7 @@
             :value="item">
           </el-option>
         </el-select>
-        <div class="left_radio"><span>车牌：</span><el-checkbox v-model="queryForm.radio" :label="true">排除</el-checkbox></div>
+        <div class="left_radio" style="overflow: hidden;"><span>车牌：</span><el-checkbox style="float: right;" v-model="queryForm.radio" :label="true">排除</el-checkbox></div>
         <div class="left_province">
           <el-select v-model="queryForm.province">
             <el-option

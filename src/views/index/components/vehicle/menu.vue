@@ -31,7 +31,7 @@
           </li>
           <li>
             <router-link :to="{name: 'vehicle_search_clxx'}">
-              <i class="vl_icon2 vl_icon2_005"></i><span>车辆信息</span>
+              <i class="vl_icon2 vl_icon2_005"></i><span>车辆档案</span>
             </router-link>
           </li>
           <li>

@@ -238,7 +238,9 @@
         <div class="info-r-content" v-if="!isNull" >
           <!-- 违章信息 -->
           <div class="info-card">
-            <p class="card-header">查询结果</p>
+            <p class="card-header">查询结果
+               <el-button type="primary" size="small" :loading="isDao" @click="exportList" class="select_btn  fright">导出</el-button>
+            </p>
             <div class="table_box">
               <el-table :data="regulationsList">
                 <el-table-column label="序号" type="index" width="100"></el-table-column>
@@ -319,7 +321,8 @@ import {
   JtcGETAppendixInfoList,
   JtcPUTAppendixsOrder,
   getPhotoAnalysis,
-  getViolation
+  getViolation,
+  exportNightVehicle
 } from "../../../api/api.judge.js";
 import { getCarmodelList } from "../../../api/api.base.js";
 // import { setTimeout } from "timers";
@@ -343,6 +346,7 @@ export default {
       historyPicList: [], // 上传历史记录
       historyPicDialog: false,
       loadingHis: false,
+      isDao: false,
       imgData: null,
       input5: "1",
       data1: "",
@@ -465,6 +469,79 @@ export default {
     this.setDTime();
   },
   methods: {
+    //导出
+    exportList(){
+      this.isDao=true
+      let ad=null
+      if (this.input5 == 1 ) {
+        let datas = {
+          dateStart: this.data1[0] + " 00:00:00",
+          dateEnd: this.data1[1] + " 23:59:59",
+          vilolationNum: this.tzscMenuForm.input4
+        };
+        if (this.sou.plateNo) {
+          datas.plateNo = this.photoAnalysis.plateNo;
+        }
+        if (this.sou.vehicleColor) {
+          datas.vehicleColor = this.photoAnalysis.vehicleColor;
+        }
+        if (this.sou.vehicleClass) {
+          datas.vehicleClass = this.photoAnalysis.vehicleClass;
+        }
+        if (this.sou.sunvisor) {
+          datas.sunvisor = this.photoAnalysis.sunVisor;
+        }
+        if (this.sou.plateColor) {
+          datas.plateColor = this.photoAnalysis.plateColor;
+        }
+        if (this.sou._plateClass) {
+          let a = this.plateType.map(
+            el => el.enumField == this.photoAnalysis.plateClass
+          );
+          datas.plateClass = a.enumValue;
+        }
+        ad=datas
+        //this.getViolation(datas);
+      } else {
+        let params = {
+          dateStart: this.data1[0] + " 00:00:00",
+          dateEnd: this.data1[1] + " 23:59:59",
+          vilolationNum: this.tzscMenuForm.input4,
+          plateClass: this.tzscMenuForm.licenseType,
+          plateColor: this.tzscMenuForm.licenseColor,
+          vehicleClass: this.tzscMenuForm.carType,
+          vehicleColor: this.tzscMenuForm.carColor,
+          vehicleModel: this.tzscMenuForm.carModel,
+          sunvisor: this.tzscMenuForm.sunVisor
+          // plateClass:this.input4,
+        };
+        // params.pageNum=this.pagination.pageNum
+        // params.pageSize=this.pagination.pageSize
+        ad=params
+       // this.getViolation(params);
+      }
+      exportNightVehicle({
+        vehicleViolationDto:ad,
+        viewType:3
+      }).then(res=>{
+        if(res && res.data) {
+          const eleA = document.getElementById('export_id');
+          if (eleA) {
+            document.body.removeChild(eleA);
+          }
+          let a = document.createElement('a');
+          a.setAttribute('href', res.data.fileUrl);
+          a.setAttribute('target', '_self');
+          a.setAttribute('id', 'export_id');
+          document.body.appendChild(a);
+          a.click();
+          this.isDao=false
+        }else{
+          this.isDao=false
+           //this.$message.error('导出失败！');
+        }
+      })
+    },
     updataB(){
       //console.log(88888888888);
       this.isNull=true
@@ -685,12 +762,6 @@ export default {
         if (this.sou.vehicleColor) {
           datas.vehicleColor = this.photoAnalysis.vehicleColor;
         }
-        // if (this.sou.vehicleBrand) {
-        //   datas.vehicleBrand = this.photoAnalysis.vehicleBrand;
-        // }
-        // if (this.sou.vehicleRoof) {
-        //   datas.vehicleRoof = this.photoAnalysis.vehicleRoof;
-        // }
         if (this.sou.vehicleClass) {
           datas.vehicleClass = this.photoAnalysis.vehicleClass;
         }
@@ -706,7 +777,8 @@ export default {
           );
           datas.plateClass = a.enumValue;
         }
-
+        datas.pageNum=this.pagination.pageNum
+        datas.pageSize=this.pagination.pageSize
         this.getViolation(datas);
       } else {
         let params = {
@@ -1004,6 +1076,11 @@ export default {
     border: 1px solid red;
     color: red;
   }
+}
+.fright{
+  float: right;
+  margin-right: 10px;
+  margin-top: 10px;
 }
 </style>
 <style lang="scss">

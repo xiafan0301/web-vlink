@@ -303,7 +303,7 @@ export default {
         this.dSum = 0;
         this.dIds = [];
       }
-      
+      this.searchSubmit();
     },
     orderHandler (type) {
       if (type === this.orderType) {
@@ -345,9 +345,6 @@ export default {
     font-style: italic;
     cursor: pointer;
   }
-}
-.rlcx_r_list_empty {
-  background: url(../../../../assets/img/null-content.png) center center no-repeat;
 }
 .rlcx_main {
   height: 100%;

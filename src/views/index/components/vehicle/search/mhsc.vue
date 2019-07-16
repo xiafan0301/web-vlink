@@ -121,11 +121,9 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-
                 <el-form-item label="车牌：" style="margin: 0;" label-width="55px" prop="isNegate">
-                  <el-checkbox v-model="mhscMenuForm.isNegate">排除</el-checkbox>
+                  <el-checkbox v-model="mhscMenuForm.isNegate" style="float: right;">排除</el-checkbox>
                 </el-form-item>
-
                 <el-form-item label prop="carNumber">
                   <el-input
                     placeholder
@@ -227,9 +225,13 @@
       </div>
       <!-- 没有数据的情况 -->
       <div v-else class="fnull">
-        <div>
+        <div v-if="isInit">
           <img src="../../../../../assets/img/null-content.png" alt />
-          {{noDataTips}}
+          <span>请在左侧输入查询条件</span>
+        </div>
+        <div v-else>
+          <img src="../../../../../assets/img/not-content.png" alt />
+          <span>抱歉，没有相关的结果!</span>
         </div>
       </div>
     </div>
@@ -279,7 +281,7 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img class="bigImg" title="点击放大图片" :src="sturcDetail.storagePath"  alt />
+            <img class="bigImg" title="点击放大图片" :src="sturcDetail.storagePath" alt />
             <span>全景图</span>
           </div>
           <div class="struc_c_d_box">
@@ -324,62 +326,62 @@
                 >{{ '车顶(天窗)：' + sturcDetail.vehicleRoof}}</div>
                 </div>-->
                 <!-- 车辆的信息栏 -->
-                <div class="struc_cdi_line" v-if="sturcDetail.shotTime">
-                  <p>
+                <div class="struc_cdi_line_mhsc" v-if="sturcDetail.shotTime">
+                  <p class="line_content">
                     <span class="key">抓拍时间</span>
                     <span class="val">{{sturcDetail.shotTime}}</span>
                   </p>
                 </div>
-                <div class="struc_cdi_line" v-if="sturcDetail.deviceName">
-                  <p>
+                <div class="struc_cdi_line_mhsc" v-if="sturcDetail.deviceName">
+                  <p class="line_content">
                     <span class="key">抓拍设备</span>
                     <span class="val">{{sturcDetail.deviceName}}</span>
                   </p>
                 </div>
-                <div class="struc_cdi_line" v-if="sturcDetail.address">
-                  <p>
+                <div class="struc_cdi_line_mhsc" v-if="sturcDetail.address">
+                  <p class="line_content">
                     <span class="key" title="抓拍地点">抓拍地点</span>
                     <span class="val">{{sturcDetail.address}}</span>
                   </p>
                 </div>
-                <div class="struc_cdi_line" v-if="sturcDetail.plateNo">
-                  <p>
+                <div class="struc_cdi_line_mhsc" v-if="sturcDetail.plateNo">
+                  <p class="line_content">
                     <span class="key">车牌号码</span>
                     <span class="val">{{sturcDetail.plateNo}}</span>
                   </p>
                 </div>
 
                 <!-- 5个特征 -->
-                <div class="struc_cdi_line" v-if="sturcDetail.plateColor">
-                  <p>
+                <div class="struc_cdi_line_mhsc" v-if="sturcDetail.plateColor">
+                  <p class="line_content">
                     <span class="key">车牌颜色</span>
                     <span class="val">{{sturcDetail.plateColor}}</span>
                   </p>
                 </div>
-                <div class="struc_cdi_line" v-if="sturcDetail.vehicleStyles">
-                  <p>
+                <div class="struc_cdi_line_mhsc" v-if="sturcDetail.vehicleStyles">
+                  <p class="line_content">
                     <span class="key">车辆型号</span>
                     <span class="val">{{sturcDetail.vehicleStyles}}</span>
                   </p>
                 </div>
 
-                <div class="struc_cdi_line" v-if="sturcDetail.vehicleColor">
-                  <p>
+                <div class="struc_cdi_line_mhsc" v-if="sturcDetail.vehicleColor">
+                  <p class="line_content">
                     <span class="key">车辆颜色</span>
                     <span class="val">{{sturcDetail.vehicleColor}}</span>
                   </p>
                 </div>
-                <div class="struc_cdi_line" v-if="sturcDetail.vehicleClass">
-                  <p>
+                <div class="struc_cdi_line_mhsc" v-if="sturcDetail.vehicleClass">
+                  <p class="line_content">
                     <span class="key">车辆类型</span>
                     <span class="val">{{sturcDetail.vehicleClass}}</span>
                   </p>
                 </div>
                 <div
-                  class="struc_cdi_line"
+                  class="struc_cdi_line_mhsc"
                   v-if="sturcDetail.plateClass || sturcDetail.plateClass === 0"
                 >
-                  <p>
+                  <p class="line_content">
                     <span class="key">号牌类型</span>
                     <span class="val">{{dicFormater(45, sturcDetail.plateClass)}}</span>
                   </p>
@@ -544,7 +546,7 @@ export default {
       /* 检索结果变量 */
       strucInfoList: [],
       strucInfoListAll: [],
-      noDataTips: "请在左侧输入查询条件",
+      isInit: true, // 是否是页面初始化状态
       pageNum: 1,
       pageSize: 20,
       total: 0,
@@ -661,7 +663,7 @@ export default {
           getVagueSearch(queryParams)
             .then(res => {
               this.getStrucInfoLoading = false; // 关闭加载效果
-              this.noDataTips = "暂无搜索结果";
+              this.isInit = false; // 页面初始化状态改变
               if (res.data) {
                 if (res.data.length > 0) {
                   // this.strucInfoList = res.data;
@@ -686,7 +688,7 @@ export default {
               this.getStrucInfoLoading = false; // 关闭加载效果
               this.strucInfoList = []; // 清空搜索结果
               this.total = 0;
-              this.noDataTips = "暂无搜索结果";
+              this.isInit = false; // 页面初始化状态改变
             });
         } else {
           return false;
@@ -1519,8 +1521,8 @@ export default {
                 margin-left: 0.1rem;
               }
             }
-            .struc_cdi_line {
-              p {
+            .struc_cdi_line_mhsc {
+              .line_content {
                 max-width: 100%;
                 display: inline-block;
                 height: 0.3rem;

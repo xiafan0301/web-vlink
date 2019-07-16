@@ -16,13 +16,13 @@
             <!-- <div class="search_wrap">
               <el-input
                 class="width232"
-                v-model="searchCamera"
+                v-model="searchPlace"
                 suffix-icon="el-icon-search"
                 placeholder="搜索地点名称"
                 @focus="isSearchResult = true;"
                 id="map-sd-search-input"
               ></el-input>
-            </div> -->
+            </div>-->
             <!-- 搜索条件 -->
             <div class="search_condition">
               <div class="condition_title">设定分析条件</div>
@@ -189,6 +189,25 @@
         <!-- 地图信息 -->
         <div class="gis_content" id="gis_content">
           <div class="map_rm" id="mapMap"></div>
+          <div class="sd_search">
+            <input
+              type="text"
+              placeholder="请输入地名，快速定位地址"
+              autocomplete="off"
+              class="sd_search_input"
+              id="map-sd-search-input"
+            />
+            <!-- <el-input
+              v-model="searchPlace"
+              placeholder="请输入地名，快速定位地址"
+              class="sd_search_input"
+              autocomplete="off"
+              id="map-sd-search-input"
+            ></el-input> -->
+            <span @click="selectArea(searchPlace)">
+              <i class="el-icon-search"></i>
+            </span>
+          </div>
           <!-- 地图控制按钮（放大，缩小，定位） -->
           <div class="map_control">
             <!-- 摄像头拍摄数量 -->
@@ -250,6 +269,7 @@
               >
                 <div v-for="(sItem, sIndex) in item.detailList" :key="'my_swiper' + sIndex">
                   <div class="swiper_contents" v-if="item.currentIndex === sIndex">
+                    <div class="shot_times">{{ item.detailList.length + '次'}}</div>
                     <div class="img_warp">
                       <img :src="sItem.upPhotoUrl" alt />
                     </div>
@@ -299,8 +319,8 @@
                         <p class="similarity_title">相似度</p>
                         <div class="select_time">
                           <el-select
-                            v-model="searchCamera"
-                            @change="slideToIndex(index, searchCamera)"
+                            v-model="searchPlace"
+                            @change="slideToIndex(index, searchPlace)"
                             placeholder="请选择"
                           >
                             <el-option
@@ -364,7 +384,7 @@ export default {
         }
       },
       /*左边搜索表单变量 */
-      searchCamera: "",
+      searchPlace: "",
       qyryfxFrom: {
         personGroupId: "",
         sex: null,
@@ -545,6 +565,10 @@ export default {
     });
   },
   methods: {
+    // searchPlaceClick() {
+    //   // 地图搜索
+    //   console.log("this.searchPlace", this.searchPlace);
+    // },
     // 日期控制
     timeChange(ind, type = "start") {
       this.$nextTick(() => {
@@ -602,7 +626,7 @@ export default {
     },
     /**重置左边菜单的方法 */
     resetLeftMenu() {
-      this.searchCamera = "";
+      this.searchPlace = "";
       // 清空表单
       this.qyryfxFrom = {
         personGroupId: "",
@@ -711,7 +735,10 @@ export default {
       const queryParams = {
         sex: this.qyryfxFrom.sex,
         age: this.qyryfxFrom.age !== "" ? this.qyryfxFrom.age.join() : "",
-        personGroupId: this.qyryfxFrom.personGroupId !== "" ? this.qyryfxFrom.personGroupId.join() : "",
+        personGroupId:
+          this.qyryfxFrom.personGroupId !== ""
+            ? this.qyryfxFrom.personGroupId.join()
+            : "",
         deviceAndTimeList: deviceAndTimeList
       };
       this.submitLoading = true; // 打开加载效果
@@ -725,13 +752,13 @@ export default {
             } else {
               this.clearMarkList(); // 清除地图标记
               this.setMarks();
-              this.$message.warning('您选择的设备没有数据');
+              this.$message.warning("您选择的设备没有数据");
             }
           } else {
             this.submitLoading = false; // 关闭加载效果
             this.clearMarkList(); // 清除地图标记
             this.setMarks();
-            this.$message.warning('您选择的设备没有数据');
+            this.$message.warning("您选择的设备没有数据");
           }
         })
         .catch(() => {
@@ -749,7 +776,10 @@ export default {
         queryParams = {
           sex: this.qyryfxFrom.sex,
           age: this.qyryfxFrom.age !== "" ? this.qyryfxFrom.age.join() : "",
-          personGroupId: this.qyryfxFrom.personGroupId !== "" ? this.qyryfxFrom.personGroupId.join() : "",
+          personGroupId:
+            this.qyryfxFrom.personGroupId !== ""
+              ? this.qyryfxFrom.personGroupId.join()
+              : "",
           deviceCode: device.viewClassCode,
           startTime: this.drawObj[0].startTime,
           endTime: this.drawObj[0].endTime
@@ -1274,7 +1304,9 @@ export default {
       }
     },
     selectArea(e) {
-      console.log(e);
+      // if (this.searchPlace) {
+        this.searchPlace = e;
+      // }
       if (e.poi && e.poi.location) {
         this.amap.setZoom(15);
         this.amap.setCenter(e.poi.location);
@@ -2029,7 +2061,7 @@ export default {
           draggable: false, // 是否可拖动
           // extData: obj,
           // 自定义点标记覆盖物内容
-          content: `<div class='qyryfx_vl_icon_wrap'> <div class="map_icons ${sClass}"></div> <div class='people_counts_l1 ${level}'> ${device.shotNum}人次 </div> </div>`
+          content: `<div class='qyryfx_vl_icon_wrap' title="点击查询设备抓拍照片"> <div class="map_icons ${sClass}"></div> <div class='people_counts_l1 ${level}'> ${device.shotNum}人次 </div> </div>`
         });
         let _this = this;
         // 给标记绑定一个点击事件
@@ -2048,7 +2080,7 @@ export default {
           draggable: false, // 是否可拖动
           // extData: obj,
           // 自定义点标记覆盖物内容
-          content: `<div class="map_icons ${sClass}"></div>`
+          content: `<div style="cursor:not-allowed;" class="map_icons ${sClass}"></div>`
         });
         this.markerList = [...this.markerList, marker];
       }
@@ -2392,6 +2424,42 @@ export default {
           width: 100%;
           height: 100%;
         }
+        // 地图搜索
+        .sd_search {
+          position: absolute;
+          top: 0.3rem;
+          left: 0.3rem;
+          z-index: 1000;
+          background-color: #fff;
+          overflow: hidden;
+
+          > .sd_search_input {
+            float: left;
+            width: 360px;
+            height: 36px;
+            line-height: 36px;
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0px 3px 10px 0px rgba(99, 99, 99, 0.39);
+            border: 0;
+            padding: 0 15px;
+            border: none;
+          }
+          > span {
+            float: left;
+            width: 60px;
+            height: 36px;
+            line-height: 36px;
+            background-color: #0c70f8;
+            cursor: pointer;
+            text-align: center;
+            > i {
+              position: relative;
+              top: 2px;
+              color: #fff;
+              font-size: 20px;
+            }
+          }
+        }
         //定位
         .map_control {
           position: absolute;
@@ -2521,6 +2589,19 @@ export default {
             margin-bottom: 25px;
             .swiper_contents {
               padding-left: 50px;
+              position: relative;
+              .shot_times {
+                position: absolute;
+                right: 0;
+                top: -30px;
+                padding: 0 16px;
+                line-height: 20px;
+                border-radius: 10px 0px 0px 10px;
+                background: #e9e9e9;
+                font-size: 12px;
+                color: #555;
+                text-align: center;
+              }
             }
             .change_img {
               position: absolute;
@@ -2694,11 +2775,9 @@ html {
 }
 .qyryfx_wrap {
   // 搜索框
-  .search_wrap {
+  .sd_search {
     .el-input__inner {
-      background: #f2f2f2;
-      border-width: 0;
-      border-radius: 20px;
+      border: none;
     }
   }
   //查询按钮

@@ -4,7 +4,7 @@
       <div is="vlBreadcrumb" 
         :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
           {name: '车辆查询', routerName: 'vehicle_search_clcx',query:urldata},
-          {name: '过车详情'}]">
+          {name: '车辆详情'}]">
       </div>
       <!-- <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
@@ -125,7 +125,7 @@
                   
                 </p>
               </div>
-              <a :href="snapObj.videoPath">下载视频</a>
+              <!-- <a :href="snapObj.videoPath">下载视频</a> -->
               <!-- <span class="playSee" v-if="showimg" @click="showimg=!showimg">视频回放</span>
               <span class="playSee" v-if="!showimg" @click="showimg=!showimg">抓拍图</span> -->
             </div>
@@ -250,7 +250,7 @@ export default {
     this.vehicleType = [...dic[0].dictList]; // 车辆类型
 
     this.getSnapDetail()
-    this.getArchives()
+    //this.getArchives()
   },
   methods: {
     extendImgs(v){
@@ -305,8 +305,8 @@ export default {
         hasPlate:this.$route.query.plateNo?'1':'0'
       }
       getSnapDetail(d).then(res=>{
-        if(res){
-          //this.detailData=res.data
+        if(res && res.data){
+          this.detailData=res.data
           if(res.data.snapDtoList && res.data.snapDtoList.length>0)
           this.strucInfoList = res.data.snapDtoList;
           this.snapObj=res.data.snapDtoList[0]
