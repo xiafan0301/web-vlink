@@ -155,35 +155,26 @@
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
             <img :src="sturcDetail.subStoragePath" alt="">
-            <span>上传图</span>
+            <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img">
               <img :src="sturcDetail.storagePath" alt="">
-              <span>抓拍图</span>
+              <span>全景图</span>
             </div>
             <div class="struc_c_d_info">
-              <h2>对比信息<div class="vl_jfo_sim"><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? (sturcDetail.semblance * 1).toFixed(2) : '0.00'}}<span style="font-size: 12px;">%</span></div></h2>
+              <h2>对比信息</h2>
               <div class="struc_cdi_line">
-                <span v-show="sturcDetail.age">{{sturcDetail.age}}</span>
-                <span v-show="sturcDetail.baby">{{sturcDetail.baby}}</span>
-                <span v-show="sturcDetail.mask">{{sturcDetail.mask}}</span>
-                <span v-show="sturcDetail.hat">{{sturcDetail.hat}}</span>
-                <span v-show="sturcDetail.glasses">{{sturcDetail.glasses}}</span>
-                <span v-show="sturcDetail.hair">{{sturcDetail.hair}}</span>
-                <span v-show="sturcDetail.umberlla">{{sturcDetail.umberlla}}</span>
-                <span v-show="sturcDetail.sex">{{sturcDetail.sex}}</span>
-                <span v-show="sturcDetail.bottomType">{{sturcDetail.bottomColor}}{{sturcDetail.bottomType}}</span>
-                <span v-show="sturcDetail.upperType">{{sturcDetail.upperColor}}{{sturcDetail.upperTexture}}{{sturcDetail.upperType}}</span>
+                <span><font>抓拍时间</font>{{sturcDetail.shotTime}}</span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.shotTime}}<i class="vl_icon vl_icon_retrieval_01"></i></span>
+                <span><font>抓拍设备</font>{{sturcDetail.deviceName}}</span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.deviceName}}<i class="vl_icon vl_icon_retrieval_02"></i></span>
+                <span><font>抓拍地址</font>{{sturcDetail.address}}</span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.address}}<i class="vl_icon vl_icon_retrieval_04"></i></span>
+                <span class="tz"><font>特征</font><p>{{sturcDetail.sex+" "+(sturcDetail.age || "")+ " "+ (sturcDetail.baby || "")+ " " + (sturcDetail.bag || "")+ " " + (sturcDetail.bottomColor || "") +(sturcDetail.bottomType || "")+ " " + (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+ " "+(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")}}</p></span>
               </div>
               <div class="struc_cdi_line"></div>
             </div>
@@ -191,8 +182,8 @@
           </div>
           <!--跳转按钮-->
           <div class="struc_t_btn">
-            <el-button type="primary" @click="gotoControl(sturcDetail.subStoragePath)">新建布控</el-button>
-            <el-button type="primary" @click="gotoLjd(sturcDetail.subStoragePath)">落脚地分析</el-button>
+            <a @click="gotoControl(sturcDetail.subStoragePath)">新建布控</a>
+            <a @click="gotoLjd(sturcDetail.subStoragePath)">落脚地分析</a>
           </div>
         </div>
         <div v-show="strucCurTab === 2" class="struc_c_address"></div>
@@ -655,18 +646,20 @@
         this.allLeftEvData = [];
         let keyArr = [];
         this.evData.forEach((x, index) => {
-          if (index <= this.count && !isAll) {
-            let key = x.shotTime.slice(0, 10);
-            if (!keyArr.includes(key)) {
-              keyArr.push(key);
-              let obj = {label: key,isOpen: true};
-              obj.list = [];
-              obj.times = 1;
-              obj.list.push(x);
-              this.leftEvData.push(obj);
-            } else {
-              this.leftEvData.find(y => y.label === key).list.push(x);
-              this.leftEvData.find(y => y.label === key).times += 1;
+          if (!isAll) {
+            if (index <= this.count) {
+              let key = x.shotTime.slice(0, 10);
+              if (!keyArr.includes(key)) {
+                keyArr.push(key);
+                let obj = {label: key,isOpen: true};
+                obj.list = [];
+                obj.times = 1;
+                obj.list.push(x);
+                this.leftEvData.push(obj);
+              } else {
+                this.leftEvData.find(y => y.label === key).list.push(x);
+                this.leftEvData.find(y => y.label === key).times += 1;
+              }
             }
           } else {
             let key = x.shotTime.slice(0, 10);
@@ -1363,8 +1356,8 @@
             top: -.5rem;
             left: -.5rem;
             transform: rotate(-45deg);
-            border: .5rem solid #50CC62;
-            border-color: transparent transparent #50CC62;
+            border: .5rem solid #0C70F8;
+            border-color: transparent transparent #0C70F8;
             z-index: 9;
           }
           span {
@@ -1388,8 +1381,8 @@
         .struc_c_d_qj {
           margin-right: .3rem;
           &:before {
-            border: .5rem solid #0c70f8;
-            border-color: transparent transparent #0C70F8;
+            border: .5rem solid #50CC62;
+            border-color: transparent transparent #50CC62;
           }
         }
         .struc_c_d_box {
@@ -1432,22 +1425,51 @@
                 line-height: .3rem;
                 margin-bottom: .08rem;
                 border: 1px solid #F2F2F2;
-                background: #FAFAFA;
                 color: #333333;
                 white-space: nowrap;
                 text-overflow: ellipsis;
                 border-radius:3px;
                 font-size: 12px;
                 overflow: hidden;
-                padding: 0 .1rem;
+                padding-right: .1rem;
                 margin-right: .08rem;
                 > i {
                   vertical-align: middle;
                   margin-left: .1rem;
                 }
-                font {
+                > font {
+                  width: 75px;
+                  text-align: center;
+                  border-right: 1px solid #F2F2F2;
                   color: #999999;
-                  margin-left: 20px;
+                  background: #FAFAFA;
+                  display: inline-block;
+                  margin-right: .1rem;
+                }
+              }
+              .tz {
+                display: flex;
+                white-space: normal;
+                overflow: visible;
+                height: auto;
+                border: none;
+                font {
+                  flex-shrink: 0;
+                  width: 75px;
+                  border: 1px solid #F2F2F2;
+                  -webkit-border-radius: 3px 0 0 3px;
+                  -moz-border-radius: 3px 0 0 3px;
+                  border-radius: 3px 0 0 3px;
+                  margin-right: 0px;
+                  border-right: none;
+                }
+                >p{
+                  color: #333333;
+                  border: 1px solid #F2F2F2;
+                  -webkit-border-radius: 0 3px 3px 0;
+                  -moz-border-radius: 0 3px 3px 0;
+                  border-radius: 0 3px 3px 0;
+                  padding-left: .1rem;
                 }
               }
               p {
@@ -1495,10 +1517,25 @@
         }
         .struc_t_btn {
           margin-top: .2rem;
-          button {
-            height: .4rem;
-            line-height: .4rem;
-            padding: 0 .12rem;
+          float: right;
+          a {
+            display: inline-block;
+            text-align: center;
+            line-height: .38rem;
+            border: solid 1px #eeeeee;
+            border-radius: 4px;
+            margin-top: 10px;
+            padding: 0px .15rem;
+            text-decoration: none;
+            margin-left: 10px;
+            background: rgba(246, 248, 249, 1);
+            border: 1px solid rgba(211, 211, 211, 1);
+            cursor: pointer;
+          }
+          a:hover {
+            background: #0c70f8;
+            border: solid 1px #0c70f8;
+            color: #ffffff;
           }
         }
       }

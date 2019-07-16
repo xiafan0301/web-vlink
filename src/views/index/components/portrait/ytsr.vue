@@ -555,7 +555,6 @@
         if (!boolean) {
           this.searching = true;
         }
-        this.$_showLoading({target: '.vl_jfo_event'});
         let _ids = [],devIds = [];
         let _arr = this.$refs.cameraTree.getCheckedNodes();
         _arr.forEach(x => {
@@ -569,22 +568,22 @@
           where: {}
         }
         if (this.stucOrder === 1) {
-          params.where['order'] = 'acs';
+          params['order'] = 'asc';
         } else {
-          params.where['order'] = 'desc';
+          params['order'] = 'desc';
         }
         switch (this.stucOrder) {
           case 1:
-            params.where['orderBy'] = 'shotTime';
+            params['orderBy'] = 'shotTime';
             break;
           case 2:
-            params.where['orderBy'] = 'shotTime';
+            params['orderBy'] = 'shotTime';
             break;
           case 3:
-            params.where['orderBy'] = 'deviceNamePinyin';
+            params['orderBy'] = 'deviceNamePinyin';
             break;
           case 4:
-            params.where['orderBy'] = 'semblance';
+            params['orderBy'] = 'semblance';
             break;
         }
         params.where.startTime = this.searchData.time[0] + ' 00:00:00';
@@ -603,7 +602,6 @@
           params.where['appendixIds'] = _ids.join(',');
         }
         ScpGETstrucInfoList(params).then(res => {
-          this.$_hideLoading();
           if (res) {
             console.log(res);
             this.strucInfoList = res.data.list;
@@ -617,7 +615,6 @@
           }
         }).catch(() => {
           this.searching = false;
-          this.$_hideLoading();
         })
         console.log(this.searchData.time)
       },
