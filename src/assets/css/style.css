@@ -169,6 +169,7 @@
 .vl_icon_retrieval_06 {width: 16px; height: 16px; background-position: -777px -669px;}
 .vl_icon_retrieval_07 {width: 140px; height: 114px; background-position: -680px -1303px;}
 .vl_icon_retrieval_08 {width: 20px; height: 20px; background-position: -620px -376px;}
+.vl_icon_retrieval_09 {width: 20px; height: 20px; background-position: -818px -670px;}
 /* 布控状态 */
 .vl_control_s{width: 120px; height: 120px; background-position: -526px -716px;}
 .vl_control_o{width: 120px; height: 120px; background-position: -665px -716px;}
@@ -790,6 +791,9 @@
 .date-comp .el-date-editor .el-range-input {
   width: 52%;
 }
+.date-comp .el-range-editor.el-input__inner {
+  padding: 3px 0 3px 10px;
+}
 .el-date-editor .el-range-separator {
   width: 30px;
   text-align: center;
@@ -1146,4 +1150,24 @@ html {
   z-index: 9998;
   background: rgba(0, 0, 0, 0.6);
   animation: fadeIn 0.2s ease-out 0.2s both;
+}
+
+.vl_date .el-icon-date:before {
+  content: "从" !important;
+  color: #999;
+}
+.vl_date.vl_date_end .el-icon-date:before {
+  content: "至" !important;
+  color: #999;
+}
+.vl_date .el-icon-time:before {
+  content: "从" !important;
+  color: #999;
+}
+.vl_date.vl_date_end .el-icon-time:before {
+  content: "至" !important;
+  color: #999;
+}
+.vl_date .el-range-separator {
+  color: #999 !important;
 }

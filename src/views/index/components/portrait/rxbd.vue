@@ -59,7 +59,7 @@
                   { validator: validateIdCard, trigger: 'blur' }
                 ]"
               >
-                <el-input type="idCard" @blur="checkId" v-model="numberValidateForm.idCard" autocomplete="off"></el-input>
+                <el-input type="idCard" placeholder="请输入证件号" @blur="checkId" v-model="numberValidateForm.idCard" autocomplete="off"></el-input>
               </el-form-item>
             </el-form>
           </div>
@@ -413,13 +413,14 @@
   }
   .vl_judge_ct {
     width: 100%;
-    height: 100%;
+    height: calc(100% - 55px);
     border: .2rem solid #fafafa;
     background: #FFFFFF;
+    padding-bottom: .5rem;
     .vl_judge_tc_h {
       width: 100%;
       text-align: center;
-      padding-top: .77rem;
+      padding-top: .57rem;
       .judge_title {
         color: #333333;
         font-size: .5rem;
@@ -450,8 +451,8 @@
     .vl_judge_tc_c {
       height: 4.3rem;
       text-align: center;
-      margin-bottom: .9rem;
-      padding-top: .9rem;
+      margin-bottom: .7rem;
+      padding-top: .7rem;
       position: relative;
       .vl_judge_tc_c_item {
         width: 3.4rem;

@@ -34,6 +34,7 @@
       </div>
       <div class="vl_jtc_search">
         <el-date-picker
+          class="vl_date"
           v-model="searchData.time"
           type="daterange"
           range-separator="至"
@@ -43,7 +44,7 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期">
         </el-date-picker>
-        <div><el-input style="width: 1.36rem" oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100" v-model="searchData.minSemblance" placeholder="相似度"></el-input> - 100</div>
+        <div><el-input style="width: 192px;" oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100" v-model="searchData.minSemblance" placeholder="相似度"></el-input> - 100</div>
         <el-select
           v-model="devIdData"
           multiple

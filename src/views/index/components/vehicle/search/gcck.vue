@@ -31,6 +31,7 @@
           <div v-show="showType === 2">
             <div class="gcck_ll_s" style="height: 100px;">
               <el-date-picker style="width: 236px;" size="small"
+                class="vl_date"
                 v-model="searchTime2"
                 type="daterange"
                 align="left"

@@ -89,7 +89,7 @@
               <div class="selectDate date-comp">
                 <el-form-item label prop="selectDate">
                   <el-date-picker
-                    class="width232"
+                    class="width232 vl_date"
                     v-model="tzscMenuForm.selectDate"
                     type="daterange"
                     range-separator="至"
@@ -193,19 +193,7 @@
                   </el-select>
                 </el-form-item>
                 <el-form-item prop="carModel">
-                  <el-select
-                    v-model="tzscMenuForm.carModel"
-                    clearable
-                    class="width232"
-                    placeholder="选择车辆型号"
-                  >
-                    <el-option
-                      v-for="item in carModelOptions"
-                      :key="item.enumField"
-                      :label="item.enumValue"
-                      :value="item.enumValue"
-                    ></el-option>
-                  </el-select>
+                  <el-cascader class="width232" clearable separator="-" placeholder="选择车辆型号" v-model="tzscMenuForm.carModel" :options="carModelOptions"></el-cascader>
                 </el-form-item>
                 <el-form-item prop="carColor">
                   <el-select
@@ -566,6 +554,8 @@ import {
   JtcGETAppendixInfoList
 } from "../../../api/api.judge.js"; // 图片上传接口
 
+import { getVehicleList } from "../../../api/api.base.js";
+
 import {
   getFeatureSearch,
   getPhotoAnalysis
@@ -596,7 +586,7 @@ export default {
         licenseColor: "",
         carType: "",
         carColor: "",
-        carModel: "",
+        carModel: [],
         sunVisor: "",
         inspectionCount: ""
       },
@@ -834,14 +824,27 @@ export default {
       // sunvisorOptions: [], // 遮阳板
       this.plateClassOptions = this.dicFormater(45)[0].dictList;
       this.plateColorOptions = this.dicFormater(46)[0].dictList;
-
       this.vehicleClassOptions = this.dicFormater(44)[0].dictList;
-      this.vehicleColorOptions = this.dicFormater(17)[0].dictList;
+      this.vehicleColorOptions = this.dicFormater(47)[0].dictList;
+      getVehicleList().then(res => {
+        // console.log("联动数据", res);
+        this.carModelOptions = res.data.map(item => {
+          item.value = item.brand;
+          item.label = item.brand;
+          item.children = [];
+          for (let i = 0; i < item.typeList.length; i++) {
+            item.children.push({ value: item.typeList[i], label: item.typeList[i] })
+          }
+          delete item.typeList;
+          return item;
+        })
+      });
     },
     getStrucInfo(isClick = false) {
       // 根据特征数组来获取到检索的结果
       this.$refs.tzscMenuForm.validate(valid => {
         if (valid) {
+          // console.log('表单数据', this.tzscMenuForm);
           if (isClick) {
             this.getStrucInfoLoading = true; // 打开加载效果
           }
@@ -877,7 +880,7 @@ export default {
                 // "sunvisor": this.tzscMenuForm.sunVisor || null, // 遮阳板
                 // "descOfRearItem": this.tzscMenuForm.inspectionCount || null, // 年检标数量
                 vehicleNumber: null, // 车牌号码
-                vehicleModel: null // 车辆型号
+                vehicleModel: this.tzscMenuForm.carModel.length > 0 ? this.tzscMenuForm.carModel.join('-') : null // 车辆型号
               },
               pageNum: this.pageNum,
               pageSize: this.pageSize

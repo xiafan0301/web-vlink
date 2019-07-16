@@ -6,7 +6,7 @@
       <el-form :inline="true" :model="searchForm">
         <el-form-item>
           <el-date-picker
-            class="e_stat_dp"
+            class="e_stat_dp vl_date"
             v-model="searchForm.dateTime"
             type="daterange"
             align="left"

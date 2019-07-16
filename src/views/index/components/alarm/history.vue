@@ -5,8 +5,9 @@
     <div class="search_box">
       <div class="date_search">
         <div class="date_search_info">
-          <label>开始</label>
+          <!-- <label>开始</label> -->
           <el-date-picker
+                class="vl_date"
                 v-model="startTime"
                 type="date"
                 :picker-options="startDateOpt"
@@ -14,8 +15,9 @@
             </el-date-picker>
         </div>
         <div class="date_search_info">
-          <label>结束</label>
+          <!-- <label>结束</label> -->
           <el-date-picker
+                class="vl_date vl_date_end"
                 v-model="endTime"
                 type="date"
                 :picker-options="endDateOpt"
@@ -702,7 +704,7 @@ export default {
           margin-right: 2px;
         }
         .el-date-editor.el-input {
-          width: 162px;
+          width: 192px;
         }
       }
     }

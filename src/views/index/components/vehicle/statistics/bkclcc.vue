@@ -9,8 +9,9 @@
     <div class="con_box">
       <div class="con_left">
         <div class="left_start">
-          <span>开始</span>
           <el-date-picker
+            class="vl_date"
+            style="width: 100%"
             v-model="queryForm.startTime"
             :picker-options="pickerOptions"
             type="datetime"
@@ -19,8 +20,9 @@
           </el-date-picker>
         </div>
         <div class="left_end">
-          <span>结束</span>
           <el-date-picker
+            class="vl_date vl_date_end"
+            style="width: 100%"
             :picker-options="pickerOptions1"
             v-model="queryForm.endTime"
             type="datetime"
