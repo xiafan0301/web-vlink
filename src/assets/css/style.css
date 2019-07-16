@@ -105,8 +105,8 @@
 .vl_icon_map_mark2, .vl_icon_map_mark22  { width: 43px;  height: 68px; background-position: -214px -171px; }
 .vl_icon_map_mark0 { width: 43px;  height: 68px; background-position: -275px -171px; } /* 摄像头 */
 .vl_icon_map_mark4 { width: 31px; height: 34px; background-position: -477px -196px; }
-.vl_icon_map_mark7 { width: 31px; height: 34px; background-position: -263px -1160px; } /* 摄像头 紫色 */
-.vl_icon_map_mark8 { width: 31px; height: 34px; background-position: -478px -1160px; }  /* 卡口 蓝色 */
+.vl_icon_map_mark7 { width: 40px; height: 57px; background-position: -263px -1160px; } /* 摄像头 紫色 */
+.vl_icon_map_mark8 { width: 40px; height: 57px; background-position: -478px -1160px; }  /* 卡口 蓝色 */
 .vl_icon_map_sxt_error { width: 43px; height: 68px; background-position: -402px -174px; }
 .vl_icon_map_hover_mark0 { width: 47px;  height: 68px; background-position: -609px -1160px;} /* 摄像头移上去效果 */
 .vl_icon_map_hover_mark1 { width: 47px;  height: 68px; background-position: -670px -1160px;} /* 卡口紫色移上去效果 **/
@@ -156,10 +156,10 @@
 /* 研判 */
 .vl_icon_judge_01{width: 22px; height: 28px; background-position: -62px -134px;} /* 暂停*/
 .vl_icon_judge_03{width: 56px;  height: 68px;  background-position: -300px -1150px;} /* 次数1*/
-.vl_icon_judge_04{width: 56px;  height: 68px;  background-position: -455px -1150px;} /* 次数2*/
+.vl_icon_judge_04{width: 56px;  height: 68px;  background-position: -417px -1150px;} /* 次数2*/
 .vl_icon_judge_05{width: 56px;  height: 68px;  background-position: -377px -1150px;} /* 次数3*/
 .vl_icon_judge_06{width: 56px;  height: 68px;  background-position: -224px -1150px;} /* 次数4*/
-.vl_icon_judge_02{width: 56px;  height: 68px;  background-position: -532px -1160px;} /* 选中状态摄像头*/
+.vl_icon_judge_02{width: 56px;  height: 68px;  background-position: -604px -1160px;} /* 选中状态摄像头*/
 /* 检索 */
 .vl_icon_retrieval_01 {width: 20px; height: 22px; background-position: -618px -669px;}
 .vl_icon_retrieval_02 {width: 20px; height: 22px; background-position: -322px -375px;}

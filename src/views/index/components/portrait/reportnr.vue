@@ -4,7 +4,46 @@
     <div style="height: 50px"></div>
     <div class="vehicle_content_nr_box">
       <div class="vehicle_content_nr_box_left">
-
+        <el-upload
+            class="vl_jtc_upload_gjfx gjfx_upload"
+            multiple
+            :show-file-list="false"
+            accept="image/*"
+            :action="uploadAcion"
+            list-type="picture-card">
+          <div>
+            <i
+                style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
+                class="vl_icon vl_icon_vehicle_01"
+            ></i>
+            <span style="position: absolute; top: 132px; left: 72px; color: #999999">点击上传图片</span>
+          </div>
+        </el-upload>
+        <div style="color: #999999; text-align: center; margin-top: 8px">请上传全身照搜索更精准</div>
+        <div style="margin-top: 10px">
+          <span style="display: inline-block; width: 14px; margin-right: 4px; color: #999999">开 始</span>
+          <el-date-picker
+              v-model="value1"
+              value-format="timestamp"
+              format="yyyy-MM-dd HH:mm:ss"
+              @change="changval1"
+              style="width: 212px; vertical-align: top"
+              type="datetime"
+              placeholder="选择日期时间">
+          </el-date-picker>
+        </div>
+        <div style="margin-top: 10px">
+          <span style="display: inline-block; width: 14px; margin-right: 4px; color: #999999">结 束</span>
+          <el-date-picker
+              v-model="value2"
+              value-format="yyyy-MM-dd HH:mm:ss"
+              format="yyyy-MM-dd HH:mm:ss"
+              style="width: 212px; vertical-align: top"
+              type="datetime"
+              placeholder="选择日期时间">
+          </el-date-picker>
+        </div>
+        <el-button type="primary" style=" width: 100%; margin-top: 10px">档案分析</el-button>
       </div>
       <div class="vehicle_content_nr_box_right">
         <div class="vehicle_content_nr_box_right_top">
@@ -17,8 +56,8 @@
             >{{item.label}}</li>
           </ul>
         </div>
-        <div class="vehicle_content_nr_box_right_bot" :class="{'active': selectIndex === 2 || selectIndex === 3}">
-          <div class="cont" v-if="selectIndex === 1">
+        <div class="vehicle_content_nr_box_right_bot" id="report_content">
+          <div class="cont" id="report_showtype_1">
             <div class="top">
               最相似人员档案
             </div>
@@ -54,7 +93,12 @@
             </div>
 
           </div>
-          <div class="cont1" v-else-if="selectIndex === 0">
+          <div class="cont1" id="report_showtype_2">
+            <div style="background-color: white; color: #333333;
+              font-weight: bold;
+              padding: 20px;
+              border-bottom: 1px solid #F2F2F2;
+              font-size: 16px; margin-bottom: 10px">同行分析</div>
             <div>
               <div class="list-box">
                 <ul class="rlcx_r_list clearfix">
@@ -78,9 +122,13 @@
             </div>
 
           </div>
-          <div class="cont2" v-else-if="selectIndex === 2">
-            <div class="cont2_map_box" v-show="reselt">
-              <div class="text">落脚点分析</div>
+          <div class="cont2" id="report_showtype_3">
+            <div style="background-color: white; color: #333333;
+              font-weight: bold;
+              padding: 20px;
+              border-bottom: 1px solid #F2F2F2;
+              font-size: 16px;">落脚点分析</div>
+            <div class="cont2_map_box">
               <div class="mes">
                 <el-collapse v-model="activeNames">
                   <el-collapse-item title="创谷广告园(2次)" name="1">
@@ -100,41 +148,46 @@
                 </el-collapse>
               </div>
             </div>
-            <div class="insetLeft2" @click="hideResult"></div>
             <div id="container"></div>
           </div>
-          <div class="cont3 cont2" v-else>
+          <div class="cont3 cont2" id="report_showtype_4">
+            <div style="background-color: white; color: #333333;
+              font-weight: bold;
+              padding: 20px;
+              border-bottom: 1px solid #F2F2F2;
+              font-size: 16px;">轨迹分析</div>
             <div class="cont2_map_box">
-              <div class="text">行人轨迹分析</div>
-              <div class="mes">
-                <el-collapse v-model="activeNames">
-                  <el-collapse-item title="创谷广告园(2次)" name="1">
-                    <div class="mes_cot">
-                      <div class="cot_1">
-                        <img src="../../../../../public/static/img/vis-eg.png">
-                        <div style="padding-left: 10px">
-                          <div style="background-color: #F6F6F6; padding: 0 8px"><i class="icon"></i>2018-12-27 15:46:07</div>
-                          <div class="subdata">
-                            <i class="vl_icon vl_icon_retrieval_03" style="height: 24px"></i>
-                            <b>99.12</b>%
+              <vue-scroll>
+                <div class="mes">
+                  <el-collapse v-model="activeNames">
+                    <el-collapse-item title="创谷广告园(2次)" name="1">
+                      <div class="mes_cot">
+                        <div class="cot_1">
+                          <img src="../../../../../public/static/img/vis-eg.png">
+                          <div style="padding-left: 10px">
+                            <div style="background-color: #F6F6F6; padding: 0 8px"><i class="icon"></i>2018-12-27 15:46:07</div>
+                            <div class="subdata">
+                              <i class="vl_icon vl_icon_retrieval_03" style="height: 24px"></i>
+                              <b>99.12</b>%
+                            </div>
+                          </div>
+                        </div>
+                        <div style="margin: 15px 0; border-bottom: 1px solid #F2F2F2"></div>
+                        <div class="cot_1">
+                          <img src="../../../../../public/static/img/vis-eg.png">
+                          <div style="padding-left: 10px">
+                            <div style="background-color: #F6F6F6; padding: 0 8px"><i class="icon"></i>2018-12-27 15:46:07</div>
+                            <div class="subdata">
+                              <i class="vl_icon vl_icon_retrieval_03" style="height: 24px"></i>
+                              <b>99.12</b>%
+                            </div>
                           </div>
                         </div>
                       </div>
-                      <div style="margin: 15px 0; border-bottom: 1px solid #F2F2F2"></div>
-                      <div class="cot_1">
-                        <img src="../../../../../public/static/img/vis-eg.png">
-                        <div style="padding-left: 10px">
-                          <div style="background-color: #F6F6F6; padding: 0 8px"><i class="icon"></i>2018-12-27 15:46:07</div>
-                          <div class="subdata">
-                            <i class="vl_icon vl_icon_retrieval_03" style="height: 24px"></i>
-                            <b>99.12</b>%
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </el-collapse-item>
-                </el-collapse>
-              </div>
+                    </el-collapse-item>
+                  </el-collapse>
+                </div>
+              </vue-scroll>
             </div>
             <div id="rightMap"></div>
           </div>
@@ -145,14 +198,17 @@
 </template>
 <script>
 import vehicleBreadcrumb from './breadcrumb.vue';
-import { mapXupuxian } from "@/config/config.js";
 import {PortraitPostPersonTrace} from "@/views/index/api/api.portrait.js";
+import { mapXupuxian,ajaxCtx } from "@/config/config.js";
 export default {
   components: {vehicleBreadcrumb},
   data () {
     return {
       evData: [],
+      value1: '',
+      value2: '',
       reselt: true,
+      uploadAcion: ajaxCtx.base + '/new',
       amap: null,
       markerPoint: [], // 地图点集合
       activeNames: ['1'],
@@ -163,15 +219,15 @@ export default {
         },
         {
           label: "同行分析",
-          value: 0
-        },
-        {
-          label: "落脚点分析",
           value: 2
         },
         {
-          label: "轨迹分析",
+          label: "落脚点分析",
           value: 3
+        },
+        {
+          label: "轨迹分析",
+          value: 4
         }
       ],
       map: null,
@@ -195,6 +251,8 @@ export default {
     this.userInfo = this.$store.state.loginUser;
   },
   mounted () {
+    this.initMap()
+    this.renderMap()
   },
   methods: {
     hideResult () {
@@ -203,16 +261,12 @@ export default {
     //tab切换
     selectTab(val) {
       this.selectIndex = val;
-      if ( val === 2) {
-        this.$nextTick(() => {
-          this.initMap()
-        })
-      }
-      if ( val === 3) {
-        this.$nextTick(() => {
-          this.renderMap()
-          // this.submitForm(1)
-        })
+      let $tar = $('#report_showtype_' + val);
+      if ($tar && $tar.length > 0) {
+        let osTop = $tar.offset().top -250;
+        let sTop = $('#report_content').scrollTop();
+        // $('#report_content').scrollTop(osTop + sTop);
+        $('#report_content').animate({scrollTop: (osTop + sTop) + 'px'}, 500);
       }
     },
     /**
@@ -357,37 +411,70 @@ export default {
         /*margin-right: 10px;*/
         background-color: white;
         box-shadow:2px 3px 10px 0px rgba(131,131,131,0.28);
+        padding: 20px;
+        padding-top: 15px;
+        .vl_jtc_upload_gjfx {
+          text-align: center;
+          /deep/ .el-upload--picture-card {
+            width: 100%;
+            padding-top: 100%;
+            position: relative;
+            > i {
+              position: absolute;
+              top: 0;
+              bottom: 0;
+              left: 0;
+              right: 0;
+              margin: auto;
+            }
+            > img {
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              -webkit-border-radius: 6px;
+              -moz-border-radius: 6px;
+              border-radius: 6px;
+            }
+          }
+        }
+        .gjfx_upload {
+          &:hover {
+            /deep/ .el-upload--picture-card {
+              background: #0C70F8;
+            }
+          }
+        }
       }
       .vehicle_content_nr_box_right{
         height: 100%;
         width: calc(100% - 272px);
-        .active {
-          padding: 0 !important;
-          margin-left: 5px;
-        }
         .vehicle_content_nr_box_right_top{
           width: 100%;
           box-shadow:2px 3px 10px 0px rgba(131,131,131,0.28);
           .tab-menu {
             background-color: #fff;
-            padding-top: 8px;
+            padding-top: 10px;
             overflow: hidden;
             border-bottom: 1px solid #f2f2f2;
             li {
               float: left;
               width: auto;
               font-size: 16px;
-              margin: 0 20px;
-              height: 44px;
-              line-height: 44px;
+              margin: 0 10px;
+              padding: 0 30px;
+              height: 40px;
+              line-height: 40px;
               text-align: center;
-              color: #999999;
+              color: #333333;
               cursor: pointer;
+              background-color: #F7F7F7;
+              border-radius:2px 2px 0px 0px;
             }
             .is-active {
-              color: #0c70f8;
-              border-bottom: 2px solid #0c70f8;
-              font-weight:bold;
+              color: white;
+              background-color: #0A6DF0;
             }
           }
         }
@@ -397,7 +484,6 @@ export default {
           overflow: auto;
           .cont{
             background: #ffffff;
-            min-height: 100%;
             box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);
             .top{
               color: #333333;
@@ -462,11 +548,11 @@ export default {
             }
           }
           .cont1{
+            padding-top: 20px;
+            box-shadow:2px 3px 10px 0px rgba(131,131,131,0.28);
             .list-box {
               display: flex;
               flex-wrap: wrap;
-              min-width: 1180px;
-              overflow: auto;
               // justify-content: space-between;
               flex-flow: row wrap;
               // height: calc(100% - 45px);
@@ -515,39 +601,20 @@ export default {
           .cont2{
             height: 100%;
             position: relative;
+            margin-top: 20px;
+            box-shadow:2px 3px 10px 0px rgba(131,131,131,0.28);
             #container{
-              height: 100%;
+              height: calc(100% - 62px);
               width: 100%;
             }
-            .insetLeft2 {
-              position: absolute;
-              left: 339px;
-              width: 28px;
-              height: 178px;
-              z-index: 9999;
-              top: 50%;
-              margin-top: -89px;
-              display: inline-block;
-              background-repeat: no-repeat;
-              transform: rotate(180deg);
-              background-image: url(../../../../assets/img/icons.png);
-              background-position: -318px -1269px;
-              cursor: pointer;
-            }
             .cont2_map_box{
-              height: 100%;
-              overflow: auto;
+              height: calc(100% - 62px);
+              padding-top: 20px;
               width: 340px;
               background-color: white;
               position: absolute;
               z-index: 9999;
               box-shadow:2px 3px 10px 0px rgba(131,131,131,0.28);
-              .text{
-                color: #333333;
-                font-weight: bold;
-                padding: 20px;
-                font-size: 16px;
-              }
               .mes{
                 padding: 20px;
                 padding-top: 0;
@@ -610,7 +677,7 @@ export default {
             height: 100%;
             position: relative;
             #rightMap{
-              height: 100%;
+              height: calc(100% - 62px);
               width: 100%;
             }
           }

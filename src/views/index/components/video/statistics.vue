@@ -681,7 +681,7 @@ export default {
         name: {
           range: [0, 1]
         },
-        'value': {
+        'value': {  
           min: 0
         }
       });

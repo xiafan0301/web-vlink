@@ -180,6 +180,21 @@ export function postTaskAnalysis(data) {
   })
 }
 
+/*-------------------------- 人员侦察报告start -------------------------------*/
+/**
+ * getTaskInfosPage
+ * 离线分析任务分页查询接口
+ * @param {object} params
+ */
+export function postTaskInfosPage(params) {
+  return request({
+    url: '/personinvestigation/showtasklist',
+    method: 'post',
+    mode: 'judge',
+    params
+  })
+}
+
 /*-------------------------- 区域人员分析start -------------------------------*/
 /**
  * postShotNumArea

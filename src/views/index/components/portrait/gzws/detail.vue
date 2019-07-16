@@ -190,7 +190,7 @@ export default {
               let sContent = "<div class='tip_box'><div class='select_target'><p class='select_p'>查询目标</p>"
                     +"<img src="+ obj.targetStoragePath +" /><div class='mongolia'>"
                     +"<span>"+ obj.shotTime +"</span><i id="+ _id +" class='vl_icon vl_icon_control_09'></i></div></div>"
-                    +"<div class='tail_vehicle'><p class='tail_p'>尾随车辆</p><img src="+ obj.peerStoragePath +" />"
+                    +"<div class='tail_vehicle'><p class='tail_p'>尾随人员</p><img src="+ obj.peerStoragePath +" />"
                     +"<div class='mongolia'><span>"+ obj.shotTime +"</span><i id="+ _idBtn +" class='vl_icon vl_icon_control_09'></i></div></div>"
                     +"<div class='divide'></div><div class='device_name'>"+ obj.deviceName +"</div></div>";
 
@@ -208,7 +208,7 @@ export default {
                 }, 500);
             });
             marker.on('mouseout', function () {
-              $('#vehicle' + obj.i).removeClass('vl_icon_map_hover_mark0');
+              $('#vehicle' + i).removeClass('vl_icon_map_hover_mark0');
             });
             _this.map.setZoom(13)
             // marker.setPosition([obj.shotPlaceLongitude, obj.shotPlaceLatitude]);
@@ -220,7 +220,8 @@ export default {
           // 绘制线条
           let polyline = new window.AMap.Polyline({
             path: path,
-            strokeWeight: 4,
+            strokeWeight: 8,
+            showDir: true,
             strokeColor: '#61C772',
             strokeStyle: 'dashed'
           });

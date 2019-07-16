@@ -62,7 +62,7 @@
         </div>
         <div class="cpai">
           <span style="display: inline-block; width: 42px;color: #999999">车牌：</span>
-          <el-checkbox v-model="unvehicleFlag"><span style="color: #999999">排除</span></el-checkbox>
+          <el-checkbox v-model="unvehicleFlag" style="float: right; margin-right: 3px"><span style="color: #999999;">排除</span></el-checkbox>
         </div>
         <div class="kakou">
           <el-input placeholder="请输入内容" v-model="vehicleNumber" class="input-with-select">
@@ -471,7 +471,11 @@ export default {
         params.vehicleNumber = this.v + this.vehicleNumber
       }
       JfoGETCity(params).then(res => {
-        if (res) {
+        if (res.data == null) {
+          this.tableData = []
+          this.pagination.total = 0
+        }
+        if (res && res.data) {
           // this.tableData = res.data;
           this.pagination.pageNum = 1;
           this.tableDataAll = res.data;

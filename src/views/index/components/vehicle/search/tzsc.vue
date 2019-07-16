@@ -365,9 +365,13 @@
       </div>
       <!-- 没有数据的情况 -->
       <div v-else class="fnull">
-        <div>
+        <div v-if="isInit">
           <img src="../../../../../assets/img/null-content.png" alt />
-          {{noDataTips}}
+          <span>请在左侧输入查询条件</span>
+        </div>
+        <div v-else>
+          <img src="../../../../../assets/img/not-content.png" alt />
+          <span>抱歉，没有相关的结果!</span>
         </div>
       </div>
     </div>
@@ -745,7 +749,7 @@ export default {
       },
       /* 检索结果变量 */
       strucInfoList: [],
-      noDataTips: "请在左侧输入查询条件",
+      isInit: true, // 是否是初始化状态
       pageNum: 1,
       pageSize: 10,
       total: 0,
@@ -832,9 +836,8 @@ export default {
       // sunvisorOptions: [], // 遮阳板
       this.plateClassOptions = this.dicFormater(45)[0].dictList;
       this.plateColorOptions = this.dicFormater(46)[0].dictList;
-
       this.vehicleClassOptions = this.dicFormater(44)[0].dictList;
-      this.vehicleColorOptions = this.dicFormater(17)[0].dictList;
+      this.vehicleColorOptions = this.dicFormater(47)[0].dictList;
     },
     getStrucInfo(isClick = false) {
       // 根据特征数组来获取到检索的结果
@@ -952,7 +955,7 @@ export default {
           getFeatureSearch(queryParams)
             .then(res => {
               this.getStrucInfoLoading = false; // 关闭加载效果
-              this.noDataTips = "暂无搜索结果";
+              this.isInit = false; // 页面初始化状态改变
               if (res.data && res.data.list) {
                 if (res.data.list.length > 0) {
                   this.strucInfoList = res.data.list;
@@ -970,7 +973,7 @@ export default {
               this.getStrucInfoLoading = false; // 关闭加载效果
               this.strucInfoList = []; // 清空搜索结果
               this.total = 0;
-              this.noDataTips = "暂无搜索结果";
+              this.isInit = false; // 页面初始化状态改变              
             });
         } else {
           return false;

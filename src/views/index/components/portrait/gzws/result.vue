@@ -11,7 +11,7 @@
       <div class="left">
         <ul>
           <li>
-            <img src="../../../../../assets/img/temp/vis-eg.png" alt="">
+            <img :src="taskDetail.taskWebParam && taskDetail.taskWebParam.targetPicUrl" alt="" class="bigImg">
           </li>
           <li>
             <span>任务名称：</span>

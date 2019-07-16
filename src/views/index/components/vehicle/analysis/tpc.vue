@@ -12,17 +12,6 @@
           <el-input v-model="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" clearable></el-input>
         </div>
         <div class="kaishi">
-<!--          <el-date-picker-->
-<!--              v-model="searchData.time"-->
-<!--              type="daterange"-->
-<!--              style="width: 232px"-->
-<!--              range-separator="-"-->
-<!--              value-format="yyyy-MM-dd HH:mm:ss"-->
-<!--              format="yy/MM/dd"-->
-<!--              start-placeholder="开始日期"-->
-<!--              end-placeholder="结束日期"-->
-<!--              :default-time="['00:00:00', '23:59:59']">-->
-<!--          </el-date-picker>-->
           <span style="display: inline-block; width: 14px; margin-right: 4px; color: #999999">开 始</span>
           <el-date-picker
               v-model="value1"
@@ -421,7 +410,9 @@ export default {
             this.showimgnull = false
           }
         }
-        this.searchLoading = false;
+        this.$nextTick(() => {
+          this.searchLoading = false;
+        })
       }).catch( error => {
         console.log(error);
         this.searchLoading = false;

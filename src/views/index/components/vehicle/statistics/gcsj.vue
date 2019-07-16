@@ -8,7 +8,7 @@
     </div>
     <div class="con_box">
       <div class="con_left">
-        <div ref="devSelect" is="devSelect" @sendSelectData="getSelectData"></div>
+        <div ref="devSelect" is="devSelect" @sendSelectData="getSelectData" @allSelectLength="allSelectLength"></div>
         <div class="left_start">
           <span>开始</span>
           <el-date-picker
@@ -40,36 +40,36 @@
             <div>
               <div>
                 <i class="vl_icon vl_icon_vehicle_gcsj_01"></i>
-                <span>设备数</span>
+                <span>设备数(个)</span>
               </div>
-              <span>{{gcsjDetail.deviceNums}}个</span>
+              <span>{{gcsjDetail.deviceNums}}</span>
             </div>
           </li>
           <li>
             <div>
               <div>
                 <i class="vl_icon vl_icon_vehicle_gcsj_02"></i>
-                <span>过车总数</span>
+                <span>过车总数(次)</span>
               </div>
-              <span>{{gcsjDetail.passingCarNums}}次</span>
+              <span>{{gcsjDetail.passingCarNums}}</span>
             </div>
           </li>
           <li>
             <div>
               <div>
                 <i class="vl_icon vl_icon_vehicle_gcsj_03"></i>
-                <span>车辆总数</span>
+                <span>车辆总数(辆)</span>
               </div>
-              <span>{{gcsjDetail.carNums}}辆</span>
+              <span>{{gcsjDetail.carNums}}</span>
             </div>
           </li>
           <li>
             <div>
               <div>
                 <i class="vl_icon vl_icon_vehicle_gcsj_04"></i>
-                <span>外地车数</span>
+                <span>外地车数(辆)</span>
               </div>
-              <span>{{gcsjDetail.fieldCarNums}}辆</span>
+              <span>{{gcsjDetail.fieldCarNums}}</span>
             </div>
           </li>
         </ul>
@@ -158,7 +158,8 @@ export default {
         passingCarNums: '',
         carNums: '',
         fieldCarNums: ''
-      }
+      },
+      selectLength: null
     }
   },
   watch: {
@@ -166,12 +167,13 @@ export default {
       const threeDays = 2 * 3600 * 24 * 1000;
       const endTime = new Date(this.queryForm.startTime).getTime() + threeDays;
       this.queryForm.endTime = formatDate(endTime, 'yyyy-MM-dd');
+    },
+    selectLength () {
+      // 设备和卡口全选后才获取过车数据统计
+      if (this.selectLength === (this.queryForm.devIdData.selSelectedData1.length + this.queryForm.devIdData.selSelectedData2.length)) {
+        this.getCarBeforeSta();
+      }
     }
-  },
-  mounted () {
-    setTimeout(() => {
-      this.getCarBeforeSta();
-    }, 1500);
   },
   methods: {
     getEndTime(time) {
@@ -181,6 +183,10 @@ export default {
           return time.getTime() < (startTime - 8.64e7) || time.getTime() > ((startTime + 2 * 3600 * 24 * 1000) - 8.64e6);
         },
       }
+    },
+    // 获取子组件传过来的设备和卡口总是
+    allSelectLength (num) {
+      this.selectLength = num;
     },
     // 获得选择设备组件传过来的数据
     getSelectData (data) {
@@ -269,6 +275,7 @@ export default {
       this.charts.chart2 = chart;
     },
     drawChart3 () {
+      if (this.chartData3.length === 0) return;
       let _this = this, chart = null;
       if (this.charts.chart3) {
         this.charts.chart3.clear();
@@ -291,10 +298,13 @@ export default {
         value: 'value', // value字段
         retains: ['time']
       });
-      chart.source(dv, {});
+      chart.source(dv, {
+        'value': {
+          min: 0
+        }
+      });
       // 坐标轴刻度
       chart.scale('value', {
-        tickCount: 7,
         title: {
           offset: 50
         }
@@ -337,6 +347,7 @@ export default {
       this.charts.chart3 = chart;
     },
     drawChart4 () {
+      if (this.chartData4.length === 0) return;
       let chart = null;
       if (this.charts.chart4) {
         this.charts.chart4.clear();
@@ -376,11 +387,13 @@ export default {
       .color('#F2F2F2')
       .size(30);
 
-      chart.source(dv, {});
+      chart.source(dv, {
+        'value': {
+          min: 0
+        }
+      });
       // 坐标轴刻度
       chart.scale('value', {
-        min: 0,
-        tickCount: 6,
         title: {
           offset: 50
         }
@@ -439,14 +452,12 @@ export default {
     },
     // 获取过车数据统计
     getCarBeforeSta () {
-      console.log(this.queryForm.devIdData, 'console.log(this.queryForm.devIdData)')
       const params = {  
         deviceIds: this.queryForm.devIdData.selSelectedData1.map(m => m.id).join(','),
         bayonetIds: this.queryForm.devIdData.selSelectedData2.map(m => m.id).join(','),
         startTime: this.queryForm.startTime + ' 00:00:00',
         endTime: this.queryForm.endTime + ' 23:59:59'
       }
-      
       apiPassingCarSta(params).then(res => {
         if (res) {
           this.gcsjDetail = res.data;
@@ -460,7 +471,6 @@ export default {
           this.chartData4 = res.data.carTypeDto.map(m => {
             return { carType: m.name, count: m.total, count1: 1 };
           })
-          /* this.drawChart1(); */
           this.drawChart2();
           this.drawChart3();
           this.drawChart4();
@@ -664,7 +674,6 @@ export default {
 // 各时间段的过车数
 .my_tooltip{
   > h1{
-    padding-bottom: 10px;
     color: #999;
   }
   > span{
