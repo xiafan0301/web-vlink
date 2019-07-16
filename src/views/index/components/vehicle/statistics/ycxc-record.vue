@@ -392,6 +392,7 @@ export default {
   padding-top: 50px;
   .th-ycxc-record-list {
     width: 100%;
+    height: 100%;
     // height: calc(100% - 55px);
     padding: 0 20px;
     background: #f7f9f9;
