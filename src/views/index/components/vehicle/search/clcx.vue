@@ -93,7 +93,7 @@
           </el-select>
           </el-form-item>
           <el-form-item prop="plateNo">
-            <p class="carCold">车牌：<el-checkbox v-model="ruleForm._include">排除</el-checkbox></p>
+            <p class="carCold">车牌：<el-checkbox style="float: right;" v-model="ruleForm._include">排除</el-checkbox></p>
             <el-input placeholder="请输入车牌号" v-model="ruleForm.plateNo" class="input-with-select">
               <!-- <el-select v-model="select" slot="prepend" placeholder=""> -->
                <!-- <el-option v-for="item in pricecode" :label="item" :value="item"></el-option> -->
