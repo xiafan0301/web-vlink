@@ -211,7 +211,7 @@ export default {
       if ( val === 3) {
         this.$nextTick(() => {
           this.renderMap()
-          this.submitForm(1)
+          // this.submitForm(1)
         })
       }
     },
