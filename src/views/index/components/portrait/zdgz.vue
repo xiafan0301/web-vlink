@@ -253,9 +253,9 @@ export default {
         time: null
       },
       sexList: [
-        {value: 0, label: '不限'},
-        {value: 1, label: '男'},
-        {value: 2, label: '女'}
+        {value: null, label: '不限'},
+        {value: '男', label: '男'},
+        {value: '女', label: '女'}
       ],
       portraitGroupList: [],
       vehicleGroupList: [],
