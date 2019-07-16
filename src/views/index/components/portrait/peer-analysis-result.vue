@@ -2,7 +2,7 @@
   <div class="peer-analysis">
     <div class="th-breadcrumb">
       <el-breadcrumb separator-class="el-icon-arrow-right">
-        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像侦察</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像侦查</el-breadcrumb-item>
         <el-breadcrumb-item :to="{ path: '/portrait/peer-analysis-list' }">同行分析</el-breadcrumb-item>
         <el-breadcrumb-item>分析结果</el-breadcrumb-item>
       </el-breadcrumb>

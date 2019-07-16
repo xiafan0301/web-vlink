@@ -3,7 +3,7 @@
     <div class="frequent-appearances">
       <div class="th-breadcrumb">
         <el-breadcrumb separator-class="el-icon-arrow-right">
-          <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像侦察</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像侦查</el-breadcrumb-item>
           <el-breadcrumb-item>同行分析</el-breadcrumb-item>
         </el-breadcrumb>
         <el-button @click="skipAddTaskPage" class="th-button-export-color">新建任务</el-button>
