@@ -115,7 +115,7 @@
                 <!-- 人员追踪 -->
                 <div v-if="pageType === 1 || ((pageType === 2 || pageType === 3) && modelDOne)" is="model" ref="mapOne" :class="{'model_height': modelType !== '1'}" :allDevData="allDevData" mapId="mapOne" :modelType="'1'" :checkList="checkList" @sendModelDataOne="getModelDataOne" :modelDataOne="modelDOne" :operateType="pageType" :imgurl="imgurl"></div>
                 <!-- 车辆追踪 -->
-                <div v-if="pageType === 1 || ((pageType === 2 || pageType === 3) && modelDTwo)" is="model" ref="mapTwo" :class="{'model_height': modelType !== '2'}" :allDevData="allDevData" mapId="mapTwo" :modelType="'2'" :checkList="checkList" @sendModelDataTwo="getModelDataTwo" :modelDataTwo="modelDTwo" :operateType="pageType" :imgurl="imgurl"></div>
+                <div v-if="pageType === 1 || ((pageType === 2 || pageType === 3) && modelDTwo)" is="model" ref="mapTwo" :class="{'model_height': modelType !== '2'}" :allDevData="allDevData" mapId="mapTwo" :modelType="'2'" :checkList="checkList" @sendModelDataTwo="getModelDataTwo" :modelDataTwo="modelDTwo" :operateType="pageType" :imgurl="imgurl" :plateNo="plateNo"></div>
                 <!-- 区域布防 -->
                 <div v-if="pageType === 1 || ((pageType === 2 || pageType === 3) && modelDFour)" is="model" ref="mapFour" :class="{'model_height': modelType !== '4'}" :allDevData="allDevData" mapId="mapFour" :modelType="'4'" :checkList="checkList" @sendModelDataFour="getModelDataFour" :modelDataFour="modelDFour" :operateType="pageType"></div>
               </template>
@@ -230,9 +230,7 @@ export default {
       this.pageType = 1;
       // 从车辆侦查或者人像侦查跳转过来新建布控
       const {imgurl, modelName, plateNo} = this.$route.query;
-      
       this.modelName = modelName;
-      
       this.checkList.push(this.modelName);
       if (this.checkList.length > 0) {
         if (this.checkList[0] === '人员追踪') {
