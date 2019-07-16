@@ -160,11 +160,11 @@
                       <!-- 车牌颜色 -->
                       <span v-else-if="item.plateColor">{{ '车牌颜色:' + item.name }}</span>
                       <!-- 车辆型号 -->
-                      <span v-else-if="item.vehicleStyles">{{item.name}}</span>
+                      <!-- <span v-else-if="item.vehicleStyles">{{item.name}}</span> -->
                       <!-- 车辆颜色 -->
                       <span v-else-if="item.vehicleColor">{{ '车辆颜色:' + item.name }}</span>
                       <!-- 车辆类型 -->
-                      <span v-else-if="item.vehicleClass">{{ '车辆类型:' + item.name }}</span>
+                      <!-- <span v-else-if="item.vehicleClass">{{ '车辆类型:' + item.name }}</span> -->
                       <!-- 号牌类型 -->
                       <span
                         v-else-if="item.plateClass || item.plateClass === 0"
