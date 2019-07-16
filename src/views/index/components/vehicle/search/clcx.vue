@@ -135,7 +135,7 @@
       </el-table-column>
       <el-table-column
         prop="vehicleGroup"
-        label="车辆类别">
+        label="车辆分组">
       </el-table-column>
       <el-table-column
         label="是否是布控车辆">
@@ -267,30 +267,30 @@ export default {
     this.getGroups()
     let dic=this.dicFormater(dataList.vehicleType);
     this.vehicleOptions= [...dic[0].dictList]
-    let vd= JSON.parse(localStorage.getItem("searchD"))
-    if(vd && this.$route.query.dateStart){
-      this.isNull=false;
-      //this.getSnapList(vd)
-      this.ruleForm= {
-        dateStart:this.$route.query.dateStart,
-        dateEnd:this.$route.query.dateEnd,
-        _vehicleGroup:this.$route.query.vehicleGroup?this.$route.query.vehicleGroup.split(","):'',
-        vehicleClass:this.$route.query.vehicleClass,
-        include:this.$route.query.include,
-        _include:0,
-        plateNo:this.$route.query.plateNo,
-        pageNum:1,
-        pageSize:10,
-      }
-      this.value1 = this.$route.query.areaIds?this.$route.query.areaIds.split(","):''
-      let da=  JSON.parse(localStorage.getItem("clcxData"))
-      let numb= JSON.parse(localStorage.getItem("clcxPage"))
-      // this.totalData = da
-      // this.pagination.total=da.length
-      this.pagination.pageNum = numb
-      // this.tableData= this.totalData.slice((numb-1)*10,10*numb)
+    // let vd= JSON.parse(localStorage.getItem("searchD"))
+    // if(vd && this.$route.query.dateStart){
+    //   this.isNull=false;
+    //   //this.getSnapList(vd)
+    //   this.ruleForm= {
+    //     dateStart:this.$route.query.dateStart,
+    //     dateEnd:this.$route.query.dateEnd,
+    //     _vehicleGroup:this.$route.query.vehicleGroup?this.$route.query.vehicleGroup.split(","):'',
+    //     vehicleClass:this.$route.query.vehicleClass,
+    //     include:this.$route.query.include,
+    //     _include:0,
+    //     plateNo:this.$route.query.plateNo,
+    //     pageNum:1,
+    //     pageSize:10,
+    //   }
+    //   this.value1 = this.$route.query.areaIds?this.$route.query.areaIds.split(","):''
+    //   let da=  JSON.parse(localStorage.getItem("clcxData"))
+    //   let numb= JSON.parse(localStorage.getItem("clcxPage"))
+    //   // this.totalData = da
+    //   // this.pagination.total=da.length
+    //   this.pagination.pageNum = numb
+    //   // this.tableData= this.totalData.slice((numb-1)*10,10*numb)
      
-    }
+    // }
     //this.submitForm()
     
   },
@@ -344,7 +344,7 @@ export default {
       //this.isNull=true
       this.tableData = [];
       this.resetForm()
-      this.submitForm()
+     // this.submitForm()
     },
     //设置默认时间
     setDTime() {
@@ -601,7 +601,8 @@ export default {
 
 .left {
   width: 272px;
-  height: calc(100% - 55px);
+  height: auto;
+  min-height: calc(100% - 55px);
   background-color: #ffffff;
   float: left;
   z-index: 1;

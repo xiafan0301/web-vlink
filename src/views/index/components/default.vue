@@ -72,7 +72,7 @@ export default {
 .vl_main {
   height: 100%;
   min-width: 1200px;
-  min-height: 625px;
+  min-height: 575px;
   > .vl_content {
     padding-top: 100px;
     height: 100%;

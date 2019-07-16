@@ -22,32 +22,24 @@
             <span v-if="detailData.color">{{detailData.color}}色</span>
           </div> -->
           <div class="div">
-             <label>车牌</label>
+             <label>车牌号码</label>
             <span>{{detailData.plateNo}}</span>
            
           </div>
-          <div class="div" v-if="detailData.color">
-             <label>车身颜色</label>
-            <span>{{detailData.vehicleColor}}色</span>
-           
-          </div>
           <div class="div">
-             <label>号牌种类</label>
+             <label>号牌类型</label>
             <span>{{detailData._numberType}}</span>
            
           </div>
+         
           <div class="div">
             <label>号牌颜色</label>
             <span>{{detailData.numberColor}}</span>
             
           </div>
-          <div class="div">
-             <label>车辆类型</label>
-            <span>{{detailData._vehicleType}}</span>
            
-          </div>
-          <div class="div" v-if="detailData.owner">
-             <label>车辆所有人</label>
+           <div class="div" v-if="detailData.owner">
+             <label>车主</label>
             <span>{{detailData.ownerName}}</span>
            
           </div>
@@ -57,9 +49,19 @@
             
           </div>
           <div class="div">
+             <label>车辆类型</label>
+            <span>{{detailData._vehicleType}}</span>
+           
+          </div>
+          <div class="div">
             <label>车辆型号</label>
-            <span>{{detailData.vehicleModel}}人</span>
+            <span>{{detailData.vehicleModel}}</span>
             
+          </div>
+          <div class="div" v-if="detailData.color">
+             <label>车辆颜色</label>
+            <span>{{detailData.vehicleColor}}</span>
+           
           </div>
           <!-- <div class="div">
             <label>使用性质</label>
@@ -105,21 +107,21 @@
             <h3 class="titles">抓拍信息</h3>
             <div class="infom">
               <div>
-                <p class="div">
+                <p class="div flexDiv">
                   <label>抓拍时间</label>
                   <span>{{snapObj.snapTime}}</span>
                   
                 </p>
               </div>
               <div>
-                <p class="div">
+                <p class="div flexDiv">
                    <label>抓拍设备</label>
                   <span>{{snapObj.snapDevice}}</span>
                  
                 </p>
               </div>
               <div>
-                <p class="div">
+                <p class="div flexDiv">
                   <label>抓拍地址</label>
                   <span>{{snapObj.address}}</span>
                   
@@ -463,27 +465,43 @@ export default {
   border: solid 1px #0c70f8;
   color: #ffffff;
 }
+
 .div {
   display: inline-block;
-  padding: 5px 10px;
-  margin: 5px 10px 5px 0px;
+  padding: 3px 10px;
+  margin: 6px 5px 6px 0px;
   background: rgba(250, 250, 250, 1);
   border: 1px solid rgba(242, 242, 242, 1);
+ 
   label {
+    width: 70px;
     font-size: 14px;
     font-weight: 400;
     color: rgba(153, 153, 153, 1);
-    line-height: 24px;
+    padding-right: 5px;
     border-right: solid 1px rgba(242, 242, 242, 1);
-    padding-right: 10px;
+   
   }
   span {
     padding-left: 10px;
     font-size: 14px;
     font-weight: 400;
     color: rgba(51, 51, 51, 1);
-    line-height: 24px;
+    line-height: 20px;
   }
+}
+p.flexDiv{
+  display: flex;
+  align-items: center;
+  padding: 0px;
+  background:#ffffff;
+  
+  label{
+    padding: 3px 5px;
+    background: rgba(250, 250, 250, 1);
+    word-break: keep-all;
+  }
+  
 }
 .select_btn {
   background-color: #0c70f8;
