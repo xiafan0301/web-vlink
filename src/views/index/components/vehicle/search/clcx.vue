@@ -21,7 +21,7 @@
               type="date"
               placeholder="开始时间"
               :picker-options="pickerOptions"
-              class="full"
+              class="full vl_date"
               value-format="yyyy-MM-dd"
             ></el-date-picker>
           </el-form-item>
@@ -31,7 +31,7 @@
               type="date"
               :picker-options="pickerOptions"
               placeholder="结束时间"
-              class="full"
+              class="full vl_date vl_date_end"
               value-format="yyyy-MM-dd"
             ></el-date-picker>
           </el-form-item>
