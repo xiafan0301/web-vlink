@@ -303,7 +303,7 @@ export default {
         this.dSum = 0;
         this.dIds = [];
       }
-      
+      this.searchSubmit();
     },
     orderHandler (type) {
       if (type === this.orderType) {
