@@ -136,9 +136,9 @@
                       <p>
                         <img class="bigImg" :title="item.plateNo" :alt="item.plateNo" :src="item.storagePath">
                       </p>
-                      <div class="gcck_rh_ft"><i class="vl_icon vl_icon_sm_sxt"></i>{{item.subStoragePath}}</div>
-                      <div><i class="vl_icon vl_icon_sm_cl"></i>{{item.plateNo}}</div>
-                      <div><i class="vl_icon vl_icon_sm_sj"></i>{{item.snapTime}}</div>
+                      <div class="gcck_rh_ft"><i class="vl_icon vl_icon_sm_sxt"></i>{{item.deviceName}}</div>
+                      <div><i class="vl_icon vl_icon_sm_cl"></i>{{item.plateNo}} </div>
+                      <div><i class="vl_icon vl_icon_sm_sj"></i>{{item.shotTime}} </div>
                     </div>
                   </li>
                 </ul>
@@ -215,7 +215,7 @@ export default {
       picTotal: 0,
       picIndex: 1,
       picPlayTime: 3,
-      picPageSize: 100,
+      picPageSize: 30,
       picPageNum: 1,
       picPages: 0,
       
@@ -746,7 +746,7 @@ export default {
     > .gcck_rh_list {
       position: absolute; top: 50%; left: 50%;
       margin-left: -280px; margin-top: -260px;
-      width: 520px; overflow: hidden;
+      width: 520px; height: 520px; overflow: hidden;
       > ul {
         padding: 0 20px;
         width: 60000px;
@@ -754,7 +754,7 @@ export default {
         transition: all .4s ease-in;
         > li {
           float: left;
-          height: 520px;
+          width: 500px; height: 520px;
           padding: 10px 40px;
           > div {
             height: 500px;
@@ -770,14 +770,15 @@ export default {
             }
             > div {
               position: relative;
-              padding-left: 20px; padding-bottom: 5px;
+              padding-left: 20px;
               color: #999;
+              height: 20px; line-height: 20px;
+              margin-bottom: 5px;
               > i {
                 position: absolute; left: 0; top: 2px;
               }
               &.gcck_rh_ft {
                 color: #333;
-                padding-bottom: 12px;
               }
             }
           }

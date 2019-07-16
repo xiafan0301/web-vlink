@@ -3,7 +3,7 @@
     <div class="frequent-appearances">
       <div class="th-breadcrumb">
         <el-breadcrumb separator-class="el-icon-arrow-right">
-          <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像检索</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像侦查</el-breadcrumb-item>
           <el-breadcrumb-item>同行分析</el-breadcrumb-item>
         </el-breadcrumb>
         <el-button @click="skipAddTaskPage" class="th-button-export-color">新建任务</el-button>
@@ -32,10 +32,11 @@
                 v-model="taskForm.reportTime"
                 type="datetimerange"
                 value-format="yyyy-MM-dd HH:mm:ss"
-                format="yyyy-MM-dd HH:mm"
+                format="yyyy-MM-dd HH:mm:ss"
                 range-separator="至"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
+                :default-time="['00:00:00', '23:59:59']"
               ></el-date-picker>
             </el-form-item>
             <el-form-item>
@@ -51,8 +52,12 @@
               <el-table-column label="序号" type="index" width="100"></el-table-column>
               <el-table-column label="任务名称" prop="taskName" show-overflow-tooltip></el-table-column>
               <el-table-column label="创建时间" prop="createTime" show-overflow-tooltip></el-table-column>
-              <el-table-column label="分析时间范围" prop="createTime" show-overflow-tooltip></el-table-column>
-              <el-table-column label="同行次数" prop="createTime" show-overflow-tooltip></el-table-column>
+              <el-table-column label="分析时间范围" prop="taskWebParam" show-overflow-tooltip>
+                <template slot-scope="scope">
+                  {{scope.row.taskWebParam.startTime}} - {{scope.row.taskWebParam.endTime}}
+                </template>
+              </el-table-column>
+              <el-table-column label="同行次数" prop="taskWebParam.number" show-overflow-tooltip></el-table-column>
               <el-table-column label="状态" v-if="selectIndex === 0" prop="taskStatus" show-overflow-tooltip>
                 <template slot-scope="scope">
                   <span>{{scope.row.taskStatus && scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 3 ? '失败' : '已中断'}}</span>
@@ -236,7 +241,7 @@
 
             <div class="line-box">
               <el-date-picker
-                v-model="addData.taskTime"
+                v-model="taskTime"
                 style="width:100%;"
                 @change="handleDateTime"
                 :picker-options="pickerDateTime"
@@ -306,12 +311,12 @@ export default {
       addData: {
         taskName: null,
         deviceId: null,
-        taskTime: [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()],
         startTime: null,
         endTime: null,
-        number: null,
+        number: 2,
         targetPicUrl: null
       },
+      taskTime: [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()],
       // 选择设备的数据
       isIndeterminate: false, // 是否处于全选与全不选之间
       checkAllTree: false, // 树是否全选
@@ -351,8 +356,8 @@ export default {
     handleDateTime (val) {
       if (val) {
         if ( (new Date(val[1]).getTime() - new Date(val[0]).getTime()) >= 3* 24 * 3600 * 1000) {
-          this.$message.warning('最多选择3天');
-          this.addData.taskTime = [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()]
+          this.$message.warning('最多选择3天')
+          this.taskTime = [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()]
         }
       }
     },
@@ -361,8 +366,8 @@ export default {
       const params = {
         'where.taskName': this.taskForm.taskName,
         'where.taskType': 2, // 2：人员同行分析
-        'where.dateStart': this.taskForm.reportTime[0],
-        'where.dateEnd': this.taskForm.reportTime[1],
+        'where.startTime': this.taskForm.reportTime[0],
+        'where.endTime': this.taskForm.reportTime[1],
         'where.isFinish': this.selectIndex,   //是否完成 0:未完成(包含处理中、处理失败、处理中断) 1：已完成(处理成功)
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
@@ -372,6 +377,9 @@ export default {
       getTaskInfosPage(params)
         .then(res => {
           if (res) {
+            res.data.list.forEach(item => {
+              this.$set(item, 'taskWebParam', JSON.parse(item.taskWebParam))
+            })
             this.list = res.data.list;
             this.pagination.total = res.data.total;
           }
@@ -391,12 +399,12 @@ export default {
       this.addData = Object.assign({}, {
         taskName: null,
         deviceId: null,
-        taskTime: [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()],
         startTime: null,
         endTime: null,
-        number: null,
+        number: 2,
         targetPicUrl: null
       })
+      this.taskTime = [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()]
       this.addTaskDialog = true
     },
     // 删除图片
@@ -424,12 +432,12 @@ export default {
     },
     onConfirmAddTask () {
       this.isAddLoading = true
-      if (!this.addData.targetPicUrl) {
-        this.$message({
-          type: 'warning',
-          message: '请先上传目标人员全身照',
-          customClass: 'request_tip'
-        })
+      if (this.addData.number < 2) {
+        this.$message.info('最小值为2')
+        this.isAddLoading = false
+        return false
+      } else if (this.addData.number > 100) {
+        this.$message.info('最大值为100')
         this.isAddLoading = false
         return false
       }
@@ -454,8 +462,8 @@ export default {
       let arr = []
       this.selectDeviceArr.forEach(item => {arr.push(item.uid)})
       this.addData.deviceId = arr.join(',')
-      this.addData.startTime = this.addData.taskTime && this.addData.taskTime.length === 2 ? formatDate(this.addData.taskTime[0]) : null
-      this.addData.endTime =  this.addData.taskTime && this.addData.taskTime.length === 2 ? formatDate(this.addData.taskTime[1]) : null
+      this.addData.startTime = this.taskTime && this.taskTime.length === 2 ? formatDate(this.taskTime[0]) : null
+      this.addData.endTime =  this.taskTime && this.taskTime.length === 2 ? formatDate(this.taskTime[1]) : null
       console.log(this.addData)
       postPeopleTask(this.addData).then(res => {
         if (res && res.data) {

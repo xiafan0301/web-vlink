@@ -6,6 +6,7 @@
         <el-form ref="form" class="pt_rlcx_fm" :model="searchForm" size="small">
           <el-form-item>
             <el-date-picker
+              class="vl_date"
               style="width: 240px;"
               v-model="searchForm.time"
               type="daterange"
@@ -127,7 +128,7 @@
       </div>
     </div>
     <!-- 详情 -->
-    <portraitDetail :open="showDetail" @closeDialog="onCloseDetail" :detailData="deData" :scrollData="seData" ></portraitDetail>
+    <portraitDetail :open="showDetail" @closeDialog="onCloseDetail" :detailData="deData"  @nextPage="nextData" :scrollData="seData" ></portraitDetail>
     <!-- D设备 B卡口  这里是设备和卡口 -->
     <div is="mapSelector" :open="openMap" :clear="msClear" :showTypes="'DB'" @mapSelectorEmit="mapSelectorEmit"></div>
   </div>
@@ -162,6 +163,7 @@ export default {
       areaSData: [],
       searchLoading: false,
       dataList: [],
+      alldataList: [],
       orderType: 1, // 1时间排序 2监控排序
       order: 1, // 1desc 2asc
       pagination: {
@@ -187,6 +189,13 @@ export default {
     this.getMapGETmonitorList();
   },
   methods: {
+    nextData(){
+      // console.log(3232131);
+      
+      let val= (this.pagination.pageNum?this.pagination.pageNum : 1) + 1
+      this.handleCurrentChange(val)
+
+    },
     onCloseDetail () {
       this.showDetail=false
     },
@@ -194,7 +203,7 @@ export default {
       // console.log(v);
       this.showDetail=true;
       this.deData = v
-      this.seData = this.dataList
+      this.seData = this.alldataList
       
     },
     //查询行政区域
@@ -256,6 +265,7 @@ export default {
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize
       }
+
       if (this.searchForm.type === 1) {
         params.where = Object.assign(params.where, {
           areaUid: this.searchForm.area.join(',')
@@ -277,17 +287,21 @@ export default {
           deviceIds: this.dIds.join(',')
         });
       }
+   
       // getFaceRetrieval getFaceRetrievalPerson
       getFaceRetrievalPerson(params).then(res => {
         if (res && res.data) {
           this.dataList = res.data.list;
+          this.alldataList.push(...res.data.list);
           this.pagination.total = res.data.total;
         }
         this.searchLoading = false;
       }).catch(() => {
         this.searchLoading = false;
       });
+      
     },
+    
     searchReset () {
       if (this.searchForm.type === 1) {
         this.searchForm  = Object.assign(this.searchForm, {
@@ -303,7 +317,7 @@ export default {
         this.dSum = 0;
         this.dIds = [];
       }
-      
+      this.searchSubmit();
     },
     orderHandler (type) {
       if (type === this.orderType) {
@@ -345,9 +359,6 @@ export default {
     font-style: italic;
     cursor: pointer;
   }
-}
-.rlcx_r_list_empty {
-  background: url(../../../../assets/img/null-content.png) center center no-repeat;
 }
 .rlcx_main {
   height: 100%;

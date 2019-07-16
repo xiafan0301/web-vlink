@@ -3,7 +3,7 @@
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
-        <el-breadcrumb-item>连续违法</el-breadcrumb-item>
+        <el-breadcrumb-item>连续违章</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="vehicle-info-content">
@@ -63,7 +63,17 @@
                   @click="clickTabItem('plateNo')"
                   :class="{red:sou.plateNo}"
                   v-if="photoAnalysis.plateNo"
-                >车牌：{{photoAnalysis.plateNo}}</span>
+                >车牌号：{{photoAnalysis.plateNo}}</span>
+                <span
+                  @click="clickTabItem('plateColor')"
+                  :class="{red:sou.plateColor}"
+                  v-if="photoAnalysis.plateColor"
+                >号牌颜色：{{photoAnalysis.plateColor}}色</span>
+                <span
+                  @click="clickTabItem('vehicleModel')"
+                  :class="{red:sou.vehicleModel}"
+                  v-if="photoAnalysis.vehicleModel"
+                >车辆型号:{{photoAnalysis.vehicleModel}}</span>
                 <span
                   @click="clickTabItem('vehicleColor')"
                   :class="{red:sou.vehicleColor}"
@@ -84,16 +94,12 @@
                   :class="{red:sou.vehicleClass}"
                   v-if="photoAnalysis.vehicleClass"
                 >{{photoAnalysis.vehicleClass}}</span>
-                <span
+                <!-- <span
                   @click="clickTabItem('sunvisor')"
                   :class="{red:sou.sunvisor}"
                   v-if="photoAnalysis.sunvisor"
-                >遮阳板{{photoAnalysis.sunvisor}}</span>
-                <span
-                  @click="clickTabItem('plateColor')"
-                  :class="{red:sou.plateColor}"
-                  v-if="photoAnalysis.plateColor"
-                >车牌{{photoAnalysis.plateColor}}色</span>
+                >遮阳板{{photoAnalysis.sunvisor}}</span> -->
+                
                 <span
                   @click="clickTabItem('_plateClass')"
                   :class="{red:sou._plateClass}"
@@ -160,12 +166,12 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label="遮阳板" label-width="70px" prop>
+                <!-- <el-form-item label="遮阳板" label-width="70px" prop>
                   <el-select v-model="tzscMenuForm.sunVisor" class="width132" placeholder="选择选项">
                     <el-option key="收起" label="收起" value="收起"></el-option>
                     <el-option key="放下" label="放下" value="放下"></el-option>
                   </el-select>
-                </el-form-item>
+                </el-form-item> -->
                 <!-- <el-form-item label="年检标数量" label-width="90px" prop>
                   <el-select
                     v-model="tzscMenuForm.inspectionCount"
@@ -238,7 +244,9 @@
         <div class="info-r-content" v-if="!isNull" >
           <!-- 违章信息 -->
           <div class="info-card">
-            <p class="card-header">查询结果</p>
+            <p class="card-header">查询结果
+               <el-button type="primary" size="small" :loading="isDao" @click="exportList" class="select_btn  fright">导出</el-button>
+            </p>
             <div class="table_box">
               <el-table :data="regulationsList">
                 <el-table-column label="序号" type="index" width="100"></el-table-column>
@@ -319,7 +327,8 @@ import {
   JtcGETAppendixInfoList,
   JtcPUTAppendixsOrder,
   getPhotoAnalysis,
-  getViolation
+  getViolation,
+  exportNightVehicle
 } from "../../../api/api.judge.js";
 import { getCarmodelList } from "../../../api/api.base.js";
 // import { setTimeout } from "timers";
@@ -343,6 +352,7 @@ export default {
       historyPicList: [], // 上传历史记录
       historyPicDialog: false,
       loadingHis: false,
+      isDao: false,
       imgData: null,
       input5: "1",
       data1: "",
@@ -357,7 +367,7 @@ export default {
         carType: "",
         carColor: "",
         carModel: "",
-        sunVisor: "",
+        // sunVisor: "",
         inspectionCount: ""
       },
       searchData: {
@@ -382,7 +392,7 @@ export default {
             start = y - 1 + "-" + (m - 1 + 12) + "-" + d;
           }
           threeMonths = new Date(start).getTime();
-          return time.getTime() > Date.now() || time.getTime() < threeMonths;
+          return time.getTime() > Date.now() ;
         }
       },
       searching: false,
@@ -426,14 +436,14 @@ export default {
       regulationsList: [], //违章信息列表
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       sou: {
-        plateNo: false,
-        vehicleColor: false,
-        vehicleBrand: false,
-        vehicleRoof: false,
-        vehicleClass: false,
-        sunvisor: false,
-        plateColor: false,
-        _plateClass: false
+        plateNo: true,
+        vehicleColor: true,
+         vehicleModel: true,
+        // vehicleRoof: true,
+        vehicleClass: true,
+        // sunvisor: true,
+        plateColor: true,
+        _plateClass: true
       }
     };
   },
@@ -465,6 +475,79 @@ export default {
     this.setDTime();
   },
   methods: {
+    //导出
+    exportList(){
+      this.isDao=true
+      let ad=null
+      if (this.input5 == 1 ) {
+        let datas = {
+          dateStart: this.data1[0] + " 00:00:00",
+          dateEnd: this.data1[1] + " 23:59:59",
+          vilolationNum: this.tzscMenuForm.input4
+        };
+        if (this.sou.plateNo) {
+          datas.plateNo = this.photoAnalysis.plateNo;
+        }
+        if (this.sou.vehicleColor) {
+          datas.vehicleColor = this.photoAnalysis.vehicleColor;
+        }
+        if (this.sou.vehicleClass) {
+          datas.vehicleClass = this.photoAnalysis.vehicleClass;
+        }
+        // if (this.sou.sunvisor) {
+        //   datas.sunvisor = this.photoAnalysis.sunVisor;
+        // }
+        if (this.sou.plateColor) {
+          datas.plateColor = this.photoAnalysis.plateColor;
+        }
+        if (this.sou._plateClass) {
+          let a = this.plateType.map(
+            el => el.enumField == this.photoAnalysis.plateClass
+          );
+          datas.plateClass = a.enumValue;
+        }
+        ad=datas
+        //this.getViolation(datas);
+      } else {
+        let params = {
+          dateStart: this.data1[0] + " 00:00:00",
+          dateEnd: this.data1[1] + " 23:59:59",
+          vilolationNum: this.tzscMenuForm.input4,
+          plateClass: this.tzscMenuForm.licenseType,
+          plateColor: this.tzscMenuForm.licenseColor,
+          vehicleClass: this.tzscMenuForm.carType,
+          vehicleColor: this.tzscMenuForm.carColor,
+          vehicleModel: this.tzscMenuForm.carModel,
+          // sunvisor: this.tzscMenuForm.sunVisor
+          // plateClass:this.input4,
+        };
+        // params.pageNum=this.pagination.pageNum
+        // params.pageSize=this.pagination.pageSize
+        ad=params
+       // this.getViolation(params);
+      }
+      exportNightVehicle({
+        vehicleViolationDto:ad,
+        viewType:3
+      }).then(res=>{
+        if(res && res.data) {
+          const eleA = document.getElementById('export_id');
+          if (eleA) {
+            document.body.removeChild(eleA);
+          }
+          let a = document.createElement('a');
+          a.setAttribute('href', res.data.fileUrl);
+          a.setAttribute('target', '_self');
+          a.setAttribute('id', 'export_id');
+          document.body.appendChild(a);
+          a.click();
+          this.isDao=false
+        }else{
+          this.isDao=false
+           //this.$message.error('导出失败！');
+        }
+      })
+    },
     updataB(){
       //console.log(88888888888);
       this.isNull=true
@@ -660,7 +743,7 @@ export default {
         carType: "",
         carColor: "",
         carModel: "",
-        sunVisor: "",
+        // sunVisor: "",
         inspectionCount: ""
       }),
         this.setDTime();
@@ -685,17 +768,11 @@ export default {
         if (this.sou.vehicleColor) {
           datas.vehicleColor = this.photoAnalysis.vehicleColor;
         }
-        // if (this.sou.vehicleBrand) {
-        //   datas.vehicleBrand = this.photoAnalysis.vehicleBrand;
-        // }
-        // if (this.sou.vehicleRoof) {
-        //   datas.vehicleRoof = this.photoAnalysis.vehicleRoof;
-        // }
         if (this.sou.vehicleClass) {
           datas.vehicleClass = this.photoAnalysis.vehicleClass;
         }
-        if (this.sou.sunvisor) {
-          datas.sunvisor = this.photoAnalysis.sunVisor;
+        if (this.sou.vehicleModel) {
+          datas.vehicleModel = this.photoAnalysis.vehicleModel;
         }
         if (this.sou.plateColor) {
           datas.plateColor = this.photoAnalysis.plateColor;
@@ -706,7 +783,8 @@ export default {
           );
           datas.plateClass = a.enumValue;
         }
-
+        datas.pageNum=this.pagination.pageNum
+        datas.pageSize=this.pagination.pageSize
         this.getViolation(datas);
       } else {
         let params = {
@@ -718,7 +796,7 @@ export default {
           vehicleClass: this.tzscMenuForm.carType,
           vehicleColor: this.tzscMenuForm.carColor,
           vehicleModel: this.tzscMenuForm.carModel,
-          sunvisor: this.tzscMenuForm.sunVisor
+          // sunvisor: this.tzscMenuForm.sunVisor
           // plateClass:this.input4,
         };
         params.pageNum=this.pagination.pageNum
@@ -1004,6 +1082,11 @@ export default {
     border: 1px solid red;
     color: red;
   }
+}
+.fright{
+  float: right;
+  margin-right: 10px;
+  margin-top: 10px;
 }
 </style>
 <style lang="scss">

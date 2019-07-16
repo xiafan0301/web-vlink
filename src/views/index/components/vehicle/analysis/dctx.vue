@@ -58,6 +58,7 @@
         <div id="mapContainer"></div>
         <ul class="top_ul">
           <li v-for="(item, index) in dataList" :key="index">
+            <!-- <el-radio v-model="radioChecked" @change="handleRadio(index, item.vehicleNumber)" :label="index">车辆{{item.vehicleNumber}}</el-radio> -->
             <el-radio v-model="radioChecked" @change="handleRadio(index, item.vehicleNumber)" :label="index">车辆{{index + 1}}</el-radio>
             <span class="line"></span>
           </li>
@@ -122,6 +123,8 @@
         <a :id="flvplayerId + '_cut_a'" style="display: none;">保存</a>
       </div>
     </el-dialog>
+    <!-- 右侧地图 -- 鼠标移入轨迹显示 -->
+    <p class="map_plateNo" v-show="isShowPlateNo" :style="{left: tranLeft + 'px', top: tranTop + 'px'}">车牌号码：{{currVehicleNum}}</p>
   </div>
 </template>
 <script>
@@ -130,7 +133,7 @@ import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { formatDate, random14 } from "@/utils/util.js";
 import { checkPlateNumber } from '@/utils/validator.js';
 import { getMultiVehicleList } from '@/views/index/api/api.judge.js';
-const overStartTime = new Date() - 24 * 60 * 60 *1000;
+const overStartTime = new Date() - 8 * 60 * 60 * 1000;
 const reg = /^(([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z](([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z][A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳使领]))$/;
 export default {
   components: {
@@ -138,6 +141,10 @@ export default {
   },
   data () {
     return {
+      currVehicleNum: null, // 鼠标移入时显示的车牌号码
+      tranLeft: 0, // 鼠标向左偏移的距离
+      tranTop: 0, // 鼠标向上偏移的距离
+      isShowPlateNo: false, // 是否显示车牌号码
       cutDialogVisible: false, // 截屏弹出框
       showLarge: false, // 全屏显示
       videoDetail: {}, // 播放视频的信息
@@ -150,12 +157,16 @@ export default {
           return time.getTime() > (new Date().getTime());
         }
       },
-      pickerEnd: {},
-      pagination: {
-        pageNum: 1,
-        pageSize: 15,
-        total: 0
+      pickerEnd: {
+        // disabledDate (time) {
+        //   return time.getTime() > (new Date().getTime());
+        // }
       },
+      // pagination: {
+      //   pageNum: 1,
+      //   pageSize: 15,
+      //   total: 0
+      // },
       /* 抓拍记录页面参数 */
       strucDetailDialog: false, // 抓拍记录弹窗
       strucCurTab: 1, // 抓拍记录弹窗tab
@@ -163,9 +174,7 @@ export default {
       // strucInfoList: [],
       sturcDetail: {},
       vehicleList: [], // 同行车辆
-      bResize: {},
-      markerPoint: null, // 地图icon
-      newMarker: null,
+      newMarker: {},
       playUrl: {},
       videoUrl: null, // 下载地址
       map: null,
@@ -175,6 +184,10 @@ export default {
         vehicleNumberList: [
           {vehicleNumber: ''},
           {vehicleNumber: ''},
+          // {vehicleNumber: '湘LYV366'},
+          // {vehicleNumber: '湘NF8988'},
+          // {vehicleNumber: '湘NJM910'},
+          // {vehicleNumber: '湘NJY056'},
         ],
         // vehicleNumberList: [
         //   {vehicleNumber: '沪D008CP'},
@@ -196,22 +209,37 @@ export default {
         shotAddress: null,
         recordList : []
       },
-      currentSelectPolyline: null
+      currentSelectPolyline: null,
+      marker: null
     }
   },
   watch: {
     'filterObj.startDate' () {
       let _this = this;
-      const threeDays = 2 * 3600 * 24 * 1000;
-      const endTime = new Date(_this.filterObj.startDate).getTime() + threeDays;
-      _this.filterObj.endDate = formatDate(endTime);
+      const oneDay = 3600 * 24 * 1000;
+      const endTime = new Date(_this.filterObj.startDate).getTime() + oneDay;
+      console.log(new Date().getTime())
+      if (endTime > new Date().getTime()) {
+        _this.filterObj.endDate = new Date();
+      } else {
+        _this.filterObj.endDate = formatDate(endTime);
+      }
     }
   },
   mounted () {
     this.initMap();
-    this.onSearch();
+    // this.onSearch();
+
+    
   },
   methods: {
+    computeMouseDistance () {
+      let _this = this;
+      document.onmousemove = function (e) {
+        _this.tranLeft = e.pageX;
+        _this.tranTop = e.pageY - 150;
+      }
+    },
     hideLeft() {
       this.hideleft = !this.hideleft;
     },
@@ -254,30 +282,31 @@ export default {
       if (data && data.length > 0) {
         let _this = this, hoverWindow = null, path= [];
 
-        _this.map.setCenter([data[0].shotPlaceLongitude, data[0].shotPlaceLatitude])
-
         for (let i = 0; i < data.length; i++) {
 
           let obj = data[i];
 
           if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
+
             let offSet = [-20.5, -55], deviceType;
 
             let longitude = null, latitude = null, detailDeviceName, detailShotAddress;
 
-           if (obj.isAllPassed) { // 全部车辆经过该设备
-             if (obj.bayonetId) { // 设备为卡口
-               deviceType = 1;
-             } else {
-               deviceType = 7;
-             }
-           } else {
-             if (obj.bayonetId) { // 设备为卡口
-               deviceType = 8;
-             } else {
-               deviceType = 0;
-             }
-           }
+            if (obj.isAllPassed) { // 全部车辆经过该设备
+
+              
+              if (obj.bayonetId) { // 设备为卡口
+                deviceType = 1;
+              } else {
+                deviceType = 7;
+              }
+            } else {
+              if (obj.bayonetId) { // 设备为卡口
+                deviceType = 8;
+              } else {
+                deviceType = 0;
+              }
+            }
 
             if (obj.bayonetId) { // 设备为卡口
               longitude = obj.bayonetLongitude;
@@ -306,7 +335,6 @@ export default {
               content: '<div id="vehicle_mark'+ idName +'" class="icon_box no_checked"><span class="vl_icon mark_span vl_icon_map_mark'+ deviceType +'"></span><span class="vl_icon mark_hover_span vl_icon_map_hover_mark'+ deviceType +'"></span></div>'
             });
 
-             
             marker.on('click', function () {
 
               $('.icon_box').removeClass('is_checked');
@@ -321,56 +349,78 @@ export default {
               _this.recordDetail.deviceName = detailDeviceName;
               _this.recordDetail.shotAddress = detailShotAddress;
 
-              if (recordObj) {
-                for (let i in recordObj) {
-                  if (obj.deviceID === i) {
-                    recordObj[i].map(item => {
-                      _this.recordDetail.recordList.push(item);
-                    })
+              if (obj.isAllPassed) { // 全部车辆经过该设备
+                _this.dataList.map(item => {
+                  for(let i in item.deviceShotRecords) {
+                    if (i == obj.deviceID) {
+                      item.deviceShotRecords[i].map(val => {
+                        _this.recordDetail.recordList.push(val);
+                      })
+                    }
+                  }
+                })
+                console.log(_this.recordDetail)
+              } else {
+                if (recordObj) {
+                  for (let i in recordObj) {
+                    if (obj.deviceID === i) {
+                      recordObj[i].map(item => {
+                        _this.recordDetail.recordList.push(item);
+                      })
+                    }
                   }
                 }
               }
+
             })
 
-            path.push(new window.AMap.LngLat(longitude, latitude));
+            path.push([longitude, latitude]);
 
-            _this.map.setZoom(13);
-            _this.map.setCenter([longitude, latitude]);
           }
-          // 绘制线条
-          let polyline = new window.AMap.Polyline({
-            path: path,
-            showDir: true,
-            strokeWeight: 8,
-            strokeColor: '#D3D3D3',
-            strokeStyle: 'solid'
-          });
-
-          polyline.on('mouseover', function () {
-            polyline.setOptions({
-              strokeWeight: 10,
-              // extData: {
-              //   title: number
-              // },
-              strokeColor: '#41D459',
-            })
-          });
-        
-          polyline.on('mouseout', function () {
-            if (_this.currentSelectPolyline !== number) { // 当前选中的折线鼠标移开不消失选中的效果
-              polyline.setOptions({
-                strokeWeight: 8,
-                strokeColor: '#D3D3D3',
-              })
-            }
-          });
-
-
-          _this.polylineObj[number] = polyline; // 将折线都存储起来
-
-          _this.map.add(polyline);
 
         }
+        // 绘制线条
+        let polyline = new window.AMap.Polyline({
+          map: _this.map,
+          path: path,
+          zIndex: 50,
+          showDir: true,
+          strokeWeight: 8,
+          strokeColor: '#D3D3D3',
+          strokeStyle: 'solid'
+        });
+
+        polyline.on('mouseover', function (e) {
+
+          _this.isShowPlateNo = true;
+          _this.computeMouseDistance();
+
+          _this.currVehicleNum = number;
+
+          polyline.setOptions({
+            zIndex: 999,
+            strokeWeight: 10,
+            strokeColor: '#41D459',
+          })
+
+          console.log('tranLeft', _this.tranLeft)
+        });
+      
+        polyline.on('mouseout', function () {
+          _this.isShowPlateNo = false;
+          if (_this.currentSelectPolyline !== number) { // 当前选中的折线鼠标移开不消失选中的效果
+            polyline.setOptions({
+              zIndex: 50,
+              strokeWeight: 8,
+              strokeColor: '#D3D3D3',
+            })
+          }
+        });
+
+
+        _this.polylineObj[number] = polyline; // 将折线都存储起来
+
+        _this.map.setFitView();
       }
     },
     // 结束时间change
@@ -379,7 +429,7 @@ export default {
       const startDate = new Date(_this.filterObj.startDate).getTime();
       _this.pickerEnd = {
         disabledDate (time) {
-         return time.getTime() < (startDate - 8.64e7) || time.getTime() > ((startDate + 2 * 3600 * 24 * 1000) - 8.64e6);
+         return time.getTime() > (new Date().getTime()) || time.getTime() > (startDate + 3600 * 24 * 1000);
         }
       }
     },
@@ -431,24 +481,30 @@ export default {
      * 查询按钮
      */
     onSearch () {
-      // let arr = [];
-      // this.filterObj.vehicleNumberList.forEach(item => {
-      //   if (!reg.test(item.vehicleNumber)) {
-      //     this.hasError = true;
-      //   }
-      //   arr.push(item.vehicleNumber)
-      // });
+      this.radioChecked = -1;
+      
+      this.map.clearMap();
 
-      // if (this.hasError) {
-      //   if (!document.querySelector('.el-message--info')) {
-      //     this.$message.info('请输入正确的车牌号码');
-      //   }
-      //   return;
-      // }
+      this.polylineObj = {};
 
-      // this.filterObj.vehicleNumbers = arr.join(',');
+      let arr = [];
+      this.filterObj.vehicleNumberList.forEach(item => {
+        if (!reg.test(item.vehicleNumber)) {
+          this.hasError = true;
+        }
+        arr.push(item.vehicleNumber)
+      });
 
-      // this.searchLoading = true;
+      if (this.hasError) {
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('请输入正确的车牌号码');
+        }
+        return;
+      }
+
+      this.filterObj.vehicleNumbers = arr.join(',');
+
+      this.searchLoading = true;
 
       const params = {
         startTime: formatDate(this.filterObj.startDate),
@@ -457,22 +513,18 @@ export default {
         // startTime: '2019-07-13 00:00:00',
         // endTime: '2019-07-13 13:59:59',
         // vehicleNumbers: "湘LYV366,湘NF8988,湘NJM910,湘NJY056",
-        order:"asc",
-        pageNum: this.pagination.pageNum,
-        pageSize: this.pagination.pageSize
       };
 
       getMultiVehicleList(params)
         .then(res => {
           if (res && res.data) {
-            this.pagination.total = res.data.total;
             this.searchLoading = false;
             this.dataList = res.data;
-
             this.dataList.map(item => {
               this.drawPoint(item.shotRecords, item.vehicleNumber, item.deviceShotRecords);
             })
           } else {
+            this.dataList = [];
             this.searchLoading = false;
           }
         })
@@ -485,12 +537,14 @@ export default {
         if (number === i ) {
           this.currentSelectPolyline = i; // 当前选中的车辆
           this.polylineObj[i].setOptions({
+            zIndex: 999,
             strokeWeight: 10,
             strokeColor: '#41D459',
           })
         } else {
           this.polylineObj[i].setOptions({
             strokeWeight: 8,
+            zIndex: 50,
             strokeColor: '#D3D3D3',
           })
         }
@@ -504,6 +558,8 @@ export default {
         shotAddress: null,
         recordList: []
       };
+      $('.icon_box').removeClass('is_checked');
+      $('.icon_box').addClass('no_checked');
     },
     // 点击视频播放按钮全屏播放视频
     openVideo (obj) {
@@ -929,6 +985,13 @@ export default {
   top: 20px;
   z-index: 1000;
   cursor: pointer;
+}
+.map_plateNo {
+  position: absolute;
+  background-color: #ffffff;
+  color: red;
+  padding: 10px;
+  z-index: 3333;
 }
 </style>
 

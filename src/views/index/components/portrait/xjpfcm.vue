@@ -139,7 +139,7 @@
               <div class="similarity">
                 <ul class="similarity-input">
                   <li class="input-name">
-                    <el-input placeholder="相似度"></el-input>
+                    <el-input placeholder="相似度" v-model="searchData.similarityName"></el-input>
                   </li>
                   <li class="input-value">
                     <el-input v-model="searchData.similarity" placeholder></el-input>
@@ -235,6 +235,7 @@ export default {
         taskName: "",
         startTime: "",
         endTime: "",
+        similarityName: "相似度",
         similarity: "85", // 相似度
         frequency: "" //频次
       },
