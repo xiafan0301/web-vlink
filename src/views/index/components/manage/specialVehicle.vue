@@ -747,6 +747,8 @@ export default {
 
             this.carForm.vehicleNumber = carInfo.vehicleNumber;
             this.carForm.desci = carInfo.desci;
+            this.carForm.ownerIdCard = carInfo.ownerIdCard;
+            this.carForm.ownerName = carInfo.ownerName;
             this.carForm.ownerIdType = carInfo.ownerIdType || null;
 
 
