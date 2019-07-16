@@ -107,11 +107,12 @@
             </div>
           </li>
         </ul>
-        <ul class="rlcx_r_list clearfix" v-else>
+        <div is="noResult" :isInitPage="false" v-else></div>
+        <!-- <ul class="rlcx_r_list clearfix" v-else>
           <li style="padding: 30px 0 0 0; width: auto; float: none; text-align: center; color: #999;">
             暂无数据
           </li>
-        </ul>
+        </ul> -->
         <div v-show="pagination.total > 0" style="text-align: center; padding: 10px 0 20px 0;">
           <el-pagination
             class="dl_hi_pa"
@@ -132,6 +133,7 @@
   </div>
 </template>
 <script>
+import noResult from '@/components/common/noResult.vue';
 import { mapXupuxian } from "@/config/config.js";
 import vehicleBreadcrumb from './breadcrumb.vue';
 import mapSelector from '@/components/common/mapSelector.vue';
@@ -141,7 +143,7 @@ import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import {formatDate} from '@/utils/util.js';
 import portraitDetail from '@/components/common/portraitDetail.vue';
 export default {
-  components: {vehicleBreadcrumb, mapSelector,portraitDetail},
+  components: {vehicleBreadcrumb, mapSelector,portraitDetail, noResult},
   data () {
     return {
       showDetail:false,
@@ -345,7 +347,7 @@ export default {
   }
 }
 .rlcx_r_list_empty {
-  background: url(../../../../assets/img/not-content.png) center center no-repeat;
+  background: url(../../../../assets/img/null-content.png) center center no-repeat;
 }
 .rlcx_main {
   height: 100%;

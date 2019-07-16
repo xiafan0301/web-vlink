@@ -1,10 +1,11 @@
 <template>
-  <div class="point" style="position: relative;">
-    <div class="breadcrumb_heaer">
-      <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
-        <el-breadcrumb-item>车辆轨迹</el-breadcrumb-item>
-      </el-breadcrumb>
+  <div class="point">
+    <div class="">
+      <div
+              is="vlBreadcrumb"
+              :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
+          {name: '车辆轨迹'}]"
+      ></div>
     </div>
 
     <div :class="['left',{hide:hideleft}]">
@@ -33,7 +34,7 @@
             <el-input placeholder="请输入车牌号" v-model="ruleForm.input3">
             </el-input>
           </el-form-item>
-          <el-form-item label="区域：" label-width="60px" prop="input5">
+          <el-form-item label="抓拍区域：" label-width="75px" style="white-space: nowrap;" prop="input5">
             <el-radio-group v-model="ruleForm.input5">
               <el-row :gutter="10">
                 <el-col :span="12">
@@ -48,7 +49,7 @@
             </el-radio-group>
           </el-form-item>
           <el-form-item v-if="ruleForm.input5=='1'" prop="value1">
-            <el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="请选择" class="full">
+            <el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="全部区域" class="full">
               <el-option-group
                 v-for="group in options"
                 :key="group.areaName"
@@ -80,7 +81,7 @@
         <div class="insetLeft" @click="hideLeft"></div>
       </div>
     </div>
-    <div :class="['right',{hide:!hideleft}, {'clgj_map_show_pic': mapPicShow}]" id="rightMap"></div>
+    <div :class="['right',{hide:!hideleft}]" id="rightMap"></div>
     <div class="reselt" v-if="reselt">
       <div class="plane insetPadding">
           <h3 class="title">分析结果</h3>
@@ -112,7 +113,6 @@
     </div>
     <!--地图操作按钮-->
     <ul class="map_rrt_u2">
-      <li @click="mapPicShow = !mapPicShow" style="font-size: 14px;" :style="{'color': mapPicShow ? '#0C70F8' : '#999'}">显示图片</li>
       <li @click="resetZoom"><i class="el-icon-aim"></i></li>
       <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
       <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
@@ -197,6 +197,7 @@
   </div>
 </template>
 <script>
+  import vlBreadcrumb from "@/components/common/breadcrumb.vue";
   import mapSelector from '@/components/common/mapSelector.vue';
   import { mapXupuxian } from "@/config/config.js";
   import { objDeepCopy, random14 } from "@/utils/util.js";
@@ -205,11 +206,9 @@
   import { MapGETmonitorList } from "@/views/index/api/api.map.js";
   import { getAllBayonetList } from "@/views/index/api/api.base.js";
   export default {
-    components: {mapSelector},
+    components: {mapSelector, vlBreadcrumb},
     data() {
       return {
-        mapPicShow: false, // 地图图片显示开关
-
         loading: false,
         count: 10,
         totalAddressNum: 0,
@@ -439,13 +438,7 @@
                   this.$message.info('选择的区域没有设备，请重新选择区域');
                 }
                 return false;
-              } else if (this.ruleForm.input5 === "1" && this.ruleForm.value1.length === 0) {
-                if (!document.querySelector('.el-message--info')) {
-                  this.$message.info('您没有选择区域，请点击下拉框选择镇');
-                }
-                return false;
               }
-              console.log(this.ruleForm.data1);
               pg.where['startTime'] = this.ruleForm.data1[0]+" 00:00:00";
               pg.where['endTime'] = this.ruleForm.data1[1]+" 23:59:59";
               pg.where['vehicleNumber'] = this.ruleForm.input3;
@@ -472,9 +465,6 @@
         this.ruleForm.input5 = '1';
         this.ruleForm.input3 = '';
         this.ruleForm.value1 = [];
-        this.options[0].areaTreeList.forEach(x => {
-          this.ruleForm.value1.push(x.areaId)
-        })
         this.selectMapClear = random14();
         this.pointData = {
           deviceList: [],
@@ -494,9 +484,6 @@
         }
         MapGETmonitorList(d).then(res=>{
           if(res && res.data){
-            res.data.areaTreeList.forEach(x => {
-              this.ruleForm.value1.push(x.areaId)
-            })
             this.options.push(res.data)
           }
         })
@@ -653,7 +640,7 @@
               this.showStrucInfo(obj, i)
             })
             path.push(_path);
-            let _content = `<div class="vl_icon vl_icon_sxt"><p>${obj.shotTime}</p></div>`
+            let _content = `<div class="vl_icon vl_icon_sxt"></div>`
             let point = new AMap.Marker({ // 添加自定义点标记
               map: this.amap,
               position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
@@ -673,7 +660,7 @@
           path: path,
           showDir: true,
           strokeColor: '#61C772',
-          strokeWeight: 10
+          strokeWeight: 6
         });
         this.markerLine.push(polyline);
         this.amap.add([polyline]);
@@ -734,37 +721,7 @@
     }
   };
 </script>
-<style lang="scss">
-  #rightMap {
-    .vl_icon.vl_icon_sxt {
-      position: relative;
-      > p {
-        position: absolute; top: 10px; left: 98%;
-        width: auto;
-        word-break:keep-all; white-space:nowrap;
-        font-size: 12px; color: #fff;
-        background-color: rgba(0, 0, 0, 0.4);
-        border-radius: 2px;
-        padding: 2px 5px;
-      }
-    }
-  }
-  .clgj_map_show_pic {
-    .vl_jtc_mk { display: block !important; }
-    &#rightMap {
-      .vl_icon.vl_icon_sxt {
-        > p {
-          display: none;
-        }
-      }
-    }
-  }
-</style>
-
 <style lang="scss" scoped>
-  .map_pic_show {
-    position: absolute; top: 65px; right: 20px; z-index: 100;
-  }
   .map_rrt_u2 {
     position: absolute; right: 30px;
     bottom: 30px;
@@ -1181,9 +1138,6 @@
             font-size: 12px;
             padding: 0 .1rem;
           }
-        }
-        .struc_c_d_qj {
-          margin-right: .3rem;
           &:before {
             display: block;
             content: '';
@@ -1211,6 +1165,13 @@
             -o-transform: rotate(-45deg);
             transform: rotate(-45deg);
             z-index: 99;
+          }
+        }
+        .struc_c_d_qj {
+          margin-right: .3rem;
+          &:before {
+            border: .5rem solid #50CC62;
+            border-color: transparent transparent #50CC62;
           }
         }
         .struc_c_d_box {
@@ -1458,7 +1419,6 @@
     }
   }
   .vl_jtc_mk {
-    display: none;
     width: 218px;
     height: 122px;
     position: relative;
@@ -1473,11 +1433,10 @@
       width: 100%;
       position: absolute;
       color: #FFFFFF;
-      bottom: 0;
+      bottom: 8px;
       font-size: 12px;
       padding: 0 6px;
-      line-height: 30px;
-      background-color: rgba(0, 0, 0, .4);
+      line-height: 20px;
       > i {
         height: 20px;
         float: right;
