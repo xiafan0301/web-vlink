@@ -10,7 +10,7 @@
           </ul>
           <div class="show_content" v-show="showConTitle === 1">
             <div class="show_search">
-              <div style="margin-left: 8%; width: 84%;">
+              <div>
                 <el-input
                   placeholder="请输入设备或区域名称"
                   size="small"
@@ -73,8 +73,8 @@
               <div class="show_search_ti">
                 <span>开始</span>
                 <el-date-picker
-                  class="vl_vid_sdater"
-                  style="width: 175px"
+                  class="vl_vid_sdater vl_date"
+                  style="width: 100%"
                   size="small"
                   v-model="startTime"
                   type="datetime"
@@ -88,8 +88,8 @@
               <div class="show_search_ti">
                 <span>结束</span>
                 <el-date-picker
-                  class="vl_vid_sdater"
-                  style="width: 175px"
+                  class="vl_vid_sdater vl_date vl_date_end"
+                  style="width: 100%"
                   size="small"
                   v-model="endTime"
                   type="datetime"
@@ -100,7 +100,7 @@
                   placeholder="选择结束时间">
                 </el-date-picker>
               </div>
-              <div style="margin-left: 7%; width: 86%; padding-bottom: 15px;">
+              <div style="padding-bottom: 15px;">
                 <el-input
                   placeholder="请输入设备或区域名称"
                   size="small"
