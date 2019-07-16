@@ -6,7 +6,7 @@
           <div class="show_search_ti">
             <span>开始</span>
             <el-date-picker
-              class="vl_vid_sdater"
+              class="vl_vid_sdater vl_date"
               style="width: 175px"
               size="small"
               v-model="startTime"
@@ -20,7 +20,7 @@
           <div class="show_search_ti">
             <span>结束</span>
             <el-date-picker
-              class="vl_vid_sdater"
+              class="vl_vid_sdater vl_date vl_date_end"
               style="width: 175px"
               size="small"
               v-model="endTime"
