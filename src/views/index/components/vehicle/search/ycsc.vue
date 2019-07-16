@@ -18,20 +18,20 @@
             <div class="form_warp">
               <el-form :model="ytscMenuForm" ref="ytscMenuForm" :rules="rules">
                 <div class="date-comp">
-                <el-form-item prop="selectDate">
-                  <el-date-picker
-                    class="width232"
-                    v-model="ytscMenuForm.selectDate"
-                    type="daterange"
-                    range-separator="至"
-                    value-format="yyyy-MM-dd"
-                    format="yyyy-MM-dd"
-                    :picker-options="pickerOptions"
-                    start-placeholder="开始日期"
-                    end-placeholder="结束日期"
-                    :clearable="false"
-                  ></el-date-picker>
-                </el-form-item>
+                  <el-form-item prop="selectDate">
+                    <el-date-picker
+                      class="width232"
+                      v-model="ytscMenuForm.selectDate"
+                      type="daterange"
+                      range-separator="至"
+                      value-format="yyyy-MM-dd"
+                      format="yyyy-MM-dd"
+                      :picker-options="pickerOptions"
+                      start-placeholder="开始日期"
+                      end-placeholder="结束日期"
+                      :clearable="false"
+                    ></el-date-picker>
+                  </el-form-item>
                 </div>
                 <!-- 选择设备 -->
                 <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
@@ -216,9 +216,13 @@
       </div>
       <!-- 没有数据的情况 -->
       <div v-else class="fnull">
-        <div>
+        <div v-if="isInit">
           <img src="../../../../../assets/img/null-content.png" alt />
-          {{noDataTips}}
+          <span>请在左侧输入查询条件</span>
+        </div>
+        <div v-else>
+          <img src="../../../../../assets/img/not-content.png" alt />
+          <span>抱歉，没有相关的结果!</span>
         </div>
       </div>
     </div>
@@ -267,14 +271,24 @@
       </div>
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
-          <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.storagePath" :class="{'active':isChoose}" class="bigImg" title="点击放大图片" />
-            <span>全景图</span>
+          <div class="struc_c_d_img struc_c_d_img_blue">
+            <img :src="curImageUrl" class="bigImg" title="点击放大图片" />
+            <span>上传图</span>
           </div>
-          <div class="struc_c_d_box">
-            <div class="struc_c_d_img struc_c_d_img_green">
-              <img :src="sturcDetail.subStoragePath" :class="{'active':isChoose2}" class="bigImg" title="点击放大图片"/>
+          <div class="struc_c_d_box" style="margin-left: 0.3rem;">
+            <!-- 抓拍图 -->
+            <div class="struc_c_d_img struc_c_d_img_green" v-if="showSubImg">
+              <img :src="sturcDetail.subStoragePath" class="bigImg" title="点击放大图片"/>
+              <!-- 切换图片 -->
+              <div class="checkout_img" @click="showSubImg = false;">切换全景图</div>
               <span>抓拍图</span>
+            </div>
+            <!-- 全景图 -->
+            <div class="struc_c_d_img struc_c_d_img_blue" v-else>
+              <img :src="sturcDetail.storagePath" class="bigImg" title="点击放大图片" />
+              <!-- 切换图片 -->
+              <div class="checkout_img sub_img" @click="showSubImg = true;">切换抓拍图</div>
+              <span>全景图</span>
             </div>
             <div class="struc_c_d_info">
               <h2>
@@ -374,14 +388,13 @@
             </div>
           </div>
         </div>
-        <div v-show="strucCurTab === 2" class="struc_c_address">
-        </div>
+        <div v-show="strucCurTab === 2" class="struc_c_address"></div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
-          <div class="struc_c_d_qj struc_c_d_img">
+          <div class="struc_c_d_img_blue struc_c_d_img">
             <img :src="sturcDetail.subStoragePath" class="bigImg" title="点击放大图片" alt />
             <span>抓拍图</span>
           </div>
-          <div class="struc_c_d_box">
+          <div class="struc_c_d_box" style="margin-left: 0.3rem;">
             <video id="capVideo" :src="sturcDetail.videoPath"></video>
             <div class="play_btn" @click="videoTap" v-show="!playing">
               <i class="vl_icon vl_icon_judge_01" v-if="playing"></i>
@@ -437,8 +450,6 @@ import { objDeepCopy } from "../../../../../utils/util.js"; // 深拷贝方法
 export default {
   data() {
     return {
-      isChoose:false,
-      isChoose2:false,
       selectType: 1,
       sortType: 1, // 1为时间排序， 2为监控排序
       timeSortType: true, // true为时间降序， false为时间升序
@@ -458,7 +469,6 @@ export default {
         ]
       },
       getStrucInfoLoading: false, // 查询按钮加载
-
       pickerOptions: {
         disabledDate(time) {
           let date = new Date();
@@ -528,11 +538,12 @@ export default {
       },
       /* 检索结果变量 */
       strucInfoList: [],
-      noDataTips: "请在左侧输入查询条件",
+      isInit: true, // 是否是页面初始化状态
       pageNum: 1,
       pageSize: 10,
       total: 0,
       /* 检索详情弹窗变量 */
+      showSubImg: true, // 模态框默认展示抓拍图
       swiperOption: {
         // swiper配置
         slidesPerView: 10,
@@ -552,7 +563,6 @@ export default {
       strucDetailDialog: false, // 弹窗是否展示
       playing: false, // 视频播放是否
       strucCurTab: 1,
-      showSim: false, // 展示相似度排序
       curImgIndex: 0, // 当前图片index
       sturcDetail: {},
       videoUrl: "" // 弹窗视频回放里的视频
@@ -580,13 +590,12 @@ export default {
     }
   },
   methods: {
-     bigImg(v){
-       if(v==1){
-          this.isChoose=!this.isChoose;
-       }else{
-          this.isChoose2=!this.isChoose2; 
-       }
-      
+    bigImg(v) {
+      if (v == 1) {
+        this.isChoose = !this.isChoose;
+      } else {
+        this.isChoose2 = !this.isChoose2;
+      }
     },
     /*重置菜单的数据 */
     resetMenu() {
@@ -660,7 +669,7 @@ export default {
             getPhotoSearch(queryParams)
               .then(res => {
                 this.getStrucInfoLoading = false; // 关闭加载效果
-                this.noDataTips = "暂无搜索结果";
+                this.isInit = false; // 页面初始化状态改变
                 if (res.data && res.data.list) {
                   if (res.data.list.length > 0) {
                     this.strucInfoList = res.data.list;
@@ -678,7 +687,7 @@ export default {
                 this.getStrucInfoLoading = false; // 关闭加载效果
                 this.strucInfoList = []; // 清空搜索结果
                 this.total = 0;
-                this.noDataTips = "暂无搜索结果";
+                this.isInit = false; // 页面初始化状态改变
               });
           } else {
             return false;
@@ -1478,14 +1487,14 @@ export default {
             right: 0;
             bottom: 0;
             margin: auto;
-            transform: scale(1);         
+            transform: scale(1);
             transition: all ease 0.5s;
           }
-          img.active{
-             transform: scale(3);          
-              position: absolute;           
-              z-index: 100;
-              left: 50%;
+          img.active {
+            transform: scale(3);
+            position: absolute;
+            z-index: 100;
+            left: 50%;
           }
           i {
             display: block;
@@ -1501,8 +1510,24 @@ export default {
             font-size: 12px;
             padding: 0 0.1rem;
           }
+          // 切换图片按钮
+          .checkout_img {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            line-height: 26px;
+            background: #0C70F8;
+            font-size: 12px;
+            padding: 0 12px;
+            color: #fff;
+            border-radius: 13px;
+            cursor: pointer;
+          }
+          .sub_img {
+            background: #50CC62;
+          }
         }
-        // 绿色标签
+        // 绿色标签（抓拍图）
         .struc_c_d_img_green {
           &:before {
             display: block;
@@ -1536,8 +1561,8 @@ export default {
             color: #50cc62;
           }
         }
-        .struc_c_d_qj {
-          margin-right: 0.3rem;
+        // 蓝色标签（全景图）
+        .struc_c_d_img_blue {
           &:before {
             display: block;
             content: "";
@@ -1565,6 +1590,9 @@ export default {
             -o-transform: rotate(-45deg);
             transform: rotate(-45deg);
             z-index: 99;
+          }
+          i {
+            color: #0c70f8;
           }
         }
         .struc_c_d_box {
