@@ -435,6 +435,7 @@ export default {
       this.fileList = [];
       this.curImageUrl = null;
       this.$refs[form].resetFields();
+      this.dataList = [];
     },
     // 根据搜索条件进行查询
     searchData (form) {
