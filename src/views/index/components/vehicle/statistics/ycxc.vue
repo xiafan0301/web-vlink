@@ -15,8 +15,19 @@
             <i v-if="treeTabShow" class="el-icon-arrow-up"></i>
             <i v-else class="el-icon-arrow-down"></i>
             <div class="device_list" v-if="selectDeviceArr.length > 0">
-              <span>{{ selectDeviceArr[0].label }}</span>
-              <span v-show="selectDeviceArr.length > 1" title="展开选中的设备" class="device_count">+{{ selectDeviceArr.length - 1 }}</span>
+              <template v-if="checkAllTree">
+                <span>全部设备</span>
+              </template>
+              <template v-else>
+                <span>{{ selectDeviceArr[0].label }}</span>
+                <span
+                  v-show="selectDeviceArr.length > 1"
+                  title="展开选中的设备"
+                  class="device_count"
+                >+{{ selectDeviceArr.length - 1 }}</span>
+              </template>
+              <!-- <span>{{ selectDeviceArr[0].label }}</span>
+              <span v-show="selectDeviceArr.length > 1" title="展开选中的设备" class="device_count">+{{ selectDeviceArr.length - 1 }}</span> -->
             </div>
             <!-- placeholder -->
             <div class="no_device" v-else>选择设备</div>
