@@ -14,6 +14,7 @@
           <el-form :inline="true" :model="formInline" ref="formInline" class="dl_hi_sf" size="small">
             <el-form-item>
               <el-date-picker style="width: 250px;"
+                class="vl_date"
                 v-model="formInline.time"
                 type="daterange"
                 align="left"
