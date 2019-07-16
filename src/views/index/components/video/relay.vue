@@ -189,29 +189,20 @@
       </div>
     </div>
     <div class="vl_vid relay_task" v-show="pageType === 2">
-      <div class="relay_task_t">
-        <el-breadcrumb separator-class="el-icon-arrow-right">
-          <el-breadcrumb-item><span style="cursor: pointer;" @click="pageType = 1">视频接力</span></el-breadcrumb-item>
-          <el-breadcrumb-item>新建任务</el-breadcrumb-item>
-        </el-breadcrumb>
-      </div>
-      <div class="relay_task_m"></div>
-      <div class="relay_task_b">
-        <el-button size="small" type="primary">&nbsp;&nbsp;&nbsp;&nbsp;确&nbsp;&nbsp;定&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
-        <el-button size="small">&nbsp;&nbsp;&nbsp;&nbsp;取&nbsp;&nbsp;消&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
-      </div>
+      <div is="relayNew" @closeNew="closeNew"></div>
     </div>
   </div>
-  
 </template>
 <script>
+import {ajaxCtx} from '@/config/config';
 import {mapXupuxian} from '@/config/config.js';
-import {videoTree} from '@/utils/video.tree.js';
 import videoEmpty from './videoEmpty.vue';
+import relayNew from './relay-new.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
-import { apiAreaServiceDeviceList } from "@/views/index/api/api.base.js";
+import { apiAreaServiceDeviceList, getAllMonitorList, getAllBayonetList } from "@/views/index/api/api.base.js";
+  import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList} from '@/views/index/api/api.judge.js'
 export default {
-  components: {videoEmpty, flvplayer},
+  components: {videoEmpty, flvplayer, relayNew},
   data () {
     let _ndate = new Date();
     return {
@@ -232,6 +223,7 @@ export default {
       initTime: [new Date(_ndate.getTime() - 3600 * 1000 * 24 * 2), _ndate],
       startTime: '',
       endTime: '',
+
       startTimeOptions: {
         disabledDate: (d) => {
           // d > new Date() || d > this.endTime
@@ -258,6 +250,8 @@ export default {
       this.playersHandler(this.showVideoTotal);
     }
   },
+  computed: {
+  },
   created () {
     // window.localStorage.getItem(name);
     // 第一次打开
@@ -266,9 +260,11 @@ export default {
     this.endTime = this.initTime[1];
   },
   mounted () {
-    videoTree('videoListTree2');
   },
   methods: {
+    closeNew () {
+      this.changePage(1);
+    },
     changePage (type) {
       this.pageType = type;
     },
@@ -377,13 +373,176 @@ export default {
       } else {
         this.showConTitle = 1;
       }
-    }
+    },
   },
   destroyed () {
   }
 }
 </script>
 <style lang="scss" scoped>
+.mb_map_map {
+  overflow: hidden;
+  .mb_map_map_l {
+    float: left;
+    width: 250px;
+    > .mb_map_map_lt {
+      height: 40px; line-height: 40px;
+      padding: 0 10px 0 10px;
+      border-bottom: 1px solid #f2f2f2;
+      overflow: hidden;
+      > span {
+        float: right;
+        color: #999;
+      }
+    }
+    > .mb_map_map_lb {
+      width: 100%; height: 599px;
+    }
+  }
+  .mb_map_map_r {
+    margin-left: 250px;
+    border-left: 1px solid rgba(242,242,242,1);
+    > h4 {
+      height: 40px; line-height: 40px;
+      padding-left: 20px;
+    }
+    > div {
+      position: relative;
+      height: 600px;
+      > ul {
+        position: absolute; bottom: 20px; right: 10px;
+        > li {
+          box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
+          background-color: #fff;
+          padding: 10px 10px;
+          text-align: center;
+          cursor: pointer;
+          > i { font-size: 24px; color: #0C70F8; }
+          > p { font-size: 12px; position: relative; top: -2px; }
+          &.vl_icon_sed {
+            color: #0C70F8;
+          }
+        }
+      }
+    }
+  }
+}
+.relay_task_mb {
+  border-top: 1px solid #eee;
+  > h3 {
+    color: #666;
+    padding-top: 10px;
+  }
+  > .task_mb_map {
+    border-radius:4px 4px 0px 0px;
+    border:1px solid rgba(211,211,211,1);
+    > .task_mb_mt {
+      border-bottom: 1px solid #eee;
+      overflow: hidden;
+      background-color: #FAFAFA;
+      > li {
+        float: left;
+        height: 40px; line-height: 40px;
+        margin: 0 20px;
+        border-bottom: 2px solid #FAFAFA;
+        cursor: pointer;
+        &.task_mb_mt_sed {
+          color: #0C70F8;
+          border-bottom-color: #0C70F8;
+          cursor: default;
+        }
+      }
+    }
+  }
+  > .task_mb_d {
+    padding: 15px 0 8px 0;
+    > span { color: #666; }
+  }
+}
+.relay_task_mm {
+  padding: 15px 0;
+  color: #0C70F8;
+  > span {
+    display: inline-block;
+    cursor: pointer;
+    > i {
+      padding-left: 5px;
+      color: #0C70F8; font-size: 16px;
+      transition: all .4s ease-out;
+      &.relay_task_mm_d2 {
+        transform: rotate(180deg);
+      }
+    }
+  }
+}
+.relay_task_mtl {
+  float: left;
+  width: 260px;
+  height: 330px;
+  border-radius:4px 4px 0px 0px;
+  border:1px solid rgba(211,211,211,1);
+  > .task_mtl_t {
+    padding: 14px 0 14px 20px;
+    text-align: left;
+    background-color: #F2F2F2;
+  }
+  > .task_mtl_m {
+    padding: 12px 25px 12px 25px;
+    color: #666;
+    overflow: hidden;
+    > i {
+      display: inline-block;
+      color: red;
+      font-style: normal;
+    }
+    > span {
+      float: right;
+      color: #0C70F8;
+      cursor: pointer;
+    }
+  }
+  > .task_mtl_u {
+    position: relative;
+    margin: 0 auto;
+    width: 200px; height: 200px;
+    > p {
+      display: none;
+      position: absolute; bottom: 0; left: 0;
+      text-align: center;
+      width: 100%; height: .4rem; line-height: .4rem;
+      color: #FFFFFF;
+      border-radius: 0 0 10px 10px;
+      background: #0C70F8;
+      cursor: pointer;
+    }
+    > .del_icon {
+      display: none;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 24px;
+      height: 24px;
+      line-height: 24px;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 4px;
+      color: #FFFFFF;
+    }
+    &:hover {
+      > p { display: block; }
+      > .del_icon { display: block; }
+    }
+  }
+}
+.relay_task_mtr {
+  margin-left: 270px;
+  height: 330px;
+  > div {
+    width: 100%; height: 100%;
+    border-radius:4px 4px 0px 0px;
+    border:1px solid rgba(211,211,211,1);
+  }
+}
 .relay_task {
   position: relative;
   height: 100%;
@@ -394,7 +553,17 @@ export default {
   }
   > .relay_task_m {
     height: 100%;
-    padding: 50px 0 60px 0;
+    padding: 50px 10px 70px 10px;
+    > div {
+      height: 100%;
+      padding: 10px;
+      overflow: auto;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background-color: #fff;
+      box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
+      border-radius:4px;
+    }
   }
   > .relay_task_b {
     position: absolute; bottom: 0; left: 0; z-index: 20;
@@ -408,7 +577,7 @@ export default {
 .relay_main { width: 100%; height: 100%; }
 .relay_ul_list {
   height: 100%;
-  padding-bottom: 45px;
+  padding-bottom: 50px;
   border-top: 1px solid #eee;
   > ul {
     height: 100%;
@@ -480,7 +649,18 @@ export default {
 .relay_ul_btn {
   position: absolute; bottom: 0; left: 0;
   border-top: 1px solid #eee;
-  width: 100%; height: 44px; line-height: 44px;
+  padding-bottom: 2px;
+  width: 100%; height: 50px; line-height: 48px;
   text-align: center;
+  background-color: #fff;
+}
+</style>
+<style lang="scss">
+.vid_relay_upload {
+  width: 200px; height: 200px;
+  > .el-upload--picture-card {
+    width: 200px; height: 200px; line-height: 200px;
+    > img { height: 100%; width: 100%; }
+  }
 }
 </style>

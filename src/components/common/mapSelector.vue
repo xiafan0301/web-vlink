@@ -22,7 +22,7 @@
             <div title="选择圆形范围内的设备" :class="{'sd_opts_sed': drawActiveType === 2 }" @click="selDrawType(2)"><span class="sd_opts_icon sd_opts_icon2"></span></div>
           </li>
           <li>
-            <div title="选择折线100米范围内的设备" :class="{'sd_opts_sed': drawActiveType === 3 }" @click="selDrawType(3)"><span class="sd_opts_icon sd_opts_icon3"></span></div>
+            <div title="选择折线200米范围内的设备" :class="{'sd_opts_sed': drawActiveType === 3 }" @click="selDrawType(3)"><span class="sd_opts_icon sd_opts_icon3"></span></div>
           </li>
           <li>
             <div title="选择多边形范围内的设备" :class="{'sd_opts_sed': drawActiveType === 4 }" @click="selDrawType(4)"><span class="sd_opts_icon sd_opts_icon4"></span></div>
@@ -87,6 +87,7 @@ export default {
       mapEventActive: false,
 
       drawActiveType: null, // 
+      drawActive: false,
       drawObj: {
         rectangle: {
           /* 'id': {
@@ -160,9 +161,9 @@ export default {
 
       // 在地图中添加MouseTool插件
       this.mouseTool = new window.AMap.MouseTool(map);
-      this.mouseTool.on("draw", (event) => {
+      this.mouseTool.on('draw', (event) => {
         // event.obj 为绘制出来的覆盖物对象
-        // console.log('draw event', event);
+        console.log('draw event', event);
         let _sid = random14();
         //  return
         if (this.drawActiveType === 1) {
@@ -188,6 +189,7 @@ export default {
         this.mouseTool.close(false);
         this.amap.setDefaultCursor();
         this.drawActiveType = 0;
+        this.drawActive = false;
       });
 
       _this.setMarks();
@@ -271,15 +273,29 @@ export default {
       }
     },
     selectArea (e) {
-      console.log(e);
       if (e.poi && e.poi.location) {
         this.amap.setZoom(15);
         this.amap.setCenter(e.poi.location);
       }
     },
     selDrawType (drawType) {
+      // this.mouseTool.close(false);
+      if (this.drawActiveType === drawType) {
+        return false;
+      }
+      if (this.drawActive && this.drawActiveType > 0) {
+        if (!document.querySelector('.el-message--info')) {
+          this.$message({
+            showClose: true,
+            message: '请先完成当前绘制再选择其它绘制类型。',
+            type: 'info'
+          });
+        }
+        return false;
+      }
       this.drawType = drawType;
       this.drawActiveType = drawType;
+      this.drawActive = true;
       if (drawType === 1) { // 矩形
         this.drawRectangle();
       } else if (drawType === 2) { // 圆形
@@ -910,6 +926,7 @@ export default {
             _d.bayonetName, 'vl_icon ' + sC);
         }
       }
+      this.amap.setFitView();
     },
     // 
     doMark (lnglat, title, sClass) {

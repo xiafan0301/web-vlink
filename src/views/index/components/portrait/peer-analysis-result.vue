@@ -2,7 +2,7 @@
   <div class="peer-analysis">
     <div class="th-breadcrumb">
       <el-breadcrumb separator-class="el-icon-arrow-right">
-        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像检索</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像侦察</el-breadcrumb-item>
         <el-breadcrumb-item :to="{ path: '/portrait/peer-analysis-list' }">同行分析</el-breadcrumb-item>
         <el-breadcrumb-item>分析结果</el-breadcrumb-item>
       </el-breadcrumb>
@@ -34,7 +34,8 @@
           </li>
           <li>
             <span>同行次数：</span>
-            <span>{{taskDetail.taskWebParam && taskDetail.taskWebParam.number ? taskDetail.taskWebParam.number : '无'}}</span>
+            <span v-if="taskDetail.taskWebParam && taskDetail.taskWebParam.number">不少于{{ taskDetail.taskWebParam.number}}次</span>
+            <span v-else>无</span>
           </li>
           <li>
             <span>创建时间：</span>
@@ -52,7 +53,7 @@
                   <li v-for="(item, index) in boxList" :key="index + 'dd'">
                     <div style="">
                       <!-- <img src="../../../../assets/img/666.jpg" alt=""> -->
-                      <img :src="item.subStoragePath" alt="">
+                      <img class="bigImg" :src="item.subStoragePath" alt="">
                       <div>
                         <h4>检索资料</h4>
                         <div><i class="vl_icon rlcx_sj"></i>{{item.shotTime.substr(2, item.shotTime.length)}}</div>
@@ -62,7 +63,7 @@
                           <span style="height: 30px;line-height: 30px;padding: 0 10px;display: inline-block;background: #fafafa;border: 1px solid #f2f2f2;border-radius: 3px;margin-left: 8px;">{{item.age ? item.age : '无'}}</span>
                         </p>
                         <p><img src="../../../../assets/img/txfx_pao.png" alt=""><b style="color: #0C70F8;font-size: 34px;padding-left: 8px;">{{item.peerNumber}}</b><span style="color: #0C70F8;"> 同行次</span></p>
-                        <div style="margin-top: 15px; cursor: pointer;border:1px solid #D3D3D3;border-radius:4px;background:rgba(246,248,249,1);color: #666;" @click="goRecord">查看同行记录</div>
+                        <div style="margin-top: 15px; cursor: pointer;border:1px solid #D3D3D3;border-radius:4px;background:rgba(246,248,249,1);color: #666;" @click="goRecord(item)">查看同行记录</div>
                       </div>
                     </div>
                   </li>
@@ -170,13 +171,15 @@ export default {
         }
       });
     },
-    goRecord () {
-      this.$router.push({name: 'peer_analysis_record', query: {uid: this.$route.query.uid}})
+    goRecord (obj) {
+      // console.log(obj)
+      // obj.uid = 1
+      this.$router.push({name: 'peer_analysis_record', query: {uid: this.$route.query.uid, id: obj.uid}})
     },
     onPageChange (page) {
       this.boxList.splice(0, this.boxList.length)
       this.boxList = [...this.taskDetail.taskResult.slice((page - 1) * 12, 12 + (page - 1) * 12)]
-      console.log(this.boxList)
+      // console.log(this.boxList)
     },
   }
 }

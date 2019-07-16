@@ -183,6 +183,7 @@ export default {
           pagination: { total: 20, pageSize: 10, pageNum: 1 },
     };
   },
+
   computed: {
   
   },
@@ -191,6 +192,7 @@ export default {
     this.getViolationInfo()
   },
   methods: {
+   
     dOut(){
        let today = new Date()
       let y = today.getFullYear()
@@ -204,11 +206,23 @@ export default {
         vehicleViolationDto:{
           dateEnd:(edate || day) + " 23:59:59",
           dateStart:(sdate || day) + " 00:00:00",
-          plateNo:this.$route.query.plateNo
-        }
+          plateNo:this.$route.query.plateNo,
+          
+        },
+        viewType:4
       }).then(res=>{
-        if(res){
-this.daochu=false
+        if(res && res.data){
+          const eleA = document.getElementById('export_id');
+          if (eleA) {
+            document.body.removeChild(eleA);
+          }
+          let a = document.createElement('a');
+          a.setAttribute('href', res.data.fileUrl);
+          a.setAttribute('target', '_self');
+          a.setAttribute('id', 'export_id');
+          document.body.appendChild(a);
+          a.click();
+          this.daochu=false
         }else{
           this.daochu=false
            this.$message('导出失败！');

@@ -17,20 +17,22 @@
             <!-- 表单 -->
             <div class="form_warp">
               <el-form :model="mhscMenuForm" ref="mhscMenuForm" :rules="rules">
-                <el-form-item label prop="selectDate">
-                  <el-date-picker
-                    class="width232"
-                    v-model="mhscMenuForm.selectDate"
-                    type="daterange"
-                    range-separator="-"
-                    value-format="yyyy-MM-dd"
-                    format="yy/MM/dd"
-                    :picker-options="pickerOptions"
-                    start-placeholder="开始日期"
-                    end-placeholder="结束日期"
-                    :clearable="false"
-                  ></el-date-picker>
-                </el-form-item>
+                <div class="date-comp">
+                  <el-form-item label prop="selectDate">
+                    <el-date-picker
+                      class="width232"
+                      v-model="mhscMenuForm.selectDate"
+                      type="daterange"
+                      range-separator="至"
+                      value-format="yyyy-MM-dd"
+                      format="yyyy-MM-dd"
+                      :picker-options="pickerOptions"
+                      start-placeholder="开始日期"
+                      end-placeholder="结束日期"
+                      :clearable="false"
+                    ></el-date-picker>
+                  </el-form-item>
+                </div>
                 <!-- 选择设备 -->
                 <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
                 <div class="selected_device" @click="treeTabShow = true;">
@@ -119,11 +121,9 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-
                 <el-form-item label="车牌：" style="margin: 0;" label-width="55px" prop="isNegate">
-                  <el-checkbox v-model="mhscMenuForm.isNegate">排除</el-checkbox>
+                  <el-checkbox v-model="mhscMenuForm.isNegate" style="float: right;">排除</el-checkbox>
                 </el-form-item>
-
                 <el-form-item label prop="carNumber">
                   <el-input
                     placeholder
@@ -151,13 +151,17 @@
             <!-- 按钮样式 -->
             <div class="btn_warp">
               <el-button class="reset_btn" @click="resetMenu">重置</el-button>
-              <el-button class="select_btn" :loading="getStrucInfoLoading" @click="getStrucInfo(true)">确定</el-button>
+              <el-button
+                class="select_btn"
+                :loading="getStrucInfoLoading"
+                @click="getStrucInfo(true)"
+              >确定</el-button>
             </div>
           </div>
         </vue-scroll>
       </div>
       <!-- 通用的右边列表 -->
-      <div class="right_img_list">
+      <div class="right_img_list" v-if="strucInfoList.length > 0">
         <!-- 排序和结果 -->
         <div class="result_sort">
           <h3 class="result">检索结果（{{ total }}）</h3>
@@ -205,19 +209,29 @@
               </div>
             </div>
             <!-- 分页器 -->
-            <!-- <template v-if="total > 0">
+            <template v-if="total > 0">
               <el-pagination
                 @size-change="handleSizeChange"
                 @current-change="onPageChange"
                 :current-page.sync="pageNum"
-                :page-sizes="[100, 200, 300, 400]"
                 :page-size="pageSize"
-                layout="total, prev, pager, next, jumper"
+                layout="total, prev, pager, next"
                 :total="total"
                 class="cum_pagination"
               ></el-pagination>
-            </template>-->
+            </template>
           </vue-scroll>
+        </div>
+      </div>
+      <!-- 没有数据的情况 -->
+      <div v-else class="fnull">
+        <div v-if="isInit">
+          <img src="../../../../../assets/img/null-content.png" alt />
+          <span>请在左侧输入查询条件</span>
+        </div>
+        <div v-else>
+          <img src="../../../../../assets/img/not-content.png" alt />
+          <span>抱歉，没有相关的结果!</span>
         </div>
       </div>
     </div>
@@ -267,37 +281,39 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.storagePath" alt />
+            <img class="bigImg" title="点击放大图片" :src="sturcDetail.storagePath" alt />
             <span>全景图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img struc_c_d_img_green">
-              <img :src="sturcDetail.subStoragePath" alt />
+              <img class="bigImg" title="点击放大图片" :src="sturcDetail.subStoragePath" alt />
               <span>抓拍图</span>
             </div>
             <div class="struc_c_d_info">
-              <h2>
-                抓拍信息
-                <!-- <div class="vl_jfo_sim" v-show="showSim">
+              <vue-scroll>
+                <h2>
+                  抓拍信息
+                  <!-- <div class="vl_jfo_sim" v-show="showSim">
                   <i class="vl_icon vl_icon_retrieval_03"></i>
                   {{sturcDetail.semblance ? sturcDetail.semblance : 98.32}}
                   <span
                     style="font-size: 12px;"
                   >%</span>
-                </div>-->
-              </h2>
-              <!-- 特征展示框 -->
-              <div class="struc_cdi_box">
+                  </div>-->
+                </h2>
+                <!-- 特征展示框 -->
+                <!-- <div class="struc_cdi_box">
+                <div
+                  class="item"
+                  v-if="sturcDetail.plateReliability"
+                >{{sturcDetail.plateReliability}}</div>
+                <div class="item" v-if="sturcDetail.vehicleBrand">{{ sturcDetail.vehicleBrand}}</div>
+                <div class="item" v-if="sturcDetail.sunvisor">{{ '遮阳板：' + sturcDetail.sunvisor}}</div>
                 <div
                   class="item"
                   v-if="sturcDetail.plateColor"
                 >{{ '车牌颜色：' + sturcDetail.plateColor}}</div>
                 <div class="item" v-if="sturcDetail.plateNo">{{ sturcDetail.plateNo}}</div>
-                <!-- <div
-                  class="item"
-                  v-if="sturcDetail.plateReliability"
-                >{{sturcDetail.plateReliability}}</div>-->
-                <div class="item" v-if="sturcDetail.vehicleBrand">{{ sturcDetail.vehicleBrand}}</div>
                 <div class="item" v-if="sturcDetail.vehicleClass">{{ sturcDetail.vehicleClass}}</div>
                 <div
                   class="item"
@@ -308,33 +324,68 @@
                   class="item"
                   v-if="sturcDetail.vehicleRoof"
                 >{{ '车顶(天窗)：' + sturcDetail.vehicleRoof}}</div>
-                <div class="item" v-if="sturcDetail.sunvisor">{{ '遮阳板：' + sturcDetail.sunvisor}}</div>
-              </div>
-              <!-- 车辆的信息栏 -->
-              <div class="struc_cdi_line">
-                <p>
-                  <span class="val">{{sturcDetail.vehicleStyles}}</span>
-                  <span class="key">车辆型号</span>
-                </p>
-              </div>
-              <div class="struc_cdi_line">
-                <p>
-                  <span class="val">{{sturcDetail.shotTime}}</span>
-                  <span class="key">抓拍时间</span>
-                </p>
-              </div>
-              <div class="struc_cdi_line">
-                <p>
-                  <span class="val">{{sturcDetail.deviceName}}</span>
-                  <span class="key">抓拍设备</span>
-                </p>
-              </div>
-              <div class="struc_cdi_line">
-                <p>
-                  <span class="val">{{sturcDetail.address}}</span>
-                  <span class="key" title="抓拍地点">抓拍地点</span>
-                </p>
-              </div>
+                </div>-->
+                <!-- 车辆的信息栏 -->
+                <div class="struc_cdi_line_mhsc" v-if="sturcDetail.shotTime">
+                  <p class="line_content">
+                    <span class="key">抓拍时间</span>
+                    <span class="val">{{sturcDetail.shotTime}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdi_line_mhsc" v-if="sturcDetail.deviceName">
+                  <p class="line_content">
+                    <span class="key">抓拍设备</span>
+                    <span class="val">{{sturcDetail.deviceName}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdi_line_mhsc" v-if="sturcDetail.address">
+                  <p class="line_content">
+                    <span class="key" title="抓拍地点">抓拍地点</span>
+                    <span class="val">{{sturcDetail.address}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdi_line_mhsc" v-if="sturcDetail.plateNo">
+                  <p class="line_content">
+                    <span class="key">车牌号码</span>
+                    <span class="val">{{sturcDetail.plateNo}}</span>
+                  </p>
+                </div>
+                <!-- 5个特征 -->
+                <div class="struc_cdi_line_mhsc" v-if="sturcDetail.plateColor">
+                  <p class="line_content">
+                    <span class="key">车牌颜色</span>
+                    <span class="val">{{sturcDetail.plateColor}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdi_line_mhsc" v-if="sturcDetail.vehicleModel">
+                  <p class="line_content">
+                    <span class="key">车辆型号</span>
+                    <span class="val">{{sturcDetail.vehicleModel}}</span>
+                  </p>
+                </div>
+
+                <div class="struc_cdi_line_mhsc" v-if="sturcDetail.vehicleColor">
+                  <p class="line_content">
+                    <span class="key">车辆颜色</span>
+                    <span class="val">{{sturcDetail.vehicleColor}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdi_line_mhsc" v-if="sturcDetail.vehicleClass">
+                  <p class="line_content">
+                    <span class="key">车辆类型</span>
+                    <span class="val">{{sturcDetail.vehicleClass}}</span>
+                  </p>
+                </div>
+                <div
+                  class="struc_cdi_line_mhsc"
+                  v-if="sturcDetail.plateClass || sturcDetail.plateClass === 0"
+                >
+                  <p class="line_content">
+                    <span class="key">号牌类型</span>
+                    <span class="val">{{dicFormater(45, sturcDetail.plateClass)}}</span>
+                  </p>
+                </div>
+              </vue-scroll>
             </div>
           </div>
         </div>
@@ -343,7 +394,7 @@
         </div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt />
+            <img :src="sturcDetail.subStoragePath" class="bigImg" title="点击放大图片" alt />
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
@@ -493,8 +544,10 @@ export default {
       },
       /* 检索结果变量 */
       strucInfoList: [],
+      strucInfoListAll: [],
+      isInit: true, // 是否是页面初始化状态
       pageNum: 1,
-      pageSize: 10,
+      pageSize: 20,
       total: 0,
       /* 检索详情弹窗变量 */
       swiperOption: {
@@ -526,11 +579,6 @@ export default {
     this.getMonitorList();
     this.setDTime();
     this.vehicleBelongOptions = this.dicFormater(48)[0].dictList; // 获取车辆归属地
-    // 一进入页面就全选设备
-    this.$nextTick(() => {
-      this.checkAllTree = true;
-      this.handleCheckedAll(true);
-    });
     // 初始化地图
     let map = new AMap.Map("capMap", {
       center: [112.974691, 28.093846],
@@ -554,7 +602,7 @@ export default {
     });
   },
   methods: {
-    getStrucInfo(isClick=false) {
+    getStrucInfo(isClick = false) {
       // 根据特征数组来获取到检索的结果
       this.$refs.mhscMenuForm.validate(valid => {
         if (isClick) {
@@ -614,10 +662,18 @@ export default {
           getVagueSearch(queryParams)
             .then(res => {
               this.getStrucInfoLoading = false; // 关闭加载效果
+              this.isInit = false; // 页面初始化状态改变
               if (res.data) {
                 if (res.data.length > 0) {
-                  this.strucInfoList = res.data;
-                  this.total = res.data.length;
+                  // this.strucInfoList = res.data;
+                  this.strucInfoListAll = res.data;
+                  this.total = this.strucInfoListAll.length;
+                  this.onPageChange(1);
+                  /* if (this.total > this.pageSize) {
+                    this.strucInfoList = this.strucInfoListAll.slice(0, this.pageSize);
+                  } else {
+                    this.strucInfoList = this.strucInfoListAll;
+                  } */
                 } else {
                   this.strucInfoList = []; // 清空搜索结果
                   this.total = 0;
@@ -631,6 +687,7 @@ export default {
               this.getStrucInfoLoading = false; // 关闭加载效果
               this.strucInfoList = []; // 清空搜索结果
               this.total = 0;
+              this.isInit = false; // 页面初始化状态改变
             });
         } else {
           return false;
@@ -639,7 +696,12 @@ export default {
     },
     onPageChange(page) {
       this.pageNum = page;
-      this.getStrucInfo();
+      let ips = (this.pageNum - 1) * this.pageSize;
+      let ipe = ips + this.pageSize;
+      if (ipe > this.total) {
+        ipe = this.total;
+      }
+      this.strucInfoList = this.strucInfoListAll.slice(ips, ipe);
     },
     handleSizeChange(val) {
       this.pageNum = 1;
@@ -728,6 +790,7 @@ export default {
       this.$nextTick(() => {
         this.checkAllTree = true;
         this.handleCheckedAll(true);
+        this.getStrucInfo();
       });
     },
     getMonitorList() {
@@ -739,11 +802,8 @@ export default {
           let camera = objDeepCopy(res.data.areaTreeList);
           let bayonet = objDeepCopy(res.data.areaTreeList);
           this.cameraTree = this.getTreeList(camera);
-          /* this.bayonetTree = this.getBayTreeList(bayonet); */
           this.getLeafCountTree(this.cameraTree);
-          /* this.getLeafCountTree(this.cameraTree, 'camera');
-          this.getLeafCountTree(this.bayonetTree, 'bayonet'); */
-          this.initCheckTree();
+          this.initCheckTree(); // 初始化全选设备
         }
       });
     },
@@ -1121,6 +1181,33 @@ export default {
         }
       }
     }
+    // 没有数据的样式
+    .fnull {
+      text-align: center;
+      line-height: 48px;
+      font-size: 16px;
+      color: #666666;
+      -webkit-box-flex: 1;
+      -ms-flex: 1;
+      flex: 1;
+      height: 100%;
+      background: #fff;
+      margin: 24px 20px 20px 20px;
+      position: relative;
+      > div {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%); /* IE 9 */
+        -webkit-transform: translate(-50%, -50%); /* Safari and Chrome */
+        img {
+          display: block;
+          margin: auto;
+          padding-bottom: 10px;
+        }
+      }
+    }
     // 右边图片列表
     .right_img_list {
       -webkit-box-flex: 1;
@@ -1394,6 +1481,7 @@ export default {
           }
           .struc_c_d_info {
             width: calc(100% - 3.6rem);
+            height: 3.6rem;
             padding-left: 0.24rem;
             color: #333333;
             h2 {
@@ -1432,8 +1520,8 @@ export default {
                 margin-left: 0.1rem;
               }
             }
-            .struc_cdi_line {
-              p {
+            .struc_cdi_line_mhsc {
+              .line_content {
                 max-width: 100%;
                 display: inline-block;
                 height: 0.3rem;
@@ -1447,15 +1535,12 @@ export default {
                 border-radius: 3px;
                 font-size: 12px;
                 overflow: hidden;
-                padding: 0 0.1rem;
+                padding-left: 0.1rem;
                 margin-right: 0.08rem;
                 .key {
                   color: #999999;
-                  padding-left: 10px;
-                }
-                .val {
-                  padding-right: 9px;
-                  position: relative;
+                  padding-right: 10px;
+                  display: inline-block;
                   &::before {
                     content: "";
                     width: 1px;
@@ -1465,6 +1550,12 @@ export default {
                     top: 1px;
                     background: #f2f2f2;
                   }
+                }
+                .val {
+                  display: inline-block;
+                  background: #fff;
+                  padding: 0 9px;
+                  position: relative;
                 }
               }
             }

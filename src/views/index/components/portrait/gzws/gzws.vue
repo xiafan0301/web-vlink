@@ -8,7 +8,7 @@
             {name: '跟踪尾随'}]">
         </div>
       </div>
-      <el-button class="add_btn" type="primary" @click="showAddTaskDialog('add')">新建任务</el-button>
+      <el-button class="add_btn" type="primary" @click="showAddTaskDialog">新建任务</el-button>
     </div>
     <div class="content_box">
       <ul class="tab-menu">
@@ -87,7 +87,7 @@
               >恢复任务</span>
               <span
                 class="operation_btn"
-                @click="showAddTaskDialog('edit', scope.row)"
+                @click="recoveryTask(scope.row)"  
                 v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 3"
               >重启任务</span>
               <span
@@ -143,7 +143,7 @@
     </el-dialog>
     <!--新建任务弹出框-->
     <el-dialog
-      :title="isAddTaskTitle === true ? '新增分析任务' : '重启分析任务'"
+      title="新增分析任务"
       :visible.sync="addTaskDialog"
       width="720px"
       :close-on-click-modal="false"
@@ -244,7 +244,6 @@ export default {
         }
       ],
       isShowDeviceTip: false, // 是否显示设备有否提示
-      isAddTaskTitle: true, // 是否是新增任务
       selectIndex: 1, // 默认选中已完成的任务
       taskId: null, // 要操作的任务id
       deleteDialog: false, // 删除任务弹出框
@@ -303,7 +302,9 @@ export default {
     handleDateTime (val) {
       if (val) {
         if ( (new Date(val[1]).getTime() - new Date(val[0]).getTime()) >= 3* 24 * 3600 * 1000) {
-          this.$message.warning('最多选择3天');
+          if (!document.querySelector('.el-message--info')) {
+            this.$message.info('最多选择3天');
+          }
           this.addForm.dateTime = [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()];
         } else {
           if (this.dialogImageUrl) {
@@ -333,8 +334,6 @@ export default {
             this.list.map(item => {
               item.taskWebParam = JSON.parse(item.taskWebParam);
             })
-
-            console.log(this.list)
           }
         })
         .catch(() => {})
@@ -362,10 +361,14 @@ export default {
       const isLt4M = file.size / 1024 / 1024 < 4;
 
       if (!isJPG) {
-        this.$message.error('上传图片只能是 jpeg、jpg、png 格式!');
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('上传图片只能是 jpeg、jpg、png 格式!');
+        }
       }
       if (!isLt4M) {
-        this.$message.error('上传图片大小不能超过 4MB!');
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('上传图片大小不能超过 4MB!');
+        }
       }
       return isJPG && isLt4M;
     },
@@ -374,11 +377,11 @@ export default {
       this.deviceList = [];
       const params = {
         // targetPicUrl : this.dialogImageUrl,
-        targetPicUrl: 'http://10.116.126.10/root/image/2019/07/10/34020000001320000016414920190709100000000009_1_1.jpeg',
-        startTime : '2019-07-09 09:59:00',
-        endTime: '2019-07-09 10:03:00'
-        // startTime : formatDate(this.addForm.dateTime[0]),
-        // endTime: formatDate(this.addForm.dateTime[1])
+        targetPicUrl: 'http://file.aorise.org/vlink/image/810ddc87-f9db-4e60-9da2-4e1ffc076683.jpg',
+        // startTime : '2019-07-09 09:59:00',
+        // endTime: '2019-07-09 10:03:00'
+        startTime : formatDate(this.addForm.dateTime[0]),
+        endTime: formatDate(this.addForm.dateTime[1])
       };
       console.log('params', params)
       getPersonShotDev(params)
@@ -431,31 +434,27 @@ export default {
       this.$refs[form].validate(valid => {
         if (valid) {
           if (!this.dialogImageUrl) {
-             this.$message({
-              type: 'warning',
-              message: '请先上传目标人员全身照',
-              customClass: 'request_tip'
-            });
+            if (!document.querySelector('.el-message--info')) {
+              this.$message.info('请先上传目标人员全身照');
+            }
             return;
           }
           if (this.dialogImageUrl && !this.addForm.deviceCode) {
-            this.$message({
-              type: 'warning',
-              message: '请设置分析起点',
-              customClass: 'request_tip'
-            });
+            if (!document.querySelector('.el-message--info')) {
+              this.$message.info('请设置分析起点');
+            }
             return;
           };
           // const vehicleType = this.addForm.vehicleClass.join(':');
           const params = {
-            targetPicUrl: 'http://10.116.126.10/root/image/2019/07/10/34020000001320000016414920190709100000000009_1_1.jpeg',
-            startTime : '2019-07-09 09:59:00',
-            endTime: '2019-07-09 10:03:00',
-            // targetPicUrl: this.dialogImageUrl,
+            // targetPicUrl: 'http://10.116.126.10/root/image/2019/07/10/34020000001320000016414920190709100000000009_1_1.jpeg',
+            // startTime : '2019-07-09 09:59:00',
+            // endTime: '2019-07-09 10:03:00',
+            targetPicUrl: this.dialogImageUrl,
             deviceId: this.addForm.deviceCode,
             deviceName: this.addForm.deviceName,
-            // startTime: formatDate(this.addForm.dateTime[0]),
-            // endTime: formatDate(this.addForm.dateTime[1]),
+            startTime: formatDate(this.addForm.dateTime[0]),
+            endTime: formatDate(this.addForm.dateTime[1]),
             taskName: this.addForm.taskName,
             interval: this.addForm.interval
           };
@@ -471,10 +470,6 @@ export default {
               this.isAddLoading = false;
               this.addTaskDialog = false;
               this.getDataList();
-              // if (res && res.data) {
-              // } else {
-              //   this.isAddLoading = false;
-              // }
             })
             .catch(() => {this.isAddLoading = false;})
         }
@@ -485,13 +480,19 @@ export default {
       this.$router.push({name: 'gzws_result', query: { id: obj.uid }});
     },
     // 显示新建任务弹出框
-    showAddTaskDialog (type, obj) {
-      if (type === 'add') {
-        this.isAddTaskTitle = true;
-      } else {
-        this.isAddTaskTitle = false;
-      }
+    showAddTaskDialog () {
       this.addTaskDialog = true;
+
+      this.addForm = {
+        taskName: null, // 任务名称
+        deviceCode: null, // 起点设备编号
+        deviceName: null, // 起点设备名称
+        dateTime: [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()],
+        interval: 3 // 尾随间隔
+      };
+      this.dialogImageUrl = null;
+      this.fileList = [];
+      
     },
     // 显示中断任务弹出框
     showInterruptDialog (obj) {
@@ -557,14 +558,10 @@ export default {
           .catch(() => {this.isDeleteLoading = false;})
       }
     },
-    // 恢复任务
+    // 恢复任务 --- 重启任务
     recoveryTask (obj) {
       if (obj.uid) {
-        const params = {
-          uid: obj.uid
-          // taskType: 3
-        };
-        putTaskInfosResume(params)
+        putTaskInfosResume(obj.uid)
           .then(res => {
             if (res) {
               this.getDataList();

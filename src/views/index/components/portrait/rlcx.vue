@@ -16,7 +16,7 @@
               end-placeholder="结束日期">
             </el-date-picker>
           </el-form-item>
-          <el-form-item label="区域：" label-width="55px">
+          <el-form-item label="抓拍区域：" label-width="80px">
             <el-radio-group v-model="searchForm.type" @change="areaTypeChanged">
               <el-radio :label="1">列表选择</el-radio>
               <el-radio :label="2" @click="alert(1)">地图选择</el-radio>
@@ -56,19 +56,19 @@
                 <el-option :label="'未知'" :value="'未知'"></el-option>
               </el-select>
             </el-form-item>
-            <!-- <el-form-item v-show="searchForm.type === 1">
+            <el-form-item v-show="searchForm.type === 1">
               <el-select style="width: 100%;" v-model="searchForm.eyeglass" placeholder="选择眼镜">
                 <el-option :label="'不限'" :value="'不限'"></el-option>
                 <el-option :label="'戴眼镜'" :value="'戴眼镜'"></el-option>
-                <el-option :label="'不戴眼镜'" :value="'不戴眼镜'"></el-option>
+                <el-option :label="'无眼镜'" :value="'无眼镜'"></el-option>
                 <el-option :label="'未知'" :value="'未知'"></el-option>
               </el-select>
-            </el-form-item> -->
+            </el-form-item>
             <el-form-item v-show="searchForm.type === 1">
               <el-select style="width: 100%;" v-model="searchForm.hat" placeholder="选择帽子">
                 <el-option :label="'不限'" :value="'不限'"></el-option>
                 <el-option :label="'戴帽子'" :value="'戴帽子'"></el-option>
-                <el-option :label="'不戴帽子'" :value="'不戴帽子'"></el-option>
+                <el-option :label="'未戴帽子'" :value="'未戴帽子'"></el-option>
                 <el-option :label="'未知'" :value="'未知'"></el-option>
               </el-select>
             </el-form-item>
@@ -107,11 +107,12 @@
             </div>
           </li>
         </ul>
-        <ul class="rlcx_r_list clearfix" v-else>
+        <div is="noResult" :isInitPage="false" v-else></div>
+        <!-- <ul class="rlcx_r_list clearfix" v-else>
           <li style="padding: 30px 0 0 0; width: auto; float: none; text-align: center; color: #999;">
             暂无数据
           </li>
-        </ul>
+        </ul> -->
         <div v-show="pagination.total > 0" style="text-align: center; padding: 10px 0 20px 0;">
           <el-pagination
             class="dl_hi_pa"
@@ -126,12 +127,13 @@
       </div>
     </div>
     <!-- 详情 -->
-    <portraitDetail :open="showDetail" @closeDialog="onCloseDetail" :detailData="deData" :scrollData="seData" ></portraitDetail>
+    <portraitDetail :open="showDetail" @closeDialog="onCloseDetail" :detailData="deData"  @nextPage="nextData" :scrollData="seData" ></portraitDetail>
     <!-- D设备 B卡口  这里是设备和卡口 -->
     <div is="mapSelector" :open="openMap" :clear="msClear" :showTypes="'DB'" @mapSelectorEmit="mapSelectorEmit"></div>
   </div>
 </template>
 <script>
+import noResult from '@/components/common/noResult.vue';
 import { mapXupuxian } from "@/config/config.js";
 import vehicleBreadcrumb from './breadcrumb.vue';
 import mapSelector from '@/components/common/mapSelector.vue';
@@ -141,7 +143,7 @@ import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import {formatDate} from '@/utils/util.js';
 import portraitDetail from '@/components/common/portraitDetail.vue';
 export default {
-  components: {vehicleBreadcrumb, mapSelector,portraitDetail},
+  components: {vehicleBreadcrumb, mapSelector,portraitDetail, noResult},
   data () {
     return {
       showDetail:false,
@@ -160,6 +162,7 @@ export default {
       areaSData: [],
       searchLoading: false,
       dataList: [],
+      alldataList: [],
       orderType: 1, // 1时间排序 2监控排序
       order: 1, // 1desc 2asc
       pagination: {
@@ -185,6 +188,13 @@ export default {
     this.getMapGETmonitorList();
   },
   methods: {
+    nextData(){
+      // console.log(3232131);
+      
+      let val= (this.pagination.pageNum?this.pagination.pageNum : 1) + 1
+      this.handleCurrentChange(val)
+
+    },
     onCloseDetail () {
       this.showDetail=false
     },
@@ -192,7 +202,7 @@ export default {
       // console.log(v);
       this.showDetail=true;
       this.deData = v
-      this.seData = this.dataList
+      this.seData = this.alldataList
       
     },
     //查询行政区域
@@ -254,12 +264,16 @@ export default {
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize
       }
+
       if (this.searchForm.type === 1) {
         params.where = Object.assign(params.where, {
           areaUid: this.searchForm.area.join(',')
         });
         if (this.searchForm.sex !== '不限') {
           params.where.sex = this.searchForm.sex;
+        }
+        if (this.searchForm.eyeglass !== '不限') {
+          params.where.glasses = this.searchForm.eyeglass;
         }
         if (this.searchForm.age !== '不限') {
           params.where.age = this.searchForm.age;
@@ -272,17 +286,21 @@ export default {
           deviceIds: this.dIds.join(',')
         });
       }
+   
       // getFaceRetrieval getFaceRetrievalPerson
       getFaceRetrievalPerson(params).then(res => {
         if (res && res.data) {
           this.dataList = res.data.list;
+          this.alldataList.push(...res.data.list);
           this.pagination.total = res.data.total;
         }
         this.searchLoading = false;
       }).catch(() => {
         this.searchLoading = false;
       });
+      
     },
+    
     searchReset () {
       if (this.searchForm.type === 1) {
         this.searchForm  = Object.assign(this.searchForm, {
@@ -298,7 +316,7 @@ export default {
         this.dSum = 0;
         this.dIds = [];
       }
-      
+      this.searchSubmit();
     },
     orderHandler (type) {
       if (type === this.orderType) {
@@ -340,9 +358,6 @@ export default {
     font-style: italic;
     cursor: pointer;
   }
-}
-.rlcx_r_list_empty {
-  background: url(../../../../assets/img/not-content.png) center center no-repeat;
 }
 .rlcx_main {
   height: 100%;
@@ -467,10 +482,10 @@ export default {
     padding-right: 5px;
   }
   .el-radio {
-    margin-right: 15px;
+    margin-right: 5px;
   }
   .el-radio__label {
-    padding-left: 5px;
+    padding-left: 0px;
   }
 }
 </style>

@@ -1,6 +1,7 @@
 <template>
+<div>
   <el-dialog
-  class="struc_detail_dialog"
+  class="struc_detail_dialog_prot"
     :visible.sync="strucDetailDialog"
     :append-to-body="true"
     :close-on-click-modal="false"
@@ -17,12 +18,12 @@
               <div class="struc_main" v-if="sturcDetail">
                 <div v-show="strucCurTab === 1" class="struc_c_detail">
                   <div class="struc_c_d_qj struc_c_d_img">
-                    <img :src="sturcDetail.storagePath" alt="">
+                    <img :src="sturcDetail.subStoragePath" class="bigImg"  >
                     <span>抓拍图</span>
                   </div>
                   <div class="struc_c_d_box">
-                    <div class="struc_c_d_qii struc_c_d_img">
-                      <img :src="sturcDetail.personStoragePath" alt="">
+                    <div class="struc_c_d_qii struc_c_d_img"> 
+                      <img :src="sturcDetail.storagePath" class="bigImg" >
                       <span>全景图</span>
                     </div>
                     <div class="struc_c_d_info">
@@ -39,12 +40,12 @@
                       <!-- <div class="struc_cdi_line">
                         <span><b>性别</b>{{sturcDetail.sex}}</span>
                       </div> -->
-                      <div class="struc_cdi_line" v-if="sturcDetail.semblance">
+                      <!-- <div class="struc_cdi_line" v-if="sturcDetail.semblance">
                         <span ><b>相似度</b>{{(sturcDetail.semblance*1).toFixed(2)}}%</span>
-                      </div>
+                      </div> -->
                       <div class="struc_cdi_line">
-                        <span v-if="sturcDetail.features"><b>特征</b>{{sturcDetail.features}}</span>
-                        <span v-else><b>特征</b>{{sturcDetail.sex+" "+(sturcDetail.age || "")+ " "+ (sturcDetail.baby || "")+ " " + (sturcDetail.bag || "")+ " " + (sturcDetail.bottomColor || "") +(sturcDetail.bottomType || "")+ " " + (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+ " "+(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")}}</span>
+                        <span class='tz' v-if="sturcDetail.features"><b>特征</b>{{sturcDetail.features}}</span>
+                        <span class="tz" v-else><b>特征</b>{{sturcDetail.sex+" "+(sturcDetail.age || "")+ " "+ (sturcDetail.baby || "")+ " " + (sturcDetail.bag || "")+ " " + (sturcDetail.bottomColor || "") +(sturcDetail.bottomType || "")+ " " + (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+ " "+(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")}}</span>
                       </div>
                       <div class="struc_cdi_line"></div>
                     </div>
@@ -70,7 +71,7 @@
                 </div>
               </div>
               <div class="struc-list" v-if="strucInfoList && strucInfoList.length>1">
-                <swiper :options="swiperOption" ref="mySwiper">
+                <swiper :options="swiperOption" ref="mySwiper" class="btf">
                   <!-- slides -->
                   <swiper-slide v-for="(item, index) in strucInfoList" :key="index + 'isgm'">
                     <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
@@ -78,11 +79,16 @@
                     </div>
                   </swiper-slide>
                   <div class="swiper-button-prev" slot="button-prev"></div>
-                  <div class="swiper-button-next" slot="button-next"></div>
+                  <div class="swiper-button-next" slot="button-next" >
+                    <div class="nextbox" @click="nextPage"></div>
+                  </div>
+                  
                 </swiper>
+                
               </div>
-      
+              
   </el-dialog>
+  </div>
 </template>
 <script>
 import flvplayer from '@/components/common/flvplayer.vue';
@@ -124,11 +130,13 @@ export default {
    
   */
  components: {
-    flvplayer,
+    flvplayer
   },
   props: ['open', 'detailData','scrollData','showItem'],
   data () {
     return {
+      bigurl:'',
+      openBig: false,
       show: false,
       strucDetailDialog:this.open, // 抓拍记录弹窗
       strucCurTab: 1, // 抓拍记录弹窗tab
@@ -195,6 +203,7 @@ export default {
     
   },
   mounted () {
+    
     this.show=this.showItem
     
     // this.getTreeList();
@@ -208,6 +217,12 @@ export default {
       //this.$_hideLoading()
   },
   methods: {
+   
+   nextPage(){
+    //  console.log("1111111111111111");
+     this.$emit("nextPage")
+     
+   },
     /**
      * 弹框地图初始化
      */
@@ -284,13 +299,19 @@ export default {
 
 </style>
 <style lang="scss" >
+.nextbox{
+  height: 60px;
+  width: 40px;
+  
+ 
+}
  html {font-size: 100px;}
   @media screen and (min-width: 960px) and (max-width: 1119px) {html {font-size: 60px !important;}}
   @media screen and (min-width: 1200px) and (max-width: 1439px) {html {font-size: 70px !important;}}
   @media screen and (min-width: 1440px) and (max-width: 1679px) {html {font-size: 80px !important;}}
   @media screen and (min-width: 1680px) and (max-width: 1919px) {html {font-size: 90px !important;}}
   @media screen and (min-width: 1920px) {html {font-size: 100px !important;} }
-  .struc_detail_dialog {
+  .struc_detail_dialog_prot {
     .el-dialog {
       max-width: 13.06rem;
       width: 100%!important;
@@ -367,6 +388,15 @@ export default {
             right: 0;
             bottom: 0;
             margin: auto;
+            transform: scale(1);         
+            transition: all ease 0.2s;
+          }
+          img.active{
+             transform: scale(3);          /*图片需要放大3倍*/
+              position: absolute;           /*是相对于前面的容器定位的，此处要放大的图片，不能使用position：relative；以及float，否则会导致z-index无效*/
+              z-index: 100;
+              left: 50%;
+              
           }
           i {
             display: block;
@@ -452,7 +482,7 @@ export default {
           box-shadow: 0px 5px 16px 0px rgba(169,169,169,0.2);
           border-radius: 1px;
           position: relative;
-          overflow: hidden;
+          // overflow: hidden;
           &:before {
             display: block;
             content: '';
@@ -499,8 +529,8 @@ export default {
                 /*position: relative;*/
                 max-width: 100%;
                 display: inline-block;
-                height: .4rem;
-                line-height: .4rem;
+                height: .5rem;
+                line-height: .5rem;
                 margin-bottom: .08rem;
                 border: 1px solid #F2F2F2;
                 background: #ffffff;
@@ -515,8 +545,8 @@ export default {
                 > b {
                   display :inline-block;
                    border-right: 1px solid #F2F2F2;
-                   height: .4rem;
-                  line-height: .4rem;
+                   height: .5rem;
+                  line-height: .5rem;
                   background: #FAFAFA;
                   color: #999;
                   font-weight: normal;
@@ -524,6 +554,20 @@ export default {
                   padding-left: 10px;
                   margin-right: 5px;
                 }
+              }
+              span.tz{
+                    white-space: normal;
+                    display: flex;
+                    overflow: auto;
+                    height: auto;
+                    align-items: center;
+                    line-height: 0.25rem;
+                    b{
+                      white-space: nowrap;
+                      display: inline-block;
+                      height: 0.5rem;
+                      line-height: 0.5rem;
+                    }
               }
             }
           }

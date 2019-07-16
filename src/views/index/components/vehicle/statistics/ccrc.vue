@@ -62,7 +62,7 @@
         </div>
         <div class="cpai">
           <span style="display: inline-block; width: 42px;color: #999999">车牌：</span>
-          <el-checkbox v-model="unvehicleFlag"><span style="color: #999999">排除</span></el-checkbox>
+          <el-checkbox style="float: right;" v-model="unvehicleFlag"><span style="color: #999999">排除</span></el-checkbox>
         </div>
         <div class="kakou">
           <el-input placeholder="请输入内容" v-model="vehicleNumber" class="input-with-select">
@@ -81,12 +81,12 @@
         </div>
         <div class="kakou">
           <el-button style="width: 110px" @click="reset">重置</el-button>
-          <el-button type="primary" style="width: 110px" @click="tongji">统计</el-button>
+          <el-button type="primary" style="width: 110px" @click="tongji" :loading="searchLoading">查询</el-button>
         </div>
       </div>
       <div class="ccrc_content_right">
         <div class="ccrc_content_right_content">
-          <div class="ccrc_content_right_table">
+          <div class="ccrc_content_right_table" v-loading = "searchLoading">
             <el-table
                 :data="tableData"
                 style="width: 100%">
@@ -132,17 +132,15 @@
               <el-table-column
                   label="操作">
                 <template slot-scope="scope">
-                  <span class="operation_btn" @click="see">查看</span>
+                  <span class="operation_btn" @click="see(scope.row)">查看</span>
                 </template>
               </el-table-column>
             </el-table>
           </div>
           <el-pagination
               class="cum_pagination"
-              v-if="false"
               @current-change="handleCurrentChange"
               :current-page.sync="pagination.pageNum"
-              :page-sizes="[100, 200, 300, 400]"
               :page-size="pagination.pageSize"
               layout="total, prev, pager, next, jumper"
               :total="pagination.total">
@@ -192,6 +190,7 @@ export default {
           }
         }
       },
+      searchLoading: false,
       kakou: [],
       v: '湘',
       lll: [],
@@ -211,6 +210,7 @@ export default {
       isShowSelectList: false,
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       tableData: [],
+      tableDataAll: [],
       cities: [],
       defaultProps: {
         children: "children",
@@ -434,8 +434,8 @@ export default {
       this.onlySurveillance = false
       this.getMonitorList()
     },
-    see () {
-      this.$router.push({name: 'vehicle_search_clxx'});
+    see (item) {
+      this.$router.push({name: 'vehicle_search_clxx', query: {plateNo: item.plateNo}});
     },
     hhh (val) {
       console.log(val)
@@ -447,10 +447,16 @@ export default {
       this.isShowSelectList = !this.isShowSelectList;
     },
     handleCurrentChange (page) {
+      /* this.pagination.pageNum = page;
+      this.JfoGETCity() */
       this.pagination.pageNum = page;
-      this.JfoGETCity()
+      let ips = (this.pagination.pageNum - 1) * this.pagination.pageSize;
+      let ipe = ips + this.pagination.pageSize;
+      if (ipe > this.pagination.total) { ipe = this.pagination.total; }
+      this.tableData = this.tableDataAll.slice(ips, ipe);
     },
     JfoGETCity () {
+      this.searchLoading = true;
       const params = {
         startTime: this.value1,
         endTime: this.value2,
@@ -466,9 +472,17 @@ export default {
       }
       JfoGETCity(params).then(res => {
         if (res) {
-          this.tableData = res.data;
+          // this.tableData = res.data;
+          this.pagination.pageNum = 1;
+          this.tableDataAll = res.data;
+          this.pagination.total = this.tableDataAll.length;
+          this.handleCurrentChange(1);
         }
-      })
+        this.searchLoading = false;
+      }).catch(error => {
+        console.log(error );
+        this.searchLoading = false;
+      });
     }
   }
 }

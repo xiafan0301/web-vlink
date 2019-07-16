@@ -99,16 +99,23 @@
             </ul>
           </div>
           <div class="vc_gcck_r" v-else-if="videoTotal === 0">
-            <p class="vc_gcck_r_empty">暂无设备，您可以选择查看其它摄像头或卡口</p>
+            <div class="vc_gcck_r_empty">
+              <div class="com_trans50_lt">
+                <img src="../../../../../assets/img/null-content.png" alt="">
+                <p>暂无设备，您可以选择查看其它摄像头或卡口</p>
+              </div>
+            </div>
           </div>
           <div class="vc_gcck_r" v-else>
-            <p class="vc_gcck_r_empty">选择左侧的摄像头或卡口进行查看</p>
+            <div class="vc_gcck_r_empty">
+              <div class="com_trans50_lt">
+                <img src="../../../../../assets/img/null-content.png" alt="">
+                <p>选择左侧的摄像头或卡口进行查看</p>
+              </div>
+            </div>
           </div>
         </div>
         <div class="vc_gcck_r_C" v-show="showType === 2">
-          <!-- <div class="vc_gcck_r">
-            <p class="vc_gcck_r_empty">选择左侧的摄像头或卡口进行查看</p>
-          </div> -->
           <div class="gcck_rh" style="overflow: auto;" v-if="zpDeviceIdsHis && picList.length > 0">
             <div>
               <div class="gcck_rh_tos">
@@ -127,11 +134,11 @@
                   <li v-for="(item, index) in picList" :key="'p_l_' + index">
                     <div>
                       <p>
-                        <img :title="item.plateNo" :alt="item.plateNo" :src="item.imagePath">
+                        <img class="bigImg" :title="item.plateNo" :alt="item.plateNo" :src="item.storagePath">
                       </p>
-                      <div class="gcck_rh_ft"><i class="vl_icon gcck_sxt"></i>{{item.deviceName}}</div>
-                      <div><i class="vl_icon gcck_cl"></i>{{item.plateNo}}</div>
-                      <div><i class="vl_icon gcck_sj"></i>{{item.snapTime}}</div>
+                      <div class="gcck_rh_ft"><i class="vl_icon vl_icon_sm_sxt"></i>{{item.deviceName}}</div>
+                      <div><i class="vl_icon vl_icon_sm_cl"></i>{{item.plateNo}} </div>
+                      <div><i class="vl_icon vl_icon_sm_sj"></i>{{item.shotTime}} </div>
                     </div>
                   </li>
                 </ul>
@@ -141,13 +148,28 @@
             </div>
           </div>
           <div class="vc_gcck_r" v-else-if="zpDeviceIdsHis && picList.length <= 0">
-            <p class="vc_gcck_r_empty">暂无数据</p>
+            <div class="vc_gcck_r_empty">
+              <div class="com_trans50_lt">
+                <img src="../../../../../assets/img/null-content.png" alt="">
+                <p>暂无数据</p>
+              </div>
+            </div>
           </div>
           <div class="vc_gcck_r" v-else-if="!zpDeviceIdsHis && picCKEmpty">
-            <p class="vc_gcck_r_empty">该卡口没有摄像头</p>
+            <div class="vc_gcck_r_empty">
+              <div class="com_trans50_lt">
+                <img src="../../../../../assets/img/null-content.png" alt="">
+                <p>该卡口没有摄像头</p>
+              </div>
+            </div>
           </div>
           <div class="vc_gcck_r" v-else>
-            <p class="vc_gcck_r_empty">选择左侧的摄像头或卡口进行查看</p>
+            <div class="vc_gcck_r_empty">
+              <div class="com_trans50_lt">
+                <img src="../../../../../assets/img/null-content.png" alt="">
+                <p>选择左侧的摄像头或卡口进行查看</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -193,7 +215,7 @@ export default {
       picTotal: 0,
       picIndex: 1,
       picPlayTime: 3,
-      picPageSize: 100,
+      picPageSize: 30,
       picPageNum: 1,
       picPages: 0,
       
@@ -234,7 +256,7 @@ export default {
         breadcrumbData: [
           {name: '车辆侦查', routerName: 'vehicle'},
           {name: '过车查看', routerName: 'vehicle_search_gcck', query: {'deviceIds': this.zpDeviceIds, bId: this.zpBId}},
-          {name: '全部抓拍'}
+          {name: '车辆详情'}
         ]
       });
       this.$router.push({name: 'vehicle_search_clcxdetail', query: {
@@ -353,7 +375,7 @@ export default {
       getDeviceSnapImagesPage({
         where: {
           deviceIds: dId,
-          startTime: formatDate(new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd 00:00:00'),
+          startTime: formatDate(new Date(), 'yyyy-MM-dd 00:00:00'),
           endTime: formatDate(new Date(), 'yyyy-MM-dd 23:59:59')
         },
         pageNum: 1,
@@ -697,9 +719,13 @@ export default {
           }
         }
         > .vc_gcck_r_empty {
-          padding-top: 20px;
           text-align: center;
           color: #999;
+          height: 100%;
+          position: relative;
+          > div {
+            position: absolute;
+          }
         }
       }
     }
@@ -720,7 +746,7 @@ export default {
     > .gcck_rh_list {
       position: absolute; top: 50%; left: 50%;
       margin-left: -280px; margin-top: -260px;
-      width: 520px; overflow: hidden;
+      width: 520px; height: 520px; overflow: hidden;
       > ul {
         padding: 0 20px;
         width: 60000px;
@@ -728,7 +754,7 @@ export default {
         transition: all .4s ease-in;
         > li {
           float: left;
-          height: 520px;
+          width: 500px; height: 520px;
           padding: 10px 40px;
           > div {
             height: 500px;
@@ -744,14 +770,15 @@ export default {
             }
             > div {
               position: relative;
-              padding-left: 20px; padding-bottom: 5px;
+              padding-left: 20px;
               color: #999;
+              height: 20px; line-height: 20px;
+              margin-bottom: 5px;
               > i {
                 position: absolute; left: 0; top: 2px;
               }
               &.gcck_rh_ft {
                 color: #333;
-                padding-bottom: 12px;
               }
             }
           }

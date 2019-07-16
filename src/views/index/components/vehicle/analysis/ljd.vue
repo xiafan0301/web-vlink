@@ -33,7 +33,7 @@
           <el-form-item prop="input3">
             <p class="carCold">车牌：</p>
             <el-input placeholder="请输入车牌号" v-model="ruleForm.input3" class="input-with-select">
-              <el-select v-model="select" slot="prepend" placeholder="请选择">
+              
                 <el-option v-for="(item, index) in pricecode" :label="item" :value="item" :key="'cph_' + index"></el-option>
               </el-select>
             </el-input>
@@ -52,7 +52,7 @@
               </el-col>
             </el-row>
           </el-form-item>
-          <el-form-item label="区域：" label-width="60px" prop="input5">
+          <el-form-item label="抓拍区域：" label-width="72px" prop="input5">
             <!-- <el-radio-group v-model="input5" @change="changeTab"> -->
             <el-radio-group v-model="ruleForm.input5" @change="changeTab">
                <el-row :gutter="10">
@@ -68,7 +68,7 @@
             </el-radio-group>
           </el-form-item>
           <el-form-item v-if="ruleForm.input5=='1'" prop="value1">
-            <el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="全部区域" class="full">
+            <el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="请选择" class="full">
             <el-option-group
               v-for="group in options"
               :key="group.areaName"
@@ -143,7 +143,6 @@ export default {
       selectDevice:[],
       selectBayonet:[],
       selectValue:"已选设备0个",
-      select: "湘",
       reselt: false,
       hideleft: false,
       ruleForm: {
@@ -162,7 +161,7 @@ export default {
           input3:[{
              required: true, message: '请输入正确车牌', trigger: 'blur'
           },{
-            pattern:/(^[A-Z0-9]{6}$)|(^[A-Z]{2}[A-Z0-9]{2}[A-Z0-9\u4E00-\u9FA5]{1}[A-Z0-9]{4}$)|(^[A-Z0-9]{5}[挂学警军港澳]{1}$)|(^[A-Z]{2}[0-9]{5}$)|(^(08|38){1}[A-Z0-9]{4}[A-Z0-9挂学警军港澳]{1}$)/,
+            pattern:/([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})/,
             message: '常规格式：湘A12345',
             trigger: 'blur'
             }]
@@ -194,8 +193,8 @@ export default {
     //this.getControlMap(1);
     this.setDTime();
     let pNo=this.$route.query.plateNo
-    this.select = pNo?pNo.substring(0,1):"湘";
-    this.ruleForm.input3 = pNo?pNo.substr(1,6):"";
+    //this.select = pNo?pNo.substring(0,1):"湘";
+    this.ruleForm.input3 = pNo;
     let map = new window.AMap.Map("mapBox", {
       zoom: 10,
       center: mapXupuxian.center
@@ -255,6 +254,12 @@ export default {
           this.selectBayonet.push(element.uid)
         });
       }
+      if(p.length==0 && v.length==0){
+        if(!document.querySelector('.el-message--info')){
+           this.$message.info("选择的区域没有设备，请重新选择区域");
+        }
+        return
+      }
       this.selectValue="已选设备"+(this.selectDevice.length+this.selectBayonet.length)+"个"
       //this.selectDevice=v
 
@@ -270,16 +275,16 @@ export default {
       // }
     },
     submitForm(v) {
-      let isP=/(^[A-Z0-9]{6}$)|(^[A-Z]{2}[A-Z0-9]{2}[A-Z0-9\u4E00-\u9FA5]{1}[A-Z0-9]{4}$)|(^[A-Z0-9]{5}[挂学警军港澳]{1}$)|(^[A-Z]{2}[0-9]{5}$)|(^(08|38){1}[A-Z0-9]{4}[A-Z0-9挂学警军港澳]{1}$)/
+      let isP=/([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})/
       let  result = isP.test(this.ruleForm.input3);
-      if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data1.length>0 && this.ruleForm.input3 && this.select){
+      if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data1.length>0 && this.ruleForm.input3){
       let pg={
         //shotTime:+"_"+this.ruleForm.data1[1]+" 23:59:59",
         startTime:this.ruleForm.data1[0]+" 00:00:00",
         endTime:this.ruleForm.data1[1]+" 23:59:59",
         //shotTime:this.ruleForm.data1[0]+"_"+this.ruleForm.data1[1],
         minSnapNum: this.ruleForm.input4 || 0,
-        plateNo:this.select+ this.ruleForm.input3 ,
+        plateNo: this.ruleForm.input3 ,
       }
       if(this.ruleForm.input5==1 && this.ruleForm.value1.length!=0){
         pg.areaIds=this.ruleForm.value1.join(",")
@@ -290,17 +295,22 @@ export default {
       }
       
       if(!result){
-         this.$message.info("请输入正确的车牌号码。");
+        if(!document.querySelector('.el-message--info')){
+           this.$message.info("请输入正确的车牌号码。");
+        }
+        
          return;
       }
 
       this.getVehicleShot(pg);
       }else{
+        if(!document.querySelector('.el-message--info')){
          this.$message.info("请输入开始时间和车牌号码。");
+        }
       }
     },
     resetForm(v){
-      this.select="湘"
+     
       this.setDTime() 
       this.ruleForm.input3=null
       this.ruleForm.input4=3
@@ -317,9 +327,11 @@ export default {
       }
       MapGETmonitorList(d).then(res=>{
         if(res && res.data){
-          
-          
           this.options.push(res.data)
+           res.data.areaTreeList.forEach(el=>{
+            this.ruleForm.value1.push(el.areaId)
+          })
+          
         }
       })
     },
@@ -348,7 +360,10 @@ export default {
           // console.log(res);
           this.reselt = true;
           if (!res.data || res.data.length === 0) {
-            this.$message.info("抱歉，没有找到匹配结果");
+            if(!document.querySelector('.el-message--info')){
+           this.$message.info("抱歉，没有找到匹配结果");
+          }
+            
             this.evData=[]
             this.amap.clearMap();
             //this.searching = false;
@@ -540,7 +555,7 @@ export default {
   animation: fadeInLeft 0.4s ease-out 0.3s both;
   transition: marginLeft 0.3s ease-in;
   .plane {
-    padding: 10px;
+    padding: 20px;
     position: relative;
     height: 100%;
   }
@@ -651,6 +666,9 @@ export default {
   }
 }
 .ljd {
+  .el-date-editor .el-range-input{
+    font-size: 13px;
+  }
   .el-dialog__wrapper .el-dialog__body {
     padding: 0px;
   }
@@ -660,5 +678,8 @@ export default {
   .el-dialog__headerbtn {
     z-index: 1;
   }
+  .el-form-item__label{
+  padding-right: 0px;
+}
 }
 </style>

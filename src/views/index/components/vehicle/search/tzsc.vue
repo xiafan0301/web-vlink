@@ -86,15 +86,15 @@
             </div>
             <!-- 表单 -->
             <el-form :model="tzscMenuForm" ref="tzscMenuForm" :rules="rules">
-              <div class="selectDate">
+              <div class="selectDate date-comp">
                 <el-form-item label prop="selectDate">
                   <el-date-picker
                     class="width232"
                     v-model="tzscMenuForm.selectDate"
                     type="daterange"
-                    range-separator="-"
+                    range-separator="至"
                     value-format="yyyy-MM-dd"
-                    format="yy/MM/dd"
+                    format="yyyy-MM-dd"
                     :picker-options="pickerOptions"
                     start-placeholder="开始日期"
                     end-placeholder="结束日期"
@@ -155,11 +155,21 @@
                       :key="'characteristic_list' + index"
                       @click="item.checked = !item.checked"
                     >
-                      <span v-if="item.plateClass">{{ dicFormater(45, item.name) }}</span>
+                      <!-- 车牌号码 -->
+                      <span v-if="item.plateNo">{{ '车牌号码:' + item.name }}</span>
+                      <!-- 车牌颜色 -->
                       <span v-else-if="item.plateColor">{{ '车牌颜色:' + item.name }}</span>
-                      <span v-else-if="item.sunvisor">{{ '遮阳板:' + item.name }}</span>
+                      <!-- 车辆型号 -->
+                      <span v-else-if="item.vehicleStyles">{{item.name}}</span>
+                      <!-- 车辆颜色 -->
                       <span v-else-if="item.vehicleColor">{{ '车辆颜色:' + item.name }}</span>
-                      <span v-else>{{item.name}}</span>
+                      <!-- 车辆类型 -->
+                      <span v-else-if="item.vehicleClass">{{ '车辆类型:' + item.name }}</span>
+                      <!-- 号牌类型 -->
+                      <span
+                        v-else-if="item.plateClass || item.plateClass === 0"
+                      >{{ '号牌类型:' + dicFormater(45, item.name) }}</span>
+                      <!-- <span v-else>{{item.name}}</span> -->
                     </div>
                     <!-- 没有特征 -->
                   </div>
@@ -167,21 +177,6 @@
               </div>
               <!-- 自定义特征 -->
               <div v-show="selectType === 2">
-                <el-form-item prop="licenseType">
-                  <el-select
-                    v-model="tzscMenuForm.licenseType"
-                    class="width232"
-                    placeholder="选择号牌类型"
-                    clearable
-                  >
-                    <el-option
-                      v-for="item in plateClassOptions"
-                      :key="'licenseType' + item.enumField"
-                      :label="item.enumValue"
-                      :value="item.enumValue"
-                    ></el-option>
-                  </el-select>
-                </el-form-item>
                 <el-form-item prop="licenseColor">
                   <el-select
                     v-model="tzscMenuForm.licenseColor"
@@ -197,15 +192,15 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item prop="carType">
+                <el-form-item prop="carModel">
                   <el-select
-                    v-model="tzscMenuForm.carType"
-                    class="width232"
+                    v-model="tzscMenuForm.carModel"
                     clearable
-                    placeholder="选择车辆类型"
+                    class="width232"
+                    placeholder="选择车辆型号"
                   >
                     <el-option
-                      v-for="item in vehicleClassOptions"
+                      v-for="item in carModelOptions"
                       :key="item.enumField"
                       :label="item.enumValue"
                       :value="item.enumValue"
@@ -227,16 +222,31 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item prop="carModel">
+                <el-form-item prop="carType">
                   <el-select
-                    v-model="tzscMenuForm.carModel"
-                    clearable
+                    v-model="tzscMenuForm.carType"
                     class="width232"
-                    placeholder="选择车辆型号"
+                    clearable
+                    placeholder="选择车辆类型"
                   >
                     <el-option
-                      v-for="item in carModelOptions"
+                      v-for="item in vehicleClassOptions"
                       :key="item.enumField"
+                      :label="item.enumValue"
+                      :value="item.enumValue"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item prop="licenseType">
+                  <el-select
+                    v-model="tzscMenuForm.licenseType"
+                    class="width232"
+                    placeholder="选择号牌类型"
+                    clearable
+                  >
+                    <el-option
+                      v-for="item in plateClassOptions"
+                      :key="'licenseType' + item.enumField"
                       :label="item.enumValue"
                       :value="item.enumValue"
                     ></el-option>
@@ -271,19 +281,24 @@
                       :value="item.enumValue"
                     ></el-option>
                   </el-select>
-                </el-form-item> -->
+                </el-form-item>-->
               </div>
             </el-form>
             <!-- 按钮样式 -->
             <div class="btn_warp">
               <el-button class="reset_btn" @click="resetMenu">重置</el-button>
-              <el-button class="select_btn" :loading="getStrucInfoLoading" :disabled="characteristicAble" @click="getStrucInfo(true)">确定</el-button>
+              <el-button
+                class="select_btn"
+                :loading="getStrucInfoLoading"
+                :disabled="characteristicAble"
+                @click="getStrucInfo(true)"
+              >确定</el-button>
             </div>
           </div>
         </vue-scroll>
       </div>
       <!-- 通用的右边列表 -->
-      <div class="right_img_list">
+      <div class="right_img_list" v-if="strucInfoList.length > 0">
         <!-- 排序和结果 -->
         <div class="result_sort">
           <h3 class="result">检索结果（{{ total }}）</h3>
@@ -341,14 +356,20 @@
                 @size-change="handleSizeChange"
                 @current-change="onPageChange"
                 :current-page.sync="pageNum"
-                :page-sizes="[100, 200, 300, 400]"
                 :page-size="pageSize"
-                layout="total, prev, pager, next, jumper"
+                layout="total, prev, pager, next"
                 :total="total"
                 class="cum_pagination"
               ></el-pagination>
             </template>
           </vue-scroll>
+        </div>
+      </div>
+      <!-- 没有数据的情况 -->
+      <div v-else class="fnull">
+        <div>
+          <img src="../../../../../assets/img/null-content.png" alt />
+          {{noDataTips}}
         </div>
       </div>
     </div>
@@ -399,74 +420,109 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.storagePath" alt />
+            <img :src="sturcDetail.storagePath" class="bigImg" title="点击放大图片" alt />
             <span>全景图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img struc_c_d_img_green">
-              <img :src="sturcDetail.subStoragePath" alt />
+              <img :src="sturcDetail.subStoragePath" class="bigImg" title="点击放大图片" alt />
               <span>抓拍图</span>
             </div>
             <div class="struc_c_d_info">
-              <h2>
-                抓拍信息
-                <!-- <div class="vl_jfo_sim" v-show="showSim">
-                  <i class="vl_icon vl_icon_retrieval_03"></i>
-                  {{sturcDetail.semblance ? sturcDetail.semblance : 98.32}}
-                  <span
-                    style="font-size: 12px;"
-                  >%</span>
-                </div>-->
-              </h2>
-              <!-- 特征展示框 -->
-              <div class="struc_cdi_box">
-                <div class="item" v-if="sturcDetail.plateColor">{{ '车牌颜色：' + sturcDetail.plateColor}}</div>
-                <div class="item" v-if="sturcDetail.plateNo">{{ sturcDetail.plateNo}}</div>
-                <!-- <div
+              <vue-scroll>
+                <h2>抓拍信息</h2>
+                <!-- 特征展示框 -->
+                <!-- <div class="struc_cdi_box">
+                <div
                   class="item"
                   v-if="sturcDetail.plateReliability"
-                >{{sturcDetail.plateReliability}}</div> -->
+                >{{sturcDetail.plateReliability}}</div>
                 <div class="item" v-if="sturcDetail.vehicleBrand">{{ sturcDetail.vehicleBrand}}</div>
-                <div class="item" v-if="sturcDetail.vehicleClass">{{ sturcDetail.vehicleClass}}</div>
-                <div class="item" v-if="sturcDetail.vehicleColor">{{ '车辆颜色：' + sturcDetail.vehicleColor}}</div>
-                <div class="item" v-if="sturcDetail.vehicleModel">{{sturcDetail.vehicleModel}}</div>
-                <div class="item" v-if="sturcDetail.vehicleRoof">{{ '车顶(天窗)：' + sturcDetail.vehicleRoof}}</div>
                 <div class="item" v-if="sturcDetail.sunvisor">{{ '遮阳板：' + sturcDetail.sunvisor}}</div>
-              </div>
-              <!-- 车辆的信息栏 -->
-              <div class="struc_cdi_line">
-                <p>
-                  <span class="val">{{sturcDetail.vehicleStyles}}</span>
-                  <span class="key">车辆型号</span>
-                </p>
-              </div>
-              <div class="struc_cdi_line">
-                <p>
-                  <span class="val">{{sturcDetail.shotTime}}</span>
-                  <span class="key">抓拍时间</span>
-                </p>
-              </div>
-              <div class="struc_cdi_line">
-                <p>
-                  <span class="val">{{sturcDetail.deviceName}}</span>
-                  <span class="key">抓拍设备</span>
-                </p>
-              </div>
-              <div class="struc_cdi_line">
-                <p>
-                  <span class="val">{{sturcDetail.address}}</span>
-                  <span class="key" title="抓拍地点">抓拍地点</span>
-                </p>
-              </div>
+                <div
+                  class="item"
+                  v-if="sturcDetail.plateColor"
+                >{{ '车牌颜色：' + sturcDetail.plateColor}}</div>
+                <div class="item" v-if="sturcDetail.plateNo">{{ sturcDetail.plateNo}}</div>
+                <div class="item" v-if="sturcDetail.vehicleClass">{{ sturcDetail.vehicleClass}}</div>
+                <div
+                  class="item"
+                  v-if="sturcDetail.vehicleColor"
+                >{{ '车辆颜色：' + sturcDetail.vehicleColor}}</div>
+                <div class="item" v-if="sturcDetail.vehicleModel">{{sturcDetail.vehicleModel}}</div>
+                <div
+                  class="item"
+                  v-if="sturcDetail.vehicleRoof"
+                >{{ '车顶(天窗)：' + sturcDetail.vehicleRoof}}</div>
+                </div>-->
+                <!-- 车辆的信息栏 -->
+                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.shotTime">
+                  <p class="line_content">
+                    <span class="key">抓拍时间</span>
+                    <span class="val">{{sturcDetail.shotTime}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.deviceName">
+                  <p class="line_content">
+                    <span class="key">抓拍设备</span>
+                    <span class="val">{{sturcDetail.deviceName}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.address">
+                  <p class="line_content">
+                    <span class="key" title="抓拍地点">抓拍地点</span>
+                    <span class="val">{{sturcDetail.address}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.plateNo">
+                  <p class="line_content">
+                    <span class="key">车牌号码</span>
+                    <span class="val">{{sturcDetail.plateNo}}</span>
+                  </p>
+                </div>
+                <!-- 5个特征 -->
+                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.plateColor">
+                  <p class="line_content">
+                    <span class="key">车牌颜色</span>
+                    <span class="val">{{sturcDetail.plateColor}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.vehicleModel">
+                  <p class="line_content">
+                    <span class="key">车辆型号</span>
+                    <span class="val">{{sturcDetail.vehicleModel}}</span>
+                  </p>
+                </div>
+
+                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.vehicleColor">
+                  <p class="line_content">
+                    <span class="key">车辆颜色</span>
+                    <span class="val">{{sturcDetail.vehicleColor}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.vehicleClass">
+                  <p class="line_content">
+                    <span class="key">车辆类型</span>
+                    <span class="val">{{sturcDetail.vehicleClass}}</span>
+                  </p>
+                </div>
+                <div
+                  class="struc_cdi_line_tzsc"
+                  v-if="sturcDetail.plateClass || sturcDetail.plateClass === 0"
+                >
+                  <p class="line_content">
+                    <span class="key">号牌类型</span>
+                    <span class="val">{{dicFormater(45, sturcDetail.plateClass)}}</span>
+                  </p>
+                </div>
+              </vue-scroll>
             </div>
           </div>
         </div>
-        <div v-show="strucCurTab === 2" class="struc_c_address">
-          <!-- <div style="width: 100%; height: 100%;" id="capMap"></div> -->
-        </div>
+        <div v-show="strucCurTab === 2" class="struc_c_address"></div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt />
+            <img class="bigImg" title="点击放大图片" :src="sturcDetail.subStoragePath" alt />
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
@@ -491,16 +547,6 @@
               @click="imgListTap(item, index)"
             >
               <img style="width: 100%; height: .88rem;" :src="item.subStoragePath" alt />
-              <!-- <div class="vl_jfo_sim" v-show="showSim">
-                <i
-                  class="vl_icon vl_icon_retrieval_05"
-                  :class="{'vl_icon_retrieval_06':  index === curImgIndex}"
-                ></i>
-                {{item.semblance ? item.semblance : 92}}
-                <span
-                  style="font-size: 12px;"
-                >%</span>
-              </div>-->
             </div>
           </swiper-slide>
           <div class="swiper-button-prev" slot="button-prev"></div>
@@ -645,17 +691,14 @@ export default {
       //     enumField: "年检标数量10个",
       //     enumValue: "年检标数量10个"
       //   }
-      // ], 
+      // ],
       characterTypes: [
-        "plateClass", // 号牌类型
-        "plateColor", // 车牌颜色
         "plateNo", // 车牌号
-        "vehicleClass", // 汽车类型（越野啥的）
-        "vehicleBrand", // 汽车型号
+        "plateColor", // 车牌颜色
         "vehicleStyles", // 汽车的型号
         "vehicleColor", // 汽车颜色
-        // "sunvisor", // 遮阳板
-        // "descOfFrontItem", // 年检标数量
+        "vehicleClass", // 汽车类型（越野啥的）
+        "plateClass" // 号牌类型
       ],
       options: [
         {
@@ -704,6 +747,7 @@ export default {
       },
       /* 检索结果变量 */
       strucInfoList: [],
+      noDataTips: "请在左侧输入查询条件",
       pageNum: 1,
       pageSize: 10,
       total: 0,
@@ -759,18 +803,6 @@ export default {
     }
   },
   mounted() {
-    // 选择一个默认的日期
-    this.setDTime();
-    //获取摄像头卡口数据
-    this.getMonitorList();
-    // 从字典中取出自定义的特征数组
-    this.getSelectOption();
-    // console.log("字典数据", this.dicObj);
-    // 一进入页面就全选设备
-    this.$nextTick(() => {
-      this.checkAllTree = true;
-      this.handleCheckedAll(true);
-    });
     // 初始化地图
     let map = new AMap.Map("capMap", {
       center: [112.974691, 28.093846],
@@ -778,6 +810,17 @@ export default {
     });
     map.setMapStyle("amap://styles/whitesmoke");
     this.amap = map;
+    // 选择一个默认的日期
+    this.setDTime();
+    //获取摄像头卡口数据
+    this.getMonitorList();
+    // 从字典中取出自定义的特征数组
+    this.getSelectOption();
+    // 一进入页面就全选设备
+    this.$nextTick(() => {
+      this.checkAllTree = true;
+      this.handleCheckedAll(true);
+    });
   },
   methods: {
     getSelectOption() {
@@ -795,12 +838,12 @@ export default {
       this.vehicleClassOptions = this.dicFormater(44)[0].dictList;
       this.vehicleColorOptions = this.dicFormater(17)[0].dictList;
     },
-    getStrucInfo(isClick=false) {
+    getStrucInfo(isClick = false) {
       // 根据特征数组来获取到检索的结果
       this.$refs.tzscMenuForm.validate(valid => {
         if (valid) {
           if (isClick) {
-          this.getStrucInfoLoading = true; // 打开加载效果
+            this.getStrucInfoLoading = true; // 打开加载效果
           }
           if (this.selectCameraArr.length <= 0 && this.selectBayonetArr <= 0) {
             this.$message.warning("请选择至少一个卡口与摄像头");
@@ -818,24 +861,23 @@ export default {
           if (this.selectType === 2) {
             queryParams = {
               where: {
-              "startTime":
-                formatDate(this.tzscMenuForm.selectDate[0], "yyyy-MM-dd") +
-                " 00:00:00", // 开始时间
-              "endTime":
-                formatDate(this.tzscMenuForm.selectDate[1], "yyyy-MM-dd") +
-                " 23:59:59", // 结束时间
-              "deviceUid":
-                deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
-              "bayonetUid":
-                bayonetUidArr.length > 0 ? bayonetUidArr.join() : null, // 卡口标识
-              "plateClass": this.tzscMenuForm.licenseType || null, // 号牌类型
-              "plateColor": this.tzscMenuForm.licenseColor || null, // 号牌颜色
-              "vehicleClass": this.tzscMenuForm.carType || null, // 车辆类型
-              "vehicleColor": this.tzscMenuForm.carColor || null, // 车辆颜色
-              // "sunvisor": this.tzscMenuForm.sunVisor || null, // 遮阳板
-              // "descOfRearItem": this.tzscMenuForm.inspectionCount || null, // 年检标数量
-              "vehicleNumber": null, // 车牌号码
-              "vehicleModel": null, // 车辆型号
+                startTime:
+                  formatDate(this.tzscMenuForm.selectDate[0], "yyyy-MM-dd") +
+                  " 00:00:00", // 开始时间
+                endTime:
+                  formatDate(this.tzscMenuForm.selectDate[1], "yyyy-MM-dd") +
+                  " 23:59:59", // 结束时间
+                deviceUid: deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
+                bayonetUid:
+                  bayonetUidArr.length > 0 ? bayonetUidArr.join() : null, // 卡口标识
+                plateClass: this.tzscMenuForm.licenseType || null, // 号牌类型
+                plateColor: this.tzscMenuForm.licenseColor || null, // 号牌颜色
+                vehicleClass: this.tzscMenuForm.carType || null, // 车辆类型
+                vehicleColor: this.tzscMenuForm.carColor || null, // 车辆颜色
+                // "sunvisor": this.tzscMenuForm.sunVisor || null, // 遮阳板
+                // "descOfRearItem": this.tzscMenuForm.inspectionCount || null, // 年检标数量
+                vehicleNumber: null, // 车牌号码
+                vehicleModel: null // 车辆型号
               },
               pageNum: this.pageNum,
               pageSize: this.pageSize
@@ -843,17 +885,16 @@ export default {
           } else {
             // 自定义的特征
             queryParams = {
-               where: {
-              "startTime":
-                formatDate(this.tzscMenuForm.selectDate[0], "yyyy-MM-dd") +
-                " 00:00:00", // 开始时间
-              "endTime":
-                formatDate(this.tzscMenuForm.selectDate[1], "yyyy-MM-dd") +
-                " 23:59:59", // 结束时间
-              "deviceUid":
-                deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
-              "bayonetUid":
-                bayonetUidArr.length > 0 ? bayonetUidArr.join() : null // 卡口标识
+              where: {
+                startTime:
+                  formatDate(this.tzscMenuForm.selectDate[0], "yyyy-MM-dd") +
+                  " 00:00:00", // 开始时间
+                endTime:
+                  formatDate(this.tzscMenuForm.selectDate[1], "yyyy-MM-dd") +
+                  " 23:59:59", // 结束时间
+                deviceUid: deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
+                bayonetUid:
+                  bayonetUidArr.length > 0 ? bayonetUidArr.join() : null // 卡口标识
               },
               pageNum: this.pageNum,
               pageSize: this.pageSize
@@ -862,17 +903,18 @@ export default {
               return item.checked;
             });
             for (let i = 0; i < selectedArr.length; i++) {
-              if (selectedArr[i].plateClass) { // 号牌类型
-                queryParams['where'].plateClass = selectedArr[i].plateClass;
+              if (selectedArr[i].plateClass) {
+                // 号牌类型
+                queryParams["where"].plateClass = selectedArr[i].plateClass;
               }
               if (selectedArr[i].plateColor) {
-                queryParams['where'].plateColor = selectedArr[i].plateColor;
+                queryParams["where"].plateColor = selectedArr[i].plateColor;
               }
               if (selectedArr[i].vehicleClass) {
-                queryParams['where'].vehicleClass = selectedArr[i].vehicleClass;
+                queryParams["where"].vehicleClass = selectedArr[i].vehicleClass;
               }
               if (selectedArr[i].vehicleColor) {
-                queryParams['where'].vehicleColor = selectedArr[i].vehicleColor;
+                queryParams["where"].vehicleColor = selectedArr[i].vehicleColor;
               }
               // if (selectedArr[i].sunvisor) { // 遮阳板
               //   queryParams['where'].sunvisor = selectedArr[i].sunvisor;
@@ -880,14 +922,14 @@ export default {
               // if (selectedArr[i].descOfFrontItem) { // 年检标数量
               //   queryParams['where'].descOfRearItem = selectedArr[i].descOfFrontItem;
               // }
-              if (selectedArr[i].plateNo) { // 车牌
-                queryParams['where'].vehicleNumber = selectedArr[i].plateNo;
+              if (selectedArr[i].plateNo) {
+                // 车牌
+                queryParams["where"].vehicleNumber = selectedArr[i].plateNo;
               }
-              if (selectedArr[i].vehicleBrand) { // 车辆型号
-                queryParams['where'].vehicleModel = selectedArr[i].vehicleBrand;
-              }
-              if (selectedArr[i].vehicleStyles) { // 车辆型号
-                queryParams['where'].vehicleModel = selectedArr[i].vehicleStyles;
+              if (selectedArr[i].vehicleStyles) {
+                // 车辆型号
+                queryParams["where"].vehicleModel =
+                  selectedArr[i].vehicleStyles;
               }
             }
           }
@@ -912,6 +954,7 @@ export default {
           getFeatureSearch(queryParams)
             .then(res => {
               this.getStrucInfoLoading = false; // 关闭加载效果
+              this.noDataTips = "暂无搜索结果";
               if (res.data && res.data.list) {
                 if (res.data.list.length > 0) {
                   this.strucInfoList = res.data.list;
@@ -929,6 +972,7 @@ export default {
               this.getStrucInfoLoading = false; // 关闭加载效果
               this.strucInfoList = []; // 清空搜索结果
               this.total = 0;
+              this.noDataTips = "暂无搜索结果";
             });
         } else {
           return false;
@@ -954,12 +998,13 @@ export default {
             this.getCharacterLoading = false;
             if (res.data) {
               const data = res.data[0];
-              if (data.descOfFrontItem) { // 过滤分号
-                data.descOfFrontItem = data.descOfFrontItem.replace(";","")
-              };
+              if (data.descOfFrontItem) {
+                // 过滤分号
+                data.descOfFrontItem = data.descOfFrontItem.replace(";", "");
+              }
               this.characteristicList = [];
-              for (let key in data) {
-                for (let i = 0; i < this.characterTypes.length; i++) {
+              for (let i = 0; i < this.characterTypes.length; i++) {
+                for (let key in data) {
                   if (key === this.characterTypes[i]) {
                     let obj = {
                       checked: true
@@ -969,13 +1014,14 @@ export default {
                     if (obj[key]) {
                       // 如果特征值有数据
                       this.characteristicList = [
-                        obj,
-                        ...this.characteristicList
+                        ...this.characteristicList,
+                        obj
                       ];
                     }
                   }
                 }
               }
+              console.log("characteristicList", this.characteristicList);
             } else {
               this.characteristicList = [];
             }
@@ -1201,6 +1247,7 @@ export default {
       this.$nextTick(() => {
         $(".struc_c_address").append($("#capMap"));
       });
+      console.log("this.markerPoint", this.markerPoint);
       if (this.markerPoint) {
         this.amap.remove(this.markerPoint);
       }
@@ -1460,7 +1507,7 @@ export default {
           }
           .color_blue {
             color: #fff;
-            background: #0C70F8;
+            background: #0c70f8;
           }
         }
       }
@@ -1632,6 +1679,33 @@ export default {
         }
       }
     }
+    // 没有数据的样式
+    .fnull {
+      text-align: center;
+      line-height: 48px;
+      font-size: 16px;
+      color: #666666;
+      -webkit-box-flex: 1;
+      -ms-flex: 1;
+      flex: 1;
+      height: 100%;
+      background: #fff;
+      margin: 24px 20px 20px 20px;
+      position: relative;
+      > div {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%); /* IE 9 */
+        -webkit-transform: translate(-50%, -50%); /* Safari and Chrome */
+        img {
+          display: block;
+          margin: auto;
+          padding-bottom: 10px;
+        }
+      }
+    }
     // 右边图片列表
     .right_img_list {
       -webkit-box-flex: 1;
@@ -1639,8 +1713,8 @@ export default {
       flex: 1;
       overflow: hidden;
       position: relative;
-      height: 100%;
       padding: 24px 20px 20px 20px;
+      height: 100%;
       // 检索结果与排序
       .result_sort {
         overflow: hidden;
@@ -1916,6 +1990,7 @@ export default {
           }
           .struc_c_d_info {
             width: calc(100% - 3.6rem);
+            height: 3.6rem;
             padding-left: 0.24rem;
             color: #333333;
             h2 {
@@ -1954,8 +2029,8 @@ export default {
                 margin-left: 0.1rem;
               }
             }
-            .struc_cdi_line {
-              p {
+            .struc_cdi_line_tzsc {
+              .line_content {
                 max-width: 100%;
                 display: inline-block;
                 height: 0.3rem;
@@ -1969,15 +2044,12 @@ export default {
                 border-radius: 3px;
                 font-size: 12px;
                 overflow: hidden;
-                padding: 0 0.1rem;
+                padding-left: 0.1rem;
                 margin-right: 0.08rem;
                 .key {
                   color: #999999;
-                  padding-left: 10px;
-                }
-                .val {
-                  padding-right: 9px;
-                  position: relative;
+                  padding-right: 10px;
+                  display: inline-block;
                   &::before {
                     content: "";
                     width: 1px;
@@ -1987,6 +2059,12 @@ export default {
                     top: 1px;
                     background: #f2f2f2;
                   }
+                }
+                .val {
+                  display: inline-block;
+                  background: #fff;
+                  padding: 0 9px;
+                  position: relative;
                 }
               }
             }

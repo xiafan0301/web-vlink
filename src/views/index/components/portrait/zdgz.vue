@@ -29,9 +29,9 @@
           <el-select class="full" v-model="searchData.ageGroup" placeholder="选择年龄段">
             <el-option
               v-for="item in ageGroupList"
-              :key="item.label"
+              :key="item.value"
               :label="item.label"
-              :value="item.label">
+              :value="item.value">
             </el-option>
           </el-select>
        
@@ -41,7 +41,7 @@
           type="daterange"
           range-separator="-"
           value-format="yyyy-MM-dd"
-          format="yy/MM/dd"
+          format="yyyy-MM-dd"
           :picker-options="pickerOptions"
           start-placeholder="开始日期"
           end-placeholder="结束日期">
@@ -253,24 +253,24 @@ export default {
         time: null
       },
       sexList: [
-        {value: 0, label: '不限'},
-        {value: 1, label: '男'},
-        {value: 2, label: '女'}
+        {value: null, label: '不限'},
+        {value: '男', label: '男'},
+        {value: '女', label: '女'}
       ],
       portraitGroupList: [],
       vehicleGroupList: [],
       focusType: [
-        {value: 0, label: '不限'},
+        {value: null, label: '不限'},
         {value: 1, label: '布控人员'},
         {value: 2, label: '布控车辆'}
       ],
       ageGroupList: [
-        {value: 0, label: '不限'},
-        {value: 1, label: '儿童'},
-        {value: 2, label: '少年'},
-        {value: 3, label: '青年'},
-        {value: 4, label: '中年'},
-        {value: 5, label: '老年'},
+        {value: null, label: '不限'},
+        {value: '儿童', label: '儿童'},
+        {value: '少年', label: '少年'},
+        {value: '青年', label: '青年'},
+        {value: '中年', label: '中年'},
+        {value: '老年', label: '老年'},
         // {value: 6, label: '50-70'},
         // {value: 7, label: '70-'}
       ],
@@ -452,8 +452,16 @@ export default {
         startTime: this.searchData.time[0] + " 00:00:00",
         endTime: this.searchData.time[1] + " 23:59:59" ,
         personGroupId: this.searchData.portraitGroupId || "" ,
-        sex: this.searchData.sex || "",
-        age: this.searchData.ageGroup || "" ,
+        // sex: this.searchData.sex || "",
+        // age: this.searchData.ageGroup || "" ,
+      }
+      console.log(this.searchData.ageGroup);
+      
+      if(this.searchData.sex){
+          params.sex=this.searchData.sex
+      }
+      if(this.searchData.ageGroup){
+           params.age=this.searchData.ageGroup
       }
       // for (let key in this.searchData) {
       //   if (this.searchData[key] && key !== 'time') {
@@ -880,17 +888,18 @@ export default {
       }
     }
   }
-
+ 
+ 
   .vl_judge_tc {
-.Breadc{
-  position: absolute;
-  top: 0px;
-  width: 100%;
-  height: 50px;
-  left: 0px;
-}
+    .Breadc{
+      position: absolute;
+      top: 0px;
+      width: 100%;
+      height: 50px;
+      left: 0px;
+    }
     position: relative;
-    padding-top: 50px;
+   
     width: 100%;
     height: 100%;
     .camera-select {
@@ -907,13 +916,13 @@ export default {
       }
     }
     .hideleft.vl_j_left{
-      margin-left: -3rem;
+      margin-left: -272px;
     }
     .vl_j_left {
       position: relative;
       z-index: 11;
       float: left;
-      width: 3rem;
+      width: 272px;
       padding-top: 24px;
       height: 100%;
       // margin-left: 0.2rem;
@@ -1023,7 +1032,7 @@ export default {
       .vl_jtc_search {
         width: 100%;
         height: auto;
-        padding: 0 .2rem;
+        padding: 0 20px;
         padding-top: .4rem;
         // .el-input__inner {
         //   height: .4rem!important;
@@ -1068,7 +1077,7 @@ export default {
     }
     .vl_j_right {
       display: inline-block;
-      width: calc(100% - 3rem);
+      width: calc(100% - 272px);
       height: calc(100% - 5px);
       position: relative;
       #tcMap {
@@ -1309,6 +1318,9 @@ export default {
 }
 </style>
 <style lang="scss" scoped="scoped">
+ .vl_judge_tc{
+    padding-top: 50px;
+  }
 .hideleft {
   .insetLeft2 {
     transform: rotate(180deg);

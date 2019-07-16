@@ -11,7 +11,7 @@
       <div class="left">
         <ul>
           <li>
-            <img src="../../../../../assets/img/temp/vis-eg.png" alt="">
+            <img :src="taskDetail.taskWebParam && taskDetail.taskWebParam.targetPicUrl" alt="" class="bigImg">
           </li>
           <li>
             <span>任务名称：</span>
@@ -68,10 +68,7 @@
           </div>
         </template>
         <template v-else>
-          <div class="not_content">
-            <img src="../../../../../assets/img/not-content.png" alt="">
-            <p>暂无相关数据</p>
-          </div>
+          <div is="noResult" :isInitPage="isInitPage"></div>
         </template>
       </div>
     </div>
@@ -79,11 +76,13 @@
 </template>
 <script>
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+import noResult from '@/components/common/noResult.vue';
 import { getTaskInfosDetail } from '@/views/index/api/api.analysis.js';
 export default {
-  components: { vlBreadcrumb },
+  components: { vlBreadcrumb, noResult },
   data () {
     return {
+      isInitPage: false,
       dataList: [], // 查询的抓拍结果列表
       taskDetail: {} // 离线任务详情
     }
