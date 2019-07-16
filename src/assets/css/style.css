@@ -300,6 +300,9 @@
 .vl_icon_tail_1{width: 17px; height: 17px;background-position: -785px -373px;} /*时间图标*/
 .vl_icon_tail_2{width: 18px; height: 18px;background-position: -936px -526px;} /*车辆图标*/
 
+
+.vl_icon_position_1{width: 17px; height: 17px;background-position: -686px -668px;} /*定位 地图图标*/
+
 .vl_icon2 {
   display: inline-block;
   width: 102px; height: 108px;
