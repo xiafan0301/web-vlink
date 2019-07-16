@@ -211,7 +211,17 @@ export default {
         },
         viewType:4
       }).then(res=>{
-        if(res){
+        if(res && res.data){
+          const eleA = document.getElementById('export_id');
+          if (eleA) {
+            document.body.removeChild(eleA);
+          }
+          let a = document.createElement('a');
+          a.setAttribute('href', res.data.fileUrl);
+          a.setAttribute('target', '_self');
+          a.setAttribute('id', 'export_id');
+          document.body.appendChild(a);
+          a.click();
           this.daochu=false
         }else{
           this.daochu=false

@@ -302,7 +302,11 @@ export default {
       // .position('date*车流量1') 
       // .color('#F2F2F2')
       // .size(30);
-      chart.source(dv, {});
+      chart.source(dv, {
+        'value': {
+          min: 0
+        }
+      });
       chart.axis('value', {
         title: null,
         position: 'left'
@@ -310,7 +314,6 @@ export default {
       // 坐标轴刻度
       chart.scale('value', {
         alias: '车流量',
-        tickCount: 7,
         title: {
           offset: 50
         }
@@ -385,11 +388,14 @@ export default {
         key: 'type', // key字段
         value: 'value', // value字段
       });
-      chart.source(dv, {});
+      chart.source(dv, {
+        'value': {
+          min: 0
+        }
+      });
        
       // 坐标轴刻度
       chart.scale('value', {
-        tickCount: 7,
         title: {
           offset: 50
         }
@@ -456,7 +462,7 @@ export default {
         bayonet: {value: ''},
         // lane: null,
         statementType: 1,
-        warningNum: null,
+        warningNum: '',
         startTime: startTime,
         endTime: endTime
       };

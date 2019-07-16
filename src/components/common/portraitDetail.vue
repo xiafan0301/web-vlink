@@ -1,7 +1,7 @@
 <template>
 <div>
   <el-dialog
-  class="struc_detail_dialog"
+  class="struc_detail_dialog_prot"
     :visible.sync="strucDetailDialog"
     :append-to-body="true"
     :close-on-click-modal="false"
@@ -297,7 +297,7 @@ export default {
   @media screen and (min-width: 1440px) and (max-width: 1679px) {html {font-size: 80px !important;}}
   @media screen and (min-width: 1680px) and (max-width: 1919px) {html {font-size: 90px !important;}}
   @media screen and (min-width: 1920px) {html {font-size: 100px !important;} }
-  .struc_detail_dialog {
+  .struc_detail_dialog_prot {
     .el-dialog {
       max-width: 13.06rem;
       width: 100%!important;

@@ -1,10 +1,13 @@
 <template>
   <div class="portrait_rlsjfx">
     <div class="vc_gcck_bd" is="vehicleBreadcrumb" :oData="[{name: '人脸数据分析'}]"></div>
-    <div class="rlsjfx_box">
+    <div class="rlsjfx_box" id="rlsjfxBox">
       <div>
         <div class="box">
-          <h1>布控库数据统计</h1>
+          <div class="title">
+            <h1>布控库数据统计</h1>
+            <span @click="skipControlLibrary">查看更多></span>
+          </div>
           <div class="info_list_box">
             <div class="item">
               <i class="vl_icon vl_icon_portrait_rlsjfx_01"></i>
@@ -39,7 +42,10 @@
       </div>
       <div>
         <div class="box">
-          <h1>基础信息库数据统计</h1>
+          <div class="title">
+            <h1>基础信息库数据统计</h1>
+            <span @click="skipInfoLibrary">查看更多></span>
+          </div>
           <div class="info_list_box">
             <div class="item">
               <i class="vl_icon vl_icon_portrait_rlsjfx_05"></i>
@@ -76,10 +82,10 @@
         <div class="box">
           <div class="title">
             <h1>人脸抓拍统计</h1>
-            <span @click="skip">查看更多></span>
+            <span @click="skipPortraitSearch">查看更多></span>
           </div>
           <div class="face_snap_form">
-            <div ref="devSelect" is="devSelect" @sendSelectData="getSelectData"></div>
+            <div ref="devSelect" is="devSelect" @sendSelectData="getSelectData" @allSelectLength="allSelectLength"></div>
             <el-date-picker
               v-model="faceSnapForm.queryDate"
               @change="validationDate(faceSnapForm)"
@@ -120,7 +126,7 @@
         <div class="box">
           <div class="title">
             <h1>人脸布控告警数据分析</h1>
-            <span @click="skip">查看更多></span>
+            <span @click="skipHistoryAlarm">查看更多></span>
           </div>
           <div class="face_control_form">
             <el-date-picker
@@ -220,22 +226,36 @@ export default {
         timeDto: []
       },
       loadingBtn1: false,
-      loadingBtn2: false
+      loadingBtn2: false,
+      selectLength: null
     }
   },
   mounted () {
     this.getFaceTotal();
     this.getFaceControlSta();
-    setTimeout(() => {
-      this.getFaceSnapSta();
-    }, 1500)
-
     this.drawChart2();
+  },
+  watch: {
+    selectLength () {
+      // 设备和卡口全选后才获取抓拍人脸数统计
+      if (this.selectLength === (this.faceSnapForm.devIdData.selSelectedData1.length + this.faceSnapForm.devIdData.selSelectedData2.length)) {
+        this.getFaceSnapSta();
+      }
+    }
   },
   methods: {
     // 查看更多
-    skip () {
-      this.$router.push({name: ''});
+    skipControlLibrary () {
+      this.$router.push({name: 'control_library'});
+    },
+    skipInfoLibrary () {
+      this.$router.push({name: 'person_info'});
+    },
+    skipPortraitSearch () {
+      this.$router.push({name: 'portrait_rlcx'});
+    },
+    skipHistoryAlarm () {
+      this.$router.push({name: 'history_alarm'});
     },
     // 验证所选时间是否符合要求
     validationDate (obj) {
@@ -256,9 +276,12 @@ export default {
         }
       }
     },
+    // 获取子组件传过来的设备和卡口总是
+    allSelectLength (num) {
+      this.selectLength = num;
+    },
     // 获得选择设备组件传过来的数据
     getSelectData (data) {
-      console.log(data, 'data');
       this.faceSnapForm.devIdData = data;
     },
     // 重置人脸抓拍统计表单
@@ -281,12 +304,6 @@ export default {
     },
     // 获取人脸抓拍统计
     getFaceSnapSta () {
-      // const params = {
-      //   deviceIds: '9',
-      //   bayonetIds: null,
-      //   startTime: this.faceSnapForm.queryDate[0],
-      //   endTime: this.faceSnapForm.queryDate[1]
-      // }
       this.chartData1 = [];
       const params = {
         deviceIds: this.faceSnapForm.devIdData.selSelectedData1.map(m => m.id).join(','),
@@ -352,7 +369,7 @@ export default {
         chart = new G2.Chart({
           container: 'faceNumContainer',
           forceFit: true,
-          padding: [ 40, 20, 20, 60 ],
+          padding: [ 40, 20, 60, 60 ],
           width: G2.DomUtil.getWidth(temp),
           height: G2.DomUtil.getHeight(temp)
         });
@@ -366,11 +383,12 @@ export default {
         retains: ['time']
       });
 
-      chart.source(dv, {});
-      // 坐标轴刻度
-      chart.scale('value', {
-        tickCount: 5,
+      chart.source(dv, {
+        'value': {
+          min: 0
+        }
       });
+      // 坐标轴刻度
       chart.axis('value', {
         title: null
       });
@@ -421,7 +439,7 @@ export default {
         chart = new G2.Chart({
           container: 'alarmNumContainer',
           forceFit: true,
-          padding: [ 40, 0, 20, 60 ],
+          padding: [ 40, 0, 60, 60 ],
           width: G2.DomUtil.getWidth(temp),
           height: G2.DomUtil.getHeight(temp)
         });
@@ -435,11 +453,10 @@ export default {
         retains: ['time']
       });
 
-      chart.source(dv, {});
-      // 坐标轴刻度
-      chart.scale('value', {
-        min: 0,
-        tickCount: 5,
+      chart.source(dv, {
+        'value': {
+          min: 0
+        }
       });
       chart.axis('value', {
         title: null

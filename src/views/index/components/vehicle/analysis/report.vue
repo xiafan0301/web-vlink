@@ -22,11 +22,11 @@
           <!-- <el-button style="float: right;" size="small" :disabled="!clInfo || searchLoading" type="primary" @click="vehicleExport">导出为PDF</el-button> -->
           
           <router-link v-if="clInfo && !searchLoading" target="_blank" class="vc_rep_cs_dc" :to="{name: 'vehicle_report_save', query: {
-            pn: clInfo.plateno,
+            pn: searchForm.plateNo,
             st: timeStr[0],
             et: timeStr[1]
-            }}">导出</router-link>
-          <a v-else class="vc_rep_cs_dc vc_rep_cs_dc_dis">导出</a>
+            }}">导出报告</router-link>
+          <a v-else class="vc_rep_cs_dc vc_rep_cs_dc_dis">导出报告</a>
         </div>
         <ul class="vc_rep_mu">
           <li><span :class="{'vc_rep_mu_sed': showType === 1}" @click="changeShowType(1)">车辆档案信息</span></li>
@@ -143,8 +143,8 @@
                   <el-table :data="yjcmList.allRecords">
                     <el-table-column label="设备名称" prop="deviceName"></el-table-column>
                     <el-table-column label="过车时间" prop="shotTime" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="时间间隔" prop="timeQuantum" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="参考时间" prop="timeSlot" show-overflow-tooltip></el-table-column>
+                    <el-table-column label="时间间隔" prop="timeSlot" show-overflow-tooltip></el-table-column>
+                    <el-table-column label="参考时间" prop="refTime" show-overflow-tooltip></el-table-column>
                   </el-table>
                 </div>
               </div>
@@ -206,19 +206,13 @@
                     <li>
                       <span>较常出没时间段：</span>
                       <div>
-                        <template v-for="(item, index) in yjcmjlList">
-                          <template v-if="index != 0">|</template>
-                          <span :key="'yjcmjl1_' + index">{{item.timeSegment}}</span>
-                        </template>
+                        <span>{{yjcmjlList ? yjcmjlList.timeSegment : ''}}</span>
                       </div>
                     </li>
                     <li>
                       <span>较常出没地点为：</span>
                       <div>
-                        <template v-for="(item, index) in yjcmjlList">
-                          <template v-if="index != 0">|</template>
-                          <span :key="'yjcmjl2_' + index">{{item.address}}</span>
-                        </template>
+                        <span>{{yjcmjlList ? yjcmjlList.address : ''}}</span>
                       </div>
                     </li>
                   </ul>
@@ -256,7 +250,7 @@
                         </div>
                         <p class="tpc_list_fst com_ellipsis"><i class="vl_icon vl_icon_sm_sj"></i>&nbsp;&nbsp;{{ item.vehicleDto.shotTime }}</p>
                         <p class="com_ellipsis"><i class="vl_icon vl_icon_sm_sxt"></i>&nbsp;&nbsp;{{ item.vehicleDto.deviceName }}</p>
-                        <p class="com_ellipsis"><i class="vl_icon vl_icon_sm_sxt"></i>&nbsp;&nbsp;{{ item.fakeReason }}</p>
+                        <p class="com_ellipsis" style="color: #FA453A;"><i class="vl_icon tpc_fake_res"></i>&nbsp;&nbsp;{{ item.fakeReason }}</p>
                       </div>
                     </li>
                   </ul>
@@ -297,11 +291,18 @@
             <div class="vc_rep_cl" id="report_showtype_9">
               <div>
                 <h2>区域碰撞</h2>
-                <div>
+                <div v-if="clInfo && !searchLoading">
                   请前往
-                   <router-link :to="{name: 'vehicle_search_qy'}">
+                   <span @click="goToQypz" style="color: #0C70F8; cursor: pointer;">
                     区域碰撞
-                  </router-link>
+                  </span>
+                  进行操作查看
+                </div>
+                <div v-else>
+                  请前往
+                  <span>
+                    区域碰撞
+                  </span>
                   进行操作查看
                 </div>
               </div>
@@ -314,7 +315,7 @@
 </template>
 <script>
 import vehicleBreadcrumb from '../breadcrumb.vue';
-import {formatDate} from '@/utils/util.js';
+import {getDate, formatDate} from '@/utils/util.js';
 import {mapXupuxian} from '@/config/config.js';
 import {getVehicleInvestigationReport, JfoGETSurveillanceObject} from '@/views/index/api/api.judge.js';
 export default {
@@ -334,7 +335,7 @@ export default {
       rcList: [], // 入城记录
       ccList: [], // 出城记录
       yjcmList: {}, // 夜间出没记录
-      yjcmjlList: [],  // 夜间出没结论
+      yjcmjlList: {},  // 夜间出没结论
       yjcmHoverWindow: null,
       pfcmList: [], // 频繁出没分析
       txclList: [], // 同行车分析
@@ -359,8 +360,26 @@ export default {
   mounted () {
     this.initClgjMap();
     this.initYjcmMap();
+    if (this.$route.query.pn && this.$route.query.st && this.$route.query.et) {
+      this.searchForm.plateNo = this.$route.query.pn;
+      this.searchForm.time = [getDate(this.$route.query.st), getDate(this.$route.query.et)];
+      this.searchSubmit();
+    } 
   },
   methods: {
+    goToQypz () {
+        // vehicle_search_qy
+      this.$store.commit('setBreadcrumbData', {
+        breadcrumbData: [
+          {name: '车辆侦查', routerName: 'vehicle'},
+          {name: '车辆侦察报告', routerName: 'vehicle_report', query: {pn: this.searchForm.plateNo, st: formatDate(this.searchForm.time[0], 'yyyy-MM-dd'), et: formatDate(this.searchForm.time[1], 'yyyy-MM-dd')}},
+          {name: '区域碰撞'}
+        ]
+      });
+      this.$router.push({name: 'vehicle_search_qy', query: {
+        breadcrumb: 2
+      }});
+    },
     // 湘AN8888 2019-07-01 00:00:00 2019-07-04 00:00:00
     searchSubmit () {
       this.searchLoading = true;
@@ -378,7 +397,7 @@ export default {
           this.rcList = data.inCityDtoList;
           this.ccList = data.outCityDtoList;
           this.yjcmList = data.analysisResultDto;
-          this.yjcmjlList = data.nightHauntConclusionList;
+          this.yjcmjlList = data.nightHauntConclusionDto;
           this.pfcmList = data.oftenCarAnalysisDtoList;
           this.tpcList = data.fakePlateResultDtoList;
           this.txclList =  data.tailBehindListForReportList; // 同行车
@@ -622,20 +641,22 @@ export default {
 .vc_rep_mu {
   overflow: hidden;
   border-bottom: 1px solid #eee;
+  padding: 6px 20px 0 20px;
   > li {
     float: left;
-    padding: 0 20px;
+    padding: 0 5px;
     > span {
       color: #333;
       display: inline-block;
-      height: 40px; line-height: 40px;
-      padding: 0 2px;
-      border-bottom: 2px solid #fff;
+      height: 34px; line-height: 34px;
+      padding: 0 25px;
+      border-radius:2px 2px 0px 0px;
+      background-color: #F7F7F7;
       cursor: pointer;
       &.vc_rep_mu_sed {
         cursor: default;
-        color: #0C70F8;
-        border-bottom-color: #0C70F8;
+        color: #fff;
+        background-color: #0C70F8;
       }
     }
   }
@@ -819,6 +840,7 @@ export default {
     border-color: #a0cfff;
   }
 }
+.tpc_fake_res { width: 14px; height: 15px; background-position: -863px -530px; }
 </style>
 <style lang="scss">
 .cl_report_gj {

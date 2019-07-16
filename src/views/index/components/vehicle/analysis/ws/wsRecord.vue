@@ -21,7 +21,7 @@
           <h2>尾随车辆的特征信息</h2>
           <ul class="left_ul">
             <li>
-              <img :src="resultList.length > 0 && resultList[0].struVehicleDto.storagePath" alt="">
+              <img :src="resultList.length > 0 && resultList[0].struVehicleDto.storagePath" alt="" class="bigImg">
             </li>
             <li>
               <span>有无车牌：</span>
@@ -299,7 +299,8 @@ export default {
           // 绘制线条
           let polyline = new window.AMap.Polyline({
             path: path,
-            strokeWeight: 4,
+            strokeWeight: 8,
+            showDir: true,
             strokeColor: '#61C772',
             strokeStyle: 'dashed'
           });

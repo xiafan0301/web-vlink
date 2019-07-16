@@ -213,7 +213,7 @@ export default {
       });
       map.setMapStyle('amap://styles/whitesmoke');
       this.amap = map;
-      this.drawPoint(this.sturcDetail);
+      this.drawPoint(_this.sturcDetail);
     },
     drawPoint(data) {
       this.$nextTick(() => {

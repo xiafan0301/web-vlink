@@ -61,36 +61,36 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt="">
+            <img :src="sturcDetail.subStoragePath" alt="" class="bigImg">
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_qii struc_c_d_img">
-              <img :src="sturcDetail.storagePath" alt="">
+              <img :src="sturcDetail.storagePath" alt="" class="bigImg">
               <span>全景图</span>
             </div>
             <div class="struc_c_d_info">
               <h2>抓拍信息</h2>
                 <div class="struc_cdi_line" v-show="sturcDetail.snapTime">
-                <span>{{sturcDetail.snapTime}}<b>抓拍时间</b></span>
+                <span><b>抓拍时间：</b>{{sturcDetail.snapTime}}</span>
               </div>
               <div class="struc_cdi_line" v-show="sturcDetail.snapDevice">
-                <span>{{sturcDetail.snapDevice}}<b>抓拍设备</b></span>
+                <span><b>抓拍设备：</b>{{sturcDetail.snapDevice}}</span>
               </div>
               <div class="struc_cdi_line" v-show="sturcDetail.snapAddress">
-                <span>{{sturcDetail.snapAddress}}<b>抓拍地址</b></span>
+                <span><b>抓拍地址：</b>{{sturcDetail.snapAddress}}</span>
               </div>
               <div class="struc_cdi_line" v-show="sturcDetail.plateNo">
-                <span>{{sturcDetail.plateNo}}<b>车牌号</b></span>
+                <span><b>车牌号：</b>{{sturcDetail.plateNo}}</span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.vehicleBrand}}</span>
-                <span>{{sturcDetail.vehicleModel}}</span>
-                <span>{{sturcDetail.vehicleClass}}</span>
-                <span>{{sturcDetail.vehicleColor}}</span>
-                <span>{{sturcDetail.vehicleRoof}}</span>
-                <span>{{sturcDetail.vehicleStyles}}</span>
-                <span>{{sturcDetail.feature}}<b>特征</b></span>
+                <span v-show="sturcDetail.vehicleBrand">{{sturcDetail.vehicleBrand}}</span>
+                <span v-show="sturcDetail.vehicleModel">{{sturcDetail.vehicleModel}}</span>
+                <span v-show="sturcDetail.vehicleClass">{{sturcDetail.vehicleClass}}</span>
+                <span v-show="sturcDetail.vehicleColor">{{sturcDetail.vehicleColor}}</span>
+                <span v-show="sturcDetail.vehicleRoof">{{sturcDetail.vehicleRoof}}</span>
+                <span v-show="sturcDetail.vehicleStyles">{{sturcDetail.vehicleStyles}}</span>
+                <span v-show="sturcDetail.feature">{{sturcDetail.feature}}</span>
               </div>
               <div class="struc_cdi_line"></div>
             </div>
@@ -101,7 +101,7 @@
         </div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt="">
+            <img :src="sturcDetail.subStoragePath" alt="" class="bigImg">
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
@@ -118,8 +118,8 @@
       <div class="struc-list">
         <swiper :options="swiperOption" ref="mySwiper">
           <!-- slides -->
-          <swiper-slide v-for="(item, index) in dataList" :key="index + 'isgm'">
-            <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
+          <swiper-slide v-for="(item, index) in allDataList" :key="index + 'isgm'">
+            <div class="swiper_img_item" :class="{'active': item.id === curImgIndex}" @click="imgListTap(item)">
               <img style="display: block; width: 100%; height: .88rem;" :src="item.subStoragePath" alt="">
             </div>
           </swiper-slide>
@@ -179,7 +179,8 @@ export default {
           prevEl: '.swiper-button-prev',
         },
       },
-      dataList: [],
+      dataList: [], // 分页抓拍记录
+      allDataList: [], // 所有的抓拍记录
       playing: false, // 视频播放是否
       queryObj: {}
     }
@@ -201,6 +202,7 @@ export default {
   },
   mounted () {
     this.getList();
+    this.getAllList();
   },
   methods: {
     // 播放视频
@@ -218,6 +220,27 @@ export default {
       });
       this.playing = !this.playing;
     },
+    // 获取所有的抓拍记录
+    getAllList () {
+    
+      this.queryObj['vehicleNumber'] = this.$route.params.vehicleNumber;
+      // this.queryObj['pageSize'] = 0;
+      this.queryObj['pageNum'] = this.pagination.pageNum;
+      this.queryObj['order'] = this.pagination.order;
+      this.queryObj['orderBy'] = this.pagination.orderBy;
+
+      const params = {
+        ...this.queryObj,
+        pageSize: 0
+      }
+      getNightVehicleRecordList(params)
+        .then(res => {
+          if (res && res.data) {
+            this.allDataList = res.data.list;
+          }
+        })
+        .catch(() => {})
+    },
     // 获取抓拍记录
     getList () {
       this.queryObj['vehicleNumber'] = this.$route.params.vehicleNumber;
@@ -225,8 +248,9 @@ export default {
       this.queryObj['pageNum'] = this.pagination.pageNum;
       this.queryObj['order'] = this.pagination.order;
       this.queryObj['orderBy'] = this.pagination.orderBy;
-      getNightVehicleRecordList( this.queryObj)
+      getNightVehicleRecordList(this.queryObj)
         .then(res => {
+          console.log('resasdsadsa', res)
           if (res && res.data) {
             this.dataList = res.data.list;
             this.pagination.total = res.data.total;
@@ -329,9 +353,9 @@ export default {
      * 打开抓拍弹框
      */
     onOpenDetail (obj) {
-
       this.sturcDetail = obj;
       this.strucDetailDialog = true;
+      // this.curImgIndex = obj.id;
       this.$nextTick(() => {
         this.initMap(obj);
       })
@@ -346,9 +370,9 @@ export default {
     /**
      * 图片切换
      */
-    imgListTap (obj, i) {
+    imgListTap (obj) {
       this.sturcDetail = {};
-      this.curImgIndex = i;
+      this.curImgIndex = obj.id;
       this.sturcDetail = obj;
       this.$nextTick(() => {
         this.initMap(obj);
@@ -368,6 +392,7 @@ export default {
   padding-top: 50px;
   .th-ycxc-record-list {
     width: 100%;
+    height: 100%;
     // height: calc(100% - 55px);
     padding: 0 20px;
     background: #f7f9f9;
@@ -729,7 +754,6 @@ export default {
               > b {
                 color: #999;
                 font-weight: normal;
-                padding-left: 18px;
               }
             }
           }

@@ -2,7 +2,7 @@
   <div class="ljd point">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像侦查</el-breadcrumb-item>
         <el-breadcrumb-item>落脚点分析</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -72,7 +72,7 @@
               </el-col>
             </el-row>
           </el-form-item>
-          <el-form-item class="firstItem" label="区域：" label-width="60px" prop="input5">
+          <el-form-item class="firstItem" label="抓拍区域：" label-width="72px" prop="input5">
             <!-- <el-radio-group v-model="input5" @change="changeTab"> -->
             <el-radio-group v-model="ruleForm.input5" @change="changeTab">
               <el-row :gutter="10">
@@ -297,8 +297,9 @@ export default {
     };
   },
   mounted() {
-    if(this.$route.query.path){
-      this.curImageUrl= this.$route.query.path
+    if( this.$route.query.imgurl || this.$route.query.path){
+      let a =  this.$route.query.imgurl || this.$route.query.path ;
+      this.curImageUrl= a
     }
     
 
@@ -484,12 +485,13 @@ export default {
     },
     resetForm(v) {
       this.curImageUrl = "";
-      this.ruleForm = {
-        data1: null,
-        minFootholdTimes: null,
-        input5: "1",
-        value1: null
-      };
+      this.setDTime()
+      this.ruleForm.minFootholdTimes=3 
+      this.ruleForm.input5='1'
+      this.ruleForm.value1=[]
+      this.options[0].areaTreeList.forEach(el=>{
+            this.ruleForm.value1.push(el.areaId)
+          })
       //this.$refs[v].resetFields();
     },
     //查询行政区域
@@ -1207,5 +1209,8 @@ export default {
       }
     }
   }
+  .el-form-item__label{
+  padding-right: 0px;
+}
 }
 </style>

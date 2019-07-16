@@ -7,7 +7,7 @@
     width="90vh"
     >
      <div class="imgbox"  @click="closeImg" > 
-<img :src="img" alt=""class="img2">
+<img :src="img" alt="" class="img2">
      </div>
   
   </el-dialog>

@@ -1,10 +1,11 @@
 <template>
-  <div class="point" style="position: relative;">
-    <div class="breadcrumb_heaer">
-      <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
-        <el-breadcrumb-item>车辆轨迹</el-breadcrumb-item>
-      </el-breadcrumb>
+  <div class="point">
+    <div class="">
+      <div
+              is="vlBreadcrumb"
+              :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
+          {name: '车辆轨迹'}]"
+      ></div>
     </div>
 
     <div :class="['left',{hide:hideleft}]">
@@ -33,7 +34,7 @@
             <el-input placeholder="请输入车牌号" v-model="ruleForm.input3">
             </el-input>
           </el-form-item>
-          <el-form-item label="区域：" label-width="60px" prop="input5">
+          <el-form-item label="抓拍区域：" label-width="75px" style="white-space: nowrap;" prop="input5">
             <el-radio-group v-model="ruleForm.input5">
               <el-row :gutter="10">
                 <el-col :span="12">
@@ -48,7 +49,7 @@
             </el-radio-group>
           </el-form-item>
           <el-form-item v-if="ruleForm.input5=='1'" prop="value1">
-            <el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="请选择" class="full">
+            <el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="全部区域" class="full">
               <el-option-group
                 v-for="group in options"
                 :key="group.areaName"
@@ -132,30 +133,30 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt="">
+            <img class="bigImg"  :src="sturcDetail.subStoragePath" alt="">
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img">
-              <img :src="sturcDetail.storagePath" alt="">
+              <img class="bigImg"  :src="sturcDetail.storagePath" alt="">
               <span>全景图</span>
             </div>
             <div class="struc_c_d_info">
               <h2>抓拍信息</h2>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.shotTime}} <font>抓拍时间</font></span>
+                <span><font>车牌号码</font>{{sturcDetail.plateNo}}</span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.deviceName}} <font>抓拍设备</font></span>
+                <span><font>车辆特征</font>{{sturcDetail.vehicleColor}} {{sturcDetail.vehicleClass}} {{sturcDetail.vehicleBrand}} {{sturcDetail.vehicleStyles}}</span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.address}} <font>抓拍地址</font></span>
+                <span><font>抓拍设备</font>{{sturcDetail.deviceName}}</span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.plateNo}} <font>车牌号</font></span>
+                <span><font>抓拍时间</font>{{sturcDetail.shotTime}}</span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.vehicleColor}} {{sturcDetail.vehicleClass}} {{sturcDetail.vehicleBrand}} {{sturcDetail.vehicleStyles}} <font>特征</font></span>
+                <span><font>抓拍地址</font>{{sturcDetail.address}}</span>
               </div>
               <div class="struc_cdi_line"></div>
             </div>
@@ -164,7 +165,7 @@
         <div v-show="strucCurTab === 2" class="struc_c_address"></div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt="">
+            <img class="bigImg"  :src="sturcDetail.subStoragePath" alt="">
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
@@ -197,6 +198,7 @@
   </div>
 </template>
 <script>
+  import vlBreadcrumb from "@/components/common/breadcrumb.vue";
   import mapSelector from '@/components/common/mapSelector.vue';
   import { mapXupuxian } from "@/config/config.js";
   import { objDeepCopy, random14 } from "@/utils/util.js";
@@ -205,11 +207,10 @@
   import { MapGETmonitorList } from "@/views/index/api/api.map.js";
   import { getAllBayonetList } from "@/views/index/api/api.base.js";
   export default {
-    components: {mapSelector},
+    components: {mapSelector, vlBreadcrumb},
     data() {
       return {
         mapPicShow: false, // 地图图片显示开关
-
         loading: false,
         count: 10,
         totalAddressNum: 0,
@@ -439,13 +440,7 @@
                   this.$message.info('选择的区域没有设备，请重新选择区域');
                 }
                 return false;
-              } else if (this.ruleForm.input5 === "1" && this.ruleForm.value1.length === 0) {
-                if (!document.querySelector('.el-message--info')) {
-                  this.$message.info('您没有选择区域，请点击下拉框选择镇');
-                }
-                return false;
               }
-              console.log(this.ruleForm.data1);
               pg.where['startTime'] = this.ruleForm.data1[0]+" 00:00:00";
               pg.where['endTime'] = this.ruleForm.data1[1]+" 23:59:59";
               pg.where['vehicleNumber'] = this.ruleForm.input3;
@@ -472,9 +467,6 @@
         this.ruleForm.input5 = '1';
         this.ruleForm.input3 = '';
         this.ruleForm.value1 = [];
-        this.options[0].areaTreeList.forEach(x => {
-          this.ruleForm.value1.push(x.areaId)
-        })
         this.selectMapClear = random14();
         this.pointData = {
           deviceList: [],
@@ -494,9 +486,6 @@
         }
         MapGETmonitorList(d).then(res=>{
           if(res && res.data){
-            res.data.areaTreeList.forEach(x => {
-              this.ruleForm.value1.push(x.areaId)
-            })
             this.options.push(res.data)
           }
         })
@@ -667,13 +656,13 @@
         }
         this.amap.setFitView()
         this.drawLine(path);
-      }, // 覆盖物（窗体和checkbox
+      },
       drawLine (path) {
         var polyline = new AMap.Polyline({
           path: path,
           showDir: true,
           strokeColor: '#61C772',
-          strokeWeight: 10
+          strokeWeight: 6
         });
         this.markerLine.push(polyline);
         this.amap.add([polyline]);
@@ -760,11 +749,7 @@
     }
   }
 </style>
-
 <style lang="scss" scoped>
-  .map_pic_show {
-    position: absolute; top: 65px; right: 20px; z-index: 100;
-  }
   .map_rrt_u2 {
     position: absolute; right: 30px;
     bottom: 30px;
@@ -1181,9 +1166,6 @@
             font-size: 12px;
             padding: 0 .1rem;
           }
-        }
-        .struc_c_d_qj {
-          margin-right: .3rem;
           &:before {
             display: block;
             content: '';
@@ -1211,6 +1193,13 @@
             -o-transform: rotate(-45deg);
             transform: rotate(-45deg);
             z-index: 99;
+          }
+        }
+        .struc_c_d_qj {
+          margin-right: .3rem;
+          &:before {
+            border: .5rem solid #50CC62;
+            border-color: transparent transparent #50CC62;
           }
         }
         .struc_c_d_box {
@@ -1253,22 +1242,26 @@
                 line-height: .3rem;
                 margin-bottom: .08rem;
                 border: 1px solid #F2F2F2;
-                background: #FAFAFA;
                 color: #333333;
                 white-space: nowrap;
                 text-overflow: ellipsis;
                 border-radius:3px;
                 font-size: 12px;
                 overflow: hidden;
-                padding: 0 .1rem;
+                padding-right: .1rem;
                 margin-right: .08rem;
                 > i {
                   vertical-align: middle;
                   margin-left: .1rem;
                 }
-                font {
+                > font {
+                  width: 75px;
+                  text-align: center;
+                  border-right: 1px solid #F2F2F2;
                   color: #999999;
-                  margin-left: 20px;
+                  background: #FAFAFA;
+                  display: inline-block;
+                  margin-right: .1rem;
                 }
               }
               p {
@@ -1473,11 +1466,10 @@
       width: 100%;
       position: absolute;
       color: #FFFFFF;
-      bottom: 0;
+      bottom: 8px;
       font-size: 12px;
       padding: 0 6px;
-      line-height: 30px;
-      background-color: rgba(0, 0, 0, .4);
+      line-height: 20px;
       > i {
         height: 20px;
         float: right;

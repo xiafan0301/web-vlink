@@ -79,7 +79,7 @@
                     </p>
                     <p class="similarity" v-show="item.semblance">
                       <i class="vl_icon_retrieval_03 vl_icon"></i>
-                      <span>{{item.semblance}}<span class="percent">%</span></span>
+                      <span>{{item.semblance.toFixed(2)}}<span class="percent">%</span></span>
                     </p>
                   </div>
                 </li>
@@ -135,31 +135,36 @@
       <div class="struc_main">
         <div class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.upPhotoUrl" alt="">
+            <img :src="sturcDetail.upPhotoUrl" alt="" class="bigImg">
             <!-- <img src="../../../../../assets/img/666.jpg" alt=""> -->
             <span>上传图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img">
-              <img :src="sturcDetail.photoUrl" alt="">
+              <img :src="sturcDetail.photoUrl" alt="" class="bigImg">
               <!-- <img src="../../../../../assets/img/temp/video_pic.png" alt=""> -->
             </div>
             <div class="struc_c_d_info">
               <h2>{{sturcDetail.name}}
                 <div class="vl_jfo_sim" v-show="sturcDetail.semblance">
                   <i class="vl_icon vl_icon_retrieval_03"></i>
-                  {{sturcDetail.semblance ? sturcDetail.semblance : 98.32}}
+                  {{sturcDetail.semblance ? sturcDetail.semblance.toFixed(2) : 98.32}}
                   <span style="font-size: 12px;">%</span>
                 </div>
               </h2>
-              <div class="struc_cdi_line" v-show="sturcDetail.birthDate">
-                <span>{{sturcDetail.birthDate}}</span>
+              <div class="struc_cdi_line">
+                <span v-show="sturcDetail.birthDate">{{sturcDetail.birthDate && sturcDetail.birthDate.split(' ')[0]}}</span>
+                <span v-show="sturcDetail.sex">{{sturcDetail.sex}}性</span>
+                <span v-show="sturcDetail.nation">{{sturcDetail.nation}}</span>
               </div>
               <div class="struc_cdi_line" v-show="sturcDetail.idNo">
                 <span>{{sturcDetail.idNo}}<i class="vl_icon vl_icon_retrieval_08"></i></span>
               </div>
-              <div class="struc_cdi_line" v-show="sturcDetail.label">
-                <span>{{sturcDetail.label}}</span>
+              <div class="struc_cdi_line" v-show="sturcDetail.group">
+                <span>{{sturcDetail.group}}</span>
+              </div>
+              <div class="struc_cdi_line" v-show="sturcDetail.repertory">
+                <span>{{sturcDetail.repertory}}</span>
               </div>
               <div class="struc_cdi_line" v-show="sturcDetail.remarks">
                 <span :title="sturcDetail.remarks" style="height: auto;white-space: normal">{{sturcDetail.remarks ? sturcDetail.remarks.length > 74 ? (sturcDetail.remarks.slice(0, 74) + '...') : sturcDetail.remarks : ''}}</span>
@@ -170,14 +175,14 @@
           </div>
         </div>
       </div>
-      <div class="struc-list">
+      <div class="struc-list" v-show="dataList.length > 1">
         <swiper :options="swiperOption" ref="mySwiper">
           <!-- slides -->
           <swiper-slide v-for="(item, index) in dataList" :key="item.id">
             <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
               <img style="height: .88rem;width: 50%;padding-right: .02rem;" :src="item.upPhotoUrl" alt="">
               <img style="height: .88rem;width: 50%;padding-left: .02rem;" :src="item.photoUrl" alt="">
-              <div class="vl_jfo_sim" ><i class="vl_icon vl_icon_retrieval_05"  :class="{'vl_icon_retrieval_06':  index === curImgIndex}"></i>{{item.semblance ? item.semblance : 92}}<span style="font-size: 12px;">%</span></div>
+              <div class="vl_jfo_sim" ><i class="vl_icon vl_icon_retrieval_05"  :class="{'vl_icon_retrieval_06':  index === curImgIndex}"></i>{{item.semblance ? item.semblance.toFixed(2) : 92}}<span style="font-size: 12px;">%</span></div>
             </div>
           </swiper-slide>
           <div class="swiper-button-prev" slot="button-prev"></div>
@@ -266,6 +271,7 @@ export default {
       this.queryImgPath = imgPath;
       this.fileList.push({path: imgPath});
       this.curImageUrl = imgPath;
+      this.curImgNum = 1;
     }
     if (similarity) {
       this.searchForm.similarity = similarity;
@@ -353,7 +359,11 @@ export default {
     deleteImg (index) {
       this.curImgNum --;
       this.fileList.splice(index, 1);
-      this.curImageUrl = null;
+      if (this.fileList.length > 0) {
+        this.curImageUrl = this.fileList[0].path;
+      } else {
+        this.curImageUrl = null;
+      }
     },
     // 上传图片
     uploadPicExceed () {
@@ -425,12 +435,13 @@ export default {
       this.fileList = [];
       this.curImageUrl = null;
       this.$refs[form].resetFields();
-      // this.searchData('searchForm');
+      this.dataList = [];
     },
     // 根据搜索条件进行查询
     searchData (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
+          this.dataList = [];
           if (this.curImgNum === 0 && !this.searchForm.idNo) {
             if (!document.querySelector('.el-message--info')) {
               this.$message.info('请先选择要上传的图片或填写身份证信息');
@@ -458,7 +469,7 @@ export default {
           getIdNoList(params).then(res => {
             if (res && res.data) {
               this.isSearchLoading = false;
-              if (res.data.list.length > 0) {
+              if (res.data.list && res.data.list.length > 0) {
                 this.dataList = res.data.list;
                 this.pagination.pageNum = res.data.pageNum;
                 this.pagination.total = res.data.total;
@@ -760,7 +771,7 @@ export default {
     width: 11.46rem;
     height: 4.4rem;
     margin: 0 auto;
-    border-bottom: 1px solid #F2F2F2;
+    // border-bottom: 1px solid #F2F2F2;
     .struc_c_detail {
       width:  100%;
       height: 3.6rem;
@@ -862,7 +873,6 @@ export default {
           }
           .struc_cdi_line {
             span {
-              /*position: relative;*/
               max-width: 100%;
               display: inline-block;
               height: .3rem;
