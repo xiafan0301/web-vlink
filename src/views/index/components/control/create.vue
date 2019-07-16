@@ -425,13 +425,13 @@ export default {
               if (res) {
                 this.$message.success(this.pageType === 3 ? '复用成功' : '新增成功');
                 this.$router.push({ name: 'control_manage' });
+                // 新增布控后，状态为待开始的事件，改为进行中
+                const obj = this.eventList.find(f => f.value === this.createForm.event);
+                if (obj && obj.eventStatus === 1) {
+                  updateEvent({uid: obj.value, type: 6});
+                }
               }
             }).finally(() => {
-              // 新增布控后，状态为待开始的事件，改为进行中
-              const obj = this.eventList.find(f => f.value === this.createForm.event);
-              if (obj && obj.eventStatus === 1) {
-                updateEvent({uid: obj.value, type: 6});
-              }
               this.loadingBtn = false;
             })
           }
