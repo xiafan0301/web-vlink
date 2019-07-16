@@ -140,7 +140,6 @@
               <!-- 选择时间 -->
               <div class="select_date">
                 <div class="time-search">
-                  <p>开始</p>
                   <el-date-picker
                     v-model="item.startTime"
                     type="datetime"
@@ -148,12 +147,11 @@
                     value-format="yyyy-MM-dd HH:mm:ss"
                     :picker-options="startDateOptArr[index]"
                     placeholder="开始时间"
-                    class="width212px"
+                    class="width232 vl_date"
                     @change="timeChange(index)"
                   ></el-date-picker>
                 </div>
                 <div class="time-search">
-                  <p>结束</p>
                   <el-date-picker
                     v-model="item.endTime"
                     :clearable="false"
@@ -162,7 +160,7 @@
                     type="datetime"
                     default-time="23:59:59"
                     placeholder="结束时间"
-                    class="width212px"
+                    class="width232 vl_date vl_date_end"
                     @change="timeChange(index, 'end')"
                   ></el-date-picker>
                 </div>

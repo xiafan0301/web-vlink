@@ -20,7 +20,7 @@
                 <div class="date-comp">
                   <el-form-item prop="selectDate">
                     <el-date-picker
-                      class="width232"
+                      class="width232 vl_date"
                       v-model="ytscMenuForm.selectDate"
                       type="daterange"
                       range-separator="至"
