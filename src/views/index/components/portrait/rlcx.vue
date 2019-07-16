@@ -6,6 +6,7 @@
         <el-form ref="form" class="pt_rlcx_fm" :model="searchForm" size="small">
           <el-form-item>
             <el-date-picker
+              class="vl_date"
               style="width: 240px;"
               v-model="searchForm.time"
               type="daterange"

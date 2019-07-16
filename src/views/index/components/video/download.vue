@@ -5,6 +5,7 @@
         <el-form-item>
           <span style="color: #666;">视频时间：&nbsp;</span>
           <el-date-picker
+            class="vl_date"
             v-model="formInline.time"
             type="daterange"
             align="left"
