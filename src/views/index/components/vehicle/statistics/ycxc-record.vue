@@ -222,12 +222,18 @@ export default {
     },
     // 获取所有的抓拍记录
     getAllList () {
+    
       this.queryObj['vehicleNumber'] = this.$route.params.vehicleNumber;
-      this.queryObj['pageSize'] = 0;
+      // this.queryObj['pageSize'] = 0;
       this.queryObj['pageNum'] = this.pagination.pageNum;
       this.queryObj['order'] = this.pagination.order;
       this.queryObj['orderBy'] = this.pagination.orderBy;
-      getNightVehicleRecordList(this.queryObj)
+
+      const params = {
+        ...this.queryObj,
+        pageSize: 0
+      }
+      getNightVehicleRecordList(params)
         .then(res => {
           if (res && res.data) {
             this.allDataList = res.data.list;
@@ -244,6 +250,7 @@ export default {
       this.queryObj['orderBy'] = this.pagination.orderBy;
       getNightVehicleRecordList(this.queryObj)
         .then(res => {
+          console.log('resasdsadsa', res)
           if (res && res.data) {
             this.dataList = res.data.list;
             this.pagination.total = res.data.total;
@@ -348,7 +355,7 @@ export default {
     onOpenDetail (obj) {
       this.sturcDetail = obj;
       this.strucDetailDialog = true;
-      this.curImgIndex = obj.id;
+      // this.curImgIndex = obj.id;
       this.$nextTick(() => {
         this.initMap(obj);
       })

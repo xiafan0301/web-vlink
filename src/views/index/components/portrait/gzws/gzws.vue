@@ -376,8 +376,8 @@ export default {
     getDeviceList () {
       this.deviceList = [];
       const params = {
-        targetPicUrl : this.dialogImageUrl,
-        // targetPicUrl: 'http://10.116.126.10/root/image/2019/07/10/34020000001320000016414920190709100000000009_1_1.jpeg',
+        // targetPicUrl : this.dialogImageUrl,
+        targetPicUrl: 'http://file.aorise.org/vlink/image/810ddc87-f9db-4e60-9da2-4e1ffc076683.jpg',
         // startTime : '2019-07-09 09:59:00',
         // endTime: '2019-07-09 10:03:00'
         startTime : formatDate(this.addForm.dateTime[0]),
@@ -482,6 +482,17 @@ export default {
     // 显示新建任务弹出框
     showAddTaskDialog () {
       this.addTaskDialog = true;
+
+      this.addForm = {
+        taskName: null, // 任务名称
+        deviceCode: null, // 起点设备编号
+        deviceName: null, // 起点设备名称
+        dateTime: [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()],
+        interval: 3 // 尾随间隔
+      };
+      this.dialogImageUrl = null;
+      this.fileList = [];
+      
     },
     // 显示中断任务弹出框
     showInterruptDialog (obj) {
