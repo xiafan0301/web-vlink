@@ -19,19 +19,19 @@
           <div class="setPost">
             <div class="top_search_input">
               <el-autocomplete
-                      class="inline-input"
-                      v-model="input3"
-                      :fetch-suggestions="querySearch"
-                      placeholder="请输入地名，快速定位地址"
-                      value-key="name"
-                      :trigger-on-focus="false"
-                      @select="handleSelect"
+                    class="inline-input"
+                    v-model="input3"
+                    :fetch-suggestions="querySearch"
+                    placeholder="请输入地名，快速定位地址"
+                    value-key="name"
+                    :trigger-on-focus="false"
+                    @select="handleSelect"
               ></el-autocomplete>
               <!--<el-input placeholder="请输入地名，快速定位地址" v-model="input3" class="input-with-select">-->
               <el-button slot="append" icon="el-icon-search" class="select_btn" @click="setCenter()"></el-button>
               <!--</el-input>-->
             </div>
-            <div style="width: 272px;height: calc(100% - 40px);padding-top: 20px;">
+            <div style="width: 272px;height: calc(100% - 40px);">
               <vue-scroll>
                 <div class="search_main">
                   <div class="search_top">
@@ -599,7 +599,6 @@
               strokeWeight: 1,
               fillColor: '#FA453A',
               fillOpacity: 0.2,
-              isRing: false
             });
             break ;
           case 'cut5' :

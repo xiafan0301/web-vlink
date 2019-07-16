@@ -37,6 +37,7 @@
           class="vl_date"
           v-model="searchData.time"
           type="daterange"
+          class="vl_date"
           range-separator="至"
           value-format="yyyy-MM-dd"
           format="yyyy-MM-dd"
@@ -44,7 +45,7 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期">
         </el-date-picker>
-        <div><el-input style="width: 1.36rem" oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100" v-model="searchData.minSemblance" placeholder="相似度"></el-input> - 100</div>
+        <div><el-input style="width: 192px;" oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100" v-model="searchData.minSemblance" placeholder="相似度"></el-input> - 100</div>
         <el-select
           v-model="devIdData"
           multiple

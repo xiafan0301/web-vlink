@@ -15,10 +15,10 @@
           <div class="map_lc_d" v-show="tabType === 1">
             <div class="map_lc_dt">
               <el-input
-                size="small"
-                placeholder="搜索"
-                clearable
-                v-model="mapInfoVal">
+                      size="small"
+                      placeholder="搜索"
+                      clearable
+                      v-model="mapInfoVal">
               </el-input>
               <el-button type="primary" @click="filterMapTree" icon="el-input__icon el-icon-search" style="font-size: .2rem;line-height: .32rem;cursor:pointer;"></el-button>
             </div>
@@ -31,17 +31,17 @@
                     <ul class="db_tree_s">
                       <li :id="'db_area_' + sitem.areaId" v-for="(sitem, sindex) in getCurList(item.infoList)" :key="'stl_' + sindex">
                         <i class="el-icon-arrow-right" @click="selSecondEvent(sitem.areaId, item.areaId)"></i>
-                        <span @click="selSecondEvent(sitem.areaId, item.areaId)">{{sitem.areaName}}</span>
+                        <span @click="selSecondEvent(sitem.areaId, item.areaId)">{{sitem.infoName}}</span>
                         <!--车辆-->
-                        <div class="db_tree_c"  v-if="sitem.infoName === '车辆' && getCurList([sitem]).length">
+                        <div class="db_tree_c"  v-if="sitem.infoName === '车辆' && getCurTypeData(sitem).length">
                           <ul class="db_tree_cul db_tree_cd db_tree_cul_open">
-                            <li :title="ditem.infoName" @click="signListTap(ditem, 'InfoWindow')" v-for="(ditem, dindex) in getCurList([sitem])[0].infoList" :key="'dl_' + index + '_' + sindex + '_' + dindex">
+                            <li :title="ditem.infoName" @click="signListTap(ditem, 'InfoWindow')" v-for="(ditem, dindex) in getCurTypeData(sitem)" :key="'dl_' + index + '_' + sindex + '_' + dindex">
                               {{ditem.infoName}}
                             </li>
                           </ul>
                         </div>
                         <!--非车辆-->
-                        <ul class="db_tree_s db_tree_c db_tree_s_s" v-show="sitem.infoName !== '车辆'">
+                        <ul class="db_tree_s db_tree_c db_tree_s_s" v-else>
                           <li :id="'db_area_' + sitem.areaId + '000001'" v-show="getCurTypeData(sitem, 0).length">
                             <i class="el-icon-arrow-right" @click="selSecondEvent(sitem.areaId + '000001')"></i>
                             <span @click="selSecondEvent(sitem.areaId + '000001')">摄像头</span>
@@ -49,7 +49,6 @@
                               <ul class="db_tree_cul db_tree_cd db_tree_cul_open">
                                 <li :title="ditem.infoName" @click="signListTap(ditem, 'InfoWindow')" v-for="(ditem, dindex) in getCurTypeData(sitem, 0)" :key="'dl_' + index + '_' + sindex + '_' + dindex">
                                   {{ditem.infoName}}
-                                  <i class="vl_icon vl_icon_v11"></i>
                                 </li>
                               </ul>
                             </div>
@@ -81,11 +80,19 @@
                     </ul>
                   </li>
                 </ul>
-                <ul class="map_search_list" v-show="showSearchList">
-                  <li  v-for="item in mapTreeData[0].infoList" :key="item.id" >
-                    <p v-for="sitem in item.infoList" :key="sitem.id">{{sitem.infoName}}<i class="vl_icon vl_icon_v11"></i></p>
-                  </li>
-                </ul>
+                <div class="map_search_list" v-if="showSearchList">
+                  <div  v-for="(item, index) in mapTreeData" :key="'tls_' + index">
+                    <template v-if="getCurList(item.infoList).length">
+                      <ul v-for="(sitem, sindex) in getCurList(item.infoList)" :key="'stls_' + sindex">
+                        <li :title="ditem.infoName" @click="signListTap(ditem, 'InfoWindow')" v-for="(ditem, dindex) in getCurTypeData(sitem)" :key="'dl_' + index + '_' + sindex + '_' + dindex">
+                          {{ditem.infoName}}
+                          <i v-show="ditem.dataType === 0" class="vl_icon vl_icon_v11"></i>
+                        </li>
+                      </ul>
+                    </template>
+                    <template v-else><p>没有匹配的数据</p></template>
+                  </div>
+                </div>
               </vue-scroll>
             </div>
           </div>
@@ -93,9 +100,9 @@
           <div class="map_lc_d" v-show="tabType === 2">
             <div class="map_lc_dt">
               <el-input
-                size="small"
-                placeholder="搜索"
-                v-model="markInfoVal">
+                      size="small"
+                      placeholder="搜索"
+                      v-model="markInfoVal">
               </el-input>
             </div>
             <div class="map_lc_dc" style="padding-bottom: .8rem;">
@@ -150,9 +157,9 @@
           <li :class="{'vl_icon_sed': activeType ===  1}" @click="selArea">
             <i class="vl_icon vl_icon_041"></i>
             <el-popover
-              placement="left"
-              trigger="hover"
-              content="单击选择范围，双击完成">
+                    placement="left"
+                    trigger="hover"
+                    content="单击选择范围，双击完成">
               <span slot="reference">选择区域</span>
             </el-popover>
           </li>
@@ -183,10 +190,10 @@
     </div>
     <!--删除标注确定弹窗-->
     <el-dialog
-      title="提示"
-      :visible.sync="deleteMarkDialog"
-      :show-close="false"
-      width="400px">
+            title="提示"
+            :visible.sync="deleteMarkDialog"
+            :show-close="false"
+            width="400px">
       <span>确定清除{{delMessage}}标注吗？</span>
       <span slot="footer" class="dialog-footer">
         <el-button :disabled="delLoading" @click="deleteMarkDialog = false">取 消</el-button>
@@ -325,22 +332,12 @@
           this.showSearchList = false;
           this.mapTreeData[0].infoList.forEach(x => {
             x.infoList.forEach(y => {
-              this.mapTypeListAll.forEach(z => {
-                this.objSetItem(x[this.key2Type[z]], {isShow: true})
-              })
-              y.isShow = true;
+              this.isInAreaAndCheckBox(y)
             })
           })
-          this.mapTypeList.forEach(u => {
-            this.updateNumberss(true, u, false);
-            setTimeout(() => {
-              this.updateNumberss(true, u, true);
-            }, 0)
-          })
-          this.mapTypeList.forEach(u => {
-            this.operClassToEL(this.marks[u], this.hideClass, true, false, this.selAreaPolygon ? this.selAreaPolygon.getPath() : null)
-          })
-          this.$refs.mapLeftTree.filter(val);
+          console.log(this.mapTreeData[0].infoList)
+          this.operClassToEL();
+          this.updateNumberss();
         }
       },
       markInfoVal (val) {
@@ -373,15 +370,7 @@
           arr = newValue.filter(x => !oldValue.includes(x))
           bool = true;
         }
-        // 更新地图Top栏 跟
-        arr.forEach(u => {
-          this.updateNumberss(true, u, bool);
-          setTimeout(() => {
-            this.operClassToEL(this.marks[u], this.hideClass, bool, false, this.selAreaPolygon ? this.selAreaPolygon.getPath() : null)
-          }, 0)
-        })
         // 更新子菜单勾选状态
-        console.log(arr)
         arr.forEach(x => {
           this.constObj[x].isIndeterminate = false;
           if (bool) {
@@ -390,6 +379,15 @@
             this.constObj[x].supTypeList = [];
           }
         })
+        // 更新地图Top栏 跟
+        this.mapTreeData[0].infoList.forEach(x => {
+          x.infoList.forEach(y => {
+            this.isInAreaAndCheckBox(y)
+          })
+        })
+        console.log(this.mapTreeData[0].infoList)
+        this.operClassToEL();
+        this.updateNumberss();
       },
       // 视频通话相关
       stateHandler (oData) {
@@ -505,7 +503,12 @@
         return list.filter(x => x.infoList.find(y => y.isShow))
       },
       getCurTypeData (data, type) {
-        return data.infoList.filter(x => x.dataType === type && x.isShow);
+        if (type) {
+          console.log(type, data.infoList.filter(x => x.dataType === type && x.isShow))
+          return data.infoList.filter(x => x.dataType === type && x.isShow);
+        } else {
+          return data.infoList.filter(x => x.isShow);
+        }
       },
       changeType (areaId, type) {
         let $li = $('#' + this.dbId).find('#db_area_' + areaId);
@@ -564,26 +567,8 @@
             })
           })
           this.updateNumberss();
-          this.marks.forEach((x, _index) => {
-            if (_index < 4) {
-              this.operClassToEL(x, this.hideClass, true, null, this.selAreaPolygon ? this.selAreaPolygon.getPath() : null)
-            }
-          })
+          this.operClassToEL()
         }
-      },
-      // 更新maptreeData[0]下，各个设备的数量值,以及刷新地图元素,boolean true代表是左侧搜索或者顶部type勾选
-      updateNumberss (boolean, key, isAdd, isSetArea) {
-        let newNum = [{deviceBasicListNum: 0}, {bayonetListNum: 0}, {carListNum: 0}, {sysUserExtendListNum: 0}];
-        this.mapTreeData[0].infoList.forEach(x => {
-          x.infoList.forEach(y => {
-            if (y.isShow) {
-              newNum[y.dataType][this.constObj[y.dataType]._key] += 1;
-            }
-          })
-        })
-        newNum.forEach((x, _index) => {
-          this.mapTreeData[0][this.constObj[_index]._key] = x[this.constObj[_index]._key];
-        })
       },
       // 获取标注列表
       getMarkHistory () {
@@ -809,12 +794,6 @@
                 let moveMark = this.marks[2].find(y => y.getExtData().uid === x.uid);
                 let _s = moveMark.getPosition();
                 // x['lineArr'] = this.drivingPath([[_s.lng, _s.lat], [x.gpsLongitude, x.gpsLatitude]]); // 路线纠偏
-                // 判断有没有画区域
-//              if (this.selAreaPolygon && window.AMap.GeometryUtil.isPointInRing(_s, this.selAreaPolygon.C.path)) {
-//                x['isInArea'] = true;
-//              } else {
-//                x['isInArea'] = false;
-//              }
                 x['lineArr'] = [[_s.lng, _s.lat], [x.gpsLongitude, x.gpsLatitude]];
                 // 判断车辆是否在画轨迹
                 new window.AMap.Polyline({
@@ -1460,62 +1439,91 @@
         }
         this.map.setDefaultCursor('');
       },
-      // boolean 为 true时 显示, false 隐藏.  operLeft 存在的话，说明是操作了左侧地图信息树，
-      operClassToEL (elList, className, boolean, isSetAera, path) {
-        elList.forEach(y => {
-          let _curObj = document.getElementById('mapMark' + y.getExtData().dataType + y.getExtData().uid).classList, point = y.getPosition();
-          let b = this.updateMarkVisible(y.getExtData());
-//        let b = true;
-          if (b){
-            if (boolean) {
-              console.log('--1')
-              if (_curObj.contains(className)) {
-                console.log('--2')
-                if (path) {
-                  if (window.AMap.GeometryUtil.isPointInRing(point, path)) {
-                    _curObj.remove(className);
-                  }
+//      判断是否在区域跟checkBox里
+      isInAreaAndCheckBox (y) {
+        if (this.selAreaPolygon) {
+          if (y.longitude && y.latitude) {
+            let m = new window.AMap.Marker({
+              position: [y.longitude, y.latitude]
+            })
+            let point = m.getPosition();
+            if (window.AMap.GeometryUtil.isPointInRing(point, this.selAreaPolygon.getPath())) {
+              // 判断是不是卡口
+              if (y.dataType === 1) {
+                if (this.mapTypeList.includes(1)) {
+                  y.isShow = true;
+                } else{
+                  y.isShow = false;
+                }
+              } else { // 说明不是卡口，判断子checkbox里的勾选状态
+                if(this.constObj[y.dataType].supTypeList.includes(parseInt(y[this.findType[y.dataType]]))) {
+                  y.isShow = true;
                 } else {
-                  // 判断小菜单有没有勾选
-                  let __obj = y.getExtData();
-                  if (__obj.dataType === 1) {
-                    _curObj.remove(className);
-                  } else {
-                    if (this.constObj[__obj.dataType].supTypeList.includes(parseFloat(__obj[this.findType[__obj.dataType]]) - 1)) {
-                      _curObj.remove(className);
-                    }
-                  }
+                  y.isShow = false;
                 }
               }
             } else {
-              //没有className并且dataType 不等于4的元素
-              if (!_curObj.contains(className) && y.getExtData().dataType !== 4) {
-                if (path && isSetAera) {
-                  let point = y.getPosition();
-                  if (!window.AMap.GeometryUtil.isPointInRing(point, path)) {
-                    _curObj.add(className)
-                  }
-                } else {
-                  _curObj.add(className)
+              y['isShow'] = false;
+            }
+            m = null;
+          }
+        } else {
+          // 判断是不是卡口
+          if (y.dataType === 1) {
+            if (this.mapTypeList.includes(1)) {
+              y.isShow = true;
+            } else{
+              y.isShow = false;
+            }
+          } else { // 说明不是卡口，判断子checkbox里的勾选状态
+            console.log(this.constObj[y.dataType].supTypeList, (parseInt(y[this.findType[y.dataType]])))
+            if(this.constObj[y.dataType].supTypeList.includes(parseInt(y[this.findType[y.dataType]]))) {
+              y.isShow = true;
+            } else {
+              y.isShow = false;
+            }
+          }
+        }
+      },
+      // 更新maptreeData[0]下，各个设备的数量值,以及刷新地图元素,boolean true代表是左侧搜索或者顶部type勾选
+      updateNumberss (boolean, key, isAdd, isSetArea) {
+        let newNum = [{deviceBasicListNum: 0}, {bayonetListNum: 0}, {carListNum: 0}, {sysUserExtendListNum: 0}];
+        this.mapTreeData[0].infoList.forEach(x => {
+          x.infoList.forEach(y => {
+            if (y.isShow) {
+              newNum[y.dataType][this.constObj[y.dataType]._key] += 1;
+            }
+          })
+        })
+        newNum.forEach((x, _index) => {
+          this.mapTreeData[0][this.constObj[_index]._key] = x[this.constObj[_index]._key];
+        })
+      },
+      // boolean 为 true时 显示, false 隐藏.  operLeft 存在的话，说明是操作了左侧地图信息树，
+      operClassToEL () {
+        this.marks.forEach((elList, _index) => {
+          if (_index < 4) {
+            elList.forEach(y => {
+              let _curObj = document.getElementById('mapMark' + y.getExtData().dataType + y.getExtData().uid).classList, point = y.getPosition();
+              let b = this.updateMarkVisible(y.getExtData());
+              if (!b){
+                if (!_curObj.contains(this.hideClass)) {
+                  _curObj.add(this.hideClass)
                 }
+              } else {
+                _curObj.remove(this.hideClass)
               }
-            }
-          } else {
-            if (!_curObj.contains(className)) {
-              _curObj.add(className)
-            }
+            })
           }
         })
       },
       // 找到设备当前显示状态，更新地图mark的extData里的状态
       updateMarkVisible(obj) {
-        let bool, arr = this.mapTreeData[0].infoList;
+        let bool = false, arr = this.mapTreeData[0].infoList;
         for (let i = 0; i < arr.length; i++) {
-          if (arr[i][this.key2Type[obj.dataType]].find(x => x.uid === obj.uid) && this.mapTypeList.indexOf(obj.dataType) !== -1) {
-            bool = arr[i][this.key2Type[obj.dataType]].find(x => x.uid === obj.uid).isShow;
+          if (arr[i].infoList.find(x => x.uid === obj.uid)) {
+            bool = arr[i].infoList.find(x => x.uid === obj.uid).isShow;
             break;
-          } else {
-            bool = false;
           }
         }
         return bool;
@@ -1895,6 +1903,10 @@
         top: 9px;
         right: 10px;
       }
+    }
+    p {
+      color: #666;
+      text-align: center;
     }
   }
   textarea {

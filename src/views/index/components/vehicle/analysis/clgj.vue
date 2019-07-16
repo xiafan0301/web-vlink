@@ -11,23 +11,23 @@
     <div :class="['left',{hide:hideleft}]">
       <div class="plane">
         <el-form
-          :model="ruleForm"
-          status-icon
-          ref="ruleForm"
-          :rules="rules"
-          label-width="0px"
-          class="demo-ruleForm"
+                :model="ruleForm"
+                status-icon
+                ref="ruleForm"
+                :rules="rules"
+                label-width="0px"
+                class="demo-ruleForm"
         >
           <el-form-item class="firstItem" prop="data1">
             <el-date-picker
-              v-model="ruleForm.data1"
-              type="daterange"
-              class="full data_range"
-              value-format="yyyy-MM-dd"
-              :picker-options="pickerOptions"
-              range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期">
+                    v-model="ruleForm.data1"
+                    type="daterange"
+                    class="full data_range vl_date"
+                    value-format="yyyy-MM-dd"
+                    :picker-options="pickerOptions"
+                    range-separator="至"
+                    start-placeholder="开始日期"
+                    end-placeholder="结束日期">
             </el-date-picker>
           </el-form-item>
           <el-form-item prop="input3">
@@ -51,14 +51,14 @@
           <el-form-item v-if="ruleForm.input5=='1'" prop="value1">
             <el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="全部区域" class="full">
               <el-option-group
-                v-for="group in options"
-                :key="group.areaName"
-                :label="group.areaName">
+                      v-for="group in options"
+                      :key="group.areaName"
+                      :label="group.areaName">
                 <el-option
-                  v-for="item in group.areaTreeList"
-                  :key="item.areaId"
-                  :label="item.areaName"
-                  :value="item.areaId">
+                        v-for="item in group.areaTreeList"
+                        :key="item.areaId"
+                        :label="item.areaName"
+                        :value="item.areaId">
                 </el-option>
               </el-option-group>
             </el-select>
@@ -84,31 +84,31 @@
     <div :class="['right',{hide:!hideleft}, {'clgj_map_show_pic': mapPicShow}]" id="rightMap"></div>
     <div class="reselt" v-if="reselt">
       <div class="plane insetPadding">
-          <h3 class="title">分析结果</h3>
-          <div class="sup_title">
-            <div  @click="timeOrderS">时间排序 <span><i class="el-icon-caret-top" :class="{'active': !timeOrder}"></i><i :class="{'active': timeOrder}" class="el-icon-caret-bottom"></i></span></div>
-            <div>抓拍地址</div>
-          </div>
-          <div class="plane_main_box"  @scroll="scrollIt">
-            <div class="plane_main">
-              <!--可以展开列表-->
-              <div class="infinite-list-wrapper" v-if="leftEvData.length" >
-                <ul>
-                  <li class="p_main_list" :class="{'is_open': item.isOpen}" v-for="item in leftEvData" :key="item.id">
-                    <div class="p_main_head" @click="item.isOpen = !item.isOpen"><i :class="{'el-icon-caret-right': !item.isOpen, 'el-icon-caret-bottom': item.isOpen}"></i>{{item.label}}</div>
-                    <div class="p_main_item" v-for="sItem in item.list" :key="sItem.id" @click="showStrucInfo(sItem, evData.findIndex(function (u) {return u === sItem}))">
-                      <div>{{sItem.shotTime.slice(-8)}}</div>
-                      <div :title="sItem.address">{{sItem.address ? sItem.address : '无'}}</div>
-                    </div>
-                  </li>
-                </ul>
-                <p style="line-height: 40px;color: #0C70F8;text-align: center;" v-if="loading">加载中...</p>
-                <p style="line-height: 40px;color: #999999;text-align: center;" v-if="noMore">没有更多了</p>
-              </div>
-              <p v-show="leftEvData.length === 0" style="line-height: 40px;color: #999999;text-align: center;">暂无数据</p>
+        <h3 class="title">分析结果</h3>
+        <div class="sup_title">
+          <div  @click="timeOrderS">时间排序 <span><i class="el-icon-caret-top" :class="{'active': !timeOrder}"></i><i :class="{'active': timeOrder}" class="el-icon-caret-bottom"></i></span></div>
+          <div>抓拍地址</div>
+        </div>
+        <div class="plane_main_box"  @scroll="scrollIt">
+          <div class="plane_main">
+            <!--可以展开列表-->
+            <div class="infinite-list-wrapper" v-if="leftEvData.length" >
+              <ul>
+                <li class="p_main_list" :class="{'is_open': item.isOpen}" v-for="item in leftEvData" :key="item.id">
+                  <div class="p_main_head" @click="item.isOpen = !item.isOpen"><i :class="{'el-icon-caret-right': !item.isOpen, 'el-icon-caret-bottom': item.isOpen}"></i>{{item.label}}</div>
+                  <div class="p_main_item" v-for="sItem in item.list" :key="sItem.id" @click="showStrucInfo(sItem, evData.findIndex(function (u) {return u === sItem}))">
+                    <div>{{sItem.shotTime.slice(-8)}}</div>
+                    <div :title="sItem.address">{{sItem.address ? sItem.address : '无'}}</div>
+                  </div>
+                </li>
+              </ul>
+              <p style="line-height: 40px;color: #0C70F8;text-align: center;" v-if="loading">加载中...</p>
+              <p style="line-height: 40px;color: #999999;text-align: center;" v-if="noMore">没有更多了</p>
             </div>
+            <p v-show="leftEvData.length === 0" style="line-height: 40px;color: #999999;text-align: center;">暂无数据</p>
           </div>
-          <div class="insetLeft2" @click="hideResult"></div>
+        </div>
+        <div class="insetLeft2" @click="hideResult"></div>
       </div>
     </div>
     <!--地图操作按钮-->
@@ -119,11 +119,11 @@
       <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
     </ul>
     <el-dialog
-        :visible.sync="strucDetailDialog"
-        class="struc_detail_dialog"
-        :close-on-click-modal="false"
-        top="4vh"
-        :show-close="false">
+            :visible.sync="strucDetailDialog"
+            class="struc_detail_dialog"
+            :close-on-click-modal="false"
+            top="4vh"
+            :show-close="false">
       <div class="struc_tab">
         <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">抓拍详情</span>
         <span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>
@@ -651,6 +651,9 @@
               // 自定义点标记覆盖物内容
               content: _content
             });
+            point.on('click', () => {
+              this.showStrucInfo(obj, i)
+            })
             this.markerPoint[i] = point;
           }
         }
