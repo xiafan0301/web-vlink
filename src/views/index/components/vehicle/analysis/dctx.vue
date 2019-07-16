@@ -186,10 +186,10 @@ export default {
         startDate: new Date(overStartTime),
         endDate: new Date(),
         vehicleNumberList: [
-          {vehicleNumber: '湘LYV366'},
-          {vehicleNumber: '湘NF8988'},
-          {vehicleNumber: '湘NJM910'},
-          {vehicleNumber: '湘NJY056'},
+          {vehicleNumber: ''},
+          {vehicleNumber: ''},
+          // {vehicleNumber: '湘NJM910'},
+          // {vehicleNumber: '湘NJY056'},
         ],
         // vehicleNumberList: [
         //   {vehicleNumber: '沪D008CP'},

@@ -178,6 +178,7 @@
                 v-model="addForm.dateTime"
                 style="width: 100%"
                 :clearable="false"
+                class="vl_date"
                 @change="handleDateTime"
                 :picker-options="pickerDateTime"
                 value-format="yyyy-MM-dd HH:mm:ss"
