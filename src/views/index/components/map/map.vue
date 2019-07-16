@@ -28,7 +28,7 @@
                   <li :id="'db_area_' + item.areaId" v-for="(item, index) in mapTreeData" :key="'tl_' + index">
                     <i class="el-icon-arrow-right" @click="selFirstEvent(item.areaId)"></i>
                     <span @click="selFirstEvent(item.areaId)">{{item.areaName}}</span>
-                    <ul class="db_tree_s" v-show="item.infoList && item.infoList.length > 0">
+                    <ul class="db_tree_s">
                       <li :id="'db_area_' + sitem.areaId" v-for="(sitem, sindex) in getCurList(item.infoList)" :key="'stl_' + sindex">
                         <i class="el-icon-arrow-right" @click="selSecondEvent(sitem.areaId, item.areaId)"></i>
                         <span @click="selSecondEvent(sitem.areaId, item.areaId)">{{sitem.areaName}}</span>
@@ -65,7 +65,7 @@
                               </ul>
                             </div>
                           </li>
-                          <li :id="'db_area_' + sitem.areaId + '000004'"  v-show="getCurTypeData(sitem, 0).length">
+                          <li :id="'db_area_' + sitem.areaId + '000004'"  v-show="getCurTypeData(sitem, 3).length">
                             <i class="el-icon-arrow-right" @click="selSecondEvent(sitem.areaId + '000004')"></i>
                             <span @click="selSecondEvent(sitem.areaId + '000004')">人员</span>
                             <div class="db_tree_c">
@@ -79,6 +79,11 @@
                         </ul>
                       </li>
                     </ul>
+                  </li>
+                </ul>
+                <ul class="map_search_list" v-show="showSearchList">
+                  <li  v-for="item in mapTreeData[0].infoList" :key="item.id" >
+                    <p v-for="sitem in item.infoList" :key="sitem.id">{{sitem.infoName}}<i class="vl_icon vl_icon_v11"></i></p>
                   </li>
                 </ul>
               </vue-scroll>
@@ -114,9 +119,6 @@
       <div class="map_rm" id="mapMap"></div>
       <!-- 头部统计 -->
       <div class="map_rt">
-        <!--<el-checkbox :indeterminate="isIndeterminate" v-model="mapTypeCheckAll" @change="mapTypeCheckAllChange">全部-->
-          <!--<span class="map_rt_ck_num" style="padding-right: 30px;">&nbsp;{{(mapTreeData[0] ? mapTreeData[0].deviceBasicListNum + mapTreeData[0].carListNum + mapTreeData[0].bayonetListNum + mapTreeData[0].sysUserExtendListNum : 0) | fmTenThousand}}</span>-->
-        <!--</el-checkbox>-->
         <el-checkbox-group v-model="mapTypeList" class="vl_map_rt_cks">
           <el-dropdown :split-button="index !== 1" trigger="click" v-for="(item, index) in constObj" :key="item.id" :hide-on-click="false">
             <el-checkbox :indeterminate="item.isIndeterminate" v-model="item.checkAll"  :label="index">
@@ -181,10 +183,10 @@
     </div>
     <!--删除标注确定弹窗-->
     <el-dialog
-            title="提示"
-            :visible.sync="deleteMarkDialog"
-            :show-close="false"
-            width="400px">
+      title="提示"
+      :visible.sync="deleteMarkDialog"
+      :show-close="false"
+      width="400px">
       <span>确定清除{{delMessage}}标注吗？</span>
       <span slot="footer" class="dialog-footer">
         <el-button :disabled="delLoading" @click="deleteMarkDialog = false">取 消</el-button>
@@ -209,8 +211,8 @@
     components: {flvplayer},
     data () {
       return {
+        showSearchList: false,
         dbId: 'db_tree_' + random14(),
-        defaultExpand: [],
         mapCenter: [110.594419,27.908869],
         graspRoad: null,
         key2Type: {
@@ -244,8 +246,6 @@
           5: '危化车'
         },
         map: null, // 地图对象
-        isIndeterminate: false,
-        mapTypeCheckAll: true,
         mapTypeList: [0, 1, 2, 3],
         mapTypeListAll: [0, 1, 2, 3],
         tabType: 1, // 1地图信息 2标注历史
@@ -322,6 +322,7 @@
     watch: {
       mapInfoVal (val) {
         if (!val) {
+          this.showSearchList = false;
           this.mapTreeData[0].infoList.forEach(x => {
             x.infoList.forEach(y => {
               this.mapTypeListAll.forEach(z => {
@@ -364,7 +365,6 @@
       },
       mapTypeList (newValue, oldValue) {
         console.log(newValue, oldValue);
-        this.checkedTypeChange(newValue);
         let arr = [], bool = false;
         if (oldValue.length > newValue.length) { // 隐藏
           arr = oldValue.filter(x => !newValue.includes(x))
@@ -498,8 +498,6 @@
       setTimeout(() => {
         this.getAlarmListByDev();
       }, 12000);
-
-
     },
     methods: {
       getCurList (list) {
@@ -557,139 +555,35 @@
 
       filterMapTree () {
         if (this.mapInfoVal) {
-          if (this.mapTreeData[0].infoName.indexOf(this.mapInfoVal) !== -1) {
-            let allNode = this.$refs.mapLeftTree.store._getAllNodes();
-            this.objSetItem(allNode, {expanded: true})
-            return;
-          }
-          // 如果过滤前已经有checkbox未被勾选，需要先把对应原始数据的数据置为 false
-          // let _arr = this.mapTypeListAll.filter(x => !this.mapTypeList.includes(x))
+          this.showSearchList = true;
           this.mapTreeData[0].infoList.forEach(x => {
-            this.mapTypeListAll.forEach(y => {
-              if (x.infoName.indexOf(this.mapInfoVal) === -1) {
-                x[this.key2Type[y]].forEach(z => {
-                  if (z.infoName.indexOf(this.mapInfoVal) === -1) {
-                    z.isShow = false;
-                  }
-                })
+            x.infoList.forEach(y => {
+              if (y.infoName.indexOf(this.mapInfoVal) === -1) {
+                y.isShow = false;
               }
             })
           })
-          this.$refs.mapLeftTree.filter(this.mapInfoVal);
           this.updateNumberss();
           this.marks.forEach((x, _index) => {
             if (_index < 4) {
               this.operClassToEL(x, this.hideClass, true, null, this.selAreaPolygon ? this.selAreaPolygon.getPath() : null)
             }
           })
-          console.log(this.mapTreeData[0].infoList[9])
         }
       },
       // 更新maptreeData[0]下，各个设备的数量值,以及刷新地图元素,boolean true代表是左侧搜索或者顶部type勾选
       updateNumberss (boolean, key, isAdd, isSetArea) {
         let newNum = [{deviceBasicListNum: 0}, {bayonetListNum: 0}, {carListNum: 0}, {sysUserExtendListNum: 0}];
         this.mapTreeData[0].infoList.forEach(x => {
-          if (boolean) {
-            let _arr = [];
-            if (isAdd) {
-              _arr = objDeepCopy(x[this.key2Type[key]]);
-              console.log(_arr)
-              _arr.forEach(m => {
-                if (this.selAreaPolygon) {
-                  if (m.isInArea && m.isShow) {
-                    x.infoList.push(m)
-                  }
-                } else {
-                  if (m.isShow) {
-                    x.infoList.push(m)
-                  }
-                }
-              })
-              // x.infoList有数据了之后，把“无相关数据”清除
-              if (x.infoList.length > 1 && x.infoList[0].infoName === '无相关数据') {
-                x.infoList.shift();
-              }
-            } else {
-              x.infoList.forEach(t => {
-                if (t.dataType === key && t.isShow) {
-                  t.isShow = false;
-                }
-              })
-              x.infoList = x.infoList.filter(z => z.isShow);
-              if (x.infoList.length === 0) {
-                x.infoList.push({infoName: '无相关数据'})
-              }
+          x.infoList.forEach(y => {
+            if (y.isShow) {
+              newNum[y.dataType][this.constObj[y.dataType]._key] += 1;
             }
-            x.infoList.forEach(y => {
-              if (y.isShow && this.mapTypeList.indexOf(y.dataType) !== -1) {
-                newNum[y.dataType][this.constObj[y.dataType]._key] += 1;
-              }
-            })
-          } else {
-            if (isSetArea) {
-              // 有画区域
-              if (this.selAreaPolygon) {
-                x.infoList = x.infoList.filter(z => z.isInArea);
-                if (x.infoList.length === 0) {
-                  // this.mapTreeData[0].infoList.splice(uIndex, 1)
-                  x.infoList.push({infoName: '无相关数据'})
-                }
-                x.infoList.forEach(y => {
-                  if (y.isInArea && this.mapTypeList.indexOf(y.dataType) !== -1) {
-                    newNum[y.dataType][this.constObj[y.dataType]._key] += 1;
-                  }
-                })
-              } else {
-                x.infoList = [];
-                this.mapTypeList.forEach(u => {
-                  let _arr1 = objDeepCopy(x[this.key2Type[u]]);
-                  _arr1.forEach(m => {
-                    if (m.isShow) {
-                      x.infoList.unshift(m)
-                    }
-                  })
-                })
-                if (x.infoList.length === 0) {
-                  x.infoList.push({infoName: '无相关数据'})
-                }
-                x.infoList.forEach(y => {
-                  if (y.isShow && this.mapTypeList.indexOf(y.dataType) !== -1) {
-                    newNum[y.dataType][this.constObj[y.dataType]._key] += 1;
-                  }
-                })
-              }
-            } else {
-              if(this.mapInfoVal && x.infoName.indexOf(this.mapInfoVal) !== -1) { // 有镇数据符合，镇下所有数据都符合
-                x.infoList.forEach(y => {
-                  if (this.mapTypeList.indexOf(y.dataType) !== -1) {
-                    y.isShow = true;
-                    newNum[y.dataType][this.constObj[y.dataType]._key] += 1;
-                  } else {
-                    y.isShow = false;
-                  }
-                })
-              } else {
-                x.infoList.forEach(y => {
-                  if (y.infoName.indexOf(this.mapInfoVal) !== -1) {
-                    y.isShow = true;
-                    if (this.mapTypeList.indexOf(y.dataType) !== -1) {
-                      newNum[y.dataType][this.constObj[y.dataType]._key] += 1;
-                    }
-                  } else {
-                    if (y.infoName !== '无相关数据') {
-                      y.isShow = false;
-                      x[this.key2Type[y.dataType]].find(e => e.uid === y.uid)['isShow'] = false;
-                    }
-                  }
-                })
-              }
-            }
-          }
+          })
         })
         newNum.forEach((x, _index) => {
           this.mapTreeData[0][this.constObj[_index]._key] = x[this.constObj[_index]._key];
         })
-        this.updateDom();
       },
       // 获取标注列表
       getMarkHistory () {
@@ -803,8 +697,15 @@
             }, 1000 * _i)
           })
         } else {
-          let sysIndex = this.callingList.findIndex(j => j.uid === objList.uid + '')
-          let _cMarkPos = this.marks[objList.dataType].find(x => x.getExtData().uid === objList.uid).getPosition();
+          let sysIndex = this.callingList.findIndex(j => j.uid === objList.uid + '');
+          let _cMark = this.marks[objList.dataType].find(x => x.getExtData().uid === objList.uid);
+          if (!_cMark) {
+            if (!document.querySelector('.el-message--info')) {
+              this.$message.info('没有发现该目标的经纬度');
+            }
+            return false;
+          }
+          let _cMarkPos = _cMark.getPosition();
           if (sysIndex === -1) {
             let sContent = '<div class="vl_map_hover" >' + this.mapHoverInfo(objList) + '</div>';
             let _px;
@@ -857,12 +758,6 @@
         }
         return obj;
       },
-      // 点击地图信息
-      mapInfoListTap (data) {
-        if (data.areaType === '5') {
-          this.signListTap(data, 'InfoWindow');
-        }
-      },
       //获取地图信息列表
       getMonitorList () {
         this.$_showLoading({target: '.vl_map'})
@@ -889,19 +784,14 @@
                     x['isDrawLine'] = false;
                   })
                   __obj.carList = vData;
-                  this.defaultExpand.push(res.data.areaName);
                   res.data.areaTreeList.push(__obj);
                   this.mapTreeData = this.switchData(res.data);
                   console.log('树的数据', this.mapTreeData);
                   this.$_hideLoading();
                   this.mapMark(this.mapTreeData[0].infoList);
-                  // this.moveDom();
-                  this.updateDom();
                   // 定时查询车辆数据
                   this.carLoop();
-
                   this.watchCalling();
-
                 })
               }
             })
@@ -1025,7 +915,6 @@
       },
       // keys的各个props 代表接口返回的摄像头，人物，车辆，卡口的list的字段名及list里面元素name;;allKey
       switchData(data) {
-        console.log(data)
         let numObj= {'deviceBasicListNum': 0, 'carListNum': 0, 'bayonetListNum': 0, 'sysUserExtendListNum': 0};
         data['infoList'] = data.areaTreeList;
         data['infoName'] = data.areaName;
@@ -1035,7 +924,6 @@
           carList = [
           ];
           x['infoName'] = x.areaName;
-          x['isShow'] = true;
           // dataType = 0 摄像头，2车辆，1卡口，3人员,
           x['deviceBasicList'] = this.objSetItem(x['deviceBasicList'], {infoName: 'deviceName', areaType: '5', dataType: 0, isShow: true});
           if (x['carList']) {
@@ -1051,12 +939,11 @@
           x['infoList'] = newArr;
           // 给第一个元素加识别号
           if (x['infoList'].length) {
-            x['infoList'][0]['isFirst'] = true;
+            x['isShow'] = true;
           } else {
-            x['infoList'].push({infoName: '无相关数据'})
+            x['isShow'] = false;
           }
           // 设置一个数组，判断当前map_tree_tab点了哪几个
-          x['tabActiveList'] = []; // 为空时，全显示，不为空时显示数组内的项，里面的值就是dataType
           // 计算各个类型的数量，
           for (let _num in numObj) {
             numObj[_num] += x[_num.slice(0, -3)].length
@@ -1078,52 +965,6 @@
           return z;
         })
         return list;
-      },
-      filterNode(value, data, node) {
-        if (!value) return true;
-        let pData = node.parent.data;
-        if (pData.areaType === '3' || data.infoName === '无相关数据' || data.areaType === '3') {
-          return false;
-        }
-        if (data.infoName.indexOf(value) !== -1) {
-          if (data.dataType && this.mapTypeList.indexOf(data.dataType) === -1) {
-            pData[this.key2Type[data.dataType]].find(x => x.uid === data.uid)['isShow'] = false;
-            data['isShow'] = false;
-            return false;
-          } else {
-            data['isShow'] = true;
-            if (pData.areaType === '4') {
-              pData['isShow'] = true;
-              // pData[this.key2Type[data.dataType]].find(x => x.uid === data.uid)['isShow'] = true;
-            } else {
-              this.mapTypeList.forEach(k => {
-                this.objSetItem(data[this.key2Type[k]], {isShow: true})
-              })
-            }
-            return true;
-          }
-        } else {
-          if (pData.areaType === '4' && pData.infoName.indexOf(value) === -1) {
-            pData[this.key2Type[data.dataType]].find(x => x.uid === data.uid)['isShow'] = false;
-          }
-          if (node.parent.data.infoName) {
-            let _b = pData.infoName.indexOf(value) !== -1;
-            pData['isShow'] = _b
-            return _b;
-          } else {
-            return false;
-          }
-        }
-      },
-      updateDom () {
-        this.$nextTick(() => {
-          let ss = document.getElementsByClassName('change_node_pos');
-          ss = Array.from(ss);
-          ss.forEach(x => {
-            $(x).parent().siblings().css('display', 'none');
-            $(x).parent().parent().css('padding-left', '40px');
-          })
-        })
       },
       // 地图标记
       mapMark (data) {
@@ -1831,29 +1672,9 @@
           this.map.setZoomAndCenter(14, this.mapCenter);
         }
       },
-      mapTypeCheckAllChange (val) {
-        this.isIndeterminate = false;
-        if (val) {
-          this.mapTypeList = this.mapTypeListAll;
-          this.constObj.forEach(x => {
-            x.supTypeList = x.supTypeListAll;
-          })
-        } else {
-          this.mapTypeList =[];
-          this.constObj.forEach(x => {
-            x.supTypeList = []
-          })
-        }
-      },
-      checkedTypeChange (value) {
-        let checkedCount = value.length;
-        this.mapTypeCheckAll = checkedCount === this.mapTypeListAll.length && this.constObj.findIndex(x => !x.checkAll) === -1;
-        this.isIndeterminate = checkedCount > 0 && checkedCount < this.mapTypeListAll.length || this.constObj.findIndex(x => !x.checkAll) !== -1;
-      },
       supCheckedTypeChange (item, index) {
         item.checkAll = item.supTypeList.length === item.supTypeListAll.length;
         item.isIndeterminate = item.supTypeList.length > 0 && item.supTypeList.length < item.supTypeListAll.length;
-        this.isIndeterminate = this.mapTypeList.length && this.constObj.findIndex(x => x.isIndeterminate) !== -1;
         let _i = this.constObj.findIndex(x => x === item);
         let _j = this.mapTypeList.findIndex(x => x === _i);
         if (item.supTypeList.length === 0 && _j !== -1) {
@@ -2052,6 +1873,30 @@
   }
 </script>
 <style lang="scss" scoped>
+  .map_search_list{
+    position: absolute;
+    top: 0;
+    width: 100%;
+    min-height: 100%;
+    background: #ffffff;
+    li {
+      position: relative;
+      height: 36px;
+      line-height: 36px;
+      padding: 0 30px 0 40px;
+      color: #666;
+      cursor: pointer;
+      overflow: hidden;
+      &:hover {
+        background: #F2F2F2;
+      }
+      i {
+        position: absolute;
+        top: 9px;
+        right: 10px;
+      }
+    }
+  }
   textarea {
     overflow: hidden;
   }
