@@ -22,6 +22,7 @@
           <!-- 时间 -->
           <div class="time-search date-comp">
             <el-date-picker
+              class="vl_date"
               v-model="searchData.time"
               type="daterange"
               range-separator="至"
