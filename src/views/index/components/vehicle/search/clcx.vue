@@ -318,7 +318,7 @@ export default {
         d.include=null
       }
       exportNightVehicle({
-        VehicleSnapQueryDto:d,
+        vehicleSnapQueryDto:d,
         viewType:2
       }).then(res=>{
         if(res && res.data) {
