@@ -967,7 +967,7 @@ export default {
     // 地图标记
     mapMark(data, aMarkers, maxDev) {
       if (data && data.length > 0) {
-        let hoverWindow = null, maxInfoWindow = null;
+        /* let hoverWindow = null, maxInfoWindow = null; */
         let _this = this;
         for (let i = 0; i < data.length; i++) {
           let obj = data[i];

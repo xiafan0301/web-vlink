@@ -485,12 +485,13 @@ export default {
     },
     resetForm(v) {
       this.curImageUrl = "";
-      this.ruleForm = {
-        data1: null,
-        minFootholdTimes: null,
-        input5: "1",
-        value1: null
-      };
+      this.setDTime()
+      this.ruleForm.minFootholdTimes=3 
+      this.ruleForm.input5='1'
+      this.ruleForm.value1=[]
+      this.options[0].areaTreeList.forEach(el=>{
+            this.ruleForm.value1.push(el.areaId)
+          })
       //this.$refs[v].resetFields();
     },
     //查询行政区域

@@ -326,61 +326,61 @@
                 >{{ '车顶(天窗)：' + sturcDetail.vehicleRoof}}</div>
               </div>-->
               <!-- 车辆的信息栏 -->
-              <div class="struc_cdi_line" v-if="sturcDetail.shotTime">
-                <p>
+              <div class="struc_cdi_line_ytsc" v-if="sturcDetail.shotTime">
+                <p class="line_content">
                   <span class="key">抓拍时间</span>
                   <span class="val">{{sturcDetail.shotTime}}</span>
                 </p>
               </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.deviceName">
-                <p>
+              <div class="struc_cdi_line_ytsc" v-if="sturcDetail.deviceName">
+                <p class="line_content">
                   <span class="key">抓拍设备</span>
                   <span class="val">{{sturcDetail.deviceName}}</span>
                 </p>
               </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.address">
-                <p>
+              <div class="struc_cdi_line_ytsc" v-if="sturcDetail.address">
+                <p class="line_content">
                   <span class="key" title="抓拍地点">抓拍地点</span>
                   <span class="val">{{sturcDetail.address}}</span>
                 </p>
               </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.plateNo">
-                <p>
+              <div class="struc_cdi_line_ytsc" v-if="sturcDetail.plateNo">
+                <p class="line_content">
                   <span class="key">车牌号码</span>
                   <span class="val">{{sturcDetail.plateNo}}</span>
                 </p>
               </div>
               <!-- 5个特征 -->
-              <div class="struc_cdi_line" v-if="sturcDetail.plateColor">
-                <p>
+              <div class="struc_cdi_line_ytsc" v-if="sturcDetail.plateColor">
+                <p class="line_content">
                   <span class="key">车牌颜色</span>
                   <span class="val">{{sturcDetail.plateColor}}</span>
                 </p>
               </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.vehicleStyles">
-                <p>
+              <div class="struc_cdi_line_ytsc" v-if="sturcDetail.vehicleStyles">
+                <p class="line_content">
                   <span class="key">车辆型号</span>
                   <span class="val">{{sturcDetail.vehicleStyles}}</span>
                 </p>
               </div>
 
-              <div class="struc_cdi_line" v-if="sturcDetail.vehicleColor">
-                <p>
+              <div class="struc_cdi_line_ytsc" v-if="sturcDetail.vehicleColor">
+                <p class="line_content">
                   <span class="key">车辆颜色</span>
                   <span class="val">{{sturcDetail.vehicleColor}}</span>
                 </p>
               </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.vehicleClass">
-                <p>
+              <div class="struc_cdi_line_ytsc" v-if="sturcDetail.vehicleClass">
+                <p class="line_content">
                   <span class="key">车辆类型</span>
                   <span class="val">{{sturcDetail.vehicleClass}}</span>
                 </p>
               </div>
               <div
-                class="struc_cdi_line"
+                class="struc_cdi_line_ytsc"
                 v-if="sturcDetail.plateClass || sturcDetail.plateClass === 0"
               >
-                <p>
+                <p class="line_content">
                   <span class="key">号牌类型</span>
                   <span class="val">{{dicFormater(45, sturcDetail.plateClass)}}</span>
                 </p>
@@ -1644,8 +1644,8 @@ export default {
                 margin-left: 0.1rem;
               }
             }
-            .struc_cdi_line {
-              p {
+            .struc_cdi_line_ytsc {
+              .line_content {
                 max-width: 100%;
                 display: inline-block;
                 height: 0.3rem;

@@ -38,12 +38,12 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt="">
+            <img :src="sturcDetail.subStoragePath"  class="bigImg" alt="">
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img ">
-              <img :src="sturcDetail.storagePath" alt="">
+              <img :src="sturcDetail.storagePath"  class="bigImg" alt="">
               <span>全景图</span>
             </div>
             <div class="struc_c_d_info">
@@ -73,7 +73,7 @@
         <div v-show="strucCurTab === 2" class="struc_c_address"></div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt="">
+            <img :src="sturcDetail.subStoragePath" class="bigImg"  alt="">
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
@@ -83,7 +83,7 @@
               <i class="vl_icon vl_icon_control_09" v-else></i>
             </div>
           </div>
-          <div class="download_btn"><el-button @click="downloadVideo(sturcDetail.videoPath)"></el-button>下载视频</div>
+          <div class="download_btn"><a href="javascript:;" @click="downloadVideo(sturcDetail.videoPath)">下载视频</a></div>
         </div>
       </div>
       <div class="struc-list">

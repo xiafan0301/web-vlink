@@ -2061,7 +2061,7 @@ export default {
           draggable: false, // 是否可拖动
           // extData: obj,
           // 自定义点标记覆盖物内容
-          content: `<div class='qyryfx_vl_icon_wrap'> <div class="map_icons ${sClass}"></div> <div class='people_counts_l1 ${level}'> ${device.shotNum}人次 </div> </div>`
+          content: `<div class='qyryfx_vl_icon_wrap' title="点击查询设备抓拍照片"> <div class="map_icons ${sClass}"></div> <div class='people_counts_l1 ${level}'> ${device.shotNum}人次 </div> </div>`
         });
         let _this = this;
         // 给标记绑定一个点击事件
@@ -2080,7 +2080,7 @@ export default {
           draggable: false, // 是否可拖动
           // extData: obj,
           // 自定义点标记覆盖物内容
-          content: `<div class="map_icons ${sClass}"></div>`
+          content: `<div style="cursor:not-allowed;" class="map_icons ${sClass}"></div>`
         });
         this.markerList = [...this.markerList, marker];
       }
@@ -2593,7 +2593,7 @@ export default {
               .shot_times {
                 position: absolute;
                 right: 0;
-                top: 0px;
+                top: -30px;
                 padding: 0 16px;
                 line-height: 20px;
                 border-radius: 10px 0px 0px 10px;
