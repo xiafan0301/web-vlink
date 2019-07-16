@@ -116,7 +116,9 @@
     </div>
     <div class="right">
       <div v-if="!isNull">
-      <h3 class="title">查询结果</h3>
+      <h3 class="title">查询结果 
+        <el-button type="primary" size="small" :loading="isDao" @click="exportList" class="select_btn  fright">导出</el-button>
+      </h3>
       <el-table
       :data="tableData"
       style="width: 100%; padding:20px;">
@@ -181,7 +183,7 @@
 <script>
 import { mapXupuxian } from "@/config/config.js";
 import { cityCode } from "@/utils/data.js";
-import { getVehicleShot,getAllDevice,getGroups,getSnapList} from "@/views/index/api/api.judge.js";
+import { getVehicleShot,getAllDevice,getGroups,getSnapList,exportNightVehicle} from "@/views/index/api/api.judge.js";
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 // import mapselect from "@/views/index/components/common/mapSelect";
 import mapSelector from '@/components/common/mapSelector.vue';
@@ -210,6 +212,7 @@ export default {
           }
         },
         isNull:false,
+        isDao:false,
       pricecode:cityCode,
       input5: "1",
       dialogVisible: false,
@@ -292,6 +295,50 @@ export default {
     
   },
   methods: {
+    //导出
+    exportList(){
+      this.isDao=true
+      if(this.input5==1){
+        this.ruleForm.areaIds =this.value1?this.value1.join(","):''
+      }else{
+        /*   this.selectDevice=[]
+      this.selectBayonet=[] */
+        this.ruleForm.deviceIds  = this.selectDevice?this.selectDevice.join(","):''
+        this.ruleForm.bayonetIds = this.selectBayonet?this.selectBayonet.join(","):''
+      }
+      this.ruleForm.vehicleGroup = this.ruleForm._vehicleGroup?this.ruleForm._vehicleGroup.join(","):''
+      this.ruleForm.dateStart = this.ruleForm.dateStart.indexOf(":")>0?(this.ruleForm.dateStart):(this.ruleForm.dateStart +" 00:00:00")
+      this.ruleForm.dateEnd = this.ruleForm.dateEnd.indexOf(":")>0?(this.ruleForm.dateEnd):(this.ruleForm.dateEnd+" 23:59:59")
+      this.ruleForm.vehicleClass = this.ruleForm.vehicleClass?this.ruleForm.vehicleClass:''
+      this.ruleForm.pageNum =this.pagination.pageNum
+      let d = JSON.stringify(this.ruleForm)
+      d = JSON.parse(d)
+      d.plateNo= this.ruleForm.plateNo;
+      if(!d.plateNo){
+        d.include=null
+      }
+      exportNightVehicle({
+        VehicleSnapQueryDto:d,
+        viewType:2
+      }).then(res=>{
+        if(res && res.data) {
+          const eleA = document.getElementById('export_id');
+          if (eleA) {
+            document.body.removeChild(eleA);
+          }
+          let a = document.createElement('a');
+          a.setAttribute('href', res.data.fileUrl);
+          a.setAttribute('target', '_self');
+          a.setAttribute('id', 'export_id');
+          document.body.appendChild(a);
+          a.click();
+          this.isDao=false
+        }else{
+          this.isDao=false
+           //this.$message.error('导出失败！');
+        }
+      })
+    },
     updataB(){
       //console.log(88888888888);
       //this.isNull=true
@@ -379,6 +426,9 @@ export default {
       d.plateNo= this.ruleForm.plateNo;
       d.pageNum = this.pagination.pageNum;
       d.pageSize = this.pagination.pageSize;
+      if(!d.plateNo){
+        d.include=null
+      }
       if(v){
         d=v
       }else{
@@ -499,6 +549,9 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.fright{
+  float: right;
+}
 .fnull{
   text-align: center;
   line-height: 48px;
@@ -528,7 +581,7 @@ export default {
   width: 100%;
 }
 .title {
-  padding: 10px 20px;
+  padding: 20px 20px;
   border-bottom: solid 1px #dddddd;
   font-size: 16px;
   font-weight: bold;
