@@ -2,7 +2,7 @@
   <div style="height: 100%;">
     <div class="th-breadcrumb">
       <el-breadcrumb separator-class="el-icon-arrow-right">
-        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像检索</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像侦察</el-breadcrumb-item>
         <el-breadcrumb-item :to="{ path: '/portrait/peer-analysis-result?uid=' + $route.query.uid }">同行分析</el-breadcrumb-item>
         <el-breadcrumb-item>同行记录</el-breadcrumb-item>
       </el-breadcrumb>

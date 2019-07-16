@@ -81,7 +81,7 @@
         <div class="insetLeft" @click="hideLeft"></div>
       </div>
     </div>
-    <div :class="['right',{hide:!hideleft}]" id="rightMap"></div>
+    <div :class="['right',{hide:!hideleft}, {'clgj_map_show_pic': mapPicShow}]" id="rightMap"></div>
     <div class="reselt" v-if="reselt">
       <div class="plane insetPadding">
           <h3 class="title">分析结果</h3>
@@ -113,6 +113,7 @@
     </div>
     <!--地图操作按钮-->
     <ul class="map_rrt_u2">
+      <li @click="mapPicShow = !mapPicShow" style="font-size: 14px;" :style="{'color': mapPicShow ? '#0C70F8' : '#999'}">显示图片</li>
       <li @click="resetZoom"><i class="el-icon-aim"></i></li>
       <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
       <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
@@ -132,30 +133,30 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt="">
+            <img class="bigImg"  :src="sturcDetail.subStoragePath" alt="">
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img">
-              <img :src="sturcDetail.storagePath" alt="">
+              <img class="bigImg"  :src="sturcDetail.storagePath" alt="">
               <span>全景图</span>
             </div>
             <div class="struc_c_d_info">
               <h2>抓拍信息</h2>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.shotTime}} <font>抓拍时间</font></span>
+                <span><font>车牌号码</font>{{sturcDetail.plateNo}}</span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.deviceName}} <font>抓拍设备</font></span>
+                <span><font>车辆特征</font>{{sturcDetail.vehicleColor}} {{sturcDetail.vehicleClass}} {{sturcDetail.vehicleBrand}} {{sturcDetail.vehicleStyles}}</span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.address}} <font>抓拍地址</font></span>
+                <span><font>抓拍设备</font>{{sturcDetail.deviceName}}</span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.plateNo}} <font>车牌号</font></span>
+                <span><font>抓拍时间</font>{{sturcDetail.shotTime}}</span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.vehicleColor}} {{sturcDetail.vehicleClass}} {{sturcDetail.vehicleBrand}} {{sturcDetail.vehicleStyles}} <font>特征</font></span>
+                <span><font>抓拍地址</font>{{sturcDetail.address}}</span>
               </div>
               <div class="struc_cdi_line"></div>
             </div>
@@ -164,7 +165,7 @@
         <div v-show="strucCurTab === 2" class="struc_c_address"></div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt="">
+            <img class="bigImg"  :src="sturcDetail.subStoragePath" alt="">
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
@@ -209,6 +210,7 @@
     components: {mapSelector, vlBreadcrumb},
     data() {
       return {
+        mapPicShow: false, // 地图图片显示开关
         loading: false,
         count: 10,
         totalAddressNum: 0,
@@ -640,7 +642,7 @@
               this.showStrucInfo(obj, i)
             })
             path.push(_path);
-            let _content = `<div class="vl_icon vl_icon_sxt"></div>`
+            let _content = `<div class="vl_icon vl_icon_sxt"><p>${obj.shotTime}</p></div>`
             let point = new AMap.Marker({ // 添加自定义点标记
               map: this.amap,
               position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
@@ -654,7 +656,7 @@
         }
         this.amap.setFitView()
         this.drawLine(path);
-      }, // 覆盖物（窗体和checkbox
+      },
       drawLine (path) {
         var polyline = new AMap.Polyline({
           path: path,
@@ -721,6 +723,32 @@
     }
   };
 </script>
+<style lang="scss">
+  #rightMap {
+    .vl_icon.vl_icon_sxt {
+      position: relative;
+      > p {
+        position: absolute; top: 10px; left: 98%;
+        width: auto;
+        word-break:keep-all; white-space:nowrap;
+        font-size: 12px; color: #fff;
+        background-color: rgba(0, 0, 0, 0.4);
+        border-radius: 2px;
+        padding: 2px 5px;
+      }
+    }
+  }
+  .clgj_map_show_pic {
+    .vl_jtc_mk { display: block !important; }
+    &#rightMap {
+      .vl_icon.vl_icon_sxt {
+        > p {
+          display: none;
+        }
+      }
+    }
+  }
+</style>
 <style lang="scss" scoped>
   .map_rrt_u2 {
     position: absolute; right: 30px;
@@ -1214,22 +1242,26 @@
                 line-height: .3rem;
                 margin-bottom: .08rem;
                 border: 1px solid #F2F2F2;
-                background: #FAFAFA;
                 color: #333333;
                 white-space: nowrap;
                 text-overflow: ellipsis;
                 border-radius:3px;
                 font-size: 12px;
                 overflow: hidden;
-                padding: 0 .1rem;
+                padding-right: .1rem;
                 margin-right: .08rem;
                 > i {
                   vertical-align: middle;
                   margin-left: .1rem;
                 }
-                font {
+                > font {
+                  width: 75px;
+                  text-align: center;
+                  border-right: 1px solid #F2F2F2;
                   color: #999999;
-                  margin-left: 20px;
+                  background: #FAFAFA;
+                  display: inline-block;
+                  margin-right: .1rem;
                 }
               }
               p {
@@ -1419,6 +1451,7 @@
     }
   }
   .vl_jtc_mk {
+    display: none;
     width: 218px;
     height: 122px;
     position: relative;

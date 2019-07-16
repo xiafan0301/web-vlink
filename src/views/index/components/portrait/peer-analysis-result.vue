@@ -2,7 +2,7 @@
   <div class="peer-analysis">
     <div class="th-breadcrumb">
       <el-breadcrumb separator-class="el-icon-arrow-right">
-        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像检索</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像侦察</el-breadcrumb-item>
         <el-breadcrumb-item :to="{ path: '/portrait/peer-analysis-list' }">同行分析</el-breadcrumb-item>
         <el-breadcrumb-item>分析结果</el-breadcrumb-item>
       </el-breadcrumb>
@@ -34,7 +34,8 @@
           </li>
           <li>
             <span>同行次数：</span>
-            <span>{{taskDetail.taskWebParam && taskDetail.taskWebParam.number ? taskDetail.taskWebParam.number : '无'}}</span>
+            <span v-if="taskDetail.taskWebParam && taskDetail.taskWebParam.number">不少于{{ taskDetail.taskWebParam.number}}次</span>
+            <span v-else>无</span>
           </li>
           <li>
             <span>创建时间：</span>
