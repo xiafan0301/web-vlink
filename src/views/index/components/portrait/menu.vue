@@ -125,7 +125,7 @@ export default {
         position: absolute; top: 50%; left: 50%;
         width: 118px; height: 118px;
         margin-top: -70px; margin-left: -59px;
-        animation: fadeIn .4s ease-out .4s both;
+        animation: fadeInUp .4s ease-out .4s both;
       }
       > .ptt_li_text {
         display: block;
