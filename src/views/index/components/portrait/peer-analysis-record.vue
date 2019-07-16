@@ -2,7 +2,7 @@
   <div style="height: 100%;">
     <div class="th-breadcrumb">
       <el-breadcrumb separator-class="el-icon-arrow-right">
-        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像侦察</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像侦查</el-breadcrumb-item>
         <el-breadcrumb-item :to="{ path: '/portrait/peer-analysis-result?uid=' + $route.query.uid }">同行分析</el-breadcrumb-item>
         <el-breadcrumb-item>同行记录</el-breadcrumb-item>
       </el-breadcrumb>
@@ -26,8 +26,8 @@
                 <img style="padding-left: 12px;" :src="item.peerStoragePath" alt="">
                 <div class="left-float">目标对象</div>
                 <div class="right-float">同行对象</div>
-                <div class="left-time">{{item.shotTime}}</div>
-                <div class="right-time">{{item.shotTime}}</div>
+                <div class="left-time">{{item.targetShotTime ? item.targetShotTime : '无'}}</div>
+                <div class="right-time">{{item.shotTime ? item.shotTime : '无'}}</div>
               </div>
               <div class="bottom">
                 <p>{{item.deviceName ? item.deviceName : '无'}}</p>
@@ -64,16 +64,16 @@
             <img style="padding-left: 24px;" :src="dialogObj.peerStoragePath" alt="">
             <div class="left-float">目标对象</div>
             <div class="right-float">同行对象</div>
-            <div class="left-time">{{dialogObj.shotTime}}</div>
-            <div class="right-time">{{dialogObj.shotTime}}</div>
+            <div class="left-time">{{dialogObj.targetShotTime ? dialogObj.targetShotTime : '无'}}</div>
+            <div class="right-time">{{dialogObj.shotTime ? dialogObj.shotTime : '无'}}</div>
           </div>
           <div class="bottom">
             <div class="text left-text">
               <p>详细资料</p>
               <p>
                 <!-- <span>王英南</span> -->
-                <span>{{dialogObj.sex}}</span>
-                <span>{{dialogObj.age}}</span>
+                <span>{{dialogObj.targetSex ? dialogObj.targetSex : '无'}}</span>
+                <span>{{dialogObj.targetAge ? dialogObj.targetAge : '无'}}</span>
                 <!-- <span>失踪儿童</span> -->
                 <!-- <span>分组2</span> -->
                 <!-- <br/> -->
@@ -115,6 +115,7 @@ export default {
       compairDialog: false,
       listbox: [],
       list: [],
+      retireObj: {},
       dialogObj: {}
     }
   },
@@ -140,6 +141,7 @@ export default {
               }
               console.log(o)
               if (o && o.personRetrieveDetailDtoList) {
+                this.retireObj = Object.assign({}, o)
                 this.listbox = [...o.personRetrieveDetailDtoList]
                 this.list = [...o.personRetrieveDetailDtoList.slice(0, 12)]
                 // console.log(new Date(this.list[0].shotTime).getTime())

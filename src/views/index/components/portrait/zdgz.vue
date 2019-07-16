@@ -35,17 +35,28 @@
             </el-option>
           </el-select>
        
-        <el-date-picker
-          v-model="searchData.time"
-          class="full"
+
+       <el-date-picker
+         v-model="searchData.time"
           type="daterange"
-          range-separator="-"
+          :clearable="false"
+          class="full vl_date"
           value-format="yyyy-MM-dd"
-          format="yyyy-MM-dd"
           :picker-options="pickerOptions"
+          range-separator="至"
           start-placeholder="开始日期"
           end-placeholder="结束日期">
         </el-date-picker>
+        <!-- <el-date-picker
+          v-model="searchData.time"
+          class="full vl_date"
+          type="daterange"
+          :clearable="false"
+          value-format="yyyy-MM-dd"
+          :picker-options="pickerOptions"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期">
+        </el-date-picker> -->
         <!-- <el-form-item label="区域：" label-width="60px" prop="input5"> -->
             <!-- <el-radio-group v-model="input5" @change="changeTab"> -->
             <el-radio-group v-model="input5" @change="changeTab">
@@ -1043,20 +1054,20 @@ export default {
         //   line-height: .4rem!important;
         // }
         .el-range-editor {
-          width: 100%;
-          padding: 0;
-          > i {
-            display: none;
-          }
+          // width: 100%;
+          // padding: 0;
+          // > i {
+          //   display: none;
+          // }
           > input {
             width: 50%;
           }
-          .el-range-separator {
-            height: .4rem;
-            line-height: .4rem;
-            width: 10px;
-            padding: 0;
-          }
+          // .el-range-separator {
+          //   height: .4rem;
+          //   line-height: .4rem;
+          //   width: 10px;
+          //   padding: 0;
+          // }
         }
         button {
           height: .5rem;

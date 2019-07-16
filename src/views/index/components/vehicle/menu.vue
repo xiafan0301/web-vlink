@@ -36,7 +36,7 @@
           </li>
           <li>
             <router-link :to="{name: 'vehicle_search_lxwf'}">
-              <i class="vl_icon2 vl_icon2_006"></i><span>连续违法</span>
+              <i class="vl_icon2 vl_icon2_006"></i><span>连续违章</span>
             </router-link>
           </li>
           <!-- <li>

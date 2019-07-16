@@ -141,7 +141,7 @@ export default {
         > .show_search {
           position: absolute; top: 48px; left: 0;
           width: 100%;
-          padding-top: 15px;
+          padding: 15px 20px 0 20px;
           /* > div {
             position: relative;
             width: 100%; height: 36px;
@@ -157,9 +157,9 @@ export default {
           > .show_search_se { margin-bottom: 10px; }
           > .show_search_ti {
             position: relative;
-            padding-left: 36px;
             margin-bottom: 10px;
             > span {
+              display: none;
               position: absolute; top: 0px; left: 17px;
               width: 18px;
               color: #666; font-size: 12px;

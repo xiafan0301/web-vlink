@@ -20,7 +20,7 @@
                 <div class="date-comp">
                   <el-form-item label prop="selectDate">
                     <el-date-picker
-                      class="width232"
+                      class="width232 vl_date"
                       v-model="mhscMenuForm.selectDate"
                       type="daterange"
                       range-separator="至"
@@ -350,7 +350,6 @@
                     <span class="val">{{sturcDetail.plateNo}}</span>
                   </p>
                 </div>
-
                 <!-- 5个特征 -->
                 <div class="struc_cdi_line_mhsc" v-if="sturcDetail.plateColor">
                   <p class="line_content">
@@ -358,10 +357,10 @@
                     <span class="val">{{sturcDetail.plateColor}}</span>
                   </p>
                 </div>
-                <div class="struc_cdi_line_mhsc" v-if="sturcDetail.vehicleStyles">
+                <div class="struc_cdi_line_mhsc" v-if="sturcDetail.vehicleModel">
                   <p class="line_content">
                     <span class="key">车辆型号</span>
-                    <span class="val">{{sturcDetail.vehicleStyles}}</span>
+                    <span class="val">{{sturcDetail.vehicleModel}}</span>
                   </p>
                 </div>
 

@@ -9,20 +9,9 @@
     <div class="ccrc_content">
       <div class="ccrc_content_left">
         <div>
-          <el-input v-model="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" clearable></el-input>
+          <el-input v-model.trim="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" clearable></el-input>
         </div>
         <div class="kaishi">
-<!--          <el-date-picker-->
-<!--              v-model="searchData.time"-->
-<!--              type="daterange"-->
-<!--              style="width: 232px"-->
-<!--              range-separator="-"-->
-<!--              value-format="yyyy-MM-dd HH:mm:ss"-->
-<!--              format="yy/MM/dd"-->
-<!--              start-placeholder="开始日期"-->
-<!--              end-placeholder="结束日期"-->
-<!--              :default-time="['00:00:00', '23:59:59']">-->
-<!--          </el-date-picker>-->
           <span style="display: inline-block; width: 14px; margin-right: 4px; color: #999999">开 始</span>
           <el-date-picker
               v-model="value1"
@@ -161,7 +150,7 @@
                   <img :src="item.vehicleDto.subStoragePath" alt="">
                   <p class="time"><i></i>{{item.vehicleDto.shotTime}}</p>
                   <p class="address"><i></i>{{item.vehicleDto.deviceName}}</p>
-                  <p class="address" style="color: red; padding-top: 5px"><i></i>{{item.fakeReason}}</p>
+                  <p class="address1" style="color: red; padding-top: 5px"><i class="vl_icon vl_icon_retrieval_09"></i>{{item.fakeReason}}</p>
                 </div>
                 <el-pagination
                     class="cum_pagination th-center-pagination"
@@ -421,7 +410,9 @@ export default {
             this.showimgnull = false
           }
         }
-        this.searchLoading = false;
+        this.$nextTick(() => {
+          this.searchLoading = false;
+        })
       }).catch( error => {
         console.log(error);
         this.searchLoading = false;
@@ -671,6 +662,18 @@ export default {
             i {
               background: url("../../../../../assets/img/the-daynoint.png") no-repeat;
               background-size: 15px 15px;
+            }
+          }
+          .address1 {
+            display: flex;
+            align-items: center;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            font-size: 0.14rem;
+            i {
+              width: 15px;
+              height: 15px;
             }
           }
         }

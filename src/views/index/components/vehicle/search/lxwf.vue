@@ -3,7 +3,7 @@
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
-        <el-breadcrumb-item>连续违法</el-breadcrumb-item>
+        <el-breadcrumb-item>连续违章</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="vehicle-info-content">
@@ -63,7 +63,17 @@
                   @click="clickTabItem('plateNo')"
                   :class="{red:sou.plateNo}"
                   v-if="photoAnalysis.plateNo"
-                >车牌：{{photoAnalysis.plateNo}}</span>
+                >车牌号：{{photoAnalysis.plateNo}}</span>
+                <span
+                  @click="clickTabItem('plateColor')"
+                  :class="{red:sou.plateColor}"
+                  v-if="photoAnalysis.plateColor"
+                >号牌颜色：{{photoAnalysis.plateColor}}色</span>
+                <span
+                  @click="clickTabItem('vehicleModel')"
+                  :class="{red:sou.vehicleModel}"
+                  v-if="photoAnalysis.vehicleModel"
+                >车辆型号:{{photoAnalysis.vehicleModel}}</span>
                 <span
                   @click="clickTabItem('vehicleColor')"
                   :class="{red:sou.vehicleColor}"
@@ -84,16 +94,12 @@
                   :class="{red:sou.vehicleClass}"
                   v-if="photoAnalysis.vehicleClass"
                 >{{photoAnalysis.vehicleClass}}</span>
-                <span
+                <!-- <span
                   @click="clickTabItem('sunvisor')"
                   :class="{red:sou.sunvisor}"
                   v-if="photoAnalysis.sunvisor"
-                >遮阳板{{photoAnalysis.sunvisor}}</span>
-                <span
-                  @click="clickTabItem('plateColor')"
-                  :class="{red:sou.plateColor}"
-                  v-if="photoAnalysis.plateColor"
-                >车牌{{photoAnalysis.plateColor}}色</span>
+                >遮阳板{{photoAnalysis.sunvisor}}</span> -->
+                
                 <span
                   @click="clickTabItem('_plateClass')"
                   :class="{red:sou._plateClass}"
@@ -160,12 +166,12 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label="遮阳板" label-width="70px" prop>
+                <!-- <el-form-item label="遮阳板" label-width="70px" prop>
                   <el-select v-model="tzscMenuForm.sunVisor" class="width132" placeholder="选择选项">
                     <el-option key="收起" label="收起" value="收起"></el-option>
                     <el-option key="放下" label="放下" value="放下"></el-option>
                   </el-select>
-                </el-form-item>
+                </el-form-item> -->
                 <!-- <el-form-item label="年检标数量" label-width="90px" prop>
                   <el-select
                     v-model="tzscMenuForm.inspectionCount"
@@ -187,12 +193,13 @@
                   <el-date-picker
                     v-model="data1"
                     type="daterange"
-                    class="full"
+                    class="full vl_date"
                     :picker-options="pickerOptions"
                     value-format="yyyy-MM-dd"
                     range-separator="至"
                     start-placeholder="开始日期"
                     end-placeholder="结束日期"
+                    :clearable='false'
                   ></el-date-picker>
                 </div>
               </el-form-item>
@@ -218,14 +225,13 @@
           <div class="search-btn">
             <el-row :gutter="10">
               <el-col :span="12">
-                <el-button style="width: auto;" @click="resetSearch" class="full">重置</el-button>
+                <el-button  @click="resetSearch" class="full">重置</el-button>
               </el-col>
               <el-col :span="12">
                 <el-button
                   type="primary"
                   :loading="searching"
                   @click="getVehicleDetail"
-                  style="width: auto;"
                   class="select_btn full"
                 >分析</el-button>
               </el-col>
@@ -361,7 +367,7 @@ export default {
         carType: "",
         carColor: "",
         carModel: "",
-        sunVisor: "",
+        // sunVisor: "",
         inspectionCount: ""
       },
       searchData: {
@@ -386,7 +392,7 @@ export default {
             start = y - 1 + "-" + (m - 1 + 12) + "-" + d;
           }
           threeMonths = new Date(start).getTime();
-          return time.getTime() > Date.now() || time.getTime() < threeMonths;
+          return time.getTime() > Date.now() ;
         }
       },
       searching: false,
@@ -430,14 +436,14 @@ export default {
       regulationsList: [], //违章信息列表
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       sou: {
-        plateNo: false,
-        vehicleColor: false,
-        vehicleBrand: false,
-        vehicleRoof: false,
-        vehicleClass: false,
-        sunvisor: false,
-        plateColor: false,
-        _plateClass: false
+        plateNo: true,
+        vehicleColor: true,
+         vehicleModel: true,
+        // vehicleRoof: true,
+        vehicleClass: true,
+        // sunvisor: true,
+        plateColor: true,
+        _plateClass: true
       }
     };
   },
@@ -488,9 +494,9 @@ export default {
         if (this.sou.vehicleClass) {
           datas.vehicleClass = this.photoAnalysis.vehicleClass;
         }
-        if (this.sou.sunvisor) {
-          datas.sunvisor = this.photoAnalysis.sunVisor;
-        }
+        // if (this.sou.sunvisor) {
+        //   datas.sunvisor = this.photoAnalysis.sunVisor;
+        // }
         if (this.sou.plateColor) {
           datas.plateColor = this.photoAnalysis.plateColor;
         }
@@ -512,7 +518,7 @@ export default {
           vehicleClass: this.tzscMenuForm.carType,
           vehicleColor: this.tzscMenuForm.carColor,
           vehicleModel: this.tzscMenuForm.carModel,
-          sunvisor: this.tzscMenuForm.sunVisor
+          // sunvisor: this.tzscMenuForm.sunVisor
           // plateClass:this.input4,
         };
         // params.pageNum=this.pagination.pageNum
@@ -737,7 +743,7 @@ export default {
         carType: "",
         carColor: "",
         carModel: "",
-        sunVisor: "",
+        // sunVisor: "",
         inspectionCount: ""
       }),
         this.setDTime();
@@ -765,8 +771,8 @@ export default {
         if (this.sou.vehicleClass) {
           datas.vehicleClass = this.photoAnalysis.vehicleClass;
         }
-        if (this.sou.sunvisor) {
-          datas.sunvisor = this.photoAnalysis.sunVisor;
+        if (this.sou.vehicleModel) {
+          datas.vehicleModel = this.photoAnalysis.vehicleModel;
         }
         if (this.sou.plateColor) {
           datas.plateColor = this.photoAnalysis.plateColor;
@@ -790,7 +796,7 @@ export default {
           vehicleClass: this.tzscMenuForm.carType,
           vehicleColor: this.tzscMenuForm.carColor,
           vehicleModel: this.tzscMenuForm.carModel,
-          sunvisor: this.tzscMenuForm.sunVisor
+          // sunvisor: this.tzscMenuForm.sunVisor
           // plateClass:this.input4,
         };
         params.pageNum=this.pagination.pageNum
