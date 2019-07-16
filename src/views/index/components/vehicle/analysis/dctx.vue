@@ -209,7 +209,7 @@ export default {
   },
   mounted () {
     this.initMap();
-    this.onSearch();
+    // this.onSearch();
   },
   methods: {
     hideLeft() {
@@ -431,41 +431,38 @@ export default {
      * 查询按钮
      */
     onSearch () {
-      // let arr = [];
-      // this.filterObj.vehicleNumberList.forEach(item => {
-      //   if (!reg.test(item.vehicleNumber)) {
-      //     this.hasError = true;
-      //   }
-      //   arr.push(item.vehicleNumber)
-      // });
+      let arr = [];
+      this.filterObj.vehicleNumberList.forEach(item => {
+        if (!reg.test(item.vehicleNumber)) {
+          this.hasError = true;
+        }
+        arr.push(item.vehicleNumber)
+      });
 
-      // if (this.hasError) {
-      //   if (!document.querySelector('.el-message--info')) {
-      //     this.$message.info('请输入正确的车牌号码');
-      //   }
-      //   return;
-      // }
+      if (this.hasError) {
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('请输入正确的车牌号码');
+        }
+        return;
+      }
 
-      // this.filterObj.vehicleNumbers = arr.join(',');
+      this.filterObj.vehicleNumbers = arr.join(',');
 
-      // this.searchLoading = true;
+      this.searchLoading = true;
 
       const params = {
         startTime: formatDate(this.filterObj.startDate),
         endTime: formatDate(this.filterObj.endDate),
-        vehicleNumbers: this.filterObj.vehicleNumbers,
+        vehicleNumbers: this.filterObj.vehicleNumbers
         // startTime: '2019-07-13 00:00:00',
         // endTime: '2019-07-13 13:59:59',
         // vehicleNumbers: "湘LYV366,湘NF8988,湘NJM910,湘NJY056",
-        order:"asc",
-        pageNum: this.pagination.pageNum,
-        pageSize: this.pagination.pageSize
       };
 
       getMultiVehicleList(params)
         .then(res => {
           if (res && res.data) {
-            this.pagination.total = res.data.total;
+            // this.pagination.total = res.data.total;
             this.searchLoading = false;
             this.dataList = res.data;
 
