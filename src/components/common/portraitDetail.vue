@@ -71,7 +71,7 @@
                 </div>
               </div>
               <div class="struc-list" v-if="strucInfoList && strucInfoList.length>1">
-                <swiper :options="swiperOption" ref="mySwiper">
+                <swiper :options="swiperOption" ref="mySwiper" class="btf">
                   <!-- slides -->
                   <swiper-slide v-for="(item, index) in strucInfoList" :key="index + 'isgm'">
                     <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
@@ -79,8 +79,12 @@
                     </div>
                   </swiper-slide>
                   <div class="swiper-button-prev" slot="button-prev"></div>
-                  <div class="swiper-button-next" slot="button-next"></div>
+                  <div class="swiper-button-next" slot="button-next" >
+                    <div class="nextbox" @click="nextPage"></div>
+                  </div>
+                  
                 </swiper>
+                
               </div>
               
   </el-dialog>
@@ -214,7 +218,11 @@ export default {
   },
   methods: {
    
-   
+   nextPage(){
+    //  console.log("1111111111111111");
+     this.$emit("nextPage")
+     
+   },
     /**
      * 弹框地图初始化
      */
@@ -291,6 +299,12 @@ export default {
 
 </style>
 <style lang="scss" >
+.nextbox{
+  height: 60px;
+  width: 40px;
+  
+ 
+}
  html {font-size: 100px;}
   @media screen and (min-width: 960px) and (max-width: 1119px) {html {font-size: 60px !important;}}
   @media screen and (min-width: 1200px) and (max-width: 1439px) {html {font-size: 70px !important;}}

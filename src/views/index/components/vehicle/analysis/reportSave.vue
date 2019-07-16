@@ -1,7 +1,7 @@
 <template>
   <div id="vehicle_report_save_c">
     <div>
-      <div class="vc_rep_c_tt">车辆侦察报告 <span v-if="clInfo">- {{clInfo.plateno}}</span></div>
+      <div class="vc_rep_c_tt">车辆侦察报告 <span v-if="clInfo">- {{pn}}</span></div>
       <div class="vc_rep_c_ti"><span>{{time[0] | fmTimestamp('yyyy年MM月dd日')}}&nbsp;-&nbsp;{{time[1] | fmTimestamp('yyyy年MM月dd日')}}</span></div>
       <!-- 车辆档案信息-车辆信息  showType 1 -->
       <div class="vc_rep_cl" id="report_showtype_1">
@@ -300,7 +300,9 @@ export default {
 
       zoom: 11,
       yjcmMap: null,
-      clgjMap: null
+      clgjMap: null,
+
+      pn: ''
 
     }
   },
@@ -316,6 +318,7 @@ export default {
     $('#app').css({ 'height': 'auto' });
     $('#app').css({ 'height': 'auto' });
     $('title').text('车辆侦察报告');
+    this.pn = this.$route.query.pn;
     this.time = [this.$route.query.st, this.$route.query.et];
     this.initClgjMap();
     this.initYjcmMap();

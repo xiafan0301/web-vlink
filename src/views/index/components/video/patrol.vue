@@ -11,7 +11,7 @@
           </ul>
           <div class="show_content" v-show="showConTitle === 3">
             <div class="show_search">
-              <div style="margin-left: 7%; width: 86%; padding-bottom: 15px;">
+              <div style="padding-bottom: 15px;">
                 <el-input
                   placeholder="请输入设备或区域名称"
                   size="small"
@@ -67,7 +67,7 @@
           </div>
           <div class="show_content" v-show="showConTitle === 1">
             <div class="show_search">
-              <div style="margin-left: 8%; width: 84%;">
+              <div style="">
                 <el-input
                   placeholder="请输入设备或分组名称"
                   size="small"

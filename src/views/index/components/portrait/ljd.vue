@@ -50,10 +50,11 @@
             <el-date-picker
               v-model="ruleForm.data1"
               type="daterange"
-              class="full"
+              class="full vl_date"
               value-format="yyyy-MM-dd"
               :picker-options="pickerOptions"
               range-separator="至"
+              :clearable="false"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
             ></el-date-picker>
@@ -127,6 +128,11 @@
       </div>
     </div>
     <div :class="['right',{hide:!hideleft}]" id="mapBox"></div>
+    <ul class="map_rrt_u2">
+        <li  @click="resemt"><i class="el-icon-aim"></i></li>
+        <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
+        <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
+      </ul>
     <div class="reselt" v-if="reselt">
       <div class="plane insetPadding">
         <h3 class="title">分析结果</h3>
@@ -316,7 +322,17 @@ export default {
     // this.getAllBayonetList(); //查询所有的卡口
   },
   methods: {
-
+    mapZoomSet(val) {
+      if (this.amap) {
+        this.amap.setZoom(this.amap.getZoom() + val);
+      }
+    },
+    resemt(){
+      if (this.map) {
+          this.map.setZoomAndCenter(14, mapXupuxian.center);
+        }
+      
+    },
     setDTime () {
       let date = new Date();
       let curDate = date.getTime();
@@ -1094,6 +1110,29 @@ export default {
     padding-bottom: 10px;
     margin-top: 10px;
     border-bottom: solid 1px #f2f2f2;
+  }
+  .map_rrt_u2 {
+    position: absolute; right: 30px;
+    bottom: 30px;
+    margin-top: .2rem;
+    font-size: 26px;
+    background: #ffffff;
+    width: 78px;
+    padding: 0 10px;
+    > li {
+      line-height: 70px;
+      text-align: center;
+      cursor: pointer;
+      border-bottom: 1px solid #F2F2F2;
+      > i {
+        margin-top: 0;
+        display: inline-block;
+      }
+      color: #999999;
+      &:hover {
+        color: #0C70F8;
+      }
+    }
   }
 </style>
 <style lang="scss">

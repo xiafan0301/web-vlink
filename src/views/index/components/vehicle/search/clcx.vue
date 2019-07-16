@@ -21,7 +21,7 @@
               type="date"
               placeholder="开始时间"
               :picker-options="pickerOptions"
-              class="full"
+              class="full vl_date"
               value-format="yyyy-MM-dd"
             ></el-date-picker>
           </el-form-item>
@@ -31,7 +31,7 @@
               type="date"
               :picker-options="pickerOptions"
               placeholder="结束时间"
-              class="full"
+              class="full vl_date vl_date_end"
               value-format="yyyy-MM-dd"
             ></el-date-picker>
           </el-form-item>
@@ -135,7 +135,7 @@
       </el-table-column>
       <el-table-column
         prop="vehicleGroup"
-        label="车辆类别">
+        label="车辆分组">
       </el-table-column>
       <el-table-column
         label="是否是布控车辆">
@@ -211,7 +211,7 @@ export default {
             return time.getTime() > Date.now() || time.getTime() < threeMonths;
           }
         },
-        isNull:false,
+        isNull:true,
         isDao:false,
       pricecode:cityCode,
       input5: "1",
@@ -267,31 +267,31 @@ export default {
     this.getGroups()
     let dic=this.dicFormater(dataList.vehicleType);
     this.vehicleOptions= [...dic[0].dictList]
-    let vd= JSON.parse(localStorage.getItem("searchD"))
-    if(vd && this.$route.query.dateStart){
-      this.isNull=false;
-      //this.getSnapList(vd)
-      this.ruleForm= {
-        dateStart:this.$route.query.dateStart,
-        dateEnd:this.$route.query.dateEnd,
-        _vehicleGroup:this.$route.query.vehicleGroup?this.$route.query.vehicleGroup.split(","):'',
-        vehicleClass:this.$route.query.vehicleClass,
-        include:this.$route.query.include,
-        _include:0,
-        plateNo:this.$route.query.plateNo,
-        pageNum:1,
-        pageSize:10,
-      }
-      this.value1 = this.$route.query.areaIds?this.$route.query.areaIds.split(","):''
-      let da=  JSON.parse(localStorage.getItem("clcxData"))
-      let numb= JSON.parse(localStorage.getItem("clcxPage"))
-      // this.totalData = da
-      // this.pagination.total=da.length
-      this.pagination.pageNum = numb
-      // this.tableData= this.totalData.slice((numb-1)*10,10*numb)
+    // let vd= JSON.parse(localStorage.getItem("searchD"))
+    // if(vd && this.$route.query.dateStart){
+    //   this.isNull=false;
+    //   //this.getSnapList(vd)
+    //   this.ruleForm= {
+    //     dateStart:this.$route.query.dateStart,
+    //     dateEnd:this.$route.query.dateEnd,
+    //     _vehicleGroup:this.$route.query.vehicleGroup?this.$route.query.vehicleGroup.split(","):'',
+    //     vehicleClass:this.$route.query.vehicleClass,
+    //     include:this.$route.query.include,
+    //     _include:0,
+    //     plateNo:this.$route.query.plateNo,
+    //     pageNum:1,
+    //     pageSize:10,
+    //   }
+    //   this.value1 = this.$route.query.areaIds?this.$route.query.areaIds.split(","):''
+    //   let da=  JSON.parse(localStorage.getItem("clcxData"))
+    //   let numb= JSON.parse(localStorage.getItem("clcxPage"))
+    //   // this.totalData = da
+    //   // this.pagination.total=da.length
+    //   this.pagination.pageNum = numb
+    //   // this.tableData= this.totalData.slice((numb-1)*10,10*numb)
      
-    }
-    this.submitForm()
+    // }
+    //this.submitForm()
     
   },
   methods: {
@@ -318,7 +318,7 @@ export default {
         d.include=null
       }
       exportNightVehicle({
-        VehicleSnapQueryDto:d,
+        vehicleSnapQueryDto:d,
         viewType:2
       }).then(res=>{
         if(res && res.data) {
@@ -344,7 +344,7 @@ export default {
       //this.isNull=true
       this.tableData = [];
       this.resetForm()
-      this.submitForm()
+     // this.submitForm()
     },
     //设置默认时间
     setDTime() {
@@ -371,9 +371,9 @@ export default {
       MapGETmonitorList(d).then(res=>{
         if(res && res.data){
           this.options.push(res.data)
-          res.data.areaTreeList.forEach(el=>{
-            this.value1.push(el.areaId)
-          })
+          // res.data.areaTreeList.forEach(el=>{
+          //   this.value1.push(el.areaId)
+          // })
         }
       })
     },
@@ -549,6 +549,10 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.carCold{
+  justify-content: space-between;
+    display: flex;
+}
 .fright{
   float: right;
 }
@@ -597,7 +601,8 @@ export default {
 
 .left {
   width: 272px;
-  height: calc(100% - 55px);
+  height: auto;
+  min-height: calc(100% - 55px);
   background-color: #ffffff;
   float: left;
   z-index: 1;

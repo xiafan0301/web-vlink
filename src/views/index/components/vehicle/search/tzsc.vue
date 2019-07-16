@@ -89,7 +89,7 @@
               <div class="selectDate date-comp">
                 <el-form-item label prop="selectDate">
                   <el-date-picker
-                    class="width232"
+                    class="width232 vl_date"
                     v-model="tzscMenuForm.selectDate"
                     type="daterange"
                     range-separator="至"
@@ -155,8 +155,10 @@
                       :key="'characteristic_list' + index"
                       @click="item.checked = !item.checked"
                     >
+                      <!-- 车牌号码 -->
+                      <span v-if="item.plateNo">{{ '车牌号码:' + item.name }}</span>
                       <!-- 车牌颜色 -->
-                      <span v-if="item.plateColor">{{ '车牌颜色:' + item.name }}</span>
+                      <span v-else-if="item.plateColor">{{ '车牌颜色:' + item.name }}</span>
                       <!-- 车辆型号 -->
                       <span v-else-if="item.vehicleStyles">{{item.name}}</span>
                       <!-- 车辆颜色 -->
@@ -191,19 +193,7 @@
                   </el-select>
                 </el-form-item>
                 <el-form-item prop="carModel">
-                  <el-select
-                    v-model="tzscMenuForm.carModel"
-                    clearable
-                    class="width232"
-                    placeholder="选择车辆型号"
-                  >
-                    <el-option
-                      v-for="item in carModelOptions"
-                      :key="item.enumField"
-                      :label="item.enumValue"
-                      :value="item.enumValue"
-                    ></el-option>
-                  </el-select>
+                  <el-cascader class="width232" clearable separator="-" placeholder="选择车辆型号" v-model="tzscMenuForm.carModel" :options="carModelOptions"></el-cascader>
                 </el-form-item>
                 <el-form-item prop="carColor">
                   <el-select
@@ -428,9 +418,9 @@
             </div>
             <div class="struc_c_d_info">
               <vue-scroll>
-              <h2>抓拍信息</h2>
-              <!-- 特征展示框 -->
-              <!-- <div class="struc_cdi_box">
+                <h2>抓拍信息</h2>
+                <!-- 特征展示框 -->
+                <!-- <div class="struc_cdi_box">
                 <div
                   class="item"
                   v-if="sturcDetail.plateReliability"
@@ -452,67 +442,67 @@
                   class="item"
                   v-if="sturcDetail.vehicleRoof"
                 >{{ '车顶(天窗)：' + sturcDetail.vehicleRoof}}</div>
-              </div>-->
-              <!-- 车辆的信息栏 -->
-              <div class="struc_cdi_line_tzsc" v-if="sturcDetail.shotTime">
-                <p class="line_content">
-                  <span class="key">抓拍时间</span>
-                  <span class="val">{{sturcDetail.shotTime}}</span>
-                </p>
-              </div>
-              <div class="struc_cdi_line_tzsc" v-if="sturcDetail.deviceName">
-                <p class="line_content">
-                  <span class="key">抓拍设备</span>
-                  <span class="val">{{sturcDetail.deviceName}}</span>
-                </p>
-              </div>
-              <div class="struc_cdi_line_tzsc" v-if="sturcDetail.address">
-                <p class="line_content">
-                  <span class="key" title="抓拍地点">抓拍地点</span>
-                  <span class="val">{{sturcDetail.address}}</span>
-                </p>
-              </div>
-              <div class="struc_cdi_line_tzsc" v-if="sturcDetail.plateNo">
-                <p class="line_content">
-                  <span class="key">车牌号码</span>
-                  <span class="val">{{sturcDetail.plateNo}}</span>
-                </p>
-              </div>
-              <!-- 5个特征 -->
-              <div class="struc_cdi_line_tzsc" v-if="sturcDetail.plateColor">
-                <p class="line_content">
-                  <span class="key">车牌颜色</span>
-                  <span class="val">{{sturcDetail.plateColor}}</span>
-                </p>
-              </div>
-              <div class="struc_cdi_line_tzsc" v-if="sturcDetail.vehicleStyles">
-                <p class="line_content">
-                  <span class="key">车辆型号</span>
-                  <span class="val">{{sturcDetail.vehicleStyles}}</span>
-                </p>
-              </div>
+                </div>-->
+                <!-- 车辆的信息栏 -->
+                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.shotTime">
+                  <p class="line_content">
+                    <span class="key">抓拍时间</span>
+                    <span class="val">{{sturcDetail.shotTime}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.deviceName">
+                  <p class="line_content">
+                    <span class="key">抓拍设备</span>
+                    <span class="val">{{sturcDetail.deviceName}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.address">
+                  <p class="line_content">
+                    <span class="key" title="抓拍地点">抓拍地点</span>
+                    <span class="val">{{sturcDetail.address}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.plateNo">
+                  <p class="line_content">
+                    <span class="key">车牌号码</span>
+                    <span class="val">{{sturcDetail.plateNo}}</span>
+                  </p>
+                </div>
+                <!-- 5个特征 -->
+                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.plateColor">
+                  <p class="line_content">
+                    <span class="key">车牌颜色</span>
+                    <span class="val">{{sturcDetail.plateColor}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.vehicleModel">
+                  <p class="line_content">
+                    <span class="key">车辆型号</span>
+                    <span class="val">{{sturcDetail.vehicleModel}}</span>
+                  </p>
+                </div>
 
-              <div class="struc_cdi_line_tzsc" v-if="sturcDetail.vehicleColor">
-                <p class="line_content">
-                  <span class="key">车辆颜色</span>
-                  <span class="val">{{sturcDetail.vehicleColor}}</span>
-                </p>
-              </div>
-              <div class="struc_cdi_line_tzsc" v-if="sturcDetail.vehicleClass">
-                <p class="line_content">
-                  <span class="key">车辆类型</span>
-                  <span class="val">{{sturcDetail.vehicleClass}}</span>
-                </p>
-              </div>
-              <div
-                class="struc_cdi_line_tzsc"
-                v-if="sturcDetail.plateClass || sturcDetail.plateClass === 0"
-              >
-                <p class="line_content">
-                  <span class="key">号牌类型</span>
-                  <span class="val">{{dicFormater(45, sturcDetail.plateClass)}}</span>
-                </p>
-              </div>
+                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.vehicleColor">
+                  <p class="line_content">
+                    <span class="key">车辆颜色</span>
+                    <span class="val">{{sturcDetail.vehicleColor}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.vehicleClass">
+                  <p class="line_content">
+                    <span class="key">车辆类型</span>
+                    <span class="val">{{sturcDetail.vehicleClass}}</span>
+                  </p>
+                </div>
+                <div
+                  class="struc_cdi_line_tzsc"
+                  v-if="sturcDetail.plateClass || sturcDetail.plateClass === 0"
+                >
+                  <p class="line_content">
+                    <span class="key">号牌类型</span>
+                    <span class="val">{{dicFormater(45, sturcDetail.plateClass)}}</span>
+                  </p>
+                </div>
               </vue-scroll>
             </div>
           </div>
@@ -564,6 +554,8 @@ import {
   JtcGETAppendixInfoList
 } from "../../../api/api.judge.js"; // 图片上传接口
 
+import { getVehicleList } from "../../../api/api.base.js";
+
 import {
   getFeatureSearch,
   getPhotoAnalysis
@@ -594,7 +586,7 @@ export default {
         licenseColor: "",
         carType: "",
         carColor: "",
-        carModel: "",
+        carModel: [],
         sunVisor: "",
         inspectionCount: ""
       },
@@ -691,11 +683,11 @@ export default {
       //   }
       // ],
       characterTypes: [
+        "plateNo", // 车牌号
         "plateColor", // 车牌颜色
-        // "plateNo", // 车牌号
-        "vehicleClass", // 汽车类型（越野啥的）
         "vehicleStyles", // 汽车的型号
         "vehicleColor", // 汽车颜色
+        "vehicleClass", // 汽车类型（越野啥的）
         "plateClass" // 号牌类型
       ],
       options: [
@@ -832,14 +824,27 @@ export default {
       // sunvisorOptions: [], // 遮阳板
       this.plateClassOptions = this.dicFormater(45)[0].dictList;
       this.plateColorOptions = this.dicFormater(46)[0].dictList;
-
       this.vehicleClassOptions = this.dicFormater(44)[0].dictList;
-      this.vehicleColorOptions = this.dicFormater(17)[0].dictList;
+      this.vehicleColorOptions = this.dicFormater(47)[0].dictList;
+      getVehicleList().then(res => {
+        // console.log("联动数据", res);
+        this.carModelOptions = res.data.map(item => {
+          item.value = item.brand;
+          item.label = item.brand;
+          item.children = [];
+          for (let i = 0; i < item.typeList.length; i++) {
+            item.children.push({ value: item.typeList[i], label: item.typeList[i] })
+          }
+          delete item.typeList;
+          return item;
+        })
+      });
     },
     getStrucInfo(isClick = false) {
       // 根据特征数组来获取到检索的结果
       this.$refs.tzscMenuForm.validate(valid => {
         if (valid) {
+          // console.log('表单数据', this.tzscMenuForm);
           if (isClick) {
             this.getStrucInfoLoading = true; // 打开加载效果
           }
@@ -875,7 +880,7 @@ export default {
                 // "sunvisor": this.tzscMenuForm.sunVisor || null, // 遮阳板
                 // "descOfRearItem": this.tzscMenuForm.inspectionCount || null, // 年检标数量
                 vehicleNumber: null, // 车牌号码
-                vehicleModel: null // 车辆型号
+                vehicleModel: this.tzscMenuForm.carModel.length > 0 ? this.tzscMenuForm.carModel.join('-') : null // 车辆型号
               },
               pageNum: this.pageNum,
               pageSize: this.pageSize

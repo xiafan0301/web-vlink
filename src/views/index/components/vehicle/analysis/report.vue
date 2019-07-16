@@ -6,6 +6,7 @@
         <div class="vc_rep_sc">
           <el-input style="width: 200px;" v-model="searchForm.plateNo" placeholder="请输入车牌信息" size="small"></el-input>&nbsp;&nbsp;&nbsp;&nbsp;
           <el-date-picker style="width: 280px;" size="small" 
+            class="vl_date"
             v-model="searchForm.time"
             type="daterange"
             align="left"

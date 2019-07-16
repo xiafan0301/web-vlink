@@ -115,3 +115,14 @@ export function getDeviceByBayonetUids(params) {
     mode: baseModeName
   })
 }
+
+/**
+ * 车辆品牌/型号列表   
+ */
+export function getVehicleList() {
+  return request({
+    url: '/vehicle-dict/list',
+    method: 'get',
+    mode: baseModeName
+  })
+}

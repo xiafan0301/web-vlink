@@ -34,6 +34,7 @@
       </div>
       <div class="vl_jtc_search">
         <el-date-picker
+          class="vl_date"
           v-model="searchData.time"
           type="daterange"
           class="vl_date"

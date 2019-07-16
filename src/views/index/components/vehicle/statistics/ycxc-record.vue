@@ -27,7 +27,7 @@
           </div>
         </div>
         <div class="list-box">
-          <div class="list-item" v-for="item in dataList" :key="item.id" @click="onOpenDetail(item)">
+          <div class="list-item" v-for="item in dataList" :key="item.uid" @click="onOpenDetail(item)">
             <img :src="item.subStoragePath" alt="">
             <p class="time"><i></i>{{item.shotTime}}</p>
             <p class="address"><i></i>抓拍设备:{{item.deviceName}}</p>
@@ -119,7 +119,7 @@
         <swiper :options="swiperOption" ref="mySwiper">
           <!-- slides -->
           <swiper-slide v-for="(item, index) in allDataList" :key="index + 'isgm'">
-            <div class="swiper_img_item" :class="{'active': item.id === curImgIndex}" @click="imgListTap(item)">
+            <div class="swiper_img_item" :class="{'active': item.uid === curImgIndex}" @click="imgListTap(item)">
               <img style="display: block; width: 100%; height: .88rem;" :src="item.subStoragePath" alt="">
             </div>
           </swiper-slide>
@@ -355,7 +355,7 @@ export default {
     onOpenDetail (obj) {
       this.sturcDetail = obj;
       this.strucDetailDialog = true;
-      // this.curImgIndex = obj.id;
+      this.curImgIndex = obj.uid;
       this.$nextTick(() => {
         this.initMap(obj);
       })
@@ -372,7 +372,7 @@ export default {
      */
     imgListTap (obj) {
       this.sturcDetail = {};
-      this.curImgIndex = obj.id;
+      this.curImgIndex = obj.uid;
       this.sturcDetail = obj;
       this.$nextTick(() => {
         this.initMap(obj);

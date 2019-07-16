@@ -1147,3 +1147,23 @@ html {
   background: rgba(0, 0, 0, 0.6);
   animation: fadeIn 0.2s ease-out 0.2s both;
 }
+
+.vl_date .el-icon-date:before {
+  content: "从" !important;
+  color: #999;
+}
+.vl_date.vl_date_end .el-icon-date:before {
+  content: "至" !important;
+  color: #999;
+}
+.vl_date .el-icon-time:before {
+  content: "从" !important;
+  color: #999;
+}
+.vl_date.vl_date_end .el-icon-time:before {
+  content: "至" !important;
+  color: #999;
+}
+.vl_date .el-range-separator {
+  color: #999 !important;
+}
