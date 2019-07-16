@@ -6,7 +6,6 @@
           <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像侦查</el-breadcrumb-item>
           <el-breadcrumb-item>同行分析</el-breadcrumb-item>
         </el-breadcrumb>
-        <el-button @click="skipAddTaskPage" class="th-button-export-color">新建任务</el-button>
       </div>
       <div class="frequent-a-content">
         <ul class="tab-menu">
@@ -45,6 +44,7 @@
             </el-form-item>
           </el-form>
           <div class="divide"></div>
+          <el-button @click="skipAddTaskPage" class="th-button-export-color">新建任务</el-button>
         </div>
         <div class="content-box">
           <div class="table_box">

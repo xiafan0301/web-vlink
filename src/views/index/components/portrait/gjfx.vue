@@ -43,7 +43,7 @@
               style="padding-left: 0px;padding-right: 0px;"
               v-model="ruleForm.data1"
               type="daterange"
-              class="full data_range"
+              class="full data_range vl_date"
               value-format="yyyy-MM-dd"
               :picker-options="pickerOptions"
               range-separator="至"

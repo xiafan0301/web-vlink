@@ -89,7 +89,7 @@
               <div class="selectDate date-comp">
                 <el-form-item label prop="selectDate">
                   <el-date-picker
-                    class="width232"
+                    class="width232 vl_date"
                     v-model="tzscMenuForm.selectDate"
                     type="daterange"
                     range-separator="至"

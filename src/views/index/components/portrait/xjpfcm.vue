@@ -111,8 +111,9 @@
             <!-- 时间 -->
             <el-form-item prop="startTime">
               <div class="time-search">
-                <p>开始</p>
+                <!-- <p>开始</p> -->
                 <el-date-picker
+                  class="vl_date"
                   v-model="searchData.startTime"
                   type="datetime"
                   value-format="yyyy-MM-dd HH:mm:ss"
@@ -123,8 +124,9 @@
             </el-form-item>
             <el-form-item prop="endTime">
               <div class="time-search">
-                <p>结束</p>
+                <!-- <p>结束</p> -->
                 <el-date-picker
+                  class="vl_date vl_date_end"
                   v-model="searchData.endTime"
                   :picker-options="endDateOpt"
                   value-format="yyyy-MM-dd HH:mm:ss"
@@ -1747,7 +1749,7 @@ export default {
   .time-search {
     .el-date-editor.el-input,
     .el-date-editor.el-input__inner {
-      width: 212px;
+      width: 232px;
     }
   }
   //搜索按钮

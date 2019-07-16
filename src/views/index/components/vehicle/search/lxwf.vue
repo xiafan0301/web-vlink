@@ -193,12 +193,13 @@
                   <el-date-picker
                     v-model="data1"
                     type="daterange"
-                    class="full"
+                    class="full vl_date"
                     :picker-options="pickerOptions"
                     value-format="yyyy-MM-dd"
                     range-separator="至"
                     start-placeholder="开始日期"
                     end-placeholder="结束日期"
+                    :clearable='false'
                   ></el-date-picker>
                 </div>
               </el-form-item>
@@ -224,14 +225,13 @@
           <div class="search-btn">
             <el-row :gutter="10">
               <el-col :span="12">
-                <el-button style="width: auto;" @click="resetSearch" class="full">重置</el-button>
+                <el-button  @click="resetSearch" class="full">重置</el-button>
               </el-col>
               <el-col :span="12">
                 <el-button
                   type="primary"
                   :loading="searching"
                   @click="getVehicleDetail"
-                  style="width: auto;"
                   class="select_btn full"
                 >分析</el-button>
               </el-col>
