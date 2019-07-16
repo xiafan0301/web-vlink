@@ -211,7 +211,7 @@ export default {
             return time.getTime() > Date.now() || time.getTime() < threeMonths;
           }
         },
-        isNull:false,
+        isNull:true,
         isDao:false,
       pricecode:cityCode,
       input5: "1",
@@ -291,7 +291,7 @@ export default {
       // this.tableData= this.totalData.slice((numb-1)*10,10*numb)
      
     }
-    this.submitForm()
+    //this.submitForm()
     
   },
   methods: {
@@ -371,9 +371,9 @@ export default {
       MapGETmonitorList(d).then(res=>{
         if(res && res.data){
           this.options.push(res.data)
-          res.data.areaTreeList.forEach(el=>{
-            this.value1.push(el.areaId)
-          })
+          // res.data.areaTreeList.forEach(el=>{
+          //   this.value1.push(el.areaId)
+          // })
         }
       })
     },
@@ -549,6 +549,10 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.carCold{
+  justify-content: space-between;
+    display: flex;
+}
 .fright{
   float: right;
 }

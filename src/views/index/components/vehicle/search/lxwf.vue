@@ -430,14 +430,14 @@ export default {
       regulationsList: [], //违章信息列表
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       sou: {
-        plateNo: false,
-        vehicleColor: false,
-        vehicleBrand: false,
-        vehicleRoof: false,
-        vehicleClass: false,
-        sunvisor: false,
-        plateColor: false,
-        _plateClass: false
+        plateNo: true,
+        vehicleColor: true,
+        // vehicleBrand: true,
+        // vehicleRoof: true,
+        vehicleClass: true,
+        sunvisor: true,
+        plateColor: true,
+        _plateClass: true
       }
     };
   },
