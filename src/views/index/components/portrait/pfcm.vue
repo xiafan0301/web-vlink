@@ -33,6 +33,7 @@
             </el-form-item>
             <el-form-item prop="reportTime" class="time">
               <el-date-picker
+                class="vl_date"
                 v-model="taskForm.reportTime"
                 type="datetimerange"
                 value-format="yyyy-MM-dd HH:mm:ss"
