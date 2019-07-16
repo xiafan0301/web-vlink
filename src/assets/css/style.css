@@ -1152,7 +1152,7 @@ html {
   content: "从" !important;
   color: #999;
 }
-.vl_date。vl_date_end .el-icon-date:before {
+.vl_date.vl_date_end .el-icon-date:before {
   content: "至" !important;
   color: #999;
 }
