@@ -28,32 +28,32 @@
             <div class="struc_c_d_info">
               <h2>对比信息</h2>
               <div class="struc_cdi_line simple_line">
-                <span>
+                <p>
                   <b>抓拍时间</b>
-                  {{sturcDetail.shotTime}}
-                </span>
+                  <span>{{sturcDetail.shotTime}}</span>
+                </p>
               </div>
               <div class="struc_cdi_line simple_line">
-                <span class="tz">
+                <p>
                   <b>抓拍设备</b>
-                  {{sturcDetail.deviceName}}
-                </span>
+                  <span>{{sturcDetail.deviceName}}</span>
+                </p>
               </div>
               <div class="struc_cdi_line">
-                <span class="tz">
+                <p>
                   <b>抓拍地址</b>
-                  {{sturcDetail.address}}
-                </span>
+                  <span>{{sturcDetail.address}}</span>
+                </p>
               </div>
               <div class="struc_cdi_line">
-                <span class="tz" v-if="sturcDetail.features">
+                <p v-if="sturcDetail.features">
                   <b>特征</b>
-                  {{sturcDetail.features}}
-                </span>
-                <span class="tz" v-else>
+                  <span>{{sturcDetail.features}}</span>
+                </p>
+                <p class="tz" v-else>
                   <b>特征</b>
-                  {{sturcDetail.sex+" "+(sturcDetail.age || "")+" "+ (sturcDetail.baby || "")+ " " + (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+ " " + (sturcDetail.bag || "")+ " " + (sturcDetail.bottomColor || "") +(sturcDetail.bottomType || "") + " "+(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")}}
-                </span>
+                  <span>{{sturcDetail.sex+" "+(sturcDetail.age || "")+" "+ (sturcDetail.baby || "")+ " " + (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+ " " + (sturcDetail.bag || "")+ " " + (sturcDetail.bottomColor || "") +(sturcDetail.bottomType || "") + " "+(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")}}</span>
+                </p>
               </div>
               <div class="struc_cdi_line"></div>
             </div>
@@ -592,51 +592,32 @@ export default {
               }
             }
             .struc_cdi_line {
-              span {
-                /* position: relative; */
+              p {
                 max-width: 100%;
-                display: inline-block;
-                height: 0.5rem;
-                line-height: 0.5rem;
-                margin-bottom: 0.08rem;
-                border: 1px solid #f2f2f2;
-                background: #ffffff;
-                color: #333333;
-                white-space: nowrap;
-                text-overflow: ellipsis;
-                border-radius: 3px;
-                font-size: 12px;
                 overflow: hidden;
+                display: table;
+                min-height: .5rem;
+                margin-bottom: 0.08rem;
                 padding-right: 10px;
                 margin-right: 0.08rem;
+                border: 1px solid #f2f2f2;
+                border-radius: 3px;
+                font-size: 12px;
                 > b {
                   width: 70px;
-                  display: inline-block;
-                  border-right: 1px solid #f2f2f2;
-                  height: 0.5rem;
-                  line-height: 0.5rem;
                   background: #fafafa;
                   color: #999;
                   font-weight: normal;
                   padding-right: 10px;
                   padding-left: 10px;
-                  margin-right: 5px;
+                  display: table-cell;
+                  vertical-align: middle;
+                  border-right: 1px solid #f2f2f2;
                 }
-              }
-              span.tz {
-                white-space: normal;
-                display: flex;
-                overflow: auto;
-                height: auto;
-                align-items: center;
-                line-height: 0.25rem;
-                b {
-                  width: 70px;
-                  flex: none;
-                  white-space: nowrap;
-                  display: inline-block;
-                  height: 0.5rem;
-                  line-height: 0.5rem;
+                >span {
+                  display: table-cell;
+                  vertical-align: middle;
+                  padding-left: 5px;
                 }
               }
             }
