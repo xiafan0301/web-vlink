@@ -17,9 +17,9 @@
             <!-- 选择设备 -->
             <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
             <div class="selected_device" @click="treeTabShow = true;">
-              <i class="el-icon-arrow-down"></i>
-              <!-- <i class="el-icon-arrow-up"></i> -->
-              <div class="device_list" v-if="selectDeviceArr.length > 0">
+              <i class="el-icon-arrow-down" v-show="!treeTabShow"></i>
+              <i class="el-icon-arrow-up" v-show="treeTabShow"></i>
+              <div class="device_list" v-if="selectDeviceArr.length > 0 && !checkAllTree">
                 <span>{{ selectDeviceArr[0]['label'] }}</span>
                 <span
                   v-show="selectDeviceArr.length > 1"
@@ -27,6 +27,7 @@
                   class="device_count"
                 >+{{ selectDeviceArr.length - 1 }}</span>
               </div>
+              <div class="no_device" v-else-if="selectDeviceArr.length > 0 && checkAllTree">全部设备</div>
               <div class="no_device" v-else>选择设备</div>
               <!-- 树tab页面 -->
               <div class="device_tree_tab" v-show="treeTabShow">
