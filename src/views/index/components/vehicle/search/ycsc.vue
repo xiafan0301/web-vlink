@@ -1421,6 +1421,13 @@ export default {
       span {
         color: #999;
       }
+      &:hover {
+        background: #2981f8;
+        border: none;
+      }
+      &:hover span {
+        color: #fff;
+      }
       img {
         width: 100%;
         height: 100%;
