@@ -36,7 +36,7 @@
           </el-select>
        
 
-       <el-date-picker
+       <!-- <el-date-picker
          v-model="searchData.time"
           type="daterange"
           :clearable="false"
@@ -46,17 +46,25 @@
           range-separator="至"
           start-placeholder="开始日期"
           end-placeholder="结束日期">
-        </el-date-picker>
-        <!-- <el-date-picker
-          v-model="searchData.time"
-          class="full vl_date"
-          type="daterange"
-          :clearable="false"
-          value-format="yyyy-MM-dd"
-          :picker-options="pickerOptions"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期">
         </el-date-picker> -->
+            <el-date-picker
+              v-model="searchData.time1"
+              type="date"
+              placeholder="开始时间"
+              :picker-options="pickerOptions"
+              class="full vl_date"
+              :clearable="false"
+              value-format="yyyy-MM-dd"
+            ></el-date-picker>
+            <el-date-picker
+              v-model="searchData.time2"
+              type="date"
+              :clearable="false"
+              :picker-options="pickerOptions"
+              placeholder="结束时间"
+              class="full vl_date vl_date_end"
+              value-format="yyyy-MM-dd"
+            ></el-date-picker>
         <!-- <el-form-item label="区域：" label-width="60px" prop="input5"> -->
             <!-- <el-radio-group v-model="input5" @change="changeTab"> -->
             <el-radio-group v-model="input5" @change="changeTab">
@@ -261,7 +269,8 @@ export default {
         portraitGroupId: '',  // 人员组
         sex: null, // 1男，2女
         ageGroup: null, // 年龄段
-        time: null
+        time1: null,
+        time2: null
       },
       sexList: [
         {value: null, label: '不限'},
@@ -430,7 +439,8 @@ export default {
       let _s = new Date(curDate - curS).getFullYear() +
         "-" + _sm + "-" +_sd;
       let _e = date.getFullYear() + "-" + _em + "-" + _ed;
-      this.searchData.time = [_s, _s]
+      this.searchData.time1 = _s
+      this.searchData.time2 = _s
     },
     resetSearch () {
       this.setDTime()
@@ -446,7 +456,7 @@ export default {
     beginSearch () {
       let _todo = false;
       for (let key in this.searchData) {
-        if (this.searchData[key] && key !== 'time') {
+        if (this.searchData[key] && key !== 'time1') {
           _todo = true;
         }
       }
@@ -460,8 +470,8 @@ export default {
         target: '.se_hi_box'
       })
       let params = {
-        startTime: this.searchData.time[0] + " 00:00:00",
-        endTime: this.searchData.time[1] + " 23:59:59" ,
+        startTime: this.searchData.time1 + " 00:00:00",
+        endTime: this.searchData.time2 + " 23:59:59" ,
         personGroupId: this.searchData.portraitGroupId || "" ,
         // sex: this.searchData.sex || "",
         // age: this.searchData.ageGroup || "" ,
@@ -595,8 +605,8 @@ export default {
         personGroupId:this.searchData.portraitGroupId,
         deviceCode:data.groupName,
         sex:this.searchData.sex,
-        startTime :this.searchData.time?(this.searchData.time[0] + " 00:00:00"):null,
-        endTime :this.searchData.time?(this.searchData.time[1] + " 23:59:59"):null,
+        startTime :this.searchData.time1?(this.searchData.time1 + " 00:00:00"):null,
+        endTime :this.searchData.time2?(this.searchData.time2 + " 23:59:59"):null,
         age:this.searchData.ageGroup,
         // surveillanceId: this.curSXT.surveillanceId ? this.curSXT.surveillanceId : '',
         // deviceId: this.curSXT.deviceId,
