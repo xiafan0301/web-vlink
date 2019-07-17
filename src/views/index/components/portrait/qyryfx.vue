@@ -269,7 +269,7 @@
                   <div class="swiper_contents" v-if="item.currentIndex === sIndex">
                     <div class="shot_times">{{ item.detailList.length + '次'}}</div>
                     <div class="img_warp">
-                      <img :src="sItem.upPhotoUrl" alt />
+                      <img :src="sItem.upPhotoUrl" title="点击放大图片" class="bigImg" alt />
                     </div>
                     <div class="similarity">
                       <p class="similarity_count">{{sItem.semblance}}</p>
@@ -290,7 +290,7 @@
                       </div>
                     </div>
                     <div class="img_warp">
-                      <img :src="sItem.subStoragePath" alt />
+                      <img :src="sItem.subStoragePath" title="点击放大图片" class="bigImg" alt />
                     </div>
                     <div class="people_message">
                       <h2 class="name">{{item.name}}</h2>

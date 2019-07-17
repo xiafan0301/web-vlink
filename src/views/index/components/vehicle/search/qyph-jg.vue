@@ -163,7 +163,7 @@
         this.$router.push({ name: 'control_create', query: {imgurl: data.subStoragePath, plateNo: data.plateNo} })
       },
       getTheList () {
-        let params = this.$route.query;
+        let params = {where: this.$route.query};
         params.pageNum = this.pagination.pageNum;
         params.pageSize = this.pagination.pageSize;
         params.firstSetted = true;
@@ -176,7 +176,7 @@
             console.log(res)
             if(res.data.list.length === 0) {
               this.$message.info('抱歉，没有找到匹配结果');
-              this.$router.push({name: "vehicle_search_qyph"})
+//              this.$router.push({name: "vehicle_search_qyph"})
             }
             this.strucInfoList = res.data.list;
             this.pagination.pageNum = res.data.pageNum;
@@ -184,13 +184,13 @@
           } else {
             if(res.data.list.length === 0) {
               this.$message.info('抱歉，没有找到匹配结果');
-              this.$router.push({name: "vehicle_search_qyph"})
+//              this.$router.push({name: "vehicle_search_qyph"})
             }
           }
         }).catch(err => {
           this.$_hideLoading();
           this.$message.info('抱歉，没有找到匹配结果');
-          this.$router.push({name: "vehicle_search_qyph"})
+//          this.$router.push({name: "vehicle_search_qyph"})
         })
       },
       searchSubmit () {

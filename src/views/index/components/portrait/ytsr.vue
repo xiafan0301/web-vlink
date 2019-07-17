@@ -44,7 +44,7 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期">
         </el-date-picker>
-        <div><el-input style="width: 192px;" oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100" v-model="searchData.minSemblance" placeholder="相似度"></el-input> - 100</div>
+        <div class="per_semblance"><span>相似度</span><el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100" v-model="searchData.minSemblance"></el-input> <i></i> 100</div>
         <el-select
           v-model="devIdData"
           multiple
@@ -52,6 +52,7 @@
           @remove-tag="removeCamera"
           @click.native="vChange"
           collapse-tags
+          style="width: 100%"
           :popper-append-to-body="false"
           placeholder="选择监控">
           <el-option value="0" label=" "></el-option>
@@ -269,7 +270,7 @@
         defaultTreeKes: [],
         searchData: {
           time: null,
-          minSemblance: null, // 最小相似度
+          minSemblance: 85, // 最小相似度
           devIds: [] // 设备列表
         },
         pickerOptions: {
@@ -1553,6 +1554,31 @@
             }
           }
         }
+      }
+    }
+  }
+  .per_semblance {
+    position: relative;
+    >span {
+      position: absolute;
+      left: 20px;
+      display: block;
+      height: 40px;
+      line-height: 40px;
+      z-index: 9;
+    }
+    >i {
+      display: inline-block;
+      width: 20px;
+      height: 1px;
+      background: #999;
+      margin: 19px 16px;
+      vertical-align: middle;
+    }
+    .el-input {
+      width: 148px;
+      input{
+        text-indent: 60px;
       }
     }
   }

@@ -22,15 +22,15 @@
             <!-- <i class="el-icon-arrow-up"></i> -->
             <div class="device_list" v-if="selectDeviceArr.length > 0">
               <template v-if="checkAllTree">
-              <span>全部设备</span>
+                <span>全部设备</span>
               </template>
               <template v-else>
-              <span>{{ selectDeviceArr[0].label }}</span>
-              <span
-                v-show="selectDeviceArr.length > 1"
-                title="展开选中的设备"
-                class="device_count"
-              >+{{ selectDeviceArr.length - 1 }}</span>
+                <span>{{ selectDeviceArr[0].label }}</span>
+                <span
+                  v-show="selectDeviceArr.length > 1"
+                  title="展开选中的设备"
+                  class="device_count"
+                >+{{ selectDeviceArr.length - 1 }}</span>
               </template>
             </div>
             <div class="no_device" v-else>选择设备</div>
@@ -415,7 +415,7 @@ export default {
       exportLoading: false,
       messageInfo: null,
       notMessageInfo: null,
-      hoverActive: false,
+      hoverActive: false
     };
   },
   computed: {
@@ -665,8 +665,8 @@ export default {
     //查询
     getSearchData() {
       let params = {};
-      if(this.notMessageInfo) {
-        this.notMessageInfo.close()
+      if (this.notMessageInfo) {
+        this.notMessageInfo.close();
       }
       if (this.searchData.time && this.searchData.time.length > 0) {
         params["startDate"] =
@@ -811,11 +811,11 @@ export default {
     },
     //选择时间段
     selectTime(val, index) {
-      if(this.messageInfo) {
-        this.messageInfo.close()
+      if (this.messageInfo) {
+        this.messageInfo.close();
       }
-      if(this.notMessageInfo) {
-        this.notMessageInfo.close()
+      if (this.notMessageInfo) {
+        this.notMessageInfo.close();
       }
       this.$set(this.timeSlot[index], "checked", !val.checked);
       if (val.value !== 0) {
@@ -869,8 +869,8 @@ export default {
         }
       }
       this.getList();
-      if(this.messageInfo) {
-        this.messageInfo.close()
+      if (this.messageInfo) {
+        this.messageInfo.close();
       }
     },
     //获取数据
@@ -908,25 +908,25 @@ export default {
           this.deviceList,
           this.doubleDeviceList
         );
-        if(this.deviceList && this.deviceList.length > 0) {
-          for(let item of this.deviceList){
-            item['shotDate'] = new Date(item.shotTime).getTime()
+        if (this.deviceList && this.deviceList.length > 0) {
+          for (let item of this.deviceList) {
+            item["shotDate"] = new Date(item.shotTime).getTime();
           }
-          this.deviceList.sort(this.sortTime)
+          this.deviceList.sort(this.sortTime);
           this.$set(this.deviceList[0], "timeSlot", "——");
           this.$set(this.deviceList[0], "refTime", "——");
-        }else {
-          this.messageInfo =this.$message.info("搜索无结果")
+        } else {
+          this.messageInfo = this.$message.info("搜索无结果");
         }
         this.getNDeviceList();
-        
+
         let devArr = objDeepCopy(this.nDeviceList);
-        devArr.sort(this.sortLength)
-        let maxDev = devArr[devArr.length -1]
+        devArr.sort(this.sortLength);
+        let maxDev = devArr[devArr.length - 1];
         /* this.nDeviceList.sort(this.sortLength)
         this.maxDev = Math.max.apply(Math, this.nDeviceList.map((o) => {return o.data.length})) */
-        console.log("------------22222----------",this.nDeviceList)
-        this.mapMark(this.nDeviceList, this.cameraMapMarkers,maxDev);
+        console.log("------------22222----------", this.nDeviceList);
+        this.mapMark(this.nDeviceList, this.cameraMapMarkers, maxDev);
       }
     },
     //排序
@@ -986,16 +986,19 @@ export default {
               /*  selClass = "vl_close"; */
             }
             /* console.log("9999999999",obj.data.length,maxDev.data.length) */
-            if(obj.data.length == maxDev.data.length) {
-              obj['st'] = 'style="display:block!important"'
-            }else {
-              obj['st'] = ''
+            if (obj.data.length == maxDev.data.length) {
+              obj["st"] = 'style="display:block!important"';
+            } else {
+              obj["st"] = "";
             }
-            let content = '<div class="vl_icon vl_icon_vehicle_04 info-window">'+
-            '<div ' +obj.st+'  class="vl_map_hover">' +
-                '<div class="vl_map_hover_main">' +
-                _this.cameraInfo(obj) +
-                "</div></div>";
+            let content =
+              '<div class="vl_icon vl_icon_vehicle_04 info-window">' +
+              "<div " +
+              obj.st +
+              '  class="vl_map_hover">' +
+              '<div class="vl_map_hover_main">' +
+              _this.cameraInfo(obj) +
+              "</div></div>";
             let marker = new window.AMap.Marker({
               // 添加自定义点标记
               map: _this.map,
@@ -1298,8 +1301,8 @@ export default {
           text-align: center;
           width: 100%;
           color: #ffffff;
-          height: 40px;
-          line-height: 40px;
+          height: 30px;
+          line-height: 30px;
           -webkit-border-radius: 0 0 10px 10px;
           -moz-border-radius: 0 0 10px 10px;
           border-radius: 0 0 10px 10px;
@@ -1548,14 +1551,13 @@ export default {
         height: 100%;
         background: #f2f2f2;
         border: none;
-        &:hover {
-          background: #2981f8;
-          border: none;
-        }
-        &:hover span {
-          color: #fff;
-        }
         span {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          margin-top: 126px;
           color: #999;
         }
         img {
@@ -1566,6 +1568,13 @@ export default {
           border-radius: 10px;
         }
       }
+    }
+    &:hover .el-upload {
+      background: #2981f8;
+      border: none;
+    }
+    &:hover .el-upload span {
+      color: #8ebaf5;
     }
   }
   //车牌颜色
@@ -1651,8 +1660,8 @@ export default {
   /* 地图标记 hover */
   .info-window {
     position: relative;
-    &:hover .vl_map_hover{
-      display: block!important;
+    &:hover .vl_map_hover {
+      display: block !important;
     }
   }
   .vl_map_hover {

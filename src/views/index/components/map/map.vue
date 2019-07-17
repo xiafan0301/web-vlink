@@ -209,6 +209,7 @@
   </div>
 </template>
 <script>
+  import {testData} from './testData'
   import flvplayer from '@/components/common/flvplayer.vue';
   import {formatDate, objDeepCopy, random14} from '../../../../utils/util.js';
   import {MapGETmonitorList, MapGETsignList, MapDELETEmapSign, MapDELETEmapSigns, MapUPDATEEmapSign, MapPOSTmapSign, MapGetBayonetInfo} from '../../api/api.map.js';
@@ -504,7 +505,6 @@
       },
       getCurTypeData (data, type) {
         if (type) {
-          console.log(type, data.infoList.filter(x => x.dataType === type && x.isShow))
           return data.infoList.filter(x => x.dataType === type && x.isShow);
         } else {
           return data.infoList.filter(x => x.isShow);
@@ -770,13 +770,15 @@
                   })
                   __obj.carList = vData;
                   res.data.areaTreeList.push(__obj);
-                  this.mapTreeData = this.switchData(res.data);
+//                  this.mapTreeData = this.switchData(res.data);
+                  this.mapTreeData = testData;
                   console.log('树的数据', this.mapTreeData);
                   this.$_hideLoading();
                   this.mapMark(this.mapTreeData[0].infoList);
                   // 定时查询车辆数据
-                  this.carLoop();
-                  this.watchCalling();
+                  this.updateNumberss();// 假数据用的
+//                  this.carLoop();
+//                  this.watchCalling();
                 })
               }
             })
@@ -1498,6 +1500,7 @@
         newNum.forEach((x, _index) => {
           this.mapTreeData[0][this.constObj[_index]._key] = x[this.constObj[_index]._key];
         })
+        console.log(this.mapTreeData[0])
       },
       // boolean 为 true时 显示, false 隐藏.  operLeft 存在的话，说明是操作了左侧地图信息树，
       operClassToEL () {
