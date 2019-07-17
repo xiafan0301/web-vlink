@@ -168,6 +168,7 @@ export default {
       videoUrl: null, // 下载地址
       map: null,
       swiperOption: {
+        initialSlide: 5,
         slidesPerView: 10,
         spaceBetween: 18,
         slidesPerGroup: 10,
@@ -225,7 +226,7 @@ export default {
     
       this.queryObj['vehicleNumber'] = this.$route.params.vehicleNumber;
       // this.queryObj['pageSize'] = 0;
-      this.queryObj['pageNum'] = this.pagination.pageNum;
+      // this.queryObj['pageNum'] = this.pagination.pageNum;
       this.queryObj['order'] = this.pagination.order;
       this.queryObj['orderBy'] = this.pagination.orderBy;
 
@@ -237,6 +238,8 @@ export default {
         .then(res => {
           if (res && res.data) {
             this.allDataList = res.data.list;
+
+            console.log('allDataList', this.allDataList)
           }
         })
         .catch(() => {})
@@ -244,10 +247,14 @@ export default {
     // 获取抓拍记录
     getList () {
       this.queryObj['vehicleNumber'] = this.$route.params.vehicleNumber;
-      this.queryObj['pageSize'] = this.pagination.pageSize;
+      // this.queryObj['pageSize'] = this.pagination.pageSize;
       this.queryObj['pageNum'] = this.pagination.pageNum;
       this.queryObj['order'] = this.pagination.order;
       this.queryObj['orderBy'] = this.pagination.orderBy;
+      const params = {
+        ...this.queryObj,
+        pageSize: this.pagination.pageSize
+      }
       getNightVehicleRecordList(this.queryObj)
         .then(res => {
           console.log('resasdsadsa', res)
@@ -354,8 +361,20 @@ export default {
      */
     onOpenDetail (obj) {
       this.sturcDetail = obj;
-      this.strucDetailDialog = true;
       this.curImgIndex = obj.uid;
+
+      let currentIndex;
+
+      this.allDataList.map((item, index) => {
+        if (item.uid === obj.uid) {
+          currentIndex = index;
+        }
+      })
+      this.strucDetailDialog = true;
+
+      console.log(this.refs)
+      // this.refs.mySwiper.slideTo(currentIndex);
+
       this.$nextTick(() => {
         this.initMap(obj);
       })

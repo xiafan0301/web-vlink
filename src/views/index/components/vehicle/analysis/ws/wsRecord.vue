@@ -99,6 +99,12 @@
           <!-- <p>以车搜车</p> -->
         </div>
         <div id="rightMap"></div>
+        <!--地图操作按钮-->
+        <ul class="map_rrt_u2">
+          <li @click="resetZoom"><i class="el-icon-aim"></i></li>
+          <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
+          <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
+        </ul>
       </div>
     </div>
     <!-- 视频全屏放大 -->
@@ -130,6 +136,7 @@
 </template>
 <script>
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+import { mapXupuxian } from "@/config/config.js";
 import { getTailBehindDetail, getVehicleArchives } from '@/views/index/api/api.judge.js'
 import { random14 } from '@/utils/util.js';
 export default {
@@ -232,12 +239,23 @@ export default {
     initMap () {
       let _this = this;
       let map = new window.AMap.Map('rightMap', {
-        zoom: 15, // 级别
-        center: [110.596015, 27.907662], // 中心点坐标[110.596015, 27.907662]
+        zoom: 14, // 级别
+        center: mapXupuxian.center, // 中心点坐标[110.596015, 27.907662]
       });
       map.setMapStyle('amap://styles/whitesmoke');
 
       _this.map = map;
+    },
+    mapZoomSet (val) {
+      if (this.map) {
+        this.map.setZoom(this.map.getZoom() + val);
+      }
+    },
+    resetZoom () {
+      if (this.map) {
+        this.map.setZoomAndCenter(18, mapXupuxian.center);
+        this.map.setFitView();
+      }
     },
     mapMark (data) {
       if (data && data.length > 0) {
@@ -289,9 +307,9 @@ export default {
             marker.on('mouseout', function () {
               $('#vehicle' + obj.deviceID).removeClass('vl_icon_map_hover_mark0');
             });
-            _this.map.setZoom(13)
+            // _this.map.setZoom(13)
             // marker.setPosition([obj.shotPlaceLongitude, obj.shotPlaceLatitude]);
-             _this.map.setCenter([obj.shotPlaceLongitude, obj.shotPlaceLatitude]);
+            //  _this.map.setCenter([obj.shotPlaceLongitude, obj.shotPlaceLatitude]);
             // marker.setMap(_this.map);
             //_this.map.setFitView();// 执行定位
 
@@ -302,10 +320,12 @@ export default {
             strokeWeight: 8,
             showDir: true,
             strokeColor: '#61C772',
-            strokeStyle: 'dashed'
+            strokeStyle: 'solid'
           });
 
           _this.map.add(polyline);
+
+          _this.map.setFitView();
         }
       }
     },
@@ -555,9 +575,32 @@ export default {
         }
       }
       #rightMap {
-        z-index: 1000;
+        // z-index: 1000;
         width: 100%;
         height: 100%;
+      }
+      .map_rrt_u2 {
+        position: absolute; right: 30px;
+        bottom: 30px;
+        margin-top: .2rem;
+        font-size: 26px;
+        background: #ffffff;
+        width: 78px;
+        padding: 0 10px;
+        > li {
+          line-height: 70px;
+          text-align: center;
+          cursor: pointer;
+          border-bottom: 1px solid #F2F2F2;
+          > i {
+            margin-top: 0;
+            display: inline-block;
+          }
+          color: #999999;
+          &:hover {
+            color: #0C70F8;
+          }
+        }
       }
     }
   }
