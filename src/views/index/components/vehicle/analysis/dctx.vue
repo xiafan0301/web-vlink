@@ -8,9 +8,9 @@
         <div class="input-box">
           <vue-scroll>
             <div class="input-box-line">
-              <p class="title"><span>开</span><span>始</span></p>
+              <!-- <p class="title"><span>开</span><span>始</span></p> -->
               <el-date-picker
-                align="right"
+                class="vl_date"
                 :clearable="false"
                 value-format="yyyy-MM-dd HH:mm:ss"
                 format="yyyy-MM-dd HH:mm:ss"
@@ -23,8 +23,9 @@
                 </el-date-picker>
             </div>
             <div class="input-box-line">
-              <p class="title"><span>结</span><span>束</span></p>
+              <!-- <p class="title"><span>结</span><span>束</span></p> -->
               <el-date-picker
+                class="vl_date vl_date_end"
                 v-model="filterObj.endDate"
                 :clearable="false"
                 value-format="yyyy-MM-dd HH:mm:ss"
@@ -188,6 +189,8 @@ export default {
         vehicleNumberList: [
           {vehicleNumber: ''},
           {vehicleNumber: ''},
+          // {vehicleNumber: '湘LYV366'},
+          // {vehicleNumber: '湘NF8988'},
           // {vehicleNumber: '湘NJM910'},
           // {vehicleNumber: '湘NJY056'},
         ],
@@ -300,7 +303,7 @@ export default {
 
               
               if (obj.bayonetId) { // 设备为卡口
-                deviceType = 1;
+                deviceType = 11;
               } else {
                 deviceType = 7;
               }
@@ -348,9 +351,9 @@ export default {
               $('#vehicle_mark' + idName).removeClass('no_checked');
               $('#vehicle_mark' + idName).addClass('is_checked');
               
+              _this.isShowRightContent = true;
 
               _this.recordDetail.recordList = [];
-              _this.isShowRightContent = true;
               _this.recordDetail.deviceName = detailDeviceName;
               _this.recordDetail.shotAddress = detailShotAddress;
 
@@ -364,10 +367,6 @@ export default {
                       })
                     }
                   })
-                  // for(let i in item.deviceShotRecords) {
-                  //   if (i == obj.deviceID) {
-                  //   }
-                  // }
                 })
                 console.log(_this.recordDetail)
               } else {
@@ -379,9 +378,6 @@ export default {
                       })
                     }
                   })
-                  // for (let i in recordObj) {
-                  // }
-                  console.log( _this.recordDetail)
                 }
               }
 
@@ -499,12 +495,11 @@ export default {
      */
     onSearch () {
       this.radioChecked = -1;
-      
-      this.map.clearMap();
-
       this.polylineObj = {};
-
       this.dataList = [];
+      this.isShowRightContent = false;
+
+      this.map.clearMap();
 
       let arr = [];
       this.filterObj.vehicleNumberList.forEach(item => {
@@ -526,11 +521,11 @@ export default {
       this.searchLoading = true;
 
       const params = {
-        // startTime: formatDate(this.filterObj.startDate),
-        // endTime: formatDate(this.filterObj.endDate),
+        startTime: formatDate(this.filterObj.startDate),
+        endTime: formatDate(this.filterObj.endDate),
         vehicleNumbers: this.filterObj.vehicleNumbers,
-        startTime: '2019-07-13 00:00:00',
-        endTime: '2019-07-13 13:59:59',
+        // startTime: '2019-07-13 00:00:00',
+        // endTime: '2019-07-13 13:59:59',
         // vehicleNumbers: "湘LYV366,湘NF8988,湘NJM910,湘NJY056",
       };
 
@@ -712,12 +707,6 @@ export default {
           display: flex;
           padding-bottom: 12px;
           padding-right: 15px;
-          .title {
-            display: flex;
-            flex-direction: column;
-            color: #909399;
-            width: 20px;
-          }
         }
         .add-vehicle-number {
           width: 100%;
@@ -786,11 +775,12 @@ export default {
         }
       }
       .right_list {
+        z-index: 111;
         position: absolute;
         right: 0;
         top: 15px;
         width: 258px;
-        height: 500px;
+        height: 400px;
         background-color: #FFFFFF;
         padding: 15px 10px 0 10px;
         color: #333333;
@@ -1112,12 +1102,12 @@ export default {
       border-left: none;
     }
   }
-  .el-date-editor {
-    .el-input__inner {
-      padding-left: 15px;
-    }
-    .el-input__prefix {right: 5px;left: auto;}
-  }
+  // .el-date-editor {
+  //   .el-input__inner {
+  //     padding-left: 15px;
+  //   }
+  //   // .el-input__prefix {right: 5px;left: auto;}
+  // }
 }
 .the-left-search {
   .btn-box {

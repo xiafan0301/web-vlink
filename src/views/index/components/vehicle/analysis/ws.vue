@@ -9,9 +9,10 @@
           <el-form-item prop="plateNo">
             <el-input type="text" v-model="searchForm.plateNo" placeholder="请输入车牌号" style="width: 100%" @blur="handlePlateNo('searchForm')"></el-input>
           </el-form-item>
-          <el-form-item label="开始" label-width="20px" class="date_time" prop="shotTime">
+          <el-form-item  class="date_time" prop="shotTime">
             <el-date-picker
               v-model="searchForm.shotTime"
+              class="vl_date"
               type="datetime"
               :clearable="false"
               value-format="yyyy-MM-dd HH:mm:ss"
@@ -22,9 +23,10 @@
               placeholder="开始时间">
             </el-date-picker>
           </el-form-item>
-          <el-form-item label="结束" label-width="20px" class="date_time" prop="dateEnd">
+          <el-form-item class="date_time" prop="dateEnd">
             <el-date-picker
               v-model="searchForm.dateEnd"
+              class="vl_date vl_date_end"
               style="width: 100%"
               :clearable="false"
               @blur="blurEndTime"
@@ -172,9 +174,9 @@ export default {
   },
   mounted () {
     this.getVehicleTypeList();
-    const plateNo = this.$route.params.plateNo;
-    const dateStart = this.$route.params.dateStart;
-    const dateEnd = this.$route.params.dateEnd;
+    const plateNo = this.$route.query.plateNo;
+    const dateStart = this.$route.query.dateStart;
+    const dateEnd = this.$route.query.dateEnd;
     if (plateNo) { // 从其他模块跳转过来的
       this.searchForm.plateNo = plateNo;
     }
@@ -182,10 +184,10 @@ export default {
       this.searchForm.plateNo = plateNo;
       this.searchForm.shotTime = dateStart;
       this.searchForm.dateEnd = dateEnd;
-      this.searchForm.interval = this.$route.params.interval;
-      this.searchForm.deviceCode = this.$route.params.deviceCode;
-      if (this.$route.params.vehicleClass) {
-        this.searchForm.vehicleClass = this.$route.params.vehicleClass.join(',');
+      this.searchForm.interval = this.$route.query.interval;
+      this.searchForm.deviceCode = this.$route.query.deviceCode;
+      if (this.$route.query.vehicleClass) {
+        this.searchForm.vehicleClass = this.$route.query.vehicleClass.join(',');
       }
       this.getDeviceList();
       setTimeout(() => {
@@ -262,9 +264,9 @@ export default {
               this.deviceStartTime = this.deviceList[0].shotTime;
               this.isShowDeviceTip = false;
 
-              if (this.$route.params.deviceCode) {
+              if (this.$route.query.deviceCode) {
                 this.deviceList.map(item => {
-                  if (item.deviceID === this.$route.params.deviceCode) {
+                  if (item.deviceID === this.$route.query.deviceCode) {
                     this.deviceStartTime = item.shotTime;
                   }
                 })
@@ -288,7 +290,7 @@ export default {
     },
     // 跳至尾随记录页面
     skipWsReocrdPage (obj) {
-      this.$router.push({name: 'ws_record', params: {
+      this.$router.push({name: 'ws_record', query: {
         plateNo: this.searchForm.plateNo,
         dateStart: formatDate(this.deviceStartTime),
         dateEnd: formatDate(this.searchForm.dateEnd),
