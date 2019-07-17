@@ -118,7 +118,7 @@
                   <el-table-column label="序号" type="index" width="100"></el-table-column>
                   <el-table-column label="违法时间" prop="vioDate" show-overflow-tooltip></el-table-column>
                   <el-table-column label="违法地点" prop="address" show-overflow-tooltip></el-table-column>
-                  <el-table-column label="城市名称" prop="city" show-overflow-tooltip></el-table-column>
+                  <!-- <el-table-column label="城市名称" prop="city" show-overflow-tooltip></el-table-column> -->
                   <el-table-column label="罚款金额" prop="fine" show-overflow-tooltip></el-table-column>
                   <el-table-column label="违章归属地" prop="vioAsPlace" show-overflow-tooltip></el-table-column>
                   <el-table-column label="违法行为" prop="vioName" show-overflow-tooltip></el-table-column>
