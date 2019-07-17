@@ -255,7 +255,7 @@
         };
       },
       seacher(v) {
-        var placeSearch = new AMap.PlaceSearch({
+        var placeSearch = new window.AMap.PlaceSearch({
           // city 指定搜索所在城市，支持传入格式有：城市名、citycode和adcode
           city: "湖南"
         });
@@ -428,7 +428,7 @@
         this.pointData[this.curDrawIndex] = [];
         if(type!="AMap.Polyline"){
           this.mapTreeData.forEach(el=>{
-            let myLngLat=new AMap.LngLat(el.longitude,el.latitude);
+            let myLngLat=new window.AMap.LngLat(el.longitude,el.latitude);
             //  var isPointInRing = window.AMap.GeometryUtil.isPointInRing(myLngLat,obj.C.path);
             let isPointInRing = obj.contains(myLngLat);
             // console.log(marker.getPosition());
@@ -568,7 +568,6 @@
           case 'cut2' :
             this.mouseTool.circle({
               strokeColor: "#FA453A",
-              strokeOpacity: 1,
               strokeWeight: 1,
               strokeOpacity: 0.2,
               fillColor: '#FA453A',

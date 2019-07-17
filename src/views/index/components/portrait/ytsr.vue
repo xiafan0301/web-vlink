@@ -37,7 +37,6 @@
           class="vl_date"
           v-model="searchData.time"
           type="daterange"
-          class="vl_date"
           range-separator="至"
           value-format="yyyy-MM-dd"
           format="yyyy-MM-dd"
