@@ -160,11 +160,11 @@
                       <!-- 车牌颜色 -->
                       <span v-else-if="item.plateColor">{{ '车牌颜色:' + item.name }}</span>
                       <!-- 车辆型号 -->
-                      <!-- <span v-else-if="item.vehicleStyles">{{item.name}}</span> -->
+                      <span v-else-if="item.vehicleModel">{{ '车辆型号:' + item.name}}</span>
                       <!-- 车辆颜色 -->
                       <span v-else-if="item.vehicleColor">{{ '车辆颜色:' + item.name }}</span>
                       <!-- 车辆类型 -->
-                      <!-- <span v-else-if="item.vehicleClass">{{ '车辆类型:' + item.name }}</span> -->
+                      <span v-else-if="item.vehicleClass">{{ '车辆类型:' + item.name }}</span>
                       <!-- 号牌类型 -->
                       <span
                         v-else-if="item.plateClass || item.plateClass === 0"
@@ -193,7 +193,14 @@
                   </el-select>
                 </el-form-item>
                 <el-form-item prop="carModel">
-                  <el-cascader class="width232" clearable separator="-" placeholder="选择车辆型号" v-model="tzscMenuForm.carModel" :options="carModelOptions"></el-cascader>
+                  <el-cascader
+                    class="width232"
+                    clearable
+                    separator="-"
+                    placeholder="选择车辆型号"
+                    v-model="tzscMenuForm.carModel"
+                    :options="carModelOptions"
+                  ></el-cascader>
                 </el-form-item>
                 <el-form-item prop="carColor">
                   <el-select
@@ -481,7 +488,6 @@
                     <span class="val">{{sturcDetail.vehicleModel}}</span>
                   </p>
                 </div>
-
                 <div class="struc_cdi_line_tzsc" v-if="sturcDetail.vehicleColor">
                   <p class="line_content">
                     <span class="key">车辆颜色</span>
@@ -685,9 +691,9 @@ export default {
       characterTypes: [
         "plateNo", // 车牌号
         "plateColor", // 车牌颜色
-        // "vehicleStyles", // 汽车的型号
+        "vehicleModel", // 汽车的型号(vehicleStyles)
         "vehicleColor", // 汽车颜色
-        // "vehicleClass", // 汽车类型（越野啥的）
+        "vehicleClass", // 汽车类型（越野啥的）
         "plateClass" // 号牌类型
       ],
       options: [
@@ -833,11 +839,14 @@ export default {
           item.label = item.brand;
           item.children = [];
           for (let i = 0; i < item.typeList.length; i++) {
-            item.children.push({ value: item.typeList[i], label: item.typeList[i] })
+            item.children.push({
+              value: item.typeList[i],
+              label: item.typeList[i]
+            });
           }
           delete item.typeList;
           return item;
-        })
+        });
       });
     },
     getStrucInfo(isClick = false) {
@@ -880,13 +889,16 @@ export default {
                 // "sunvisor": this.tzscMenuForm.sunVisor || null, // 遮阳板
                 // "descOfRearItem": this.tzscMenuForm.inspectionCount || null, // 年检标数量
                 vehicleNumber: null, // 车牌号码
-                vehicleModel: this.tzscMenuForm.carModel.length > 0 ? this.tzscMenuForm.carModel.join('-') : null // 车辆型号
+                vehicleModel:
+                  this.tzscMenuForm.carModel.length > 0
+                    ? this.tzscMenuForm.carModel.join("-")
+                    : null // 车辆型号
               },
               pageNum: this.pageNum,
               pageSize: this.pageSize
             };
           } else {
-            // 自定义的特征
+            // 从图片提取
             queryParams = {
               where: {
                 startTime:
@@ -929,10 +941,9 @@ export default {
                 // 车牌
                 queryParams["where"].vehicleNumber = selectedArr[i].plateNo;
               }
-              if (selectedArr[i].vehicleStyles) {
+              if (selectedArr[i].vehicleModel) {
                 // 车辆型号
-                queryParams["where"].vehicleModel =
-                  selectedArr[i].vehicleStyles;
+                queryParams["where"].vehicleModel = selectedArr[i].vehicleModel;
               }
             }
           }
@@ -1832,6 +1843,13 @@ export default {
       border: none;
       span {
         color: #999;
+      }
+      &:hover {
+        background: #2981f8;
+        border: none;
+      }
+      &:hover span {
+        color: #fff;
       }
       img {
         width: 100%;

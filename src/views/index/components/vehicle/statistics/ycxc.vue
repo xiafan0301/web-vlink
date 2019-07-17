@@ -61,6 +61,7 @@
 
           <div class="left_time date-comp">
             <el-date-picker
+              class="vl_date"
               placeholder="请选择日期"
               v-model="queryDate"
               :clearable="false"
@@ -358,7 +359,7 @@ export default {
     }
   },
   created () {
-    if (this.$route.params.startDate) {
+    if (this.$route.query.startDate) {
       this.handleQueryData();
     } else {
       this.setDTime();
@@ -380,14 +381,16 @@ export default {
       let date = new Date();
       let curDate = date.getTime();
       let curS = 1 * 24 * 3600 * 1000;
-      let _s =
-        new Date(curDate - curS).getFullYear() +
-        "-" +
-        (new Date(curDate - curS).getMonth() + 1) +
-        "-" +
-        new Date(curDate - curS).getDate();
-      /* let _e =
-        date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate(); */
+      
+      let year = new Date(curDate - curS).getFullYear();
+
+      let month = new Date(curDate - curS).getMonth() + 1;// 月
+      if (month < 10) { month = '0' + month; }
+      
+      let day = new Date(curDate - curS).getDate();// 日
+      if (day < 10) { day = '0' + day; }
+      let _s = year + '-' + month + '-' + day;
+
       this.queryDate = [_s, _s];
     },
     //日期选择
@@ -405,17 +408,17 @@ export default {
       }
     },
     handleQueryData () {
-      const startDate = this.$route.params.startDate.split(' ')[0];
-      const endDate = this.$route.params.endDate.split(' ')[0];
+      const startDate = this.$route.query.startDate.split(' ')[0];
+      const endDate = this.$route.query.endDate.split(' ')[0];
 
       this.queryDate = [startDate, endDate]
 
 
-      const startTime = this.$route.params.startHour;
-      const endTime = this.$route.params.endhour;
-      const minShotTimes = this.$route.params.minShotTimes;
-      const surveillanceIds = this.$route.params.surveillanceIds && this.$route.params.surveillanceIds.split(',');
-      const vehicleTypes =  this.$route.params.vehicleTypes && this.$route.params.vehicleTypes.split(',');
+      const startTime = this.$route.query.startHour;
+      const endTime = this.$route.query.endhour;
+      const minShotTimes = this.$route.query.minShotTimes;
+      const surveillanceIds = this.$route.query.surveillanceIds && this.$route.query.surveillanceIds.split(',');
+      const vehicleTypes =  this.$route.query.vehicleTypes && this.$route.query.vehicleTypes.split(',');
 
 
       this.queryForm.startDate = startDate;
@@ -467,9 +470,9 @@ export default {
           this.cameraTree = this.getTreeList(camera);
           this.getLeafCountTree(this.cameraTree);
 
-          if (this.$route.params.cameraIds || this.$route.params.bayonetIds) {
-            const cameraIds = this.$route.params.cameraIds.split(',');
-            const bayonetIds = this.$route.params.bayonetIds.split(',');
+          if (this.$route.query.cameraIds || this.$route.query.bayonetIds) {
+            const cameraIds = this.$route.query.cameraIds.split(',');
+            const bayonetIds = this.$route.query.bayonetIds.split(',');
 
             let arr = [], arrNodes = [];
 
@@ -498,11 +501,15 @@ export default {
 
             setTimeout(() => {
               let checkedKeys = this.$refs.cameraTree.getCheckedKeys(true);
-              this.selectDeviceArr = this.$refs.cameraTree.getCheckedNodes(true);
+              this.selectDeviceArr = this.$refs.cameraTree.getCheckedNodes(false);
 
               this.handleData();
 
+              console.log('zxczxczxc', checkedKeys)
+              console.log('this.selectDeviceArr.length', this.selectDeviceArr.length)
+              console.log('this.selectDeviceArr', this.videoTreeNodeCount)
               if (this.selectDeviceArr.length === this.videoTreeNodeCount) {
+                console.log('asdasdasdasdasd')
                 this.checkAllTree = true;
                 this.isIndeterminate = false;
               } else if (this.selectDeviceArr.length > 0 && this.selectDeviceArr.length < this.videoTreeNodeCount) {
@@ -512,7 +519,7 @@ export default {
                 this.checkAllTree = false;
                 this.isIndeterminate = false;
               }
-            }, 500)
+            }, 1000)
 
           } else {
             
@@ -572,6 +579,7 @@ export default {
       this.handleData();
     },
     getLeafCountTree(json) {
+      console.log('json', json)
       // 获取树节点的数量
       for (let i = 0; i < json.length; i++) {
         if (json[i].hasOwnProperty("id")) {
@@ -583,6 +591,7 @@ export default {
           continue;
         }
       }
+      console.log('videoTreeNodeCount', this.videoTreeNodeCount)
     },
     //摄像头
     listenChecked(val, val1) {
@@ -635,7 +644,7 @@ export default {
         surveillanceIds: []
       })
       
-      this.$route.params == {};
+      // this.$route.query == {};
 
       this.queryDate = [(new Date() - (24 * 60 * 60 * 1000)), (new Date() - (24 * 60 * 60 * 1000))];
       this.resetLoading = false;
@@ -664,6 +673,8 @@ export default {
         let bayonentIds = this.selectBayonetArr.map(res => res.id);
         this.queryForm.bayonetIds = bayonentIds.join(",");
       }
+
+      console.log('queryDate', this.queryDate)
 
       this.queryForm.startDate = this.queryDate[0];
       this.queryForm.endDate = this.queryDate[1];
@@ -773,7 +784,7 @@ export default {
      */
     onOpenRecord (obj) {
       this.searchStr['vehicleNumber'] = obj.vehicleNumber;
-      this.$router.push({name: 'vehicle_search_ycxc_record', params: {
+      this.$router.push({name: 'vehicle_search_ycxc_record', query: {
         ...this.searchStr
       }});
     },
@@ -1034,34 +1045,12 @@ export default {
   } 
 }
 .left_time {
-  // .el-range-editor {
-  //   padding-left: 0px;
+  // .end_time_select {
+  //   .el-input__inner {
+  //     padding-left: 30px;
+  //     padding-right: 25px;
+  //   }
   // }
-  .el-date-editor {
-    /* .el-input__inner {
-      padding-left: 15px;
-    } */
-    /* .el-range__icon {
-      position: absolute;
-      right: 3px;
-      top: 2px;
-    }
-    .el-range__close-icon {
-      position: absolute;
-      right: 3px;
-      top: 2px;
-    } */
-  }
-  .el-input__prefix {
-    right: 5px;
-    left: auto;
-  }
-  .end_time_select {
-    .el-input__inner {
-      padding-left: 30px;
-      padding-right: 25px;
-    }
-  }
 }
 .left_num {
   .left-none-border {

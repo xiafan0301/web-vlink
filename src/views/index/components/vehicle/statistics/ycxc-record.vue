@@ -2,7 +2,7 @@
   <div class="th-ycxc-record">
     <div class="vc_gcck_bd">
       <div is="vlBreadcrumb" :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle'},
-        {name: '夜间行车分析', routerName: 'vehicle_search_ycxc', params: {
+        {name: '夜间行车分析', routerName: 'vehicle_search_ycxc', query: {
           ... this.queryObj
         }}, {name: '抓拍记录'}]"></div>
     </div>
@@ -61,38 +61,56 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt="" class="bigImg">
-            <span>抓拍图</span>
+            <img :src="sturcDetail.storagePath" alt="" class="bigImg">
+            <span>全景图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_qii struc_c_d_img">
-              <img :src="sturcDetail.storagePath" alt="" class="bigImg">
-              <span>全景图</span>
+              <img :src="sturcDetail.subStoragePath" alt="" class="bigImg">
+              <span>抓拍图</span>
             </div>
             <div class="struc_c_d_info">
               <h2>抓拍信息</h2>
-                <div class="struc_cdi_line" v-show="sturcDetail.snapTime">
-                <span><b>抓拍时间：</b>{{sturcDetail.snapTime}}</span>
-              </div>
-              <div class="struc_cdi_line" v-show="sturcDetail.snapDevice">
-                <span><b>抓拍设备：</b>{{sturcDetail.snapDevice}}</span>
-              </div>
-              <div class="struc_cdi_line" v-show="sturcDetail.snapAddress">
-                <span><b>抓拍地址：</b>{{sturcDetail.snapAddress}}</span>
-              </div>
-              <div class="struc_cdi_line" v-show="sturcDetail.plateNo">
-                <span><b>车牌号：</b>{{sturcDetail.plateNo}}</span>
-              </div>
-              <div class="struc_cdi_line">
-                <span v-show="sturcDetail.vehicleBrand">{{sturcDetail.vehicleBrand}}</span>
-                <span v-show="sturcDetail.vehicleModel">{{sturcDetail.vehicleModel}}</span>
-                <span v-show="sturcDetail.vehicleClass">{{sturcDetail.vehicleClass}}</span>
-                <span v-show="sturcDetail.vehicleColor">{{sturcDetail.vehicleColor}}</span>
-                <span v-show="sturcDetail.vehicleRoof">{{sturcDetail.vehicleRoof}}</span>
-                <span v-show="sturcDetail.vehicleStyles">{{sturcDetail.vehicleStyles}}</span>
-                <span v-show="sturcDetail.feature">{{sturcDetail.feature}}</span>
-              </div>
-              <div class="struc_cdi_line"></div>
+                <ul class="stru_ul">
+              <vue-scroll>
+                  <li>
+                    <span>车牌号码</span>
+                    <span>{{sturcDetail.plateNo ? sturcDetail.plateNo : '无'}}</span>
+                  </li>
+                  <li>
+                    <span>车辆颜色</span>
+                    <span>{{sturcDetail.vehicleColor ? sturcDetail.vehicleColor : '无'}}</span>
+                  </li>
+                  <li>
+                    <span>车辆类型</span>
+                    <span>{{sturcDetail.vehicleClass ? sturcDetail.vehicleClass : '无'}}</span>
+                  </li>
+                  <li>
+                    <span>车辆型号</span>
+                    <span>{{sturcDetail.vehicleModel ? sturcDetail.vehicleModel : '无'}}</span>
+                  </li>
+                  <li>
+                    <span>号牌颜色</span>
+                    <span>{{sturcDetail.plateColor ? sturcDetail.plateColor : '无'}}</span>
+                  </li>
+                  <li>
+                    <span>号牌类型</span>
+                    <span>{{sturcDetail.plateClass ? sturcDetail.plateClass : '无'}}</span>
+                  </li>
+                  <li>
+                    <span>抓拍时间</span>
+                    <span>{{sturcDetail.shotTime ? sturcDetail.shotTime : '无'}}</span>
+                  </li>
+                  <li>
+                    <span>抓拍设备</span>
+                    <span :title="sturcDetail.deviceName" class="info_span">{{sturcDetail.deviceName ? sturcDetail.deviceName : '无'}}</span>
+                  </li>
+                  <li>
+                    <span>抓拍地址</span>
+                    <span :title="sturcDetail.address" class="info_span">{{sturcDetail.address ? sturcDetail.address : '无'}}</span>
+                  </li>
+              </vue-scroll>
+                </ul>
             </div>
           </div>
         </div>
@@ -187,18 +205,18 @@ export default {
     }
   },
   created () {
-    console.log('aaa', this.$route.params)
+    // console.log('aaa', this.$route.params)
     this.queryObj = {
-      bayonetIds: this.$route.params.bayonetIds,
-      cameraIds: this.$route.params.cameraIds,
-      endDate: this.$route.params.endDate,
-      endhour: this.$route.params.endhour,
-      startDate: this.$route.params.startDate,
-      startHour: this.$route.params.startHour,
-      minShotTimes: this.$route.params.minShotTimes,
-      vehicleTypes: this.$route.params.vehicleTypes,
-      surveillanceIds: this.$route.params.surveillanceIds,
-      isNextDay: this.$route.params.isNextDay
+      bayonetIds: this.$route.query.bayonetIds,
+      cameraIds: this.$route.query.cameraIds,
+      endDate: this.$route.query.endDate,
+      endhour: this.$route.query.endhour,
+      startDate: this.$route.query.startDate,
+      startHour: this.$route.query.startHour,
+      minShotTimes: this.$route.query.minShotTimes,
+      vehicleTypes: this.$route.query.vehicleTypes,
+      surveillanceIds: this.$route.query.surveillanceIds,
+      isNextDay: this.$route.query.isNextDay
     }
   },
   mounted () {
@@ -224,7 +242,7 @@ export default {
     // 获取所有的抓拍记录
     getAllList () {
     
-      this.queryObj['vehicleNumber'] = this.$route.params.vehicleNumber;
+      this.queryObj['vehicleNumber'] = this.$route.query.vehicleNumber;
       // this.queryObj['pageSize'] = 0;
       // this.queryObj['pageNum'] = this.pagination.pageNum;
       this.queryObj['order'] = this.pagination.order;
@@ -246,7 +264,7 @@ export default {
     },
     // 获取抓拍记录
     getList () {
-      this.queryObj['vehicleNumber'] = this.$route.params.vehicleNumber;
+      this.queryObj['vehicleNumber'] = this.$route.query.vehicleNumber;
       // this.queryObj['pageSize'] = this.pagination.pageSize;
       this.queryObj['pageNum'] = this.pagination.pageNum;
       this.queryObj['order'] = this.pagination.order;
@@ -512,9 +530,10 @@ export default {
 </style>
 
 <style lang="scss">
+
 .struc_detail_ycxc_dialog {
   .el-dialog {
-    max-width: 13.06rem;
+    max-width: 15rem;
     width: 100%!important;
   }
   .el-dialog__header {
@@ -545,7 +564,7 @@ export default {
   }
   .struc_main {
     width: 11.86rem;
-    height: 4.4rem;
+    height: 5rem;
     margin: 0 auto;
     border-bottom: 1px solid #F2F2F2;
     .download_btn {
@@ -557,8 +576,8 @@ export default {
       text-align: center;
       line-height: 40px;
       position: absolute;
-      top: 4.9rem;
-      right: 0.68rem;
+      top: 5.5rem;
+      right: 1.6rem;
       text-decoration: none;
       color: #B2B2B2;
       cursor: pointer;
@@ -570,13 +589,14 @@ export default {
     }
     .struc_c_detail {
       width:  100%;
-      height: 3.6rem;
-      >div {
-        float: left;
-      }
+      height: 4.2rem;
+      display: flex;
+      // >div {
+      //   float: left;
+      // }
       .struc_c_d_img {
-        width: 3.6rem;
-        height: 3.6rem;
+        width: 4.2rem;
+        height: 4.2rem;
         background: #EAEAEA;
         position: relative;
         img {
@@ -670,7 +690,7 @@ export default {
       .struc_c_d_box {
         width: calc(100% - 3.9rem);
         display: flex;
-        height: 3.6rem;
+        height: 4.2rem;
         box-shadow: 0px 5px 16px 0px rgba(169,169,169,0.2);
         border-radius: 1px;
         position: relative;
@@ -744,35 +764,51 @@ export default {
           float: left;
         }
         .struc_c_d_info {
-          width: calc(100% - 3.6rem);
+          width: calc(100% - 4rem);
           padding-left: .24rem;
           color: #333333;
+
           h2 {
             font-weight: bold;
-            line-height: .74rem;
+            font-size: 18px;
+            margin: 10px 0;
             padding-right: 1rem;
           }
-          .struc_cdi_line {
-            span {
-              /*position: relative;*/
-              max-width: 100%;
-              display: inline-block;
-              height: .3rem;
-              line-height: .3rem;
-              margin-bottom: .08rem;
-              border: 1px solid #F2F2F2;
-              background: #FAFAFA;
-              color: #333333;
-              white-space: nowrap;
-              text-overflow: ellipsis;
-              border-radius:3px;
+           .stru_ul {
+             width: 100%;
+            padding-bottom: 30px;
+            height: calc(100% - 20px);
+            .__view {
+              width: 100% !important;
+              height: 100% !important;
+            }
+            li {
+              margin-bottom: 6px;
+              height: 30px;
+              line-height: 30px;
+              border-radius:2px;
               font-size: 12px;
-              overflow: hidden;
-              padding: 0 .3rem 0 .1rem;
-              margin-right: .08rem;
-              > b {
-                color: #999;
-                font-weight: normal;
+              span:first-child {
+                width: 70px;
+                overflow: hidden;
+                display: inline-block;
+                padding: 0 5px;
+                background-color: #FAFAFA;
+                color: #999999;
+                border: 1px solid #F2F2F2;
+              }
+              span:last-child {
+                border: 1px solid #F2F2F2;
+                border-left: none;
+                display: inline-block;
+                overflow: hidden;
+                padding: 0 7px;
+                color: #333333;
+              }
+              .info_span {
+                max-width: 2rem;
+                white-space: nowrap;
+                text-overflow: ellipsis;
               }
             }
           }

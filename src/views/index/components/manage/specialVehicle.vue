@@ -29,12 +29,13 @@
         <el-form :inline="true" :model="searchForm" class="search_form clearfix" ref="searchForm">
           <el-form-item prop="dateTime">
             <el-date-picker
+              class="vl_date"
               style="width: 250px;"
               v-model="searchForm.dateTime"
               type="daterange"
               value-format="yyyy-MM-dd HH:mm:ss"
               format="yyyy-MM-dd HH:mm:ss"
-              range-separator="-"
+              range-separator="至"
               start-placeholder="开始日期"
               :default-time="['00:00:00', '23:59:59']"
               end-placeholder="结束日期">
