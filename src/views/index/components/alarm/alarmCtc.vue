@@ -737,7 +737,7 @@ export default {
       height: calc(100% - .2rem);
       margin-bottom: .2rem;
       background: #fff;
-      .ctc-plan-box, {
+      .ctc-plan-box {
         width: 100%;
         clear: both;
         .plan-box {
