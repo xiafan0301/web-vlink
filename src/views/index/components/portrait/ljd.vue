@@ -328,8 +328,8 @@ export default {
       }
     },
     resemt(){
-      if (this.map) {
-          this.map.setZoomAndCenter(14, mapXupuxian.center);
+      if (this.amap) {
+          this.amap.setZoomAndCenter(14, mapXupuxian.center);
         }
       
     },
