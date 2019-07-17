@@ -1647,8 +1647,8 @@ export default {
           text-align: center;
           width: 100%;
           color: #ffffff;
-          height: 40px;
-          line-height: 40px;
+          height: 36px;
+          line-height: 36px;
           -webkit-border-radius: 0 0 10px 10px;
           -moz-border-radius: 0 0 10px 10px;
           border-radius: 0 0 10px 10px;
@@ -1842,6 +1842,12 @@ export default {
       background: #f2f2f2;
       border: none;
       span {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        margin-top: 126px;
         color: #999;
       }
       &:hover {
