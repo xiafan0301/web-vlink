@@ -1177,6 +1177,7 @@ export default {
           continue;
         }
       }
+      console.log('videoTreeNodeCount', this.videoTreeNodeCount)
     },
     //摄像头
     listenChecked(val, val1) {

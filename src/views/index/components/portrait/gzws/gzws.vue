@@ -8,7 +8,6 @@
             {name: '跟踪尾随'}]">
         </div>
       </div>
-      <el-button class="add_btn" type="primary" @click="showAddTaskDialog">新建任务</el-button>
     </div>
     <div class="content_box">
       <ul class="tab-menu">
@@ -49,6 +48,7 @@
         <div class="divide"></div>
       </div>
       <div class="table_box">
+        <el-button class="add_btn" type="primary" @click="showAddTaskDialog">新建任务</el-button>
         <el-table :data="list">
           <el-table-column label="序号" type="index" width="100"></el-table-column>
           <el-table-column label="任务名称" prop="taskName" show-overflow-tooltip></el-table-column>
@@ -602,9 +602,7 @@ export default {
     .vc_gcck_bd {
       width: 100%;
     }
-    .add_btn {
-      margin-right: 10px;
-    }
+    
   }
   .content_box {
     height: calc(100% - 100px);
@@ -640,6 +638,9 @@ export default {
     }
     .table_box {
       margin: 0 20px;
+      .add_btn {
+        margin-bottom: 10px;
+      }
       .operation_btn {
         display: inline-block;
         padding: 0 10px;

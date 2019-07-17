@@ -4,13 +4,13 @@
       <div is="vlBreadcrumb" 
         :breadcrumbData="[
           {name: '车辆侦查', routerName: 'vehicle'},
-          {name: '尾随分析', routerName: 'vehicle_search_ws', params: {
-            plateNo: $route.params.plateNo,
-            dateStart: $route.params.dateStart,
-            dateEnd: $route.params.dateEnd,
-            vehicleClass: $route.params.vehicleClass,
-            interval: $route.params.interval,
-            deviceCode: $route.params.deviceCode
+          {name: '尾随分析', routerName: 'vehicle_search_ws', query: {
+            plateNo: $route.query.plateNo,
+            dateStart: $route.query.dateStart,
+            dateEnd: $route.query.dateEnd,
+            vehicleClass: $route.query.vehicleClass,
+            interval: $route.query.interval,
+            deviceCode: $route.query.deviceCode
           }},
           {name: '尾随记录'}]">
       </div>
@@ -157,14 +157,14 @@ export default {
   },
   created () {
     this.queryObj = {
-      plateNo: this.$route.params.plateNo,
-      dateStart: this.$route.params.dateStart,
-      dateEnd: this.$route.params.dateEnd,
-      plateNoTb: this.$route.params.dateStart,
-      vehicleClass: this.$route.params.vehicleClass,
-      interval: this.$route.params.interval,
-      deviceCode: this.$route.params.deviceCode,
-      dateStartTb: this.$route.params.dateStartTb
+      plateNo: this.$route.query.plateNo,
+      dateStart: this.$route.query.dateStart,
+      dateEnd: this.$route.query.dateEnd,
+      plateNoTb: this.$route.query.dateStart,
+      vehicleClass: this.$route.query.vehicleClass,
+      interval: this.$route.query.interval,
+      deviceCode: this.$route.query.deviceCode,
+      dateStartTb: this.$route.query.dateStartTb
     };
   },
   mounted () {
@@ -180,44 +180,44 @@ export default {
       this.$store.commit('setBreadcrumbData', {
         breadcrumbData: [
           {name: '车辆侦查', routerName: 'vehicle'},
-          {name: '尾随分析', routerName: 'vehicle_search_ws', params: { ...this.queryObj }},
-          { name: '尾随记录', routerName: 'ws_record', params: { ...this.queryObj }},
+          {name: '尾随分析', routerName: 'vehicle_search_ws', query: { ...this.queryObj }},
+          { name: '尾随记录', routerName: 'ws_record', query: { ...this.queryObj }},
           { name: '新建布控' }
         ]
       });
-      this.$router.push({name: 'control_create', query: { plateNo: this.$route.params.plateNo, modelName: '车辆追踪' }});
+      this.$router.push({name: 'control_create', query: { plateNo: this.$route.query.plateNo, modelName: '车辆追踪' }});
     },
     // 跳至轨迹分析页面
     skipTrajectoryPage () {
       this.$store.commit('setBreadcrumbData', {
         breadcrumbData: [
           {name: '车辆侦查', routerName: 'vehicle'},
-          {name: '尾随分析', routerName: 'vehicle_search_ws', params: { ...this.queryObj }},
-          { name: '尾随记录', routerName: 'ws_record', params: { ...this.queryObj }},
+          {name: '尾随分析', routerName: 'vehicle_search_ws', query: { ...this.queryObj }},
+          { name: '尾随记录', routerName: 'ws_record', query: { ...this.queryObj }},
           { name: '车辆轨迹' }
         ]
       });
-      this.$router.push({name: 'vehicle_analysis_clgj', query: { plateNo: this.$route.params.plateNo }});
+      this.$router.push({name: 'vehicle_analysis_clgj', query: { plateNo: this.$route.query.plateNo }});
     },
     // 跳至落脚点分析页面
     skipFootholdPage () {
       this.$store.commit('setBreadcrumbData', {
         breadcrumbData: [
           {name: '车辆侦查', routerName: 'vehicle'},
-          {name: '尾随分析', routerName: 'vehicle_search_ws', params: { ...this.queryObj }},
-          { name: '尾随记录', routerName: 'ws_record', params: { ...this.queryObj }},
+          {name: '尾随分析', routerName: 'vehicle_search_ws', query: { ...this.queryObj }},
+          { name: '尾随记录', routerName: 'ws_record', query: { ...this.queryObj }},
           { name: '落脚点分析' }
         ]
       });
-      this.$router.push({name: 'vehicle_search_ljd', query: { plateNo: this.$route.params.plateNo }});
+      this.$router.push({name: 'vehicle_search_ljd', query: { plateNo: this.$route.query.plateNo }});
     },
     // 获取尾随车辆详情
     getDetail () {
-      const plateNo = this.$route.params.plateNo;
-      const startTime = this.$route.params.dateStart;
-      const endTime = this.$route.params.dateEnd;
-      const plateNoTb = this.$route.params.plateNoTb;
-      const startTimeTb = this.$route.params.dateStartTb;
+      const plateNo = this.$route.query.plateNo;
+      const startTime = this.$route.query.dateStart;
+      const endTime = this.$route.query.dateEnd;
+      const plateNoTb = this.$route.query.plateNoTb;
+      const startTimeTb = this.$route.query.dateStartTb;
       const params = {
         plateNo,
         startTime,
