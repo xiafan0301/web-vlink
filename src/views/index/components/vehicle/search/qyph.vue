@@ -66,11 +66,12 @@
                           :picker-options="pickerOptions1"
                           v-model="searchData.endTime"
                           type="datetime"
+                          @change="chooseEndTime"
                           placeholder="选择日期时间">
                   </el-date-picker>
                 </div>
                 <div class="search_line">
-                  <span class="red_star">频次：期间不少于 <el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 200)value = 200" style="width: 65px;" v-model="searchData.minTimes"></el-input> 次</span>
+                  <span class="red_star">频次：期间不少于 <el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 200)value = 200;if(value <5) value = 5;" style="width: 65px;" v-model="searchData.minTimes"></el-input> 次</span>
                 </div>
                 <!--按钮-->
                 <div class="search_btn">
@@ -175,6 +176,11 @@
 
     },
     methods: {
+      chooseEndTime (e) {
+        if (new Date(e).getTime() < new Date(this.searchData.startTime).getTime()) {
+          this.$message.info('结束时间必须大于开始时间才会有结果')
+        }
+      },
       hideLeft() {
         this.hideleft = !this.hideleft;
       },
@@ -575,12 +581,12 @@
         }
         let sT = formatDate(this.searchData.startTime, 'yyyy-MM-dd HH:mm:ss');
         let eT = formatDate(this.searchData.endTime, 'yyyy-MM-dd HH:mm:ss');
-        let query = {'where': {}};
-        query.where.startTime = sT;
-        query.where.endTime = eT;
-        query.where.frequence = this.searchData.minTimes;
-        query.where['bayonetIds'] = this.pointData.filter(x => x.dataType === 1).map(y => {return y.uid}).join(',');
-        query.where['cameraIds'] = this.pointData.filter(x => x.dataType === 0).map(y => {return y.uid}).join(',');
+        let query = {};
+        query.startTime = sT;
+        query.endTime = eT;
+        query.frequence = this.searchData.minTimes;
+        query['bayonetIds'] = this.pointData.filter(x => x.dataType === 1).map(y => {return y.uid}).join(',');
+        query['cameraIds'] = this.pointData.filter(x => x.dataType === 0).map(y => {return y.uid}).join(',');
         this.$router.push({name: 'vehicle_search_qyph_jg', query: query})
       }
     }
