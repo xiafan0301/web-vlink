@@ -1,5 +1,5 @@
 <template>
-  <div class="vehicle-info">
+  <div class="vehicle-info d">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
@@ -552,6 +552,7 @@ export default {
       //console.log(88888888888);
       this.isNull=true
       this.regulationsList = [];
+      this.photoAnalysis=null
       this.resetSearch()
     },
     clickTabItem(v) {
@@ -1040,7 +1041,7 @@ export default {
   }
 }
 .full {
-  width: 100%;
+  width: 100% !important;
 }
 .select_btn {
   background-color: #0c70f8;
@@ -1079,8 +1080,8 @@ export default {
     padding: 0px 10px;
   }
   .red {
-    border: 1px solid red;
-    color: red;
+    border: 1px solid #F2F2F2;
+    color: #0C70F8;
   }
 }
 .fright{
@@ -1122,6 +1123,15 @@ html {
 .info-left {
   .el-date-editor .el-range-input {
     /* font-size: 12px; */
+  }
+}
+.d.vehicle-info{
+  .search-btn {
+    
+    .el-button {
+      width: 100%;
+    }
+   
   }
 }
 .vehicle-info {

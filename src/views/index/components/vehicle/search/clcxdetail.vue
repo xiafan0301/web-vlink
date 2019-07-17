@@ -34,7 +34,7 @@
          
           <div class="div">
             <label>号牌颜色</label>
-            <span>{{detailData.numberColor}}</span>
+            <span>{{detailData._numberColor}}</span>
             
           </div>
            
@@ -58,9 +58,9 @@
             <span>{{detailData.vehicleModel}}</span>
             
           </div>
-          <div class="div" v-if="detailData.color">
+          <div class="div" >
              <label>车辆颜色</label>
-            <span>{{detailData.vehicleColor}}</span>
+            <span>{{detailData._vehicleColor}}</span>
            
           </div>
           <!-- <div class="div">
@@ -77,7 +77,7 @@
             <span>{{detailData.isSurveillance}}</span>
             <label>布控车辆</label>
           </div> -->
-          <el-button type="primary"  @click="goToPage('vehicle_search_lxwfdetail')" class="select_btn full">查看违章记录</el-button>
+          <!-- <el-button type="primary"  @click="goToPage('vehicle_search_lxwfdetail')" class="select_btn full">查看违章记录</el-button> -->
         </div>
       </div>
     </div>
@@ -236,6 +236,8 @@ export default {
       detailData:{},
       plateType:[],
       vehicleType:[],
+      plateColor:[],
+      vehicleColor:[],
 
     };
   },
@@ -247,9 +249,13 @@ export default {
     //console.log(this.urldata);
     let dic = this.dicFormater(dataList.vehicleType);
     let dic1 = this.dicFormater(dataList.plateType);
+    let dic2 = this.dicFormater(dataList.plateColor);
+    let dic3 = this.dicFormater(dataList.vehicleColor);
 
     this.plateType = [...dic1[0].dictList]; // 号牌类型
     this.vehicleType = [...dic[0].dictList]; // 车辆类型
+    this.plateColor = [...dic2[0].dictList]; // 号牌颜色
+    this.vehicleColor = [...dic3[0].dictList]; // 车辆颜色
 
     this.getSnapDetail()
     //this.getArchives()
@@ -289,11 +295,15 @@ export default {
           // this.vehicleType = [...dic[0].dictList]; // 车辆类型
           let a = this.plateType.find(el=>el.enumField==this.detailData.numberType)
           let b = this.vehicleType.find(el=>el.enumField==this.detailData.vehicleType)
+          let c = this.plateColor.find(el=>el.enumField==this.detailData.numberColor)
+          let d = this.vehicleColor.find(el=>el.enumField==this.detailData.vehicleColor)
           // console.log(this.plateType);
           // console.log(b);
           //if(a)
           this.detailData._vehicleType=a ? a.enumValue :''
           this.detailData._numberType= b ? b.enumValue :''
+          this.detailData._numberColor= c ? c.enumValue :''
+          this.detailData._vehicleColor= d ? d.enumValue :''
         }
       })
     },
