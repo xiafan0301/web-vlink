@@ -46,9 +46,31 @@
               </div>
             </div>
           </el-form-item>
-          <el-form-item prop="data1">
+          <el-form-item  prop="data1">
             <el-date-picker
               v-model="ruleForm.data1"
+              type="date"
+              :clearable="false"
+              placeholder="开始时间"
+              :picker-options="pickerOptions"
+              class="full vl_date"
+              value-format="yyyy-MM-dd"
+            ></el-date-picker>
+          </el-form-item>
+          <el-form-item  prop="data2">
+            <el-date-picker
+              v-model="ruleForm.data2"
+              type="date"
+              :clearable="false"
+              :picker-options="pickerOptions"
+              placeholder="结束时间"
+              class="full vl_date vl_date_end"
+              value-format="yyyy-MM-dd"
+            ></el-date-picker>
+          </el-form-item>
+          <!-- <el-form-item prop="data2">
+            <el-date-picker
+              v-model="ruleForm.data2"
               type="daterange"
               class="full vl_date"
               value-format="yyyy-MM-dd"
@@ -58,7 +80,7 @@
               start-placeholder="开始日期"
               end-placeholder="结束日期"
             ></el-date-picker>
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item prop="minFootholdTimes" class="firstItem">
             <el-row :gutter="5">
               <el-col :span="22">
@@ -322,6 +344,7 @@ export default {
       hideleft: false,
       ruleForm: {
         data1: null,
+        data2: null,
         minFootholdTimes: 3,
         input5: "1",
         value1: null
@@ -382,7 +405,8 @@ export default {
       let _s = new Date(curDate - curS).getFullYear() +
         "-" + _sm + "-" +_sd;
       let _e = date.getFullYear() + "-" + _em + "-" + _ed;
-      this.ruleForm.data1 = [_s, _s]
+      this.ruleForm.data1 = _s
+      this.ruleForm.data2 = _s
     },
     /**
      * 弹框地图初始化
@@ -515,12 +539,12 @@ export default {
       if (
         this.ruleForm &&
         this.ruleForm.data1 &&
-        this.ruleForm.data1.length > 0 &&
+        this.ruleForm.data2  &&
         this.curImageUrl
       ) {
         let pg = {
-          startDate: this.ruleForm.data1[0] + " 00:00:00",
-          endDate: this.ruleForm.data1[1] + " 23:59:59",
+          startDate: this.ruleForm.data1 + " 00:00:00",
+          endDate: this.ruleForm.data2 + " 23:59:59",
           minFootholdTimes: this.ruleForm.minFootholdTimes || 0,
         };
         if (this.ruleForm.input5 == 1 && this.ruleForm.value1.length != 0) {
