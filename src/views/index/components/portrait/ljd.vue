@@ -634,19 +634,21 @@ export default {
           if (!res.data || res.data.length === 0) {
             this.$message.info("抱歉，没有找到匹配结果");
             this.amap.clearMap();
+            this.chooseData=[]
+            this.evData=[]
             //this.searching = false;
             return false;
           }else{
             for(let i=0; i<res.data.length;i++){
               this.activeChoose.push(i)
             }
-            
+             this.chooseData=res.data
           }
           // this.evData = res.data.map(x => {
           //   x.checked = false;
           //   return x;
           // });
-          this.chooseData=res.data
+         
           this.amap.clearMap();
           //this.evData.sort(this.compare("shotNum"));
           //this.drawMarkers(this.evData);
