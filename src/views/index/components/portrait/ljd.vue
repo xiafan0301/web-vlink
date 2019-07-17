@@ -40,7 +40,7 @@
                   <span>点击上传图片</span>
                 </div>
               </el-upload>
-              <!-- <p @click="showHistoryPic">从上传记录中选择</p> -->
+              <p @click="showHistoryPic">从上传记录中选择</p>
               <div v-show="curImageUrl" class="del_icon">
                 <i class="el-icon-delete" @click="delPic"></i>
               </div>
@@ -210,6 +210,37 @@
         <el-button type="primary" @click="chooseOk">确 定</el-button>
       </span>
     </el-dialog>
+
+    
+    <!--上传记录弹窗-->
+    <el-dialog
+      :visible.sync="historyPicDialog"
+      class="history-pic-dialog"
+      :close-on-click-modal="false"
+      top="4vh"
+      title="最近上传的图片"
+    >
+      <div style="text-align: center;font-size: 20px;" v-if="loadingHis">
+        <i class="el-icon-loading"></i>
+      </div>
+      <vue-scroll class="his-pic-box" v-else-if="historyPicList.length">
+        <div
+          class="his-pic-item"
+          :class="{'active': item.checked}"
+          v-for="item in historyPicList"
+          :key="item.uid"
+          @click="chooseHisPic(item)"
+        >
+          <img :src="item.path" alt>
+        </div>
+        <div style="clear: both;"></div>
+      </vue-scroll>
+      <p v-else>暂无历史记录</p>
+      <div slot="footer">
+        <el-button @click="historyPicDialog = false">取消</el-button>
+        <el-button type="primary" @click="addHisToImg" :disabled="choosedHisPic.length === 0">确认</el-button>
+      </div>
+    </el-dialog>
 <!-- 抓拍信息 -->
      
     <portraitDetail :open="showDetail" @closeDialog="onCloseDetail" :detailData="deData" :scrollData="seData" :showItem="true" ></portraitDetail>
@@ -222,7 +253,8 @@ import flvplayer from '@/components/common/flvplayer.vue';
 import {
   getVehicleShot,
   getAllDevice,
-  JtcPOSTAppendixInfo,getFoothold
+  JtcPUTAppendixsOrder,
+  JtcPOSTAppendixInfo,getFoothold,JtcGETAppendixInfoList
 } from "@/views/index/api/api.judge.js";
 import { getAllBayonetList } from "@/views/index/api/api.base.js";
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
@@ -320,6 +352,11 @@ export default {
     this.getMapGETmonitorList(); //查询行政区域
     // this.getAllDevice(); //查询所有的设备
     // this.getAllBayonetList(); //查询所有的卡口
+  },
+   computed: {
+    choosedHisPic() {
+      return this.historyPicList.filter(x => x.checked);
+    }
   },
   methods: {
     mapZoomSet(val) {
@@ -798,6 +835,48 @@ export default {
       this.uploading = false;
       this.$message.error("上传失败");
     },
+     //选择最近上传的图片
+    chooseHisPic(item) {
+      this.historyPicList.forEach(x => {
+        x.checked = false;
+      });
+      item.checked = true;
+    },
+    //获取上传记录
+    showHistoryPic() {
+      this.loadingHis = true;
+      this.historyPicDialog = true;
+      let params = {
+        userId: this.$store.state.loginUser.uid,
+        fileType: 1
+      };
+      JtcGETAppendixInfoList(params)
+        .then(res => {
+          if (res) {
+            this.loadingHis = false;
+            res.data.forEach(x => (x.checked = false));
+            this.historyPicList = res.data;
+          }
+        })
+        .catch(() => {
+          this.historyPicDialog = false;
+        });
+    },
+    //从历史上传图片中上传
+    addHisToImg() {
+      this.historyPicDialog = false;
+      let _ids = [];
+      this.choosedHisPic.forEach(x => {
+        _ids.push(x.uid);
+        this.curImageUrl = x.path;
+        this.disab = false;
+        this.imgData = x;
+      });
+      let _obj = {
+        appendixInfoIds: _ids.join(",")
+      };
+      JtcPUTAppendixsOrder(_obj);
+    },
     delPic() {
       //删除图片
       this.curImageUrl = "";
@@ -1251,5 +1330,46 @@ export default {
   .el-form-item__label{
   padding-right: 0px;
 }
+.history-pic-dialog {
+    .el-dialog {
+      max-width: 12.6rem;
+      width: 100% !important;
+    }
+    .el-dialog__title {
+      font-size: 0.16rem;
+      color: #333333;
+    }
+    .el-dialog__body {
+      padding: 0 0.76rem 0.3rem;
+    }
+    .his-pic-box {
+      width: 100%;
+      height: 4.6rem !important;
+      .his-pic-item {
+        float: left;
+        width: 1.38rem;
+        height: 1.38rem;
+        border: 0.02rem solid #ffffff;
+        margin-right: 0.2rem;
+        margin-bottom: 0.2rem;
+        cursor: pointer;
+        img {
+          width: 100%;
+          height: 100%;
+        }
+      }
+      .active {
+        border-color: #0c70f8;
+      }
+    }
+    .el-dialog__footer {
+      button {
+        width: 1.4rem !important;
+        height: 0.4rem;
+        line-height: 0.4rem;
+        padding: 0;
+      }
+    }
+  }
 }
 </style>
