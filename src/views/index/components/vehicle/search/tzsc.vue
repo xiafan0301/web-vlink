@@ -685,9 +685,9 @@ export default {
       characterTypes: [
         "plateNo", // 车牌号
         "plateColor", // 车牌颜色
-        "vehicleStyles", // 汽车的型号
+        // "vehicleStyles", // 汽车的型号
         "vehicleColor", // 汽车颜色
-        "vehicleClass", // 汽车类型（越野啥的）
+        // "vehicleClass", // 汽车类型（越野啥的）
         "plateClass" // 号牌类型
       ],
       options: [
