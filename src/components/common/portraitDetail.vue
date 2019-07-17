@@ -74,7 +74,7 @@
                 <swiper :options="swiperOption" ref="mySwiper" class="btf">
                   <!-- slides -->
                   <swiper-slide v-for="(item, index) in strucInfoList" :key="index + 'isgm'">
-                    <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
+                    <div class="swiper_img_item" :class="{'active': item.uid === curImgIndex.uid}" @click="imgListTap(item, index)">
                       <img style="display: block; width: 100%; height: .88rem;" :src="item.subStoragePath" alt="">
                     </div>
                   </swiper-slide>
@@ -140,7 +140,7 @@ export default {
       show: false,
       strucDetailDialog:this.open, // 抓拍记录弹窗
       strucCurTab: 1, // 抓拍记录弹窗tab
-      curImgIndex: 0, // 当前选择的图片index
+      curImgIndex: null, // 当前选择的图片index
       strucInfoList:null ,
       sturcDetail:null,
       bResize: {},
@@ -180,12 +180,14 @@ export default {
     scrollData (v) {
      
      this.strucInfoList=v
-     this.curImgIndex = v.findIndex(el=>el.uid==this.detailData.uid)
+     this.curImgIndex = v.find(el=>el.uid==this.detailData.uid)
+     //console.log(this.curImgIndex);
+     
      
     },
     detailData (){
       // console.log(12345);
-      
+      this.curImgIndex = this.detailData
       this.sturcDetail=this.detailData
       // console.log(this.sturcDetail)
        
@@ -284,7 +286,7 @@ export default {
      * 图片切换
      */
     imgListTap (obj, i) {
-      this.curImgIndex = i
+      this.curImgIndex = obj
       this.sturcDetail = obj
     },
   },

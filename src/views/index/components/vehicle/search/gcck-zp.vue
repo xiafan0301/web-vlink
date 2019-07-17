@@ -44,7 +44,7 @@
               <el-checkbox class="gcck_ck_f" v-model="formInline.no">排除</el-checkbox>
             </el-form-item>
             <el-form-item>
-              <el-input placeholder="A00000" style="width: 200px;" v-model="formInline.cp">
+              <el-input placeholder="请输入车牌号" style="width: 200px;" v-model="formInline.cp">
                 <el-select style="width: 80px;" v-model="formInline.cpp" slot="prepend" placeholder="归属">
                   <el-option v-for="(item, index) in cppList" :label="item.enumValue" :key="'afawe-list-' + index" :value="item.enumValue"></el-option>
                   <el-option :label="'不选'" :value="''"></el-option>
