@@ -87,18 +87,28 @@
             <!-- 表单 -->
             <el-form :model="tzscMenuForm" ref="tzscMenuForm" :rules="rules">
               <div class="selectDate date-comp">
-                <el-form-item label prop="selectDate">
+                <el-form-item label prop="startTime">
                   <el-date-picker
-                    class="width232 vl_date"
-                    v-model="tzscMenuForm.selectDate"
-                    type="daterange"
-                    range-separator="至"
+                    v-model="tzscMenuForm.startTime"
+                    type="datetime"
+                    :clearable="false"
                     value-format="yyyy-MM-dd"
                     format="yyyy-MM-dd"
-                    :picker-options="pickerOptions"
-                    start-placeholder="开始日期"
-                    end-placeholder="结束日期"
+                    :picker-options="startDateOpt"
+                    placeholder="开始时间"
+                    class="width232 vl_date"
+                  ></el-date-picker>
+                </el-form-item>
+                <el-form-item label prop="endTime">
+                  <el-date-picker
+                    v-model="tzscMenuForm.endTime"
+                    type="datetime"
                     :clearable="false"
+                    value-format="yyyy-MM-dd"
+                    format="yyyy-MM-dd"
+                    :picker-options="endDateOpt"
+                    placeholder="结束时间"
+                    class="width232 vl_date vl_date_end"
                   ></el-date-picker>
                 </el-form-item>
               </div>
@@ -586,7 +596,8 @@ export default {
       getCharacterLoading: false, // 获取车辆特征加载效果
       // 菜单表单变量
       tzscMenuForm: {
-        selectDate: "",
+        startTime: "",
+        endTime: "",
         selectDevice: "",
         licenseType: "",
         licenseColor: "",
@@ -597,13 +608,36 @@ export default {
         inspectionCount: ""
       },
       rules: {
-        selectDate: [
-          {
-            required: true,
-            message: "请选择日期",
-            trigger: "change"
+        // selectDate: [
+        //   {
+        //     required: true,
+        //     message: "请选择日期",
+        //     trigger: "change"
+        //   }
+        // ]
+      },
+      startDateOpt: {
+        disabledDate: time => {
+          if (this.tzscMenuForm.endTime) {
+            return time.getTime() > new Date(this.tzscMenuForm.endTime).getTime();
+          } else {
+            return time.getTime() > new Date().getTime();
           }
-        ]
+        }
+      },
+      endDateOpt: {
+        disabledDate: time => {
+          if (this.tzscMenuForm.startTime) {
+            return (
+              time.getTime() < new Date(this.tzscMenuForm.startTime).getTime() ||
+              time.getTime() > new Date().getTime()
+            );
+          } else {
+            return (
+              time.getTime() > new Date().getTime()
+            );
+          }
+        }
       },
       getStrucInfoLoading: false, // 查询按钮加载
       pickerOptions: {
@@ -874,10 +908,10 @@ export default {
             queryParams = {
               where: {
                 startTime:
-                  formatDate(this.tzscMenuForm.selectDate[0], "yyyy-MM-dd") +
+                  formatDate(this.tzscMenuForm.startTime, "yyyy-MM-dd") +
                   " 00:00:00", // 开始时间
                 endTime:
-                  formatDate(this.tzscMenuForm.selectDate[1], "yyyy-MM-dd") +
+                  formatDate(this.tzscMenuForm.endTime, "yyyy-MM-dd") +
                   " 23:59:59", // 结束时间
                 deviceUid: deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
                 bayonetUid:
@@ -902,10 +936,10 @@ export default {
             queryParams = {
               where: {
                 startTime:
-                  formatDate(this.tzscMenuForm.selectDate[0], "yyyy-MM-dd") +
+                  formatDate(this.tzscMenuForm.startTime, "yyyy-MM-dd") +
                   " 00:00:00", // 开始时间
                 endTime:
-                  formatDate(this.tzscMenuForm.selectDate[1], "yyyy-MM-dd") +
+                  formatDate(this.tzscMenuForm.endTime, "yyyy-MM-dd") +
                   " 23:59:59", // 结束时间
                 deviceUid: deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
                 bayonetUid:
@@ -1092,10 +1126,8 @@ export default {
     /*选择日期的方法 */
     setDTime() {
       //设置默认时间
-      this.tzscMenuForm.selectDate = [
-        formatDate(new Date().getTime() - 3600 * 1000 * 24 * 2, "yyyy-MM-dd"),
-        formatDate(new Date(), "yyyy-MM-dd")
-      ];
+      this.tzscMenuForm.startTime = formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd");
+      this.tzscMenuForm.endTime = formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd");
     },
     /*选择设备的方法*/
     initCheckTree() {
@@ -1261,7 +1293,6 @@ export default {
       this.$nextTick(() => {
         $(".struc_c_address").append($("#capMap"));
       });
-      console.log("this.markerPoint", this.markerPoint);
       if (this.markerPoint) {
         this.amap.remove(this.markerPoint);
       }
