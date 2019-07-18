@@ -397,13 +397,9 @@ export default {
             if (this.drawObj[0].endTime) {
               return (
                 time.getTime() > new Date(this.drawObj[0].endTime).getTime()
-                // ||
-                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
               );
             } else {
               return (
-                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
-                // ||
                 time.getTime() > new Date().getTime()
               );
             }
@@ -860,13 +856,9 @@ export default {
             if (this.drawObj[index].endTime) {
               return (
                 time.getTime() > new Date(this.drawObj[index].endTime).getTime()
-                //   ||
-                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
               );
             } else {
               return (
-                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
-                // ||
                 time.getTime() > new Date().getTime()
               );
             }
@@ -880,12 +872,10 @@ export default {
             if (this.drawObj[index].startTime) {
               return (
                 time.getTime() <
-                  new Date(this.drawObj[index].startTime).getTime() ||
-                time.getTime() > new Date().getTime()
+                  new Date(this.drawObj[index].startTime).getTime() || time.getTime() > new Date().getTime()
               );
             } else {
               return (
-                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3 ||
                 time.getTime() > new Date().getTime()
               );
             }
@@ -2380,7 +2370,6 @@ export default {
               }
             }
           }
-
           .select_date {
             margin-top: 10px;
             .time-search {

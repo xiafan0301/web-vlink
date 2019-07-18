@@ -13,23 +13,33 @@
       <div class="left_menu">
         <!-- 菜单表单 -->
         <vue-scroll>
-          <div style="padding: 20px;">
+          <div style="padding: 2px 20px 20px 20px;">
             <!-- 表单 -->
             <div class="form_warp">
               <el-form :model="ytscMenuForm" ref="ytscMenuForm" :rules="rules">
                 <div class="date-comp">
-                  <el-form-item prop="selectDate">
+                  <el-form-item label prop="startTime">
                     <el-date-picker
-                      class="width232 vl_date"
-                      v-model="ytscMenuForm.selectDate"
-                      type="daterange"
-                      range-separator="至"
+                      v-model="ytscMenuForm.startTime"
+                      type="datetime"
+                      :clearable="false"
                       value-format="yyyy-MM-dd"
                       format="yyyy-MM-dd"
-                      :picker-options="pickerOptions"
-                      start-placeholder="开始日期"
-                      end-placeholder="结束日期"
+                      :picker-options="startDateOpt"
+                      placeholder="开始时间"
+                      class="width232 vl_date"
+                    ></el-date-picker>
+                  </el-form-item>
+                  <el-form-item label prop="endTime">
+                    <el-date-picker
+                      v-model="ytscMenuForm.endTime"
+                      type="datetime"
                       :clearable="false"
+                      value-format="yyyy-MM-dd"
+                      format="yyyy-MM-dd"
+                      :picker-options="endDateOpt"
+                      placeholder="结束时间"
+                      class="width232 vl_date vl_date_end"
                     ></el-date-picker>
                   </el-form-item>
                 </div>
@@ -39,7 +49,7 @@
                   <!-- 箭头icon -->
                   <i class="el-icon-arrow-down" v-show="!treeTabShow"></i>
                   <i class="el-icon-arrow-up" v-show="treeTabShow"></i>
-                  <div class="device_list" v-if="selectDeviceArr.length > 0">
+                  <div class="device_list" v-if="selectDeviceArr.length > 0 && !checkAllTree">
                     <span>{{ selectDeviceArr[0]['label'] }}</span>
                     <span
                       v-show="selectDeviceArr.length > 1"
@@ -47,6 +57,7 @@
                       class="device_count"
                     >+{{ selectDeviceArr.length - 1 }}</span>
                   </div>
+                  <div class="no_device" v-else-if="selectDeviceArr.length > 0 && checkAllTree">全部设备</div>
                   <div class="no_device" v-else>选择设备</div>
                   <!-- 树tab页面 -->
                   <div class="device_tree_tab" v-show="treeTabShow">
@@ -459,16 +470,33 @@ export default {
       characteristicList: ["湘H3A546", "红色", "有挂饰"], // 车辆的特征数组
       // 菜单表单变量
       ytscMenuForm: {
-        selectDate: ""
+        startTime: "",
+        endTime: "",
       },
-      rules: {
-        selectDate: [
-          {
-            required: true,
-            message: "请选择日期",
-            trigger: "change"
+      rules: {},
+      startDateOpt: {
+        disabledDate: time => {
+          if (this.ytscMenuForm.endTime) {
+            return (
+              time.getTime() > new Date(this.ytscMenuForm.endTime).getTime()
+            );
+          } else {
+            return time.getTime() > new Date().getTime();
           }
-        ]
+        }
+      },
+      endDateOpt: {
+        disabledDate: time => {
+          if (this.ytscMenuForm.startTime) {
+            return (
+              time.getTime() <
+                new Date(this.ytscMenuForm.startTime).getTime() ||
+              time.getTime() > new Date().getTime()
+            );
+          } else {
+            return time.getTime() > new Date().getTime();
+          }
+        }
       },
       getStrucInfoLoading: false, // 查询按钮加载
       pickerOptions: {
@@ -638,10 +666,10 @@ export default {
             const queryParams = {
               where: {
                 startTime:
-                  formatDate(this.ytscMenuForm.selectDate[0], "yyyy-MM-dd") +
+                  formatDate(this.ytscMenuForm.startTime, "yyyy-MM-dd") +
                     " 00:00:00" || null, // 开始时间
                 endTime:
-                  formatDate(this.ytscMenuForm.selectDate[1], "yyyy-MM-dd") +
+                  formatDate(this.ytscMenuForm.endTime, "yyyy-MM-dd") +
                     " 23:59:59" || null, // 结束时间
                 uploadImgUrl: this.curImageUrl || null, // 车辆图片信息
                 deviceUid: deviceUidArr.join(), // 摄像头标识
@@ -711,10 +739,14 @@ export default {
     /*选择日期的方法 */
     setDTime() {
       //设置默认时间
-      this.ytscMenuForm.selectDate = [
-        formatDate(new Date().getTime() - 3600 * 1000 * 24 * 2, "yyyy-MM-dd"),
-        formatDate(new Date(), "yyyy-MM-dd")
-      ];
+      this.ytscMenuForm.startTime = formatDate(
+        new Date().getTime() - 3600 * 1000 * 24,
+        "yyyy-MM-dd"
+      );
+      this.ytscMenuForm.endTime = formatDate(
+        new Date().getTime() - 3600 * 1000 * 24,
+        "yyyy-MM-dd"
+      );
     },
     /*sort排序方法*/
     clickTime() {
@@ -1104,6 +1136,10 @@ export default {
       background: #fff;
       box-shadow: 2px 3px 10px 0px rgba(131, 131, 131, 0.28);
       height: 100%;
+      // 表单选项间隔
+      .el-form-item {
+        margin-bottom: 12px;
+      }
       // 菜单的表单
       .width232 {
         width: 232px;
@@ -1113,7 +1149,7 @@ export default {
       }
       // 选择设备下拉
       .selected_device {
-        margin-bottom: 20px;
+        margin-bottom: 12px;
         position: relative;
         width: 232px;
         height: 40px;
@@ -1151,7 +1187,7 @@ export default {
           z-index: 100;
           background: #fff;
           width: 232px;
-          height: 350px;
+          height: 330px;
           border-radius: 4px;
           border: 1px solid #d3d3d3;
           .tab_title {
@@ -1168,7 +1204,7 @@ export default {
           }
           // 树
           .tree_content {
-            height: 340px;
+            height: 320px;
             padding-top: 10px;
             .checked_all {
               padding: 0 0 8px 23px;
