@@ -7,7 +7,55 @@
     <div class="the-bottom">
       <div class="the-left-search">
         <div class="con_left">
-
+          <div class="left_time date-comp">
+            <el-date-picker
+              class="vl_date"
+              v-model="queryForm.startDate"
+              :clearable="false"
+              type="date"
+              placeholder="开始日期"
+              value-format="yyyy-MM-dd"
+              format="yyyy-MM-dd"
+              :picker-options="pickerOptions">
+            </el-date-picker>
+          </div>
+          <div class="left_time date-comp">
+            <el-date-picker
+              class="vl_date vl_date_end"
+              placeholder="结束日期"
+              v-model="queryForm.endDate"
+              :clearable="false"
+              type="date"
+              value-format="yyyy-MM-dd"
+              format="yyyy-MM-dd"
+              @change="dateChange"
+              :picker-options="pickerOptions"
+            >
+            </el-date-picker>
+          </div>
+          <div class="left_time">
+            <el-select v-model="queryForm.startTime" placeholder="开始时间" style="width: 216px;" @change="handleChangeStartTime">
+              <el-option 
+                v-for="(item, index) in startTimeOptions" 
+                :key="index"
+                :label="item.label"
+                :value="item.value"
+                :disabled="item.disabled"
+              >
+              </el-option>
+            </el-select>
+            <span class="left_time_separator">-</span>
+            <el-select v-model="queryForm.endTime" placeholder="结束时间" style="width: 216px;">
+              <el-option 
+                v-for="(item, index) in endTimeOptions" 
+                :key="index"
+                :label="item.label"
+                :value="item.value"
+                :disabled="item.disabled"
+              >
+              </el-option>
+            </el-select>
+          </div>
           <!-- 选择设备 -->
           <!-- treeTabShow 为展开 -->
           <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
@@ -58,56 +106,7 @@
               </div>
             </div>
           </div>
-
-          <div class="left_time date-comp">
-            <el-date-picker
-              class="vl_date"
-              v-model="queryForm.startDate"
-              :clearable="false"
-              type="date"
-              placeholder="开始日期"
-              value-format="yyyy-MM-dd"
-              format="yyyy-MM-dd"
-              :picker-options="pickerOptions">
-            </el-date-picker>
-          </div>
-          <div class="left_time date-comp">
-            <el-date-picker
-              class="vl_date vl_date_end"
-              placeholder="结束日期"
-              v-model="queryForm.endDate"
-              :clearable="false"
-              type="date"
-              value-format="yyyy-MM-dd"
-              format="yyyy-MM-dd"
-              @change="dateChange"
-              :picker-options="pickerOptions"
-            >
-            </el-date-picker>
-          </div>
-          <div class="left_time">
-            <el-select v-model="queryForm.startTime" placeholder="开始时间" style="width: 216px;" @change="handleChangeStartTime">
-              <el-option 
-                v-for="(item, index) in startTimeOptions" 
-                :key="index"
-                :label="item.label"
-                :value="item.value"
-                :disabled="item.disabled"
-              >
-              </el-option>
-            </el-select>
-            <span class="left_time_separator">-</span>
-            <el-select v-model="queryForm.endTime" placeholder="结束时间" style="width: 216px;">
-              <el-option 
-                v-for="(item, index) in endTimeOptions" 
-                :key="index"
-                :label="item.label"
-                :value="item.value"
-                :disabled="item.disabled"
-              >
-              </el-option>
-            </el-select>
-          </div>
+          
           <div class="left_num">
             <el-input class="left-none-border" v-model="queryForm.minShotTimes" @blur="handleBlurShotTimes">
               <template slot="prepend">过车次数</template>
