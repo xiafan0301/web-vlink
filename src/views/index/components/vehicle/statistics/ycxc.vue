@@ -62,17 +62,27 @@
           <div class="left_time date-comp">
             <el-date-picker
               class="vl_date"
-              placeholder="请选择日期"
-              v-model="queryDate"
+              v-model="queryForm.startDate"
               :clearable="false"
-              type="daterange"
-              range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
+              type="date"
+              placeholder="开始日期"
+              value-format="yyyy-MM-dd"
+              format="yyyy-MM-dd"
+              :picker-options="pickerOptions">
+            </el-date-picker>
+          </div>
+          <div class="left_time date-comp">
+            <el-date-picker
+              class="vl_date vl_date_end"
+              placeholder="结束日期"
+              v-model="queryForm.endDate"
+              :clearable="false"
+              type="date"
               value-format="yyyy-MM-dd"
               format="yyyy-MM-dd"
               @change="dateChange"
-              :picker-options="pickerOptions">
+              :picker-options="pickerOptions"
+            >
             </el-date-picker>
           </div>
           <div class="left_time">
@@ -105,7 +115,7 @@
             <span>次（范围2-100）</span>
           </div>
           
-          <el-select v-model="queryForm.vehicleTypes" placeholder="请选择车辆类型" style="width: 100%;" clearable multiple>
+          <el-select v-model="queryForm.vehicleTypes" collapse-tags placeholder="请选择车辆类型" style="width: 100%;" clearable multiple>
             <el-option
               v-for="item in carTypeList"
               :key="item.enumField"
@@ -113,7 +123,7 @@
               :value="item.enumValue">
             </el-option>
           </el-select>
-          <el-select v-model="queryForm.surveillanceIds" placeholder="请选择布控车辆" style="width: 100%;" clearable multiple>
+          <el-select v-model="queryForm.surveillanceIds" collapse-tags placeholder="请选择布控车辆" style="width: 100%;" clearable multiple>
             <el-option
               v-for="item in controlVehicleList"
               :key="item.uid"
@@ -316,9 +326,10 @@ export default {
           return time.getTime() > Date.now();
         }
       },
+      pickerEnd: {},
       queryForm: {
         startDate: null,
-        endDate: null,
+        endDate:  null,
         cameraIds: null,
         bayonetIds: null,
         startTime: 19,
@@ -358,6 +369,14 @@ export default {
       searchStr: {}, // 传到抓拍记录页面的数据
     }
   },
+  watch: {
+    // 'queryForm.startDate' () {
+    //   let _this = this;
+    //   const threeDays = 2 * 3600 * 24 * 1000;
+    //   const endTime = new Date(_this.queryForm.startDate).getTime() + threeDays;
+    //   _this.queryForm.endDate = formatDate(endTime);
+    // }
+  },
   created () {
     if (this.$route.query.startDate) {
       this.handleQueryData();
@@ -391,12 +410,15 @@ export default {
       if (day < 10) { day = '0' + day; }
       let _s = year + '-' + month + '-' + day;
 
-      this.queryDate = [_s, _s];
+      this.queryForm.startDate = _s;
+      this.queryForm.endDate = _s;
+      // this.queryDate = [_s, _s];
     },
     //日期选择
-    dateChange(val) {
+    dateChange() {
+      let _this = this;
       if (
-        new Date(val[1]).getTime() - new Date(val[0]).getTime() >=
+        new Date(_this.queryForm.endDate).getTime() - new Date(_this.queryForm.startDate).getTime() >=
         3 * 24 * 3600 * 1000
       ) {
         if (!document.querySelector(".el-message")) {
@@ -405,14 +427,14 @@ export default {
           );
         }
         this.setDTime();
+        return false;
+      } else {
+        return true;
       }
     },
     handleQueryData () {
       const startDate = this.$route.query.startDate.split(' ')[0];
       const endDate = this.$route.query.endDate.split(' ')[0];
-
-      this.queryDate = [startDate, endDate]
-
 
       const startTime = this.$route.query.startHour;
       const endTime = this.$route.query.endhour;
@@ -428,7 +450,6 @@ export default {
       this.queryForm.minShotTimes = minShotTimes;
       this.queryForm.surveillanceIds = surveillanceIds;
       this.queryForm.vehicleTypes = vehicleTypes;
-
 
     },
     // 获取布控车辆
@@ -482,6 +503,7 @@ export default {
                   for(let i = 0; i < cameraIds.length; i ++) {
                     if (val.id === cameraIds[i]) {
                       arr.push(val.label);
+                      // arr.push(val)
                       this.$refs.cameraTree.setCheckedKeys(arr);
                       this.$refs.cameraTree.setCheckedNodes(arr);
                     }
@@ -491,6 +513,7 @@ export default {
                   for(let i = 0; i < bayonetIds.length; i ++) {
                     if (val.id === bayonetIds[i]) {
                       arr.push(val.label);
+                      // arr.push(val)
                       this.$refs.cameraTree.setCheckedKeys(arr);
                       this.$refs.cameraTree.setCheckedNodes(arr);
                     }
@@ -501,15 +524,16 @@ export default {
 
             setTimeout(() => {
               let checkedKeys = this.$refs.cameraTree.getCheckedKeys(true);
-              this.selectDeviceArr = this.$refs.cameraTree.getCheckedNodes(false);
+              this.selectDeviceArr = this.$refs.cameraTree.getCheckedNodes(true);
 
               this.handleData();
 
-              console.log('zxczxczxc', checkedKeys)
-              console.log('this.selectDeviceArr.length', this.selectDeviceArr.length)
-              console.log('this.selectDeviceArr', this.videoTreeNodeCount)
+              console.log('checkedKeys', checkedKeys)
+              console.log('zxczxczxc', this.selectDeviceArr)
+              // console.log('this.selectDeviceArr.length', this.selectDeviceArr.length)
+              // console.log('this.selectDeviceArr', this.videoTreeNodeCount)
               if (this.selectDeviceArr.length === this.videoTreeNodeCount) {
-                console.log('asdasdasdasdasd')
+                // console.log('asdasdasdasdasd')
                 this.checkAllTree = true;
                 this.isIndeterminate = false;
               } else if (this.selectDeviceArr.length > 0 && this.selectDeviceArr.length < this.videoTreeNodeCount) {
@@ -579,7 +603,7 @@ export default {
       this.handleData();
     },
     getLeafCountTree(json) {
-      console.log('json', json)
+      // console.log('json', json)
       // 获取树节点的数量
       for (let i = 0; i < json.length; i++) {
         if (json[i].hasOwnProperty("id")) {
@@ -591,10 +615,12 @@ export default {
           continue;
         }
       }
-      console.log('videoTreeNodeCount', this.videoTreeNodeCount)
+      // console.log('videoTreeNodeCount', this.videoTreeNodeCount)
     },
     //摄像头
     listenChecked(val, val1) {
+      console.log('val1', val1);
+      
       this.selectDeviceArr = this.$refs.cameraTree.getCheckedNodes(true);
       this.handleData();
       if (val1.checkedNodes.length === this.videoTreeNodeCount) {
@@ -644,9 +670,8 @@ export default {
         surveillanceIds: []
       })
       
-      // this.$route.query == {};
+      this.setDTime();
 
-      this.queryDate = [(new Date() - (24 * 60 * 60 * 1000)), (new Date() - (24 * 60 * 60 * 1000))];
       this.resetLoading = false;
 
       this.$nextTick(() => {
@@ -674,11 +699,11 @@ export default {
         this.queryForm.bayonetIds = bayonentIds.join(",");
       }
 
-      console.log('queryDate', this.queryDate)
 
-      this.queryForm.startDate = this.queryDate[0];
-      this.queryForm.endDate = this.queryDate[1];
-
+      if (!this.dateChange()) {
+        this.searchLoading = false;
+        return;
+      }
 
       if (!this.validatorShotTimes(this.queryForm.minShotTimes)) {
         this.searchLoading = false;
@@ -742,8 +767,8 @@ export default {
         this.queryForm.bayonetIds = bayonentIds.join(",");
       }
 
-      this.queryForm.startDate = this.queryDate[0];
-      this.queryForm.endDate = this.queryDate[1];
+      // this.queryForm.startDate = this.queryDate[0];
+      // this.queryForm.endDate = this.queryDate[1];
 
       const data = {
         bayonetIds: this.queryForm.bayonetIds,
@@ -788,20 +813,6 @@ export default {
         ...this.searchStr
       }});
     },
-    /**
-     * 查看车辆信息
-     */
-    // onOpenVehicleInfo (obj) {
-    //   this.searchStr['vehicleNumber'] = obj.vehicleNumber;
-    //   this.$store.commit('setBreadcrumbData', {
-    //     breadcrumbData: [
-    //       {name: '车辆侦查', routerName: 'vehicle'},
-    //       {name: '夜间行车分析', routerName: 'vehicle_search_ycxc', params: { ...this.searchStr }},
-    //       { name: '车辆详情' }
-    //     ]
-    //   });
-    //   this.$router.push({name: 'vehicle_search_clxx', query: {plateNo: obj.vehicleNumber}});
-    // },
     /**
      * 分页赋值
      */

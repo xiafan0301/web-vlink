@@ -275,7 +275,6 @@ export default {
       }
       getNightVehicleRecordList(this.queryObj)
         .then(res => {
-          console.log('resasdsadsa', res)
           if (res && res.data) {
             this.dataList = res.data.list;
             this.pagination.total = res.data.total;
@@ -383,18 +382,17 @@ export default {
 
       let currentIndex;
 
-      this.allDataList.map((item, index) => {
-        if (item.uid === obj.uid) {
-          currentIndex = index;
-        }
-      })
       this.strucDetailDialog = true;
-
-      console.log(this.refs)
-      // this.refs.mySwiper.slideTo(currentIndex);
 
       this.$nextTick(() => {
         this.initMap(obj);
+
+        this.allDataList.map((item, index) => {
+          if (item.uid === obj.uid) {
+            currentIndex = index;
+          }
+        })
+        this.$refs.mySwiper.slideTo(currentIndex);
       })
     },
     /**
@@ -576,24 +574,22 @@ export default {
       text-align: center;
       line-height: 40px;
       position: absolute;
+      color: #666666;
       top: 5.5rem;
       right: 1.6rem;
       text-decoration: none;
       color: #B2B2B2;
       cursor: pointer;
       &:hover {
-        background-color: #FFFFFF;
+        background-color: #0C70F8;
         border-color: #0C70F8;
-        color: #0C70F8;
+        color: #FFFFFF;
       }
     }
     .struc_c_detail {
       width:  100%;
       height: 4.2rem;
       display: flex;
-      // >div {
-      //   float: left;
-      // }
       .struc_c_d_img {
         width: 4.2rem;
         height: 4.2rem;
