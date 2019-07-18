@@ -6,9 +6,6 @@
     <div class="content_box">
       <div class="left">
         <el-form class="left_form" :model="searchForm" ref="searchForm" :rules="rules">
-          <el-form-item prop="plateNo">
-            <el-input type="text" v-model="searchForm.plateNo" placeholder="请输入车牌号" style="width: 100%" @blur="handlePlateNo('searchForm')"></el-input>
-          </el-form-item>
           <el-form-item  class="date_time" prop="shotTime">
             <el-date-picker
               v-model="searchForm.shotTime"
@@ -38,6 +35,9 @@
               placeholder="结束时间"
               >
             </el-date-picker>
+          </el-form-item>
+          <el-form-item prop="plateNo">
+            <el-input type="text" v-model="searchForm.plateNo" placeholder="请输入车牌号" style="width: 100%" @blur="handlePlateNo('searchForm')"></el-input>
           </el-form-item>
           <el-form-item prop="deviceCode" class="device_code">
             <el-select placeholder="请选择起点设备" style="width: 100%" v-model="searchForm.deviceCode" @change="handleChangeDeviceCode">
