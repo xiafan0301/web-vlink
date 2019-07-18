@@ -326,7 +326,7 @@ export default {
       mapPicShow: false,
       mapPicShow2: false,
       searchForm: {
-        plateNo: '湘NCP100', // 沪D008CP 沪A009CP 湘AN8888
+        plateNo: '', // 沪D008CP 沪A009CP 湘AN8888
         time: [new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000), new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000)]
         // time: [new Date(new Date().getTime() - 5 * 24 * 60 * 60 * 1000), new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000)]
       },
