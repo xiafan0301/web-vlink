@@ -16,7 +16,6 @@
             <div class="gcck_ll_s">
               <el-input
                 placeholder="搜索设备"
-                size="small"
                 @keyup.enter.native="getTreeList1()"
                 v-model="searchVal1">
                 <i slot="suffix" @click="getTreeList1()" class="el-input__icon el-icon-search" style="font-size: 20px;"></i>
@@ -29,31 +28,36 @@
             </div>
           </div>
           <div v-show="showType === 2">
-            <div class="gcck_ll_s" style="height: 100px;">
-              <el-date-picker style="width: 236px;" size="small"
+            <div class="gcck_ll_s" style="height: 165px;">
+              <el-date-picker style="width: 236px;"
                 class="vl_date"
-                v-model="searchTime2"
-                type="daterange"
+                v-model="searchTime2[0]"
+                type="date"
                 align="left"
-                unlink-panels
                 :editable="false"
                 :clearable="false"
-                range-separator="至"
-                start-placeholder="开始日期"
                 @change="pickerChanged"
-                :picker-options="pickerOptions"
-                end-placeholder="结束日期">
+                :picker-options="pickerOptions">
+              </el-date-picker>
+              <el-date-picker style="width: 236px; margin-top: 10px"
+                class="vl_date vl_date_end"
+                v-model="searchTime2[1]"
+                type="date"
+                align="left"
+                :editable="false"
+                :clearable="false"
+                @change="pickerChanged"
+                :picker-options="pickerOptions">
               </el-date-picker>
               <el-input
                 style="margin-top: 10px"
                 placeholder="搜索设备"
-                size="small"
                 @keyup.enter.native="getTreeList2()"
                 v-model="searchVal2">
                 <i slot="suffix" @click="getTreeList2()" class="el-input__icon el-icon-search" style="font-size: 20px;"></i>
               </el-input>
             </div>
-            <div class="gcck_ll_l" style="padding-top: 100px;">
+            <div class="gcck_ll_l" style="padding-top: 165px;">
               <div>
                 <div is="dbTree" @selectItem="selectItem2" :likeKey="searchVal2" :doSearch="doSearch2"></div>
               </div>

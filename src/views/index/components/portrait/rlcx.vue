@@ -3,13 +3,26 @@
     <div class="vc_gcck_bd" is="vehicleBreadcrumb" :oData="[{name: '特征搜人'}]"></div>
     <div class="rlcx_main clearfix">
       <div class="rlcx_l">
-        <el-form ref="form" class="pt_rlcx_fm" :model="searchForm" size="small">
+        <el-form ref="form" class="pt_rlcx_fm" :model="searchForm">
           <el-form-item>
             <el-date-picker
               class="vl_date"
               style="width: 240px;"
-              v-model="searchForm.time"
-              type="daterange"
+              v-model="searchForm.time[0]"
+              type="date"
+              :editable="false" :clearable="false"
+              :picker-options="pickerOptions"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item>
+            <el-date-picker
+              class="vl_date vl_date_end"
+              style="width: 240px;"
+              v-model="searchForm.time[1]"
+              type="date"
               :editable="false" :clearable="false"
               :picker-options="pickerOptions"
               range-separator="至"
@@ -254,6 +267,16 @@ export default {
       }
     },
     searchSubmit () {
+      /* if (this.searchForm.time[0].getTime() > this.searchForm.time[1].getTime()) {
+        if (document.querySelector('.el-message')) {
+        }
+        this.$message({
+          message: '恭喜你，这是一条成功消息',
+          type: 'warning',
+          duration: 0
+        });
+        return false;
+      } */
       this.searchLoading = true;
       let params = {
         where: {
