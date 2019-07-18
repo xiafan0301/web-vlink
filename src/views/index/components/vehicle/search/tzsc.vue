@@ -13,8 +13,37 @@
       <div class="left_menu">
         <!-- 菜单表单 -->
         <vue-scroll>
-          <div style="padding: 20px;">
-            <!-- 选择设备 -->
+          <div style="padding: 2px 20px 20px 20px;">
+            <!-- 表单 -->
+            <el-form :model="tzscMenuForm" ref="tzscMenuForm" :rules="rules">
+              <div class="selectDate date-comp">
+                <el-form-item label prop="startTime">
+                  <el-date-picker
+                    v-model="tzscMenuForm.startTime"
+                    type="datetime"
+                    :clearable="false"
+                    value-format="yyyy-MM-dd"
+                    format="yyyy-MM-dd"
+                    :picker-options="startDateOpt"
+                    placeholder="开始时间"
+                    class="width232 vl_date"
+                  ></el-date-picker>
+                </el-form-item>
+                <el-form-item label prop="endTime">
+                  <el-date-picker
+                    v-model="tzscMenuForm.endTime"
+                    type="datetime"
+                    :clearable="false"
+                    value-format="yyyy-MM-dd"
+                    format="yyyy-MM-dd"
+                    :picker-options="endDateOpt"
+                    placeholder="结束时间"
+                    class="width232 vl_date vl_date_end"
+                  ></el-date-picker>
+                </el-form-item>
+              </div>
+
+              <!-- 选择设备 -->
             <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
             <div class="selected_device" @click="treeTabShow = true;">
               <i class="el-icon-arrow-down" v-show="!treeTabShow"></i>
@@ -85,34 +114,7 @@
                 </div>-->
               </div>
             </div>
-            <!-- 表单 -->
-            <el-form :model="tzscMenuForm" ref="tzscMenuForm" :rules="rules">
-              <div class="selectDate date-comp">
-                <el-form-item label prop="startTime">
-                  <el-date-picker
-                    v-model="tzscMenuForm.startTime"
-                    type="datetime"
-                    :clearable="false"
-                    value-format="yyyy-MM-dd"
-                    format="yyyy-MM-dd"
-                    :picker-options="startDateOpt"
-                    placeholder="开始时间"
-                    class="width232 vl_date"
-                  ></el-date-picker>
-                </el-form-item>
-                <el-form-item label prop="endTime">
-                  <el-date-picker
-                    v-model="tzscMenuForm.endTime"
-                    type="datetime"
-                    :clearable="false"
-                    value-format="yyyy-MM-dd"
-                    format="yyyy-MM-dd"
-                    :picker-options="endDateOpt"
-                    placeholder="结束时间"
-                    class="width232 vl_date vl_date_end"
-                  ></el-date-picker>
-                </el-form-item>
-              </div>
+
               <!-- 选择搜车的类型 -->
               <div class="select_type">
                 <el-radio-group v-model="selectType">
@@ -1509,9 +1511,6 @@ export default {
       .el-form-item {
         margin-bottom: 12px;
       }
-      .selectDate .el-form-item {
-        margin-bottom: 20px;
-      }
       // 选择搜车类型
       .select_type {
         padding-bottom: 20px;
@@ -1597,7 +1596,7 @@ export default {
           z-index: 100;
           background: #fff;
           width: 232px;
-          height: 350px;
+          height: 330px;
           border-radius: 4px;
           border: 1px solid #d3d3d3;
           .tab_title {
@@ -1614,7 +1613,7 @@ export default {
           }
           // 树
           .tree_content {
-            height: 340px;
+            height: 320px;
             padding-top: 10px;
             .checked_all {
               padding: 0 0 8px 23px;

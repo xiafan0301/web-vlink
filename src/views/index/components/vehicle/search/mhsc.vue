@@ -13,7 +13,7 @@
       <div class="left_menu">
         <!-- 菜单表单 -->
         <vue-scroll>
-          <div style="padding: 20px;">
+          <div style="padding: 2px 20px 20px 20px;">
             <!-- 表单 -->
             <div class="form_warp">
               <el-form :model="mhscMenuForm" ref="mhscMenuForm" :rules="rules">
@@ -1039,6 +1039,10 @@ export default {
       background: #fff;
       box-shadow: 2px 3px 10px 0px rgba(131, 131, 131, 0.28);
       height: 100%;
+      // 表单选项间隔
+      .el-form-item {
+        margin-bottom: 12px;
+      }
       // 菜单的表单
       .width232 {
         width: 232px;
@@ -1048,7 +1052,7 @@ export default {
       }
       // 选择设备下拉
       .selected_device {
-        margin-bottom: 20px;
+        margin-bottom: 12px;
         position: relative;
         width: 232px;
         height: 40px;
@@ -1086,7 +1090,7 @@ export default {
           z-index: 100;
           background: #fff;
           width: 232px;
-          height: 350px;
+          height: 330px;
           border-radius: 4px;
           border: 1px solid #d3d3d3;
           .tab_title {
@@ -1103,7 +1107,7 @@ export default {
           }
           // 树
           .tree_content {
-            height: 340px;
+            height: 320px;
             padding-top: 10px;
             .checked_all {
               padding: 0 0 8px 23px;
