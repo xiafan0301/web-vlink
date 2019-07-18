@@ -214,9 +214,12 @@ export default {
       let data = {
         carFlowQueryDto: {
           bayonetIds: this.queryForm.bayonet.value,
-          carType: this.queryForm.carType
+          /* carType: this.queryForm.carType */
         },
         viewType: 6
+      }
+      if(this.queryForm.carType) {
+        data.carFlowQueryDto['carType'] = this.queryForm.carType
       }
       if (this.queryForm.statementType !== 5) {
         data.carFlowQueryDto['reportType'] = this.queryForm.statementType
