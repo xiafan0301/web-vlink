@@ -15,10 +15,6 @@
       <!-- 搜索条件 -->
       <div class="info-left">
         <vue-scroll>
-          <!-- 车牌号搜索 -->
-          <div class="license-plate-search">
-            <el-input v-model="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" clearable></el-input>
-          </div>
           <!-- 时间 -->
           <div class="time-search date-comp">
             <el-date-picker
@@ -51,6 +47,10 @@
                 placeholder="结束时间"
                 :clearable="false">
             </el-date-picker>
+          </div>
+          <!-- 车牌号搜索 -->
+          <div class="license-plate-search">
+            <el-input v-model="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" clearable></el-input>
           </div>
           <div class="search-btn">
             <el-button @click="resetSearch">重置</el-button>
