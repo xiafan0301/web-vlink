@@ -212,6 +212,7 @@ export default {
       picListAll: [],
       zpDeviceIdsHis: '',
       zpBId: '',
+      jrZpIntval: null,
 
       picTotal: 0,
       picIndex: 1,
@@ -276,6 +277,7 @@ export default {
     },
     selectItem (type, item) {
       console.log(type, item);
+      this.jrZpIntvalFn();
       let ids = '';
       if (type === 1) { // deviceName
         this.videoTotal = 1;
@@ -288,10 +290,11 @@ export default {
           }
         ];
         ids = item.uid;
-        this.getDeviceSnapSum(ids);
-        this.getDeviceSnapPage(ids);
         this.zpDeviceIds = ids;
         this.zpBId = '';
+        this.getDeviceSnapSum(ids);
+        this.getDeviceSnapPage(ids);
+        this.jrZpIntvalFn(ids);
       } else if (type === 2) {
         getDeviceByBayonetUid({
           bayonetUid: item.uid
@@ -343,16 +346,29 @@ export default {
               });
               if (ids && ids.length > 0) { ids = ids.substring(0, ids.length - 1); }
               this.videoList = vList;
-              this.getDeviceSnapSum(ids);
-              this.getDeviceSnapPage(ids);
               this.zpDeviceIds = ids;
               this.zpBId = item.uid;
+              this.getDeviceSnapSum(ids);
+              this.getDeviceSnapPage(ids);
+              this.jrZpIntvalFn(ids);
             }
             // this.zpTotal = res.data[0].snapImagesCount;
             // this.zpList = res.data.slice(0, 10);
             // console.log(this.zpList);
           }
         });
+      }
+    },
+
+    jrZpIntvalFn (dId) {
+      if (this.jrZpIntval) {
+        window.clearInterval(this.jrZpIntval);
+      }
+      if (dId) {
+        this.jrZpIntval = window.setInterval(() => {
+          this.getDeviceSnapSum (dId);
+          this.getDeviceSnapPage (dId);
+        }, 10 * 1000);
       }
     },
 
@@ -543,6 +559,7 @@ export default {
     if (this.picAntoPlayInval) {
       window.clearInterval(this.picAntoPlayInval);
     }
+    this.jrZpIntvalFn();
   }
 }
 </script>
