@@ -37,7 +37,11 @@
             </el-radio-group>
           </el-form-item>
             <el-form-item v-show="searchForm.type === 1">
-              <el-select style="width: 100%;" v-model="searchForm.area" multiple collapse-tags placeholder="请选择区域" class="full">
+              <el-select style="width: 100%;" @change="handleCheckedCitiesChange" v-model="searchForm.area" multiple collapse-tags placeholder="请选择区域" class="full">
+                <!-- <el-option label="全部区域" value="all"></el-option> -->
+                <el-checkbox style="margin: 5px 0 5px 20px" :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">
+                  全部区域
+                </el-checkbox>
                 <el-option-group
                   v-for="group in areaList"
                   :key="group.areaName"
@@ -151,8 +155,7 @@ import noResult from '@/components/common/noResult.vue';
 import { mapXupuxian } from "@/config/config.js";
 import vehicleBreadcrumb from './breadcrumb.vue';
 import mapSelector from '@/components/common/mapSelector.vue';
-import {getFaceRetrieval, getFaceRetrievalPerson} from '../../api/api.judge.js';
-import { getDeviceByBayonetUids } from "@/views/index/api/api.base.js";
+import {getFaceRetrievalPerson} from '../../api/api.judge.js';
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import {formatDate} from '@/utils/util.js';
 import portraitDetail from '@/components/common/portraitDetail.vue';
@@ -160,8 +163,11 @@ export default {
   components: {vehicleBreadcrumb, mapSelector,portraitDetail, noResult},
   data () {
     return {
+      checkAll: true,
+      isIndeterminate: false,
+
       showDetail:false,
-       deData:null,
+      deData:null,
       seData:null,
       searchForm: {
         time: [new Date(new Date().getTime() - 2 * 24 * 60 * 60 * 1000), new Date()],
@@ -202,6 +208,16 @@ export default {
     this.getMapGETmonitorList();
   },
   methods: {
+    handleCheckAllChange (val) {
+      this.searchForm.area = val ? this.areaSData : [];
+      this.isIndeterminate = false;
+    },
+    handleCheckedCitiesChange(value) {
+      let checkedCount = value.length;
+      this.checkAll = checkedCount === this.areaSData.length;
+      this.isIndeterminate = checkedCount > 0 && checkedCount < this.areaSData.length;
+    },
+
     nextData(){
       // console.log(3232131);
       

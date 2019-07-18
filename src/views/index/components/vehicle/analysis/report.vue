@@ -1,5 +1,5 @@
 <template>
-  <div class="vehicle_content">
+  <div class="vehicle_content" :class="{'map_pic_show': mapPicShow}">
     <div class="vc_rep_bd" is="vehicleBreadcrumb" :oData="[{name: '车辆侦察报告'}]"></div>
     <div class="vc_rep">
       <div class="vc_rep_t">
@@ -38,7 +38,7 @@
           <li><span :class="{'vc_rep_mu_sed': showType === 6}" @click="changeShowType(6)">频繁出没分析</span></li>
           <li><span :class="{'vc_rep_mu_sed': showType === 7}" @click="changeShowType(7)">套牌车分析</span></li>
           <li><span :class="{'vc_rep_mu_sed': showType === 8}" @click="changeShowType(8)">同行车辆分析</span></li>
-          <li><span :class="{'vc_rep_mu_sed': showType === 9}" @click="changeShowType(9)">区域碰撞</span></li>
+          <!-- <li><span :class="{'vc_rep_mu_sed': showType === 9}" @click="changeShowType(9)">区域碰撞</span></li> -->
         </ul>
       </div>
       <div class="vc_rep_c">
@@ -125,10 +125,11 @@
                   <div class="rep_map">
                     <div class="rep_map_c" id="map_report_clgj"></div>
                     <ul class="rep_map_o">
-                      <li><i class="vl_icon vl_icon_map_o01" @click="mapChangeState('clgj', 1)"></i></li>
-                      <li><i class="vl_icon vl_icon_map_o02" @click="mapChangeState('clgj', 2)"></i></li>
+                      <li @click="mapPicShow = !mapPicShow" style="font-size: 12px;" :style="{'color': mapPicShow ? '#0C70F8' : '#999'}">显示图片</li>
+                      <li><i class="el-icon-aim" @click="mapChangeState('clgj', 1)"></i></li>
+                      <li><i class="el-icon-plus" @click="mapChangeState('clgj', 2)"></i></li>
                       <li>
-                        <i class="vl_icon vl_icon_map_o03" @click="mapChangeState('clgj', 3)"></i>
+                        <i class="el-icon-minus" @click="mapChangeState('clgj', 3)"></i>
                         <span></span>
                       </li>
                     </ul>
@@ -158,11 +159,10 @@
                   <div class="rep_map">
                     <div class="rep_map_c" id="map_report_yjcm"></div>
                     <ul class="rep_map_o">
-                      <li><i class="vl_icon vl_icon_map_o01" @click="mapChangeState('yjcm', 1)"></i></li>
-                      <li><i class="vl_icon vl_icon_map_o02" @click="mapChangeState('yjcm', 2)"></i></li>
+                      <li><i class="el-icon-aim" @click="mapChangeState('yjcm', 1)"></i></li>
+                      <li><i class="el-icon-plus" @click="mapChangeState('yjcm', 2)"></i></li>
                       <li>
-                        <i class="vl_icon vl_icon_map_o03" @click="mapChangeState('yjcm', 3)"></i>
-                        <span></span>
+                        <i class="el-icon-minus" @click="mapChangeState('yjcm', 3)"></i>
                       </li>
                     </ul>
                     <div class="rep_map_sk">
@@ -289,7 +289,7 @@
               </div>
             </div>
             <!-- 区域碰撞 showType 9 -->
-            <div class="vc_rep_cl" id="report_showtype_9">
+            <!-- <div class="vc_rep_cl" id="report_showtype_9">
               <div>
                 <h2>区域碰撞</h2>
                 <div v-if="clInfo && !searchLoading">
@@ -307,7 +307,7 @@
                   进行操作查看
                 </div>
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
@@ -318,13 +318,15 @@
 import vehicleBreadcrumb from '../breadcrumb.vue';
 import {getDate, formatDate} from '@/utils/util.js';
 import {mapXupuxian} from '@/config/config.js';
-import {getVehicleInvestigationReport, JfoGETSurveillanceObject} from '@/views/index/api/api.judge.js';
+import {getVehicleInvestigationReport} from '@/views/index/api/api.judge.js';
 export default {
   components: {vehicleBreadcrumb},
   data () {
     return {
+      mapPicShow: false,
+      mapPicShow2: false,
       searchForm: {
-        plateNo: '', // 沪D008CP 沪A009CP 湘AN8888
+        plateNo: '湘NCP100', // 沪D008CP 沪A009CP 湘AN8888
         time: [new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000), new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000)]
         // time: [new Date(new Date().getTime() - 5 * 24 * 60 * 60 * 1000), new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000)]
       },
@@ -448,7 +450,7 @@ export default {
           let _oo = oList[key];
           if (_oo.longitude > 0 && _oo.latitude > 0) {
             // console.log('_oo', _oo);
-            let marker = new window.AMap.Marker({ // 添加自定义点标记
+            new window.AMap.Marker({ // 添加自定义点标记
               map: _this.yjcmMap,
               position: [_oo.longitude, _oo.latitude], // 基点位置 [116.397428, 39.90923]
               offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
@@ -461,32 +463,7 @@ export default {
                 '<h3>' + _oo.CM_shotTimes.length + '次</h3>' +
                 '</div></div></div>'
             });
-            /* marker.on('mouseover', function (mEvent) {
-              // let iW = Math.round($(window).width() * 0.15);
-              // let extD = mEvent.target.F.extData;
-              // console.log('mEvent', mEvent);
-              let sContent = '<div class="cl_report_hw"><div>' +
-                '<p>' + _oo.deviceName + '</p>' +
-                '<h3>' + _oo.CM_shotTimes.length + '次</h3>' +
-                '<ul><li>出没时间:</li>';
-              for (let j = 0; j < _oo.CM_shotTimes.length; j++) {
-                sContent += '<li>' + _oo.CM_shotTimes[j] + '</li>';
-              }
-              sContent += '</ul></div></div>';
-              let aOffSet = [0, -50];
-              _this.yjcmHoverWindow = new AMap.InfoWindow({
-                isCustom: true,
-                closeWhenClickMap: true,
-                offset: new AMap.Pixel(aOffSet[0], aOffSet[1]), // 相对于基点的偏移位置
-                content: sContent
-              });
-              let aCenter = mEvent.target.B.position;
-              _this.yjcmHoverWindow.open(_this.yjcmMap, aCenter);
-            }); */
           }
-          /* marker.on('mouseout', function (mEvent) {
-            // if (_this.yjcmHoverWindow) { _this.yjcmHoverWindow.close(); }
-          }); */
         }
         this.yjcmMap.setFitView();
       }
@@ -500,9 +477,10 @@ export default {
         if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
           let  sVideo = '';
           if (obj.storagePath) {
-            sVideo = '<div><img src="' + obj.storagePath + '" controls></img></div>';
+            sVideo = '<div><img src="' + obj.storagePath + '" controls></img></div>' +
+              '<p>' + obj.shotTime + '</p>';
           }
-          let marker = new window.AMap.Marker({ // 添加自定义点标记
+          new window.AMap.Marker({ // 添加自定义点标记
             map: this.clgjMap,
             position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
             offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
@@ -517,7 +495,7 @@ export default {
         }
       }
       // 绘制轨迹
-      var polyline = new window.AMap.Polyline({
+      new window.AMap.Polyline({
           map: this.clgjMap,
           path: gjPath,
           showDir: true,
@@ -750,14 +728,19 @@ export default {
     }
     > .rep_map_o {
       position: absolute; bottom: 10px; right: 10px;
+      padding: 5px 10px;
+      background-color: #fff;
       > li {
-        padding: 10px;
-        background-color: #fff;
-        box-shadow: 0px 5px 5px 0px rgba(131,131,131,0.28);
-        &:nth-child(1) { margin-bottom: 10px; }
-        &:nth-child(2) { border-bottom: 0; }
+        padding: 10px 0;
+        width: 60px;
+        font-size: 20px; font-weight: bold;
+        text-align: center;
+        cursor: pointer;
+        color: #999;
+        border-top: 1px solid #F2F2F2;
+        &:nth-child(1) { padding: 15px 0; border-top: 0; font-weight: normal; }
+        &:nth-child(2) { }
         &:nth-child(3) { 
-          border-top: 0;
           position: relative;
           > span {
             display: block;
@@ -767,6 +750,7 @@ export default {
             overflow: hidden;
           }
         }
+        &:hover { color: #0C70F8; }
       }
     }
     > .rep_map_sk {
@@ -844,12 +828,23 @@ export default {
 .tpc_fake_res { width: 14px; height: 15px; background-position: -863px -530px; }
 </style>
 <style lang="scss">
+.map_pic_show, .map_pic_show2 {
+  .cl_report_gj {
+    > div {
+      display: block;
+    }
+    > p {
+      display: none;
+    }
+  }
+}
 .cl_report_gj {
   position: relative;
   display: inline-block;
   width: 42px; height: 49px;
   background: url(../../../../../assets/img/icons/icons_sxt.png) center center no-repeat;
   > div {
+    display: none;
     position: absolute; bottom: -20px; left: 95%; z-index: 1;
     width: 160px; height: 120px;
     background-color: #fff;
@@ -858,6 +853,15 @@ export default {
     > img {
       width: 100%; height: 100%;
     }
+  }
+  > p {
+    position: absolute; bottom: 17px; left: 95%; z-index: 1;
+    width: 150px; height: 20px; line-height: 20px;
+    background-color: #0C70F8;
+    border-radius: 10px;
+    color: #fff; font-size: 12px;
+    text-align: center;
+    &:hover { z-index: 2; }
   }
 }
 .cl_report_cm {
