@@ -18,16 +18,27 @@
                 label-width="0px"
                 class="demo-ruleForm"
         >
-          <el-form-item class="firstItem" prop="data1">
+          <el-form-item class="" prop="data1">
             <el-date-picker
-                    v-model="ruleForm.data1"
-                    type="daterange"
-                    class="full data_range vl_date"
-                    value-format="yyyy-MM-dd"
-                    :picker-options="pickerOptions"
-                    range-separator="至"
-                    start-placeholder="开始日期"
-                    end-placeholder="结束日期">
+              v-model="ruleForm.data1"
+              style="width: 100%;"
+              class="vl_date"
+              :picker-options="pickerOptions"
+              type="datetime"
+              value-format="timestamp"
+              placeholder="选择日期时间">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item>
+            <el-date-picker
+              style="width: 100%;"
+              class="vl_date vl_date_end"
+              :picker-options="pickerOptions"
+              v-model="ruleForm.data2"
+              @change="chooseEndTime"
+              value-format="timestamp"
+              type="datetime"
+              placeholder="选择日期时间">
             </el-date-picker>
           </el-form-item>
           <el-form-item prop="input3">
@@ -201,7 +212,7 @@
   import vlBreadcrumb from "@/components/common/breadcrumb.vue";
   import mapSelector from '@/components/common/mapSelector.vue';
   import { mapXupuxian } from "@/config/config.js";
-  import { objDeepCopy, random14 } from "@/utils/util.js";
+  import { objDeepCopy, random14, formatDate } from "@/utils/util.js";
   import { cityCode } from "@/utils/data.js";
   import { InvestigateGetTrace } from "@/views/index/api/api.judge.js";
   import { MapGETmonitorList } from "@/views/index/api/api.map.js";
@@ -254,6 +265,7 @@
         timeOrder: false,
         ruleForm: {
           data1:null,
+          data2: null,
           input3: '',
           input5: "1",
           value1: null,
@@ -307,6 +319,11 @@
       this.setDTime();
     },
     methods: {
+      chooseEndTime (e) {
+        if (e < this.ruleForm.data1) {
+          this.$message.info('结束时间必须大于开始时间才会有结果')
+        }
+      },
       scrollIt (e) {
         if(e.srcElement.scrollTop + e.srcElement.offsetHeight > e.srcElement.scrollHeight - 10){
           if (!this.loading && !this.noMore) {
@@ -344,9 +361,10 @@
         } else {
           sD =  new Date(curDate - curS).getDate()
         }
-        let _s = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD;
-//        let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() - 1;
-        this.ruleForm.data1 = [_s, _s];
+        let _s = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD + '  00:00:00';
+        let _e = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD + ' 23:59:59';
+        this.ruleForm.data1 = new Date(_s);
+        this.ruleForm.data2 = new Date(_e);
       },
       hideResult() {
         this.reselt = false;
@@ -430,7 +448,7 @@
       submitForm(v) {
         this.$refs[v].validate((valid) => {
           if (valid) {
-            if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data1.length>0 && this.ruleForm.input3){
+            if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data2 && this.ruleForm.input3){
               let pg = {
                 pageSize: 9999,
                 where: {}
@@ -441,8 +459,8 @@
                 }
                 return false;
               }
-              pg.where['startTime'] = this.ruleForm.data1[0]+" 00:00:00";
-              pg.where['endTime'] = this.ruleForm.data1[1]+" 23:59:59";
+              pg.where['startTime'] = formatDate(this.ruleForm.data1, 'yyyy-MM-dd HH:mm:ss');
+              pg.where['endTime'] = formatDate(this.ruleForm.data2, 'yyyy-MM-dd HH:mm:ss');
               pg.where['vehicleNumber'] = this.ruleForm.input3;
               if(this.ruleForm.input5==1 && this.ruleForm.value1.length!=0){
                 pg.where['areaUid']=this.ruleForm.value1.join(",")
