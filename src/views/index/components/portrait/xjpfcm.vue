@@ -119,6 +119,7 @@
                   value-format="yyyy-MM-dd HH:mm:ss"
                   :picker-options="startDateOpt"
                   placeholder="开始时间"
+                  :clearable="false"
                 ></el-date-picker>
               </div>
             </el-form-item>
@@ -133,6 +134,7 @@
                   type="datetime"
                   default-time="23:59:59"
                   placeholder="结束时间"
+                  :clearable="false"
                 ></el-date-picker>
               </div>
             </el-form-item>

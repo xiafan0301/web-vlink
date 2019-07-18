@@ -93,6 +93,15 @@
           <!-- 时间 -->
           <div class="time-search date-comp">
             <el-date-picker
+                class="vl_date"
+                v-model="searchData.startTime"
+                type="date"
+                :picker-options="startDateOpt"
+                placeholder="开始时间"
+                @change="timeChange()"
+                :clearable="false">
+            </el-date-picker>
+            <!-- <el-date-picker
               class="vl_date"
               v-model="searchData.time"
               type="daterange"
@@ -104,7 +113,18 @@
               end-placeholder="结束日期"
               @change="dateChange"
               :clearable="false"
-            ></el-date-picker>
+            ></el-date-picker> -->
+          </div>
+          <div class="time-search date-comp">
+            <el-date-picker
+                class="vl_date vl_date_end"
+                v-model="searchData.endTime"
+                type="date"
+                :picker-options="endDateOpt"
+                placeholder="结束时间"
+                @change="timeChange('end')"
+                :clearable="false">
+            </el-date-picker>
           </div>
           <!-- 下划线 -->
           <div class="line"></div>
@@ -291,28 +311,36 @@ export default {
       imgData: null,
       searchData: {
         //搜索参数
-        time: null,
+        startTime: "",
+        endTime: "",
         licensePlateNum: null, // 车牌号
         licensePlateColor: "" //车牌颜色
       },
-      pickerOptions: {
-        disabledDate(time) {
-          /* let date = new Date();
-          let y = date.getFullYear();
-          let m =
-            date.getMonth() + 1 < 10
-              ? "0" + (date.getMonth() + 1)
-              : date.getMonth() + 1;
-          let d = date.getDate();
-          let threeMonths = "";
-          let start = "";
-          if (parseFloat(m) >= 4) {
-            start = y + "-" + (m - 3) + "-" + d;
+      startDateOpt: {
+        disabledDate: time => {
+          if (this.searchData.endTime) {
+            return (
+              time.getTime() > new Date(this.searchData.endTime).getTime()
+            );
           } else {
-            start = y - 1 + "-" + (m - 3 + 12) + "-" + d;
+            return (
+              time.getTime() > new Date().getTime()
+            );
           }
-          threeMonths = new Date(start).getTime(); */
-          return time.getTime() > Date.now();
+        }
+      },
+      endDateOpt: {
+        disabledDate: time => {
+          if (this.searchData.startTime) {
+            return (
+              time.getTime() < new Date(this.searchData.startTime).getTime() ||
+              time.getTime() > new Date().getTime()
+            );
+          } else {
+            return (
+              time.getTime() > new Date().getTime()
+            );
+          }
         }
       },
       searching: false,
@@ -554,24 +582,35 @@ export default {
         (new Date(curDate - curS).getMonth() + 1) +
         "-" +
         new Date(curDate - curS).getDate();
-      /* let _e =
-        date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate(); */
-      this.searchData.time = [_s, _s];
+      this.searchData.startTime = formatDate(_s);
+      this.searchData.endTime = formatDate(_s);
     },
-    //日期选择
-    dateChange(val) {
-      console.log("-------------val-----------", typeof new Date(val[1]));
-      if (
-        new Date(val[1]).getTime() - new Date(val[0]).getTime() >=
-        3 * 24 * 3600 * 1000
-      ) {
-        if (!document.querySelector(".el-message")) {
-          this.$message.info(
-            "最大时间段为3天，超过开始时间3天（72小时）后的时间不可选择!"
-          );
+    // 日期控制
+    timeChange(type = "start") {
+      this.$nextTick(() => {
+        if (this.searchData.startTime && this.searchData.endTime) {
+          if (
+            new Date(this.searchData.endTime).getTime() -
+              new Date(this.searchData.startTime).getTime() >
+            3 * 24 * 3600 * 1000
+          ) {
+            if (!document.querySelector(".el-message")) {
+              this.$message.info("最大选择时间段为三天");
+            }
+            if (type === "start") {
+              this.searchData.endTime = formatDate(
+                new Date(this.searchData.startTime).getTime() +
+                  3600 * 1000 * 24 * 3
+              );
+            } else {
+              this.searchData.startTime = formatDate(
+                new Date(this.searchData.endTime).getTime() -
+                  3600 * 1000 * 24 * 3
+              );
+            }
+          }
         }
-        this.setDTime();
-      }
+      });
     },
     //重置
     resetSearch() {
@@ -664,16 +703,13 @@ export default {
     },
     //查询
     getSearchData() {
-      let params = {};
       if (this.notMessageInfo) {
         this.notMessageInfo.close();
       }
-      if (this.searchData.time && this.searchData.time.length > 0) {
-        params["startDate"] =
-          formatDate(this.searchData.time[0], "yyyy-MM-dd") + " 00:00:00";
-        params["endDate"] =
-          formatDate(this.searchData.time[1], "yyyy-MM-dd") + " 23:59:59";
-      }
+      let params = {
+        startDate: formatDate(this.searchData.startTime, "yyyy-MM-dd") + " 00:00:00",
+        endDate: formatDate(this.searchData.endTime, "yyyy-MM-dd") + " 23:59:59",
+      };
       if (!this.checkAllTree) {
         if (this.selectCameraArr && this.selectCameraArr.length > 0) {
           let cameraIds = this.selectCameraArr.map(res => res.id);
@@ -728,12 +764,10 @@ export default {
     exportExcel() {
       let params = {},
         drivingDiscipline = {};
-      if (this.searchData.time && this.searchData.time.length > 0) {
-        drivingDiscipline["startDate"] =
-          formatDate(this.searchData.time[0], "yyyy-MM-dd") + " 00:00:00";
-        drivingDiscipline["endDate"] =
-          formatDate(this.searchData.time[1], "yyyy-MM-dd") + " 23:59:59";
-      }
+      drivingDiscipline = {
+        startDate: formatDate(this.searchData.startTime, "yyyy-MM-dd") + " 00:00:00",
+        endDate: formatDate(this.searchData.endTime, "yyyy-MM-dd") + " 23:59:59",
+      };
       if (!this.checkAllTree) {
         if (this.selectCameraArr && this.selectCameraArr.length > 0) {
           let cameraIds = this.selectCameraArr.map(res => res.id);
@@ -1590,6 +1624,10 @@ export default {
     .el-date-editor--daterange.el-input__inner,
     .el-date-editor--timerange.el-input,
     .el-date-editor--timerange.el-input__inner {
+      width: 232px;
+    }
+    .el-date-editor.el-input,
+    .el-date-editor.el-input__inner {
       width: 232px;
     }
   }
