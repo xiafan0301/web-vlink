@@ -323,6 +323,17 @@ export default {
           this.strucInfoList = res.data.snapDtoList;
           this.snapObj=res.data.snapDtoList[0]
           // console.log(res.data);
+           let a = this.plateType.find(el=>el.enumField==this.detailData.numberType)
+          let b = this.vehicleType.find(el=>el.enumField==this.detailData.vehicleType)
+          let c = this.plateColor.find(el=>el.enumField==this.detailData.numberColor)
+          let d = this.vehicleColor.find(el=>el.enumField==this.detailData.vehicleColor)
+          // console.log(this.plateType);
+          // console.log(b);
+          //if(a)
+          this.detailData._vehicleType=a ? a.enumValue :''
+          this.detailData._numberType= b ? b.enumValue :''
+          this.detailData._numberColor= c ? c.enumValue :''
+          this.detailData._vehicleColor= d ? d.enumValue :''
           
         }
       })

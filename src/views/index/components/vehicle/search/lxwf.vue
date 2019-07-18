@@ -188,7 +188,7 @@
                 </el-form-item>-->
               </div>
               <!-- 时间 -->
-              <el-form-item>
+              <!-- <el-form-item>
                 <div class="time-search date-comp">
                   <el-date-picker
                     v-model="data1"
@@ -202,6 +202,28 @@
                     :clearable='false'
                   ></el-date-picker>
                 </div>
+              </el-form-item> -->
+              <el-form-item  prop="data1">
+                <el-date-picker
+                  v-model="data1"
+                  type="date"
+                  :clearable="false"
+                  placeholder="开始时间"
+                  :picker-options="pickerOptions"
+                  class="full vl_date"
+                  value-format="yyyy-MM-dd"
+                ></el-date-picker>
+              </el-form-item>
+              <el-form-item  prop="data2">
+                <el-date-picker
+                  v-model="data2"
+                  :clearable="false"
+                  type="date"
+                  :picker-options="pickerOptions"
+                  placeholder="结束时间"
+                  class="full vl_date vl_date_end"
+                  value-format="yyyy-MM-dd"
+                ></el-date-picker>
               </el-form-item>
               <el-form-item prop="input4">
                 <div class="license-plate-search">
@@ -356,6 +378,7 @@ export default {
       imgData: null,
       input5: "1",
       data1: "",
+      data2: "",
 
       // 菜单表单变量
       tzscMenuForm: {
@@ -481,8 +504,8 @@ export default {
       let ad=null
       if (this.input5 == 1 ) {
         let datas = {
-          dateStart: this.data1[0] + " 00:00:00",
-          dateEnd: this.data1[1] + " 23:59:59",
+          dateStart: this.data1 + " 00:00:00",
+          dateEnd: this.data2 + " 23:59:59",
           vilolationNum: this.tzscMenuForm.input4
         };
         if (this.sou.plateNo) {
@@ -510,8 +533,8 @@ export default {
         //this.getViolation(datas);
       } else {
         let params = {
-          dateStart: this.data1[0] + " 00:00:00",
-          dateEnd: this.data1[1] + " 23:59:59",
+          dateStart: this.data1 + " 00:00:00",
+          dateEnd: this.data2 + " 23:59:59",
           vilolationNum: this.tzscMenuForm.input4,
           plateClass: this.tzscMenuForm.licenseType,
           plateColor: this.tzscMenuForm.licenseColor,
@@ -579,8 +602,8 @@ export default {
     // },
     //查看详情
     handleClick(v) {
-      v.datastart = this.data1[0];
-      v.dataend = this.data1[1];
+      v.datastart = this.data1;
+      v.dataend = this.data2;
       if (this.curImageUrl) {
         v.imgurl = this.curImageUrl;
       }
@@ -726,7 +749,8 @@ export default {
 
       //let _s = new Date(curDate - curS).getFullYear() + "-" + _sm + "-" +_sd;
       let _e = date.getFullYear() + "-" + _em + "-" + _ed;
-      this.data1 = [_e, _e];
+      this.data1 = _e;
+      this.data2 = _e;
     },
     //重置
     resetSearch() {
@@ -759,8 +783,8 @@ export default {
         
    
         let datas = {
-          dateStart: this.data1[0] + " 00:00:00",
-          dateEnd: this.data1[1] + " 23:59:59",
+          dateStart: this.data1 + " 00:00:00",
+          dateEnd: this.data2 + " 23:59:59",
           vilolationNum: this.tzscMenuForm.input4
         };
         if (this.sou.plateNo) {
@@ -789,8 +813,8 @@ export default {
         this.getViolation(datas);
       } else {
         let params = {
-          dateStart: this.data1[0] + " 00:00:00",
-          dateEnd: this.data1[1] + " 23:59:59",
+          dateStart: this.data1 + " 00:00:00",
+          dateEnd: this.data2 + " 23:59:59",
           vilolationNum: this.tzscMenuForm.input4,
           plateClass: this.tzscMenuForm.licenseType,
           plateColor: this.tzscMenuForm.licenseColor,
@@ -1126,8 +1150,10 @@ html {
   }
 }
 .d.vehicle-info{
+  .el-form-item{
+    margin-bottom: 15px;
+  }
   .search-btn {
-    
     .el-button {
       width: 100%;
     }

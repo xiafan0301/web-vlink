@@ -19,6 +19,7 @@
             <el-date-picker
               v-model="ruleForm.dateStart"
               type="date"
+              :clearable="false"
               placeholder="开始时间"
               :picker-options="pickerOptions"
               class="full vl_date"
@@ -29,6 +30,7 @@
             <el-date-picker
               v-model="ruleForm.dateEnd"
               type="date"
+              :clearable="false"
               :picker-options="pickerOptions"
               placeholder="结束时间"
               class="full vl_date vl_date_end"
