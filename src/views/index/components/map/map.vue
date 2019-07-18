@@ -15,17 +15,17 @@
           <div class="map_lc_d" v-show="tabType === 1">
             <div class="map_lc_dt">
               <el-input
-                      size="small"
-                      placeholder="搜索"
-                      clearable
-                      v-model="mapInfoVal">
+                size="small"
+                placeholder="搜索"
+                clearable
+                v-model="mapInfoVal">
               </el-input>
               <el-button type="primary" @click="filterMapTree" icon="el-input__icon el-icon-search" style="font-size: .2rem;line-height: .32rem;cursor:pointer;"></el-button>
             </div>
             <div class="map_lc_dc">
               <vue-scroll>
                 <ul class="db_tree" :id="dbId">
-                  <li :id="'db_area_' + item.areaId" v-for="(item, index) in mapTreeData" :key="'tl_' + index">
+                  <li :id="'db_area_' + item.areaId" class="db_tree_sli_sed" v-for="(item, index) in mapTreeData" :key="'tl_' + index">
                     <i class="el-icon-arrow-right" @click="selFirstEvent(item.areaId)"></i>
                     <span @click="selFirstEvent(item.areaId)">{{item.areaName}}</span>
                     <ul class="db_tree_s">
@@ -47,8 +47,9 @@
                             <span @click="selSecondEvent(sitem.areaId + '000001')">摄像头</span>
                             <div class="db_tree_c">
                               <ul class="db_tree_cul db_tree_cd db_tree_cul_open">
-                                <li :title="ditem.infoName" @click="signListTap(ditem, 'InfoWindow')" v-for="(ditem, dindex) in getCurTypeData(sitem, 0)" :key="'dl_' + index + '_' + sindex + '_' + dindex">
+                                <li :title="ditem.infoName" @click="signListTap(ditem, 'InfoWindow')" v-for="(ditem, dindex) in getCurTypeData(sitem, 0)" :key="'35dl_' + index + '_' + sindex + '_' + dindex">
                                   {{ditem.infoName}}
+                                  <i class="vl_icon vl_icon_v11"></i>
                                 </li>
                               </ul>
                             </div>
@@ -58,7 +59,7 @@
                             <span @click="selSecondEvent(sitem.areaId + '000002')">卡口</span>
                             <div class="db_tree_c">
                               <ul class="db_tree_cul db_tree_cd db_tree_cul_open">
-                                <li :title="ditem.infoName" @click="signListTap(ditem, 'InfoWindow')" v-for="(ditem, dindex) in getCurTypeData(sitem, 1)" :key="'dl_' + index + '_' + sindex + '_' + dindex">
+                                <li :title="ditem.infoName" @click="signListTap(ditem, 'InfoWindow')" v-for="(ditem, dindex) in getCurTypeData(sitem, 1)" :key="'565dl_' + index + '_' + sindex + '_' + dindex">
                                   {{ditem.infoName}}
                                 </li>
                               </ul>
@@ -69,7 +70,7 @@
                             <span @click="selSecondEvent(sitem.areaId + '000004')">人员</span>
                             <div class="db_tree_c">
                               <ul class="db_tree_cul db_tree_cd db_tree_cul_open">
-                                <li :title="ditem.infoName" @click="signListTap(ditem, 'InfoWindow')" v-for="(ditem, dindex) in getCurTypeData(sitem, 3)" :key="'dl_' + index + '_' + sindex + '_' + dindex">
+                                <li :title="ditem.infoName" @click="signListTap(ditem, 'InfoWindow')" v-for="(ditem, dindex) in getCurTypeData(sitem, 3)" :key="'87dl_' + index + '_' + sindex + '_' + dindex">
                                   {{ditem.infoName}}
                                 </li>
                               </ul>
@@ -84,7 +85,7 @@
                   <div  v-for="(item, index) in mapTreeData" :key="'tls_' + index">
                     <template v-if="getCurList(item.infoList).length">
                       <ul v-for="(sitem, sindex) in getCurList(item.infoList)" :key="'stls_' + sindex">
-                        <li :title="ditem.infoName" @click="signListTap(ditem, 'InfoWindow')" v-for="(ditem, dindex) in getCurTypeData(sitem)" :key="'dl_' + index + '_' + sindex + '_' + dindex">
+                        <li :title="ditem.infoName" @click="signListTap(ditem, 'InfoWindow')" v-for="(ditem, dindex) in getCurTypeData(sitem)" :key="'908dl_' + index + '_' + sindex + '_' + dindex">
                           {{ditem.infoName}}
                           <i v-show="ditem.dataType === 0" class="vl_icon vl_icon_v11"></i>
                         </li>
@@ -157,17 +158,17 @@
           <li :class="{'vl_icon_sed': activeType ===  1}" @click="selArea">
             <i class="vl_icon vl_icon_041"></i>
             <el-popover
-                    placement="left"
-                    trigger="hover"
-                    content="单击选择范围，双击完成">
+              placement="left"
+              trigger="hover"
+              content="单击选择范围，双击完成">
               <span slot="reference">选择区域</span>
             </el-popover>
           </li>
           <li :class="{'vl_icon_sed': activeType ===  2}" @click="ranging">
             <i class="vl_icon vl_icon_042"></i>
             <el-popover
-                    placement="left"
-                    trigger="hover">
+              placement="left"
+              trigger="hover">
               <p>点击×删除当前测距点，点击<span class="el-icon-delete"></span>删除全部测距点</p>
               <span slot="reference">测距</span>
             </el-popover>
@@ -190,10 +191,10 @@
     </div>
     <!--删除标注确定弹窗-->
     <el-dialog
-            title="提示"
-            :visible.sync="deleteMarkDialog"
-            :show-close="false"
-            width="400px">
+      title="提示"
+      :visible.sync="deleteMarkDialog"
+      :show-close="false"
+      width="400px">
       <span>确定清除{{delMessage}}标注吗？</span>
       <span slot="footer" class="dialog-footer">
         <el-button :disabled="delLoading" @click="deleteMarkDialog = false">取 消</el-button>
@@ -209,7 +210,6 @@
   </div>
 </template>
 <script>
-  import {testData} from './testData'
   import flvplayer from '@/components/common/flvplayer.vue';
   import {formatDate, objDeepCopy, random14} from '../../../../utils/util.js';
   import {MapGETmonitorList, MapGETsignList, MapDELETEmapSign, MapDELETEmapSigns, MapUPDATEEmapSign, MapPOSTmapSign, MapGetBayonetInfo} from '../../api/api.map.js';
@@ -220,6 +220,7 @@
     data () {
       return {
         showSearchList: false,
+        curSearchedWord: '', // 当前用户最近搜索的词
         dbId: 'db_tree_' + random14(),
         mapCenter: [110.594419,27.908869],
         graspRoad: null,
@@ -330,13 +331,11 @@
     watch: {
       mapInfoVal (val) {
         if (!val) {
-          this.showSearchList = false;
-          this.mapTreeData[0].infoList.forEach(x => {
-            x.infoList.forEach(y => {
-              this.isInAreaAndCheckBox(y)
-            })
-          })
-          console.log(this.mapTreeData[0].infoList)
+          if (!this.selAreaPolygon) {
+            this.showSearchList = false;
+          }
+          this.curSearchedWord = '';
+          this.isInAreaAndCheckBox();
           this.operClassToEL();
           this.updateNumberss();
         }
@@ -381,11 +380,7 @@
           }
         })
         // 更新地图Top栏 跟
-        this.mapTreeData[0].infoList.forEach(x => {
-          x.infoList.forEach(y => {
-            this.isInAreaAndCheckBox(y)
-          })
-        })
+        this.isInAreaAndCheckBox();
         console.log(this.mapTreeData[0].infoList)
         this.operClassToEL();
         this.updateNumberss();
@@ -429,66 +424,25 @@
       // 添加事件
       window.AMap.event.addListener(mouseTool, 'draw', function (e) {
         console.log(e)
-        if(!e.obj.B.isRing) {
-          if (_this.selAreaPolygon) {_this.map.remove(_this.selAreaPolygon);}
-          if (_this.delSelAreaIcon) {_this.map.remove(_this.delSelAreaIcon);}
-          _this.selAreaPolygon = e.obj;
-          // delete icon
-          _this.delSelAreaIcon = new window.AMap.Marker({
-            map: _this.map,
-            position: e.obj.getPath()[e.obj.getPath().length - 1],
-            offset: new window.AMap.Pixel(-15, -16),
-            draggable: false, // 是否可拖动
-            content: '<div  class="vl_map_hover"><span class="del_area_icon el-icon-circle-close"></span></div>'
-          })
-          // 给范围内外的元素添加isInArea,原始数据也同样设置
-          let m;
-          _this.mapTreeData[0].infoList.forEach(x => {
-            x.infoList.forEach(y => {
-              if (y.longitude && y.latitude) {
-                m = new window.AMap.Marker({
-                  position: [y.longitude, y.latitude]
-                })
-                let point = m.getPosition();
-                if (window.AMap.GeometryUtil.isPointInRing(point, _this.selAreaPolygon.getPath()) && y.isShow) {
-                  y['isInArea'] = true;
-                } else {
-                  y['isInArea'] = false;
-                }
-                m = null;
-              }
-            })
-            // 原始数据也加上isInArea
-            _this.mapTypeList.forEach(z => {
-              x[_this.key2Type[z]].forEach(y => {
-                if (y.longitude && y.latitude) {
-                  m = new window.AMap.Marker({
-                    position: [y.longitude, y.latitude]
-                  })
-                  let point = m.getPosition();
-                  if (window.AMap.GeometryUtil.isPointInRing(point, _this.selAreaPolygon.getPath())) {
-                    y['isInArea'] = true;
-                  } else {
-                    y['isInArea'] = false;
-                  }
-                  m = null;
-                }
-              })
-            })
-          })
-          console.log(_this.mapTreeData[0])
-          _this.updateNumberss(false, '', false, true);
-          setTimeout(() => {
-            let allNode = _this.$refs.mapLeftTree.store._getAllNodes();
-            _this.objSetItem(allNode, {expanded: true})
-          }, 30)
-          // 给范围内的marker加class
-          _this.mapTypeList.forEach(u => {
-            _this.operClassToEL(_this.marks[u], _this.hideClass, false, true, _this.selAreaPolygon ? _this.selAreaPolygon.getPath() : null)
-          })
-          _this.activeType = 0;
-          _this.resetTools(1)
-        }
+        if (_this.selAreaPolygon) {_this.map.remove(_this.selAreaPolygon);}
+        if (_this.delSelAreaIcon) {_this.map.remove(_this.delSelAreaIcon);}
+        _this.selAreaPolygon = e.obj;
+        // delete icon
+        _this.delSelAreaIcon = new window.AMap.Marker({
+          map: _this.map,
+          position: e.obj.getPath()[e.obj.getPath().length - 1],
+          offset: new window.AMap.Pixel(-15, -16),
+          draggable: false, // 是否可拖动
+          content: '<div  class="vl_map_hover"><span class="del_area_icon el-icon-circle-close"></span></div>'
+        })
+
+        _this.isInAreaAndCheckBox();
+        _this.updateNumberss();
+        _this.operClassToEL();
+        _this.showSearchList = true;
+        // 给范围内的marker加class
+        _this.activeType = 0;
+        _this.resetTools(1)
       });
       this.getMonitorList();
       this.getMarkHistory();
@@ -499,77 +453,6 @@
       }, 12000);
     },
     methods: {
-      getCurList (list) {
-        // 过滤出list下对象的infoList，有isShow的元素
-        return list.filter(x => x.infoList.find(y => y.isShow))
-      },
-      getCurTypeData (data, type) {
-        if (type) {
-          return data.infoList.filter(x => x.dataType === type && x.isShow);
-        } else {
-          return data.infoList.filter(x => x.isShow);
-        }
-      },
-      changeType (areaId, type) {
-        let $li = $('#' + this.dbId).find('#db_area_' + areaId);
-        if ($li && $li.length > 0) {
-          if (type === 1) { // 摄像头
-            $li.find('.db_tree_ct_b').removeClass('db_tree_ct_sed');
-            $li.find('.db_tree_ct_d').addClass('db_tree_ct_sed');
-            $li.find('.db_tree_cb').removeClass('db_tree_cul_open');
-            $li.find('.db_tree_cd').addClass('db_tree_cul_open');
-          } else {
-            $li.find('.db_tree_ct_d').removeClass('db_tree_ct_sed');
-            $li.find('.db_tree_ct_b').addClass('db_tree_ct_sed');
-            $li.find('.db_tree_cd').removeClass('db_tree_cul_open');
-            $li.find('.db_tree_cb').addClass('db_tree_cul_open');
-          }
-        }
-      },
-      selFirstEvent (areaId) {
-        let $li = $('#' + this.dbId).find('#db_area_' + areaId);
-        if ($li && $li.length > 0) {
-          let $cld = $li.children('.db_tree_s');
-          if ($cld.is(':hidden')) {
-            // $('#' + this.dbId).find('#db_area_' + pareaId).find('.db_tree_c').hide();
-            $cld.slideDown(300);
-            $li.addClass('db_tree_sli_sed');
-          } else {
-            $cld.slideUp(300);
-            $li.removeClass('db_tree_sli_sed');
-          }
-        }
-      },
-      // areaId, pareaId
-      selSecondEvent (areaId) {
-        let $li = $('#' + this.dbId).find('#db_area_' + areaId);
-        if ($li && $li.length > 0) {
-          let $cld = $li.children('.db_tree_c');
-          if ($cld.is(':hidden')) {
-            // $('#' + this.dbId).find('#db_area_' + pareaId).find('.db_tree_c').hide();
-            $cld.slideDown(300);
-            $li.addClass('db_tree_sli_sed');
-          } else {
-            $cld.slideUp(300);
-            $li.removeClass('db_tree_sli_sed');
-          }
-        }
-      },
-
-      filterMapTree () {
-        if (this.mapInfoVal) {
-          this.showSearchList = true;
-          this.mapTreeData[0].infoList.forEach(x => {
-            x.infoList.forEach(y => {
-              if (y.infoName.indexOf(this.mapInfoVal) === -1) {
-                y.isShow = false;
-              }
-            })
-          })
-          this.updateNumberss();
-          this.operClassToEL()
-        }
-      },
       // 获取标注列表
       getMarkHistory () {
         MapGETsignList().then(res => {
@@ -770,15 +653,16 @@
                   })
                   __obj.carList = vData;
                   res.data.areaTreeList.push(__obj);
-//                  this.mapTreeData = this.switchData(res.data);
-                  this.mapTreeData = testData;
+                  this.mapTreeData = this.switchData(res.data);
+                  // 这里执行isInAreaAndCheckBox只是为了，把没有经纬度的数据过滤掉；
+                  this.isInAreaAndCheckBox();
                   console.log('树的数据', this.mapTreeData);
                   this.$_hideLoading();
                   this.mapMark(this.mapTreeData[0].infoList);
                   // 定时查询车辆数据
-                  this.updateNumberss();// 假数据用的
-//                  this.carLoop();
-//                  this.watchCalling();
+                  this.updateNumberss();
+                  this.carLoop();
+                  this.watchCalling();
                 })
               }
             })
@@ -850,23 +734,12 @@
                 }
               })
             }
-            // _carL.carList = objDeepCopy(_supData);
             _carL.carList = _supData;
             // 判断顶部车辆有没有勾选
-            if (this.mapTypeList.includes(2)) {
-              _carL.infoList = [];
-              // 判断有没有搜索条件
-              _supData.forEach(d => {
-                if (this.mapInfoVal) {
-                  if (d.infoName.indexOf(this.mapInfoVal) !== -1 || '车辆'.indexOf(this.mapInfoVal) !== -1) {
-                    _carL.infoList.push(d);
-                  }
-                } else {
-                  _carL.infoList.push(d);
-                }
-              })
-            }
+            _carL.infoList = _supData;
+            this.isInAreaAndCheckBox();
             this.updateNumberss();
+            this.operClassToEL();
           })
           this.carLoop();
         }, 5000)
@@ -896,7 +769,6 @@
       },
       // keys的各个props 代表接口返回的摄像头，人物，车辆，卡口的list的字段名及list里面元素name;;allKey
       switchData(data) {
-        let numObj= {'deviceBasicListNum': 0, 'carListNum': 0, 'bayonetListNum': 0, 'sysUserExtendListNum': 0};
         data['infoList'] = data.areaTreeList;
         data['infoName'] = data.areaName;
         data['infoList'].map(x => {
@@ -924,14 +796,8 @@
           } else {
             x['isShow'] = false;
           }
-          // 设置一个数组，判断当前map_tree_tab点了哪几个
-          // 计算各个类型的数量，
-          for (let _num in numObj) {
-            numObj[_num] += x[_num.slice(0, -3)].length
-          }
           return x;
         })
-        this.objSetItem([data], numObj)
         return [data];
       },
       objSetItem (list, obj) {
@@ -1340,16 +1206,19 @@
           if (e.target.classList.contains('del_area_icon')) {
             if (_this.delSelAreaIcon) {
               _this.map.remove(_this.delSelAreaIcon);
+              _this.delSelAreaIcon = null;
             }
             if (_this.selAreaPolygon) {
               _this.map.remove(_this.selAreaPolygon);
+              _this.selAreaPolygon = null;
             }
             _this.map.emit('rightclick');
-            _this.selAreaPolygon = null;
-            _this.updateNumberss(false, '', false, true);
-            _this.mapTypeList.forEach(x => {
-              _this.operClassToEL(_this.marks[x], _this.hideClass, true, false, _this.selAreaPolygon ? _this.selAreaPolygon.getPath() : null)
-            })
+            if (!_this.curSearchedWord) {
+              _this.showSearchList = false;
+            }
+            _this.isInAreaAndCheckBox();
+            _this.updateNumberss();
+            _this.operClassToEL()
           }
           // close small video
           if (e.target.classList.contains('close_small_video')) {
@@ -1409,17 +1278,25 @@
           case 0: // clear all tap event
             this.activeType = 0;
             if (this.map) {
-              this.map.setZoomAndCenter(14, this.mapCenter);
+//              this.map.setZoomAndCenter(14, this.mapCenter);
+              this.map.setFitView();
             }
             this.markRest();
             if (this.markListener) {window.AMap.event.removeListener(this.markListener);}
             if (this.delSelAreaIcon) {this.map.remove(this.delSelAreaIcon);}
             this.selAreaPolygon = null;
             this.mouseTool.close(true);
-            this.updateNumberss(false, '', false, true);
-            this.mapTypeList.forEach(x => {
-              this.operClassToEL(this.marks[x], this.hideClass, true, false, this.selAreaPolygon ? this.selAreaPolygon.getPath() : null)
+            this.curSearchedWord = '';
+            this.showSearchList = false;
+            this.mapInfoVal = '';
+            this.mapTypeList = [0, 1, 2, 3];
+            this.constObj.forEach(x => {
+              x.supTypeList = x.supTypeListAll;
+              x.isIndeterminate = false;
             })
+            this.isInAreaAndCheckBox();
+            this.operClassToEL();
+            this.updateNumberss();
             break;
           case 1: // clear all tap event but selArea
             this.mouseTool.close(false);
@@ -1441,54 +1318,123 @@
         }
         this.map.setDefaultCursor('');
       },
-//      判断是否在区域跟checkBox里
-      isInAreaAndCheckBox (y) {
-        if (this.selAreaPolygon) {
-          if (y.longitude && y.latitude) {
-            let m = new window.AMap.Marker({
-              position: [y.longitude, y.latitude]
+
+
+      getCurList (list) {
+        // 过滤出list下对象的infoList，有isShow的元素
+        return list.filter(x => x.infoList.find(y => y.isShow))
+      },
+      getCurTypeData (data, type) {
+        if (type || type === 0) {
+          return data.infoList.filter(x => x.dataType === type && x.isShow);
+        } else {
+          return data.infoList.filter(x => x.isShow);
+        }
+      },
+      selFirstEvent (areaId) {
+        let $li = $('#' + this.dbId).find('#db_area_' + areaId);
+        if ($li && $li.length > 0) {
+          let $cld = $li.children('.db_tree_s');
+          if ($cld.is(':hidden')) {
+            // $('#' + this.dbId).find('#db_area_' + pareaId).find('.db_tree_c').hide();
+            $cld.slideDown(300);
+            $li.addClass('db_tree_sli_sed');
+          } else {
+            $cld.slideUp(300);
+            $li.removeClass('db_tree_sli_sed');
+          }
+        }
+      },
+      // areaId, pareaId
+      selSecondEvent (areaId) {
+        let $li = $('#' + this.dbId).find('#db_area_' + areaId);
+        if ($li && $li.length > 0) {
+          let $cld = $li.children('.db_tree_c');
+          if ($cld.is(':hidden')) {
+            // $('#' + this.dbId).find('#db_area_' + pareaId).find('.db_tree_c').hide();
+            $cld.slideDown(300);
+            $li.addClass('db_tree_sli_sed');
+          } else {
+            $cld.slideUp(300);
+            $li.removeClass('db_tree_sli_sed');
+          }
+        }
+      },
+
+      filterMapTree () {
+        if (this.mapInfoVal) {
+          this.curSearchedWord = this.mapInfoVal.slice(0);
+          this.showSearchList = true;
+          this.mapTreeData[0].infoList.forEach(x => {
+            x.infoList.forEach(y => {
+              if (y.infoName.indexOf(this.mapInfoVal) === -1) {
+                y.isShow = false;
+              }
             })
-            let point = m.getPosition();
-            if (window.AMap.GeometryUtil.isPointInRing(point, this.selAreaPolygon.getPath())) {
-              // 判断是不是卡口
-              if (y.dataType === 1) {
-                if (this.mapTypeList.includes(1)) {
-                  y.isShow = true;
-                } else{
-                  y.isShow = false;
-                }
-              } else { // 说明不是卡口，判断子checkbox里的勾选状态
-                if(this.constObj[y.dataType].supTypeList.includes(parseInt(y[this.findType[y.dataType]]))) {
-                  y.isShow = true;
+          })
+          this.updateNumberss();
+          this.operClassToEL()
+        }
+      },
+//      判断是否在区域跟checkBox里
+      isInAreaAndCheckBox () {
+        this.mapTreeData[0].infoList.forEach(x => {
+          x.infoList.forEach(y => {
+            if (y.longitude && y.latitude) {
+              if (this.selAreaPolygon) {
+                let m = new window.AMap.Marker({
+                  position: [y.longitude, y.latitude]
+                })
+                let point = m.getPosition();
+                if (window.AMap.GeometryUtil.isPointInRing(point, this.selAreaPolygon.getPath())) {
+                  // 判断是不是卡口
+                  if (y.dataType === 1) {
+                    if (this.mapTypeList.includes(1)) {
+                      y.isShow = true;
+                    } else{
+                      y.isShow = false;
+                    }
+                  } else { // 说明不是卡口，判断子checkbox里的勾选状态
+                    if(this.constObj[y.dataType].supTypeList.includes(parseInt(y[this.findType[y.dataType]]) - 1)) {
+                      y.isShow = true;
+                    } else {
+                      y.isShow = false;
+                    }
+                  }
                 } else {
+                  y['isShow'] = false;
+                }
+                m = null;
+              } else {
+                // 判断是不是卡口
+                if (y.dataType === 1) {
+                  if (this.mapTypeList.includes(1)) {
+                    y.isShow = true;
+                  } else{
+                    y.isShow = false;
+                  }
+                } else { // 说明不是卡口，判断子checkbox里的勾选状态
+                  if(this.constObj[y.dataType].supTypeList.includes(parseInt(y[this.findType[y.dataType]]) - 1)) {
+                    y.isShow = true;
+                  } else {
+                    y.isShow = false;
+                  }
+                }
+              }
+              // 判断是不是左侧搜索的结果过滤
+              if (this.curSearchedWord) {
+                if (y.infoName.indexOf(this.curSearchedWord) === -1) {
                   y.isShow = false;
                 }
               }
             } else {
-              y['isShow'] = false;
-            }
-            m = null;
-          }
-        } else {
-          // 判断是不是卡口
-          if (y.dataType === 1) {
-            if (this.mapTypeList.includes(1)) {
-              y.isShow = true;
-            } else{
               y.isShow = false;
             }
-          } else { // 说明不是卡口，判断子checkbox里的勾选状态
-            console.log(this.constObj[y.dataType].supTypeList, (parseInt(y[this.findType[y.dataType]])))
-            if(this.constObj[y.dataType].supTypeList.includes(parseInt(y[this.findType[y.dataType]]))) {
-              y.isShow = true;
-            } else {
-              y.isShow = false;
-            }
-          }
-        }
+          })
+        })
       },
       // 更新maptreeData[0]下，各个设备的数量值,以及刷新地图元素,boolean true代表是左侧搜索或者顶部type勾选
-      updateNumberss (boolean, key, isAdd, isSetArea) {
+      updateNumberss () {
         let newNum = [{deviceBasicListNum: 0}, {bayonetListNum: 0}, {carListNum: 0}, {sysUserExtendListNum: 0}];
         this.mapTreeData[0].infoList.forEach(x => {
           x.infoList.forEach(y => {
@@ -1524,13 +1470,14 @@
       updateMarkVisible(obj) {
         let bool = false, arr = this.mapTreeData[0].infoList;
         for (let i = 0; i < arr.length; i++) {
-          if (arr[i].infoList.find(x => x.uid === obj.uid)) {
-            bool = arr[i].infoList.find(x => x.uid === obj.uid).isShow;
+          if (arr[i].infoList.find(x => x.uid === obj.uid && x.dataType === obj.dataType)) {
+            bool = arr[i].infoList.find(x => x.uid === obj.uid && x.dataType === obj.dataType).isShow;
             break;
           }
         }
         return bool;
       },
+
       // 选择区域
       selArea () {
         this.activeType === 1 ? this.activeType = 0 : this.activeType = 1;
@@ -1680,7 +1627,8 @@
       },
       resetZoom () {
         if (this.map) {
-          this.map.setZoomAndCenter(14, this.mapCenter);
+//          this.map.setZoomAndCenter(14, this.mapCenter);
+          this.map.setFitView();
         }
       },
       supCheckedTypeChange (item, index) {
@@ -1701,23 +1649,9 @@
         }
         console.log(item, index);
         // 类型字段伪造
-        this.mapTreeData[0].infoList.forEach(x => {
-          x.infoList.forEach(y => {
-            if (y.dataType === index) {
-              console.log(item.supTypeList.includes(parseFloat(y[this.findType[index]]) - 1))
-              if (item.supTypeList.includes(parseFloat(y[this.findType[index]]) - 1)) {
-                y.isShow = true;
-              } else {
-                y.isShow = false;
-              }
-            }
-          })
-        })
-        console.log(this.mapTreeData[0])
-        this.operClassToEL(this.marks[index], this.hideClass, false, null, this.selAreaPolygon ? this.selAreaPolygon.getPath() : null);
-        let addMark = this.marks[index].filter(x => item.supTypeList.includes(parseFloat(x.getExtData()[this.findType[index]]) - 1))
-        console.log(addMark, this.marks[index])
-        this.operClassToEL(addMark, this.hideClass, true, null, this.selAreaPolygon ? this.selAreaPolygon.getPath() : null);
+        this.isInAreaAndCheckBox();
+        this.updateNumberss();
+        this.operClassToEL();
       },
 
       // 视频播放
@@ -2185,6 +2119,9 @@
           color: #0C70F8;
           transform: rotate(90deg);
         }
+      }
+      >.db_tree_s {
+        display: block;
       }
     }
     .db_tree_s {
