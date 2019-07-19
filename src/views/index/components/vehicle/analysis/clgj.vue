@@ -11,23 +11,34 @@
     <div :class="['left',{hide:hideleft}]">
       <div class="plane">
         <el-form
-          :model="ruleForm"
-          status-icon
-          ref="ruleForm"
-          :rules="rules"
-          label-width="0px"
-          class="demo-ruleForm"
+                :model="ruleForm"
+                status-icon
+                ref="ruleForm"
+                :rules="rules"
+                label-width="0px"
+                class="demo-ruleForm"
         >
-          <el-form-item class="firstItem" prop="data1">
+          <el-form-item class="" prop="data1">
             <el-date-picker
               v-model="ruleForm.data1"
-              type="daterange"
-              class="full data_range"
-              value-format="yyyy-MM-dd"
+              style="width: 100%;"
+              class="vl_date"
               :picker-options="pickerOptions"
-              range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期">
+              type="datetime"
+              value-format="timestamp"
+              placeholder="选择日期时间">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item>
+            <el-date-picker
+              style="width: 100%;"
+              class="vl_date vl_date_end"
+              :picker-options="pickerOptions"
+              v-model="ruleForm.data2"
+              @change="chooseEndTime"
+              value-format="timestamp"
+              type="datetime"
+              placeholder="选择日期时间">
             </el-date-picker>
           </el-form-item>
           <el-form-item prop="input3">
@@ -51,14 +62,14 @@
           <el-form-item v-if="ruleForm.input5=='1'" prop="value1">
             <el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="全部区域" class="full">
               <el-option-group
-                v-for="group in options"
-                :key="group.areaName"
-                :label="group.areaName">
+                      v-for="group in options"
+                      :key="group.areaName"
+                      :label="group.areaName">
                 <el-option
-                  v-for="item in group.areaTreeList"
-                  :key="item.areaId"
-                  :label="item.areaName"
-                  :value="item.areaId">
+                        v-for="item in group.areaTreeList"
+                        :key="item.areaId"
+                        :label="item.areaName"
+                        :value="item.areaId">
                 </el-option>
               </el-option-group>
             </el-select>
@@ -84,31 +95,31 @@
     <div :class="['right',{hide:!hideleft}, {'clgj_map_show_pic': mapPicShow}]" id="rightMap"></div>
     <div class="reselt" v-if="reselt">
       <div class="plane insetPadding">
-          <h3 class="title">分析结果</h3>
-          <div class="sup_title">
-            <div  @click="timeOrderS">时间排序 <span><i class="el-icon-caret-top" :class="{'active': !timeOrder}"></i><i :class="{'active': timeOrder}" class="el-icon-caret-bottom"></i></span></div>
-            <div>抓拍地址</div>
-          </div>
-          <div class="plane_main_box"  @scroll="scrollIt">
-            <div class="plane_main">
-              <!--可以展开列表-->
-              <div class="infinite-list-wrapper" v-if="leftEvData.length" >
-                <ul>
-                  <li class="p_main_list" :class="{'is_open': item.isOpen}" v-for="item in leftEvData" :key="item.id">
-                    <div class="p_main_head" @click="item.isOpen = !item.isOpen"><i :class="{'el-icon-caret-right': !item.isOpen, 'el-icon-caret-bottom': item.isOpen}"></i>{{item.label}}</div>
-                    <div class="p_main_item" v-for="sItem in item.list" :key="sItem.id" @click="showStrucInfo(sItem, evData.findIndex(function (u) {return u === sItem}))">
-                      <div>{{sItem.shotTime.slice(-8)}}</div>
-                      <div :title="sItem.address">{{sItem.address ? sItem.address : '无'}}</div>
-                    </div>
-                  </li>
-                </ul>
-                <p style="line-height: 40px;color: #0C70F8;text-align: center;" v-if="loading">加载中...</p>
-                <p style="line-height: 40px;color: #999999;text-align: center;" v-if="noMore">没有更多了</p>
-              </div>
-              <p v-show="leftEvData.length === 0" style="line-height: 40px;color: #999999;text-align: center;">暂无数据</p>
+        <h3 class="title">分析结果</h3>
+        <div class="sup_title">
+          <div  @click="timeOrderS">时间排序 <span><i class="el-icon-caret-top" :class="{'active': !timeOrder}"></i><i :class="{'active': timeOrder}" class="el-icon-caret-bottom"></i></span></div>
+          <div>抓拍地址</div>
+        </div>
+        <div class="plane_main_box"  @scroll="scrollIt">
+          <div class="plane_main">
+            <!--可以展开列表-->
+            <div class="infinite-list-wrapper" v-if="leftEvData.length" >
+              <ul>
+                <li class="p_main_list" :class="{'is_open': item.isOpen}" v-for="item in leftEvData" :key="item.id">
+                  <div class="p_main_head" @click="item.isOpen = !item.isOpen"><i :class="{'el-icon-caret-right': !item.isOpen, 'el-icon-caret-bottom': item.isOpen}"></i>{{item.label}}</div>
+                  <div class="p_main_item" v-for="sItem in item.list" :key="sItem.id" @click="showStrucInfo(sItem, evData.findIndex(function (u) {return u === sItem}))">
+                    <div>{{sItem.shotTime.slice(-8)}}</div>
+                    <div :title="sItem.address">{{sItem.address ? sItem.address : '无'}}</div>
+                  </div>
+                </li>
+              </ul>
+              <p style="line-height: 40px;color: #0C70F8;text-align: center;" v-if="loading">加载中...</p>
+              <p style="line-height: 40px;color: #999999;text-align: center;" v-if="noMore">没有更多了</p>
             </div>
+            <p v-show="leftEvData.length === 0" style="line-height: 40px;color: #999999;text-align: center;">暂无数据</p>
           </div>
-          <div class="insetLeft2" @click="hideResult"></div>
+        </div>
+        <div class="insetLeft2" @click="hideResult"></div>
       </div>
     </div>
     <!--地图操作按钮-->
@@ -119,11 +130,11 @@
       <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
     </ul>
     <el-dialog
-        :visible.sync="strucDetailDialog"
-        class="struc_detail_dialog"
-        :close-on-click-modal="false"
-        top="4vh"
-        :show-close="false">
+            :visible.sync="strucDetailDialog"
+            class="struc_detail_dialog"
+            :close-on-click-modal="false"
+            top="4vh"
+            :show-close="false">
       <div class="struc_tab">
         <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">抓拍详情</span>
         <span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>
@@ -201,7 +212,7 @@
   import vlBreadcrumb from "@/components/common/breadcrumb.vue";
   import mapSelector from '@/components/common/mapSelector.vue';
   import { mapXupuxian } from "@/config/config.js";
-  import { objDeepCopy, random14 } from "@/utils/util.js";
+  import { objDeepCopy, random14, formatDate } from "@/utils/util.js";
   import { cityCode } from "@/utils/data.js";
   import { InvestigateGetTrace } from "@/views/index/api/api.judge.js";
   import { MapGETmonitorList } from "@/views/index/api/api.map.js";
@@ -254,6 +265,7 @@
         timeOrder: false,
         ruleForm: {
           data1:null,
+          data2: null,
           input3: '',
           input5: "1",
           value1: null,
@@ -307,6 +319,11 @@
       this.setDTime();
     },
     methods: {
+      chooseEndTime (e) {
+        if (e < this.ruleForm.data1) {
+          this.$message.info('结束时间必须大于开始时间才会有结果')
+        }
+      },
       scrollIt (e) {
         if(e.srcElement.scrollTop + e.srcElement.offsetHeight > e.srcElement.scrollHeight - 10){
           if (!this.loading && !this.noMore) {
@@ -344,9 +361,10 @@
         } else {
           sD =  new Date(curDate - curS).getDate()
         }
-        let _s = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD;
-//        let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() - 1;
-        this.ruleForm.data1 = [_s, _s];
+        let _s = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD + '  00:00:00';
+        let _e = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD + ' 23:59:59';
+        this.ruleForm.data1 = new Date(_s);
+        this.ruleForm.data2 = new Date(_e);
       },
       hideResult() {
         this.reselt = false;
@@ -430,7 +448,7 @@
       submitForm(v) {
         this.$refs[v].validate((valid) => {
           if (valid) {
-            if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data1.length>0 && this.ruleForm.input3){
+            if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data2 && this.ruleForm.input3){
               let pg = {
                 pageSize: 9999,
                 where: {}
@@ -441,8 +459,8 @@
                 }
                 return false;
               }
-              pg.where['startTime'] = this.ruleForm.data1[0]+" 00:00:00";
-              pg.where['endTime'] = this.ruleForm.data1[1]+" 23:59:59";
+              pg.where['startTime'] = formatDate(this.ruleForm.data1, 'yyyy-MM-dd HH:mm:ss');
+              pg.where['endTime'] = formatDate(this.ruleForm.data2, 'yyyy-MM-dd HH:mm:ss');
               pg.where['vehicleNumber'] = this.ruleForm.input3;
               if(this.ruleForm.input5==1 && this.ruleForm.value1.length!=0){
                 pg.where['areaUid']=this.ruleForm.value1.join(",")
@@ -651,6 +669,9 @@
               // 自定义点标记覆盖物内容
               content: _content
             });
+            point.on('click', () => {
+              this.showStrucInfo(obj, i)
+            })
             this.markerPoint[i] = point;
           }
         }

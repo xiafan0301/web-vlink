@@ -7,7 +7,55 @@
     <div class="the-bottom">
       <div class="the-left-search">
         <div class="con_left">
-
+          <div class="left_time date-comp">
+            <el-date-picker
+              class="vl_date"
+              v-model="queryForm.startDate"
+              :clearable="false"
+              type="date"
+              placeholder="开始日期"
+              value-format="yyyy-MM-dd"
+              format="yyyy-MM-dd"
+              :picker-options="pickerOptions">
+            </el-date-picker>
+          </div>
+          <div class="left_time date-comp">
+            <el-date-picker
+              class="vl_date vl_date_end"
+              placeholder="结束日期"
+              v-model="queryForm.endDate"
+              :clearable="false"
+              type="date"
+              value-format="yyyy-MM-dd"
+              format="yyyy-MM-dd"
+              @change="dateChange"
+              :picker-options="pickerOptions"
+            >
+            </el-date-picker>
+          </div>
+          <div class="left_time">
+            <el-select v-model="queryForm.startTime" placeholder="开始时间" style="width: 216px;" @change="handleChangeStartTime">
+              <el-option 
+                v-for="(item, index) in startTimeOptions" 
+                :key="index"
+                :label="item.label"
+                :value="item.value"
+                :disabled="item.disabled"
+              >
+              </el-option>
+            </el-select>
+            <span class="left_time_separator">-</span>
+            <el-select v-model="queryForm.endTime" placeholder="结束时间" style="width: 216px;">
+              <el-option 
+                v-for="(item, index) in endTimeOptions" 
+                :key="index"
+                :label="item.label"
+                :value="item.value"
+                :disabled="item.disabled"
+              >
+              </el-option>
+            </el-select>
+          </div>
           <!-- 选择设备 -->
           <!-- treeTabShow 为展开 -->
           <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
@@ -15,8 +63,19 @@
             <i v-if="treeTabShow" class="el-icon-arrow-up"></i>
             <i v-else class="el-icon-arrow-down"></i>
             <div class="device_list" v-if="selectDeviceArr.length > 0">
-              <span>{{ selectDeviceArr[0].label }}</span>
-              <span v-show="selectDeviceArr.length > 1" title="展开选中的设备" class="device_count">+{{ selectDeviceArr.length - 1 }}</span>
+              <template v-if="checkAllTree">
+                <span>全部设备</span>
+              </template>
+              <template v-else>
+                <span>{{ selectDeviceArr[0].label }}</span>
+                <span
+                  v-show="selectDeviceArr.length > 1"
+                  title="展开选中的设备"
+                  class="device_count"
+                >+{{ selectDeviceArr.length - 1 }}</span>
+              </template>
+              <!-- <span>{{ selectDeviceArr[0].label }}</span>
+              <span v-show="selectDeviceArr.length > 1" title="展开选中的设备" class="device_count">+{{ selectDeviceArr.length - 1 }}</span> -->
             </div>
             <!-- placeholder -->
             <div class="no_device" v-else>选择设备</div>
@@ -47,45 +106,7 @@
               </div>
             </div>
           </div>
-
-          <div class="left_time date-comp">
-            <el-date-picker
-              placeholder="请选择日期"
-              v-model="queryDate"
-              :clearable="false"
-              type="daterange"
-              range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              value-format="yyyy-MM-dd"
-              format="yyyy-MM-dd"
-              @change="dateChange"
-              :picker-options="pickerOptions">
-            </el-date-picker>
-          </div>
-          <div class="left_time">
-            <el-select v-model="queryForm.startTime" placeholder="开始时间" style="width: 216px;" @change="handleChangeStartTime">
-              <el-option 
-                v-for="(item, index) in startTimeOptions" 
-                :key="index"
-                :label="item.label"
-                :value="item.value"
-                :disabled="item.disabled"
-              >
-              </el-option>
-            </el-select>
-            <span class="left_time_separator">-</span>
-            <el-select v-model="queryForm.endTime" placeholder="结束时间" style="width: 216px;">
-              <el-option 
-                v-for="(item, index) in endTimeOptions" 
-                :key="index"
-                :label="item.label"
-                :value="item.value"
-                :disabled="item.disabled"
-              >
-              </el-option>
-            </el-select>
-          </div>
+          
           <div class="left_num">
             <el-input class="left-none-border" v-model="queryForm.minShotTimes" @blur="handleBlurShotTimes">
               <template slot="prepend">过车次数</template>
@@ -93,7 +114,7 @@
             <span>次（范围2-100）</span>
           </div>
           
-          <el-select v-model="queryForm.vehicleTypes" placeholder="请选择车辆类型" style="width: 100%;" clearable multiple>
+          <el-select v-model="queryForm.vehicleTypes" collapse-tags placeholder="请选择车辆类型" style="width: 100%;" clearable multiple>
             <el-option
               v-for="item in carTypeList"
               :key="item.enumField"
@@ -101,7 +122,7 @@
               :value="item.enumValue">
             </el-option>
           </el-select>
-          <el-select v-model="queryForm.surveillanceIds" placeholder="请选择布控车辆" style="width: 100%;" clearable multiple>
+          <el-select v-model="queryForm.surveillanceIds" collapse-tags placeholder="请选择布控车辆" style="width: 100%;" clearable multiple>
             <el-option
               v-for="item in controlVehicleList"
               :key="item.uid"
@@ -304,9 +325,10 @@ export default {
           return time.getTime() > Date.now();
         }
       },
+      pickerEnd: {},
       queryForm: {
         startDate: null,
-        endDate: null,
+        endDate:  null,
         cameraIds: null,
         bayonetIds: null,
         startTime: 19,
@@ -346,8 +368,16 @@ export default {
       searchStr: {}, // 传到抓拍记录页面的数据
     }
   },
+  watch: {
+    // 'queryForm.startDate' () {
+    //   let _this = this;
+    //   const threeDays = 2 * 3600 * 24 * 1000;
+    //   const endTime = new Date(_this.queryForm.startDate).getTime() + threeDays;
+    //   _this.queryForm.endDate = formatDate(endTime);
+    // }
+  },
   created () {
-    if (this.$route.params.startDate) {
+    if (this.$route.query.startDate) {
       this.handleQueryData();
     } else {
       this.setDTime();
@@ -369,20 +399,25 @@ export default {
       let date = new Date();
       let curDate = date.getTime();
       let curS = 1 * 24 * 3600 * 1000;
-      let _s =
-        new Date(curDate - curS).getFullYear() +
-        "-" +
-        (new Date(curDate - curS).getMonth() + 1) +
-        "-" +
-        new Date(curDate - curS).getDate();
-      /* let _e =
-        date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate(); */
-      this.queryDate = [_s, _s];
+      
+      let year = new Date(curDate - curS).getFullYear();
+
+      let month = new Date(curDate - curS).getMonth() + 1;// 月
+      if (month < 10) { month = '0' + month; }
+      
+      let day = new Date(curDate - curS).getDate();// 日
+      if (day < 10) { day = '0' + day; }
+      let _s = year + '-' + month + '-' + day;
+
+      this.queryForm.startDate = _s;
+      this.queryForm.endDate = _s;
+      // this.queryDate = [_s, _s];
     },
     //日期选择
-    dateChange(val) {
+    dateChange() {
+      let _this = this;
       if (
-        new Date(val[1]).getTime() - new Date(val[0]).getTime() >=
+        new Date(_this.queryForm.endDate).getTime() - new Date(_this.queryForm.startDate).getTime() >=
         3 * 24 * 3600 * 1000
       ) {
         if (!document.querySelector(".el-message")) {
@@ -391,20 +426,20 @@ export default {
           );
         }
         this.setDTime();
+        return false;
+      } else {
+        return true;
       }
     },
     handleQueryData () {
-      const startDate = this.$route.params.startDate.split(' ')[0];
-      const endDate = this.$route.params.endDate.split(' ')[0];
+      const startDate = this.$route.query.startDate.split(' ')[0];
+      const endDate = this.$route.query.endDate.split(' ')[0];
 
-      this.queryDate = [startDate, endDate]
-
-
-      const startTime = this.$route.params.startHour;
-      const endTime = this.$route.params.endhour;
-      const minShotTimes = this.$route.params.minShotTimes;
-      const surveillanceIds = this.$route.params.surveillanceIds && this.$route.params.surveillanceIds.split(',');
-      const vehicleTypes =  this.$route.params.vehicleTypes && this.$route.params.vehicleTypes.split(',');
+      const startTime = this.$route.query.startHour;
+      const endTime = this.$route.query.endhour;
+      const minShotTimes = this.$route.query.minShotTimes;
+      const surveillanceIds = this.$route.query.surveillanceIds && this.$route.query.surveillanceIds.split(',');
+      const vehicleTypes =  this.$route.query.vehicleTypes && this.$route.query.vehicleTypes.split(',');
 
 
       this.queryForm.startDate = startDate;
@@ -414,7 +449,6 @@ export default {
       this.queryForm.minShotTimes = minShotTimes;
       this.queryForm.surveillanceIds = surveillanceIds;
       this.queryForm.vehicleTypes = vehicleTypes;
-
 
     },
     // 获取布控车辆
@@ -456,9 +490,9 @@ export default {
           this.cameraTree = this.getTreeList(camera);
           this.getLeafCountTree(this.cameraTree);
 
-          if (this.$route.params.cameraIds || this.$route.params.bayonetIds) {
-            const cameraIds = this.$route.params.cameraIds.split(',');
-            const bayonetIds = this.$route.params.bayonetIds.split(',');
+          if (this.$route.query.cameraIds || this.$route.query.bayonetIds) {
+            const cameraIds = this.$route.query.cameraIds.split(',');
+            const bayonetIds = this.$route.query.bayonetIds.split(',');
 
             let arr = [], arrNodes = [];
 
@@ -468,6 +502,7 @@ export default {
                   for(let i = 0; i < cameraIds.length; i ++) {
                     if (val.id === cameraIds[i]) {
                       arr.push(val.label);
+                      // arr.push(val)
                       this.$refs.cameraTree.setCheckedKeys(arr);
                       this.$refs.cameraTree.setCheckedNodes(arr);
                     }
@@ -477,6 +512,7 @@ export default {
                   for(let i = 0; i < bayonetIds.length; i ++) {
                     if (val.id === bayonetIds[i]) {
                       arr.push(val.label);
+                      // arr.push(val)
                       this.$refs.cameraTree.setCheckedKeys(arr);
                       this.$refs.cameraTree.setCheckedNodes(arr);
                     }
@@ -491,7 +527,12 @@ export default {
 
               this.handleData();
 
+              console.log('checkedKeys', checkedKeys)
+              console.log('zxczxczxc', this.selectDeviceArr)
+              // console.log('this.selectDeviceArr.length', this.selectDeviceArr.length)
+              // console.log('this.selectDeviceArr', this.videoTreeNodeCount)
               if (this.selectDeviceArr.length === this.videoTreeNodeCount) {
+                // console.log('asdasdasdasdasd')
                 this.checkAllTree = true;
                 this.isIndeterminate = false;
               } else if (this.selectDeviceArr.length > 0 && this.selectDeviceArr.length < this.videoTreeNodeCount) {
@@ -501,7 +542,7 @@ export default {
                 this.checkAllTree = false;
                 this.isIndeterminate = false;
               }
-            }, 500)
+            }, 1000)
 
           } else {
             
@@ -561,6 +602,7 @@ export default {
       this.handleData();
     },
     getLeafCountTree(json) {
+      // console.log('json', json)
       // 获取树节点的数量
       for (let i = 0; i < json.length; i++) {
         if (json[i].hasOwnProperty("id")) {
@@ -572,9 +614,12 @@ export default {
           continue;
         }
       }
+      // console.log('videoTreeNodeCount', this.videoTreeNodeCount)
     },
     //摄像头
     listenChecked(val, val1) {
+      console.log('val1', val1);
+      
       this.selectDeviceArr = this.$refs.cameraTree.getCheckedNodes(true);
       this.handleData();
       if (val1.checkedNodes.length === this.videoTreeNodeCount) {
@@ -624,9 +669,8 @@ export default {
         surveillanceIds: []
       })
       
-      this.$route.params == {};
+      this.setDTime();
 
-      this.queryDate = [(new Date() - (24 * 60 * 60 * 1000)), (new Date() - (24 * 60 * 60 * 1000))];
       this.resetLoading = false;
 
       this.$nextTick(() => {
@@ -654,9 +698,11 @@ export default {
         this.queryForm.bayonetIds = bayonentIds.join(",");
       }
 
-      this.queryForm.startDate = this.queryDate[0];
-      this.queryForm.endDate = this.queryDate[1];
 
+      if (!this.dateChange()) {
+        this.searchLoading = false;
+        return;
+      }
 
       if (!this.validatorShotTimes(this.queryForm.minShotTimes)) {
         this.searchLoading = false;
@@ -720,8 +766,8 @@ export default {
         this.queryForm.bayonetIds = bayonentIds.join(",");
       }
 
-      this.queryForm.startDate = this.queryDate[0];
-      this.queryForm.endDate = this.queryDate[1];
+      // this.queryForm.startDate = this.queryDate[0];
+      // this.queryForm.endDate = this.queryDate[1];
 
       const data = {
         bayonetIds: this.queryForm.bayonetIds,
@@ -762,24 +808,10 @@ export default {
      */
     onOpenRecord (obj) {
       this.searchStr['vehicleNumber'] = obj.vehicleNumber;
-      this.$router.push({name: 'vehicle_search_ycxc_record', params: {
+      this.$router.push({name: 'vehicle_search_ycxc_record', query: {
         ...this.searchStr
       }});
     },
-    /**
-     * 查看车辆信息
-     */
-    // onOpenVehicleInfo (obj) {
-    //   this.searchStr['vehicleNumber'] = obj.vehicleNumber;
-    //   this.$store.commit('setBreadcrumbData', {
-    //     breadcrumbData: [
-    //       {name: '车辆侦查', routerName: 'vehicle'},
-    //       {name: '夜间行车分析', routerName: 'vehicle_search_ycxc', params: { ...this.searchStr }},
-    //       { name: '车辆详情' }
-    //     ]
-    //   });
-    //   this.$router.push({name: 'vehicle_search_clxx', query: {plateNo: obj.vehicleNumber}});
-    // },
     /**
      * 分页赋值
      */
@@ -1023,34 +1055,12 @@ export default {
   } 
 }
 .left_time {
-  // .el-range-editor {
-  //   padding-left: 0px;
+  // .end_time_select {
+  //   .el-input__inner {
+  //     padding-left: 30px;
+  //     padding-right: 25px;
+  //   }
   // }
-  .el-date-editor {
-    /* .el-input__inner {
-      padding-left: 15px;
-    } */
-    /* .el-range__icon {
-      position: absolute;
-      right: 3px;
-      top: 2px;
-    }
-    .el-range__close-icon {
-      position: absolute;
-      right: 3px;
-      top: 2px;
-    } */
-  }
-  .el-input__prefix {
-    right: 5px;
-    left: auto;
-  }
-  .end_time_select {
-    .el-input__inner {
-      padding-left: 30px;
-      padding-right: 25px;
-    }
-  }
 }
 .left_num {
   .left-none-border {

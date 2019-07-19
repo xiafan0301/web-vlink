@@ -65,9 +65,12 @@
               </div>
               <div class="struc_cdi_line">
                 <p v-if="curInSur">该车牌信息已存在布控库中</p>
-                <el-button :disabled="curInSur"  @click="gotoControl(sturcDetail)" type="primary" size="mini">加入布控库</el-button>
               </div>
             </div>
+          </div>
+          <div class="download_btn">
+            <a  @click="gotoControl(sturcDetail)" v-if="!curInSur">加入布控库</a>
+            <a class="disabled"  v-else>加入布控库</a>
           </div>
         </div>
         <div v-show="strucCurTab === 2" class="struc_c_address"></div>
@@ -83,7 +86,7 @@
               <i class="vl_icon vl_icon_control_09" v-else></i>
             </div>
           </div>
-          <div class="download_btn"><a href="javascript:;" @click="downloadVideo(sturcDetail.videoPath)">下载视频</a></div>
+          <div class="download_btn"><a @click="downloadVideo(sturcDetail.videoPath)">下载视频</a></div>
         </div>
       </div>
       <div class="struc-list">
@@ -163,7 +166,7 @@
         this.$router.push({ name: 'control_create', query: {imgurl: data.subStoragePath, plateNo: data.plateNo} })
       },
       getTheList () {
-        let params = this.$route.query;
+        let params = {where: this.$route.query};
         params.pageNum = this.pagination.pageNum;
         params.pageSize = this.pagination.pageSize;
         params.firstSetted = true;
@@ -176,7 +179,7 @@
             console.log(res)
             if(res.data.list.length === 0) {
               this.$message.info('抱歉，没有找到匹配结果');
-              this.$router.push({name: "vehicle_search_qyph"})
+//              this.$router.push({name: "vehicle_search_qyph"})
             }
             this.strucInfoList = res.data.list;
             this.pagination.pageNum = res.data.pageNum;
@@ -184,13 +187,13 @@
           } else {
             if(res.data.list.length === 0) {
               this.$message.info('抱歉，没有找到匹配结果');
-              this.$router.push({name: "vehicle_search_qyph"})
+//              this.$router.push({name: "vehicle_search_qyph"})
             }
           }
         }).catch(err => {
           this.$_hideLoading();
           this.$message.info('抱歉，没有找到匹配结果');
-          this.$router.push({name: "vehicle_search_qyph"})
+//          this.$router.push({name: "vehicle_search_qyph"})
         })
       },
       searchSubmit () {
@@ -535,6 +538,33 @@
             z-index: 99;
           }
         }
+        .download_btn {
+          text-align: center;
+          width: auto;
+          height: .4rem;
+          float: right !important;
+          margin-top: .2rem;
+          background: #f6f8f9;
+          border: 1px solid lightgray;
+          border-radius: 4px;
+          line-height: .4rem;
+          cursor: pointer;
+          color: #666666;
+          padding: 0 .1rem;
+          position: relative;
+          &:hover {
+            color: #FFFFFF;
+            background: #0C70F8;
+            border-color: #0C70F8;
+          }
+          a {
+            display: block;
+            text-decoration: none;
+          }
+          .disabled {
+            cursor:not-allowed;
+          }
+        }
       }
       .struc_c_address {
         height: 100%;
@@ -592,31 +622,6 @@
           -webkit-box-shadow: 0 0 0!important;
           -moz-box-shadow: 0 0 0!important;
           box-shadow: 0 0 0!important;
-        }
-        .download_btn {
-          text-align: center;
-          width: 1.1rem;
-          height: .4rem;
-          float: right!important;
-          margin-top: .2rem;
-          background: rgba(246,248,249,1);
-          border: 1px solid rgba(211,211,211,1);
-          border-radius: 4px;
-          line-height: .4rem;
-          cursor: pointer;
-          color: #666666;
-          position: relative;
-          &:hover {
-            color: #FFFFFF;
-            background: #0C70F8;
-            border-color: #0C70F8;
-          }
-          a {
-            display: block;
-            position: absolute;
-            width: 100%;
-            height: 100%;
-          }
         }
       }
     }

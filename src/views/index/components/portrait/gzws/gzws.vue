@@ -8,7 +8,6 @@
             {name: '跟踪尾随'}]">
         </div>
       </div>
-      <el-button class="add_btn" type="primary" @click="showAddTaskDialog">新建任务</el-button>
     </div>
     <div class="content_box">
       <ul class="tab-menu">
@@ -31,6 +30,7 @@
           </el-form-item>
           <el-form-item label="创建时间:" prop="reportTime">
             <el-date-picker
+              class="vl_date"
               v-model="searchForm.reportTime"
               type="datetimerange"
               value-format="yyyy-MM-dd HH:mm:ss"
@@ -49,6 +49,7 @@
         <div class="divide"></div>
       </div>
       <div class="table_box">
+        <el-button class="add_btn" type="primary" @click="showAddTaskDialog">新建任务</el-button>
         <el-table :data="list">
           <el-table-column label="序号" type="index" width="100"></el-table-column>
           <el-table-column label="任务名称" prop="taskName" show-overflow-tooltip></el-table-column>
@@ -170,14 +171,12 @@
         </div>
         <div class="right">
           <el-form class="left_form" :model="addForm" ref="addForm" :rules="rules">
-            <el-form-item prop="taskName">
-              <el-input placeholder="请输入任务名称，最多20字" maxlength="20" v-model="addForm.taskName"></el-input>
-            </el-form-item>
             <el-form-item  prop="dateTime">
               <el-date-picker
                 v-model="addForm.dateTime"
                 style="width: 100%"
                 :clearable="false"
+                class="vl_date"
                 @change="handleDateTime"
                 :picker-options="pickerDateTime"
                 value-format="yyyy-MM-dd HH:mm:ss"
@@ -199,6 +198,9 @@
                 ></el-option>
               </el-select>
               <span class="span_tips" v-show="isShowDeviceTip">该人像在该时间内无抓拍设备</span>
+            </el-form-item>
+            <el-form-item prop="taskName">
+              <el-input placeholder="请输入任务名称，最多20字" maxlength="20" v-model="addForm.taskName"></el-input>
             </el-form-item>
             <el-form-item prop="interval">
               <el-select placeholder="请选择尾随时间间隔" style="width: 100%" v-model="addForm.interval">
@@ -601,9 +603,7 @@ export default {
     .vc_gcck_bd {
       width: 100%;
     }
-    .add_btn {
-      margin-right: 10px;
-    }
+    
   }
   .content_box {
     height: calc(100% - 100px);
@@ -639,6 +639,9 @@ export default {
     }
     .table_box {
       margin: 0 20px;
+      .add_btn {
+        margin-bottom: 10px;
+      }
       .operation_btn {
         display: inline-block;
         padding: 0 10px;

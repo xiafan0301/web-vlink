@@ -4,10 +4,9 @@
       <div>
         <div class="show_search">
           <div class="show_search_ti">
-            <span>开始</span>
             <el-date-picker
               class="vl_vid_sdater vl_date"
-              style="width: 175px"
+              style="width: 100%"
               size="small"
               v-model="startTime"
               type="datetime"
@@ -18,10 +17,9 @@
             </el-date-picker>
           </div>
           <div class="show_search_ti">
-            <span>结束</span>
             <el-date-picker
               class="vl_vid_sdater vl_date vl_date_end"
-              style="width: 175px"
+              style="width: 100%"
               size="small"
               v-model="endTime"
               type="datetime"
@@ -31,8 +29,8 @@
               placeholder="选择结束时间">
             </el-date-picker>
           </div>
-          <div class="show_search_se" style="padding-left: 20px;">
-            <el-select style="width: 191px;" v-model="signPeople" filterable placeholder="选择标记人" size="small">
+          <div class="show_search_se">
+            <el-select style="width: 100%;" v-model="signPeople" filterable placeholder="选择标记人" size="small">
               <el-option
                 v-for="item in signPeopleList"
                 :key="'people_list_' + item.userId"
@@ -41,8 +39,8 @@
               </el-option>
             </el-select>
           </div>
-          <div class="show_search_se" style="padding-left: 20px;">
-            <el-select style="width: 191px;" v-model="signContent" filterable placeholder="选择标记内容" size="small">
+          <div class="show_search_se">
+            <el-select style="width: 100%;" v-model="signContent" filterable placeholder="选择标记内容" size="small">
               <el-option
                 v-for="item in signContentList"
                 :key="'content_list_' + item.uid"
@@ -380,16 +378,6 @@ export default {
     }
   }
   > .show_search_se { margin-bottom: 5px; }
-  > .show_search_ti {
-    position: relative;
-    padding-left: 36px;
-    margin-bottom: 10px;
-    > span {
-      position: absolute; top: 2px; left: 17px;
-      width: 18px;
-      color: #666; font-size: 12px;
-    }
-  }
 }
 .sign_content_list {
   position: relative;

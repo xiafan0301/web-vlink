@@ -102,18 +102,20 @@
 .vl_icon_map_mark6 { width: 43px; height: 68px; background-position: -340px -174px; }
 .vl_icon_map_mark3 { width: 43px;  height: 68px; background-position: -84px -171px; }
 .vl_icon_map_mark1 { width: 43px;  height: 68px; background-position: -149px -171px; } /* 卡口--紫色 */
+.vl_icon_map_mark11 { width: 43px;  height: 68px; background-position: -262px -1160px; } /* 卡口--紫色 */
 .vl_icon_map_mark2, .vl_icon_map_mark22  { width: 43px;  height: 68px; background-position: -214px -171px; }
 .vl_icon_map_mark0 { width: 43px;  height: 68px; background-position: -275px -171px; } /* 摄像头 */
 .vl_icon_map_mark4 { width: 31px; height: 34px; background-position: -477px -196px; }
-.vl_icon_map_mark7 { width: 40px; height: 57px; background-position: -263px -1160px; } /* 摄像头 紫色 */
+.vl_icon_map_mark7 { width: 40px; height: 57px; background-position: -208px -1160px; } /* 摄像头 紫色 */
 .vl_icon_map_mark8 { width: 40px; height: 57px; background-position: -478px -1160px; }  /* 卡口 蓝色 */
 .vl_icon_map_sxt_error { width: 43px; height: 68px; background-position: -402px -174px; }
 .vl_icon_map_hover_mark0 { width: 47px;  height: 68px; background-position: -609px -1160px;} /* 摄像头移上去效果 */
 .vl_icon_map_hover_mark1 { width: 47px;  height: 68px; background-position: -670px -1160px;} /* 卡口紫色移上去效果 **/
 .vl_icon_map_hover_mark2{ width: 47px;  height: 68px; background-position: -787px -1163px;}
 .vl_icon_map_hover_mark3 { width: 47px;  height: 68px; background-position: -394px -260px;}
-.vl_icon_map_hover_mark7 { width: 47px;  height: 68px; background-position: -670px -1160px;} /* 摄像头移上去效果 */
+.vl_icon_map_hover_mark7 { width: 47px;  height: 68px; background-position: -856px -1163px;} /* 摄像头紫色移上去效果 */
 .vl_icon_map_hover_mark8 { width: 47px;  height: 68px; background-position: -670px -1160px;} /* 卡口蓝色移上去效果 **/
+.vl_icon_map_hover_mark11 { width: 47px;  height: 68px; background-position: -916px -1163px; } /* 卡口紫色移上去效果*/
 /* .vl_icon_map_hover_mark5 { width: 47px;  height: 68px; background-position: -394px -260px;} */
 .vl_icon_map_mark_calling { width: 47px;  height: 68px; background-position: -394px -260px;}
 .vl_icon_map_calling0 { width: 32px;  height: 26px; background: url("../img/webrtc/webrtc11.png") no-repeat; }
@@ -169,6 +171,7 @@
 .vl_icon_retrieval_06 {width: 16px; height: 16px; background-position: -777px -669px;}
 .vl_icon_retrieval_07 {width: 140px; height: 114px; background-position: -680px -1303px;}
 .vl_icon_retrieval_08 {width: 20px; height: 20px; background-position: -620px -376px;}
+.vl_icon_retrieval_09 {width: 20px; height: 20px; background-position: -818px -670px;}
 /* 布控状态 */
 .vl_control_s{width: 120px; height: 120px; background-position: -526px -716px;}
 .vl_control_o{width: 120px; height: 120px; background-position: -665px -716px;}
@@ -298,6 +301,9 @@
 /** 车辆侦查  --尾随分析   **/
 .vl_icon_tail_1{width: 17px; height: 17px;background-position: -785px -373px;} /*时间图标*/
 .vl_icon_tail_2{width: 18px; height: 18px;background-position: -936px -526px;} /*车辆图标*/
+
+
+.vl_icon_position_1{width: 17px; height: 17px;background-position: -686px -668px;} /*定位 地图图标*/
 
 .vl_icon2 {
   display: inline-block;
@@ -789,6 +795,9 @@
 }
 .date-comp .el-date-editor .el-range-input {
   width: 52%;
+}
+.date-comp .el-range-editor.el-input__inner {
+  padding: 3px 0 3px 10px;
 }
 .el-date-editor .el-range-separator {
   width: 30px;

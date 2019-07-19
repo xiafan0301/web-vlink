@@ -111,26 +111,30 @@
             <!-- 时间 -->
             <el-form-item prop="startTime">
               <div class="time-search">
-                <p>开始</p>
+                <!-- <p>开始</p> -->
                 <el-date-picker
+                  class="vl_date"
                   v-model="searchData.startTime"
                   type="datetime"
                   value-format="yyyy-MM-dd HH:mm:ss"
                   :picker-options="startDateOpt"
                   placeholder="开始时间"
+                  :clearable="false"
                 ></el-date-picker>
               </div>
             </el-form-item>
             <el-form-item prop="endTime">
               <div class="time-search">
-                <p>结束</p>
+                <!-- <p>结束</p> -->
                 <el-date-picker
+                  class="vl_date vl_date_end"
                   v-model="searchData.endTime"
                   :picker-options="endDateOpt"
                   value-format="yyyy-MM-dd HH:mm:ss"
                   type="datetime"
                   default-time="23:59:59"
                   placeholder="结束时间"
+                  :clearable="false"
                 ></el-date-picker>
               </div>
             </el-form-item>
@@ -139,7 +143,7 @@
               <div class="similarity">
                 <ul class="similarity-input">
                   <li class="input-name">
-                    <el-input placeholder="相似度"></el-input>
+                    <el-input placeholder="相似度" readonly v-model="searchData.similarityName"></el-input>
                   </li>
                   <li class="input-value">
                     <el-input v-model="searchData.similarity" placeholder></el-input>
@@ -235,6 +239,7 @@ export default {
         taskName: "",
         startTime: "",
         endTime: "",
+        similarityName: "相似度",
         similarity: "85", // 相似度
         frequency: "" //频次
       },
@@ -1746,7 +1751,7 @@ export default {
   .time-search {
     .el-date-editor.el-input,
     .el-date-editor.el-input__inner {
-      width: 212px;
+      width: 232px;
     }
   }
   //搜索按钮

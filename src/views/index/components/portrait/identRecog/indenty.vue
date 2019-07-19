@@ -42,8 +42,10 @@
             <div class="divide"></div>
           </div>
           <el-form class="left_form" :model="searchForm" ref="searchForm" :rules="searchRules">
-            <el-form-item prop="similarity">
-              <el-input placeholder="填写相似度(数字)" v-model="searchForm.similarity" style="width: 80%" type="text"></el-input>
+            <el-form-item prop="similarity" class="similarity_input">
+              <el-input placeholder="填写相似度(数字)" v-model="searchForm.similarity" style="width: 80%" type="text">
+                <template slot="prepend">相似度</template>
+              </el-input>
               <span style="margin-left: 10px;">- 100</span>
             </el-form-item>
             <el-form-item prop="idNo">
@@ -121,10 +123,10 @@
         <el-button class="operation_btn function_btn" @click="addHisToImg" :disabled="choosedHisPic.length === 0">确认</el-button>
       </div>
     </el-dialog>
-    <!--身份核实详情弹窗-->
+    <!--身份核实详情弹窗 -- 根据身份证查询-->
     <el-dialog
       :visible.sync="identyDetailDialog"
-      class="struc_detail_idendty_dialog"
+      class="struc_detail_idendty_idNo_dialog"
       width="890px"
       top="15vh"
       :close-on-click-modal="true"
@@ -147,7 +149,7 @@
             </li>
             <li>
               <span>出生日期</span>
-              <span>{{sturcDetail.birthDate ? sturcDetail.birthDate.split(' ')[0] : '无'}}</span>
+              <span>{{sturcDetail.birthDate ? sturcDetail.birthDate : '无'}}</span>
             </li>
             <li>
               <span>民族</span>
@@ -159,18 +161,87 @@
             </li>
             <li>
               <span>底库信息</span>
-              <span class="info_span">{{sturcDetail.repertory ? sturcDetail.repertory : '无'}}</span>
+              <span class="info_span" :title="sturcDetail.repertory">{{sturcDetail.repertory ? sturcDetail.repertory : '无'}}</span>
             </li>
             <li>
               <span>分组信息</span>
-              <span class="info_span">{{sturcDetail.group ? sturcDetail.group : '无'}}</span>
+              <span class="info_span" :title="sturcDetail.group">{{sturcDetail.group ? sturcDetail.group : '无'}}</span>
             </li>
             <li>
               <span>备注信息</span>
-              <span class="info_span">{{sturcDetail.remarks ? sturcDetail.remarks : '无'}}</span>
+              <span class="info_span" :title="sturcDetail.remarks">{{sturcDetail.remarks ? sturcDetail.remarks : '无'}}</span>
             </li>
           </ul>
         </div>
+      </div>
+    </el-dialog>
+    <!--身份核实详情弹窗 --根据上传图查询-->
+    <el-dialog
+      :visible.sync="strucDetailDialog"
+      class="struc_detail_idendty_img_dialog"
+      :close-on-click-modal="false"
+      top="4vh"
+      :show-close="false">
+      <div class="struc_tab">
+        <span>检索详情</span>
+        <i class="el-icon-close" @click="strucDetailDialog = false"></i>
+      </div>
+      <div class="struc_main">
+        <div class="struc_c_detail">
+          <div class="struc_c_d_qj struc_c_d_img">
+            <img :src="sturcDetail.upPhotoUrl" alt="" class="bigImg">
+            <span>上传图</span>
+          </div>
+          <div class="struc_c_d_box">
+            <div class="struc_c_d_img">
+              <img :src="sturcDetail.photoUrl" alt="" class="bigImg">
+            </div>
+            <div class="struc_c_d_info">
+              <h2>{{sturcDetail.name}}
+                <div class="vl_jfo_sim">
+                  <i class="vl_icon vl_icon_retrieval_03"></i>
+                  {{sturcDetail.semblance && sturcDetail.semblance.toFixed(2)}}
+                  <span style="font-size: 12px;">%</span>
+                </div>
+              </h2>
+              <div class="struc_cdi_line">
+                <span v-show="sturcDetail.nation">{{sturcDetail.nation}}</span>
+                <span v-show="sturcDetail.sex">{{sturcDetail.sex}}</span>
+              </div>
+              <div class="struc_cdi_line">
+                <span v-show="sturcDetail.birthDate">{{sturcDetail.birthDate}}</span>
+              </div>
+              <div class="struc_cdi_line">
+                <span v-show="sturcDetail.idNo">{{sturcDetail.idNo}}<i class="vl_icon vl_icon_retrieval_01"></i></span>
+              </div>
+              <div class="struc_cdi_line">
+                <span v-show="sturcDetail.group">{{sturcDetail.group}}</span>
+              </div>
+              <div class="struc_cdi_line">
+                <span v-show="sturcDetail.repertory">{{sturcDetail.repertory}}</span>
+              </div>
+              <div class="struc_cdi_line">
+                <span :title="sturcDetail.remarks" style="height: auto;white-space: normal">{{sturcDetail.remarks ? sturcDetail.remarks.length > 74 ? (sturcDetail.remarks.slice(0, 74) + '...') : sturcDetail.remarks : ''}}</span>
+              </div>
+              <div class="struc_cdi_line"></div>
+            </div>
+            <span>布控库信息</span>
+          </div>
+        </div>
+      </div>
+      <div class="struc-list" v-show="dataList.length > 1">
+        <swiper :options="swiperOption" ref="mySwiper">
+          <!-- slides -->
+          <swiper-slide v-for="(item, index) in dataList" :key="item.id">
+            <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
+              <img style="height: .88rem;width: 50%;padding-right: .02rem;" :src="item.upPhotoUrl" alt="">
+              <img style="height: .88rem;width: 50%;padding-left: .02rem;" :src="item.photoUrl" alt="">
+              <div class="vl_jfo_sim" ><i class="vl_icon vl_icon_retrieval_05"  :class="{'vl_icon_retrieval_06':  index === curImgIndex}"></i>{{item.semblance && item.semblance.toFixed(2)}}<span style="font-size: 12px;">%</span></div>
+            </div>
+          </swiper-slide>
+          <div class="swiper-button-prev" slot="button-prev"></div>
+          <div class="swiper-button-next" slot="button-next"></div>
+        </swiper>
       </div>
     </el-dialog>
   </div>
@@ -199,6 +270,7 @@ export default {
     return {
       isInitPage: true, // 是否是初始化页面
       identyDetailDialog: false, // 身份核实详情弹出框
+      strucDetailDialog: false,
       loadingHis: false, // 获取历史图片加载中
       historyPicDialog: false, // 历史图片弹出框
       uploading: false, // 是否正在上传
@@ -228,6 +300,18 @@ export default {
       dataList: [],
       queryImgPath: null, // 从其他模块传过来的图片
       isSearchLoading: false, // 搜索条件加载中
+      swiperOption: {
+        slidesPerView: 5,
+        spaceBetween: 10,
+        slidesPerGroup: 5,
+        loop: false,
+        slideToClickedSlide: true,
+        loopFillGroupWithBlank: true,
+        navigation: {
+          nextEl: '.swiper-button-next',
+          prevEl: '.swiper-button-prev',
+        },
+      },
     }
   },
   computed: {
@@ -409,7 +493,7 @@ export default {
       this.curImgNum = 0;
 
       this.dataList = [];
-      
+
       this.$refs[form].resetFields();
     },
     // 根据搜索条件进行查询
@@ -466,8 +550,12 @@ export default {
     },
     // 显示身份核实详情
     showStrucInfo (data, index) {
-      this.curImgIndex = index;
-      this.identyDetailDialog = true;
+      if (data.semblance) {
+        this.curImgIndex = index;
+        this.strucDetailDialog = true;
+      } else {
+        this.identyDetailDialog = true;
+      }
       this.sturcDetail = data;
     },
   }
@@ -588,6 +676,17 @@ export default {
         width: 100%;
         padding: 15px 20px;
         font-size: 12px !important;
+        /deep/ .similarity_input{
+          /deep/ .el-input__inner {
+
+            border-left: 0;
+          }
+        }
+        /deep/ .el-input-group__prepend {
+          background: transparent;
+          padding: 0 10px;
+          border-right: 1px solid #ffffff;
+        }
         /deep/ .el-form-item {
           margin-bottom: 20px;
         }
@@ -710,7 +809,7 @@ export default {
     }
   }
 }
-.struc_detail_idendty_dialog {
+.struc_detail_idendty_idNo_dialog {
   .struc_main {
     display: flex;
     padding: 30px 30px 30px 50px;
@@ -780,7 +879,276 @@ export default {
 }
 </style>
 <style lang="scss">
-
+.struc_detail_idendty_img_dialog {
+  .el-dialog {
+    max-width: 13.06rem;
+    width: 100%!important;
+  }
+  .el-dialog__header {
+    display: none;
+  }
+  .struc_tab {
+    height: 1.16rem;
+    padding: .3rem 0;
+    position: relative;
+    color: #999999;
+    span {
+      display: inline-block;
+      margin-right: .55rem;
+      padding-bottom: .1rem;
+      cursor: pointer;
+    }
+    .active {
+      color: #0C70F8;
+      border-bottom: 2px solid #0C70F8;
+    }
+    i {
+      display: block;
+      position: absolute;
+      top: .3rem;
+      right: 0px;
+      cursor: pointer;
+    }
+  }
+  .struc_main {
+    width: 11.46rem;
+    height: 4.4rem;
+    margin: 0 auto;
+    // border-bottom: 1px solid #F2F2F2;
+    .struc_c_detail {
+      width:  100%;
+      height: 3.6rem;
+      >div {
+        float: left;
+      }
+      .struc_c_d_img {
+        width: 3.6rem;
+        height: 3.6rem;
+        background: #EAEAEA;
+        position: relative;
+        img {
+          width: 100%;
+          height: auto;
+          max-height: 100%;
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          margin: auto;
+        }
+        i {
+          display: block;
+          position: absolute;
+          top: .1rem;
+          right: .1rem;
+          line-height: .26rem;
+          height: .26rem;
+          background: rgba(255, 255, 255, .8);
+          border-radius: .13rem;
+          font-style: normal;
+          color: #0C70F8;
+          font-size: 12px;
+          padding: 0 .1rem;
+        }
+      }
+      .struc_c_d_qj {
+        margin-right: .3rem;
+        &:before {
+          display: block;
+          content: '';
+          position: absolute;
+          top: -.5rem;
+          left: -.5rem;
+          transform: rotate(-45deg);
+          border: .5rem solid #0c70f8;
+          border-color: transparent transparent #0C70F8;
+          z-index: 9;
+        }
+        span {
+          display: block;
+          position: absolute;
+          top: .1rem;
+          left: .1rem;
+          width: .6rem;
+          height: .6rem;
+          text-align: center;
+          color: #FFFFFF;
+          font-size: .12rem;
+          -webkit-transform: rotate(-45deg);
+          -moz-transform: rotate(-45deg);
+          -ms-transform: rotate(-45deg);
+          -o-transform: rotate(-45deg);
+          transform: rotate(-45deg);
+          z-index: 99;
+        }
+      }
+      .struc_c_d_box {
+        width: calc(100% - 3.9rem);
+        box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
+        border-radius:1px;
+        position: relative;
+        overflow: hidden;
+        >div {
+          float: left;
+        }
+        .struc_c_d_info {
+          width: calc(100% - 3.6rem);
+          padding-left: .24rem;
+          color: #333333;
+          h2 {
+            font-weight: bold;
+            line-height: .74rem;
+            padding-right: 1rem;
+            .vl_jfo_sim {
+              color: #0C70F8;
+              font-weight: bold;
+              font-size: .24rem;
+              float: right;
+              i {
+                vertical-align: text-bottom;
+                margin-right: .1rem;
+              }
+              span {
+                font-weight: normal;
+              }
+            }
+          }
+          .struc_cdi_line {
+            span {
+              /*position: relative;*/
+              max-width: 100%;
+              display: inline-block;
+              height: .3rem;
+              line-height: .3rem;
+              margin-bottom: .08rem;
+              border: 1px solid #F2F2F2;
+              background: #FAFAFA;
+              color: #333333;
+              white-space: nowrap;
+              text-overflow: ellipsis;
+              border-radius:3px;
+              font-size: 12px;
+              overflow: hidden;
+              padding: 0 .1rem;
+              margin-right: .08rem;
+              > i {
+                vertical-align: middle;
+                margin-left: .1rem;
+              }
+            }
+          }
+        }
+        &:before {
+          display: block;
+          content: '';
+          position: absolute;
+          top: -.7rem;
+          right: -.7rem;
+          transform: rotate(-46deg);
+          border: .7rem solid #0c70f8;
+          border-color: transparent transparent transparent #0C70F8;
+        }
+        &:after {
+          display: block;
+          content: '';
+          position: absolute;
+          top: -.4rem;
+          right: -.4rem;
+          transform: rotate(-45deg);
+          border: .4rem solid #FFFFFF;
+          border-color: transparent transparent transparent #FFFFFF;
+        }
+        >span {
+          display: block;
+          position: absolute;
+          top: .19rem;
+          right: .19rem;
+          width: 1rem;
+          height: 1rem;
+          text-align: center;
+          color: #FFFFFF;
+          font-size: .12rem;
+          -webkit-transform: rotate(45deg);
+          -moz-transform: rotate(45deg);
+          -ms-transform: rotate(45deg);
+          -o-transform: rotate(45deg);
+          transform: rotate(45deg);
+          z-index: 99;
+        }
+      }
+    }
+    .struc_c_address {
+      height: 100%;
+      #capMap {
+        width:  100%;
+        height: 100%;
+      }
+    }
+  }
+  .struc-list {
+    width: 12.46rem;
+    margin: 0 auto;
+    padding: .44rem 0 .34rem 0;
+    .swiper-container {
+      padding: .02rem .5rem;
+      &:before {
+        display: block;
+        content: '';
+        width: .5rem;
+        height: 110%;
+        background: #FFFFFF;
+        position: absolute;
+        left: 0;
+        z-index: 9;
+        border: 1px solid #FFFFFF;
+      }
+      &:after {
+        display: block;
+        content: '';
+        width: .5rem;
+        height: 110%;
+        background: #FFFFFF;
+        position: absolute;
+        right: 0;
+        top: 0;
+        z-index: 9;
+        border: 1px solid #FFFFFF;
+      }
+      .swiper-button-next {
+        right:  0;
+      }
+      .swiper-button-prev {
+        left: 0;
+      }
+      .swiper-slide {
+        .swiper_img_item {
+          cursor: pointer;
+          border: 1px solid #FFFFFF;
+          padding: 2px;
+          .vl_jfo_sim {
+            font-size: .14rem;
+            height: .3rem;
+            margin-top: 0;
+            /*display: inline-block;*/
+            white-space: nowrap;
+            text-align: center;
+            color: #999999;
+            i {
+              margin-right: 0;
+            }
+          }
+        }
+        .active {
+          border-color: #0C70F8;
+          .vl_jfo_sim {
+            color: #0C70F8;
+          }
+        }
+      }
+    }
+  }
+}
 </style>
 
 

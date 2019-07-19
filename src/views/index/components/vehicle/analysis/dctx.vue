@@ -8,9 +8,9 @@
         <div class="input-box">
           <vue-scroll>
             <div class="input-box-line">
-              <p class="title"><span>开</span><span>始</span></p>
+              <!-- <p class="title"><span>开</span><span>始</span></p> -->
               <el-date-picker
-                align="right"
+                class="vl_date"
                 :clearable="false"
                 value-format="yyyy-MM-dd HH:mm:ss"
                 format="yyyy-MM-dd HH:mm:ss"
@@ -23,8 +23,9 @@
                 </el-date-picker>
             </div>
             <div class="input-box-line">
-              <p class="title"><span>结</span><span>束</span></p>
+              <!-- <p class="title"><span>结</span><span>束</span></p> -->
               <el-date-picker
+                class="vl_date vl_date_end"
                 v-model="filterObj.endDate"
                 :clearable="false"
                 value-format="yyyy-MM-dd HH:mm:ss"
@@ -57,26 +58,22 @@
       <div class="the-right-result" :class="[{hide:!hideleft}]">
         <div id="mapContainer"></div>
         <ul class="top_ul">
-          <li v-for="(item, index) in dataList" :key="index">
-            <!-- <el-radio v-model="radioChecked" @change="handleRadio(index, item.vehicleNumber)" :label="index">车辆{{item.vehicleNumber}}</el-radio> -->
-            <el-radio v-model="radioChecked" @change="handleRadio(index, item.vehicleNumber)" :label="index">车辆{{index + 1}}</el-radio>
-            <span class="line"></span>
+          <li v-for="(item, index) in dataList" :class="[radioChecked === index ? 'is_active_li' : '']" :key="index" @click="handleRadio(index, item.vehicleNumber)">
+            {{item.vehicleNumber}}
+            <!-- <el-radio v-model="radioChecked" @change="handleRadio(index, item.vehicleNumber)" :label="index">车辆{{index + 1}}</el-radio> -->
+            <!-- <span class="line"></span> -->
           </li>
-          <!-- <li v-for="(item, index) in dataList" :key="index">
-            <el-radio v-model="radioChecked" @change="handleRadio(index, item.vehicleNumber)" :label="index">车辆{{index + 1}}</el-radio>
-            <span class="line"></span>
-          </li> -->
         </ul>
 
         <div class="right_list" v-show="isShowRightContent">
           <div class="top_content">
             <p>
               <i class="vl_icon vl_icon_v11"></i>
-              <span>{{recordDetail.deviceName}}</span>
+              <span :title="recordDetail.deviceName">{{recordDetail.deviceName}}</span>
             </p>
             <p>
-              <i class="vl_icon vl_icon_v11"></i>
-              <span>{{recordDetail.shotAddress}}</span>
+              <i class="vl_icon vl_icon_position_1"></i>
+              <span :title="recordDetail.shotAddress">{{recordDetail.shotAddress}}</span>
             </p>
             <span class="close_btn el-icon-close" @click="closeRightBox"></span>
             <div class="divide"></div>
@@ -95,7 +92,14 @@
               </li>
             </vue-scroll>
           </ul>
+          
         </div>
+        <!--地图操作按钮-->
+        <ul class="map_rrt_u2">
+          <li @click="resetZoom"><i class="el-icon-aim"></i></li>
+          <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
+          <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
+        </ul>
       </div>
     </div>
     <!-- 视频全屏放大 -->
@@ -128,9 +132,10 @@
   </div>
 </template>
 <script>
-import { testData } from './ws/testData.js';
+// import { testData } from './ws/testData.js';
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { formatDate, random14 } from "@/utils/util.js";
+import { mapXupuxian } from "@/config/config.js";
 import { checkPlateNumber } from '@/utils/validator.js';
 import { getMultiVehicleList } from '@/views/index/api/api.judge.js';
 const overStartTime = new Date() - 8 * 60 * 60 * 1000;
@@ -228,11 +233,19 @@ export default {
   },
   mounted () {
     this.initMap();
-    // this.onSearch();
-
-    
   },
   methods: {
+    mapZoomSet (val) {
+      if (this.map) {
+        this.map.setZoom(this.map.getZoom() + val);
+      }
+    },
+    resetZoom () {
+      if (this.map) {
+        this.map.setZoomAndCenter(18, mapXupuxian.center);
+        this.map.setFitView();
+      }
+    },
     computeMouseDistance () {
       let _this = this;
       document.onmousemove = function (e) {
@@ -264,16 +277,10 @@ export default {
     initMap (obj) {
       let map = new window.AMap.Map('mapContainer', {
         zoom: 18, // 级别
-        center: [110.595111, 27.90289], // 中心点坐标
+        center: mapXupuxian.center, // 中心点坐标
       });
       map.setMapStyle('amap://styles/whitesmoke');
       this.map = map;
-
-      // if (this.dataList.length > 0) {
-      //   this.dataList.map((item, index) => {
-      //     this.drawPoint(item.arrList, item.vehicleNumber, testData[0].vehicleNumber);
-      //   })
-      // }
     },
     /**
      * 地图描点
@@ -296,7 +303,7 @@ export default {
 
               
               if (obj.bayonetId) { // 设备为卡口
-                deviceType = 1;
+                deviceType = 11;
               } else {
                 deviceType = 7;
               }
@@ -328,6 +335,7 @@ export default {
             let marker = new window.AMap.Marker({
               map: _this.map,
               position: [longitude, latitude],
+              zIndex: obj.isAllPassed ? 100 : 50,
               offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
               draggable: false, // 是否可拖动
               extData: '', // 用户自定义属性
@@ -343,32 +351,33 @@ export default {
               $('#vehicle_mark' + idName).removeClass('no_checked');
               $('#vehicle_mark' + idName).addClass('is_checked');
               
+              _this.isShowRightContent = true;
 
               _this.recordDetail.recordList = [];
-              _this.isShowRightContent = true;
               _this.recordDetail.deviceName = detailDeviceName;
               _this.recordDetail.shotAddress = detailShotAddress;
 
               if (obj.isAllPassed) { // 全部车辆经过该设备
                 _this.dataList.map(item => {
-                  for(let i in item.deviceShotRecords) {
-                    if (i == obj.deviceID) {
-                      item.deviceShotRecords[i].map(val => {
+                  item.deviceShotRecordsGroupList.map(value => {
+                    if (value.deviceId ===  obj.deviceID) {
+
+                      value.deviceShotRecords.map(val => {
                         _this.recordDetail.recordList.push(val);
                       })
                     }
-                  }
+                  })
                 })
                 console.log(_this.recordDetail)
               } else {
                 if (recordObj) {
-                  for (let i in recordObj) {
-                    if (obj.deviceID === i) {
-                      recordObj[i].map(item => {
-                        _this.recordDetail.recordList.push(item);
+                  recordObj.map(item => {
+                    if (obj.deviceID === item.deviceId) {
+                      item.deviceShotRecords.map(val => {
+                        _this.recordDetail.recordList.push(val);
                       })
                     }
-                  }
+                  })
                 }
               }
 
@@ -385,9 +394,9 @@ export default {
           path: path,
           zIndex: 50,
           showDir: true,
-          strokeWeight: 8,
+          strokeWeight: 4,
           strokeColor: '#D3D3D3',
-          strokeStyle: 'solid'
+          strokeStyle: 'dashed'
         });
 
         polyline.on('mouseover', function (e) {
@@ -401,6 +410,7 @@ export default {
             zIndex: 999,
             strokeWeight: 10,
             strokeColor: '#41D459',
+            strokeStyle: 'solid'
           })
 
           console.log('tranLeft', _this.tranLeft)
@@ -411,8 +421,9 @@ export default {
           if (_this.currentSelectPolyline !== number) { // 当前选中的折线鼠标移开不消失选中的效果
             polyline.setOptions({
               zIndex: 50,
-              strokeWeight: 8,
+              strokeWeight: 4,
               strokeColor: '#D3D3D3',
+              strokeStyle: 'dashed'
             })
           }
         });
@@ -476,16 +487,19 @@ export default {
       };
       this.filterObj = Object.assign({}, obj);
       this.resetLoading = false;
+      this.dataList = [];
+      this.map.clearMap();
     },
     /**
      * 查询按钮
      */
     onSearch () {
       this.radioChecked = -1;
-      
-      this.map.clearMap();
-
       this.polylineObj = {};
+      this.dataList = [];
+      this.isShowRightContent = false;
+
+      this.map.clearMap();
 
       let arr = [];
       this.filterObj.vehicleNumberList.forEach(item => {
@@ -521,7 +535,7 @@ export default {
             this.searchLoading = false;
             this.dataList = res.data;
             this.dataList.map(item => {
-              this.drawPoint(item.shotRecords, item.vehicleNumber, item.deviceShotRecords);
+              this.drawPoint(item.shotRecords, item.vehicleNumber, item.deviceShotRecordsGroupList);
             })
           } else {
             this.dataList = [];
@@ -532,21 +546,34 @@ export default {
     },
     // 车辆单选框change
     handleRadio (index, number) {
-      this.radioChecked = index;
-      for (let i in this.polylineObj) {
-        if (number === i ) {
-          this.currentSelectPolyline = i; // 当前选中的车辆
-          this.polylineObj[i].setOptions({
-            zIndex: 999,
-            strokeWeight: 10,
-            strokeColor: '#41D459',
-          })
-        } else {
-          this.polylineObj[i].setOptions({
-            strokeWeight: 8,
-            zIndex: 50,
-            strokeColor: '#D3D3D3',
-          })
+      if (this.radioChecked === index) {
+        this.radioChecked = -1;
+        this.currentSelectPolyline = -1; // 当前选中的车辆
+        this.polylineObj[number].setOptions({
+          strokeWeight: 4,
+          zIndex: 50,
+          strokeColor: '#D3D3D3',
+          strokeStyle: 'dashed'
+        })
+      } else {
+        this.radioChecked = index;
+        for (let i in this.polylineObj) {
+          if (number === i ) {
+            this.currentSelectPolyline = i; // 当前选中的车辆
+            this.polylineObj[i].setOptions({
+              zIndex: 999,
+              strokeWeight: 10,
+              strokeColor: '#41D459',
+              strokeStyle: 'solid'
+            })
+          } else {
+            this.polylineObj[i].setOptions({
+              strokeWeight: 4,
+              zIndex: 50,
+              strokeColor: '#D3D3D3',
+              strokeStyle: 'dashed'
+            })
+          }
         }
       }
     },
@@ -674,18 +701,12 @@ export default {
       position: relative;
       .input-box {
         width: 100%;
-        height: calc(100% - 50px);
+        // height: calc(100% - 50px);
         overflow: hidden;
         .input-box-line {
           display: flex;
           padding-bottom: 12px;
           padding-right: 15px;
-          .title {
-            display: flex;
-            flex-direction: column;
-            color: #909399;
-            width: 20px;
-          }
         }
         .add-vehicle-number {
           width: 100%;
@@ -708,58 +729,77 @@ export default {
         height: 100%;
         width: 100%;
       }
-      .top_ul {
-        width: auto;
-        box-shadow: 0px 12px 14px 0px rgba(148,148,148,0.4);
-        position: absolute;
-        top: 15px;
-        left: 20px;
-        // margin-left: -25%;
-        display: flex;
+      .map_rrt_u2 {
+        position: absolute; right: 30px;
+        bottom: 30px;
+        margin-top: .2rem;
+        font-size: 26px;
+        background: #ffffff;
+        width: 78px;
         padding: 0 10px;
-        background-color: #FFFFFF;
-        >li {
-          height: 48px;
-          align-items: center;
-          display: flex;
-          /deep/ .el-radio {
-            margin-right: 0;
-          }
-          /deep/ .is-checked {
-            color: #333333;
-          }
-          .line {
-            color: #999999;
-            width: 1px;
-            height: 32px;
+        > li {
+          line-height: 70px;
+          text-align: center;
+          cursor: pointer;
+          border-bottom: 1px solid #F2F2F2;
+          > i {
+            margin-top: 0;
             display: inline-block;
-            background-color: #F2F2F2;
-            margin: 0 10px;
           }
-          &:last-child {
-            .line {
-              display: none;
-            }
+          color: #999999;
+          &:hover {
+            color: #0C70F8;
           }
         }
       }
+      .top_ul {
+        width: auto;
+        position: absolute;
+        top: 15px;
+        left: 20px;
+        display: flex;
+        >li {
+          height: 40px;
+          line-height: 40px;
+          padding: 0 10px;
+          border-radius:4px;
+          background:rgba(246,248,249,1);
+          border: 1px solid rgba(211,211,211,1);
+          cursor: pointer;
+          margin-right: 10px;
+        }
+        .is_active_li {
+          background:linear-gradient(90deg,rgba(8,106,234,1) 0%,rgba(4,102,222,1) 100%);
+          color: #FFFFFF;
+          border-color: transparent;
+        }
+      }
       .right_list {
+        z-index: 111;
         position: absolute;
         right: 0;
         top: 15px;
         width: 258px;
-        height: calc(100% - 30px);
+        height: 400px;
         background-color: #FFFFFF;
         padding: 15px 10px 0 10px;
         color: #333333;
         box-shadow: 0px 12px 14px 0px rgba(148,148,148,0.4);
+        
         .top_content {
           position: relative;
           >p {
             display: flex;
             align-items: center;
             margin-bottom: 5px;
+            >span {
+              width: calc(100% - 18px);
+              overflow: hidden;
+              white-space: nowrap;
+              text-overflow: ellipsis;
+            }
             i {
+              overflow: hidden;
               margin-right: 5px;
             }
           }
@@ -780,6 +820,7 @@ export default {
         }
         .result_ul {
           height: calc(100% - 60px);
+          padding-bottom: 20px;
           li {
             margin-bottom: 10px;
             &:last-child {
@@ -995,7 +1036,6 @@ export default {
 }
 </style>
 
-
 <style lang="scss">
 #mapContainer {
   .is_checked {
@@ -1062,22 +1102,22 @@ export default {
       border-left: none;
     }
   }
-  .el-date-editor {
-    .el-input__inner {
-      padding-left: 15px;
-    }
-    .el-input__prefix {right: 5px;left: auto;}
-  }
+  // .el-date-editor {
+  //   .el-input__inner {
+  //     padding-left: 15px;
+  //   }
+  //   // .el-input__prefix {right: 5px;left: auto;}
+  // }
 }
 .the-left-search {
   .btn-box {
     width: 100%;
     height: 50px;
     line-height: 50px;
-    text-align: center;
-    position: fixed;
-    bottom: 15px;
-    left: 0;
+    // text-align: center;
+    // position: fixed;
+    // bottom: 15px;
+    // left: 0;
     .el-button {
       width: 110px;height: 40px;
     }
