@@ -20,7 +20,7 @@ import '@/utils/method.js';
 import '@/utils/antv.shape.js';
 // 混入
 import '@/utils/mixins.js';
-import '@/utils/extendBig.js';
+// import '@/utils/extendBig.js';
 import store from '@/store/store.js'
 
 import vuePicturePreview from 'vue-picture-preview';
