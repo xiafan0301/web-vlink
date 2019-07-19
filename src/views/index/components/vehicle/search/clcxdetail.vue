@@ -88,7 +88,7 @@
             <div v-if="snapObj.videoPath">
             <video id="capVideo"
               :src="snapObj.videoPath"
-              class="spimg"
+              class="video"
               autoplay
             ></video>
             <div class="play_btn" @click="videoTap" v-show="!playing">
@@ -137,12 +137,12 @@
           <swiper :options="swiperOption" ref="mySwiper">
             <!-- slides -->
             <swiper-slide v-for="(item, index) in strucInfoList" :key="item.id">
-              <div
+              <div style="width:0.88rem; height:0.88rem;"
                 class="swiper_img_item"
                 :class="{'active': index === curImgIndex}"
                 @click="imgListTap(item, index)"
               >
-                <img style="width: 100%; height: 100%; min-height:0.88rem;" :src="item.subStoragePath" >
+                <img style="width: 100%; height: 100%; " :src="item.subStoragePath" >
                 <!-- <div class="vl_jfo_sim" v-show="showSim">
                   <i
                     class="vl_icon vl_icon_retrieval_05"
@@ -599,6 +599,9 @@ p.flexDiv{
   box-shadow: 0 0 0 !important;
 }
 .bkt {
+  div{
+    height: 100%;
+  }
   background: #eeeeee;
   // width: 40rem;
   // height: 40rem;
@@ -610,6 +613,14 @@ p.flexDiv{
   .spimg {
     width: 100%;
     height: auto;
+    max-height: 100%;
+    display: block;
+    vertical-align: middle;
+    align-items: center;
+  }
+  .video{
+     width: 100%;
+    height: 100%;
     max-height: 100%;
     display: block;
     vertical-align: middle;
