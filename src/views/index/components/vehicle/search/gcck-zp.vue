@@ -47,7 +47,7 @@
               <el-input placeholder="请输入车牌号" style="width: 200px;" v-model="formInline.cp">
                 <el-select style="width: 80px;" v-model="formInline.cpp" slot="prepend" placeholder="归属">
                   <el-option v-for="(item, index) in cppList" :label="item.enumValue" :key="'afawe-list-' + index" :value="item.enumValue"></el-option>
-                  <el-option :label="'不选'" :value="''"></el-option>
+                  <el-option :label="''" :value="''"></el-option>
                 </el-select>
               </el-input>
             </el-form-item>
@@ -123,7 +123,7 @@ export default {
         lb: '',
         lx: '',
         no: false,
-        cpp: '湘',
+        cpp: '',
         cp: ''
       },
       searchLoading: false,

@@ -33,7 +33,7 @@
           <el-form-item label="抓拍区域：" label-width="80px">
             <el-radio-group v-model="searchForm.type" @change="areaTypeChanged">
               <el-radio :label="1">列表选择</el-radio>
-              <el-radio :label="2" @click="alert(1)">地图选择</el-radio>
+              <el-radio :label="2">地图选择</el-radio>
             </el-radio-group>
           </el-form-item>
             <el-form-item v-show="searchForm.type === 1">
@@ -55,6 +55,14 @@
                 </el-option-group>
               </el-select>
             </el-form-item>
+
+            <!-- <el-form-item>
+              <el-radio-group v-model="searchForm.type2" @change="areaTypeChanged2">
+                <el-radio style="margin-left: 20px;" :label="1">从图片提取</el-radio>
+                <el-radio style="margin-left: 20px;" :label="2">自定义特征</el-radio>
+              </el-radio-group>
+            </el-form-item> -->
+
             <el-form-item v-show="searchForm.type === 1">
               <el-select style="width: 100%;" v-model="searchForm.sex" placeholder="选择性别">
                 <el-option :label="'不限'" :value="'不限'"></el-option>
@@ -171,7 +179,8 @@ export default {
       seData:null,
       searchForm: {
         time: [new Date(new Date().getTime() - 2 * 24 * 60 * 60 * 1000), new Date()],
-        type: 1, // 列表选择 地图选择
+        type: 1, // 1列表选择 2地图选择
+        type2: 1, // 1图片  2自定义
         area: [],
         sex: '',
         age: '',
@@ -282,17 +291,9 @@ export default {
         this.openMap = !this.openMap;
       }
     },
+    areaTypeChanged2 (val) {
+    },
     searchSubmit (pageNum) {
-      /* if (this.searchForm.time[0].getTime() > this.searchForm.time[1].getTime()) {
-        if (document.querySelector('.el-message')) {
-        }
-        this.$message({
-          message: '恭喜你，这是一条成功消息',
-          type: 'warning',
-          duration: 0
-        });
-        return false;
-      } */
       if (pageNum > 0) {
         this.pagination.pageNum = pageNum;
       }

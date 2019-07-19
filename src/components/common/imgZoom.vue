@@ -31,19 +31,6 @@ export default {
       $('#imgZoomMask').hide();
       $('#imgZoomImg').fadeOut().remove();
     });
-    $(document).on("mousewheel", function(e, d) {
-      //d 1 上 -1 下
-      if (d === 1) {
-          var width = $("#imgZoomImg").width();
-          var height = $("#imgZoomImg").height();
-          $("#imgZoomImg").css({ "width": width * 1.2, "height": height * 1.2 });
-      }
-      if (d === -1) {
-          var width = $("#imgZoomImg").width();
-          var height = $("#imgZoomImg").height();
-          $("#imgZoomImg").css({ "width": width / 1.2, "height": height / 1.2 });
-      }
-    });
     $(document).keyup(function (event) {
       if (event && (event.keyCode === 27 || event.keyCode === 96)) {
         $('#imgZoomMask').hide();
@@ -100,7 +87,36 @@ export default {
         $("body").append(dom);
         $("#imgZoomImg").dragging({
             move: "both", //拖动方向，x y both
+            direction:'all',
             randomPosition: false //初始位置是否随机
+        });
+        $("#imgZoomImg").on("mousewheel", function(e, d) {
+          //d 1 上 -1 下
+          let iFex = 1.1, iFex2 = 1.05;
+          if (d === 1) {
+            let nI = $('#imgZoomImg');
+            let iT = Number(nI.css('top').replace(/px/g, '')), 
+              iL = Number(nI.css('left').replace(/px/g, '')), 
+              width = nI.width(), height = nI.height();
+            $("#imgZoomImg").css({
+              top: iT / iFex2 + 'px',
+              left: iL / iFex2 + 'px',
+              width: width * iFex,
+              height: height * iFex
+            });
+          }
+          if (d === -1) {
+            let nI = $('#imgZoomImg');
+            let iT = Number(nI.css('top').replace(/px/g, '')), 
+              iL = Number(nI.css('left').replace(/px/g, '')), 
+              width = nI.width(), height = nI.height();
+            $("#imgZoomImg").css({
+              top: iT * iFex2 + 'px',
+              left: iL * iFex2 + 'px',
+              width: width / iFex,
+              height: height / iFex
+            });
+          }
         });
       }
     }
