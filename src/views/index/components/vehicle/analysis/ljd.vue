@@ -61,7 +61,7 @@
               </el-select>
             </el-input>
           </el-form-item>
-          <el-form-item prop="input4" >
+          <!-- <el-form-item prop="input4" >
             <el-row :gutter="5">
               <el-col :span="22">
                 <div>
@@ -76,7 +76,6 @@
             </el-row>
           </el-form-item>
           <el-form-item label="抓拍区域：" label-width="72px" prop="input5">
-            <!-- <el-radio-group v-model="input5" @change="changeTab"> -->
             <el-radio-group v-model="ruleForm.input5" @change="changeTab">
                <el-row :gutter="10">
                 <el-col :span="12">
@@ -108,7 +107,7 @@
           <el-form-item v-if="ruleForm.input5=='2'" >
             <el-input  v-model="selectValue" :disabled="true">
             </el-input>
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item>
             <el-row :gutter="10">
               <el-col :span="12">
@@ -146,7 +145,7 @@
         <mapselect @selectMap="mapPoint" @closeMap="hideMap" :allPoints="allDevice" :allBayonets="allBayonet"></mapselect>
     </el-dialog> -->
     <!-- D设备 B卡口  这里是设备和卡口 -->
-    <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div>
+    <!-- <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div> -->
   </div>
 </template>
 <script>
@@ -279,34 +278,34 @@ export default {
     // hideMap(){
     //   this.dialogVisible=false
     // },
-    mapPoint(data){
-      let v = data.deviceList;
-      let p = data.bayonetList;
-      this.selectDevice=[]
-      this.selectBayonet=[]
-      //返回有效点集合
-      if(v && v.length>0){
-        v.forEach(element => {
-          this.selectDevice.push(element.uid)
-        });
-      }
-      if(p && p.length>0){
-        p.forEach(element => {
-          this.selectBayonet.push(element.uid)
-        });
-      }
-      if(p.length==0 && v.length==0){
-        if(!document.querySelector('.el-message--info')){
-           this.$message.info("选择的区域没有设备，请重新选择区域");
-        }
-        return
-      }
-      this.selectValue="已选设备"+(this.selectDevice.length+this.selectBayonet.length)+"个"
-      //this.selectDevice=v
+    // mapPoint(data){
+    //   let v = data.deviceList;
+    //   let p = data.bayonetList;
+    //   this.selectDevice=[]
+    //   this.selectBayonet=[]
+    //   //返回有效点集合
+    //   if(v && v.length>0){
+    //     v.forEach(element => {
+    //       this.selectDevice.push(element.uid)
+    //     });
+    //   }
+    //   if(p && p.length>0){
+    //     p.forEach(element => {
+    //       this.selectBayonet.push(element.uid)
+    //     });
+    //   }
+    //   if(p.length==0 && v.length==0){
+    //     if(!document.querySelector('.el-message--info')){
+    //        this.$message.info("选择的区域没有设备，请重新选择区域");
+    //     }
+    //     return
+    //   }
+    //   this.selectValue="已选设备"+(this.selectDevice.length+this.selectBayonet.length)+"个"
+    //   //this.selectDevice=v
 
-      // console.log(this.selectDevice);
+    //   // console.log(this.selectDevice);
       
-    },
+    // },
     changeTab(v) {
       //console.log(v);
       // if (v == "2") {
@@ -324,16 +323,16 @@ export default {
         startTime:this.ruleForm.data1+" 00:00:00",
         endTime:this.ruleForm.data2+" 23:59:59",
         //shotTime:this.ruleForm.data1[0]+"_"+this.ruleForm.data1[1],
-        minSnapNum: this.ruleForm.input4 || 0,
+        // minSnapNum: this.ruleForm.input4 || 0,
         plateNo: this.ruleForm.input3 ,
       }
-      if(this.ruleForm.input5==1 && this.ruleForm.value1.length!=0){
-        pg.areaIds=this.ruleForm.value1.join(",")
-      }
-      if(this.ruleForm.input5==2){
-         pg.deviceIds=this.selectDevice.join(",")
-         pg.bayonetIds=this.selectBayonet.join(",")
-      }
+      // if(this.ruleForm.input5==1 && this.ruleForm.value1.length!=0){
+      //   pg.areaIds=this.ruleForm.value1.join(",")
+      // }
+      // if(this.ruleForm.input5==2){
+      //    pg.deviceIds=this.selectDevice.join(",")
+      //    pg.bayonetIds=this.selectBayonet.join(",")
+      // }
       
       if(!result){
         if(!document.querySelector('.el-message--info')){
