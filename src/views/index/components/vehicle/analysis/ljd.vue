@@ -17,7 +17,29 @@
           label-width="0px"
           class="demo-ruleForm"
         >
-          <el-form-item class="firstItem" prop="data1">
+        <el-form-item  prop="data1">
+            <el-date-picker
+              v-model="ruleForm.data1"
+              type="date"
+              placeholder="开始时间"
+              :picker-options="pickerOptions"
+              class="full vl_date"
+              :clearable="false"
+              value-format="yyyy-MM-dd"
+            ></el-date-picker>
+          </el-form-item>
+          <el-form-item  prop="data2">
+            <el-date-picker
+              v-model="ruleForm.data2"
+              :clearable="false"
+              type="date"
+              :picker-options="pickerOptions"
+              placeholder="结束时间"
+              class="full vl_date vl_date_end"
+              value-format="yyyy-MM-dd"
+            ></el-date-picker>
+          </el-form-item>
+          <!-- <el-form-item class="firstItem" prop="data1">
             <el-date-picker
           v-model="ruleForm.data1"
           type="daterange"
@@ -29,7 +51,7 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期">
         </el-date-picker>
-          </el-form-item>
+          </el-form-item> -->
 
           <el-form-item prop="input3">
             <p class="carCold">车牌：</p>
@@ -153,6 +175,7 @@ export default {
       hideleft: false,
       ruleForm: {
         data1:null,
+        data2:null,
         input3: null,
         input4: 3,
         input5: "1",
@@ -237,7 +260,8 @@ export default {
       let _s = new Date(curDate - curS).getFullYear() +
         "-" + _sm + "-" +_sd;
       let _e = date.getFullYear() + "-" + _em + "-" + _ed;
-      this.ruleForm.data1 = [_s, _e]
+      this.ruleForm.data1 = _s
+      this.ruleForm.data2 =  _e
     },
     hideResult() {
       this.reselt = false;
@@ -294,11 +318,11 @@ export default {
     submitForm(v) {
       let isP=/([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})/
       let  result = isP.test(this.ruleForm.input3);
-      if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data1.length>0 && this.ruleForm.input3){
+      if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data2 && this.ruleForm.input3){
       let pg={
         //shotTime:+"_"+this.ruleForm.data1[1]+" 23:59:59",
-        startTime:this.ruleForm.data1[0]+" 00:00:00",
-        endTime:this.ruleForm.data1[1]+" 23:59:59",
+        startTime:this.ruleForm.data1+" 00:00:00",
+        endTime:this.ruleForm.data2+" 23:59:59",
         //shotTime:this.ruleForm.data1[0]+"_"+this.ruleForm.data1[1],
         minSnapNum: this.ruleForm.input4 || 0,
         plateNo: this.ruleForm.input3 ,

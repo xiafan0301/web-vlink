@@ -40,15 +40,37 @@
                   <span>点击上传图片</span>
                 </div>
               </el-upload>
-              <!-- <p @click="showHistoryPic">从上传记录中选择</p> -->
+              <p @click="showHistoryPic">从上传记录中选择</p>
               <div v-show="curImageUrl" class="del_icon">
                 <i class="el-icon-delete" @click="delPic"></i>
               </div>
             </div>
           </el-form-item>
-          <el-form-item prop="data1">
+          <el-form-item  prop="data1">
             <el-date-picker
               v-model="ruleForm.data1"
+              type="date"
+              :clearable="false"
+              placeholder="开始时间"
+              :picker-options="pickerOptions"
+              class="full vl_date"
+              value-format="yyyy-MM-dd"
+            ></el-date-picker>
+          </el-form-item>
+          <el-form-item  prop="data2">
+            <el-date-picker
+              v-model="ruleForm.data2"
+              type="date"
+              :clearable="false"
+              :picker-options="pickerOptions"
+              placeholder="结束时间"
+              class="full vl_date vl_date_end"
+              value-format="yyyy-MM-dd"
+            ></el-date-picker>
+          </el-form-item>
+          <!-- <el-form-item prop="data2">
+            <el-date-picker
+              v-model="ruleForm.data2"
               type="daterange"
               class="full vl_date"
               value-format="yyyy-MM-dd"
@@ -58,7 +80,7 @@
               start-placeholder="开始日期"
               end-placeholder="结束日期"
             ></el-date-picker>
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item prop="minFootholdTimes" class="firstItem">
             <el-row :gutter="5">
               <el-col :span="22">
@@ -210,6 +232,37 @@
         <el-button type="primary" @click="chooseOk">确 定</el-button>
       </span>
     </el-dialog>
+
+    
+    <!--上传记录弹窗-->
+    <el-dialog
+      :visible.sync="historyPicDialog"
+      class="history-pic-dialog"
+      :close-on-click-modal="false"
+      top="4vh"
+      title="最近上传的图片"
+    >
+      <div style="text-align: center;font-size: 20px;" v-if="loadingHis">
+        <i class="el-icon-loading"></i>
+      </div>
+      <vue-scroll class="his-pic-box" v-else-if="historyPicList.length">
+        <div
+          class="his-pic-item"
+          :class="{'active': item.checked}"
+          v-for="item in historyPicList"
+          :key="item.uid"
+          @click="chooseHisPic(item)"
+        >
+          <img :src="item.path" alt>
+        </div>
+        <div style="clear: both;"></div>
+      </vue-scroll>
+      <p v-else>暂无历史记录</p>
+      <div slot="footer">
+        <el-button @click="historyPicDialog = false">取消</el-button>
+        <el-button type="primary" @click="addHisToImg" :disabled="choosedHisPic.length === 0">确认</el-button>
+      </div>
+    </el-dialog>
 <!-- 抓拍信息 -->
      
     <portraitDetail :open="showDetail" @closeDialog="onCloseDetail" :detailData="deData" :scrollData="seData" :showItem="true" ></portraitDetail>
@@ -222,7 +275,8 @@ import flvplayer from '@/components/common/flvplayer.vue';
 import {
   getVehicleShot,
   getAllDevice,
-  JtcPOSTAppendixInfo,getFoothold
+  JtcPUTAppendixsOrder,
+  JtcPOSTAppendixInfo,getFoothold,JtcGETAppendixInfoList
 } from "@/views/index/api/api.judge.js";
 import { getAllBayonetList } from "@/views/index/api/api.base.js";
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
@@ -290,6 +344,7 @@ export default {
       hideleft: false,
       ruleForm: {
         data1: null,
+        data2: null,
         minFootholdTimes: 3,
         input5: "1",
         value1: null
@@ -321,6 +376,11 @@ export default {
     // this.getAllDevice(); //查询所有的设备
     // this.getAllBayonetList(); //查询所有的卡口
   },
+   computed: {
+    choosedHisPic() {
+      return this.historyPicList.filter(x => x.checked);
+    }
+  },
   methods: {
     mapZoomSet(val) {
       if (this.amap) {
@@ -328,8 +388,8 @@ export default {
       }
     },
     resemt(){
-      if (this.map) {
-          this.map.setZoomAndCenter(14, mapXupuxian.center);
+      if (this.amap) {
+          this.amap.setZoomAndCenter(14, mapXupuxian.center);
         }
       
     },
@@ -345,7 +405,8 @@ export default {
       let _s = new Date(curDate - curS).getFullYear() +
         "-" + _sm + "-" +_sd;
       let _e = date.getFullYear() + "-" + _em + "-" + _ed;
-      this.ruleForm.data1 = [_s, _s]
+      this.ruleForm.data1 = _s
+      this.ruleForm.data2 = _s
     },
     /**
      * 弹框地图初始化
@@ -478,12 +539,12 @@ export default {
       if (
         this.ruleForm &&
         this.ruleForm.data1 &&
-        this.ruleForm.data1.length > 0 &&
+        this.ruleForm.data2  &&
         this.curImageUrl
       ) {
         let pg = {
-          startDate: this.ruleForm.data1[0] + " 00:00:00",
-          endDate: this.ruleForm.data1[1] + " 23:59:59",
+          startDate: this.ruleForm.data1 + " 00:00:00",
+          endDate: this.ruleForm.data2 + " 23:59:59",
           minFootholdTimes: this.ruleForm.minFootholdTimes || 0,
         };
         if (this.ruleForm.input5 == 1 && this.ruleForm.value1.length != 0) {
@@ -597,19 +658,21 @@ export default {
           if (!res.data || res.data.length === 0) {
             this.$message.info("抱歉，没有找到匹配结果");
             this.amap.clearMap();
+            this.chooseData=[]
+            this.evData=[]
             //this.searching = false;
             return false;
           }else{
             for(let i=0; i<res.data.length;i++){
               this.activeChoose.push(i)
             }
-            
+             this.chooseData=res.data
           }
           // this.evData = res.data.map(x => {
           //   x.checked = false;
           //   return x;
           // });
-          this.chooseData=res.data
+         
           this.amap.clearMap();
           //this.evData.sort(this.compare("shotNum"));
           //this.drawMarkers(this.evData);
@@ -797,6 +860,48 @@ export default {
       //上传失败
       this.uploading = false;
       this.$message.error("上传失败");
+    },
+     //选择最近上传的图片
+    chooseHisPic(item) {
+      this.historyPicList.forEach(x => {
+        x.checked = false;
+      });
+      item.checked = true;
+    },
+    //获取上传记录
+    showHistoryPic() {
+      this.loadingHis = true;
+      this.historyPicDialog = true;
+      let params = {
+        userId: this.$store.state.loginUser.uid,
+        fileType: 1
+      };
+      JtcGETAppendixInfoList(params)
+        .then(res => {
+          if (res) {
+            this.loadingHis = false;
+            res.data.forEach(x => (x.checked = false));
+            this.historyPicList = res.data;
+          }
+        })
+        .catch(() => {
+          this.historyPicDialog = false;
+        });
+    },
+    //从历史上传图片中上传
+    addHisToImg() {
+      this.historyPicDialog = false;
+      let _ids = [];
+      this.choosedHisPic.forEach(x => {
+        _ids.push(x.uid);
+        this.curImageUrl = x.path;
+        this.disab = false;
+        this.imgData = x;
+      });
+      let _obj = {
+        appendixInfoIds: _ids.join(",")
+      };
+      JtcPUTAppendixsOrder(_obj);
     },
     delPic() {
       //删除图片
@@ -1251,5 +1356,46 @@ export default {
   .el-form-item__label{
   padding-right: 0px;
 }
+.history-pic-dialog {
+    .el-dialog {
+      max-width: 12.6rem;
+      width: 100% !important;
+    }
+    .el-dialog__title {
+      font-size: 0.16rem;
+      color: #333333;
+    }
+    .el-dialog__body {
+      padding: 0 0.76rem 0.3rem;
+    }
+    .his-pic-box {
+      width: 100%;
+      height: 4.6rem !important;
+      .his-pic-item {
+        float: left;
+        width: 1.38rem;
+        height: 1.38rem;
+        border: 0.02rem solid #ffffff;
+        margin-right: 0.2rem;
+        margin-bottom: 0.2rem;
+        cursor: pointer;
+        img {
+          width: 100%;
+          height: 100%;
+        }
+      }
+      .active {
+        border-color: #0c70f8;
+      }
+    }
+    .el-dialog__footer {
+      button {
+        width: 1.4rem !important;
+        height: 0.4rem;
+        line-height: 0.4rem;
+        padding: 0;
+      }
+    }
+  }
 }
 </style>

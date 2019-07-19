@@ -3,13 +3,26 @@
     <div class="vc_gcck_bd" is="vehicleBreadcrumb" :oData="[{name: '特征搜人'}]"></div>
     <div class="rlcx_main clearfix">
       <div class="rlcx_l">
-        <el-form ref="form" class="pt_rlcx_fm" :model="searchForm" size="small">
+        <el-form ref="form" class="pt_rlcx_fm" :model="searchForm">
           <el-form-item>
             <el-date-picker
               class="vl_date"
               style="width: 240px;"
-              v-model="searchForm.time"
-              type="daterange"
+              v-model="searchForm.time[0]"
+              type="date"
+              :editable="false" :clearable="false"
+              :picker-options="pickerOptions"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item>
+            <el-date-picker
+              class="vl_date vl_date_end"
+              style="width: 240px;"
+              v-model="searchForm.time[1]"
+              type="date"
               :editable="false" :clearable="false"
               :picker-options="pickerOptions"
               range-separator="至"
@@ -24,7 +37,11 @@
             </el-radio-group>
           </el-form-item>
             <el-form-item v-show="searchForm.type === 1">
-              <el-select style="width: 100%;" v-model="searchForm.area" multiple collapse-tags placeholder="请选择区域" class="full">
+              <el-select style="width: 100%;" @change="handleCheckedCitiesChange" v-model="searchForm.area" multiple collapse-tags placeholder="请选择区域" class="full">
+                <!-- <el-option label="全部区域" value="all"></el-option> -->
+                <el-checkbox style="margin: 5px 0 5px 20px" :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">
+                  全部区域
+                </el-checkbox>
                 <el-option-group
                   v-for="group in areaList"
                   :key="group.areaName"
@@ -138,8 +155,7 @@ import noResult from '@/components/common/noResult.vue';
 import { mapXupuxian } from "@/config/config.js";
 import vehicleBreadcrumb from './breadcrumb.vue';
 import mapSelector from '@/components/common/mapSelector.vue';
-import {getFaceRetrieval, getFaceRetrievalPerson} from '../../api/api.judge.js';
-import { getDeviceByBayonetUids } from "@/views/index/api/api.base.js";
+import {getFaceRetrievalPerson} from '../../api/api.judge.js';
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import {formatDate} from '@/utils/util.js';
 import portraitDetail from '@/components/common/portraitDetail.vue';
@@ -147,8 +163,11 @@ export default {
   components: {vehicleBreadcrumb, mapSelector,portraitDetail, noResult},
   data () {
     return {
+      checkAll: true,
+      isIndeterminate: false,
+
       showDetail:false,
-       deData:null,
+      deData:null,
       seData:null,
       searchForm: {
         time: [new Date(new Date().getTime() - 2 * 24 * 60 * 60 * 1000), new Date()],
@@ -189,6 +208,16 @@ export default {
     this.getMapGETmonitorList();
   },
   methods: {
+    handleCheckAllChange (val) {
+      this.searchForm.area = val ? this.areaSData : [];
+      this.isIndeterminate = false;
+    },
+    handleCheckedCitiesChange(value) {
+      let checkedCount = value.length;
+      this.checkAll = checkedCount === this.areaSData.length;
+      this.isIndeterminate = checkedCount > 0 && checkedCount < this.areaSData.length;
+    },
+
     nextData(){
       // console.log(3232131);
       
@@ -254,6 +283,16 @@ export default {
       }
     },
     searchSubmit () {
+      /* if (this.searchForm.time[0].getTime() > this.searchForm.time[1].getTime()) {
+        if (document.querySelector('.el-message')) {
+        }
+        this.$message({
+          message: '恭喜你，这是一条成功消息',
+          type: 'warning',
+          duration: 0
+        });
+        return false;
+      } */
       this.searchLoading = true;
       let params = {
         where: {

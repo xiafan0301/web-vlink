@@ -32,7 +32,7 @@
                 <!--区域选择-->
                 <div class="search_line_ts">
                   <div class="title">
-                    <span class="red_star">抓拍区域:</span>
+                    <span class="">抓拍区域:</span>
                     <span>
                     <i class="choose_btn el-icon-location-outline" @click="setFitV" :class="{'not-active': !searchData.area}"></i>
                     <i class="choose_btn el-icon-delete" @click="delDialog = true"></i>
@@ -49,28 +49,31 @@
                   </div>
                 </div>
                 <div class="search_line">
-                  <span class="time">开始</span>
+                  <!--<span class="time">从</span>-->
                   <el-date-picker
                           v-model="searchData.startTime"
-                          style="width: 212px;"
+                          style="width: 100%;"
+                          class="vl_date"
                           :picker-options="pickerOptions"
                           type="datetime"
                           placeholder="选择日期时间">
                   </el-date-picker>
                 </div>
-                <p class="red_star"></p>
+                <!--<p class="red_star"></p>-->
                 <div class="search_line">
-                  <span class="time">结束</span>
+                  <!--<span class="time">至</span>-->
                   <el-date-picker
-                          style="width: 212px;"
+                          style="width: 100%;"
+                          class="vl_date vl_date_end"
                           :picker-options="pickerOptions1"
                           v-model="searchData.endTime"
                           type="datetime"
+                          @change="chooseEndTime"
                           placeholder="选择日期时间">
                   </el-date-picker>
                 </div>
                 <div class="search_line">
-                  <span class="red_star">频次：期间不少于 <el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 200)value = 200" style="width: 65px;" v-model="searchData.minTimes"></el-input> 次</span>
+                  <span class="">频次：期间不少于 <el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 200)value = 200;" style="width: 65px;" v-model="searchData.minTimes"></el-input> 次</span>
                 </div>
                 <!--按钮-->
                 <div class="search_btn">
@@ -125,7 +128,7 @@
           area: null, // 区域
           startTime: '',
           endTime: '',
-          minTimes: 5// 最少次数
+          minTimes: 3// 最少次数
         },
         pickerOptions: {
           disabledDate (time) {
@@ -175,6 +178,11 @@
 
     },
     methods: {
+      chooseEndTime (e) {
+        if (new Date(e).getTime() < new Date(this.searchData.startTime).getTime()) {
+          this.$message.info('结束时间必须大于开始时间才会有结果')
+        }
+      },
       hideLeft() {
         this.hideleft = !this.hideleft;
       },
@@ -555,9 +563,9 @@
         this.searchData.area = null;
       },
       tcDiscuss () {
-        if (!this.searchData.minTimes) {
+        if (!this.searchData.minTimes || this.searchData.minTimes < 3) {
           if (!document.querySelector('.el-message--info')) {
-            this.$message.info('请输入频次');
+            this.$message.info('频次必须是3-200的数字');
           }
           return false;
         }
@@ -575,12 +583,12 @@
         }
         let sT = formatDate(this.searchData.startTime, 'yyyy-MM-dd HH:mm:ss');
         let eT = formatDate(this.searchData.endTime, 'yyyy-MM-dd HH:mm:ss');
-        let query = {'where': {}};
-        query.where.startTime = sT;
-        query.where.endTime = eT;
-        query.where.frequence = this.searchData.minTimes;
-        query.where['bayonetIds'] = this.pointData.filter(x => x.dataType === 1).map(y => {return y.uid}).join(',');
-        query.where['cameraIds'] = this.pointData.filter(x => x.dataType === 0).map(y => {return y.uid}).join(',');
+        let query = {};
+        query.startTime = sT;
+        query.endTime = eT;
+        query.frequence = this.searchData.minTimes;
+        query['bayonetIds'] = this.pointData.filter(x => x.dataType === 1).map(y => {return y.uid}).join(',');
+        query['cameraIds'] = this.pointData.filter(x => x.dataType === 0).map(y => {return y.uid}).join(',');
         this.$router.push({name: 'vehicle_search_qyph_jg', query: query})
       }
     }

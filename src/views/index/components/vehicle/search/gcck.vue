@@ -16,7 +16,6 @@
             <div class="gcck_ll_s">
               <el-input
                 placeholder="搜索设备"
-                size="small"
                 @keyup.enter.native="getTreeList1()"
                 v-model="searchVal1">
                 <i slot="suffix" @click="getTreeList1()" class="el-input__icon el-icon-search" style="font-size: 20px;"></i>
@@ -29,31 +28,36 @@
             </div>
           </div>
           <div v-show="showType === 2">
-            <div class="gcck_ll_s" style="height: 100px;">
-              <el-date-picker style="width: 236px;" size="small"
+            <div class="gcck_ll_s" style="height: 165px;">
+              <el-date-picker style="width: 236px;"
                 class="vl_date"
-                v-model="searchTime2"
-                type="daterange"
+                v-model="searchTime2[0]"
+                type="date"
                 align="left"
-                unlink-panels
                 :editable="false"
                 :clearable="false"
-                range-separator="至"
-                start-placeholder="开始日期"
                 @change="pickerChanged"
-                :picker-options="pickerOptions"
-                end-placeholder="结束日期">
+                :picker-options="pickerOptions">
+              </el-date-picker>
+              <el-date-picker style="width: 236px; margin-top: 10px"
+                class="vl_date vl_date_end"
+                v-model="searchTime2[1]"
+                type="date"
+                align="left"
+                :editable="false"
+                :clearable="false"
+                @change="pickerChanged"
+                :picker-options="pickerOptions">
               </el-date-picker>
               <el-input
                 style="margin-top: 10px"
                 placeholder="搜索设备"
-                size="small"
                 @keyup.enter.native="getTreeList2()"
                 v-model="searchVal2">
                 <i slot="suffix" @click="getTreeList2()" class="el-input__icon el-icon-search" style="font-size: 20px;"></i>
               </el-input>
             </div>
-            <div class="gcck_ll_l" style="padding-top: 100px;">
+            <div class="gcck_ll_l" style="padding-top: 165px;">
               <div>
                 <div is="dbTree" @selectItem="selectItem2" :likeKey="searchVal2" :doSearch="doSearch2"></div>
               </div>
@@ -212,6 +216,7 @@ export default {
       picListAll: [],
       zpDeviceIdsHis: '',
       zpBId: '',
+      jrZpIntval: null,
 
       picTotal: 0,
       picIndex: 1,
@@ -276,6 +281,7 @@ export default {
     },
     selectItem (type, item) {
       console.log(type, item);
+      this.jrZpIntvalFn();
       let ids = '';
       if (type === 1) { // deviceName
         this.videoTotal = 1;
@@ -288,10 +294,11 @@ export default {
           }
         ];
         ids = item.uid;
-        this.getDeviceSnapSum(ids);
-        this.getDeviceSnapPage(ids);
         this.zpDeviceIds = ids;
         this.zpBId = '';
+        this.getDeviceSnapSum(ids);
+        this.getDeviceSnapPage(ids);
+        this.jrZpIntvalFn(ids);
       } else if (type === 2) {
         getDeviceByBayonetUid({
           bayonetUid: item.uid
@@ -343,16 +350,29 @@ export default {
               });
               if (ids && ids.length > 0) { ids = ids.substring(0, ids.length - 1); }
               this.videoList = vList;
-              this.getDeviceSnapSum(ids);
-              this.getDeviceSnapPage(ids);
               this.zpDeviceIds = ids;
               this.zpBId = item.uid;
+              this.getDeviceSnapSum(ids);
+              this.getDeviceSnapPage(ids);
+              this.jrZpIntvalFn(ids);
             }
             // this.zpTotal = res.data[0].snapImagesCount;
             // this.zpList = res.data.slice(0, 10);
             // console.log(this.zpList);
           }
         });
+      }
+    },
+
+    jrZpIntvalFn (dId) {
+      if (this.jrZpIntval) {
+        window.clearInterval(this.jrZpIntval);
+      }
+      if (dId) {
+        this.jrZpIntval = window.setInterval(() => {
+          this.getDeviceSnapSum (dId);
+          this.getDeviceSnapPage (dId);
+        }, 10 * 1000);
       }
     },
 
@@ -543,6 +563,7 @@ export default {
     if (this.picAntoPlayInval) {
       window.clearInterval(this.picAntoPlayInval);
     }
+    this.jrZpIntvalFn();
   }
 }
 </script>

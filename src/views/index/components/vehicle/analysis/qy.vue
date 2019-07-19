@@ -41,7 +41,7 @@
                   <div class="search_item" v-for="(item, index) in searchData" :key="item.id">
                     <div class="search_line_ts">
                       <div class="title">
-                        <span class="red_star">抓拍区域:</span>
+                        <span class="">抓拍区域:</span>
                         <span>
                       <i class="choose_btn el-icon-location-outline" @click="setFitV(index)" :class="{'not-active': !item.area}"></i>
                       <i class="choose_btn el-icon-delete" @click="clearArea(index)"></i>
@@ -58,21 +58,23 @@
                       </div>
                     </div>
                     <div class="search_line">
-                      <span class="time">开始</span>
+                      <!--<span class="time">开始</span>-->
                       <el-date-picker
                               v-model="item.startTime"
-                              style="width: 212px;"
+                              style="width: 100%;"
+                              class="vl_date"
                               :picker-options="pickerOptions"
                               type="datetime"
                               value-format="timestamp"
                               placeholder="选择日期时间">
                       </el-date-picker>
                     </div>
-                    <p class="red_star"></p>
+                    <!--<p class="red_star"></p>-->
                     <div class="search_line">
-                      <span class="time">结束</span>
+                      <!--<span class="time">结束</span>-->
                       <el-date-picker
-                              style="width: 212px;"
+                              style="width: 100%;"
+                              class="vl_date vl_date_end"
                               :picker-options="pickerOptions1"
                               v-model="item.endTime"
                               value-format="timestamp"
@@ -255,7 +257,7 @@
         };
       },
       seacher(v) {
-        var placeSearch = new AMap.PlaceSearch({
+        var placeSearch = new window.AMap.PlaceSearch({
           // city 指定搜索所在城市，支持传入格式有：城市名、citycode和adcode
           city: "湖南"
         });
@@ -428,7 +430,7 @@
         this.pointData[this.curDrawIndex] = [];
         if(type!="AMap.Polyline"){
           this.mapTreeData.forEach(el=>{
-            let myLngLat=new AMap.LngLat(el.longitude,el.latitude);
+            let myLngLat=new window.AMap.LngLat(el.longitude,el.latitude);
             //  var isPointInRing = window.AMap.GeometryUtil.isPointInRing(myLngLat,obj.C.path);
             let isPointInRing = obj.contains(myLngLat);
             // console.log(marker.getPosition());
@@ -568,7 +570,6 @@
           case 'cut2' :
             this.mouseTool.circle({
               strokeColor: "#FA453A",
-              strokeOpacity: 1,
               strokeWeight: 1,
               strokeOpacity: 0.2,
               fillColor: '#FA453A',
