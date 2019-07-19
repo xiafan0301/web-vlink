@@ -23,7 +23,6 @@
                 type="date"
                 :picker-options="startDateOpt"
                 placeholder="开始时间"
-                @change="timeChange()"
                 :clearable="false">
             </el-date-picker>
             <!-- <el-date-picker
@@ -47,7 +46,6 @@
                 type="date"
                 :picker-options="endDateOpt"
                 placeholder="结束时间"
-                @change="timeChange('end')"
                 :clearable="false">
             </el-date-picker>
           </div>
@@ -1635,6 +1633,7 @@ export default {
   .search-btn {
     width: 232px;
     text-align: center;
+    padding-top: 10px;
     .el-button {
       width: 45%;
     }
