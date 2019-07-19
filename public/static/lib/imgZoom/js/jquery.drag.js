@@ -99,12 +99,12 @@ $.fn.extend({
 				}else{
 					return;
 				}
-				if(moveX < 0){
+				/* if(moveX < 0){
 					$this.css({"left":"0"});
 				}
 				if(moveX > (faWidth-thisWidth)){
 					$this.css({"left":faWidth-thisWidth});
-				}
+				} */
 				return moveX;
 			}
 			
@@ -114,12 +114,12 @@ $.fn.extend({
 				}else{
 					return;
 				}
-				if(moveY < 0){
+				/* if(moveY < 0){
 					$this.css({"top":"0"});
 				}
 				if(moveY > (faHeight-thisHeight)){
 					$this.css({"top":faHeight-thisHeight});
-				}
+				} */
 				return moveY;
 			}
 
@@ -129,12 +129,12 @@ $.fn.extend({
 				}else{
 					return;
 				}
-				if(moveX < 0){
+				/* if(moveX < 0){
 					$this.css({"left":"0"});
 				}
 				if(moveY < 0){
 					$this.css({"top":"0"});
-				}
+				} */
 			}
 			if(movePosition.toLowerCase() == "x"){
 				thisXMove();
