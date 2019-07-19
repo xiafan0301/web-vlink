@@ -9,36 +9,37 @@
     <div class="ccrc_content">
       <div class="ccrc_content_left">
         <div class="kaishi">
-          <span style="display: inline-block; width: 14px; margin-right: 4px; color: #999999">开 始</span>
           <el-date-picker
               v-model="value1"
               value-format="yyyy-MM-dd HH:mm:ss"
               :picker-options="pickerOptions"
-              style="width: 212px; vertical-align: top"
+              style="width: 230px; vertical-align: top"
+              class="full vl_date"
               type="datetime"
               placeholder="选择日期时间">
           </el-date-picker>
         </div>
         <div class="jiesu">
-          <span style="display: inline-block; width: 14px; margin-right: 4px; color: #999999">结 束</span>
           <el-date-picker
               v-model="value2"
               format="yyyy-MM-dd HH:mm:ss"
               :picker-options="pickerOptions1"
               value-format="yyyy-MM-dd HH:mm:ss"
-              style="width: 212px; vertical-align: top"
+              class="full vl_date vl_date_end"
+              style="width: 230px; vertical-align: top"
               type="datetime"
               placeholder="选择日期时间">
           </el-date-picker>
         </div>
         <div class="kakou">
-          <el-select v-model="lll" placeholder="请选择卡口" style="width: 230px" multiple collapse-tags>
-              <el-option
-                  v-for="item in kakou"
-                  :key="item.uid"
-                  :label="item.label"
-                  :value="item.uid">
-              </el-option>
+          <el-select v-model="lll" placeholder="请选择卡口" style="width: 230px" multiple collapse-tags @change="selchange">
+            <el-option key="全选" lable="全选" value="全选"  :class="{selected: showselected}"></el-option>
+            <el-option
+                v-for="item in kakou"
+                :key="item.uid"
+                :label="item.label"
+                :value="item.uid">
+            </el-option>
           </el-select>
 <!--          <div class="search_item" v-show="isShowSelectList">-->
 <!--            <vue-scroll>-->
@@ -216,6 +217,7 @@ export default {
         children: "children",
         label: "label"
       },
+      showselected: true
     }
   },
   created () {
@@ -227,6 +229,24 @@ export default {
     this.setDTime();
   },
   methods: {
+    selchange (val) {
+      console.log(val)
+      if (val.indexOf("全选") !== -1 && this.lll.length - 1 < this.kakou.length) {
+        this.showselected = true
+        this.lll = this.kakou.map((item)=> {
+          return item.uid
+        })
+      }else if (val.indexOf("全选") !== -1 && this.lll.length === this.kakou.length + 1) {
+        this.lll = []
+        this.showselected = false
+      }
+      if (this.lll.length !== this.kakou.length) {
+        console.log(23423523525)
+        this.showselected = false
+      }else {
+        this.showselected = true
+      }
+    },
     changval1 (val) {
       let time = val.replace(/-/g, '/');
       let time1 = new Date(time)

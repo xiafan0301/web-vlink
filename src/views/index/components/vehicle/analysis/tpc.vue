@@ -12,24 +12,24 @@
           <el-input v-model.trim="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" clearable></el-input>
         </div>
         <div class="kaishi">
-          <span style="display: inline-block; width: 14px; margin-right: 4px; color: #999999">开 始</span>
           <el-date-picker
               v-model="value1"
               value-format="timestamp"
               format="yyyy-MM-dd HH:mm:ss"
+              class="full vl_date"
               @change="changval1"
-              style="width: 212px; vertical-align: top"
+              style="width: 230px; vertical-align: top"
               type="datetime"
               placeholder="选择日期时间">
           </el-date-picker>
         </div>
         <div class="jiesu">
-          <span style="display: inline-block; width: 14px; margin-right: 4px; color: #999999">结 束</span>
           <el-date-picker
               v-model="value2"
               value-format="yyyy-MM-dd HH:mm:ss"
               format="yyyy-MM-dd HH:mm:ss"
-              style="width: 212px; vertical-align: top"
+              style="width: 230px; vertical-align: top"
+              class="full vl_date vl_date_end"
               type="datetime"
               :picker-options="pickerOptions"
               placeholder="选择日期时间">
