@@ -227,32 +227,20 @@
         </div>
       </div>
       <!-- 同行车辆分析 showType 8 -->
-      <div class="vc_rep_cl" id="report_showtype_8">
+      <!-- <div class="vc_rep_cl" id="report_showtype_8">
         <div>
           <h2>同行车辆分析</h2>
           <div>
             <el-table :data="txclList">
               <el-table-column label="序号" type="index" width="100"></el-table-column>
               <el-table-column label="车牌号码" prop="plateNo" show-overflow-tooltip></el-table-column>
-              <!-- <el-table-column label="号牌颜色" prop="plateColor" show-overflow-tooltip></el-table-column> -->
               <el-table-column label="车辆颜色" prop="vehicleColor" show-overflow-tooltip></el-table-column>
               <el-table-column label="车辆类型" prop="vehicleClass" show-overflow-tooltip></el-table-column>
               <el-table-column label="同行次数" prop="shotNum" show-overflow-tooltip></el-table-column>
-              <!--  <el-table-column
-                label="操作"
-                width="120">
-                <template slot-scope="scope">
-                  <el-button
-                    @click.native.prevent="cktxjlEvent(scope.$index, tableData)"
-                    type="text" size="small">
-                    查看同行记录
-                  </el-button>
-                </template>
-              </el-table-column> -->
             </el-table>
           </div>
         </div>
-      </div>
+      </div> -->
       <!-- 区域碰撞 showType 9 -->
       <!-- <div class="vc_rep_cl" id="report_showtype_9">
         <div>
