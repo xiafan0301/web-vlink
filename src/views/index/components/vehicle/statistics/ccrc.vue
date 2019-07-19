@@ -61,6 +61,24 @@
 <!--            </vue-scroll>-->
 <!--          </div>-->
         </div>
+        <div class="kakou">
+          <el-select
+              v-model="carType"
+              multiple
+              collapse-tags
+              class="width232"
+              clearable
+              placeholder="全部车辆类别"
+              style="width: 230px"
+          >
+            <el-option
+                v-for="item in vehicleClassOptions"
+                :key="item.enumField"
+                :label="item.enumValue"
+                :value="item.enumField"
+            ></el-option>
+          </el-select>
+        </div>
         <div class="cpai">
           <span style="display: inline-block; width: 42px;color: #999999">车牌：</span>
           <el-checkbox v-model="unvehicleFlag" style="float: right; margin-right: 3px"><span style="color: #999999;">排除</span></el-checkbox>
@@ -78,7 +96,7 @@
           </el-input>
         </div>
         <div style="padding-top: 10px">
-          <el-checkbox v-model="onlySurveillance"><span style="color: #999999">只查看布控库内车辆</span></el-checkbox>
+          <el-checkbox v-model="onlySurveillance"><span style="color: #999999">只查看初次入城记录</span></el-checkbox>
         </div>
         <div class="kakou">
           <el-button style="width: 110px" @click="reset">重置</el-button>
@@ -157,6 +175,7 @@ import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import { objDeepCopy, formatDate } from "@/utils/util.js";
 import { JfoGETCity } from '../../../api/api.judge.js';
 import { cityCode } from "@/utils/data.js";
+import { getGroupsByType } from "@/views/index/api/api.js";
 export default {
   data () {
     return {
@@ -217,7 +236,19 @@ export default {
         children: "children",
         label: "label"
       },
-      showselected: true
+      showselected: true,
+      vehicleClassOptions: [
+        // 车辆类别下拉
+        {
+          enumField: "无牌车",
+          enumValue: "无牌车"
+        },
+        {
+          enumField: "布控库车辆",
+          enumValue: "布控库车辆"
+        }
+      ],
+      carType: []
     }
   },
   created () {
@@ -227,6 +258,20 @@ export default {
   mounted() {
     this.getMonitorList()
     this.setDTime();
+    // 获取到车辆类别
+    getGroupsByType({ groupType: 9 }).then(res => {
+      if (res.data) {
+        this.vehicleClassOptions = [
+          ...this.vehicleClassOptions,
+          ...res.data.map(item => {
+            return {
+              enumField: item.groupName,
+              enumValue: item.groupName // uid
+            };
+          })
+        ];
+      }
+    });
   },
   methods: {
     selchange (val) {
