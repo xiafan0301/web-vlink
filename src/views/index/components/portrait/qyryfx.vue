@@ -153,7 +153,6 @@
                     :picker-options="startDateOptArr[index]"
                     placeholder="开始时间"
                     class="width232 vl_date"
-                    @change="timeChange(index)"
                   ></el-date-picker>
                 </div>
                 <div class="time-search">
@@ -166,7 +165,6 @@
                     default-time="23:59:59"
                     placeholder="结束时间"
                     class="width232 vl_date vl_date_end"
-                    @change="timeChange(index, 'end')"
                   ></el-date-picker>
                 </div>
               </div>
