@@ -37,7 +37,7 @@
           <li><span :class="{'vc_rep_mu_sed': showType === 5}" @click="changeShowType(5)">夜间活动规律</span></li>
           <li><span :class="{'vc_rep_mu_sed': showType === 6}" @click="changeShowType(6)">频繁出没分析</span></li>
           <li><span :class="{'vc_rep_mu_sed': showType === 7}" @click="changeShowType(7)">套牌车分析</span></li>
-          <li><span :class="{'vc_rep_mu_sed': showType === 8}" @click="changeShowType(8)">同行车辆分析</span></li>
+          <!-- <li><span :class="{'vc_rep_mu_sed': showType === 8}" @click="changeShowType(8)">同行车辆分析</span></li> -->
           <!-- <li><span :class="{'vc_rep_mu_sed': showType === 9}" @click="changeShowType(9)">区域碰撞</span></li> -->
         </ul>
       </div>
@@ -262,7 +262,7 @@
               </div>
             </div>
             <!-- 同行车辆分析 showType 8 -->
-            <div class="vc_rep_cl" id="report_showtype_8">
+            <!-- <div class="vc_rep_cl" id="report_showtype_8">
               <div>
                 <h2>同行车辆分析</h2>
                 <div>
@@ -287,7 +287,7 @@
                   </el-table>
                 </div>
               </div>
-            </div>
+            </div> -->
             <!-- 区域碰撞 showType 9 -->
             <!-- <div class="vc_rep_cl" id="report_showtype_9">
               <div>

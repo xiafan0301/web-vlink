@@ -98,7 +98,7 @@
           <el-form-item>
             <div style="text-align: center; padding-top: 10px;">
               <el-button @click="searchReset">&nbsp;&nbsp;重&nbsp;&nbsp;置&nbsp;&nbsp;</el-button>
-              <el-button type="primary" @click="searchSubmit" :loading="searchLoading"
+              <el-button type="primary" @click="searchSubmit(1)" :loading="searchLoading"
                 :disabled="(searchForm.type === 2 && dSum <= 0) || (!searchForm.area || searchForm.area.length <= 0)">&nbsp;&nbsp;确&nbsp;&nbsp;定&nbsp;&nbsp;</el-button>
             </div>
           </el-form-item>
@@ -282,7 +282,7 @@ export default {
         this.openMap = !this.openMap;
       }
     },
-    searchSubmit () {
+    searchSubmit (pageNum) {
       /* if (this.searchForm.time[0].getTime() > this.searchForm.time[1].getTime()) {
         if (document.querySelector('.el-message')) {
         }
@@ -293,6 +293,9 @@ export default {
         });
         return false;
       } */
+      if (pageNum > 0) {
+        this.pagination.pageNum = pageNum;
+      }
       this.searchLoading = true;
       let params = {
         where: {
