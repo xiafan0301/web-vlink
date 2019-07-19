@@ -343,7 +343,7 @@ export default {
     },
     updataB(){
       //console.log(88888888888);
-      //this.isNull=true
+      this.isNull=true
       this.tableData = [];
       this.resetForm()
      // this.submitForm()
