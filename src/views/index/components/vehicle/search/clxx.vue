@@ -444,6 +444,7 @@ export default {
   .search-btn {
     width: 232px;
     text-align: center;
+    padding-top: 10px;
     .el-button {
       width: 45%;
     }
