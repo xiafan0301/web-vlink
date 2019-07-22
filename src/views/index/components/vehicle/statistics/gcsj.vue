@@ -275,7 +275,7 @@ export default {
       this.charts.chart2 = chart;
     },
     drawChart3 () {
-      if (this.chartData3.length === 0) return;
+      // if (this.chartData3.length === 0) return;
       let _this = this, chart = null;
       if (this.charts.chart3) {
         this.charts.chart3.clear();
@@ -347,7 +347,7 @@ export default {
       this.charts.chart3 = chart;
     },
     drawChart4 () {
-      if (this.chartData4.length === 0) return;
+      // if (this.chartData4.length === 0) return;
       let chart = null;
       if (this.charts.chart4) {
         this.charts.chart4.clear();

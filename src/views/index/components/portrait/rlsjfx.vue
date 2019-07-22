@@ -359,7 +359,7 @@ export default {
     },
     // 画抓拍人脸数图表
     drawChart1 () {
-      if (this.chartData1.length === 0) return;
+      // if (this.chartData1.length === 0) return;
       let chart = null,_this = this;
       if (this.charts.chart1) {
         this.charts.chart1.clear();
@@ -429,7 +429,7 @@ export default {
     },
     // 画布控告警次数图表
     drawChart2 () {
-      if (this.chartData2.length === 0) return;
+      // if (this.chartData2.length === 0) return;
       let chart = null,_this = this;
       if (this.charts.chart2) {
         this.charts.chart2.clear();
