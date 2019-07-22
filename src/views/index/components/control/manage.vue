@@ -282,7 +282,7 @@ export default {
     getControlObjBySelect () {
       getControlObjBySelect({surveillanceStatus: this.manageForm.state}).then(res => {
         if (res) {
-          this.controlObjList = res.data;
+          this.controlObjList = res.data.filter(f => f.name);
         }
       })
     },
@@ -326,8 +326,6 @@ export default {
       for (let key in this.manageForm) {
         this.manageForm[key] = null;
       }
-      this.controlObjList = [];
-      this.facilityNameList = [];
       this.getControlList();
     },
     // 获取所有布控设备

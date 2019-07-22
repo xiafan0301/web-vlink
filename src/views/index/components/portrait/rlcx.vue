@@ -413,6 +413,18 @@ export default {
       },
       fnHqtz () {
         this.hqtzLoading = true;
+        this.uploadTZObj = {
+          sex: null,
+          age: null,
+          glasses: null,
+          hat: null,
+          mask: null,
+          hair: null,
+          upperType: null,
+          upperColor: null,
+          bottomType: null,
+          bottomColor: null
+        }
         getPicRecognize({
           bussType: 'person', // vehicle机动车、face人脸、person人体
           url: this.curImageUrl
@@ -431,6 +443,8 @@ export default {
               bottomColor: {active: false, value: jRes.data.bottomColor}
             }
           }
+          this.hqtzLoading = false;
+        }).catch(() => {
           this.hqtzLoading = false;
         })
       },
