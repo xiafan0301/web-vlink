@@ -52,7 +52,7 @@
                 </p>
                 <p class="tz" v-else>
                   <b>特征</b>
-                  <span>{{sturcDetail.sex+" "+(sturcDetail.age || "")+" "+ (sturcDetail.baby || "")+ " " + (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+ " " + (sturcDetail.bag || "")+ " " + (sturcDetail.bottomColor || "") +(sturcDetail.bottomType || "") + " "+(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")}}</span>
+                  <span>{{sturcDetail.sex+" "+(sturcDetail.age || "")+ " " + (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+" "+ (sturcDetail.baby || "")+ " " + (sturcDetail.bag || "") + " "+(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")+ " " + (sturcDetail.bottomColor || "") +(sturcDetail.bottomType || "")}}</span>
                 </p>
               </div>
               <div class="struc_cdi_line"></div>
