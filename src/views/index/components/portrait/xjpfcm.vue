@@ -156,8 +156,15 @@
             <!-- 频次搜索 -->
             <el-form-item prop="frequency">
               <div class="frequency">
-                频次不少于&nbsp;
-                <el-input v-model="searchData.frequency" placeholder></el-input>&nbsp;次
+                <ul class="frequency-input">
+                  <li class="input-name">
+                    <el-input placeholder="频次不少于" readonly v-model="searchData.frequencyName"></el-input>
+                  </li>
+                  <li class="input-value">
+                    <el-input v-model="searchData.frequency" placeholder></el-input>
+                  </li>
+                </ul>
+                <p class="another-value">次</p>
               </div>
             </el-form-item>
             <el-form-item>
@@ -241,7 +248,8 @@ export default {
         endTime: "",
         similarityName: "相似度",
         similarity: "85", // 相似度
-        frequency: "" //频次
+        frequency: "", //频次
+        frequencyName: "频次不少于"
       },
       rules: {
         taskName: [
@@ -1476,7 +1484,6 @@ export default {
         margin: 6px 0;
       }
       //相似度,频次,任务名称搜索
-      .frequency,
       .task-name {
         width: 232px;
       }
@@ -1509,6 +1516,32 @@ export default {
         .max-value {
           color: #333;
           line-height: 40px;
+        }
+      }
+      .frequency {
+        width: 232px;
+        display: flex;
+        .frequency-input {
+          display: flex;
+          border: 1px solid #dcdfe6;
+          width: 202px;
+          height: 40px;
+          border-radius: 4px;
+          &:hover,
+          &:focus {
+            border-color: #0c70f8;
+          }
+          .input-name {
+            width: 88px;
+          }
+          .input-value {
+            width: 112px;
+          }
+        }
+        .another-value {
+          color: #333;
+          line-height: 40px;
+          margin-left: 8px;
         }
       }
       .sd-opts {
@@ -1724,7 +1757,7 @@ export default {
     }
   }
   //相似度搜索
-  .similarity {
+  .similarity,.frequency {
     .el-input__inner {
       border: none;
       height: 38px;
@@ -1736,11 +1769,11 @@ export default {
     }
   }
   //频次
-  .frequency {
+  /* .frequency {
     .el-input {
       width: 126px;
     }
-  }
+  } */
   //车牌颜色
   .license-plate-color {
     .el-select {

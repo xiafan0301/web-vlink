@@ -15,6 +15,40 @@
       <!-- 搜索条件 -->
       <div class="info-left" v-show="videoMenuStatus">
         <vue-scroll>
+          <!-- 时间 -->
+          <div class="time-search date-comp">
+            <el-date-picker
+                class="vl_date"
+                v-model="searchData.startTime"
+                type="date"
+                :picker-options="startDateOpt"
+                placeholder="开始时间"
+                :clearable="false">
+            </el-date-picker>
+            <!-- <el-date-picker
+              class="vl_date"
+              v-model="searchData.time"
+              type="daterange"
+              range-separator="至"
+              value-format="yyyy-MM-dd"
+              format="yyyy-MM-dd"
+              :picker-options="pickerOptions"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              @change="dateChange"
+              :clearable="false"
+            ></el-date-picker> -->
+          </div>
+          <div class="time-search date-comp">
+            <el-date-picker
+                class="vl_date vl_date_end"
+                v-model="searchData.endTime"
+                type="date"
+                :picker-options="endDateOpt"
+                placeholder="结束时间"
+                :clearable="false">
+            </el-date-picker>
+          </div>
           <!-- 设备搜索 -->
           <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
           <div class="selected_device" @click="treeTabShow = true;">
@@ -89,42 +123,6 @@
                     </vue-scroll>
               </div>-->
             </div>
-          </div>
-          <!-- 时间 -->
-          <div class="time-search date-comp">
-            <el-date-picker
-                class="vl_date"
-                v-model="searchData.startTime"
-                type="date"
-                :picker-options="startDateOpt"
-                placeholder="开始时间"
-                @change="timeChange()"
-                :clearable="false">
-            </el-date-picker>
-            <!-- <el-date-picker
-              class="vl_date"
-              v-model="searchData.time"
-              type="daterange"
-              range-separator="至"
-              value-format="yyyy-MM-dd"
-              format="yyyy-MM-dd"
-              :picker-options="pickerOptions"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              @change="dateChange"
-              :clearable="false"
-            ></el-date-picker> -->
-          </div>
-          <div class="time-search date-comp">
-            <el-date-picker
-                class="vl_date vl_date_end"
-                v-model="searchData.endTime"
-                type="date"
-                :picker-options="endDateOpt"
-                placeholder="结束时间"
-                @change="timeChange('end')"
-                :clearable="false">
-            </el-date-picker>
           </div>
           <!-- 下划线 -->
           <div class="line"></div>
@@ -1635,6 +1633,7 @@ export default {
   .search-btn {
     width: 232px;
     text-align: center;
+    padding-top: 10px;
     .el-button {
       width: 45%;
     }

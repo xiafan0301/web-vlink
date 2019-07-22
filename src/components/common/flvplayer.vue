@@ -2,7 +2,7 @@
   <div class="vl_flvplayer" :class="{'flvplayer_fullscreen': fullScreen}">
     <div class="flvplayer_player" :id="flvplayerId + '_container'">
       <!-- poster="videojs/eguidlogo.png" -->
-      <div class="flvplayer_player_c" :id="flvplayerId + '_c'">
+      <div class="flvplayer_player_c" :id="flvplayerId + '_c'" @dblclick="playerFullScreen(!fullScreen)">
         <video crossOrigin="anonymous" :id="flvplayerId" style="width: 100%; height: 100%; object-fit: fill;" autoplay="autoplay" muted>
         </video>
       </div>
@@ -427,7 +427,9 @@ export default {
     }
     this.initPlayer();
     // $(window).on('unload', this.videoUnloadSave);
-    this.sizeHandler();
+    window.setTimeout(() => {
+      this.sizeHandler();
+    }, 300);
   },
   methods: {
     // sizeHandler

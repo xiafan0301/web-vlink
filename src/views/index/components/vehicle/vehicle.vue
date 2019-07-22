@@ -31,7 +31,7 @@ export default {
 
 <!-- 车辆侦察公用CSS -->
 <style lang="scss">
-.vehicle_content { height: 100%; position: relative; }
+.vehicle_content { height: 100%; position: relative; overflow: hidden; }
 .my_tooltip{
   position: absolute;
   background:rgba(255,255,255,1);
