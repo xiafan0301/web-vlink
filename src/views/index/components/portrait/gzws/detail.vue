@@ -368,7 +368,7 @@ export default {
           { name: '以图搜人' }
         ]
       });
-      this.$router.push({name: 'portrait_ytsr', query: { imgurl: this.detailInfo.subStoragePath }});
+      this.$router.push({name: 'portrait_ytsr_list', query: { imgurl: this.detailInfo.subStoragePath }});
     },
     // 跳至轨迹分析页面
     skipPjfxPortraitPage () {

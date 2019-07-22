@@ -101,7 +101,7 @@
                   </p>
                   <p>
                     <i class="vl_icon_tail_1 vl_icon"></i>
-                    <span>{{item.shotTime}}</span>
+                    <span :title="item.shotTime">{{item.shotTime}}</span>
                   </p>
                   <div class="record_btn" @click="skipWsReocrdPage(item)">尾随记录</div>
                 </div>
@@ -158,19 +158,23 @@ export default {
           return time.getTime() > (new Date().getTime());
         }
       },
-      pickerEnd: {},
+      pickerEnd: {
+        disabledDate (time) {
+          return time.getTime() > (new Date().getTime());
+        }
+      },
       deviceList: [], // 抓拍设备列表
       vehicleTypeList: [], // 车辆类型列表
       dataList: [], // 查询的抓拍结果列表
     }
   },
   watch: {
-    'searchForm.shotTime' () {
-      let _this = this;
-      const threeDays = 2 * 3600 * 24 * 1000;
-      const endTime = new Date(_this.searchForm.shotTime).getTime() + threeDays;
-      _this.searchForm.dateEnd = formatDate(endTime);
-    }
+    // 'searchForm.shotTime' () {
+    //   let _this = this;
+    //   const threeDays = 2 * 3600 * 24 * 1000;
+    //   const endTime = new Date(_this.searchForm.shotTime).getTime() + threeDays;
+    //   _this.searchForm.dateEnd = formatDate(endTime);
+    // }
   },
   mounted () {
     this.getVehicleTypeList();
@@ -237,13 +241,13 @@ export default {
     },
     // 结束时间focus
     handleEndTime () {
-      let _this = this;
-      const startDate = new Date(_this.searchForm.shotTime).getTime();
-      _this.pickerEnd = {
-        disabledDate (time) {
-         return time.getTime() < (startDate - 8.64e7) || time.getTime() > ((startDate + 2 * 3600 * 24 * 1000) - 8.64e6);
-        }
-      }
+      // let _this = this;
+      // const startDate = new Date(_this.searchForm.shotTime).getTime();
+      // _this.pickerEnd = {
+      //   disabledDate (time) {
+      //    return time.getTime() < (startDate - 8.64e7) || time.getTime() > ((startDate + 2 * 3600 * 24 * 1000) - 8.64e6);
+      //   }
+      // }
     },
     // 获取抓拍设备列表
     getDeviceList () {
@@ -304,6 +308,7 @@ export default {
     // 重置查询条件
     resetData (form) {
       this.isInitPage = false;
+      this.isShowDeviceTip = false;
       this.$refs[form].resetFields();
       this.dataList = [];
     },
@@ -324,7 +329,6 @@ export default {
             }
             return;
           };
-
 
           const vehicleType = this.searchForm.vehicleClass.join(',');
           const params = {
@@ -454,6 +458,9 @@ export default {
                 border-radius:3px;
                 color: #333333;
                 font-size: 12px;
+                overflow:hidden; /*内容超出宽度时隐藏超出部分的内容 */
+                text-overflow:ellipsis;/* 当对象内文本溢出时显示省略标记(...) ；需与overflow:hidden;一起使用。*/
+                white-space:nowrap; /*不换行 */
                 i {
                   margin-right: 5px;
                 }
