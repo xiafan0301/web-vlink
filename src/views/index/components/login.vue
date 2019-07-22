@@ -89,8 +89,10 @@ export default {
                 this.$store.commit('setLoginToken', {
                   loginToken: true
                 });
+                this.$nextTick(() => {
+                   this.$router.push({name: 'index'});
+                });
                 // this.loginBtnLoading = false;
-                this.$router.push({name: 'index'});
               } else {
                 this.loginBtnLoading = false;
               }
