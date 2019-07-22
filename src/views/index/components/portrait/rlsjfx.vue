@@ -234,6 +234,8 @@ export default {
     this.getFaceTotal();
     this.getFaceControlSta();
     this.drawChart2();
+    // 进入页面滚动条保持在最顶部
+    document.getElementById('rlsjfxBox').scrollTop = 0;
   },
   watch: {
     selectLength () {
@@ -417,7 +419,7 @@ export default {
           } else {
             str += `<h1>${_this.transformTime(title)}-${title}</h1>`;
           }
-          str += `<span><span>${items[0].value}</span><span>辆</span></span></div>`;
+          str += `<span><span>${items[0].value}</span><span>张</span></span></div>`;
           return str;
         }
       });
@@ -485,7 +487,7 @@ export default {
           } else {
             str += `<h1>${_this.transformTime(title)}-${title}</h1>`;
           }
-          str += `<span><span>${items[0].value}</span><span>辆</span></span></div>`;
+          str += `<span><span>${items[0].value}</span><span>次</span></span></div>`;
           return str;
         }
       });
@@ -506,6 +508,7 @@ export default {
   .rlsjfx_box{
     width: 100%;
     height: 100%;
+    overflow-y: auto;
     padding: 5px;
     display: flex;
     flex-flow: row wrap;

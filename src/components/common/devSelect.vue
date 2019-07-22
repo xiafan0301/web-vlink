@@ -47,6 +47,13 @@ export default {
   },
   created () {
     this.getTreeList();
+    let _this = this;
+    $(':not(.dev_select)').on('click', function () {
+      _this.isShowSelectList = false;
+    })
+  },
+  destroyed () {
+    $(':not(.dev_select)').unbind('click');
   },
   methods: {
     checkedAll(){
