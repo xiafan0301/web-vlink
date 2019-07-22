@@ -80,11 +80,11 @@
                   </swiper-slide>
                   <div class="swiper-button-prev" slot="button-prev"></div>
                   <div class="swiper-button-next" slot="button-next" >
-                    <div class="nextbox" @click="nextPage"></div>
+                    <div class="nextboxs" style="width:40px;height:60px;" @click="nextPage"></div>
                   </div>
-                  
+                   
                 </swiper>
-                
+                <!-- <div class="nextbox" @click="nextPage"></div> -->
               </div>
               
   </el-dialog>
@@ -92,6 +92,7 @@
 </template>
 <script>
 import flvplayer from '@/components/common/flvplayer.vue';
+import { setTimeout } from 'timers';
 export default {
   /* 提交成功后通过在父组件 emit mapSelectorEmit 事件获取所框选的东西 */
   /* 
@@ -132,7 +133,7 @@ export default {
  components: {
     flvplayer
   },
-  props: ['open', 'detailData','scrollData','showItem'],
+  props: ['open', 'detailData','scrollData','showItem','conditions'],
   data () {
     return {
       bigurl:'',
@@ -158,6 +159,7 @@ export default {
           prevEl: '.swiper-button-prev',
         },
       },
+      cond:this.conditions,
       videoUrl: null, // 下载地址
       map: null,
     }
@@ -201,13 +203,17 @@ export default {
         }
       }
       this.strucDetailDialog = this.open
+    },
+     conditions (v) {
+      this.cond=v
+     // console.log(this.cond);
     }
     
   },
   mounted () {
     
     this.show=this.showItem
-    
+
     // this.getTreeList();
     // this.mapEvents();
    // this.$_showLoading({text: '加载中...'})
@@ -221,8 +227,20 @@ export default {
   methods: {
    
    nextPage(){
-    //  console.log("1111111111111111");
-     this.$emit("nextPage")
+      //console.log("1111111111111111");
+      let a=false
+      let _this=this
+      setTimeout(function(){
+         a = $(".swiper-button-next").hasClass("swiper-button-disabled")
+         console.log("1111111111111111"+a);
+         if(a){
+           _this.$emit("nextPage")
+         }
+         
+      },500)
+      
+
+    // this.$emit("nextPage")
      
    },
     /**
@@ -304,7 +322,10 @@ export default {
 .nextbox{
   height: 60px;
   width: 40px;
-  
+  position: absolute;
+  top: 20px;
+  right: 0px;
+  z-index: 2;
  
 }
  html {font-size: 100px;}
@@ -585,6 +606,7 @@ export default {
       }
     }
     .struc-list {
+      position: relative;
       width: 12.46rem;
       margin: 0 auto;
       padding: .44rem 0 .34rem 0;
