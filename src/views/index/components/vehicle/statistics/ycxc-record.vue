@@ -72,44 +72,44 @@
             <div class="struc_c_d_info">
               <h2>抓拍信息</h2>
                 <ul class="stru_ul">
-              <vue-scroll>
-                  <li>
-                    <span>车牌号码</span>
-                    <span>{{sturcDetail.plateNo ? sturcDetail.plateNo : '无'}}</span>
-                  </li>
-                  <li>
-                    <span>车辆颜色</span>
-                    <span>{{sturcDetail.vehicleColor ? sturcDetail.vehicleColor : '无'}}</span>
-                  </li>
-                  <li>
-                    <span>车辆类型</span>
-                    <span>{{sturcDetail.vehicleClass ? sturcDetail.vehicleClass : '无'}}</span>
-                  </li>
-                  <li>
-                    <span>车辆型号</span>
-                    <span>{{sturcDetail.vehicleModel ? sturcDetail.vehicleModel : '无'}}</span>
-                  </li>
-                  <li>
-                    <span>号牌颜色</span>
-                    <span>{{sturcDetail.plateColor ? sturcDetail.plateColor : '无'}}</span>
-                  </li>
-                  <li>
-                    <span>号牌类型</span>
-                    <span>{{sturcDetail.plateClass ? sturcDetail.plateClass : '无'}}</span>
-                  </li>
-                  <li>
-                    <span>抓拍时间</span>
-                    <span>{{sturcDetail.shotTime ? sturcDetail.shotTime : '无'}}</span>
-                  </li>
-                  <li>
-                    <span>抓拍设备</span>
-                    <span :title="sturcDetail.deviceName" class="info_span">{{sturcDetail.deviceName ? sturcDetail.deviceName : '无'}}</span>
-                  </li>
-                  <li>
-                    <span>抓拍地址</span>
-                    <span :title="sturcDetail.address" class="info_span">{{sturcDetail.address ? sturcDetail.address : '无'}}</span>
-                  </li>
-              </vue-scroll>
+                  <vue-scroll>
+                    <li>
+                      <span>抓拍时间</span>
+                      <span>{{sturcDetail.shotTime ? sturcDetail.shotTime : '无'}}</span>
+                    </li>
+                    <li>
+                      <span>抓拍摄像头</span>
+                      <span :title="sturcDetail.deviceName" class="info_span">{{sturcDetail.deviceName ? sturcDetail.deviceName : '无'}}</span>
+                    </li>
+                    <li>
+                      <span>抓拍地点</span>
+                      <span :title="sturcDetail.address" class="info_span">{{sturcDetail.address ? sturcDetail.address : '无'}}</span>
+                    </li>
+                    <li>
+                      <span>车牌号码</span>
+                      <span>{{sturcDetail.plateNo ? sturcDetail.plateNo : '无'}}</span>
+                    </li>
+                    <li>
+                      <span>号牌颜色</span>
+                      <span>{{sturcDetail.plateColor ? sturcDetail.plateColor : '无'}}</span>
+                    </li>
+                    <li>
+                      <span>车辆型号</span>
+                      <span>{{sturcDetail.vehicleModel ? sturcDetail.vehicleModel : '无'}}</span>
+                    </li>
+                    <li>
+                      <span>车辆颜色</span>
+                      <span>{{sturcDetail.vehicleColor ? sturcDetail.vehicleColor : '无'}}</span>
+                    </li>
+                    <li>
+                      <span>车辆类型</span>
+                      <span>{{sturcDetail.vehicleClass ? sturcDetail.vehicleClass : '无'}}</span>
+                    </li>
+                    <li>
+                      <span>号牌类型</span>
+                      <span>{{sturcDetail.plateClass ? sturcDetail.plateClass : '无'}}</span>
+                    </li>
+                  </vue-scroll>
                 </ul>
             </div>
           </div>
@@ -243,8 +243,6 @@ export default {
     getAllList () {
     
       this.queryObj['vehicleNumber'] = this.$route.query.vehicleNumber;
-      // this.queryObj['pageSize'] = 0;
-      // this.queryObj['pageNum'] = this.pagination.pageNum;
       this.queryObj['order'] = this.pagination.order;
       this.queryObj['orderBy'] = this.pagination.orderBy;
 
@@ -273,7 +271,8 @@ export default {
         ...this.queryObj,
         pageSize: this.pagination.pageSize
       }
-      getNightVehicleRecordList(this.queryObj)
+      console.log('params', params)
+      getNightVehicleRecordList(params)
         .then(res => {
           if (res && res.data) {
             this.dataList = res.data.list;
@@ -381,18 +380,21 @@ export default {
       this.curImgIndex = obj.uid;
 
       let currentIndex;
+      this.allDataList.map((item, index) => {
+        if (item.uid === obj.uid) {
+          currentIndex = index;
+        }
+      })
 
       this.strucDetailDialog = true;
 
-      this.$nextTick(() => {
-        this.initMap(obj);
+      let _this = this;
 
-        this.allDataList.map((item, index) => {
-          if (item.uid === obj.uid) {
-            currentIndex = index;
-          }
-        })
-        this.$refs.mySwiper.slideTo(currentIndex);
+      _this.$nextTick(() => {
+        _this.initMap(obj);
+      console.log('refs', _this.$refs)
+
+        _this.$refs.mySwiper.slideTo(currentIndex);
       })
     },
     /**
@@ -771,7 +773,7 @@ export default {
             padding-right: 1rem;
           }
            .stru_ul {
-             width: 100%;
+            width: 100%;
             padding-bottom: 30px;
             height: calc(100% - 20px);
             .__view {
@@ -785,7 +787,7 @@ export default {
               border-radius:2px;
               font-size: 12px;
               span:first-child {
-                width: 70px;
+                min-width: 70px;
                 overflow: hidden;
                 display: inline-block;
                 padding: 0 5px;
