@@ -153,7 +153,7 @@
       </div>
     </div>
     <!-- 详情 -->
-    <portraitDetail :open="showDetail" @closeDialog="onCloseDetail" :detailData="deData"  @nextPage="nextData" :scrollData="seData" ></portraitDetail>
+    <portraitDetail :open="showDetail" @closeDialog="onCloseDetail" :detailData="deData"  @nextPage="nextData" :scrollData="seData" :conditions="condition" ></portraitDetail>
     <!-- D设备 B卡口  这里是设备和卡口 -->
     <div is="mapSelector" :open="openMap" :clear="msClear" :showTypes="'DB'" @mapSelectorEmit="mapSelectorEmit"></div>
   </div>
@@ -210,7 +210,8 @@ export default {
         disabledDate (d) {
           return d > new Date() || d < new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000);
         }
-      }
+      },
+      condition:{}
     }
   },
   created () {
@@ -231,6 +232,11 @@ export default {
       // console.log(3232131);
       
       let val= (this.pagination.pageNum?this.pagination.pageNum : 1) + 1
+      let lim = Math.ceil(this.pagination.total/this.pagination.pageSize)
+      if(val > lim){
+        return
+      }
+      this.pagination.currentPage=val
       this.handleCurrentChange(val)
 
     },
@@ -330,12 +336,13 @@ export default {
           deviceIds: this.dIds.join(',')
         });
       }
-   
+      this.condition=params
       // getFaceRetrieval getFaceRetrievalPerson
       getFaceRetrievalPerson(params).then(res => {
         if (res && res.data) {
           this.dataList = res.data.list;
           this.alldataList.push(...res.data.list);
+          // this.alldataList=res.data.list;
           this.pagination.total = res.data.total;
         }
         this.searchLoading = false;
