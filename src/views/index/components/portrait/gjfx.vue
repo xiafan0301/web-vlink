@@ -38,17 +38,27 @@
               </div>
             </el-upload>
           </el-form-item>
-          <el-form-item class="firstItem" prop="data1">
+          <el-form-item class="" prop="data1">
             <el-date-picker
-              style="padding-left: 0px;padding-right: 0px;"
-              v-model="ruleForm.data1"
-              type="daterange"
-              class="full data_range"
-              value-format="yyyy-MM-dd"
-              :picker-options="pickerOptions"
-              range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期">
+                    v-model="ruleForm.data1"
+                    style="width: 100%;"
+                    class="vl_date"
+                    :picker-options="pickerOptions"
+                    type="datetime"
+                    value-format="timestamp"
+                    placeholder="选择日期时间">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item prop="data2">
+            <el-date-picker
+                    style="width: 100%;"
+                    class="vl_date vl_date_end"
+                    :picker-options="pickerOptions"
+                    v-model="ruleForm.data2"
+                    @change="chooseEndTime"
+                    value-format="timestamp"
+                    type="datetime"
+                    placeholder="选择日期时间">
             </el-date-picker>
           </el-form-item>
           <el-form-item label="抓拍区域：" class="quyu" label-width="68px"  prop="input5">
@@ -98,7 +108,7 @@
         <div class="insetLeft" @click="hideLeft"></div>
       </div>
     </div>
-    <div :class="['right',{hide:!hideleft}]" id="rightMap"></div>
+    <div :class="['right',{hide:!hideleft}, {'clgj_map_show_pic': mapPicShow}]" id="rightMap"></div>
     <div class="reselt" v-if="reselt && showLeft">
       <div class="plane insetPadding">
         <h3 class="title">分析结果<p>共经过{{totalAddressNum}}个地方，出现{{totalMapNum}}次</p></h3>
@@ -139,6 +149,13 @@
         <div class="insetLeft2" @click="hideResult"></div>
       </div>
     </div>
+    <!--地图操作按钮-->
+    <ul class="map_rrt_u2">
+      <li @click="mapPicShow = !mapPicShow" style="font-size: 14px;" :style="{'color': mapPicShow ? '#0C70F8' : '#999'}">显示图片</li>
+      <li @click="resetZoom"><i class="el-icon-aim"></i></li>
+      <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
+      <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
+    </ul>
     <el-dialog
         :visible.sync="strucDetailDialog"
         class="struc_detail_dialog_gjfx"
@@ -265,7 +282,7 @@
   import vlBreadcrumb from '@/components/common/breadcrumb.vue';
   import mapSelector from '@/components/common/mapSelector.vue';
   import { mapXupuxian,ajaxCtx } from "@/config/config.js";
-  import { objDeepCopy, random14 } from "@/utils/util.js";
+  import { objDeepCopy, random14, formatDate } from "@/utils/util.js";
   import { cityCode } from "@/utils/data.js";
   import {PortraitPostPersonTrace} from "@/views/index/api/api.portrait.js";
   import { MapGETmonitorList } from "@/views/index/api/api.map.js";
@@ -274,6 +291,7 @@
     components: {mapSelector, vlBreadcrumb},
     data() {
       return {
+        mapPicShow: false, // 地图图片显示开关
         filterDialog: false,
         showLeft: false,
         selectMapClear: '',
@@ -367,6 +385,11 @@
       }
     },
     methods: {
+      chooseEndTime (e) {
+        if (e < this.ruleForm.data1) {
+          this.$message.info('结束时间必须大于开始时间才会有结果')
+        }
+      },
       gotoControl (url) {
         this.$router.push({ name: 'control_create', query: {modelName: "人员追踪", imgurl: url} })
       },
@@ -426,9 +449,10 @@
         } else {
           sD =  new Date(curDate - curS).getDate()
         }
-        let _s = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD;
-//        let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() - 1;
-        this.ruleForm.data1 = [_s, _s];
+        let _s = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD + '  00:00:00';
+        let _e = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD + ' 23:59:59';
+        this.ruleForm.data1 = new Date(_s);
+        this.ruleForm.data2 = new Date(_e);
       },
       hideResult() {
         this.reselt = false;
@@ -510,15 +534,15 @@
         this.dialogVisible=false
       },
       submitForm(v) {
-        if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data1.length>0 && this.ruleForm.input3){
+        if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data2 && this.ruleForm.input3){
           let pg = {
           }
           if (this.pointData.bayonetList.length === 0 && this.pointData.deviceList.length === 0 && this.ruleForm.input5 === "2") {
             this.$message.info('选择的区域没有设备，请重新选择区域');
             return false;
           }
-          pg['startTime'] = this.ruleForm.data1[0]+" 00:00:00";
-          pg['endTime'] = this.ruleForm.data1[1]+" 23:59:59";
+          pg['startTime'] = formatDate(this.ruleForm.data1, 'yyyy-MM-dd HH:mm:ss');
+          pg['endTime'] = formatDate(this.ruleForm.data2, 'yyyy-MM-dd HH:mm:ss')
 //          pg['imageUrl'] = 'http://file.aorise.org/vlink/image/18c70cc3-424a-43fc-92ee-a6c6de4248f2.jpg';
           pg['imageUrl'] = this.ruleForm.input3;
           if(this.ruleForm.input5 == "1"){
@@ -746,7 +770,7 @@
               this.showStrucInfo(obj, i)
             })
             path.push(_path);
-            let _content = `<div class="vl_icon vl_icon_sxt"></div>`
+            let _content = `<div class="vl_icon vl_icon_sxt"><p>${obj.shotTime}</p></div>`
             let point = new AMap.Marker({ // 添加自定义点标记
               map: this.amap,
               position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
@@ -832,11 +856,44 @@
         this.curImgIndex = index;
         this.sturcDetail = data;
         this.drawPoint(data);
-      }
+      },
+      mapZoomSet (val) {
+        if (this.amap) {
+          this.amap.setZoom(this.amap.getZoom() + val);
+        }
+      },
+      resetZoom () {
+        if (this.amap) {
+          this.amap.setZoomAndCenter(14, mapXupuxian.center);
+        }
+      },
     }
   };
 </script>
 <style lang="scss" scoped>
+  .map_rrt_u2 {
+    position: absolute; right: 30px;
+    bottom: 30px;
+    margin-top: .2rem;
+    font-size: 26px;
+    background: #ffffff;
+    width: 78px;
+    padding: 0 10px;
+    > li {
+      line-height: 70px;
+      text-align: center;
+      cursor: pointer;
+      border-bottom: 1px solid #F2F2F2;
+      > i {
+        margin-top: 0;
+        display: inline-block;
+      }
+      color: #999999;
+      &:hover {
+        color: #0C70F8;
+      }
+    }
+  }
   .point {
     width: 100%;
     height: 100%;
@@ -857,6 +914,7 @@
     width: calc(100% - 226px);
     height: calc(100% - 54px);
     float: right;
+    min-height: 560px;
   }
   .right {
     width: 100%;
@@ -938,6 +996,7 @@
       padding: 10px;
       position: relative;
       height: 100%;
+      min-height: 560px;
     }
     .line40 {
       line-height: 40px;
@@ -1227,6 +1286,30 @@
   }
 </style>
 <style lang="scss">
+  #rightMap {
+    .vl_icon.vl_icon_sxt {
+      position: relative;
+      > p {
+        position: absolute; top: 10px; left: 98%;
+        width: auto;
+        word-break:keep-all; white-space:nowrap;
+        font-size: 12px; color: #fff;
+        background-color: rgba(0, 0, 0, 0.4);
+        border-radius: 2px;
+        padding: 2px 5px;
+      }
+    }
+  }
+  .clgj_map_show_pic {
+    .vl_jtc_mk { display: block !important; }
+    &#rightMap {
+      .vl_icon.vl_icon_sxt {
+        > p {
+          display: none;
+        }
+      }
+    }
+  }
   .demo-ruleForm {
     .quyu {
       .el-form-item__label {
@@ -1695,6 +1778,7 @@
     width: 218px;
     height: 122px;
     position: relative;
+    display: none;
     > img {
       width: 100%;
       height: 100%;

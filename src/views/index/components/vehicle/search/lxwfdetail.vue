@@ -3,8 +3,8 @@
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
-        <el-breadcrumb-item  :to="{ path: '/vehicle/lxwf' }">连续违法</el-breadcrumb-item>
-        <el-breadcrumb-item>连续违法详情</el-breadcrumb-item>
+        <el-breadcrumb-item  :to="{ path: '/vehicle/lxwf' }">连续违章</el-breadcrumb-item>
+        <el-breadcrumb-item>连续违章详情</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="vehicle-info-content">
@@ -113,25 +113,49 @@
                   >
                 </el-table-column>
                 <el-table-column
-                  label="违法时间"
+                  label="违章时间"
                   prop="vioDate"
                   show-overflow-tooltip
                   >
                 </el-table-column>
                 <el-table-column
-                  label="违法地点"
+                  label="违章地点"
                   prop="address"
                   show-overflow-tooltip
                   >
                 </el-table-column>
                 <el-table-column
-                  label="违法行为"
+                  label="城市名称"
+                  prop="city"
+                  show-overflow-tooltip
+                  >
+                </el-table-column>
+                <el-table-column
+                  label="罚款金额"
+                  prop="fine"
+                  show-overflow-tooltip
+                  >
+                </el-table-column>
+                <el-table-column
+                  label="违章归属地"
+                  prop="vioAsPlace"
+                  show-overflow-tooltip
+                  >
+                </el-table-column>
+                <el-table-column
+                  label="违章行为"
                   prop="vioName"
                   show-overflow-tooltip
                   >
                 </el-table-column>
                 <el-table-column
-                  label="处理机关"
+                  label="分类类型"
+                  prop="vioCategory"
+                  show-overflow-tooltip
+                  >
+                </el-table-column>
+                <el-table-column
+                  label="采集机关"
                   prop="vioCollectionOffice"
                   show-overflow-tooltip
                   >

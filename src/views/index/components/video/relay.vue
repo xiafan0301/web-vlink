@@ -10,12 +10,12 @@
               <li class="show_title_line" :class="{'show_title_line2': showConTitle === 2}"></li>
             </ul>
             <div class="show_content" v-show="showConTitle === 1">
-              <div class="show_search" style="z-index: 2;">
+              <div class="show_search" style="z-index: 2; padding: 15px 20px 0 20px;">
                 <div class="show_search_ti">
                   <span>开始</span>
                   <el-date-picker
-                    class="vl_vid_sdater"
-                    style="width: 175px"
+                    class="vl_vid_sdater vl_date"
+                    style="width: 100%"
                     size="small"
                     v-model="startTime"
                     type="date"
@@ -29,8 +29,8 @@
                 <div class="show_search_ti">
                   <span>结束</span>
                   <el-date-picker
-                    class="vl_vid_sdater"
-                    style="width: 175px"
+                    class="vl_vid_sdater vl_date vl_date_end"
+                    style="width: 100%"
                     size="small"
                     v-model="endTime"
                     type="date"
@@ -41,7 +41,7 @@
                     placeholder="选择结束时间">
                   </el-date-picker>
                 </div>
-                <div style="margin-left: 8%; width: 84%;">
+                <div>
                   <el-select size="small" style="width: 100%;" v-model="targetType" placeholder="选择目标类型">
                     <el-option :label="'人员'" :value="'人员'"></el-option>
                     <el-option :label="'车辆'" :value="'车辆'"></el-option>
@@ -93,12 +93,12 @@
               </div>
             </div>
             <div class="show_content" v-show="showConTitle === 2">
-              <div class="show_search" style="z-index: 2;">
+              <div class="show_search" style="z-index: 2; padding: 15px 20px 0 20px;">
                 <div class="show_search_ti">
                   <span>开始</span>
                   <el-date-picker
-                    class="vl_vid_sdater"
-                    style="width: 175px"
+                    class="vl_vid_sdater vl_date"
+                    style="width: 100%"
                     size="small"
                     v-model="startTime"
                     type="date"
@@ -112,8 +112,8 @@
                 <div class="show_search_ti">
                   <span>结束</span>
                   <el-date-picker
-                    class="vl_vid_sdater"
-                    style="width: 175px"
+                    class="vl_vid_sdater vl_date vl_date_end"
+                    style="width: 100%"
                     size="small"
                     v-model="endTime"
                     type="date"
@@ -124,7 +124,7 @@
                     placeholder="选择结束时间">
                   </el-date-picker>
                 </div>
-                <div style="margin-left: 8%; width: 84%;">
+                <div>
                   <el-select size="small" style="width: 100%;" v-model="targetType" placeholder="选择目标类型">
                     <el-option :label="'人员'" :value="'人员'"></el-option>
                     <el-option :label="'车辆'" :value="'车辆'"></el-option>

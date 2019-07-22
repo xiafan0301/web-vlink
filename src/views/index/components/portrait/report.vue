@@ -53,9 +53,13 @@
               <el-table-column label="序号" type="index" width="100"></el-table-column>
               <el-table-column label="任务名称" prop="taskName" show-overflow-tooltip></el-table-column>
               <el-table-column label="创建时间" prop="createTime" show-overflow-tooltip></el-table-column>
-              <el-table-column label="相似度" prop="taskName" show-overflow-tooltip></el-table-column>
-              <el-table-column label="频次阈值" prop="taskName" show-overflow-tooltip></el-table-column>
-              <el-table-column label="频次阈值" v-if="selectIndex === 0" show-overflow-tooltip>
+              <el-table-column label="分析时间范围" prop="taskName" show-overflow-tooltip min-width="150px">
+                <template slot-scope="scope">
+                  {{JSON.parse(scope.row.taskWebParam).startDate}}-
+                  {{JSON.parse(scope.row.taskWebParam).endDate}}
+                </template>
+              </el-table-column>
+              <el-table-column label="状态" v-if="selectIndex === 0" show-overflow-tooltip>
                 <template slot-scope="scope">
                   {{scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 2 ? '成功' : scope.row.taskStatus === 3 ? '失败' : scope.row.taskStatus === 4 ? '已中断' : ''}}
                 </template>
@@ -141,7 +145,7 @@
 </template>
 <script>
 import vehicleBreadcrumb from './breadcrumb.vue';
-import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from "../../api/api.analysis.js";
+import { postTaskInfosPage, putAnalysisTask, putTaskInfosResume } from "../../api/api.analysis.js";
 import { formatDate} from '@/utils/util.js';
 // import {mapXupuxian} from '@/config/config.js';
 export default {
@@ -200,7 +204,7 @@ export default {
         pageSize: this.pagination.pageSize,
         orderBy: 'create_time',
         order: 'desc',
-        'where.taskType': 1,    //任务类型 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
+        // 'where.taskType': 9,    //任务类型 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
         'where.isFinish': this.selectIndex,   //是否完成 0:未完成(包含处理中、处理失败、处理中断) 1：已完成(处理成功)
       }
       this.taskForm.taskName && (params['where.taskName'] = this.taskForm.taskName);
@@ -210,11 +214,12 @@ export default {
       }
       console.log("---------params-----------",JSON.stringify(params))
       this.isLoading = true;
-      getTaskInfosPage(params).then(res => {
+      postTaskInfosPage(params).then(res => {
         console.log("--------getTaskInfosPage--------",res)
         if(res.data) {
           this.list = res.data.list;
           this.pagination.total = res.data.total;
+          console.log(this.list)
         }
         this.$nextTick(() => {
           this.isLoading = false;

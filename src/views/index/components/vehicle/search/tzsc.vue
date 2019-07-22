@@ -2,24 +2,58 @@
   <!-- 特征搜车 -->
   <div class="tzsc_wrap">
     <!-- 面包屑通用样式 -->
-    <div class="link_bread">
+    <div
+        is="vlBreadcrumb"
+        :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
+          {name: '特征搜车'}]"
+      ></div>
+    <!-- <div class="link_bread">
       <el-breadcrumb separator=">" class="bread_common">
         <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
         <el-breadcrumb-item>特征搜车</el-breadcrumb-item>
       </el-breadcrumb>
-    </div>
+    </div> -->
     <div class="sc_content">
       <!-- 通用的左边菜单 -->
       <div class="left_menu">
         <!-- 菜单表单 -->
         <vue-scroll>
-          <div style="padding: 20px;">
-            <!-- 选择设备 -->
+          <div style="padding: 12px 20px 20px 20px;">
+            <!-- 表单 -->
+            <el-form :model="tzscMenuForm" ref="tzscMenuForm" :rules="rules">
+              <div class="selectDate date-comp">
+                <el-form-item label prop="startTime">
+                  <el-date-picker
+                    v-model="tzscMenuForm.startTime"
+                    type="datetime"
+                    :clearable="false"
+                    value-format="yyyy-MM-dd"
+                    format="yyyy-MM-dd"
+                    :picker-options="startDateOpt"
+                    placeholder="开始时间"
+                    class="width232 vl_date"
+                  ></el-date-picker>
+                </el-form-item>
+                <el-form-item label prop="endTime">
+                  <el-date-picker
+                    v-model="tzscMenuForm.endTime"
+                    type="datetime"
+                    :clearable="false"
+                    value-format="yyyy-MM-dd"
+                    format="yyyy-MM-dd"
+                    :picker-options="endDateOpt"
+                    placeholder="结束时间"
+                    class="width232 vl_date vl_date_end"
+                  ></el-date-picker>
+                </el-form-item>
+              </div>
+
+              <!-- 选择设备 -->
             <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
             <div class="selected_device" @click="treeTabShow = true;">
-              <i class="el-icon-arrow-down"></i>
-              <!-- <i class="el-icon-arrow-up"></i> -->
-              <div class="device_list" v-if="selectDeviceArr.length > 0">
+              <i class="el-icon-arrow-down" v-show="!treeTabShow"></i>
+              <i class="el-icon-arrow-up" v-show="treeTabShow"></i>
+              <div class="device_list" v-if="selectDeviceArr.length > 0 && !checkAllTree">
                 <span>{{ selectDeviceArr[0]['label'] }}</span>
                 <span
                   v-show="selectDeviceArr.length > 1"
@@ -27,6 +61,7 @@
                   class="device_count"
                 >+{{ selectDeviceArr.length - 1 }}</span>
               </div>
+              <div class="no_device" v-else-if="selectDeviceArr.length > 0 && checkAllTree">全部设备</div>
               <div class="no_device" v-else>选择设备</div>
               <!-- 树tab页面 -->
               <div class="device_tree_tab" v-show="treeTabShow">
@@ -84,24 +119,7 @@
                 </div>-->
               </div>
             </div>
-            <!-- 表单 -->
-            <el-form :model="tzscMenuForm" ref="tzscMenuForm" :rules="rules">
-              <div class="selectDate date-comp">
-                <el-form-item label prop="selectDate">
-                  <el-date-picker
-                    class="width232"
-                    v-model="tzscMenuForm.selectDate"
-                    type="daterange"
-                    range-separator="至"
-                    value-format="yyyy-MM-dd"
-                    format="yyyy-MM-dd"
-                    :picker-options="pickerOptions"
-                    start-placeholder="开始日期"
-                    end-placeholder="结束日期"
-                    :clearable="false"
-                  ></el-date-picker>
-                </el-form-item>
-              </div>
+
               <!-- 选择搜车的类型 -->
               <div class="select_type">
                 <el-radio-group v-model="selectType">
@@ -160,7 +178,7 @@
                       <!-- 车牌颜色 -->
                       <span v-else-if="item.plateColor">{{ '车牌颜色:' + item.name }}</span>
                       <!-- 车辆型号 -->
-                      <span v-else-if="item.vehicleStyles">{{item.name}}</span>
+                      <span v-else-if="item.vehicleModel">{{ '车辆型号:' + item.name}}</span>
                       <!-- 车辆颜色 -->
                       <span v-else-if="item.vehicleColor">{{ '车辆颜色:' + item.name }}</span>
                       <!-- 车辆类型 -->
@@ -193,19 +211,14 @@
                   </el-select>
                 </el-form-item>
                 <el-form-item prop="carModel">
-                  <el-select
-                    v-model="tzscMenuForm.carModel"
-                    clearable
+                  <el-cascader
                     class="width232"
+                    clearable
+                    separator="-"
                     placeholder="选择车辆型号"
-                  >
-                    <el-option
-                      v-for="item in carModelOptions"
-                      :key="item.enumField"
-                      :label="item.enumValue"
-                      :value="item.enumValue"
-                    ></el-option>
-                  </el-select>
+                    v-model="tzscMenuForm.carModel"
+                    :options="carModelOptions"
+                  ></el-cascader>
                 </el-form-item>
                 <el-form-item prop="carColor">
                   <el-select
@@ -493,7 +506,6 @@
                     <span class="val">{{sturcDetail.vehicleModel}}</span>
                   </p>
                 </div>
-
                 <div class="struc_cdi_line_tzsc" v-if="sturcDetail.vehicleColor">
                   <p class="line_content">
                     <span class="key">车辆颜色</span>
@@ -558,6 +570,9 @@
   </div>
 </template>
 <script>
+
+import vlBreadcrumb from "@/components/common/breadcrumb.vue";
+
 import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入溆浦县地图
 import { formatDate } from "@/utils/util.js";
 
@@ -565,6 +580,8 @@ import {
   JtcPOSTAppendixInfo,
   JtcGETAppendixInfoList
 } from "../../../api/api.judge.js"; // 图片上传接口
+
+import { getVehicleList } from "../../../api/api.base.js";
 
 import {
   getFeatureSearch,
@@ -590,24 +607,48 @@ export default {
       getCharacterLoading: false, // 获取车辆特征加载效果
       // 菜单表单变量
       tzscMenuForm: {
-        selectDate: "",
+        startTime: "",
+        endTime: "",
         selectDevice: "",
         licenseType: "",
         licenseColor: "",
         carType: "",
         carColor: "",
-        carModel: "",
+        carModel: [],
         sunVisor: "",
         inspectionCount: ""
       },
       rules: {
-        selectDate: [
-          {
-            required: true,
-            message: "请选择日期",
-            trigger: "change"
+        // selectDate: [
+        //   {
+        //     required: true,
+        //     message: "请选择日期",
+        //     trigger: "change"
+        //   }
+        // ]
+      },
+      startDateOpt: {
+        disabledDate: time => {
+          if (this.tzscMenuForm.endTime) {
+            return time.getTime() > new Date(this.tzscMenuForm.endTime).getTime();
+          } else {
+            return time.getTime() > new Date().getTime();
           }
-        ]
+        }
+      },
+      endDateOpt: {
+        disabledDate: time => {
+          if (this.tzscMenuForm.startTime) {
+            return (
+              time.getTime() < new Date(this.tzscMenuForm.startTime).getTime() ||
+              time.getTime() > new Date().getTime()
+            );
+          } else {
+            return (
+              time.getTime() > new Date().getTime()
+            );
+          }
+        }
       },
       getStrucInfoLoading: false, // 查询按钮加载
       pickerOptions: {
@@ -695,7 +736,7 @@ export default {
       characterTypes: [
         "plateNo", // 车牌号
         "plateColor", // 车牌颜色
-        "vehicleStyles", // 汽车的型号
+        "vehicleModel", // 汽车的型号(vehicleStyles)
         "vehicleColor", // 汽车颜色
         "vehicleClass", // 汽车类型（越野啥的）
         "plateClass" // 号牌类型
@@ -802,6 +843,7 @@ export default {
       }
     }
   },
+  components: { vlBreadcrumb },
   mounted() {
     // 初始化地图
     let map = new AMap.Map("capMap", {
@@ -834,14 +876,30 @@ export default {
       // sunvisorOptions: [], // 遮阳板
       this.plateClassOptions = this.dicFormater(45)[0].dictList;
       this.plateColorOptions = this.dicFormater(46)[0].dictList;
-
       this.vehicleClassOptions = this.dicFormater(44)[0].dictList;
-      this.vehicleColorOptions = this.dicFormater(17)[0].dictList;
+      this.vehicleColorOptions = this.dicFormater(47)[0].dictList;
+      getVehicleList().then(res => {
+        // console.log("联动数据", res);
+        this.carModelOptions = res.data.map(item => {
+          item.value = item.brand;
+          item.label = item.brand;
+          item.children = [];
+          for (let i = 0; i < item.typeList.length; i++) {
+            item.children.push({
+              value: item.typeList[i],
+              label: item.typeList[i]
+            });
+          }
+          delete item.typeList;
+          return item;
+        });
+      });
     },
     getStrucInfo(isClick = false) {
       // 根据特征数组来获取到检索的结果
       this.$refs.tzscMenuForm.validate(valid => {
         if (valid) {
+          // console.log('表单数据', this.tzscMenuForm);
           if (isClick) {
             this.getStrucInfoLoading = true; // 打开加载效果
           }
@@ -862,10 +920,10 @@ export default {
             queryParams = {
               where: {
                 startTime:
-                  formatDate(this.tzscMenuForm.selectDate[0], "yyyy-MM-dd") +
+                  formatDate(this.tzscMenuForm.startTime, "yyyy-MM-dd") +
                   " 00:00:00", // 开始时间
                 endTime:
-                  formatDate(this.tzscMenuForm.selectDate[1], "yyyy-MM-dd") +
+                  formatDate(this.tzscMenuForm.endTime, "yyyy-MM-dd") +
                   " 23:59:59", // 结束时间
                 deviceUid: deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
                 bayonetUid:
@@ -877,20 +935,23 @@ export default {
                 // "sunvisor": this.tzscMenuForm.sunVisor || null, // 遮阳板
                 // "descOfRearItem": this.tzscMenuForm.inspectionCount || null, // 年检标数量
                 vehicleNumber: null, // 车牌号码
-                vehicleModel: null // 车辆型号
+                vehicleModel:
+                  this.tzscMenuForm.carModel.length > 0
+                    ? this.tzscMenuForm.carModel.join("-")
+                    : null // 车辆型号
               },
               pageNum: this.pageNum,
               pageSize: this.pageSize
             };
           } else {
-            // 自定义的特征
+            // 从图片提取
             queryParams = {
               where: {
                 startTime:
-                  formatDate(this.tzscMenuForm.selectDate[0], "yyyy-MM-dd") +
+                  formatDate(this.tzscMenuForm.startTime, "yyyy-MM-dd") +
                   " 00:00:00", // 开始时间
                 endTime:
-                  formatDate(this.tzscMenuForm.selectDate[1], "yyyy-MM-dd") +
+                  formatDate(this.tzscMenuForm.endTime, "yyyy-MM-dd") +
                   " 23:59:59", // 结束时间
                 deviceUid: deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
                 bayonetUid:
@@ -926,10 +987,9 @@ export default {
                 // 车牌
                 queryParams["where"].vehicleNumber = selectedArr[i].plateNo;
               }
-              if (selectedArr[i].vehicleStyles) {
+              if (selectedArr[i].vehicleModel) {
                 // 车辆型号
-                queryParams["where"].vehicleModel =
-                  selectedArr[i].vehicleStyles;
+                queryParams["where"].vehicleModel = selectedArr[i].vehicleModel;
               }
             }
           }
@@ -1078,10 +1138,8 @@ export default {
     /*选择日期的方法 */
     setDTime() {
       //设置默认时间
-      this.tzscMenuForm.selectDate = [
-        formatDate(new Date().getTime() - 3600 * 1000 * 24 * 2, "yyyy-MM-dd"),
-        formatDate(new Date(), "yyyy-MM-dd")
-      ];
+      this.tzscMenuForm.startTime = formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd");
+      this.tzscMenuForm.endTime = formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd");
     },
     /*选择设备的方法*/
     initCheckTree() {
@@ -1247,7 +1305,6 @@ export default {
       this.$nextTick(() => {
         $(".struc_c_address").append($("#capMap"));
       });
-      console.log("this.markerPoint", this.markerPoint);
       if (this.markerPoint) {
         this.amap.remove(this.markerPoint);
       }
@@ -1435,16 +1492,16 @@ export default {
   height: 100%;
   position: relative;
   // 面包屑样式
-  .link_bread {
-    height: 60px;
-    background: #fff;
-    .bread_common {
-      padding: 23px 0 0 20px;
-    }
-  }
+  // .link_bread {
+  //   height: 60px;
+  //   background: #fff;
+  //   .bread_common {
+  //     padding: 23px 0 0 20px;
+  //   }
+  // }
   // 搜车主体页面
   .sc_content {
-    height: calc(100% - 60px);
+    height: calc(100% - 49px);
     overflow: hidden;
     display: -webkit-box;
     display: -ms-flexbox;
@@ -1462,9 +1519,6 @@ export default {
       }
       .el-form-item {
         margin-bottom: 12px;
-      }
-      .selectDate .el-form-item {
-        margin-bottom: 20px;
       }
       // 选择搜车类型
       .select_type {
@@ -1551,7 +1605,7 @@ export default {
           z-index: 100;
           background: #fff;
           width: 232px;
-          height: 350px;
+          height: 330px;
           border-radius: 4px;
           border: 1px solid #d3d3d3;
           .tab_title {
@@ -1568,7 +1622,7 @@ export default {
           }
           // 树
           .tree_content {
-            height: 340px;
+            height: 320px;
             padding-top: 10px;
             .checked_all {
               padding: 0 0 8px 23px;
@@ -1633,8 +1687,8 @@ export default {
           text-align: center;
           width: 100%;
           color: #ffffff;
-          height: 40px;
-          line-height: 40px;
+          height: 36px;
+          line-height: 36px;
           -webkit-border-radius: 0 0 10px 10px;
           -moz-border-radius: 0 0 10px 10px;
           border-radius: 0 0 10px 10px;
@@ -1828,7 +1882,20 @@ export default {
       background: #f2f2f2;
       border: none;
       span {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        margin-top: 126px;
         color: #999;
+      }
+      &:hover {
+        background: #2981f8;
+        border: none;
+      }
+      &:hover span {
+        color: #fff;
       }
       img {
         width: 100%;

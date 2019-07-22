@@ -19,13 +19,15 @@
     </el-dialog> -->
     <!--视频通话-->
     <div is="webrtc"></div>
+    <div is="imgZoom"></div>
   </div>
 </template>
 <script>
 import webrtc from '@/components/common/webrtc.vue';
 import vlinkHeader from '../../../components/header.vue';
+import imgZoom from '@/components/common/imgZoom.vue';
 export default {
-  components: {vlinkHeader, webrtc},
+  components: {vlinkHeader, webrtc, imgZoom},
   data () {
     return {
       /* loginDialogVisible: false,
@@ -72,7 +74,7 @@ export default {
 .vl_main {
   height: 100%;
   min-width: 1200px;
-  min-height: 625px;
+  min-height: 575px;
   > .vl_content {
     padding-top: 100px;
     height: 100%;

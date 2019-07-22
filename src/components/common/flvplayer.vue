@@ -427,7 +427,9 @@ export default {
     }
     this.initPlayer();
     // $(window).on('unload', this.videoUnloadSave);
-    this.sizeHandler();
+    window.setTimeout(() => {
+      this.sizeHandler();
+    }, 300);
   },
   methods: {
     // sizeHandler

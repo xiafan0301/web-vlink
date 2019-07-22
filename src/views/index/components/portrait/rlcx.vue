@@ -3,12 +3,26 @@
     <div class="vc_gcck_bd" is="vehicleBreadcrumb" :oData="[{name: '特征搜人'}]"></div>
     <div class="rlcx_main clearfix">
       <div class="rlcx_l">
-        <el-form ref="form" class="pt_rlcx_fm" :model="searchForm" size="small">
+        <el-form ref="form" class="pt_rlcx_fm" :model="searchForm">
           <el-form-item>
             <el-date-picker
+              class="vl_date"
               style="width: 240px;"
-              v-model="searchForm.time"
-              type="daterange"
+              v-model="searchForm.time[0]"
+              type="date"
+              :editable="false" :clearable="false"
+              :picker-options="pickerOptions"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item>
+            <el-date-picker
+              class="vl_date vl_date_end"
+              style="width: 240px;"
+              v-model="searchForm.time[1]"
+              type="date"
               :editable="false" :clearable="false"
               :picker-options="pickerOptions"
               range-separator="至"
@@ -19,11 +33,15 @@
           <el-form-item label="抓拍区域：" label-width="80px">
             <el-radio-group v-model="searchForm.type" @change="areaTypeChanged">
               <el-radio :label="1">列表选择</el-radio>
-              <el-radio :label="2" @click="alert(1)">地图选择</el-radio>
+              <el-radio :label="2">地图选择</el-radio>
             </el-radio-group>
           </el-form-item>
             <el-form-item v-show="searchForm.type === 1">
-              <el-select style="width: 100%;" v-model="searchForm.area" multiple collapse-tags placeholder="请选择区域" class="full">
+              <el-select style="width: 100%;" @change="handleCheckedCitiesChange" v-model="searchForm.area" multiple collapse-tags placeholder="请选择区域" class="full">
+                <!-- <el-option label="全部区域" value="all"></el-option> -->
+                <el-checkbox style="margin: 5px 0 5px 20px" :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">
+                  全部区域
+                </el-checkbox>
                 <el-option-group
                   v-for="group in areaList"
                   :key="group.areaName"
@@ -37,6 +55,14 @@
                 </el-option-group>
               </el-select>
             </el-form-item>
+
+            <!-- <el-form-item>
+              <el-radio-group v-model="searchForm.type2" @change="areaTypeChanged2">
+                <el-radio style="margin-left: 20px;" :label="1">从图片提取</el-radio>
+                <el-radio style="margin-left: 20px;" :label="2">自定义特征</el-radio>
+              </el-radio-group>
+            </el-form-item> -->
+
             <el-form-item v-show="searchForm.type === 1">
               <el-select style="width: 100%;" v-model="searchForm.sex" placeholder="选择性别">
                 <el-option :label="'不限'" :value="'不限'"></el-option>
@@ -80,7 +106,7 @@
           <el-form-item>
             <div style="text-align: center; padding-top: 10px;">
               <el-button @click="searchReset">&nbsp;&nbsp;重&nbsp;&nbsp;置&nbsp;&nbsp;</el-button>
-              <el-button type="primary" @click="searchSubmit" :loading="searchLoading"
+              <el-button type="primary" @click="searchSubmit(1)" :loading="searchLoading"
                 :disabled="(searchForm.type === 2 && dSum <= 0) || (!searchForm.area || searchForm.area.length <= 0)">&nbsp;&nbsp;确&nbsp;&nbsp;定&nbsp;&nbsp;</el-button>
             </div>
           </el-form-item>
@@ -127,7 +153,7 @@
       </div>
     </div>
     <!-- 详情 -->
-    <portraitDetail :open="showDetail" @closeDialog="onCloseDetail" :detailData="deData"  @nextPage="nextData" :scrollData="seData" ></portraitDetail>
+    <portraitDetail :open="showDetail" @closeDialog="onCloseDetail" :detailData="deData"  @nextPage="nextData" :scrollData="seData" :conditions="condition" ></portraitDetail>
     <!-- D设备 B卡口  这里是设备和卡口 -->
     <div is="mapSelector" :open="openMap" :clear="msClear" :showTypes="'DB'" @mapSelectorEmit="mapSelectorEmit"></div>
   </div>
@@ -137,8 +163,7 @@ import noResult from '@/components/common/noResult.vue';
 import { mapXupuxian } from "@/config/config.js";
 import vehicleBreadcrumb from './breadcrumb.vue';
 import mapSelector from '@/components/common/mapSelector.vue';
-import {getFaceRetrieval, getFaceRetrievalPerson} from '../../api/api.judge.js';
-import { getDeviceByBayonetUids } from "@/views/index/api/api.base.js";
+import {getFaceRetrievalPerson} from '../../api/api.judge.js';
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import {formatDate} from '@/utils/util.js';
 import portraitDetail from '@/components/common/portraitDetail.vue';
@@ -146,12 +171,16 @@ export default {
   components: {vehicleBreadcrumb, mapSelector,portraitDetail, noResult},
   data () {
     return {
+      checkAll: true,
+      isIndeterminate: false,
+
       showDetail:false,
-       deData:null,
+      deData:null,
       seData:null,
       searchForm: {
         time: [new Date(new Date().getTime() - 2 * 24 * 60 * 60 * 1000), new Date()],
-        type: 1, // 列表选择 地图选择
+        type: 1, // 1列表选择 2地图选择
+        type2: 1, // 1图片  2自定义
         area: [],
         sex: '',
         age: '',
@@ -181,17 +210,33 @@ export default {
         disabledDate (d) {
           return d > new Date() || d < new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000);
         }
-      }
+      },
+      condition:{}
     }
   },
   created () {
     this.getMapGETmonitorList();
   },
   methods: {
+    handleCheckAllChange (val) {
+      this.searchForm.area = val ? this.areaSData : [];
+      this.isIndeterminate = false;
+    },
+    handleCheckedCitiesChange(value) {
+      let checkedCount = value.length;
+      this.checkAll = checkedCount === this.areaSData.length;
+      this.isIndeterminate = checkedCount > 0 && checkedCount < this.areaSData.length;
+    },
+
     nextData(){
       // console.log(3232131);
       
       let val= (this.pagination.pageNum?this.pagination.pageNum : 1) + 1
+      let lim = Math.ceil(this.pagination.total/this.pagination.pageSize)
+      if(val > lim){
+        return
+      }
+      this.pagination.currentPage=val
       this.handleCurrentChange(val)
 
     },
@@ -252,7 +297,12 @@ export default {
         this.openMap = !this.openMap;
       }
     },
-    searchSubmit () {
+    areaTypeChanged2 (val) {
+    },
+    searchSubmit (pageNum) {
+      if (pageNum > 0) {
+        this.pagination.pageNum = pageNum;
+      }
       this.searchLoading = true;
       let params = {
         where: {
@@ -286,12 +336,13 @@ export default {
           deviceIds: this.dIds.join(',')
         });
       }
-   
+      this.condition=params
       // getFaceRetrieval getFaceRetrievalPerson
       getFaceRetrievalPerson(params).then(res => {
         if (res && res.data) {
           this.dataList = res.data.list;
           this.alldataList.push(...res.data.list);
+          // this.alldataList=res.data.list;
           this.pagination.total = res.data.total;
         }
         this.searchLoading = false;

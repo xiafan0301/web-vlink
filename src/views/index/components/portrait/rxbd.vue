@@ -19,14 +19,14 @@
         </div>
         <div class="vl_judge_tc_c_item">
           <el-upload
-            :class="{'vl_jtc_upload': true}"
-            :show-file-list="false"
-            accept="image/*"
-            :action="uploadAcion"
-            list-type="picture-card"
-            :before-upload="beforeAvatarUpload"
-            :on-success="uploadSucess"
-            :on-error="handleError">
+                  :class="{'vl_jtc_upload': true}"
+                  :show-file-list="false"
+                  accept="image/*"
+                  :action="uploadAcion"
+                  list-type="picture-card"
+                  :before-upload="beforeAvatarUpload"
+                  :on-success="uploadSucess"
+                  :on-error="handleError">
             <i v-if="uploading" class="el-icon-loading"></i>
             <img v-else-if="curImageUrl" :src="curImageUrl">
             <i style="width: 140px;height: 114px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;" class="vl_icon vl_icon_retrieval_07" v-else></i>
@@ -38,14 +38,14 @@
         </div>
         <div class="vl_judge_tc_c_item">
           <el-upload
-            :class="{'vl_jtc_upload': true}"
-            :show-file-list="false"
-            accept="image/*"
-            :action="uploadAcion"
-            list-type="picture-card"
-            :before-upload="beforeAvatarUpload2"
-            :on-success="uploadSucess2"
-            :on-error="handleError2">
+                  :class="{'vl_jtc_upload': true}"
+                  :show-file-list="false"
+                  accept="image/*"
+                  :action="uploadAcion"
+                  list-type="picture-card"
+                  :before-upload="beforeAvatarUpload2"
+                  :on-success="uploadSucess2"
+                  :on-error="handleError2">
             <i v-if="uploading2" class="el-icon-loading"></i>
             <img v-else-if="curImageUrl2" :src="curImageUrl2">
             <i style="width: 140px;height: 114px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;" class="vl_icon vl_icon_retrieval_07" v-else></i>
@@ -59,7 +59,7 @@
                   { validator: validateIdCard, trigger: 'blur' }
                 ]"
               >
-                <el-input type="idCard" @blur="checkId" v-model="numberValidateForm.idCard" autocomplete="off"></el-input>
+                <el-input type="idCard" placeholder="请输入证件号" @blur="checkId" v-model="numberValidateForm.idCard" autocomplete="off"></el-input>
               </el-form-item>
             </el-form>
           </div>
@@ -73,11 +73,11 @@
     </div>
     <!--历史记录弹窗-->
     <el-dialog
-        :visible.sync="historyPicDialog"
-        class="history-pic-dialog"
-        :close-on-click-modal="false"
-        top="4vh"
-        title="最近上传的图片">
+            :visible.sync="historyPicDialog"
+            class="history-pic-dialog"
+            :close-on-click-modal="false"
+            top="4vh"
+            title="最近上传的图片">
       <div style="text-align: center;font-size: 20px;" v-if="loadingHis"><i class="el-icon-loading"></i></div>
       <vue-scroll class="his-pic-box" v-else-if="historyPicList.length">
         <div class="his-pic-item" :class="{'active': item.checked}" v-for="item in historyPicList" :key="item.id" @click="chooseHisPic(item)">

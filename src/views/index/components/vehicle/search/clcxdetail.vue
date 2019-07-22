@@ -22,32 +22,24 @@
             <span v-if="detailData.color">{{detailData.color}}色</span>
           </div> -->
           <div class="div">
-             <label>车牌</label>
+             <label>车牌号码</label>
             <span>{{detailData.plateNo}}</span>
            
           </div>
-          <div class="div" v-if="detailData.color">
-             <label>车身颜色</label>
-            <span>{{detailData.vehicleColor}}色</span>
-           
-          </div>
           <div class="div">
-             <label>号牌种类</label>
+             <label>号牌类型</label>
             <span>{{detailData._numberType}}</span>
            
           </div>
+         
           <div class="div">
             <label>号牌颜色</label>
-            <span>{{detailData.numberColor}}</span>
+            <span>{{detailData._numberColor}}</span>
             
           </div>
-          <div class="div">
-             <label>车辆类型</label>
-            <span>{{detailData._vehicleType}}</span>
            
-          </div>
-          <div class="div" v-if="detailData.owner">
-             <label>车辆所有人</label>
+           <div class="div" v-if="detailData.owner">
+             <label>车主</label>
             <span>{{detailData.ownerName}}</span>
            
           </div>
@@ -57,9 +49,19 @@
             
           </div>
           <div class="div">
+             <label>车辆类型</label>
+            <span>{{detailData._vehicleType}}</span>
+           
+          </div>
+          <div class="div">
             <label>车辆型号</label>
-            <span>{{detailData.vehicleModel}}人</span>
+            <span>{{detailData.vehicleModel}}</span>
             
+          </div>
+          <div class="div" >
+             <label>车辆颜色</label>
+            <span>{{detailData._vehicleColor}}</span>
+           
           </div>
           <!-- <div class="div">
             <label>使用性质</label>
@@ -75,7 +77,7 @@
             <span>{{detailData.isSurveillance}}</span>
             <label>布控车辆</label>
           </div> -->
-          <el-button type="primary"  @click="goToPage('vehicle_search_lxwfdetail')" class="select_btn full">查看违章记录</el-button>
+          <!-- <el-button type="primary"  @click="goToPage('vehicle_search_lxwfdetail')" class="select_btn full">查看违章记录</el-button> -->
         </div>
       </div>
     </div>
@@ -86,7 +88,7 @@
             <div v-if="snapObj.videoPath">
             <video id="capVideo"
               :src="snapObj.videoPath"
-              class="spimg"
+              class="video"
               autoplay
             ></video>
             <div class="play_btn" @click="videoTap" v-show="!playing">
@@ -105,21 +107,21 @@
             <h3 class="titles">抓拍信息</h3>
             <div class="infom">
               <div>
-                <p class="div">
+                <p class="div flexDiv">
                   <label>抓拍时间</label>
                   <span>{{snapObj.snapTime}}</span>
                   
                 </p>
               </div>
               <div>
-                <p class="div">
+                <p class="div flexDiv">
                    <label>抓拍设备</label>
                   <span>{{snapObj.snapDevice}}</span>
                  
                 </p>
               </div>
               <div>
-                <p class="div">
+                <p class="div flexDiv">
                   <label>抓拍地址</label>
                   <span>{{snapObj.address}}</span>
                   
@@ -135,12 +137,12 @@
           <swiper :options="swiperOption" ref="mySwiper">
             <!-- slides -->
             <swiper-slide v-for="(item, index) in strucInfoList" :key="item.id">
-              <div
+              <div style="width:0.88rem; height:0.88rem;"
                 class="swiper_img_item"
                 :class="{'active': index === curImgIndex}"
                 @click="imgListTap(item, index)"
               >
-                <img style="width: 100%; height: 100%; min-height:0.88rem;" :src="item.subStoragePath" >
+                <img style="width: 100%; height: 100%; " :src="item.subStoragePath" >
                 <!-- <div class="vl_jfo_sim" v-show="showSim">
                   <i
                     class="vl_icon vl_icon_retrieval_05"
@@ -234,6 +236,8 @@ export default {
       detailData:{},
       plateType:[],
       vehicleType:[],
+      plateColor:[],
+      vehicleColor:[],
 
     };
   },
@@ -245,9 +249,13 @@ export default {
     //console.log(this.urldata);
     let dic = this.dicFormater(dataList.vehicleType);
     let dic1 = this.dicFormater(dataList.plateType);
+    let dic2 = this.dicFormater(dataList.plateColor);
+    let dic3 = this.dicFormater(dataList.vehicleColor);
 
     this.plateType = [...dic1[0].dictList]; // 号牌类型
     this.vehicleType = [...dic[0].dictList]; // 车辆类型
+    this.plateColor = [...dic2[0].dictList]; // 号牌颜色
+    this.vehicleColor = [...dic3[0].dictList]; // 车辆颜色
 
     this.getSnapDetail()
     //this.getArchives()
@@ -287,11 +295,15 @@ export default {
           // this.vehicleType = [...dic[0].dictList]; // 车辆类型
           let a = this.plateType.find(el=>el.enumField==this.detailData.numberType)
           let b = this.vehicleType.find(el=>el.enumField==this.detailData.vehicleType)
+          let c = this.plateColor.find(el=>el.enumField==this.detailData.numberColor)
+          let d = this.vehicleColor.find(el=>el.enumField==this.detailData.vehicleColor)
           // console.log(this.plateType);
           // console.log(b);
           //if(a)
           this.detailData._vehicleType=a ? a.enumValue :''
           this.detailData._numberType= b ? b.enumValue :''
+          this.detailData._numberColor= c ? c.enumValue :''
+          this.detailData._vehicleColor= d ? d.enumValue :''
         }
       })
     },
@@ -311,6 +323,17 @@ export default {
           this.strucInfoList = res.data.snapDtoList;
           this.snapObj=res.data.snapDtoList[0]
           // console.log(res.data);
+           let a = this.plateType.find(el=>el.enumField==this.detailData.numberType)
+          let b = this.vehicleType.find(el=>el.enumField==this.detailData.vehicleType)
+          let c = this.plateColor.find(el=>el.enumField==this.detailData.numberColor)
+          let d = this.vehicleColor.find(el=>el.enumField==this.detailData.vehicleColor)
+          // console.log(this.plateType);
+          // console.log(b);
+          //if(a)
+          this.detailData._vehicleType=a ? a.enumValue :''
+          this.detailData._numberType= b ? b.enumValue :''
+          this.detailData._numberColor= c ? c.enumValue :''
+          this.detailData._vehicleColor= d ? d.enumValue :''
           
         }
       })
@@ -463,27 +486,43 @@ export default {
   border: solid 1px #0c70f8;
   color: #ffffff;
 }
+
 .div {
   display: inline-block;
-  padding: 5px 10px;
-  margin: 5px 10px 5px 0px;
+  padding: 3px 10px;
+  margin: 6px 5px 6px 0px;
   background: rgba(250, 250, 250, 1);
   border: 1px solid rgba(242, 242, 242, 1);
+ 
   label {
+    width: 70px;
     font-size: 14px;
     font-weight: 400;
     color: rgba(153, 153, 153, 1);
-    line-height: 24px;
+    padding-right: 5px;
     border-right: solid 1px rgba(242, 242, 242, 1);
-    padding-right: 10px;
+   
   }
   span {
     padding-left: 10px;
     font-size: 14px;
     font-weight: 400;
     color: rgba(51, 51, 51, 1);
-    line-height: 24px;
+    line-height: 20px;
   }
+}
+p.flexDiv{
+  display: flex;
+  align-items: center;
+  padding: 0px;
+  background:#ffffff;
+  
+  label{
+    padding: 3px 5px;
+    background: rgba(250, 250, 250, 1);
+    word-break: keep-all;
+  }
+  
 }
 .select_btn {
   background-color: #0c70f8;
@@ -560,6 +599,9 @@ export default {
   box-shadow: 0 0 0 !important;
 }
 .bkt {
+  div{
+    height: 100%;
+  }
   background: #eeeeee;
   // width: 40rem;
   // height: 40rem;
@@ -571,6 +613,14 @@ export default {
   .spimg {
     width: 100%;
     height: auto;
+    max-height: 100%;
+    display: block;
+    vertical-align: middle;
+    align-items: center;
+  }
+  .video{
+     width: 100%;
+    height: 100%;
     max-height: 100%;
     display: block;
     vertical-align: middle;
