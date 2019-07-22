@@ -267,7 +267,7 @@ export default {
         "-" + _sm + "-" +_sd;
       let _e = date.getFullYear() + "-" + _em + "-" + _ed;
       this.ruleForm.data1 = _s
-      this.ruleForm.data2 =  _e
+      this.ruleForm.data2 =  _s
     },
     hideResult() {
       this.reselt = false;

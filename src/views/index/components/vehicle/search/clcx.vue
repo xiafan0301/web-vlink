@@ -580,7 +580,7 @@ export default {
     setDTime() {
       let date = new Date();
       let curDate = date.getTime();
-      let curS = 30 * 24 * 3600 * 1000;
+      let curS = 1 * 24 * 3600 * 1000;
       let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
       let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
       let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
@@ -590,8 +590,8 @@ export default {
         "-" + _sm + "-" +_sd;
       let _e = date.getFullYear() + "-" + _em + "-" + _ed;
       // this.data1 = [_e, _e];
-      this.ruleForm.dateStart=_e
-      this.ruleForm.dateEnd=_e
+      this.ruleForm.dateStart=_s
+      this.ruleForm.dateEnd=_s
     },
     //查询行政区域
     getMapGETmonitorList(){
