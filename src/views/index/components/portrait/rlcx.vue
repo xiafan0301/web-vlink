@@ -1,6 +1,8 @@
 <template>
   <div class="portrait_content">
-    <div class="vc_gcck_bd" is="vehicleBreadcrumb" :oData="[{name: '特征搜人'}]"></div>
+    <div class="vc_gcck_bd">
+      <div is="vehicleBreadcrumb" :breadcrumbData="[{name: '人像侦查', routerName: 'portrait'}, {name: '人像检索'}]"></div>
+    </div>
     <div class="rlcx_main clearfix">
       <div class="rlcx_l">
         <el-form ref="form" class="pt_rlcx_fm" :model="searchForm">
@@ -273,7 +275,7 @@
 <script>
 import noResult from '@/components/common/noResult.vue';
 import { mapXupuxian } from "@/config/config.js";
-import vehicleBreadcrumb from './breadcrumb.vue';
+import vehicleBreadcrumb from '@/components/common/breadcrumb.vue';
 import mapSelector from '@/components/common/mapSelector.vue';
 import {getFaceRetrievalPerson} from '../../api/api.judge.js';
 import {getPicRecognize} from '../../api/api.structuring.js';
@@ -694,6 +696,10 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.vc_gcck_bd {
+  position: absolute; top: 0; left: 0;
+  width: 100%;
+}
 .up_tz_list {
   padding-top: 5px;
   overflow: hidden;
