@@ -26,10 +26,8 @@
                   <el-form-item label prop="startTime">
                     <el-date-picker
                       v-model="ytscMenuForm.startTime"
-                      type="datetime"
+                      type="date"
                       :clearable="false"
-                      value-format="yyyy-MM-dd"
-                      format="yyyy-MM-dd"
                       :picker-options="startDateOpt"
                       placeholder="开始时间"
                       class="width232 vl_date"
@@ -38,10 +36,8 @@
                   <el-form-item label prop="endTime">
                     <el-date-picker
                       v-model="ytscMenuForm.endTime"
-                      type="datetime"
+                      type="date"
                       :clearable="false"
-                      value-format="yyyy-MM-dd"
-                      format="yyyy-MM-dd"
                       :picker-options="endDateOpt"
                       placeholder="结束时间"
                       class="width232 vl_date vl_date_end"
@@ -203,13 +199,13 @@
                 </div>
                 <div class="text_wrap">
                   <h3 class="text_name">检索资料</h3>
-                  <div class="text_message">
+                  <div class="text_message" :title="item.shotTime">
                     <i class="vl_icon vl_icon_retrieval_01"></i>
-                    <span>{{item.shotTime}}</span>
+                    {{item.shotTime}}
                   </div>
-                  <div class="text_message">
+                  <div class="text_message" :title="item.deviceName">
                     <i class="vl_icon vl_icon_retrieval_02"></i>
-                    <span>{{item.deviceName}}</span>
+                    {{item.deviceName}}
                   </div>
                 </div>
               </div>
@@ -628,13 +624,13 @@ export default {
     }
   },
   methods: {
-    bigImg(v) {
-      if (v == 1) {
-        this.isChoose = !this.isChoose;
-      } else {
-        this.isChoose2 = !this.isChoose2;
-      }
-    },
+    // bigImg(v) {
+    //   if (v == 1) {
+    //     this.isChoose = !this.isChoose;
+    //   } else {
+    //     this.isChoose2 = !this.isChoose2;
+    //   }
+    // },
     /*重置菜单的数据 */
     resetMenu() {
       // 置空数据数量
@@ -1428,21 +1424,21 @@ export default {
             }
             // 检索的资料信息
             .text_message {
+              width: 184px;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+              overflow: hidden;
               margin-top: 8px;
               padding: 0 12px;
               font-size: 12px;
               background: #fafafa;
               border: 1px solid #f2f2f2;
               border-radius: 3px;
-              overflow: hidden;
               > i {
                 margin-top: 3px;
                 float: left;
               }
-              > span {
-                line-height: 26px;
-                float: left;
-              }
+              line-height: 26px;
             }
           }
         }
