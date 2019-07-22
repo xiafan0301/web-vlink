@@ -2,18 +2,23 @@
   <!-- 模糊搜车 -->
   <div class="mhsc_wrap">
     <!-- 面包屑通用样式 -->
-    <div class="link_bread">
+    <div
+        is="vlBreadcrumb"
+        :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
+          {name: '模糊搜车'}]"
+      ></div>
+    <!-- <div class="link_bread">
       <el-breadcrumb separator=">" class="bread_common">
         <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
         <el-breadcrumb-item>模糊搜车</el-breadcrumb-item>
       </el-breadcrumb>
-    </div>
+    </div> -->
     <div class="sc_content">
       <!-- 通用的左边菜单 -->
       <div class="left_menu">
         <!-- 菜单表单 -->
         <vue-scroll>
-          <div style="padding: 2px 20px 20px 20px;">
+          <div style="padding: 12px 20px 20px 20px;">
             <!-- 表单 -->
             <div class="form_warp">
               <el-form :model="mhscMenuForm" ref="mhscMenuForm" :rules="rules">
@@ -451,6 +456,8 @@
   </div>
 </template>
 <script>
+import vlBreadcrumb from "@/components/common/breadcrumb.vue";
+
 import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入一个地图的地址
 import { formatDate } from "@/utils/util.js";
 
@@ -603,6 +610,7 @@ export default {
       videoUrl: "" // 弹窗视频回放里的视频
     };
   },
+  components: { vlBreadcrumb },
   mounted() {
     this.getMonitorList();
     this.setDTime();
@@ -1018,16 +1026,16 @@ export default {
   height: 100%;
   position: relative;
   // 面包屑样式
-  .link_bread {
-    height: 60px;
-    background: #fff;
-    .bread_common {
-      padding: 23px 0 0 20px;
-    }
-  }
+  // .link_bread {
+  //   height: 60px;
+  //   background: #fff;
+  //   .bread_common {
+  //     padding: 23px 0 0 20px;
+  //   }
+  // }
   // 搜车主体页面
   .sc_content {
-    height: calc(100% - 60px);
+    height: calc(100% - 49px);
     overflow: hidden;
     display: -webkit-box;
     display: -ms-flexbox;

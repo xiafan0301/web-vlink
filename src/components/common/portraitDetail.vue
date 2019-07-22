@@ -45,7 +45,7 @@
                       </div> -->
                       <div class="struc_cdi_line">
                         <span class='tz' v-if="sturcDetail.features"><b>特征</b>{{sturcDetail.features}}</span>
-                        <span class="tz" v-else><b>特征</b>{{sturcDetail.sex+" "+(sturcDetail.age || "")+ " "+ (sturcDetail.baby || "")+ " " + (sturcDetail.bag || "")+ " " + (sturcDetail.bottomColor || "") +(sturcDetail.bottomType || "")+ " " + (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+ " "+(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")}}</span>
+                        <span class="tz" v-else><b>特征</b>{{sturcDetail.sex+" "+(sturcDetail.age || "")+ " "+ (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+ " "+ (sturcDetail.baby || "")+ " " + (sturcDetail.bag || "")+ " " + (sturcDetail.bottomColor || "") +" " +(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")+" "+(sturcDetail.bottomType || "")}}</span>
                       </div>
                       <div class="struc_cdi_line"></div>
                     </div>

@@ -36,7 +36,6 @@
                 align="left"
                 :editable="false"
                 :clearable="false"
-                @change="pickerChanged"
                 :picker-options="pickerOptions">
               </el-date-picker>
               <el-date-picker style="width: 236px; margin-top: 10px"
@@ -46,7 +45,6 @@
                 align="left"
                 :editable="false"
                 :clearable="false"
-                @change="pickerChanged"
                 :picker-options="pickerOptions">
               </el-date-picker>
               <el-input
@@ -552,12 +550,12 @@ export default {
     getTreeList2 () {
       this.doSearch2 = {};
     },
-    pickerChanged () {
+    /* pickerChanged () {
       if ((this.searchTime2[1].getTime() - this.searchTime2[0].getTime()) > 2 * 24 * 60 * 60 * 1000) {
         this.searchTime2[1] = new Date(this.searchTime2[0].getTime() + 2 * 24 * 60 * 60 * 1000);
         this.$message('最多不能超过72小时.');
       }
-    }
+    } */
   },
   beforeDestroy () {
     if (this.picAntoPlayInval) {
