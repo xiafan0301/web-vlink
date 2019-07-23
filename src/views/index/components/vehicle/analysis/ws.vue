@@ -45,7 +45,7 @@
                 v-for="(item, index) in deviceList"
                 :key="index"
                 :label="item.deviceName"
-                :value="item.deviceID"
+                :value="item.deviceName"
               ></el-option>
             </el-select>
             <span class="span_tips" v-show="isShowDeviceTip">该车辆在该时间内无抓拍设备</span>
@@ -101,7 +101,7 @@
                   </p>
                   <p>
                     <i class="vl_icon_tail_1 vl_icon"></i>
-                    <span>{{item.shotTime}}</span>
+                    <span :title="item.shotTime">{{item.shotTime}}</span>
                   </p>
                   <div class="record_btn" @click="skipWsReocrdPage(item)">尾随记录</div>
                 </div>
@@ -148,29 +148,33 @@ export default {
         { label: '10分钟', value: 10 }
       ],
       rules: {
-        plateNo: [
-          { required: true, message: '请输入正确的车牌号码', trigger: 'blur' },
-          { validator: checkPlateNumber, trigger: 'blur' }
-        ]
+        // plateNo: [
+        //   { required: true, message: '请输入正确的车牌号码', trigger: 'blur' },
+        //   { validator: checkPlateNumber, trigger: 'blur' }
+        // ]
       },
       pickerStart: {
         disabledDate (time) {
           return time.getTime() > (new Date().getTime());
         }
       },
-      pickerEnd: {},
+      pickerEnd: {
+        disabledDate (time) {
+          return time.getTime() > (new Date().getTime());
+        }
+      },
       deviceList: [], // 抓拍设备列表
       vehicleTypeList: [], // 车辆类型列表
       dataList: [], // 查询的抓拍结果列表
     }
   },
   watch: {
-    'searchForm.shotTime' () {
-      let _this = this;
-      const threeDays = 2 * 3600 * 24 * 1000;
-      const endTime = new Date(_this.searchForm.shotTime).getTime() + threeDays;
-      _this.searchForm.dateEnd = formatDate(endTime);
-    }
+    // 'searchForm.shotTime' () {
+    //   let _this = this;
+    //   const threeDays = 2 * 3600 * 24 * 1000;
+    //   const endTime = new Date(_this.searchForm.shotTime).getTime() + threeDays;
+    //   _this.searchForm.dateEnd = formatDate(endTime);
+    // }
   },
   mounted () {
     this.getVehicleTypeList();
@@ -219,7 +223,6 @@ export default {
     // 开始时间blur
     blurStartTime (form) {
       let _this = this;
-    
       if (_this.searchForm.shotTime) {
         if (_this.searchForm.plateNo && _this.searchForm.dateEnd) {
           _this.getDeviceList();
@@ -237,13 +240,13 @@ export default {
     },
     // 结束时间focus
     handleEndTime () {
-      let _this = this;
-      const startDate = new Date(_this.searchForm.shotTime).getTime();
-      _this.pickerEnd = {
-        disabledDate (time) {
-         return time.getTime() < (startDate - 8.64e7) || time.getTime() > ((startDate + 2 * 3600 * 24 * 1000) - 8.64e6);
-        }
-      }
+      // let _this = this;
+      // const startDate = new Date(_this.searchForm.shotTime).getTime();
+      // _this.pickerEnd = {
+      //   disabledDate (time) {
+      //    return time.getTime() < (startDate - 8.64e7) || time.getTime() > ((startDate + 2 * 3600 * 24 * 1000) - 8.64e6);
+      //   }
+      // }
     },
     // 获取抓拍设备列表
     getDeviceList () {
@@ -260,13 +263,13 @@ export default {
               this.deviceList = res.data;
 
               // 初始化页面时默认选中第一个设备
-              this.searchForm.deviceCode = this.deviceList[0].deviceID;
+              this.searchForm.deviceCode = this.deviceList[0].deviceName;
               this.deviceStartTime = this.deviceList[0].shotTime;
               this.isShowDeviceTip = false;
 
               if (this.$route.query.deviceCode) {
                 this.deviceList.map(item => {
-                  if (item.deviceID === this.$route.query.deviceCode) {
+                  if (item.deviceName === this.$route.query.deviceCode) {
                     this.deviceStartTime = item.shotTime;
                   }
                 })
@@ -282,7 +285,8 @@ export default {
     handleChangeDeviceCode (obj) {
       if (obj) {
         this.deviceList.map(item => {
-          if (item.deviceID === obj) {
+          if (item.deviceName === obj) {
+            // this.searchForm.deviceCode = item.deviceID;
             this.deviceStartTime = item.shotTime;
           }
         })
@@ -304,6 +308,7 @@ export default {
     // 重置查询条件
     resetData (form) {
       this.isInitPage = false;
+      this.isShowDeviceTip = false;
       this.$refs[form].resetFields();
       this.dataList = [];
     },
@@ -324,11 +329,15 @@ export default {
             }
             return;
           };
-
-
+          let deviceCode;
+          this.deviceList.map(item => {
+            if (item.deviceName === this.searchForm.deviceCode) {
+              deviceCode = item.deviceID;
+            }
+          })
           const vehicleType = this.searchForm.vehicleClass.join(',');
           const params = {
-            deviceCode: this.searchForm.deviceCode,
+            deviceCode: deviceCode,
             startTime: formatDate(this.searchForm.shotTime),
             shotTime: formatDate(this.deviceStartTime),
             plateNo: this.searchForm.plateNo,
@@ -454,6 +463,9 @@ export default {
                 border-radius:3px;
                 color: #333333;
                 font-size: 12px;
+                overflow:hidden; /*内容超出宽度时隐藏超出部分的内容 */
+                text-overflow:ellipsis;/* 当对象内文本溢出时显示省略标记(...) ；需与overflow:hidden;一起使用。*/
+                white-space:nowrap; /*不换行 */
                 i {
                   margin-right: 5px;
                 }

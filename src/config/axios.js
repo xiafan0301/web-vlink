@@ -19,6 +19,7 @@ let service = axios.create({
 service.interceptors.request.use((config) => {
   // 用户信息
   const userInfo = localStorage.getItem('as_vlink_user_info');
+  // console.log(userInfo);
   if (userInfo) {
     config.headers['Auth-Session-Id'] = JSON.parse(userInfo).sessionId;
   }
@@ -49,10 +50,10 @@ service.interceptors.response.use(function (response) {
     if (_data.code === '00000000') {
       return _data;
     } else if (_data.code === '10060002') {
-      store.commit('setLoginToken', {
-        loginToken: false
-      });
-      return null;
+      // store.commit('setLoginToken', {
+      //   loginToken: false
+      // });
+      // return null;
       // 未登录
       // ElementUI.Message({ message: _data.viewMsg, type: 'error', customClass: 'request_tip' });
     } else if ( contenType === 'application/msexcel') {

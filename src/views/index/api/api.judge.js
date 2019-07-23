@@ -465,6 +465,18 @@ export function getMultiVehicleList(params) {
     mode: 'judge'
   })
 }
+/**
+ * 判断基准车辆是否有抓拍数据
+ * @param {object} params
+ */
+export function getBaseVehicleList(params) {
+  return request({
+    url: '/base-vehicle-check',
+    method: 'get',
+    params,
+    mode: 'judge'
+  })
+}
 /*--------------------------  车辆侦查--多车同行分析end  ---------------------------------*/
 
 /*--------------------------  车辆侦查--夜间行车分析start  ---------------------------------*/

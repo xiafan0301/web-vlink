@@ -503,6 +503,7 @@ export default {
     },
       imgListTap(data, index) {
       // 点击swiper图片
+       this.playing = false;
       this.curImgIndex = index;
       this.sturcDetail = data;
       this.drawPoint(data); // 重新绘制地图
@@ -580,7 +581,7 @@ export default {
     setDTime() {
       let date = new Date();
       let curDate = date.getTime();
-      let curS = 30 * 24 * 3600 * 1000;
+      let curS = 1 * 24 * 3600 * 1000;
       let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
       let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
       let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
@@ -590,8 +591,8 @@ export default {
         "-" + _sm + "-" +_sd;
       let _e = date.getFullYear() + "-" + _em + "-" + _ed;
       // this.data1 = [_e, _e];
-      this.ruleForm.dateStart=_e
-      this.ruleForm.dateEnd=_e
+      this.ruleForm.dateStart=_s
+      this.ruleForm.dateEnd=_s
     },
     //查询行政区域
     getMapGETmonitorList(){
@@ -685,6 +686,8 @@ export default {
            if(!document.querySelector('.el-message--info')){
              this.$message.info("没有相关数据。");
           }
+          this.pagination.total=0;
+          this.pagination.pageNum=1;
           this.tableData=[]
         }
       }).catch(() => {
@@ -750,8 +753,8 @@ export default {
       v.dateEnd = this.ruleForm.dateEnd
       //this.strucDetailDialog = true 
       let d={
-        dateStart:this.ruleForm.dateStart + " 00:00:00",
-        dateEnd:this.ruleForm.dateEnd + " 23:59:59",
+        dateStart:this.ruleForm.dateStart,
+        dateEnd:this.ruleForm.dateEnd ,
         devIds:'',
         plateNo:v.plateNo,
         hasPlate:v.plateNo?'1':'0'
@@ -781,7 +784,7 @@ export default {
     submitForm(){
       this.ruleForm.include=this.ruleForm._include?0:1
       // console.log(this.ruleForm);
-     
+      this.pagination.pageNum = 1;
       this.getSnapList()
       
     },
