@@ -753,8 +753,8 @@ export default {
       v.dateEnd = this.ruleForm.dateEnd
       //this.strucDetailDialog = true 
       let d={
-        dateStart:this.ruleForm.dateStart + " 00:00:00",
-        dateEnd:this.ruleForm.dateEnd + " 23:59:59",
+        dateStart:this.ruleForm.dateStart,
+        dateEnd:this.ruleForm.dateEnd ,
         devIds:'',
         plateNo:v.plateNo,
         hasPlate:v.plateNo?'1':'0'
