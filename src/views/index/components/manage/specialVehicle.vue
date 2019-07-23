@@ -165,7 +165,7 @@
     </div>
     <!--新建/修改车辆弹出框-->
     <el-dialog
-      :title="`${vehicleTitle}车辆`"
+      :title="`${vehicleTitle}车像`"
       :visible.sync="dialogVisiable"
       width="722px"
       :close-on-click-modal="false"
@@ -187,7 +187,7 @@
               :on-remove="handleRemove"
               :before-upload="beforeAvatarUpload"
               :file-list="fileList">
-              <i class="vl_icon vl_icon_control_14"></i>
+              <i class="vl_icon vl_icon_012_012"></i>
             </el-upload>
           </div>
           <template v-if="!isAddImgDisabled">
@@ -1468,15 +1468,16 @@ export default {
         /deep/ .el-upload {
           width: 160px;
           height: 160px;
-          
+          line-height: 160px;
           i {
-             width: 120px;
-            height: 110px;
+            width: 104px;
+            height: 87px;
+            vertical-align: middle;
           }
           &:hover{
             background: #0C70F8;
-            i.vl_icon_control_14{
-              background-position: -228px -570px;
+            i.vl_icon_012_012 {
+              background-position: -965px -611px;
             }
           }
         }

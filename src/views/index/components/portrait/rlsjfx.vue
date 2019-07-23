@@ -234,6 +234,8 @@ export default {
     this.getFaceTotal();
     this.getFaceControlSta();
     this.drawChart2();
+    // 进入页面滚动条保持在最顶部
+    document.getElementById('rlsjfxBox').scrollTop = 0;
   },
   watch: {
     selectLength () {
@@ -359,7 +361,7 @@ export default {
     },
     // 画抓拍人脸数图表
     drawChart1 () {
-      if (this.chartData1.length === 0) return;
+      // if (this.chartData1.length === 0) return;
       let chart = null,_this = this;
       if (this.charts.chart1) {
         this.charts.chart1.clear();
@@ -417,7 +419,7 @@ export default {
           } else {
             str += `<h1>${_this.transformTime(title)}-${title}</h1>`;
           }
-          str += `<span><span>${items[0].value}</span><span>辆</span></span></div>`;
+          str += `<span><span>${items[0].value}</span><span>张</span></span></div>`;
           return str;
         }
       });
@@ -429,7 +431,7 @@ export default {
     },
     // 画布控告警次数图表
     drawChart2 () {
-      if (this.chartData2.length === 0) return;
+      // if (this.chartData2.length === 0) return;
       let chart = null,_this = this;
       if (this.charts.chart2) {
         this.charts.chart2.clear();
@@ -485,7 +487,7 @@ export default {
           } else {
             str += `<h1>${_this.transformTime(title)}-${title}</h1>`;
           }
-          str += `<span><span>${items[0].value}</span><span>辆</span></span></div>`;
+          str += `<span><span>${items[0].value}</span><span>次</span></span></div>`;
           return str;
         }
       });
@@ -506,6 +508,7 @@ export default {
   .rlsjfx_box{
     width: 100%;
     height: 100%;
+    overflow-y: auto;
     padding: 5px;
     display: flex;
     flex-flow: row wrap;

@@ -302,18 +302,18 @@ export default {
   methods: {
     // 时间选择change
     handleDateTime (val) {
-      if (val) {
-        if ( (new Date(val[1]).getTime() - new Date(val[0]).getTime()) >= 3* 24 * 3600 * 1000) {
-          if (!document.querySelector('.el-message--info')) {
-            this.$message.info('最多选择3天');
-          }
-          this.addForm.dateTime = [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()];
-        } else {
-          if (this.dialogImageUrl) {
-            this.getDeviceList();
-          }
-        }
-      }
+      // if (val) {
+      //   if ( (new Date(val[1]).getTime() - new Date(val[0]).getTime()) >= 3* 24 * 3600 * 1000) {
+      //     if (!document.querySelector('.el-message--info')) {
+      //       this.$message.info('最多选择3天');
+      //     }
+      //     this.addForm.dateTime = [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()];
+      //   } else {
+      //     if (this.dialogImageUrl) {
+      //       this.getDeviceList();
+      //     }
+      //   }
+      // }
     },
     // 获取离线任务
     getDataList () {

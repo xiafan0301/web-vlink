@@ -254,14 +254,19 @@ export default {
     getData () {
       this.searchLoading = true;
       this.delSignActive = {};
-      apiVideoList({
+      let params = {
         'where.startTime': formatDate(this.startTime),
         'where.endTime': formatDate(this.endTime),
-        'where.userId': this.signPeople,
-        'where.contentId': this.signContent,
         pageNum: this.pagination.currentPage,
         pageSize: this.pagination.pageSize
-      }).then(res => {
+      };
+      if (this.signPeople) {
+        params['where.userId'] = this.signPeople;
+      }
+      if (this.signContent) {
+        params['where.contentId'] = this.signContent;
+      }
+      apiVideoList(params).then(res => {
         if (res && res.data) {
           this.pagination.total = res.data.total;
           this.signList = res.data.list;
