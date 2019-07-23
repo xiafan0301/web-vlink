@@ -641,7 +641,6 @@ export default {
       if (this.selectIndex === 1) {
         if (
           this.searchData.licensePlateNum &&
-          reg.test(this.searchData.licensePlateNum) &&
           this.selectDeviceArr &&
           this.selectDeviceArr.length > 0
         ) {
@@ -651,12 +650,12 @@ export default {
             this.$message.info("请输入车牌号码");
           }
           return false;
-        } else if (!reg.test(this.searchData.licensePlateNum)) {
+        } /* else if (!reg.test(this.searchData.licensePlateNum)) {
           if (!document.querySelector(".el-message")) {
             this.$message.info("请正确输入车牌号码");
           }
           return false;
-        } else {
+        } */ else {
           if (!document.querySelector(".el-message")) {
             this.$message.info("请选择设备");
           }
