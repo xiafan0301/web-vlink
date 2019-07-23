@@ -316,7 +316,7 @@ export default {
     getControlObjBySelect () {
       getControlObjBySelect({surveillanceStatus: this.mapForm.state}).then(res => {
         if (res) {
-          this.controlObjDropdownList = res.data;
+          this.controlObjDropdownList = res.data.filter(f => f.name);
         }
       })
     },
@@ -629,11 +629,12 @@ export default {
           this.clickWindow = clickWindow;
           // 跳转至布控详情页
           $('#mapBox').on('click', '.vl_map_name', function (e) {
-            const { href } = _this.$router.resolve({
-              name: 'control_manage',
-              query: {pageType: 2, state: obj.surveillanceStatus, controlId: e.currentTarget.id }
-            })
-            window.open(href, '_blank', 'toolbar=no,location=no,width=1300,height=900')
+            // const { href } = _this.$router.resolve({
+            //   name: 'control_manage',
+            //   query: {pageType: 2, state: obj.surveillanceStatus, controlId: e.currentTarget.id }
+            // })
+            // window.open(href, '_blank', 'toolbar=no,location=no,width=1300,height=900')
+            _this.$router.push({name: 'control_manage', query: {pageType: 2, state: obj.surveillanceStatus, controlId: e.currentTarget.id }});
           })
           // 跳转至视频回放页面
           $('#mapBox').on('click', '.vl_map_btn', function () {
@@ -790,11 +791,12 @@ export default {
     },
     // 跳转至视频回放页面
     skipIsVideo (uid, deviceName) {
-      const { href } = this.$router.resolve({
-        name: 'video_playback',
-        query: {uid, deviceName}
-      })
-      window.open(href, '_blank', 'toolbar=no,location=no,width=1300,height=900')
+      // const { href } = this.$router.resolve({
+      //   name: 'video_playback',
+      //   query: {uid, deviceName}
+      // })
+      // window.open(href, '_blank', 'toolbar=no,location=no,width=1300,height=900')
+      this.$router.push({name: 'video_playback', query: {uid, deviceName}});
     },
     // 重置表单
     resetForm () {

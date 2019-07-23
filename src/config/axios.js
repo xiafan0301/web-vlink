@@ -19,6 +19,7 @@ let service = axios.create({
 service.interceptors.request.use((config) => {
   // 用户信息
   const userInfo = localStorage.getItem('as_vlink_user_info');
+  // console.log(userInfo);
   if (userInfo) {
     config.headers['Auth-Session-Id'] = JSON.parse(userInfo).sessionId;
   }

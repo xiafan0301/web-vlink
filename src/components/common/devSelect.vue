@@ -47,6 +47,13 @@ export default {
   },
   created () {
     this.getTreeList();
+    let _this = this;
+    $(':not(.dev_select)').on('click', function () {
+      _this.isShowSelectList = false;
+    })
+  },
+  destroyed () {
+    $(':not(.dev_select)').unbind('click');
   },
   methods: {
     checkedAll(){
@@ -67,51 +74,63 @@ export default {
       MapGETmonitorList(params).then(res => {
         if (res) {
           this.treeList = [res.data];
-          this.treeList = this.treeList.map(m => {
-            return {
-              id: m.areaId,
-              label: m.areaName,
-              children: m.areaTreeList.map(a => {
-                return {
-                  id: a.areaId,
-                  label: a.areaName,
-                  children: [...a.bayonetList.map(b => {
-                    return {
-                      id: b.uid,
-                      label: b.bayonetName,
-                      type: 2
-                    }
-                  }),...a.deviceBasicList.map(d => {
-                    return {
-                      id: d.uid,
-                      label: d.deviceName,
-                      type: 1
-                    }
-                  })]
-                }
-              })
-            }
-          })
-          // 获取设备和卡口总数
-          let arr = [];
-          this.selectNum = this.treeList.forEach(f => {
-            if (f.children) {
-              f.children.forEach(c => {
-                if (c.children) {
-                  c.children.forEach(a => {
-                    arr.push(a)
-                  })
-                }
-              })
-            }
-          })
-          this.selectNum = arr.length;
+          this.treeList = this.transformTreeList(this.treeList);//改造成所需要的树结构
+          this.selectNum = this.getDevTotal(this.treeList);//获取设备和卡口总数
           this.checked = true;
           this.$nextTick(() => {
             this.checkedAll();//  全选
           })
         }
       });
+    },
+    // 获取设备和卡口总数方法
+    getDevTotal (arr) {
+      const result = [];
+      const func = (_arr) => {
+        _arr.forEach(f => {
+          if (f.children) {
+            func(f.children);
+          } else {
+            result.push(f);
+          }
+        })
+      }
+      func(arr);
+      return result.length;
+    },
+    // 改造成所需要的数结构方法
+    transformTreeList (arry, result = []) {
+      arry.forEach(f => {
+        if (f.areaTreeList.length > 0) {
+          let child = {
+            id: f.areaId,
+            label: f.areaName,
+            children: []
+          }
+          result.push(child);
+          this.transformTreeList(f.areaTreeList, child.children);
+        } else {
+          let child = {
+            id: f.areaId,
+            label: f.areaName,
+            children: [...f.bayonetList.map(b => {
+              return {
+                id: b.uid,
+                label: b.bayonetName,
+                type: 2
+              }
+            }),...f.deviceBasicList.map(d => {
+              return {
+                id: d.uid,
+                label: d.deviceName,
+                type: 1
+              }
+            })]
+          }
+          result.push(child);
+        }
+      })
+      return result;
     },
     // 重置表单
     resetSelect () {
@@ -167,12 +186,6 @@ export default {
     background-color: #fff;
     box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
     margin-top: 10px;
-    // .select_tree {
-    //   border: 1px solid #e4e7ed;
-    //   border-radius: 4px;
-    //   background-color: #fff;
-    //   box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
-    // }
   }
 }
 </style>

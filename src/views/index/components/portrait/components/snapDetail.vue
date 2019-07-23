@@ -62,7 +62,7 @@
           <div class="operate_btn" @click="spinToRecog()">身份确认</div>
           <div class="operate_btn margin_btn" @click="spinToGJFX()">轨迹分析</div>
           <div class="operate_btn margin_btn" @click="spinToLJD()">落脚点分析</div>
-          <div class="operate_btn margin_btn" @click="spinToControl()">新建布控任务</div>
+          <div class="operate_btn margin_btn" @click="spinToControl()">新建布控</div>
         </div>
         <div v-show="strucCurTab === 2" class="struc_c_address"></div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">

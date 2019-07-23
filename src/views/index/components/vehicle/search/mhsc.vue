@@ -641,6 +641,7 @@ export default {
       this.$refs.mhscMenuForm.validate(valid => {
         if (isClick) {
           this.getStrucInfoLoading = true; // 打开加载效果
+          this.pageNum = 1;
         }
         if (valid) {
           if (this.selectCameraArr.length <= 0 && this.selectBayonetArr <= 0) {
