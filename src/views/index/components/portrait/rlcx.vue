@@ -1,7 +1,7 @@
 <template>
   <div class="portrait_content">
     <div class="vc_gcck_bd">
-      <div is="vehicleBreadcrumb" :breadcrumbData="[{name: '人像侦查', routerName: 'portrait'}, {name: '人像检索'}]"></div>
+      <div is="vehicleBreadcrumb" :breadcrumbData="[{name: '人像侦查', routerName: 'portrait'}, {name: '特征搜人'}]"></div>
     </div>
     <div class="rlcx_main clearfix">
       <div class="rlcx_l">
@@ -9,7 +9,7 @@
           <el-form-item>
             <el-date-picker
               class="vl_date"
-              style="width: 240px;"
+              style="width: 100%;"
               v-model="searchForm.time[0]"
               type="date"
               :editable="false" :clearable="false"
@@ -22,7 +22,7 @@
           <el-form-item>
             <el-date-picker
               class="vl_date vl_date_end"
-              style="width: 240px;"
+              style="width: 100%;"
               v-model="searchForm.time[1]"
               type="date"
               :editable="false" :clearable="false"
@@ -32,7 +32,7 @@
               end-placeholder="结束日期">
             </el-date-picker>
           </el-form-item>
-          <el-form-item label="抓拍区域：" label-width="80px">
+          <el-form-item label="抓拍区域:" label-width="72px">
             <el-radio-group v-model="searchForm.type" @change="areaTypeChanged">
               <el-radio :label="1">列表选择</el-radio>
               <el-radio :label="2">地图选择</el-radio>
@@ -104,6 +104,8 @@
                 <li v-if="uploadTZObj.upperColor" @click="uploadTZObj.upperColor.active = !uploadTZObj.upperColor.active" :class="{'up_tz_list_sed': uploadTZObj.upperColor.active}">{{'上身颜色：' + uploadTZObj.upperColor.value}}</li>
                 <li v-if="uploadTZObj.bottomType" @click="uploadTZObj.bottomType.active = !uploadTZObj.bottomType.active" :class="{'up_tz_list_sed': uploadTZObj.bottomType.active}">{{uploadTZObj.bottomType.value}}</li>
                 <li v-if="uploadTZObj.bottomColor" @click="uploadTZObj.bottomColor.active = !uploadTZObj.bottomColor.active" :class="{'up_tz_list_sed': uploadTZObj.bottomColor.active}">{{'下身颜色：' + uploadTZObj.bottomColor.value}}</li>
+                <li v-if="uploadTZObj.baby" @click="uploadTZObj.baby.active = !uploadTZObj.baby.active" :class="{'up_tz_list_sed': uploadTZObj.baby.active}">{{uploadTZObj.baby.value}}</li>
+                <li v-if="uploadTZObj.bag" @click="uploadTZObj.bag.active = !uploadTZObj.bag.active" :class="{'up_tz_list_sed': uploadTZObj.bag.active}">{{uploadTZObj.bag.value}}</li>
               </ul>
             </el-form-item>
 
@@ -161,7 +163,7 @@
               </el-select>
             </el-form-item>
             <el-form-item v-show="searchForm.type2 === 2">
-              <el-select style="width: 100%;" v-model="searchForm.upperType" placeholder="上身款式">
+              <el-select style="width: 100%;" v-model="searchForm.upperType" placeholder="选择上身款式">
                 <el-option :label="'不限'" :value="'不限'"></el-option>
                 <el-option :label="'长袖'" :value="'长袖'"></el-option>
                 <el-option :label="'短袖'" :value="'短袖'"></el-option>
@@ -169,7 +171,7 @@
               </el-select>
             </el-form-item>
             <el-form-item v-show="searchForm.type2 === 2">
-              <el-select style="width: 100%;" v-model="searchForm.upperColor" placeholder="上身颜色">
+              <el-select style="width: 100%;" v-model="searchForm.upperColor" placeholder="选择上身颜色">
                 <el-option :label="'不限'" :value="'不限'"></el-option>
                 <el-option :label="'红'" :value="'红'"></el-option>
                 <el-option :label="'黑'" :value="'黑'"></el-option>
@@ -180,7 +182,7 @@
               </el-select>
             </el-form-item>
             <el-form-item v-show="searchForm.type2 === 2">
-              <el-select style="width: 100%;" v-model="searchForm.bottomType" placeholder="下身款式">
+              <el-select style="width: 100%;" v-model="searchForm.bottomType" placeholder="选择下身款式">
                 <el-option :label="'不限'" :value="'不限'"></el-option>
                 <el-option :label="'裙子'" :value="'裙子'"></el-option>
                 <el-option :label="'长裤'" :value="'长裤'"></el-option>
@@ -188,13 +190,29 @@
               </el-select>
             </el-form-item>
             <el-form-item v-show="searchForm.type2 === 2">
-              <el-select style="width: 100%;" v-model="searchForm.bottomColor" placeholder="下身颜色">
+              <el-select style="width: 100%;" v-model="searchForm.bottomColor" placeholder="选择下身颜色">
                 <el-option :label="'不限'" :value="'不限'"></el-option>
                 <el-option :label="'红'" :value="'红'"></el-option>
                 <el-option :label="'黑'" :value="'黑'"></el-option>
                 <el-option :label="'灰'" :value="'灰'"></el-option>
                 <el-option :label="'白'" :value="'白'"></el-option>
                 <el-option :label="'绿'" :value="'绿'"></el-option>
+                <el-option :label="'未知'" :value="'未知'"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item v-show="searchForm.type2 === 2">
+              <el-select style="width: 100%;" v-model="searchForm.baby" placeholder="选择抱小孩">
+                <el-option :label="'不限'" :value="'不限'"></el-option>
+                <el-option :label="'抱小孩'" :value="'抱小孩'"></el-option>
+                <el-option :label="'未抱小孩'" :value="'未抱小孩'"></el-option>
+                <el-option :label="'未知'" :value="'未知'"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item v-show="searchForm.type2 === 2">
+              <el-select style="width: 100%;" v-model="searchForm.bag" placeholder="选择拎东西">
+                <el-option :label="'不限'" :value="'不限'"></el-option>
+                <el-option :label="'拎东西'" :value="'拎东西'"></el-option>
+                <el-option :label="'未拎东西'" :value="'未拎东西'"></el-option>
                 <el-option :label="'未知'" :value="'未知'"></el-option>
               </el-select>
             </el-form-item>
@@ -227,7 +245,7 @@
             </div>
           </li>
         </ul>
-        <div is="noResult" :isInitPage="false" v-else></div>
+        <div style="height: calc(100% - 100px);" is="noResult" :isInitPage="isInitPage" v-else></div>
         <!-- <ul class="rlcx_r_list clearfix" v-else>
           <li style="padding: 30px 0 0 0; width: auto; float: none; text-align: center; color: #999;">
             暂无数据
@@ -277,7 +295,7 @@ import noResult from '@/components/common/noResult.vue';
 import { mapXupuxian } from "@/config/config.js";
 import vehicleBreadcrumb from '@/components/common/breadcrumb.vue';
 import mapSelector from '@/components/common/mapSelector.vue';
-import {getFaceRetrievalPerson} from '../../api/api.judge.js';
+import {getFaceRetrievalPerson, JtcGETAppendixInfoList} from '../../api/api.judge.js';
 import {getPicRecognize} from '../../api/api.structuring.js';
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import {formatDate} from '@/utils/util.js';
@@ -287,6 +305,7 @@ export default {
   components: {vehicleBreadcrumb, mapSelector,portraitDetail, noResult},
   data () {
     return {
+      isInitPage: true,
       uploadAcion: ajaxCtx.base + '/new',
       curImageUrl: '', // 当前上传的图片
       uploading: false, // 是否上传中
@@ -307,7 +326,9 @@ export default {
         upperType: null,
         upperColor: null,
         bottomType: null,
-        bottomColor: null
+        bottomColor: null,
+        baby: null,
+        bag: null
       },
 
       checkAll: true,
@@ -330,7 +351,9 @@ export default {
         upperType: '',
         upperColor: '',
         bottomType: '',
-        bottomColor: ''
+        bottomColor: '',
+        baby: '',
+        bag: ''
       },
       areaList: [],
       areaSData: [],
@@ -423,7 +446,9 @@ export default {
           upperType: null,
           upperColor: null,
           bottomType: null,
-          bottomColor: null
+          bottomColor: null,
+          baby: null,
+          bag: null
         }
         getPicRecognize({
           bussType: 'person', // vehicle机动车、face人脸、person人体
@@ -431,16 +456,18 @@ export default {
         }).then(jRes => {
           if (jRes && jRes.data) {
             this.uploadTZObj = {
-              sex: {active: false, value: jRes.data.sex},
-              age: {active: false, value: jRes.data.age},
-              glasses: {active: false, value: jRes.data.glasses},
-              hat: {active: false, value: jRes.data.hat},
-              mask: {active: false, value: jRes.data.mask},
-              hair: {active: false, value: jRes.data.hair},
-              upperType: {active: false, value: jRes.data.upperType},
-              upperColor: {active: false, value: jRes.data.upperColor},
-              bottomType: {active: false, value: jRes.data.bottomType},
-              bottomColor: {active: false, value: jRes.data.bottomColor}
+              sex: {active: true, value: jRes.data.sex},
+              age: {active: true, value: jRes.data.age},
+              glasses: {active: true, value: jRes.data.glasses},
+              hat: {active: true, value: jRes.data.hat},
+              mask: {active: true, value: jRes.data.mask},
+              hair: {active: true, value: jRes.data.hair},
+              upperType: {active: true, value: jRes.data.upperType},
+              upperColor: {active: true, value: jRes.data.upperColor},
+              bottomType: {active: true, value: jRes.data.bottomType},
+              bottomColor: {active: true, value: jRes.data.bottomColor},
+              baby: {active: true, value: jRes.data.baby},
+              bag: {active: true, value: jRes.data.bag}
             }
           }
           this.hqtzLoading = false;
@@ -484,7 +511,7 @@ export default {
         let _obj = {
           appendixInfoIds: _ids.join(',')
         }
-        JtcPUTAppendixsOrder(_obj);
+        // JtcPUTAppendixsOrder(_obj);
       },
 
     handleCheckAllChange (val) {
@@ -531,14 +558,13 @@ export default {
           })
           this.searchForm.area = this.areaSData;
           this.areaList.push(res.data);
-          this.$nextTick(() => {
+          /* this.$nextTick(() => {
             this.searchSubmit();
-          });
+          }); */
         }
       })
     },
     mapSelectorEmit (result) {
-      console.log('mapSelectorEmit', result);
       if (result) {
         // bayonetList deviceList
         this.dSum = 0;
@@ -568,7 +594,61 @@ export default {
     },
     areaTypeChanged2 (val) {
     },
+    searchAble () {
+      let flag = false, msg = '';
+      if (this.searchForm.type === 1) {
+        if (!this.searchForm.area || this.searchForm.area.length <= 0) {
+          return '请选择区域';
+        }
+      }
+      if (this.searchForm.type === 2) {
+        if (this.dSum <= 0) {
+          return '请选择设备';
+        }
+      }
+      if (this.searchForm.type2 === 1) {
+        let f = false;
+        for (let _key in this.uploadTZObj) {
+          if (this.uploadTZObj[_key] && this.uploadTZObj[_key].active) {
+            f = true;
+            break;
+          }
+        }
+        if (!f) { return '请选择特征'; }
+      }
+      if (this.searchForm.type2 === 2) {
+        let f = false;
+        if (this.searchForm.sex) { f = true; }
+        if (this.searchForm.age) { f = true; }
+        if (this.searchForm.eyeglass) { f = true; }
+        if (this.searchForm.hat) { f = true; }
+        if (this.searchForm.mask) { f = true; }
+        if (this.searchForm.hair) { f = true; }
+        if (this.searchForm.upperType) { f = true; }
+        if (this.searchForm.upperColor) { f = true; }
+        if (this.searchForm.bottomType) { f = true; }
+        if (this.searchForm.bottomColor) { f = true; }
+        if (this.searchForm.baby) { f = true; }
+        if (this.searchForm.bag) { f = true; }
+        if (!f) { return '请选择特征'; }
+      }
+      return false;
+    },
     searchSubmit (pageNum) {
+      let smsg = this.searchAble();
+      if (smsg) {
+        let nMsg = $('.el-message--info');
+        if (nMsg && nMsg.length > 0) {
+          nMsg.find('.el-message__content').text(smsg);
+        } else {
+          this.$message({
+            message: smsg,
+            type: 'info'
+          });
+        }
+        return false;
+      }
+
       if (pageNum > 0) {
         this.pagination.pageNum = pageNum;
       }
@@ -632,10 +712,17 @@ export default {
         if (this.searchForm.bottomColor && this.searchForm.bottomColor !== '不限') {
           params.where.bottomColor = this.searchForm.bottomColor;
         }
+        if (this.searchForm.baby && this.searchForm.baby !== '不限') {
+          params.where.baby = this.searchForm.baby;
+        }
+        if (this.searchForm.bag && this.searchForm.bag !== '不限') {
+          params.where.bag = this.searchForm.bag;
+        }
       }
       this.condition=params
       // getFaceRetrieval getFaceRetrievalPerson
       getFaceRetrievalPerson(params).then(res => {
+        this.isInitPage = false;
         if (res && res.data) {
           this.dataList = res.data.list;
           this.alldataList.push(...res.data.list);
@@ -672,7 +759,9 @@ export default {
           upperType: null,
           upperColor: null,
           bottomType: null,
-          bottomColor: null
+          bottomColor: null,
+          baby: null,
+          bag: null
         }
       } else {
         this.searchForm  = Object.assign(this.searchForm, {
@@ -685,7 +774,9 @@ export default {
           upperType: '',
           upperColor: '',
           bottomType: '',
-          bottomColor: ''
+          bottomColor: '',
+          baby: '',
+          bag: ''
         });
       }
       this.searchSubmit();
@@ -996,4 +1087,45 @@ export default {
     padding-left: 0px;
   }
 }
+.history-pic-dialog {
+      .el-dialog {
+        max-width: 12.6rem;
+        width: 100%!important;
+      }
+      .el-dialog__title {
+        font-size: .16rem;
+        color: #333333;
+      }
+      .el-dialog__body {
+        padding: 0 .76rem .3rem;
+      }
+      .his-pic-box {
+        width: 100%;
+        height: 4.6rem!important;
+        .his-pic-item {
+          float: left;
+          width: 1.38rem;
+          height: 1.38rem;
+          border: .02rem solid #FFFFFF;
+          margin-right: .2rem;
+          margin-bottom: .2rem;
+          cursor: pointer;
+          img {
+            width: 100%;
+            height: 100%;
+          }
+        }
+        .active {
+          border-color: #0C70F8;
+        }
+      }
+      .el-dialog__footer {
+        button {
+          width: 1.4rem!important;
+          height: .4rem;
+          line-height: .4rem;
+          padding: 0;
+        }
+      }
+    }
 </style>
