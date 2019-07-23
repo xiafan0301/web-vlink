@@ -346,8 +346,12 @@ export default {
   methods: {
     //设置时间
     setDate() {
-      let startTime = new Date() - 3600 * 1000 * 24 * 1;
-      let endTime = new Date();
+      let curDate = new Date(new Date().toLocaleDateString()).getTime()
+      let curS = 1 * 24 * 3600 * 1000;
+      let startTime = curDate - curS;
+      let endTime = curDate - 1
+      /* let startTime = new Date() - 3600 * 1000 * 24 * 1;
+      let endTime = new Date(); */
       this.searchData.startTime = formatDate(startTime);
       this.searchData.endTime = formatDate(endTime);
     },

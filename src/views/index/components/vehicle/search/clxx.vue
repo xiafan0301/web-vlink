@@ -23,7 +23,8 @@
                 type="date"
                 :picker-options="startDateOpt"
                 placeholder="开始时间"
-                :clearable="false">
+                :clearable="false"
+                format="yyyy-MM-dd HH:mm:ss">
             </el-date-picker>
             <!-- <el-date-picker
               class="vl_date"
@@ -45,7 +46,9 @@
                 type="date"
                 :picker-options="endDateOpt"
                 placeholder="结束时间"
-                :clearable="false">
+                :clearable="false"
+                format="yyyy-MM-dd HH:mm:ss"
+                @change="dateChange">
             </el-date-picker>
           </div>
           <!-- 车牌号搜索 -->
@@ -227,19 +230,15 @@ export default {
     },
     //设置默认时间
     setDTime() {
-      let date = new Date();
-      let curDate = date.getTime();
+      let curDate = new Date(new Date().toLocaleDateString()).getTime()
       let curS = 30 * 24 * 3600 * 1000;
-      let _s =
-        new Date(curDate - curS).getFullYear() +
-        "-" +
-        (new Date(curDate - curS).getMonth() + 1) +
-        "-" +
-        new Date(curDate - curS).getDate();
-      let _e =
-        date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
+      let _s = curDate - curS;
+      let _e = curDate + 24 * 3600 * 1000 - 1;
       this.searchData.startTime = formatDate(_s);
       this.searchData.endTime = formatDate(_e);
+    },
+    dateChange() {
+      this.searchData.endTime = new Date(this.searchData.endTime).getTime() + 1 * 24 * 3600 * 1000 - 1;
     },
     //重置
     resetSearch() {
@@ -256,8 +255,8 @@ export default {
     },
     getSearchData() {
       let params = {
-        dateStart: formatDate(this.searchData.startTime, "yyyy-MM-dd") + " 00:00:00",
-        dateEnd: formatDate(this.searchData.endTime, "yyyy-MM-dd") + " 23:59:59",
+        dateStart: formatDate(this.searchData.startTime, "yyyy-MM-dd HH:mm:ss"),
+        dateEnd: formatDate(this.searchData.endTime, "yyyy-MM-dd HH:mm:ss"),
       };
       if (this.searchData.licensePlateNum) {
         params["plateNo"] = this.searchData.licensePlateNum;
