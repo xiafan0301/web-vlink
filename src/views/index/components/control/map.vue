@@ -64,16 +64,28 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item prop="time" class="time">
+        <el-form-item prop="startTime" class="time">
           <el-date-picker
             style="width: 192px;"
-            v-model="mapForm.time"
-            type="daterange"
-            range-separator="-"
-            start-placeholder="开始时间"
-            end-placeholder="结束时间"
+            :clearable="false"
+            :picker-options="pickerOptions"
+            v-model="mapForm.startTime"
+            type="date"
             value-format="yyyy-MM-dd"
-            :default-time="['00:00:00', '23:59:59']">
+            placeholder="开始日期"
+            class="vl_date">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item prop="endTime" class="time">
+          <el-date-picker
+            style="width: 192px;"
+            :clearable="false"
+            :picker-options="pickerOptions1"
+            v-model="mapForm.endTime"
+            type="date"
+            value-format="yyyy-MM-dd"
+            placeholder="结束日期"
+            class="vl_date vl_date_end">
           </el-date-picker>
         </el-form-item>
         <el-form-item style="width: 192px;">
@@ -208,7 +220,38 @@ export default {
         state: 1,
         type: null,
         alarmId: [],
-        time: null
+        startTime: null,
+        endTime: null
+      },
+      pickerOptions: {
+        disabledDate: time => {
+          if (this.mapForm.endTime) {
+            return (
+              time.getTime() > new Date(this.mapForm.endTime).getTime() ||
+              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90
+            );
+          } else {
+            return (
+              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90 ||
+              time.getTime() > new Date().getTime()
+            );
+          }
+        }
+      },
+      pickerOptions1: {
+        disabledDate: time => {
+          if (this.mapForm.startTime) {
+            return (
+              time.getTime() < new Date(this.mapForm.startTime).getTime() ||
+              time.getTime() > new Date().getTime()
+            );
+          } else {
+            return (
+              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 30 ||
+              time.getTime() > new Date().getTime()
+            );
+          }
+        }
       },
       controlNameList: [],
       eventList: [],
@@ -383,8 +426,8 @@ export default {
         deviceType: this.mapForm.type,//设备类型
         surveillanceStatus: this.mapForm.state,//布控状态
         alarmLevel: this.mapForm.alarmId.length > 0 ? this.mapForm.alarmId.join(',') : null,//告警级别
-        surveillanceDateStart: this.mapForm.time && this.mapForm.time[0],//布控开始时间
-        surveillanceDateEnd: this.mapForm.time && this.mapForm.time[1],//布控结束时间
+        surveillanceDateStart: this.mapForm.startTime,//布控开始时间
+        surveillanceDateEnd: this.mapForm.endTime,//布控结束时间
         surveillanceName: this.mapForm.name,//布控名称
         eventId: this.mapForm.event,//事件Id
         surveillanceObjectId: this.mapForm.obj.objId,//布控对象id
@@ -1030,8 +1073,7 @@ export default {
       margin-bottom: 10px!important;
     }
     .time input{
-      width: 70px;
-      font-size: 12px;
+      width: 100%;
     }
   }
   .map_box{

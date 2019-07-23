@@ -14,7 +14,7 @@
     </el-select>
     <div class="search_item" :style="{'height': isShowSelectList ? '160px' : '0px'}">
       <vue-scroll>
-        <el-checkbox style="padding-left: 24px;padding-top: 10px;" v-model="checked" @change="checkedAll">全选</el-checkbox>
+        <el-checkbox style="padding-left: 24px;padding-top: 10px;" v-model="checked" @change="isCheckedAll">全选</el-checkbox>
         <el-tree
           :data="treeList"
           class="select_tree"
@@ -56,7 +56,7 @@ export default {
     $(':not(.dev_select)').unbind('click');
   },
   methods: {
-    checkedAll(){
+    isCheckedAll(){
       if (this.checked) {
         //全选
         this.$refs.selectTree.setCheckedNodes(this.treeList);
@@ -65,6 +65,10 @@ export default {
         this.$refs.selectTree.setCheckedKeys([]);
         this.devIdData = [];
       }
+    },
+    checkedAll () {
+      this.checked = true;
+      this.$refs.selectTree.setCheckedNodes(this.treeList);
     },
     getTreeList () {
       let params = {
@@ -78,7 +82,7 @@ export default {
           this.selectNum = this.getDevTotal(this.treeList);//获取设备和卡口总数
           this.checked = true;
           this.$nextTick(() => {
-            this.checkedAll();//  全选
+            this.isCheckedAll();//  全选
           })
         }
       });
@@ -133,17 +137,17 @@ export default {
       return result;
     },
     // 重置表单
-    resetSelect () {
-      this.devIdData = [];
-      this.selObj = {
-        selSelectedData1: [],
-        selSelectedData2: [],
-      };
-      if (this.$refs.selectTree) {
-        this.$refs.selectTree.setCheckedKeys([]);
-      }
-      this.isShowSelectList = false;
-    },
+    // resetSelect () {
+    //   this.devIdData = [];
+    //   this.selObj = {
+    //     selSelectedData1: [],
+    //     selSelectedData2: [],
+    //   };
+    //   if (this.$refs.selectTree) {
+    //     this.$refs.selectTree.setCheckedKeys([]);
+    //   }
+    //   this.isShowSelectList = false;
+    // },
     // 是否显示下拉列表
     showChange () {
       this.isShowSelectList = !this.isShowSelectList;
@@ -166,6 +170,15 @@ export default {
       this.devIdData = data;
       this.$emit('sendSelectData', this.selObj);
       this.$emit('allSelectLength', this.selectNum);
+    }
+  },
+  watch: {
+    devIdData () {
+      if (this.devIdData.length < this.selectNum) {
+        this.checked = false;
+      } else {
+        this.checked = true;
+      }
     }
   }
 }
