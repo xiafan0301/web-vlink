@@ -25,11 +25,6 @@
             </router-link>
           </li>
           <li>
-            <router-link :to="{name: 'vehicle_search_clxx'}">
-              <i class="vl_icon2 vl_icon2_005"></i><span>车辆档案</span>
-            </router-link>
-          </li>
-          <li>
             <router-link :to="{name: 'vehicle_search_clcx'}">
               <i class="vl_icon2 vl_icon2_001"></i><span>车辆查询</span>
             </router-link>
@@ -37,6 +32,11 @@
           <li>
             <router-link :to="{name: 'vehicle_search_lxwf'}">
               <i class="vl_icon2 vl_icon2_006"></i><span>连续违章</span>
+            </router-link>
+          </li>
+          <li>
+            <router-link :to="{name: 'vehicle_search_clxx'}">
+              <i class="vl_icon2 vl_icon2_005"></i><span>车辆档案</span>
             </router-link>
           </li>
           <!-- <li>

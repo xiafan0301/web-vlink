@@ -352,6 +352,8 @@ export default {
   > .vc_gcck_con {
     position: relative;
     padding-top: 10px; padding-bottom: 20px;
+    overflow: auto;
+    height: 100%;
   }
 }
 .gcck_s {

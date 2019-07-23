@@ -650,6 +650,7 @@ export default {
         this.$refs.ytscMenuForm.validate(valid => {
           if (isClick) {
             this.getStrucInfoLoading = true; // 打开加载效果
+            this.pageNum = 1;
           }
           if (valid) {
             if (

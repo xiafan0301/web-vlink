@@ -896,6 +896,7 @@ export default {
           // console.log('表单数据', this.tzscMenuForm);
           if (isClick) {
             this.getStrucInfoLoading = true; // 打开加载效果
+            this.pageNum = 1;
           }
           if (this.selectCameraArr.length <= 0 && this.selectBayonetArr <= 0) {
             this.$message.warning("请选择至少一个卡口与摄像头");
