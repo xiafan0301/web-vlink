@@ -126,3 +126,16 @@ export function getVehicleList() {
     mode: baseModeName
   })
 }
+
+/*******    摄像头管理       ******** */
+
+/**
+ * 获取摄像头列表
+ */
+export function getCameraList() {
+  return request({
+    url: '/device-service/deviceBasicPageList',
+    method: 'get',
+    mode: baseModeName
+  });
+}

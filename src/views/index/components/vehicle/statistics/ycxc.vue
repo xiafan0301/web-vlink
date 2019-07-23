@@ -109,7 +109,7 @@
           
           <div class="left_num">
             <el-input class="left-none-border" v-model="queryForm.minShotTimes" @blur="handleBlurShotTimes">
-              <template slot="prepend">过车次数</template>
+              <template slot="prepend">过车次数≥</template>
             </el-input>
             <span>次（范围2-100）</span>
           </div>
@@ -887,8 +887,11 @@ export default {
         width: 285px;
         height: 100%;
         padding: 20px;
+        .date-comp {
+         margin-bottom: 10px;
+        }
         > .left_time{
-          padding-bottom: 10px;
+          // padding-bottom: 10px;
           display: flex;
           align-items: center;
           position: relative;
@@ -911,11 +914,11 @@ export default {
           }
         }
         .el-select{
-          padding-bottom: 10px;
+          margin-bottom: 10px;
         }
         .left_num{
           display: flex;
-          padding-bottom: 10px;
+          margin-bottom: 10px;
           .el-input{
             width: 145px;
           }

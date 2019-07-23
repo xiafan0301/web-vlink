@@ -45,7 +45,7 @@
                 v-for="(item, index) in deviceList"
                 :key="index"
                 :label="item.deviceName"
-                :value="item.deviceID"
+                :value="item.deviceName"
               ></el-option>
             </el-select>
             <span class="span_tips" v-show="isShowDeviceTip">该车辆在该时间内无抓拍设备</span>
@@ -148,10 +148,10 @@ export default {
         { label: '10分钟', value: 10 }
       ],
       rules: {
-        plateNo: [
-          { required: true, message: '请输入正确的车牌号码', trigger: 'blur' },
-          { validator: checkPlateNumber, trigger: 'blur' }
-        ]
+        // plateNo: [
+        //   { required: true, message: '请输入正确的车牌号码', trigger: 'blur' },
+        //   { validator: checkPlateNumber, trigger: 'blur' }
+        // ]
       },
       pickerStart: {
         disabledDate (time) {
@@ -223,7 +223,6 @@ export default {
     // 开始时间blur
     blurStartTime (form) {
       let _this = this;
-    
       if (_this.searchForm.shotTime) {
         if (_this.searchForm.plateNo && _this.searchForm.dateEnd) {
           _this.getDeviceList();
@@ -264,13 +263,13 @@ export default {
               this.deviceList = res.data;
 
               // 初始化页面时默认选中第一个设备
-              this.searchForm.deviceCode = this.deviceList[0].deviceID;
+              this.searchForm.deviceCode = this.deviceList[0].deviceName;
               this.deviceStartTime = this.deviceList[0].shotTime;
               this.isShowDeviceTip = false;
 
               if (this.$route.query.deviceCode) {
                 this.deviceList.map(item => {
-                  if (item.deviceID === this.$route.query.deviceCode) {
+                  if (item.deviceName === this.$route.query.deviceCode) {
                     this.deviceStartTime = item.shotTime;
                   }
                 })
@@ -286,7 +285,8 @@ export default {
     handleChangeDeviceCode (obj) {
       if (obj) {
         this.deviceList.map(item => {
-          if (item.deviceID === obj) {
+          if (item.deviceName === obj) {
+            // this.searchForm.deviceCode = item.deviceID;
             this.deviceStartTime = item.shotTime;
           }
         })
@@ -329,10 +329,15 @@ export default {
             }
             return;
           };
-
+          let deviceCode;
+          this.deviceList.map(item => {
+            if (item.deviceName === this.searchForm.deviceCode) {
+              deviceCode = item.deviceID;
+            }
+          })
           const vehicleType = this.searchForm.vehicleClass.join(',');
           const params = {
-            deviceCode: this.searchForm.deviceCode,
+            deviceCode: deviceCode,
             startTime: formatDate(this.searchForm.shotTime),
             shotTime: formatDate(this.deviceStartTime),
             plateNo: this.searchForm.plateNo,
