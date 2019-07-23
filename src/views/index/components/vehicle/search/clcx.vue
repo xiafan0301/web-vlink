@@ -685,6 +685,8 @@ export default {
            if(!document.querySelector('.el-message--info')){
              this.$message.info("没有相关数据。");
           }
+          this.pagination.total=0;
+          this.pagination.pageNum=1;
           this.tableData=[]
         }
       }).catch(() => {
