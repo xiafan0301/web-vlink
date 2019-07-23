@@ -218,5 +218,20 @@ export default {
       name: 'room_detail',
       component: () => import('@/views/index/components/manage/components/roomAndStall/detail.vue')
     },
+    {
+      path: 'cameraManage',
+      name: 'camera_manage',
+      component: () => import('@/views/index/components/manage/cameraManage.vue')
+    },
+    {
+      path: 'cameraDetail',
+      name: 'camera_detail',
+      component: () => import('@/views/index/components/manage/cameraDetail.vue')
+    },
+    {
+      path: 'addCamera',
+      name: 'add_camera',
+      component: () => import('@/views/index/components/manage/addCamera.vue')
+    },
   ]
 }

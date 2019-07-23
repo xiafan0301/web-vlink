@@ -13,6 +13,9 @@
       <li>
         <router-link :to="{name: 'archives_manage'}">档案管理</router-link>
       </li>
+       <li>
+        <router-link :to="{name: 'camera_manage'}">摄像头管理</router-link>
+      </li>
       <li>
         <router-link :to="{name: 'user'}">用户管理</router-link>
       </li>

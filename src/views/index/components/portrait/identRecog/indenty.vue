@@ -331,7 +331,7 @@ export default {
     // const similarity = this.$route.query.semblance;
     if (imgPath) {
       this.queryImgPath = imgPath;
-      // this.fileList.push({path: imgPath});
+      this.fileList.push({path: imgPath});
       this.curImageUrl = imgPath;
       // this.curImgNum = 1;
     }
@@ -429,6 +429,7 @@ export default {
     },
     handleRemove () {
       this.curImageUrl = null;
+      this.fileList = [];
     },
     // 上传图片
     uploadPicExceed () {
@@ -491,9 +492,9 @@ export default {
       this.isInitPage = false;
 
       this.curImageUrl = null;
-
+      this.fileList = [];
       this.dataDetail = null;
-
+      this.$refs.uploadPic.clearFiles();
       this.$refs[form].resetFields();
     },
     // 根据搜索条件进行查询
@@ -521,7 +522,7 @@ export default {
           if (_ids.length) {
             params['appendixIds'] = _ids.join(',');
           }
-          //  params['appendixIds'] = '01tBEd6hSUblR8X9C5KElA'
+          // params['appendixIds'] = '01tBEd6hSUblR8X9C5KElA'
           this.isSearchLoading = true;
           getIdNoList(params).then(res => {
             if (res && res.data) {
@@ -639,7 +640,7 @@ export default {
     .right {
       width: calc(100% - 265px);
       margin: 15px 15px 0 15px;
-      height: 100%;
+      // height: 100%;
       background-color: #ffffff;
       box-shadow:0px 3px 8px 0px rgba(169,169,169,0.2);
       .result_box {
