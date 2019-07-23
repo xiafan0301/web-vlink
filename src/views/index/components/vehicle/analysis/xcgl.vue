@@ -126,6 +126,13 @@
           </div>
           <!-- 下划线 -->
           <div class="line"></div>
+           <!-- 切换查询条件 -->
+           <div class="switching-select">
+           <el-radio-group v-model="selectIndex">
+              <el-radio :label="0">使用图片</el-radio>
+              <el-radio :label="1">使用车牌</el-radio>
+            </el-radio-group>
+           </div>
           <!-- 上传 -->
           <div class="vl_judge_tc_c_item" v-show="selectIndex === 0">
             <el-upload
@@ -171,8 +178,8 @@
             </div>
           </div>
           <!-- 切换查询条件 -->
-          <div class="tab-switching" v-show="selectIndex === 0" @click="selectTab(1)">使用车牌号</div>
-          <div class="tab-switching" v-show="selectIndex === 1" @click="selectTab(0)">使用图片</div>
+         <!--  <div class="tab-switching" v-show="selectIndex === 0" @click="selectTab(1)">使用车牌号</div>
+          <div class="tab-switching" v-show="selectIndex === 1" @click="selectTab(0)">使用图片</div> -->
 
           <div class="search-btn">
             <el-button @click="resetSearch">重置</el-button>
@@ -1373,12 +1380,17 @@ export default {
           color: #0c70f8;
         }
       }
+      //条件切换
+      .switching-select {
+        margin-bottom: 20px;
+        padding-right: 20px;
+      }
       //下划线
       .line {
         width: 232px;
         height: 1px;
         background-color: #d3d3d3;
-        margin: 40px 0;
+        margin: 30px 0;
       }
       //车牌号搜索
       .license-plate-search {
@@ -1629,11 +1641,27 @@ export default {
       width: 232px;
     }
   }
+  //条件切换
+  .switching-select {
+    .el-radio-group {
+      display: flex;
+      justify-content: space-between;
+    }
+    .el-radio {
+      color: #999;
+    }
+    .el-radio__label {
+      padding-left: 5px;
+    }
+    .el-radio__input.is-checked+.el-radio__label {
+      color: #0c70f8;
+    }
+  }
   //搜索按钮
   .search-btn {
     width: 232px;
     text-align: center;
-    padding-top: 10px;
+    padding-top: 20px;
     .el-button {
       width: 45%;
     }
