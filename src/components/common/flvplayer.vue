@@ -370,6 +370,9 @@ export default {
   watch: {
     oData (newData, oldData) {
       console.log('watch oData', newData);
+      if (oldData && oldData.video.uid === newData.video.uid) {
+        return false;
+      }
       // 去掉暂停按钮
       this.playActive = true;
       // 取消录像
