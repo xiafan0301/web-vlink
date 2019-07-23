@@ -6,9 +6,11 @@
           <el-form ref="helpForm" :model="helpForm" class="help_form">
             <el-form-item prop="helpDate">
               <el-date-picker
+                class="vl_date"
+                :clearable="false"
                 v-model="helpForm.helpDate"
                 type="daterange"
-                range-separator="-"
+                range-separator="至"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
                 value-format="yyyy-MM-dd"

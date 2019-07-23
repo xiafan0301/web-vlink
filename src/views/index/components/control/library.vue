@@ -40,17 +40,26 @@
         </vue-scroll>
         <!-- 人像库左侧组合搜索 -->
         <el-form :model="libPortraitForm" class="lib_form" ref="portraitLibForm" v-show="tabType === '1'">
-          <el-form-item prop="perTime">
+          <el-form-item prop="startTime">
             <el-date-picker
+              class="vl_date"
               style="width: 192px;"
-              v-model="libPortraitForm.perTime"
-              type="daterange"
-              format="yy-MM-dd"
-              range-separator="-"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              value-format="yyyy-MM-dd"
-              :default-time="['00:00:00', '23:59:59']">
+              v-model="libPortraitForm.startTime"
+              type="date"
+              format="yyyy-MM-dd"
+              placeholder="开始日期"
+              value-format="yyyy-MM-dd">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item prop="endTime">
+            <el-date-picker
+              class="vl_date vl_date_end"
+              style="width: 192px;"
+              v-model="libPortraitForm.endTime"
+              type="date"
+              format="yyyy-MM-dd"
+              placeholder="结束日期"
+              value-format="yyyy-MM-dd">
             </el-date-picker>
           </el-form-item>
           <el-form-item style="width: 192px;" prop="sex">
@@ -99,17 +108,26 @@
         </el-form>
         <!-- 车像库左侧组合搜索 -->
         <el-form :model="libVehicleForm" class="lib_form" v-show="tabType === '2'" ref="carLibForm">
-          <el-form-item prop="carTime">
+          <el-form-item prop="startTime">
             <el-date-picker
+              class="vl_date"
               style="width: 192px;"
-              v-model="libVehicleForm.carTime"
-              type="daterange"
-              format="yy-MM-dd"
-              range-separator="-"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              value-format="yyyy-MM-dd"
-              :default-time="['00:00:00', '23:59:59']">
+              v-model="libVehicleForm.startTime"
+              type="date"
+              format="yyyy-MM-dd"
+              placeholder="开始日期"
+              value-format="yyyy-MM-dd">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item prop="endTime">
+            <el-date-picker
+              class="vl_date vl_date_end"
+              style="width: 192px;"
+              v-model="libVehicleForm.endTime"
+              type="date"
+              format="yyyy-MM-dd"
+              placeholder="结束日期"
+              value-format="yyyy-MM-dd">
             </el-date-picker>
           </el-form-item>
           <el-form-item style="width: 192px;" prop="vehicleColor">
@@ -538,14 +556,16 @@ export default {
       group: null,//搜索组
       // 人像库筛选参数
       libPortraitForm: {
-        perTime: null,
+        startTime: null,
+        endTime: null,
         sex: null,
         nation: null,
         card: null
       },
       // 车像库筛选参数
       libVehicleForm: {
-        carTime: null,
+        startTime: null,
+        endTime: null,
         vehicleColor: null,
         vehicleType: null,
         numberType: null,
@@ -1162,8 +1182,8 @@ export default {
         pageSize: this.pageSize,
         orderBy: null,
         order: null,
-        'where.dateStart': this.libPortraitForm.perTime && this.libPortraitForm.perTime[0],
-        'where.dateEnd': this.libPortraitForm.perTime && this.libPortraitForm.perTime[1],
+        'where.dateStart': this.libPortraitForm.startTime,
+        'where.dateEnd': this.libPortraitForm.endTime,
         'where.sex': this.libPortraitForm.sex,
         'where.nation': this.libPortraitForm.nation,
         'where.groupId': groupId
@@ -1198,8 +1218,8 @@ export default {
         pageSize: this.pageSize,
         orderBy: null,
         order: null,
-        'where.dateStart': this.libVehicleForm.carTime && this.libVehicleForm.carTime[0],
-        'where.dateEnd': this.libVehicleForm.carTime && this.libVehicleForm.carTime[1],
+        'where.dateStart': this.libVehicleForm.startTime,
+        'where.dateEnd': this.libVehicleForm.endTime,
         'where.vehicleColor': this.libVehicleForm.vehicleColor,
         'where.vehicleType': this.libVehicleForm.vehicleType,
         'where.numberType': this.libVehicleForm.numberType,

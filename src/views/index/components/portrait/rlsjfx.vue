@@ -87,10 +87,12 @@
           <div class="face_snap_form">
             <div ref="devSelect" is="devSelect" @sendSelectData="getSelectData" @allSelectLength="allSelectLength"></div>
             <el-date-picker
+              class="vl_date"
+              :clearable="false"
               v-model="faceSnapForm.queryDate"
               @change="validationDate(faceSnapForm)"
               type="daterange"
-              range-separator="-"
+              range-separator="至"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
               value-format="yyyy-MM-dd HH:mm:ss"
@@ -130,10 +132,12 @@
           </div>
           <div class="face_control_form">
             <el-date-picker
+              :clearable="false"
+              class="vl_date"
               v-model="faceControlQueryDate"
               @change="validationDate(faceControlQueryDate)"
               type="daterange"
-              range-separator="-"
+              range-separator="至"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
               value-format="yyyy-MM-dd HH:mm:ss"
@@ -289,7 +293,8 @@ export default {
     // 重置人脸抓拍统计表单
     resetFaceSnapForm () {     
       this.faceSnapForm.queryDate = [startTime, endTime]
-      // this.getFaceSnapSta();
+      // 设备全选
+      this.$refs['devSelect'].checkedAll();
     },
     // 重置人脸布控告警数据分析表单
     resetFaceControlDate () {
@@ -667,11 +672,8 @@ export default {
     .el-range-input{
       width: 42%!important;
     }
-    .el-input__icon{
-      display: none;
-    }
     .el-range-separator{
-      width: 16px!important;
+      width: 22px!important;
     }
   } 
   .my_tooltip{

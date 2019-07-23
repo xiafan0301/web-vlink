@@ -10,6 +10,7 @@
       <div class="con_left">
         <div class="left_start">
           <el-date-picker
+            :clearable="false"
             class="vl_date"
             style="width: 100%"
             v-model="queryForm.startTime"
@@ -21,6 +22,7 @@
         </div>
         <div class="left_end">
           <el-date-picker
+            :clearable="false"
             class="vl_date vl_date_end"
             style="width: 100%"
             :picker-options="pickerOptions1"
@@ -67,7 +69,7 @@
         </div>
         <div class="left_btn">
           <el-button class="reset_btn" @click="resetQueryForm">重置</el-button>
-          <el-button class="select_btn" @click="getControlCarSta" :loading="loadingBtn">统计</el-button>
+          <el-button class="select_btn" @click="getControlCarSta" :loading="loadingBtn">查询</el-button>
         </div>
       </div>
       <div class="con_right">
@@ -278,7 +280,7 @@
           </div>
         </div>
       </div>
-      <div class="struc-list" v-show="strucInfoList.length > 1">
+      <div class="struc-list" v-show="strucInfoList && strucInfoList.length > 1">
         <swiper :options="swiperOption" ref="mySwiper">
           <!-- slides -->
           <swiper-slide v-for="(item, index) in strucInfoList" :key="'my_swiper' + index">
@@ -622,6 +624,8 @@ export default {
         }
       }
       .left_btn{
+        display: flex;
+        justify-content: space-between;
         padding-top: 10px;
         .select_btn, .reset_btn {
           width: 110px;
