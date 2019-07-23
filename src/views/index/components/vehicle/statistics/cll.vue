@@ -49,6 +49,7 @@
         <!-- 自定义报表类型 -->
         <div class="left_start" v-show="queryForm.statementType === 5">
           <el-date-picker
+            :clearable="false"
             style="width: 100%;"
             :picker-options="pickerOptions"
             v-model="queryForm.startTime"
@@ -60,6 +61,7 @@
         </div>
         <div class="left_end" v-show="queryForm.statementType === 5">
           <el-date-picker
+            :clearable="false"
             style="width: 100%;"
             :picker-options="pickerOptions1"
             v-model="queryForm.endTime"
@@ -78,8 +80,8 @@
         <div class="right_box" v-if="isShowChart">
           <div class="tab_box">
             <div>
-              <i class="vl_icon vl_icon_vehicle_cll_01" @click="changeTwo" :class="{'active': tabIndex === 1}" v-show="queryForm.statementType !== 5"></i>
-              <i class="vl_icon vl_icon_vehicle_cll_02" @click="tabIndex = 2" :class="{'active': tabIndex === 2}" ></i>
+              <i class="vl_icon vl_icon_vehicle_cll_01" @click="changeTab(1)" :class="{'active': tabIndex === 1}" v-show="queryForm.statementType !== 5"></i>
+              <i class="vl_icon vl_icon_vehicle_cll_02" @click="changeTab(2)" :class="{'active': tabIndex === 2}" ></i>
               <i class="vl_icon vl_icon_vehicle_cll_03" @click="tabIndex = 3" :class="{'active': tabIndex === 3}" v-show="queryForm.statementType !== 5"></i>
             </div>
             <h1>({{dateTitle}})车流量统计</h1>
@@ -283,20 +285,14 @@ export default {
     },  
     // 画图表
     drawChart1 () {
-      let chart = null;
-      if (this.charts.chart1) {
-        this.charts.chart1.clear();
-        chart = this.charts.chart1;
-      } else {
-        let temp = document.getElementById('chartContainer1');
-        chart = new G2.Chart({
-          container: 'chartContainer1',
-          forceFit: true,
-          padding: [ 20, 40, 60, 40 ],
-          width: G2.DomUtil.getWidth(temp),
-          height: G2.DomUtil.getHeight(temp)
-        });
-      }
+      let temp = document.getElementById('chartContainer1');
+      let chart = new G2.Chart({
+        container: 'chartContainer1',
+        forceFit: true,
+        padding: [ 20, 40, 60, 40 ],
+        width: G2.DomUtil.getWidth(temp),
+        height: G2.DomUtil.getHeight(temp)
+      });
       let dv = new View().source(this.chartData);
       dv.transform({
         type: 'fold',
@@ -384,20 +380,14 @@ export default {
       this.charts.chart1 = chart;
     },
     drawChart2 () {
-      let chart = null;
-      if (this.charts.chart2) {
-        this.charts.chart2.clear();
-        chart = this.charts.chart2;
-      } else {
-        let temp = document.getElementById('chartContainer2');
-        chart = new G2.Chart({
-          container: 'chartContainer2',
-          forceFit: true,
-          padding: [ 20, 40, 60, 40 ],
-          width: G2.DomUtil.getWidth(temp),
-          height: G2.DomUtil.getHeight(temp)
-        });
-      }
+      let temp = document.getElementById('chartContainer2');
+      let chart = new G2.Chart({
+        container: 'chartContainer2',
+        forceFit: true,
+        padding: [ 20, 40, 60, 40 ],
+        width: G2.DomUtil.getWidth(temp),
+        height: G2.DomUtil.getHeight(temp)
+      });
       let dv = new View().source(this.chartData);
       dv.transform({
         type: 'fold',
@@ -464,10 +454,22 @@ export default {
       this.charts.chart2 = chart;
     },
     // tab切换
-    changeTwo () {
-      this.tabIndex = 1;
+    changeTab (index) {
+      this.tabIndex = index;
       this.$nextTick(() => {
-        this.drawChart1();
+        if (this.tabIndex === 1) {
+          if (this.charts.chart1) {
+            this.charts.chart1.destroy();
+          }
+          this.charts.chart1 = null;
+          this.drawChart1();
+        } else {
+          if (this.charts.chart2) {
+            this.charts.chart2.destroy();
+          }
+          this.charts.chart2 = null;
+          this.drawChart2();
+        }
       })
     },
     // 重置查询表单
@@ -535,6 +537,10 @@ export default {
             this.tabIndex = 2;
             this.isShowChart = true;
             this.$nextTick(() => {
+              if (this.charts.chart2) {
+                this.charts.chart2.destroy();
+              }
+              this.charts.chart2 = null;
               this.drawChart2();
               this.beforeDate = this.chartData[0].date;
               this.afterDate = this.chartData[this.chartData.length - 1].date;
@@ -587,6 +593,8 @@ export default {
         padding-bottom: 20px;
       }
       .left_btn{
+        display: flex;
+        justify-content: space-between;
         padding-top: 10px;
       }
       .el-select{

@@ -47,10 +47,12 @@
             <el-form-item v-if="createForm.controlType === 1" label="布控日期:" prop="controlDate" style="width: 25%;" :rules="{required: true, message: '请选择布控日期', trigger: 'blur'}">
               <el-date-picker
                 style="width: 192px;"
+                class="vl_date"
+                :clearable="false"
                 v-model="createForm.controlDate"
                 type="daterange"
                 :picker-options="pickerOptions"
-                range-separator="-"
+                range-separator="至"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
                 value-format="yyyy-MM-dd"
