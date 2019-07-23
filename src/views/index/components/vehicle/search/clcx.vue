@@ -503,6 +503,7 @@ export default {
     },
       imgListTap(data, index) {
       // 点击swiper图片
+       this.playing = false;
       this.curImgIndex = index;
       this.sturcDetail = data;
       this.drawPoint(data); // 重新绘制地图
@@ -781,7 +782,7 @@ export default {
     submitForm(){
       this.ruleForm.include=this.ruleForm._include?0:1
       // console.log(this.ruleForm);
-     
+      this.pagination.pageNum = 1;
       this.getSnapList()
       
     },
