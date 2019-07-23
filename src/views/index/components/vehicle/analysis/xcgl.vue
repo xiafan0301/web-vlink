@@ -450,7 +450,6 @@ export default {
       },
       exportLoading: false,
       messageInfo: null,
-      notMessageInfo: null,
       hoverActive: false
     };
   },
@@ -635,13 +634,15 @@ export default {
     //查询
     search() {
       console.log("==================", this.searchData);
+      if (this.messageInfo) {
+        this.messageInfo.close();
+      }
       /* this.emptyData(1); */
       let reg = /^([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})$/;
 
       if (this.selectIndex === 1) {
         if (
           this.searchData.licensePlateNum &&
-          reg.test(this.searchData.licensePlateNum) &&
           this.selectDeviceArr &&
           this.selectDeviceArr.length > 0
         ) {
@@ -651,12 +652,12 @@ export default {
             this.$message.info("请输入车牌号码");
           }
           return false;
-        } else if (!reg.test(this.searchData.licensePlateNum)) {
+        } /* else if (!reg.test(this.searchData.licensePlateNum)) {
           if (!document.querySelector(".el-message")) {
             this.$message.info("请正确输入车牌号码");
           }
           return false;
-        } else {
+        } */ else {
           if (!document.querySelector(".el-message")) {
             this.$message.info("请选择设备");
           }
@@ -709,9 +710,6 @@ export default {
     },
     //查询
     getSearchData() {
-      if (this.notMessageInfo) {
-        this.notMessageInfo.close();
-      }
       let params = {
         startDate: formatDate(this.searchData.startTime, "yyyy-MM-dd HH:mm:ss"),
         endDate: formatDate(this.searchData.endTime, "yyyy-MM-dd HH:mm:ss"),
@@ -751,9 +749,6 @@ export default {
             let data = res.data;
             this.list = data;
             this.doubleDeviceList = objDeepCopy(data);
-            if (!this.list.allRecords || this.list.allRecords.length <= 0) {
-              this.notMessageInfo = this.$message.info("搜索无结果");
-            }
             //获取全部时刻
             this.getData();
           }
@@ -854,9 +849,6 @@ export default {
       if (this.messageInfo) {
         this.messageInfo.close();
       }
-      if (this.notMessageInfo) {
-        this.notMessageInfo.close();
-      }
       this.$set(this.timeSlot[index], "checked", !val.checked);
       if (val.value !== 0) {
         this.$set(this.timeSlot[0], "checked", false);
@@ -909,13 +901,16 @@ export default {
         }
       }
       this.getList();
-      if (this.messageInfo) {
+      /* if (this.messageInfo) {
         this.messageInfo.close();
-      }
+      } */
     },
     //获取数据
     getList() {
       this.emptyData(2);
+      if (this.messageInfo) {
+        this.messageInfo.close();
+      }
       let result = [];
       this.list = objDeepCopy(this.doubleDeviceList);
       if (this.list.allRecords) {

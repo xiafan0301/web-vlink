@@ -503,6 +503,7 @@ export default {
     },
       imgListTap(data, index) {
       // 点击swiper图片
+       this.playing = false;
       this.curImgIndex = index;
       this.sturcDetail = data;
       this.drawPoint(data); // 重新绘制地图
@@ -752,8 +753,8 @@ export default {
       v.dateEnd = this.ruleForm.dateEnd
       //this.strucDetailDialog = true 
       let d={
-        dateStart:this.ruleForm.dateStart + " 00:00:00",
-        dateEnd:this.ruleForm.dateEnd + " 23:59:59",
+        dateStart:this.ruleForm.dateStart,
+        dateEnd:this.ruleForm.dateEnd ,
         devIds:'',
         plateNo:v.plateNo,
         hasPlate:v.plateNo?'1':'0'
@@ -783,7 +784,7 @@ export default {
     submitForm(){
       this.ruleForm.include=this.ruleForm._include?0:1
       // console.log(this.ruleForm);
-     
+      this.pagination.pageNum = 1;
       this.getSnapList()
       
     },

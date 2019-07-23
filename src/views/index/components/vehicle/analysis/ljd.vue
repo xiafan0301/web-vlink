@@ -133,15 +133,17 @@
         <h3 class="title">分析结果</h3>
         <el-table :data="evData" style="width: 100%">
           <el-table-column  type="index" :show-overflow-tooltip="true" label="序号"></el-table-column>
-          <el-table-column  prop="address" :show-overflow-tooltip="true" label="地址"></el-table-column>
-          <el-table-column prop="shotNum" width="80px" sortable label="次数"></el-table-column>
+          <el-table-column  prop="address" :show-overflow-tooltip="true" label="落脚点位置"></el-table-column>
+          <el-table-column prop="stopOverTime" width="80px" sortable label="停留时长"></el-table-column>
         </el-table>
         <div class="insetLeft2" @click="hideResult"></div>
       </div>
     </div>
 <!-- 视频播放 -->
-<el-dialog :visible.sync="dialogVisible" width="80%">
-        <div is="flvplayer" :index="1" :oData="playUrl" :bResize="bResize" :oConfig="{sign: false, close: false, pause: true}" ></div>
+<el-dialog :visible.sync="dialogVisible" width="100%" style="height:100vh;">
+    <div style="width:100%; height:100%">
+      <div is="flvplayer" :index="1" :oData="playUrl" :bResize="bResize" :oConfig="{sign: false, close: false, pause: true,fullscreen:false}"  ></div>
+    </div>
   </el-dialog>
     <!-- 地图选择 -->
     <!-- <el-dialog :visible.sync="dialogVisible" width="80%">
@@ -459,28 +461,35 @@ export default {
       // if(data.length > 3){
       //    limit= data[2].shotNum
       // }
-      
+      let _this = this
       for (let i = 0; i < data.length; i++) {
         let obj = data[i];
         let _idWin = "vlJfoImg" + i;
         // let isBig = obj.shotNum >= limit?true:false
        // if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
-          // if( isBig){
-            let _sContent = `<div id="${_idWin}" class="vl_jig_mk_p"><img class="igm" src="${obj.storagePath}"><p>
-
-地址：${obj.address}</p><p>停留时长:${obj.stopOverTime}</p></div>`;
+            let _sContent = `<div id="${_idWin}" class="vl_jig_mk_p"><img class="igm" src="${obj.storagePath}"><p class='addres'>${obj.address} <i class='el-icon-caret-right'></i></p><p class='times'>${obj.stopOverTime}</p></div>`;
             // 窗体
             new AMap.Marker({
               // 添加自定义点标记
               map: this.amap,
-              position:mapXupuxian.center ,// [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-              offset: new AMap.Pixel(-90, -204), // 相对于基点的偏移位置
+              position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
+              offset: new AMap.Pixel(-90, -164), // 相对于基点的偏移位置
               draggable: false, // 是否可拖动
               extData: obj,
               // 自定义点标记覆盖物内容
               content: _sContent
             });
-          // }
+            // let clickWindow = new window.AMap.InfoWindow({
+            //   isCustom: true,
+            //   closeWhenClickMap: false,
+            //   offset: new window.AMap.Pixel(0, -40), // 相对于基点的偏移位置
+            //   content: obj.sContent
+            // });
+            // clickWindow.open(self.amap, new window.AMap.LngLat(obj.shotPlaceLongitude, obj.shotPlaceLatitude));
+            //obj.sContent=_sContent
+            
+          // 打开弹窗
+          
           // 摄像头
             let _id = "vlJfoSxt" + i;
             let _content =
@@ -490,7 +499,7 @@ export default {
             new AMap.Marker({
               // 添加自定义点标记
               map: this.amap,
-              position:mapXupuxian.center ,// [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
+              position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
               offset: new AMap.Pixel(-28.5, -50), // 相对于基点的偏移位置
               draggable: false, // 是否可拖动
               extData: obj,
@@ -498,10 +507,13 @@ export default {
               content: _content
             });
             setTimeout(() => {
-              this.addListen($("#" + _id), "mouseover", i);
+              this.addListen($("#" + _id), "mouseover", i,obj);
               this.addListen($("#" + _id), "mouseout", i, obj);
               // this.addListen($("#" + _id), "click", i, obj);
               this.addListen($("#" + _idWin), "click", i, obj);
+              this.addListen($("#" + _idWin), "mouseover", i, obj);
+              this.addListen($("#" + _idWin), "mouseout", i, obj);
+              //this.addListen($("#" + _id), "click", i, obj);
             }, 300);
           // }
       //  }
@@ -514,33 +526,25 @@ export default {
       el.bind(evType, function() {
         switch (evType) {
           case "mouseover":
-            $("#vlJfoImg" + key).addClass("vl_jig_mk_img_hover");
+            $("#vlJfoImg" + key).addClass("vl_jig_mk_img_show");
             $("#vlJfoSxt" + key).addClass("vl_icon_judge_02");
+            
             break;
           case "mouseout":
             if (!obj.checked) {
-              $("#vlJfoImg" + key).removeClass("vl_jig_mk_img_hover");
+              $("#vlJfoImg" + key).removeClass("vl_jig_mk_img_show");
               $("#vlJfoSxt" + key).removeClass("vl_icon_judge_02");
             }
             break;
           case "click":
-            // _key = self.curVideo.indexNum;
-            // self.evData.forEach(z => {
-            //   z.checked = false;
-            // });
-            // obj.checked = true;
-            // if (_key !== null) {
-            //   $("#vlJfoImg" + _key).removeClass("vl_jig_mk_img_hover");
-            //   $("#vlJfoSxt" + _key).removeClass("vl_icon_judge_02");
-            // }
-            // $("#vlJfoImg" + key).addClass("vl_jig_mk_img_hover");
-            // $("#vlJfoSxt" + key).addClass("vl_icon_judge_02");
             self.showVideo(obj);
             break;
         }
       });
     },
+    
     showVideo(v){
+
      // console.log(v);
       this.dialogVisible=true
       this.playUrl = {
@@ -703,7 +707,18 @@ export default {
 }
 </style>
 <style lang="scss">
+.ljd{
+  .el-dialog__wrapper{
+  .el-dialog{
+    height: auto;
+    min-height: 80vh;
+  }
+}
+}
+
 .vl_jig_mk_p {
+  display: none;
+  position: relative;
   width: 180px;
   height: auto;
   background: #ffffff;
@@ -712,6 +727,28 @@ export default {
   text-align: center;
   box-shadow: 4px 0px 10px 0px #838383;
   box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);
+  .times{
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    background: #50CC62;
+    padding: 0px 8px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    color: #ffffff;
+  }
+  .addres{
+    right: 10px;
+    text-align: left;
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    color: #ffffff;
+    i{
+      float: right;
+      font-size: 24px;;
+    }
+  }
   .igm{
     width: 100%;
     height: 100px;
@@ -731,6 +768,9 @@ export default {
     border-top: 10px solid #fff;
     border-left: 10px solid transparent;
     border-right: 10px solid transparent;
+  }
+  &.vl_jig_mk_img_show{
+    display: block;
   }
   &.vl_jig_mk_img_hover {
     &:after {
