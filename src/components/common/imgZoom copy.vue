@@ -53,9 +53,13 @@ export default {
             displayWidth = windowWidth / 2;
             displayHeight = img.height * displayWidth / img.width;
             style = "z-index:16666;position:absolute;top:" +
-                (windowHeight / 2 -  displayHeight / 2) +
+                windowHeight / 2 +
+                "px;margin-top:-" +
+                displayHeight / 2 +
                 "px;left:" +
-                (windowWidth / 2 - displayWidth / 2) +
+                windowWidth / 2 +
+                "px;margin-left:-" +
+                displayWidth / 2 +
                 "px;cursor:pointer;";
             dom = "<img draggable='true' src = '" +
                 src +
@@ -66,9 +70,13 @@ export default {
             displayHeight = windowHeight / 2;
             displayWidth = displayHeight * img.width / img.height;
             style = "z-index: 16666;position:absolute;top:" +
-                (windowHeight / 2 - displayHeight / 2) +
+                windowHeight / 2 +
+                "px;margin-top:-" +
+                displayHeight / 2 +
                 "px;left:" +
-                (windowWidth / 2 - displayWidth / 2) +
+                windowWidth / 2 +
+                "px;margin-left:-" +
+                displayWidth / 2 +
                 "px;cursor:pointer;";
             dom = "<img draggable='true' src = '" +
                 src +
@@ -83,7 +91,7 @@ export default {
             randomPosition: false //初始位置是否随机
         });
         $("#imgZoomImg").on("mousewheel", function(e, d) {
-          //d 1 前/大 -1 后/小
+          //d 1 上 -1 下
           let iFex = 1.1, iFex2 = 1.05;
           if (d === 1) {
             let nI = $('#imgZoomImg');
@@ -91,8 +99,8 @@ export default {
               iL = Number(nI.css('left').replace(/px/g, '')), 
               width = nI.width(), height = nI.height();
             $("#imgZoomImg").css({
-              top: (iT - height * ((iFex - 1) / 2))  + 'px',
-              left: (iL - width * ((iFex - 1) / 2)) + 'px',
+              top: iT / iFex2 + 'px',
+              left: iL / iFex2 + 'px',
               width: width * iFex,
               height: height * iFex
             });
@@ -103,10 +111,10 @@ export default {
               iL = Number(nI.css('left').replace(/px/g, '')), 
               width = nI.width(), height = nI.height();
             $("#imgZoomImg").css({
-              top: (iT + height * ((iFex - 1) / 2))  + 'px',
-              left: (iL + width * ((iFex - 1) / 2)) + 'px',
-              width: width - (iFex - 1) * width,
-              height: height - (iFex - 1) * height
+              top: iT * iFex2 + 'px',
+              left: iL * iFex2 + 'px',
+              width: width / iFex,
+              height: height / iFex
             });
           }
         });
