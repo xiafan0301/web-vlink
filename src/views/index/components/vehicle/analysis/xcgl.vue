@@ -23,7 +23,8 @@
                 type="date"
                 :picker-options="startDateOpt"
                 placeholder="开始时间"
-                :clearable="false">
+                :clearable="false"
+                format="yyyy-MM-dd HH:mm:ss">
             </el-date-picker>
             <!-- <el-date-picker
               class="vl_date"
@@ -46,7 +47,9 @@
                 type="date"
                 :picker-options="endDateOpt"
                 placeholder="结束时间"
-                :clearable="false">
+                :clearable="false"
+                format="yyyy-MM-dd HH:mm:ss"
+                @change="dateChange">
             </el-date-picker>
           </div>
           <!-- 设备搜索 -->
@@ -125,14 +128,14 @@
             </div>
           </div>
           <!-- 下划线 -->
-          <div class="line"></div>
+         <!--  <div class="line"></div> -->
            <!-- 切换查询条件 -->
-           <div class="switching-select">
+           <!-- <div class="switching-select">
            <el-radio-group v-model="selectIndex">
               <el-radio :label="0">使用图片</el-radio>
               <el-radio :label="1">使用车牌</el-radio>
             </el-radio-group>
-           </div>
+           </div> -->
           <!-- 上传 -->
           <div class="vl_judge_tc_c_item" v-show="selectIndex === 0">
             <el-upload
@@ -161,10 +164,6 @@
             </div>
           </div>
           <div v-show="selectIndex === 1">
-            <!-- 车牌号搜索 -->
-            <div class="license-plate-search">
-              <el-input v-model="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" clearable></el-input>
-            </div>
             <!-- 车牌颜色搜索 -->
             <div class="license-plate-color">
               <el-select v-model="searchData.licensePlateColor" clearable placeholder="全部车牌颜色">
@@ -175,6 +174,10 @@
                   :value="item.enumValue"
                 ></el-option>
               </el-select>
+            </div>
+            <!-- 车牌号搜索 -->
+            <div class="license-plate-search">
+              <el-input v-model="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" clearable></el-input>
             </div>
           </div>
           <!-- 切换查询条件 -->
@@ -349,7 +352,7 @@ export default {
         }
       },
       searching: false,
-      selectIndex: 0, //选中，0图片,1车牌号
+      selectIndex: 1, //选中，0图片,1车牌号
       colorList: [], //车牌颜色
       map: null, // 地图对象
       mapCenter: [110.594419, 27.908869], //地图中心位
@@ -578,17 +581,15 @@ export default {
     },
     //设置默认时间
     setDTime() {
-      let date = new Date();
-      let curDate = date.getTime();
+      let curDate = new Date(new Date().toLocaleDateString()).getTime()
       let curS = 1 * 24 * 3600 * 1000;
-      let _s =
-        new Date(curDate - curS).getFullYear() +
-        "-" +
-        (new Date(curDate - curS).getMonth() + 1) +
-        "-" +
-        new Date(curDate - curS).getDate();
+      let _s = curDate - curS;
+      let _e = curDate - 1
       this.searchData.startTime = formatDate(_s);
-      this.searchData.endTime = formatDate(_s);
+      this.searchData.endTime = formatDate(_e);
+    },
+    dateChange() {
+      this.searchData.endTime = new Date(this.searchData.endTime).getTime() + 1 * 24 * 3600 * 1000 - 1;
     },
     // 日期控制
     timeChange(type = "start") {
@@ -712,8 +713,8 @@ export default {
         this.notMessageInfo.close();
       }
       let params = {
-        startDate: formatDate(this.searchData.startTime, "yyyy-MM-dd") + " 00:00:00",
-        endDate: formatDate(this.searchData.endTime, "yyyy-MM-dd") + " 23:59:59",
+        startDate: formatDate(this.searchData.startTime, "yyyy-MM-dd HH:mm:ss"),
+        endDate: formatDate(this.searchData.endTime, "yyyy-MM-dd HH:mm:ss"),
       };
       if (!this.checkAllTree) {
         if (this.selectCameraArr && this.selectCameraArr.length > 0) {
@@ -770,8 +771,8 @@ export default {
       let params = {},
         drivingDiscipline = {};
       drivingDiscipline = {
-        startDate: formatDate(this.searchData.startTime, "yyyy-MM-dd") + " 00:00:00",
-        endDate: formatDate(this.searchData.endTime, "yyyy-MM-dd") + " 23:59:59",
+        startDate: formatDate(this.searchData.startTime, "yyyy-MM-dd HH:mm:ss"),
+        endDate: formatDate(this.searchData.endTime, "yyyy-MM-dd HH:mm:ss"),
       };
       if (!this.checkAllTree) {
         if (this.selectCameraArr && this.selectCameraArr.length > 0) {
@@ -1395,7 +1396,6 @@ export default {
       //车牌号搜索
       .license-plate-search {
         width: 232px;
-        margin-bottom: 10px;
       }
       // 关闭设备tab
       .selected_device_comp {
@@ -1625,6 +1625,7 @@ export default {
   .license-plate-color {
     .el-select {
       width: 232px;
+      margin-bottom: 10px;
     }
   }
   //时间搜索
