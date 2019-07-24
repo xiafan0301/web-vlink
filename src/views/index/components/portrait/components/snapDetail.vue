@@ -52,7 +52,7 @@
                 </p>
                 <p class="tz" v-else>
                   <b>特征</b>
-                  <span>{{sturcDetail.sex+" "+(sturcDetail.age || "")+" "+ (sturcDetail.baby || "")+ " " + (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+ " " + (sturcDetail.bag || "")+ " " + (sturcDetail.bottomColor || "") +(sturcDetail.bottomType || "") + " "+(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")}}</span>
+                  <span>{{sturcDetail.sex+" "+(sturcDetail.age || "")+ " " + (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+" "+ (sturcDetail.baby || "")+ " " + (sturcDetail.bag || "") + " "+(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")+ " " + (sturcDetail.bottomColor || "") +(sturcDetail.bottomType || "")}}</span>
                 </p>
               </div>
               <div class="struc_cdi_line"></div>
@@ -62,7 +62,7 @@
           <div class="operate_btn" @click="spinToRecog()">身份确认</div>
           <div class="operate_btn margin_btn" @click="spinToGJFX()">轨迹分析</div>
           <div class="operate_btn margin_btn" @click="spinToLJD()">落脚点分析</div>
-          <div class="operate_btn margin_btn" @click="spinToControl()">新建布控任务</div>
+          <div class="operate_btn margin_btn" @click="spinToControl()">新建布控</div>
         </div>
         <div v-show="strucCurTab === 2" class="struc_c_address"></div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">

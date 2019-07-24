@@ -45,26 +45,30 @@
             :value="item.value">
           </el-option>
         </el-select>
-        <el-input v-model.number="queryForm.warningNum" placeholder="请输入大于0的警戒数值" @blur="validationWarningNum"></el-input>
+        <el-input v-model="queryForm.warningNum" placeholder="请输入大于0的警戒数值" @blur="validationWarningNum"></el-input>
         <!-- 自定义报表类型 -->
         <div class="left_start" v-show="queryForm.statementType === 5">
-          <span>开始</span>
           <el-date-picker
+            :clearable="false"
+            style="width: 100%;"
+            :picker-options="pickerOptions"
             v-model="queryForm.startTime"
             type="datetime"
             value-format="yyyy-MM-dd HH:mm:ss"
-            placeholder="请选择开始时间">
+            placeholder="请选择开始时间"
+            class="vl_date">
           </el-date-picker>
         </div>
         <div class="left_end" v-show="queryForm.statementType === 5">
-          <span>结束</span>
           <el-date-picker
+            :clearable="false"
+            style="width: 100%;"
             :picker-options="pickerOptions1"
             v-model="queryForm.endTime"
             type="datetime"
-            @focus="getEndTime"  
             value-format="yyyy-MM-dd HH:mm:ss"
-            placeholder="请选择结束时间">
+            placeholder="请选择结束时间"
+            class="vl_date vl_date_end">
           </el-date-picker>
         </div>
         <div class="left_btn">
@@ -76,8 +80,8 @@
         <div class="right_box" v-if="isShowChart">
           <div class="tab_box">
             <div>
-              <i class="vl_icon vl_icon_vehicle_cll_01" @click="changeTwo" :class="{'active': tabIndex === 1}" v-show="queryForm.statementType !== 5"></i>
-              <i class="vl_icon vl_icon_vehicle_cll_02" @click="tabIndex = 2" :class="{'active': tabIndex === 2}" ></i>
+              <i class="vl_icon vl_icon_vehicle_cll_01" @click="changeTab(1)" :class="{'active': tabIndex === 1}" v-show="queryForm.statementType !== 5"></i>
+              <i class="vl_icon vl_icon_vehicle_cll_02" @click="changeTab(2)" :class="{'active': tabIndex === 2}" ></i>
               <i class="vl_icon vl_icon_vehicle_cll_03" @click="tabIndex = 3" :class="{'active': tabIndex === 3}" v-show="queryForm.statementType !== 5"></i>
             </div>
             <h1>({{dateTitle}})车流量统计</h1>
@@ -105,23 +109,26 @@
             </el-table>
           </div>
         </div>
-        <div class="not_content" v-else>如需进行车流量统计请先选择卡口</div>
+        <div is="noResult" v-else :isInitPage="isInitPage"></div>
       </div>
     </div>
   </div>
 </template>
 <script>
-let startTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss'); //默认开始时间为当前时间前一天
-let endTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() + (24 * 60 * 60 * 1000 - 1) - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss');//默认结束时间为开始时间后第三天
+let startTime = formatDate(new Date().getTime() - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss'); //默认开始时间为当前时间前24小时
+let endTime = formatDate(new Date().getTime() + (24 * 60 * 60 * 1000 - 1) - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss');
 import G2 from '@antv/g2';
 import { View } from '@antv/data-set';
 import {apiCarFlow, exportExcel} from '@/views/index/api/api.vehicle.js';
 import {getAllBayonetListByName} from '@/views/index/api/api.vehicle.js';
 import {formatDate} from '@/utils/util.js';
 import {dataList} from '@/utils/data.js';
+import noResult from '@/components/common/noResult.vue';
 export default {
+  components: {noResult},
   data () {
     return {
+      isInitPage: true,
       queryForm: {
         // radio: 1,
         carType: "",
@@ -132,7 +139,36 @@ export default {
         startTime: startTime,
         endTime: endTime
       },
-      pickerOptions1: [],
+      pickerOptions: {
+        disabledDate: time => {
+          if (this.queryForm.endTime) {
+            return (
+              time.getTime() > new Date(this.queryForm.endTime).getTime() ||
+              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90
+            );
+          } else {
+            return (
+              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90 ||
+              time.getTime() > new Date().getTime()
+            );
+          }
+        }
+      },
+      pickerOptions1: {
+        disabledDate: time => {
+          if (this.queryForm.startTime) {
+            return (
+              time.getTime() < new Date(this.queryForm.startTime).getTime() ||
+              time.getTime() > new Date().getTime()
+            );
+          } else {
+            return (
+              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 30 ||
+              time.getTime() > new Date().getTime()
+            );
+          }
+        }
+      },
       listBayonet: [],
       tabIndex: 2,
       carTypeList: this.dicFormater(dataList.vehicleType)[0].dictList.map(m => {
@@ -182,21 +218,9 @@ export default {
       } else if (type === 4) {
         return '年报表';
       } else if (type === 5) {
-        /* const startTime = new Date(this.queryForm.startTime).getTime();
-        const endTime = new Date(this.queryForm.endTime).getTime();
-        const threeDays = 3 * 3600 * 24 * 1000;
-        if (endTime - startTime >= threeDays) return '周报表';
-        return '日报表'; */
         return '自定义时间段'
       }
     }
-  },
-  watch: {
-   /* 'queryForm.startTime' () {
-      const threeDays = 2 * 3600 * 24 * 1000 + (24 * 60 * 60 * 1000 - 1);
-      const endTime = new Date(this.queryForm.startTime).getTime() + threeDays;
-      this.queryForm.endTime = formatDate(endTime, 'yyyy-MM-dd HH:mm:ss');
-    } */
   },
   mounted () {
     this.getListBayonet();
@@ -204,7 +228,8 @@ export default {
   methods: {
     // 验证输入的警戒值
     validationWarningNum () {
-      if (this.queryForm.warningNum !== '' && this.queryForm.warningNum <= 0) {
+      const reg = /^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$/;
+      if (this.queryForm.warningNum !== '' && !reg.test(this.queryForm.warningNum)) {
         this.$message.warning('输入的警戒数值必须大于0');
         this.queryForm.warningNum = '';
       }
@@ -245,14 +270,6 @@ export default {
         this.loadingBtnExport = false;
       })
     },
-    getEndTime(time) {
-      let startTime = new Date(this.queryForm.startTime).getTime() + 1 * 3600 * 24 * 1000;
-      /* this.pickerOptions1 = {
-        disabledDate(time) {
-          return time.getTime() < (startTime - 8.64e7) || time.getTime() > ((startTime + 1 * 3600 * 24 * 1000) + (24 * 60 * 60 * 1000 - 1) - 8.64e6);
-        },
-      } */
-    },
     // 模糊搜索卡口
     getListBayonet () {
       getAllBayonetListByName().then(res => {
@@ -268,20 +285,14 @@ export default {
     },  
     // 画图表
     drawChart1 () {
-      let chart = null;
-      if (this.charts.chart1) {
-        this.charts.chart1.clear();
-        chart = this.charts.chart1;
-      } else {
-        let temp = document.getElementById('chartContainer1');
-        chart = new G2.Chart({
-          container: 'chartContainer1',
-          forceFit: true,
-          padding: [ 20, 40, 60, 40 ],
-          width: G2.DomUtil.getWidth(temp),
-          height: G2.DomUtil.getHeight(temp)
-        });
-      }
+      let temp = document.getElementById('chartContainer1');
+      let chart = new G2.Chart({
+        container: 'chartContainer1',
+        forceFit: true,
+        padding: [ 20, 40, 60, 40 ],
+        width: G2.DomUtil.getWidth(temp),
+        height: G2.DomUtil.getHeight(temp)
+      });
       let dv = new View().source(this.chartData);
       dv.transform({
         type: 'fold',
@@ -365,25 +376,18 @@ export default {
         });
       }
 
-      /* chart.line().position('date*warnNum').color('#ef5555'); */
       chart.render();
       this.charts.chart1 = chart;
     },
     drawChart2 () {
-      let chart = null;
-      if (this.charts.chart2) {
-        this.charts.chart2.clear();
-        chart = this.charts.chart2;
-      } else {
-        let temp = document.getElementById('chartContainer2');
-        chart = new G2.Chart({
-          container: 'chartContainer2',
-          forceFit: true,
-          padding: [ 20, 20, 60, 30 ],
-          width: G2.DomUtil.getWidth(temp),
-          height: G2.DomUtil.getHeight(temp)
-        });
-      }
+      let temp = document.getElementById('chartContainer2');
+      let chart = new G2.Chart({
+        container: 'chartContainer2',
+        forceFit: true,
+        padding: [ 20, 40, 60, 40 ],
+        width: G2.DomUtil.getWidth(temp),
+        height: G2.DomUtil.getHeight(temp)
+      });
       let dv = new View().source(this.chartData);
       dv.transform({
         type: 'fold',
@@ -446,15 +450,26 @@ export default {
           },
         });
       }
-      /* chart.line().position('date*warnNum').color('#ef5555'); */
       chart.render();
       this.charts.chart2 = chart;
     },
     // tab切换
-    changeTwo () {
-      this.tabIndex = 1;
+    changeTab (index) {
+      this.tabIndex = index;
       this.$nextTick(() => {
-        this.drawChart1();
+        if (this.tabIndex === 1) {
+          if (this.charts.chart1) {
+            this.charts.chart1.destroy();
+          }
+          this.charts.chart1 = null;
+          this.drawChart1();
+        } else {
+          if (this.charts.chart2) {
+            this.charts.chart2.destroy();
+          }
+          this.charts.chart2 = null;
+          this.drawChart2();
+        }
       })
     },
     // 重置查询表单
@@ -522,6 +537,10 @@ export default {
             this.tabIndex = 2;
             this.isShowChart = true;
             this.$nextTick(() => {
+              if (this.charts.chart2) {
+                this.charts.chart2.destroy();
+              }
+              this.charts.chart2 = null;
               this.drawChart2();
               this.beforeDate = this.chartData[0].date;
               this.afterDate = this.chartData[this.chartData.length - 1].date;
@@ -533,7 +552,8 @@ export default {
             };
             this.tabIndex = 2;
             this.isShowChart = false;
-            this.$message.warning('没有相关卡口的统计数据');
+            this.isInitPage = false;
+            // this.$message.warning('没有相关卡口的统计数据');
           } 
           
         }
@@ -562,11 +582,7 @@ export default {
       height: 100%;
       padding: 20px;
       .left_start, .left_end{
-        display: flex;
         padding-bottom: 10px; 
-        > span{
-          color: #999999;
-        }
       }
       .left_start{
         margin-top: 10px;
@@ -577,6 +593,8 @@ export default {
         padding-bottom: 20px;
       }
       .left_btn{
+        display: flex;
+        justify-content: space-between;
         padding-top: 10px;
       }
       .el-select{

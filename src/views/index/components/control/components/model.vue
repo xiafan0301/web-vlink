@@ -565,7 +565,6 @@ export default {
     reset () {
       this.$refs[this.mapId].clearValidate();
     },
-
     // 验证人员追踪的必填项
     validateModelOne () {
       if (this.checkListCommon('人员追踪')) {

@@ -41,7 +41,6 @@ export default {
   height: 49px; line-height: 49px;
   padding-left: 20px;
   border-bottom: 1px solid #eee;
-  box-shadow: 0 0 4px #ddd;
   background-color: #fff;
 }
 </style>

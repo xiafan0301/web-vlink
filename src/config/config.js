@@ -7,7 +7,7 @@ const oDomains = {
     base: {
       dev: 'https://apidev.aorise.org/vlink-base',
       // dev: 'http://10.116.64.23:8081',
-      // dev: 'http://10.116.64.142:8081',
+      // dev: 'http://10.116.64.231:8081',
       // dev: 'http://10.116.66.29:8082',// 钟赞
       test: 'https://apirel.aorise.org/vlink-base',
       prod: 'https://apirel.aorise.org/vlink-base'
@@ -47,7 +47,7 @@ const oDomains = {
     judge: {
         // dev: 'http://10.116.64.127:8082',
         // dev: 'http://10.116.64.109:8082',
-        // dev: 'http://10.116.64.93:8081',
+        // dev: 'http://10.116.64.97:8081',
         dev: 'https://apidev.aorise.org/vlink-judge/',
         // dev: 'https://apirel.aorise.org/vlink-judge/',
         test: 'https://apirel.aorise.org/vlink-judge/',

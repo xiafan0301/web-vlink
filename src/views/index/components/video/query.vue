@@ -193,6 +193,8 @@ export default {
       // 回放列表
       deviceList2: [],
 
+      bResize: null,
+
       // {video: {}, title: ''},
       videoList: [{}, {}, {}, {}],
       showVideoTotal: 4,
