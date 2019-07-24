@@ -102,7 +102,6 @@ router.beforeEach((to, from, next) => {
   } else {
     // 需要登陆
     // 通过vuex state获取当前的token是否存在
-    console.log('store.state.loginToken', store.state.loginToken);
     if (store.state.loginToken) {
       next()
     } else {

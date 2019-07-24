@@ -878,7 +878,8 @@ export default {
       if (this.download.downlaodInval) {
         window.clearInterval(this.download.downlaodInval);
       }
-      let ti = (Math.floor((this.download.currentM / 30) * 5) + 2) * 1000;
+      // let ti = (Math.floor((this.download.currentM / 30) * 5) + 2) * 1000;
+      let ti = 3000;
       console.log(ti);
       this.download.downlaodInval = window.setInterval(() => {
         this.playerDownloadProgress();
