@@ -731,7 +731,7 @@ export default {
       if (this.tape.active) { return; }
       this.tape.active = true;
       this.tape.loading  = true;
-      this.$message('开始录像。');
+      // this.$message('开始录像。');
       this.tape.tapeTime = 0;
       getVideoPlayRecordStart({
         deviceId: this.oData.video.uid
