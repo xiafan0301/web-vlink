@@ -1,6 +1,6 @@
 <template>
   <div class="vehicle_content" :class="{'map_pic_show': mapPicShow}">
-    <div class="vc_rep_bd" is="vehicleBreadcrumb" :oData="[{name: '车辆侦察报告'}]"></div>
+    <div class="vc_rep_bd" is="vehicleBreadcrumb" :oData="[{name: '车辆综合分析报告'}]"></div>
     <div class="vc_rep">
       <div class="vc_rep_t">
         <div class="vc_rep_sc">

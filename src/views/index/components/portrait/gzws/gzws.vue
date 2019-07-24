@@ -194,7 +194,7 @@
                   v-for="(item, index) in deviceList"
                   :key="index"
                   :label="item.deviceName"
-                  :value="item.deviceID"
+                  :value="item.deviceName"
                 ></el-option>
               </el-select>
               <span class="span_tips" v-show="isShowDeviceTip">该人像在该时间内无抓拍设备</span>
@@ -302,18 +302,18 @@ export default {
   methods: {
     // 时间选择change
     handleDateTime (val) {
-      if (val) {
-        if ( (new Date(val[1]).getTime() - new Date(val[0]).getTime()) >= 3* 24 * 3600 * 1000) {
-          if (!document.querySelector('.el-message--info')) {
-            this.$message.info('最多选择3天');
-          }
-          this.addForm.dateTime = [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()];
-        } else {
-          if (this.dialogImageUrl) {
-            this.getDeviceList();
-          }
-        }
-      }
+      // if (val) {
+      //   if ( (new Date(val[1]).getTime() - new Date(val[0]).getTime()) >= 3* 24 * 3600 * 1000) {
+      //     if (!document.querySelector('.el-message--info')) {
+      //       this.$message.info('最多选择3天');
+      //     }
+      //     this.addForm.dateTime = [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()];
+      //   } else {
+      //     if (this.dialogImageUrl) {
+      //       this.getDeviceList();
+      //     }
+      //   }
+      // }
     },
     // 获取离线任务
     getDataList () {
@@ -408,7 +408,7 @@ export default {
     handleChangeDeviceCode (obj) {
       if (obj) {
         this.deviceList.map(item => {
-          if (item.deviceID === obj) {
+          if (item.deviceName === obj) {
             this.addForm.deviceName = item.deviceName;
           }
         })
@@ -417,13 +417,6 @@ export default {
     // 跳至尾随记录页面
     skipWsReocrdPage (obj) {
       this.$router.push({name: 'gzws_detail'})
-      // this.$router.push({name: 'gzws_detail', query: { 
-      //   plateNo: this.addForm.plateNo,
-      //   dateStart: this.deviceStartTime,
-      //   dateEnd: this.addForm.dateEnd,
-      //   plateNoTb: obj.plateNo,
-      //   dateStartTb: obj.shotTime
-      //  }});
     },
     // 取消新建
     cancelAdd (form) {
@@ -447,13 +440,18 @@ export default {
             }
             return;
           };
-          // const vehicleType = this.addForm.vehicleClass.join(':');
+          let deviceCode;
+          this.deviceList.map(item => {
+            if (item.deviceName === this.addForm.deviceCode) {
+              deviceCode = item.deviceID;
+            }
+          })
           const params = {
             // targetPicUrl: 'http://10.116.126.10/root/image/2019/07/10/34020000001320000016414920190709100000000009_1_1.jpeg',
             // startTime : '2019-07-09 09:59:00',
             // endTime: '2019-07-09 10:03:00',
             targetPicUrl: this.dialogImageUrl,
-            deviceId: this.addForm.deviceCode,
+            deviceId: deviceCode,
             deviceName: this.addForm.deviceName,
             startTime: formatDate(this.addForm.dateTime[0]),
             endTime: formatDate(this.addForm.dateTime[1]),

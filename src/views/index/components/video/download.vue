@@ -5,6 +5,7 @@
         <el-form-item>
           <span style="color: #666;">视频时间：&nbsp;</span>
           <el-date-picker
+            style="width: 300px;"
             class="vl_date"
             v-model="formInline.time"
             type="daterange"
@@ -164,16 +165,19 @@ export default {
     },
     getData () {
       this.searchLoading = true;
-      apiVideoDownloadList({
+      let params = {
         pageNum: this.pagination.currentPage,
         pageSize: this.pagination.pageSize,
-        // orderBy: '',
-        // order: '',
         'where.startTime': formatDate(this.formInline.time[0], 'yyyy-MM-dd 00:00:00'),
         'where.endTime': formatDate(this.formInline.time[1], 'yyyy-MM-dd 23:59:59'),
-        'where.oprUserId': this.formInline.user,
-        'where.oprDeptId': this.formInline.region
-      }).then(res => {
+      }
+      if (this.formInline.user) {
+        params['where.oprUserId'] = this.formInline.user;
+      }
+      if (this.formInline.region) {
+        params['where.oprDeptId'] = this.formInline.region;
+      }
+      apiVideoDownloadList(params).then(res => {
         if (res && res.data) {
           this.pagination.total = res.data.total;
           this.tableData = res.data.list;
