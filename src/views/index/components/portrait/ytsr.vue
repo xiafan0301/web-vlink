@@ -3,113 +3,25 @@
     <div class="">
       <div is="vlBreadcrumb"
            :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
-            {name: '以图搜人'}]">
+            {name: '以图搜人', routerName: 'portrait_ytsr_list'},
+            {name: '搜索结果'}]">
       </div>
     </div>
     <div class="vl_j_left">
-      <div class="vl_jtc_img_box">
-        <div class="vl_judge_tc_c_item"  @drop="drop($event)" @dragover="allowDrop($event)">
-          <el-upload
-                  :class="{'vl_jtc_upload_ytsr': true}"
-                  :show-file-list="false"
-                  accept="image/*"
-                  :action="uploadAcion"
-                  list-type="picture-card"
-                  @drop="drop($event)"
-                  :before-upload="beforeAvatarUpload"
-                  :on-success="uploadSucess"
-                  :on-error="handleError">
-            <i v-if="uploading" class="el-icon-loading"></i>
-            <img v-else-if="curImageUrl" :src="curImageUrl">
-            <i style="width: 140px;height: 114px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;" class="vl_icon vl_icon_retrieval_07" v-else></i>
-          </el-upload>
-          <p @click="showHistoryPic">从上传记录中选择</p>
-        </div>
-      </div>
-      <div class="vl_jtc_search">
-        <el-date-picker
-                v-model="searchData.startTime"
-                style="width: 100%;"
-                class="vl_date"
-                :picker-options="pickerOptions"
-                type="datetime"
-                value-format="timestamp"
-                placeholder="选择日期时间">
-        </el-date-picker>
-        <el-date-picker
-                style="width: 100%;"
-                class="vl_date vl_date_end"
-                :picker-options="pickerOptions"
-                v-model="searchData.endTime"
-                value-format="timestamp"
-                type="datetime"
-                @change="chooseEndTime"
-                placeholder="选择日期时间">
-        </el-date-picker>
-        <div class="per_semblance"><span>相似度</span><el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100" v-model="searchData.minSemblance"></el-input> <i></i> 100</div>
-        <el-select
-          v-show="!isCheckAll"
-          v-model="devIdData"
-          multiple
-          class="camera-select"
-          @remove-tag="removeCamera"
-          @click.native="vChange"
-          collapse-tags
-          style="width: 100%"
-          :popper-append-to-body="false"
-          placeholder="选择监控">
-          <el-option value="0" label=" "></el-option>
-        </el-select>
-        <el-select
-          v-show="isCheckAll"
-          v-model="allDevice"
-          class="camera-select"
-          @click.native="vChange"
-          collapse-tags
-          style="width: 100%"
-          :popper-append-to-body="false">
-          <el-option value="0" label=" "></el-option>
-        </el-select>
-        <div class="vl_jtc_search_item">
-          <vue-scroll>
-            <el-tree
-                v-show="showCameraList"
-                :data="cameraData"
-                class="camera-tree"
-                ref="cameraTree"
-                :default-checked-keys="defaultTreeKes"
-                :default-expanded-keys="defaultTreeKes"
-                @check="chooseCamera"
-                show-checkbox
-                node-key="deviceName"
-                :props="defaultProps">
-            </el-tree>
-          </vue-scroll>
-        </div>
-        <div style="text-align: center;margin-bottom: 0px;">
-          <el-button @click="resetSearch">重置</el-button>
-          <el-button type="primary" :loading="searching" @click="tcDiscuss(false)">确定</el-button>
-        </div>
-      </div>
     </div>
     <div class="vl_s_right">
-      <template v-if="strucInfoList && strucInfoList.length > 0">
-        <div class="vl_jig_right">
+      <div class="vl_jig_right">
+        <template v-if="strucInfoList && strucInfoList.length > 0">
           <div class="vl_jig_right_title">
             <div class="vl_jr_t_item">
               <span><span style="color: #333333">检索结果 </span> ({{strucInfoList.length}})</span>
-              <div :class="{'active-item': stucOrder < 3}" @click="timeOrderS">时间排序 <span><i :class="{'active': stucOrder === 2}" class="el-icon-caret-top"></i><i :class="{'active': stucOrder === 1}" class="el-icon-caret-bottom"></i></span></div>
-            </div>
-            <div class="vl_jr_t_item">
-              <div :class="{'active-item': stucOrder === 3}" @click="stucOrder = 3">监控排序</div>
-              <div :class="{'active-item': stucOrder === 4}" @click="stucOrder = 4" style="margin-left: .1rem;">相似度排序</div>
             </div>
           </div>
           <div class="vl_jfo_event">
             <vue-scroll>
               <div class="vl_jfo_event_box clearfix">
                 <div class="vl_jfo_box_item" v-for="(item, index) in strucInfoList" :key="item.id" @click="showStrucInfo(item, index)">
-                  <div class="vl_jfo_i_left"><img title="可以试着把我拖拽到左侧上传图片处" draggable="true" @dragstart="drag($event)" :src="item.subStoragePath" alt=""></div>
+                  <div class="vl_jfo_i_left"><img :src="item.subStoragePath" alt=""></div>
                   <div class="vl_jfo_i_right">
                     <p>检索资料</p>
                     <div class="vl_jfo_line" :title="item.shotTime"><i class="vl_icon vl_icon_retrieval_01"></i>{{item.shotTime}}</div>
@@ -129,32 +41,12 @@
               </el-pagination>
             </vue-scroll>
           </div>
+        </template>
+        <template v-else>
+          <div is="noResult"></div>
+        </template>
         </div>
-      </template>
-      <template v-else>
-        <div is="noResult" :isInitPage="isInitPage"></div>
-      </template>
     </div>
-    <!--历史记录弹窗-->
-    <el-dialog
-            :visible.sync="historyPicDialog"
-            class="history-pic-dialog"
-            :close-on-click-modal="false"
-            top="4vh"
-            title="最近上传的图片">
-      <div style="text-align: center;font-size: 20px;" v-if="loadingHis"><i class="el-icon-loading"></i></div>
-      <vue-scroll class="his-pic-box" v-else-if="historyPicList.length">
-        <div class="his-pic-item" :class="{'active': item.checked}" v-for="item in historyPicList" :key="item.id" @click="chooseHisPic(item)">
-          <img :src="item.path" alt="">
-        </div>
-        <div style="clear: both;"></div>
-      </vue-scroll>
-      <p v-else>暂无历史记录</p>
-      <div slot="footer">
-        <el-button @click="historyPicDialog = false">取消</el-button>
-        <el-button type="primary" @click="addHisToImg" :disabled="choosedHisPic.length === 0">确认</el-button>
-      </div>
-    </el-dialog>
     <!--检索详情弹窗-->
     <el-dialog
       :visible.sync="strucDetailDialog"
@@ -242,21 +134,14 @@
 </template>
 <script>
   import vlBreadcrumb from '@/components/common/breadcrumb.vue';
-  import noResult from '@/components/common/noResult.vue';
   import { formatDate } from "@/utils/util.js";
+  import noResult from '@/components/common/noResult.vue';
+  import { getPeopleTaskDetail } from '@/views/index/api/api.analysis.js';
   let AMap = window.AMap;
-  import {ajaxCtx} from '@/config/config';
-  import { MapGETmonitorList } from "../../api/api.map.js";
-  import {ScpGETstrucInfoList, ScpGETdeviceListById, ScpGETretrievalHisById} from '../../api/api.search.js';
-  import {JtcPUTAppendixsOrder, JtcPOSTAppendixInfo, JtcGETAppendixInfoList } from '../../api/api.judge'
   export default {
     components: {vlBreadcrumb, noResult},
     data() {
       return {
-        isCheckAll: true,
-        allDevice: '全部设备',
-        isInitPage: true,
-        targetType: 2,
         swiperOption: {
           slidesPerView: 10,
           spaceBetween: 18,
@@ -270,45 +155,7 @@
           },
         },
         pagination: { total: 0, pageSize: 12, pageNum: 1 },
-        uploadAcion: ajaxCtx.base + '/new',
         mapData: [],
-        searching: false,
-        curImageUrl: '', // 当前上传的图片
-        uploading: false, // 是否上传中
-        imgList: '',
-        historyPicList: [], // 上传历史记录
-        loadingHis: false,
-        cameraData: [],
-        devIdData: [],
-        showCameraList: false,
-        defaultProps: {
-          children: 'deviceBasicList',
-          label: 'deviceName'
-        },
-        defaultTreeKes: [],
-        searchData: {
-          startTime: null,
-          endTime: null,
-          minSemblance: 85, // 最小相似度
-          devIds: [] // 设备列表
-        },
-        pickerOptions: {
-          disabledDate (time) {
-            let date = new Date();
-            let y = date.getFullYear();
-            let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
-            let d = date.getDate();
-            let threeMonths = '';
-            let start = '';
-            if (parseFloat(m) >= 4) {
-              start = y + '-' + (m - 3) + '-' + d;
-            } else {
-              start = (y - 1) + '-' + (m - 3 + 12) + '-' + d;
-            }
-            threeMonths = new Date(start).getTime();
-            return time.getTime() > Date.now() || time.getTime() < threeMonths;
-          }
-        },
         amap: null, // 地图实例
         markerPoint: null, // 地图点集合
         InfoWindow: null,
@@ -316,6 +163,7 @@
         playing: false, // 视频播放是否
         historyPicDialog: false,
         stucOrder: 4, // 1升序，2降序，3监控，4相似度
+        taskDetail: {},
         strucInfoList: [], // 检索抓拍信息
         strucCurTab: 1,
         curImgIndex: 0,
@@ -324,53 +172,8 @@
         videoUrl: '' // 弹窗视频回放里的视频
       }
     },
-    computed: {
-      choosedHisPic () {
-        return this.historyPicList.filter(x => x.checked)
-      }
-    },
     mounted () {
-      this.setDTime();
-      new Promise((resolve) => {
-        this.getDeviceList(resolve);
-      }).then(() => {
-        if (this.$route.query.hisId) {
-          ScpGETretrievalHisById(this.$route.query.hisId)
-              .then(res => {
-                if (res) {
-                  this.searchData.time = [res.data.startTime, res.data.endTime];
-                  this.searchData.minSemblance = res.data.minSemblance ? res.data.minSemblance : '';
-                  res.data.retrievalPicList.forEach((x, index) => {
-                    this.imgList = x;
-                    if ((index + 1) === res.data.retrievalPicList.length) {
-                      this.curImageUrl = x.path;
-                    }
-                  })
-                  res.data.retrievalDevList.forEach(x => {
-                    this.defaultTreeKes.push(x.uid)
-                  })
-                  this.defaultTreeKes = [3];
-                }
-                this.tcDiscuss(true);
-              })
-        } else {
-          if (this.$route.query.imgurl) {
-            let x = {
-              contentUid: this.$store.state.loginUser.uid,
-              cname: '带图' + Math.random(),
-              filePathName: '带图' + Math.random(),
-              path: this.$route.query.imgurl
-            }
-            JtcPOSTAppendixInfo(x).then(jRes => {
-              if (jRes) {
-                x['uid'] = jRes.data;
-                console.log(x);
-              }
-            })
-            this.imgList = x;
-          }
-        }
-      })
+      this.getDetail();
       let map = new AMap.Map('capMap', {
         center: [112.974691, 28.093846],
         zoom: 16
@@ -379,287 +182,22 @@
       this.amap = map;
     },
     methods: {
-      chooseEndTime (e) {
-        if (e < this.searchData.startTime) {
-          this.$message.info('结束时间必须大于开始时间才会有结果')
-        }
-      },
-      drag (ev) {
-        ev.dataTransfer.setData("Text",ev.target.currentSrc);
-      },
-      drop (e) {
-        let x = {
-          contentUid: this.$store.state.loginUser.uid,
-          cname: '拖拽图片' + Math.random(),
-          filePathName: '拖拽图片' + Math.random(),
-          path: e.dataTransfer.getData("Text")
-        }
-        JtcPOSTAppendixInfo(x).then(jRes => {
-          if (jRes) {
-            x['uid'] = jRes.data;
-            console.log(x);
-          }
-        })
-        this.imgList = x;
-        this.curImageUrl = x.path;
-      },
-      allowDrop (e) {
-        e.preventDefault();
-      },
-      // 设备列表
-      getDeviceList (cb) {
-        let params = {
-          areaUid: '431224'
-        }
-        MapGETmonitorList(params)
-            .then(res => {
-              if (res) {
-                let _obj = res.data;
-                _obj['deviceName'] = '全选';
-                _obj['deviceBasicList'] = _obj.areaTreeList.filter(y => y.deviceBasicList.length).map(x => {
-                  x['deviceName'] = x['areaName'];
-                  return x;
-                });
-                this.cameraData = [_obj]
-                this.defaultTreeKes = ['全选'];
-              }
-              cb()
-            })
-      },
-      // 上传图片
-      uploadPicExceed () {
-        this.$message.warning('当前限制选择 3 个文件，请删除后再上传！');
-      },
-      beforeAvatarUpload (file) {
-        const isJPG = (file.type === 'image/jpeg' || file.type === 'image/png');
-        const isLt = file.size / 1024 / 1024 < 100;
-        if (!isJPG) {
-          this.$message.error('只能上传 JPG / PNG 格式图片!');
-        }
-        if (!isLt) {
-          this.$message.error('上传图片大小不能超过 100MB!');
-        }
-        this.uploading = true;
-        return isJPG && isLt;
-      },
-      uploadSucess (response, file, fileList) {
-        this.uploading = false;
-        if (response && response.data) {
-          let oRes = response.data;
-          if (oRes) {
-            let x = {
-              cname: oRes.fileName, // 附件名称 ,
-              contentUid: this.$store.state.loginUser.uid,
-              // desci: '', // 备注 ,
-              filePathName: oRes.fileName, // 附件保存名称 ,
-              fileType: 1, // 文件类型 ,
-              imgHeight: oRes.fileHeight, // 图片高存储的单位位px ,
-              imgSize: oRes.fileSize, // 图片大小存储的单位位byte ,
-              imgWidth: oRes.fileWidth, //  图片宽存储的单位位px ,
-              // otherFlag: '', // 其他标识 ,
-              path: oRes.fileFullPath, // 附件路径 ,
-              // path: oRes.path,
-              thumbnailName: oRes.thumbnailFileName, // 缩略图名称 ,
-              thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
-              // uid: '' //  附件标识
-            };
-            JtcPOSTAppendixInfo(x).then(jRes => {
-              if (jRes) {
-                x['uid'] = jRes.data;
-                console.log(x);
-              }
-            })
-            this.imgList = x;
-            this.curImageUrl = x.path;
-          }
-        }
-        console.log(fileList)
-      },
-      handleError () {
-        this.uploading = false;
-        this.$message.error('上传失败')
-      },
-      showHistoryPic () {
-        this.loadingHis = true;
-        this.historyPicDialog = true;
-        let params = {
-          userId: this.$store.state.loginUser.uid,
-          fileType: 1
-        }
-        JtcGETAppendixInfoList(params).then(res => {
-          if (res) {
-            this.loadingHis = false;
-            res.data.forEach(x => x.checked = false);
-            this.historyPicList = res.data;
-          }
-        }).catch(() => {
-          this.historyPicDialog = false;
-        })
-      },
-      chooseHisPic (item) {
-        this.historyPicList.forEach(x => x.checked = false)
-        item.checked = true;
-      },
-      addHisToImg () {
-        this.historyPicDialog = false;
-        let _ids = [];
-        this.choosedHisPic.forEach(x => {
-          _ids.push(x.uid)
-          this.imgList = x;
-          this.curImageUrl = x.path;
-        })
-        let _obj = {
-          appendixInfoIds: _ids.join(',')
-        }
-        JtcPUTAppendixsOrder(_obj);
-      },
-      setDTime () {
-        let date = new Date();
-        let curDate = date.getTime();
-        let curS = 1 * 24 * 3600 * 1000;
-        let sM = '', sD = '';
-        if ((new Date(curDate - curS).getMonth() + 1) < 10 ) {
-          sM = '0' + (new Date(curDate - curS).getMonth() + 1);
-        } else {
-          sM = (new Date(curDate - curS).getMonth() + 1)
-        }
-        if ( new Date(curDate - curS).getDate() < 10 ) {
-          sD = '0' +  new Date(curDate - curS).getDate();
-        } else {
-          sD =  new Date(curDate - curS).getDate()
-        }
-        let _s = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD + ' 00:00:00';
-        let eM = '', eD = '';
-        if ((date.getMonth() + 1) < 10 ) {
-          eM = '0' + (date.getMonth() + 1);
-        } else {
-          eM = (date.getMonth() + 1)
-        }
-        if (date.getDate() < 10 ) {
-          eD = '0' + date.getDate();
-        } else {
-          eD = date.getDate()
-        }
-        let _e = date.getFullYear() + '-' + eM + '-' + eD + ' 23:59:59';
-        this.searchData.startTime = new Date(_s);
-        this.searchData.endTime = new Date(_e);
-      },
-      vChange () {
-        this.showCameraList = !this.showCameraList;
-      },
-      removeCamera (e) { // 有问题，摄像头名字是否会有相同的，
-        console.log(e, this.cameraData[0])
-        let list = this.cameraData[0].deviceBasicList;
-        for (let i = 0; i < list.length; i++) {
-          let _index = list[i].deviceBasicList.findIndex(y => y.deviceName === e);
-          if (_index !== -1) {
-            this.$refs.cameraTree.setChecked(list[i].deviceBasicList[_index].deviceName, false)
-            break;
-          }
-        }
-      },
-      chooseCamera () {
-        let obj = [];
-        this.$refs.cameraTree.getCheckedNodes()
-            .forEach(x => {
-              if (!x.deviceBasicList) {
-                obj.push(x.deviceName)
-              }
-            })
-        this.devIdData = obj.splice(0, obj.length);
-        if (this.$refs.cameraTree.getCheckedKeys().includes("全选")) {
-          this.isCheckAll = true;
-        } else {
-          this.isCheckAll = false;
-        }
-      },
-      resetSearch () {
-        this.$refs.cameraTree.setCheckedKeys(['全选']);
-        this.searchData.minSemblance = 85;
-        this.isCheckAll = true;
-        this.searchData.devIds = [];
-        this.devIdData = [];
-        this.imgList = '';
-        this.curImageUrl = '';
-        this.isInitPage = false;
-      },
-      tcDiscuss (boolean) {
-        if (!this.imgList) {
-          if (!document.querySelector('.el-message--info')) {
-            this.$message.info('请上传图片')
-          }
-          return false;
-        }
-        if (!boolean) {
-          this.searching = true;
-        }
-        let _ids = [],devIds = [];
-        let _arr = this.$refs.cameraTree.getCheckedNodes();
-        _arr.forEach(x => {
-          if (!x.deviceBasicList) {
-            devIds.push(x.uid)
-          }
-        })
-        let params = {
-          pageNum: this.pagination.pageNum,
-          pageSize: this.pagination.pageSize,
-          where: {}
-        }
-        if (this.stucOrder === 1) {
-          params['order'] = 'asc';
-        } else {
-          params['order'] = 'desc';
-        }
-        switch (this.stucOrder) {
-          case 1:
-            params['orderBy'] = 'shotTime';
-            break;
-          case 2:
-            params['orderBy'] = 'shotTime';
-            break;
-          case 3:
-            params['orderBy'] = 'deviceNamePinyin';
-            break;
-          case 4:
-            params['orderBy'] = 'semblance';
-            break;
-        }
-        params.where.startTime = formatDate(this.searchData.startTime, 'yyyy-MM-dd HH:mm:ss');
-        params.where.endTime = formatDate(this.searchData.endTime, 'yyyy-MM-dd HH:mm:ss');
-        params.where.targetType = this.targetType * 1;
-        if (this.searchData.minSemblance) {
-          params.where['minSemblance'] = this.searchData.minSemblance;
-        } else {
-          params.where['minSemblance'] = 0;
-        }
-        if (devIds.length) {
-          params.where['deviceIds'] = devIds.join(',');
-        }
-        _ids.push(this.imgList.uid);
-        if (_ids.length) {
-          params.where['appendixIds'] = _ids.join(',');
-        }
-        ScpGETstrucInfoList(params).then(res => {
-          if (res) {
-            console.log(res);
-            this.strucInfoList = res.data.list;
-//            this.pagination.pageNum = res.data.pageNum;
-            this.pagination.total = res.data.total;
-            this.searching = false;
-            this.isInitPage = false;
-          } else {
-            this.searching = false;
-          }
-        }).catch(() => {
-          this.searching = false;
-        })
-        console.log(this.searchData.time)
-      },
-      timeOrderS () {
-        if (this.stucOrder > 2) {
-          this.stucOrder = 2;
-        } else {
-          this.stucOrder === 1 ? this.stucOrder = 2 : this.stucOrder = 1;
+      // 获取离线任务详情
+      getDetail () {
+        const id = this.$route.query.uid
+        if (id) {
+          getPeopleTaskDetail(id)
+              .then(res => {
+                if (res) {
+                  this.$set(res.data, 'taskResult', JSON.parse(res.data.taskResult));
+                  this.$set(res.data, 'taskWebParam', JSON.parse(res.data.taskWebParam));
+                  // res.data.taskResult.push(...res.data.taskResult)
+                  this.pagination.total = res.data.taskResult.portrailInfoDtos.length;
+                  this.strucInfoList = res.data.taskResult.portrailInfoDtos;
+                  this.taskDetail = res.data
+                  console.log(res.data)
+                }
+              })
         }
       },
       showStrucInfo (data, index) {
@@ -718,18 +256,6 @@
         })
         this.playing = !this.playing;
       }
-    },
-    watch: {
-      stucOrder () {
-        this.tcDiscuss(true);
-      },
-      strucCurTab (e) {
-        if (e === 2) {
-          this.drawPoint(this.sturcDetail)
-        } else if (e === 3) {
-          this.videoUrl = document.getElementById('capVideo').src;
-        }
-      }
     }
   }
 </script>
@@ -737,19 +263,6 @@
   .breadcrumb_heaer {
     background: #ffffff;
     border-bottom: 1px solid #D3D3D3;
-  }
-  .camera-select {
-    .el-select-dropdown {
-      display: none;
-    }
-    .el-select__tags {
-      >span {
-        white-space: nowrap;
-        display: block;
-        width: 100%;
-        overflow: hidden;
-      }
-    }
   }
   .cap_info_win {
     background: #FFFFFF;
@@ -775,219 +288,10 @@
       width: 272px;
       padding-top: 20px;
       height: calc(100% - 56px);
-      min-height: 763px;
+      min-height: 788px;
       background: #ffffff;
-      box-shadow:0px 0px 0px 0px rgba(131,131,131,0.28);
+      box-shadow: 2px 3px 10px 0px rgba(131, 131, 131, 0.28);
       animation: fadeInLeft .4s ease-out .3s both;
-      .vl_jtc_img_box {
-        width: 100%;
-        height: auto;
-        border-bottom: 1px dashed #D3D3D3;
-        padding-bottom: 20px;
-        .vl_judge_tc_c_item {
-          width: 238px;
-          height: 238px;
-          display: inline-block;
-          position: relative;
-          -webkit-box-shadow: 0 5px 20px 0px rgba(169, 169, 169, .3);
-          -moz-box-shadow: 0 5px 20px 0px rgba(169, 169, 169, .3);
-          box-shadow: 0 5px 20px 0px rgba(169, 169, 169, .3);
-          -webkit-border-radius: 10px;
-          -moz-border-radius: 10px;
-          border-radius: 10px;
-          cursor: pointer;
-          &:first-child {
-            margin-right: .15rem;
-          }
-          &:last-child {
-            margin-left: .15rem;
-          }
-          &:hover {
-            background: #2981F8;
-            >p {
-              display: block;
-            }
-          }
-          .vl_jtc_upload_ytsr {
-            width: 100%;
-            height: 100%;
-            background: none;
-            .el-upload--picture-card {
-              border: none;
-            }
-            .el-upload {
-              width: 100%;
-              height: 100%;
-              background: none;
-              line-height: 238px;
-              img {
-                width: 100%;
-                height: 100%;
-                -webkit-border-radius: 10px;
-                -moz-border-radius: 10px;
-                border-radius: 10px;
-              }
-            }
-          }
-          >p {
-            display: none;
-            position: absolute;
-            bottom: 0;
-            text-align: center;
-            width: 100%;
-            color: #FFFFFF;
-            height: 40px;
-            line-height: 40px;
-            -webkit-border-radius: 0 0 10px 10px;
-            -moz-border-radius: 0 0 10px 10px;
-            border-radius: 0 0 10px 10px;
-            background: #0C70F8;
-          }
-          .vl_jtc_ic_input {
-            position: absolute;
-            top: .2rem;
-            width: 3rem;
-            height: .26rem;
-            left: .2rem;
-            border: 1px solid #D3D3D3;
-            -webkit-border-radius: .13rem;
-            -moz-border-radius: .13rem;
-            border-radius: .13rem;
-            padding: 0 .02rem;
-            background: #FFFFFF;
-            .el-form-item__content {
-              height: .23rem;
-              line-height: .23rem;
-            }
-            input {
-              border: none!important;
-              height: .23rem;
-              line-height: .23rem;
-            }
-          }
-          .del_icon {
-            display: none;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 24px;
-            height: 24px;
-            line-height: 24px;
-            text-align: center;
-            background: rgba(0, 0, 0, .4);
-            -webkit-border-radius: 4px;
-            -moz-border-radius: 4px;
-            border-radius: 4px;
-            color: #FFFFFF;
-          }
-        }
-        .vl_jtc_img_list {
-          width: 100%;
-          margin-top: 10px;
-          text-align: center;
-          .middle_img {
-            display: inline-block;
-          }
-          > div {
-            width: 30%;
-            padding-top: 30%;
-            border: 1px dashed #D3D3D3;
-            position: relative;
-            &:hover {
-              .del_mask {
-                display: block;
-              }
-            }
-            &:last-child {
-              float: right;
-            }
-            &:first-child {
-              float: left;
-            }
-            .del_mask {
-              display: none;
-              position: absolute;
-              width: 100%;
-              height: 100%;
-              background: rgba(0, 0, 0, .2);
-              top: 0;
-              > i {
-                cursor: pointer;
-                display: block;
-                position: absolute;
-                top: 0;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                margin: auto;
-                color: #ffffff;
-                width: 16px;
-                height: 16px;
-                text-align: center;
-              }
-            }
-            > img {
-              position: absolute;
-              top: 0;
-              left: 0;
-              width: 100%;
-              height: 100%;
-            }
-          }
-        }
-      }
-      .vl_jtc_search {
-        width: 100%;
-        height: auto;
-        padding: 20px;
-        .el-input__inner {
-          height: 40px!important;
-          line-height: 40px!important;
-        }
-        .el-input__icon {
-          height: 40px!important;
-          line-height: 40px!important;
-        }
-        .el-range-editor {
-          width: 100%;
-          /*padding: 0;*/
-          > .el-range__close-icon {
-            display: none;
-          }
-          > input {
-            width: 50%;
-          }
-          /*.el-range-separator {*/
-            /*height: 40px;*/
-            /*line-height: 40px;*/
-            /*width: 10px;*/
-            /*padding: 0;*/
-          /*}*/
-        }
-        button {
-          width: 110px;
-          height: 40px;
-          line-height: 40px;
-          padding: 0 12px;
-        }
-        .el-select {
-          margin-bottom: 10px;
-        }
-        > div {
-          margin-bottom: 10px;
-        }
-        .vl_jtc_search_item {
-          height: 217px;
-          .camera-tree {
-            border: 1px solid #e4e7ed;
-            border-radius: 4px;
-            background-color: #fff;
-            -webkit-box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
-            box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
-            -webkit-box-sizing: border-box;
-          }
-        }
-      }
     }
     .vl_s_right {
       display: inline-block;
