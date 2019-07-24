@@ -9,9 +9,6 @@
     <div class="ccrc_content">
       <div class="ccrc_content_left">
         <div>
-          <el-input v-model.trim="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" clearable></el-input>
-        </div>
-        <div class="kaishi">
           <el-date-picker
               v-model="value1"
               value-format="timestamp"
@@ -34,6 +31,9 @@
               :picker-options="pickerOptions"
               placeholder="选择日期时间">
           </el-date-picker>
+        </div>
+        <div class="kaishi">
+          <el-input v-model.trim="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" clearable></el-input>
         </div>
         <div class="kaishi">
           <el-button style="width: 110px" @click="rester">重置</el-button>
@@ -356,9 +356,13 @@ export default {
     },
     //查询
     search() {
-      if (this.checkPlateNumber(this.searchData.licensePlateNum)) {
+      if (this.searchData.licensePlateNum){
         this.getSearchData();
+      }else{
+        this.$message.info("请输入车牌号码");
       }
+      // if (this.checkPlateNumber(this.searchData.licensePlateNum)) {
+      // }
     },
     getSearchData() {
       let params = {};

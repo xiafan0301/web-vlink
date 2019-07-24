@@ -526,11 +526,14 @@ export default {
         startTime: this.value1,
         endTime: this.value2,
         unvehicleFlag: this.unvehicleFlag,
-        onlySurveillance: this.onlySurveillance,
+        onlyFirstEnterCity: this.onlySurveillance,
         vehicleNumber: this.v
       }
       if (this.lll&& this.lll.length > 0) {
         params['bayonetUid'] = this.lll.join(',')
+      }
+      if (this.carType&& this.carType.length > 0) {
+        params['vehicleType'] = this.carType.join(',')
       }
       if (this.vehicleNumber) {
         params.vehicleNumber = this.v + this.vehicleNumber
