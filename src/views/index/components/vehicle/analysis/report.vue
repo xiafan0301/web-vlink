@@ -544,10 +544,10 @@ export default {
       }
     },
     pickerChanged () {
-      if ((this.searchForm.time[1].getTime() - this.searchForm.time[0].getTime()) > 2 * 24 * 60 * 60 * 1000) {
+      /* if ((this.searchForm.time[1].getTime() - this.searchForm.time[0].getTime()) > 2 * 24 * 60 * 60 * 1000) {
         this.searchForm.time[1] = new Date(this.searchForm.time[0].getTime() + 2 * 24 * 60 * 60 * 1000);
         this.$message('最多不能超过3天.');
-      }
+      } */
     },
 
     /* vehicleExport () {
