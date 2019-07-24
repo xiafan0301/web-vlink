@@ -11,29 +11,31 @@
         <div ref="devSelect" is="devSelect" @sendSelectData="getSelectData" @allSelectLength="allSelectLength"></div>
         <div class="left_start">
           <el-date-picker
+            :clearable="false"
             class="vl_date"
             style="width: 100%"
             :picker-options="pickerOptions"
             v-model="queryForm.startTime"
-            type="date"
-            value-format="yyyy-MM-dd"
+            type="datetime"
+            value-format="yyyy-MM-dd HH:mm:ss"
             placeholder="请选择开始时间">
           </el-date-picker>
         </div>
         <div class="left_end">
           <el-date-picker
+            :clearable="false"
             class="vl_date vl_date_end"
             style="width: 100%"
             :picker-options="pickerOptions1"
             v-model="queryForm.endTime"
-            type="date"
-            value-format="yyyy-MM-dd"
+            type="datetime"
+            value-format="yyyy-MM-dd HH:mm:ss"
             placeholder="请选择结束时间">
           </el-date-picker>
         </div>
         <div class="left_btn">
           <el-button class="reset_btn" @click="resetQueryForm">重置</el-button>
-          <el-button class="select_btn" @click="search" :loading="loadingBtn">查询</el-button>
+          <el-button class="select_btn" @click="search" :loading="loadingBtn">统计</el-button>
         </div>
       </div>
       <div class="con_right">
@@ -53,7 +55,7 @@
                 <i class="vl_icon vl_icon_vehicle_gcsj_02"></i>
                 <span>过车总数(次)</span>
               </div>
-              <span>{{gcsjDetail.passingCarNums + 10000 | fmTenThousand}}</span>
+              <span>{{gcsjDetail.passingCarNums | fmTenThousand}}</span>
             </div>
           </li>
           <li>
@@ -116,6 +118,8 @@
   </div>
 </template>
 <script>
+let startTime = formatDate(new Date(new Date(new Date().toLocaleDateString())).getTime() - 24*60*60*1000, 'yyyy-MM-dd HH:mm:ss');
+let endTime = formatDate(new Date(new Date(new Date().toLocaleDateString())).getTime() - 1, 'yyyy-MM-dd HH:mm:ss');
 import G2 from '@antv/g2';
 import { View } from '@antv/data-set';
 import {apiPassingCarSta} from '@/views/index/api/api.vehicle.js';
@@ -126,8 +130,8 @@ export default {
   data () {
     return {
       queryForm: {
-        startTime: formatDate(new Date().getTime() - 24*60*60*1000, 'yyyy-MM-dd'),
-        endTime: formatDate(new Date().getTime() - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd'),
+        startTime: startTime,
+        endTime: endTime,
         devIdData: {
           selSelectedData1: [],
           selSelectedData2: []
@@ -466,8 +470,10 @@ export default {
     // },
     // 重置表单
     resetQueryForm () {
-      this.queryForm.startTime = formatDate(new Date().getTime() - 24*60*60*1000, 'yyyy-MM-dd');
-      this.queryForm.endTime = formatDate(new Date().getTime() - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd');
+      this.queryForm.startTime = startTime;
+      this.queryForm.endTime = endTime;
+      // 设备全选
+      this.$refs['devSelect'].checkedAll();
     },
     //查询
     search() {
@@ -479,8 +485,8 @@ export default {
       const params = {  
         deviceIds: this.queryForm.devIdData.selSelectedData1.map(m => m.id).join(','),
         bayonetIds: this.queryForm.devIdData.selSelectedData2.map(m => m.id).join(','),
-        startTime: this.queryForm.startTime + ' 00:00:00',
-        endTime: this.queryForm.endTime + ' 23:59:59'
+        startTime: this.queryForm.startTime,
+        endTime: this.queryForm.endTime
       }
       apiPassingCarSta(params).then(res => {
         if (res) {
@@ -535,6 +541,8 @@ export default {
         padding-top: 10px; 
       }
       .left_btn{
+        display: flex;
+        justify-content: space-between;
         padding-top: 10px;
         .select_btn, .reset_btn {
           width: 110px;

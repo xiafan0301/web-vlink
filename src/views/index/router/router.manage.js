@@ -219,6 +219,30 @@ export default {
       component: () => import('@/views/index/components/manage/components/roomAndStall/detail.vue')
     },
     {
+      path: 'bayonetManage',
+      name: 'bayonet_manage',
+      component: () => import('@/views/index/components/manage/bayonetManage.vue'),
+      redirect: {
+        name: 'bayonet_manage_list'
+      },
+      children: [{
+          path: 'list',
+          name: 'bayonet_manage_list',
+          component: () => import('@/views/index/components/manage/components/bayonet/list.vue')
+        },
+        {
+          path: 'add',
+          name: 'bayonet_manage_add',
+          component: () => import('@/views/index/components/manage/components/bayonet/add.vue')
+        },
+        {
+          path: 'detail',
+          name: 'bayonet_manage_detail',
+          component: () => import('@/views/index/components/manage/components/bayonet/detail.vue')
+        }
+      ]
+    },
+    {
       path: 'cameraManage',
       name: 'camera_manage',
       component: () => import('@/views/index/components/manage/cameraManage.vue')
