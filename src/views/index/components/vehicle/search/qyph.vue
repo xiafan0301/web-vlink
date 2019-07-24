@@ -56,6 +56,7 @@
                           class="vl_date"
                           :picker-options="pickerOptions"
                           type="datetime"
+                          value-format="timestamp"
                           placeholder="选择日期时间">
                   </el-date-picker>
                 </div>
@@ -69,11 +70,12 @@
                           v-model="searchData.endTime"
                           type="datetime"
                           @change="chooseEndTime"
+                          value-format="timestamp"
                           placeholder="选择日期时间">
                   </el-date-picker>
                 </div>
                 <div class="search_line">
-                  <span class="">频次：期间不少于 <el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 200)value = 200;" style="width: 65px;" v-model="searchData.minTimes"></el-input> 次</span>
+                  <div class="per_semblance"><span>频次 <b>期间不少于</b></span><el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 200)value = 200;"  v-model="searchData.minTimes"></el-input> 次</div>
                 </div>
                 <!--按钮-->
                 <div class="search_btn">
@@ -175,11 +177,12 @@
       this.renderMap();
       this.setDTime();
       this.getAllDevice() //查询所有的设备
+      this.resetZoom();
 
     },
     methods: {
       chooseEndTime (e) {
-        if (new Date(e).getTime() < new Date(this.searchData.startTime).getTime()) {
+        if (new Date(e).getTime() < this.searchData.startTime) {
           this.$message.info('结束时间必须大于开始时间才会有结果')
         }
       },
@@ -483,20 +486,8 @@
         let date = new Date();
         let curDate = date.getTime();
         let curS = 1 * 24 * 3600 * 1000;
-        let sM = '', sD = '';
-        if ((new Date(curDate - curS).getMonth() + 1) < 10 ) {
-          sM = '0' + (new Date(curDate - curS).getMonth() + 1);
-        } else {
-          sM = (new Date(curDate - curS).getMonth() + 1)
-        }
-        if ( new Date(curDate - curS).getDate() < 10 ) {
-          sD = '0' +  new Date(curDate - curS).getDate();
-        } else {
-          sD =  new Date(curDate - curS).getDate()
-        }
-        let _s = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD;
-        this.searchData.startTime = _s + " 00:00:00";
-        this.searchData.endTime = _s + " 23:59:59";
+        this.searchData.startTime = curDate - curS;
+        this.searchData.endTime = curDate;
       },
       // 选择区域
       selArea (v) {
@@ -870,6 +861,37 @@
          display: none;
        }
      }
+    }
+  }
+  .per_semblance {
+    position: relative;
+    >span {
+      position: absolute;
+      left: 10px;
+      display: block;
+      height: 50px;
+      line-height: 50px;
+      z-index: 9;
+      b {
+        color: #D3D3D3;
+        font-weight: normal;
+        margin-left: 10px;
+      }
+    }
+    >i {
+      display: inline-block;
+      width: 20px;
+      height: 1px;
+      background: #999;
+      margin: 19px 16px;
+      vertical-align: middle;
+    }
+    .el-input {
+      width: 198px;
+      margin-right: 10px;
+      input{
+        text-indent: 130px;
+      }
     }
   }
 }
