@@ -188,12 +188,12 @@
       :close-on-click-modal="false"
       top="4vh"
       :show-close="false"
-    >
+      >
       <div class="struc_tab">
         <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">抓拍详情</span>
         <span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>
         <span :class="{'active': strucCurTab === 3}" @click="strucCurTab = 3">视频回放</span>
-        <i class="el-icon-close" @click="strucDetailDialog = false"></i>
+        <i style="font-size: 20px;" class="el-icon-close" @click="strucDetailDialog = false"></i>
       </div>
       <div class="struc_main" >
         <div v-show="strucCurTab === 1" class="struc_c_detail">
@@ -342,7 +342,8 @@ export default {
               start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
             }
             threeMonths = new Date(start).getTime();
-            return time.getTime() > Date.now() || time.getTime() < threeMonths;
+            //return time.getTime() > Date.now() || time.getTime() < threeMonths;
+            return time.getTime() > Date.now() ;
           }
         },
         isNull:true,
@@ -501,7 +502,7 @@ export default {
         content: sConent
       });
     },
-      imgListTap(data, index) {
+    imgListTap(data, index) {
       // 点击swiper图片
        this.playing = false;
       this.curImgIndex = index;
