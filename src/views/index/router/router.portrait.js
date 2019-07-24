@@ -75,9 +75,14 @@ export default {
       component: () => import('@/views/index/components/portrait/rxbd.vue')
     },
     {
-      path: 'ytsr', // 意图搜人
+      path: 'ytsr', // 以图搜人-结果
       name: 'portrait_ytsr',
       component: () => import('@/views/index/components/portrait/ytsr.vue')
+    },
+    {
+      path: 'ytsr_list', // 以图搜人-离线任务列表
+      name: 'portrait_ytsr_list',
+      component: () => import('@/views/index/components/portrait/ytsr-list.vue')
     },
     {
       path: 'gjfx', // 轨迹分析
