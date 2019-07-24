@@ -14,7 +14,7 @@
     </el-select>
     <div class="search_item" :style="{'height': isShowSelectList ? '160px' : '0px'}">
       <vue-scroll>
-        <el-checkbox style="padding-left: 24px;padding-top: 10px;" v-model="checked" @change="checkedAll">全选</el-checkbox>
+        <el-checkbox style="padding-left: 24px;padding-top: 10px;" v-model="checked" @change="isCheckedAll">全选</el-checkbox>
         <el-tree
           :data="treeList"
           class="select_tree"
@@ -47,9 +47,16 @@ export default {
   },
   created () {
     this.getTreeList();
+    let _this = this;
+    $(':not(.dev_select)').on('click', function () {
+      _this.isShowSelectList = false;
+    })
+  },
+  destroyed () {
+    $(':not(.dev_select)').unbind('click');
   },
   methods: {
-    checkedAll(){
+    isCheckedAll(){
       if (this.checked) {
         //全选
         this.$refs.selectTree.setCheckedNodes(this.treeList);
@@ -59,6 +66,10 @@ export default {
         this.devIdData = [];
       }
     },
+    checkedAll () {
+      this.checked = true;
+      this.$refs.selectTree.setCheckedNodes(this.treeList);
+    },
     getTreeList () {
       let params = {
         areaUid: '431224',
@@ -67,64 +78,76 @@ export default {
       MapGETmonitorList(params).then(res => {
         if (res) {
           this.treeList = [res.data];
-          this.treeList = this.treeList.map(m => {
-            return {
-              id: m.areaId,
-              label: m.areaName,
-              children: m.areaTreeList.map(a => {
-                return {
-                  id: a.areaId,
-                  label: a.areaName,
-                  children: [...a.bayonetList.map(b => {
-                    return {
-                      id: b.uid,
-                      label: b.bayonetName,
-                      type: 2
-                    }
-                  }),...a.deviceBasicList.map(d => {
-                    return {
-                      id: d.uid,
-                      label: d.deviceName,
-                      type: 1
-                    }
-                  })]
-                }
-              })
-            }
-          })
-          // 获取设备和卡口总数
-          let arr = [];
-          this.selectNum = this.treeList.forEach(f => {
-            if (f.children) {
-              f.children.forEach(c => {
-                if (c.children) {
-                  c.children.forEach(a => {
-                    arr.push(a)
-                  })
-                }
-              })
-            }
-          })
-          this.selectNum = arr.length;
+          this.treeList = this.transformTreeList(this.treeList);//改造成所需要的树结构
+          this.selectNum = this.getDevTotal(this.treeList);//获取设备和卡口总数
           this.checked = true;
           this.$nextTick(() => {
-            this.checkedAll();//  全选
+            this.isCheckedAll();//  全选
           })
         }
       });
     },
-    // 重置表单
-    resetSelect () {
-      this.devIdData = [];
-      this.selObj = {
-        selSelectedData1: [],
-        selSelectedData2: [],
-      };
-      if (this.$refs.selectTree) {
-        this.$refs.selectTree.setCheckedKeys([]);
+    // 获取设备和卡口总数方法
+    getDevTotal (arr) {
+      const result = [];
+      const func = (_arr) => {
+        _arr.forEach(f => {
+          if (f.children) {
+            func(f.children);
+          } else {
+            result.push(f);
+          }
+        })
       }
-      this.isShowSelectList = false;
+      func(arr);
+      return result.length;
     },
+    // 改造成所需要的数结构方法
+    transformTreeList (arry, result = []) {
+      arry.forEach(f => {
+        if (f.areaTreeList.length > 0) {
+          let child = {
+            id: f.areaId,
+            label: f.areaName,
+            children: []
+          }
+          result.push(child);
+          this.transformTreeList(f.areaTreeList, child.children);
+        } else {
+          let child = {
+            id: f.areaId,
+            label: f.areaName,
+            children: [...f.bayonetList.map(b => {
+              return {
+                id: b.uid,
+                label: b.bayonetName,
+                type: 2
+              }
+            }),...f.deviceBasicList.map(d => {
+              return {
+                id: d.uid,
+                label: d.deviceName,
+                type: 1
+              }
+            })]
+          }
+          result.push(child);
+        }
+      })
+      return result;
+    },
+    // 重置表单
+    // resetSelect () {
+    //   this.devIdData = [];
+    //   this.selObj = {
+    //     selSelectedData1: [],
+    //     selSelectedData2: [],
+    //   };
+    //   if (this.$refs.selectTree) {
+    //     this.$refs.selectTree.setCheckedKeys([]);
+    //   }
+    //   this.isShowSelectList = false;
+    // },
     // 是否显示下拉列表
     showChange () {
       this.isShowSelectList = !this.isShowSelectList;
@@ -148,6 +171,15 @@ export default {
       this.$emit('sendSelectData', this.selObj);
       this.$emit('allSelectLength', this.selectNum);
     }
+  },
+  watch: {
+    devIdData () {
+      if (this.devIdData.length < this.selectNum) {
+        this.checked = false;
+      } else {
+        this.checked = true;
+      }
+    }
   }
 }
 </script>
@@ -167,12 +199,6 @@ export default {
     background-color: #fff;
     box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
     margin-top: 10px;
-    // .select_tree {
-    //   border: 1px solid #e4e7ed;
-    //   border-radius: 4px;
-    //   background-color: #fff;
-    //   box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
-    // }
   }
 }
 </style>

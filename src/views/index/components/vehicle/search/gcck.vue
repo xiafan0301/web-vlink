@@ -36,7 +36,6 @@
                 align="left"
                 :editable="false"
                 :clearable="false"
-                @change="pickerChanged"
                 :picker-options="pickerOptions">
               </el-date-picker>
               <el-date-picker style="width: 236px; margin-top: 10px"
@@ -46,7 +45,6 @@
                 align="left"
                 :editable="false"
                 :clearable="false"
-                @change="pickerChanged"
                 :picker-options="pickerOptions">
               </el-date-picker>
               <el-input
@@ -88,7 +86,7 @@
               <template v-if="zpList && zpList.length > 0">
                 <li v-for="(item, index) in zpList" :key="'jrzp_' + index">
                   <div class="vc_gcck_rbl">
-                    <p @click="goToDetail(item.plateNo)">
+                    <p @click="goToDetail(item, index)">
                       <img :title="item.deviceName" :alt="item.deviceName" :src="item.subStoragePath">
                     </p>
                     <div class="com_ellipsis"><i class="vl_icon vl_icon_sm_sj"></i>{{item.shotTime}}</div>
@@ -179,10 +177,12 @@
         </div>
       </div>
     </div>
+    <div is="vehicleDetail" :oData="detailData"></div>
   </div>
 </template>
 <script>
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+import vehicleDetail from './gcck-detail.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 import dbTree from '@/components/common/dbTree.vue';
 import {getDeviceByBayonetUid, getDeviceDetailById} from '../../../api/api.base.js';
@@ -190,10 +190,11 @@ import {MapGETmonitorList} from '../../../api/api.map.js';
 import {getDeviceSnapImagesSum, getDeviceSnapImagesPage} from '../../../api/api.judge.js';
 import {formatDate} from '@/utils/util.js';
 export default {
-  components: {vlBreadcrumb, flvplayer, dbTree},
+  components: {vlBreadcrumb, flvplayer, dbTree, vehicleDetail},
   data () {
     let nDate = new Date();
     return {
+      detailData: null,
       showType: 1, // 1实时过车  2历史过车
       videoTotal: null, // 1 / 2 / 8
       videoList: [],
@@ -257,18 +258,13 @@ export default {
     }
   },
   methods: {
-    goToDetail (plateNo) {
-      this.$store.commit('setBreadcrumbData', {
-        breadcrumbData: [
-          {name: '车辆侦查', routerName: 'vehicle'},
-          {name: '过车查看', routerName: 'vehicle_search_gcck', query: {'deviceIds': this.zpDeviceIds, bId: this.zpBId}},
-          {name: '车辆详情'}
-        ]
+    goToDetail (item, index) {
+      // this.zpList
+      let _o = Object.assign({}, {
+        list: this.zpList,
+        index: index
       });
-      this.$router.push({name: 'vehicle_search_clcxdetail', query: {
-        breadcrumb: 2,
-        plateNo: plateNo
-      }});
+      this.detailData = _o;
     },
 
     goToZP () {
@@ -397,6 +393,7 @@ export default {
         where: {
           deviceIds: dId,
           startTime: formatDate(new Date(), 'yyyy-MM-dd 00:00:00'),
+          // startTime: '2019-01-01 00:00:00',
           endTime: formatDate(new Date(), 'yyyy-MM-dd 23:59:59')
         },
         pageNum: 1,
@@ -552,12 +549,12 @@ export default {
     getTreeList2 () {
       this.doSearch2 = {};
     },
-    pickerChanged () {
+    /* pickerChanged () {
       if ((this.searchTime2[1].getTime() - this.searchTime2[0].getTime()) > 2 * 24 * 60 * 60 * 1000) {
         this.searchTime2[1] = new Date(this.searchTime2[0].getTime() + 2 * 24 * 60 * 60 * 1000);
         this.$message('最多不能超过72小时.');
       }
-    }
+    } */
   },
   beforeDestroy () {
     if (this.picAntoPlayInval) {

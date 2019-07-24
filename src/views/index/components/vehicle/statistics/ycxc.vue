@@ -7,7 +7,55 @@
     <div class="the-bottom">
       <div class="the-left-search">
         <div class="con_left">
-
+          <div class="left_time date-comp">
+            <el-date-picker
+              class="vl_date"
+              v-model="queryForm.startDate"
+              :clearable="false"
+              type="date"
+              placeholder="开始日期"
+              value-format="yyyy-MM-dd"
+              format="yyyy-MM-dd"
+              :picker-options="pickerOptions">
+            </el-date-picker>
+          </div>
+          <div class="left_time date-comp">
+            <el-date-picker
+              class="vl_date vl_date_end"
+              placeholder="结束日期"
+              v-model="queryForm.endDate"
+              :clearable="false"
+              type="date"
+              value-format="yyyy-MM-dd"
+              format="yyyy-MM-dd"
+              @change="dateChange"
+              :picker-options="pickerOptions"
+            >
+            </el-date-picker>
+          </div>
+          <div class="left_time">
+            <el-select v-model="queryForm.startTime" placeholder="开始时间" style="width: 216px;" @change="handleChangeStartTime">
+              <el-option 
+                v-for="(item, index) in startTimeOptions" 
+                :key="index"
+                :label="item.label"
+                :value="item.value"
+                :disabled="item.disabled"
+              >
+              </el-option>
+            </el-select>
+            <span class="left_time_separator">-</span>
+            <el-select v-model="queryForm.endTime" placeholder="结束时间" style="width: 216px;">
+              <el-option 
+                v-for="(item, index) in endTimeOptions" 
+                :key="index"
+                :label="item.label"
+                :value="item.value"
+                :disabled="item.disabled"
+              >
+              </el-option>
+            </el-select>
+          </div>
           <!-- 选择设备 -->
           <!-- treeTabShow 为展开 -->
           <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
@@ -58,59 +106,10 @@
               </div>
             </div>
           </div>
-
-          <div class="left_time date-comp">
-            <el-date-picker
-              class="vl_date"
-              v-model="queryForm.startDate"
-              :clearable="false"
-              type="date"
-              placeholder="开始日期"
-              value-format="yyyy-MM-dd"
-              format="yyyy-MM-dd"
-              :picker-options="pickerOptions">
-            </el-date-picker>
-          </div>
-          <div class="left_time date-comp">
-            <el-date-picker
-              class="vl_date vl_date_end"
-              placeholder="结束日期"
-              v-model="queryForm.endDate"
-              :clearable="false"
-              type="date"
-              value-format="yyyy-MM-dd"
-              format="yyyy-MM-dd"
-              @change="dateChange"
-              :picker-options="pickerOptions"
-            >
-            </el-date-picker>
-          </div>
-          <div class="left_time">
-            <el-select v-model="queryForm.startTime" placeholder="开始时间" style="width: 216px;" @change="handleChangeStartTime">
-              <el-option 
-                v-for="(item, index) in startTimeOptions" 
-                :key="index"
-                :label="item.label"
-                :value="item.value"
-                :disabled="item.disabled"
-              >
-              </el-option>
-            </el-select>
-            <span class="left_time_separator">-</span>
-            <el-select v-model="queryForm.endTime" placeholder="结束时间" style="width: 216px;">
-              <el-option 
-                v-for="(item, index) in endTimeOptions" 
-                :key="index"
-                :label="item.label"
-                :value="item.value"
-                :disabled="item.disabled"
-              >
-              </el-option>
-            </el-select>
-          </div>
+          
           <div class="left_num">
             <el-input class="left-none-border" v-model="queryForm.minShotTimes" @blur="handleBlurShotTimes">
-              <template slot="prepend">过车次数</template>
+              <template slot="prepend">过车次数≥</template>
             </el-input>
             <span>次（范围2-100）</span>
           </div>
@@ -392,7 +391,7 @@ export default {
 
     setTimeout(() => {
       this.handleSubmitData();
-    }, 1000)
+    }, 2000)
   },
   methods: {
     //设置默认时间
@@ -416,21 +415,21 @@ export default {
     },
     //日期选择
     dateChange() {
-      let _this = this;
-      if (
-        new Date(_this.queryForm.endDate).getTime() - new Date(_this.queryForm.startDate).getTime() >=
-        3 * 24 * 3600 * 1000
-      ) {
-        if (!document.querySelector(".el-message")) {
-          this.$message.info(
-            "最大时间段为3天，超过开始时间3天（72小时）后的时间不可选择!"
-          );
-        }
-        this.setDTime();
-        return false;
-      } else {
-        return true;
-      }
+      // let _this = this;
+      // if (
+      //   new Date(_this.queryForm.endDate).getTime() - new Date(_this.queryForm.startDate).getTime() >=
+      //   3 * 24 * 3600 * 1000
+      // ) {
+      //   if (!document.querySelector(".el-message")) {
+      //     this.$message.info(
+      //       "最大时间段为3天，超过开始时间3天（72小时）后的时间不可选择!"
+      //     );
+      //   }
+      //   this.setDTime();
+      //   return false;
+      // } else {
+      //   return true;
+      // }
     },
     handleQueryData () {
       const startDate = this.$route.query.startDate.split(' ')[0];
@@ -687,23 +686,27 @@ export default {
       this.handleSubmitData();
     },
     handleSubmitData () {
-      this.queryForm.bayonetIds = null;
-      this.queryForm.cameraIds = null;
-
+      // this.queryForm.bayonetIds = null;
+      // this.queryForm.cameraIds = null;
+      
+      console.log('this.selectCameraArr', this.selectCameraArr)
+      console.log('this.selectBayonetArr', this.selectBayonetArr)
       if (this.selectCameraArr && this.selectCameraArr.length > 0) {
+        console.log('mmmmmm')
         let cameraIds = this.selectCameraArr.map(res => res.id);
         this.queryForm.cameraIds = cameraIds.join(",");
       }
       if (this.selectBayonetArr && this.selectBayonetArr.length > 0) {
+        console.log('nnnnnnn')
         let bayonentIds = this.selectBayonetArr.map(res => res.id);
         this.queryForm.bayonetIds = bayonentIds.join(",");
       }
 
 
-      if (!this.dateChange()) {
-        this.searchLoading = false;
-        return;
-      }
+      // if (!this.dateChange()) {
+      //   this.searchLoading = false;
+      //   return;
+      // }
 
       if (!this.validatorShotTimes(this.queryForm.minShotTimes)) {
         this.searchLoading = false;
@@ -884,8 +887,11 @@ export default {
         width: 285px;
         height: 100%;
         padding: 20px;
+        .date-comp {
+         margin-bottom: 10px;
+        }
         > .left_time{
-          padding-bottom: 10px;
+          // padding-bottom: 10px;
           display: flex;
           align-items: center;
           position: relative;
@@ -908,11 +914,11 @@ export default {
           }
         }
         .el-select{
-          padding-bottom: 10px;
+          margin-bottom: 10px;
         }
         .left_num{
           display: flex;
-          padding-bottom: 10px;
+          margin-bottom: 10px;
           .el-input{
             width: 145px;
           }

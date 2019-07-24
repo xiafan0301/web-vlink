@@ -11,29 +11,31 @@
         <div ref="devSelect" is="devSelect" @sendSelectData="getSelectData" @allSelectLength="allSelectLength"></div>
         <div class="left_start">
           <el-date-picker
+            :clearable="false"
             class="vl_date"
             style="width: 100%"
+            :picker-options="pickerOptions"
             v-model="queryForm.startTime"
-            type="date"
-            value-format="yyyy-MM-dd"
+            type="datetime"
+            value-format="yyyy-MM-dd HH:mm:ss"
             placeholder="请选择开始时间">
           </el-date-picker>
         </div>
         <div class="left_end">
           <el-date-picker
+            :clearable="false"
             class="vl_date vl_date_end"
             style="width: 100%"
             :picker-options="pickerOptions1"
             v-model="queryForm.endTime"
-            type="date"
-            @focus="getEndTime"
-            value-format="yyyy-MM-dd"
+            type="datetime"
+            value-format="yyyy-MM-dd HH:mm:ss"
             placeholder="请选择结束时间">
           </el-date-picker>
         </div>
         <div class="left_btn">
           <el-button class="reset_btn" @click="resetQueryForm">重置</el-button>
-          <el-button class="select_btn" @click="search" :loading="loadingBtn">查询</el-button>
+          <el-button class="select_btn" @click="search" :loading="loadingBtn">统计</el-button>
         </div>
       </div>
       <div class="con_right">
@@ -44,7 +46,7 @@
                 <i class="vl_icon vl_icon_vehicle_gcsj_01"></i>
                 <span>设备数(个)</span>
               </div>
-              <span>{{gcsjDetail.deviceNums}}</span>
+              <span>{{gcsjDetail.deviceNums | fmTenThousand}}</span>
             </div>
           </li>
           <li>
@@ -53,7 +55,7 @@
                 <i class="vl_icon vl_icon_vehicle_gcsj_02"></i>
                 <span>过车总数(次)</span>
               </div>
-              <span>{{gcsjDetail.passingCarNums}}</span>
+              <span>{{gcsjDetail.passingCarNums | fmTenThousand}}</span>
             </div>
           </li>
           <li>
@@ -62,7 +64,7 @@
                 <i class="vl_icon vl_icon_vehicle_gcsj_03"></i>
                 <span>车辆总数(辆)</span>
               </div>
-              <span>{{gcsjDetail.carNums}}</span>
+              <span>{{gcsjDetail.carNums | fmTenThousand}}</span>
             </div>
           </li>
           <li>
@@ -71,7 +73,7 @@
                 <i class="vl_icon vl_icon_vehicle_gcsj_04"></i>
                 <span>外地车数(辆)</span>
               </div>
-              <span>{{gcsjDetail.fieldCarNums}}</span>
+              <span>{{gcsjDetail.fieldCarNums | fmTenThousand}}</span>
             </div>
           </li>
         </ul>
@@ -81,14 +83,12 @@
               <h1>设备过车数（Top5）</h1>
               <!-- <p>数量（次）</p> -->
               <div id="chartContainer1">
-                <!-- <vue-scroll> -->
-                  <div class="chart_table">
-                <el-table :data="chartData1" height="192">
-                  <el-table-column label="设备名称" prop="name" show-overflow-tooltip></el-table-column>
-                  <el-table-column label="过车数" prop="total" width="100" show-overflow-tooltip></el-table-column>
-                </el-table>
+                <div class="chart_table">
+                  <el-table :data="chartData1" height="192">
+                    <el-table-column label="设备名称" prop="name" show-overflow-tooltip></el-table-column>
+                    <el-table-column label="过车数" prop="total" width="100" show-overflow-tooltip></el-table-column>
+                  </el-table>
                 </div>
-                <!-- </vue-scroll> -->
               </div>
             </div>
           </div>
@@ -118,6 +118,8 @@
   </div>
 </template>
 <script>
+let startTime = formatDate(new Date(new Date(new Date().toLocaleDateString())).getTime() - 24*60*60*1000, 'yyyy-MM-dd HH:mm:ss');
+let endTime = formatDate(new Date(new Date(new Date().toLocaleDateString())).getTime() - 1, 'yyyy-MM-dd HH:mm:ss');
 import G2 from '@antv/g2';
 import { View } from '@antv/data-set';
 import {apiPassingCarSta} from '@/views/index/api/api.vehicle.js';
@@ -128,14 +130,43 @@ export default {
   data () {
     return {
       queryForm: {
-        startTime: formatDate(new Date().getTime() - 24*60*60*1000, 'yyyy-MM-dd'), //默认开始时间为当前时间前一天
-        endTime: formatDate(new Date().getTime() - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd'),//默认结束时间为开始时间后第三天
+        startTime: startTime,
+        endTime: endTime,
         devIdData: {
           selSelectedData1: [],
           selSelectedData2: []
         }
       },
-      pickerOptions1: [],
+      pickerOptions: {
+        disabledDate: time => {
+          if (this.queryForm.endTime) {
+            return (
+              time.getTime() > new Date(this.queryForm.endTime).getTime() ||
+              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90
+            );
+          } else {
+            return (
+              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90 ||
+              time.getTime() > new Date().getTime()
+            );
+          }
+        }
+      },
+      pickerOptions1: {
+        disabledDate: time => {
+          if (this.queryForm.startTime) {
+            return (
+              time.getTime() < new Date(this.queryForm.startTime).getTime() ||
+              time.getTime() > new Date().getTime()
+            );
+          } else {
+            return (
+              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 30 ||
+              time.getTime() > new Date().getTime()
+            );
+          }
+        }
+      },
       provinceList: [],
       loading: false,
       loadingBtn: false,
@@ -165,11 +196,11 @@ export default {
     }
   },
   watch: {
-    'queryForm.startTime' () {
-      const threeDays = 2 * 3600 * 24 * 1000;
-      const endTime = new Date(this.queryForm.startTime).getTime() + threeDays;
-      this.queryForm.endTime = formatDate(endTime, 'yyyy-MM-dd');
-    },
+    // 'queryForm.startTime' () {
+    //   const threeDays = 2 * 3600 * 24 * 1000;
+    //   const endTime = new Date(this.queryForm.startTime).getTime() + threeDays;
+    //   this.queryForm.endTime = formatDate(endTime, 'yyyy-MM-dd');
+    // },
     selectLength () {
       // 设备和卡口全选后才获取过车数据统计
       if (this.selectLength === (this.queryForm.devIdData.selSelectedData1.length + this.queryForm.devIdData.selSelectedData2.length)) {
@@ -178,14 +209,14 @@ export default {
     }
   },
   methods: {
-    getEndTime(time) {
-      let startTime = new Date(this.queryForm.startTime).getTime();
-      this.pickerOptions1 = {
-        disabledDate(time) {
-          return time.getTime() < (startTime - 8.64e7) || time.getTime() > ((startTime + 2 * 3600 * 24 * 1000) - 8.64e6);
-        },
-      }
-    },
+    // getEndTime(time) {
+    //   let startTime = new Date(this.queryForm.startTime).getTime();
+    //   this.pickerOptions1 = {
+    //     disabledDate(time) {
+    //       return time.getTime() < (startTime - 8.64e7) || time.getTime() > ((startTime + 2 * 3600 * 24 * 1000) - 8.64e6);
+    //     },
+    //   }
+    // },
     // 获取子组件传过来的设备和卡口总是
     allSelectLength (num) {
       this.selectLength = num;
@@ -277,7 +308,7 @@ export default {
       this.charts.chart2 = chart;
     },
     drawChart3 () {
-      if (this.chartData3.length === 0) return;
+      // if (this.chartData3.length === 0) return;
       let _this = this, chart = null;
       if (this.charts.chart3) {
         this.charts.chart3.clear();
@@ -333,12 +364,7 @@ export default {
         useHtml: true,
         htmlContent: function (title, items) {
           let str = `<div class="my_tooltip">`;
-          if (title === '0点') {
-            str += `<h1>${title}</h1>`;
-          } else {
-            str += `<h1>${_this.transformTime(title)}-${title}</h1>`;
-          }
-          str += `<span><span>${items[0].value}</span><span>辆</span></span></div>`;
+          str += `<h1>${title}</h1><span><span>${items[0].value}</span><span>辆</span></span></div>`;
           return str;
         }
       });
@@ -349,7 +375,7 @@ export default {
       this.charts.chart3 = chart;
     },
     drawChart4 () {
-      if (this.chartData4.length === 0) return;
+      // if (this.chartData4.length === 0) return;
       let chart = null;
       if (this.charts.chart4) {
         this.charts.chart4.clear();
@@ -438,14 +464,16 @@ export default {
       this.charts.chart4 = chart;
     },
     // 转换时间间隔
-    transformTime (title) {
-      if (title === '0点') return 0;
-      return title.length === 2 ? parseInt(title.slice(0, 1)) - 1 : parseInt(title.slice(0, 2)) - 1;
-    },
+    // transformTime (title) {
+    //   if (title === '0点') return 0;
+    //   return title.length === 2 ? parseInt(title.slice(0, 1)) - 1 : parseInt(title.slice(0, 2)) - 1;
+    // },
     // 重置表单
     resetQueryForm () {
-      this.queryForm.startTime = formatDate(new Date().getTime() - 24*60*60*1000, 'yyyy-MM-dd'); //默认开始时间为当前时间前一天
-      this.queryForm.endTime = formatDate(new Date().getTime() - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd');//默认结束时间为开始时间后第三天
+      this.queryForm.startTime = startTime;
+      this.queryForm.endTime = endTime;
+      // 设备全选
+      this.$refs['devSelect'].checkedAll();
     },
     //查询
     search() {
@@ -457,8 +485,8 @@ export default {
       const params = {  
         deviceIds: this.queryForm.devIdData.selSelectedData1.map(m => m.id).join(','),
         bayonetIds: this.queryForm.devIdData.selSelectedData2.map(m => m.id).join(','),
-        startTime: this.queryForm.startTime + ' 00:00:00',
-        endTime: this.queryForm.endTime + ' 23:59:59'
+        startTime: this.queryForm.startTime,
+        endTime: this.queryForm.endTime
       }
       apiPassingCarSta(params).then(res => {
         if (res) {
@@ -488,6 +516,7 @@ export default {
 .gcsj_container{
   width: 100%;
   height: 100%;
+  overflow: hidden;
   background: #FFFFFF;
   .breadcrumb_heaer{
     border-bottom: 1px solid #D3D3D3;
@@ -512,6 +541,8 @@ export default {
         padding-top: 10px; 
       }
       .left_btn{
+        display: flex;
+        justify-content: space-between;
         padding-top: 10px;
         .select_btn, .reset_btn {
           width: 110px;
@@ -528,8 +559,9 @@ export default {
       }
     }
     .con_right{
-      width: calc(100% - 272px);
+      width: 100%;
       height: 100%;
+      overflow-y: auto;
       background: #F7F9F9;
       .chart_top{
         width: 100%;
@@ -559,7 +591,7 @@ export default {
               }
             }
             > span:nth-child(2){
-              font-size: 28px;
+              font-size: 22px;
               font-family:Adobe Heiti Std R;
               font-weight:normal;
               color: #fff;
@@ -691,10 +723,5 @@ export default {
     background-color: #0567E2;
     color: #fff;
   }
-}
-.chart_item {
-  .__view {
-        width: 100% !important;
-      }
 }
 </style>

@@ -511,10 +511,6 @@ export default {
       color: #666666;
       border-color: #DDDDDD;
     }
-    // 重置日期选择框样式
-    .el-range__icon.el-icon-date{
-      display: none;
-    }
   }
   .vl_map_hover_main{
     bottom: 58px;

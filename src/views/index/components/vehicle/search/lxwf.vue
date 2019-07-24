@@ -572,7 +572,7 @@ export default {
       })
     },
     updataB(){
-      //console.log(88888888888);
+      console.log(88888888888);
       this.isNull=true
       this.regulationsList = [];
       this.photoAnalysis=null
@@ -737,20 +737,20 @@ export default {
     //设置默认时间
     setDTime() {
       let date = new Date();
-      //let curDate = date.getTime();
-      //let curS = 30 * 24 * 3600 * 1000;
-      //let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
-      //let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
-      let _em =
-        date.getMonth() + 1 > 9
-          ? date.getMonth() + 1
-          : "0" + (date.getMonth() + 1);
-      let _ed = date.getDate() > 9 ? date.getDate() : "0" + date.getDate();
+      let curDate = date.getTime();
+      let curS = 1 * 24 * 3600 * 1000;
+      let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
+      let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
+      // let _em =
+      //   date.getMonth() + 1 > 9
+      //     ? date.getMonth() + 1
+      //     : "0" + (date.getMonth() + 1);
+      // let _ed = date.getDate() > 9 ? date.getDate() : "0" + date.getDate();
 
-      //let _s = new Date(curDate - curS).getFullYear() + "-" + _sm + "-" +_sd;
-      let _e = date.getFullYear() + "-" + _em + "-" + _ed;
-      this.data1 = _e;
-      this.data2 = _e;
+      let _s = new Date(curDate - curS).getFullYear() + "-" + _sm + "-" +_sd;
+      // let _e = date.getFullYear() + "-" + _em + "-" + _ed;
+      this.data1 = _s;
+      this.data2 = _s;
     },
     //重置
     resetSearch() {
@@ -781,7 +781,14 @@ export default {
 
       if (this.input5 == 1 ) {
         
-   
+       
+        if(!this.curImageUrl || !this.photoAnalysis){
+           this.searching=false
+          if(!document.querySelector('.el-message--info')){
+            this.$message.info("请上传图片并获取特征");
+          }
+           return
+        }
         let datas = {
           dateStart: this.data1 + " 00:00:00",
           dateEnd: this.data2 + " 23:59:59",

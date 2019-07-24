@@ -26,7 +26,6 @@
               v-model="value1"
               value-format="timestamp"
               format="yyyy-MM-dd HH:mm:ss"
-              @change="changval1"
               style="width: 212px; vertical-align: top"
               type="datetime"
               placeholder="选择日期时间">

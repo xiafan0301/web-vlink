@@ -194,6 +194,14 @@ export function postTaskInfosPage(params) {
     params
   })
 }
+export function newTaskInfos(params) {
+  return request({
+    url: '/personinvestigation/addinvestigationtask',
+    method: 'post',
+    mode: 'judge',
+    params
+  })
+}
 
 /*-------------------------- 区域人员分析start -------------------------------*/
 /**

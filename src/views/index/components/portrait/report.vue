@@ -43,7 +43,7 @@
         </div>
         <div class="content-box">
           <div class="button_box">
-            <div class="add_event_btn" @click="skipAddTaskPage">
+            <div class="add_event_btn" @click="skipAddTaskPage('ruleForm')">
               <span>+</span>
               <span>新增分析任务</span>
             </div>
@@ -139,19 +139,67 @@
             <el-button class="operation_btn function_btn" @click="interruptConfirm(2)">确认</el-button>
           </div>
         </el-dialog>
+        <!--新建任务弹出框-->
+        <el-dialog
+            title="新建分析任务"
+            :visible.sync="newTaskeDialog"
+            width="482px"
+            :close-on-click-modal="false"
+            :close-on-press-escape="false"
+            class="dialog_comp"
+        >
+          <div :class="['upload_pic',{'hidden': dialogImageUrl}]">
+            <el-upload
+                ref="uploadPic"
+                accept="image/*"
+                :action="uploadUrl"
+                :before-upload="befupload"
+                :on-success="uploadPicSuccess"
+                :limit="1"
+                :data="{projectType: 2}"
+                list-type="picture-card">
+              <i class="vl_icon vl_icon_control_14"></i>
+            </el-upload>
+          </div>
+          <div style="color:rgba(153,153,153,1); margin-top: 10px; text-align: center">点击上传全身照，搜索更精准</div>
+          <div style="padding: 20px; padding-bottom: 0">
+            <el-form :model="ruleForm" ref="ruleForm" class="demo-ruleForm">
+              <el-form-item prop="taskName">
+                <el-input v-model="ruleForm.taskName"  placeholder="请输入任务名称"></el-input>
+              </el-form-item>
+            <el-form-item prop="value1">
+              <el-date-picker
+                  v-model="ruleForm.value1"
+                  type="datetimerange"
+                  class="full vl_date"
+                  range-separator="至"
+                  :default-time="['00:00:00', '23:59:59']"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期">
+              </el-date-picker>
+            </el-form-item>
+          </el-form>
+          </div>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="newTaskeDialog = false">取消</el-button>
+            <el-button class="operation_btn function_btn" @click="addnewtask" :loading="addloading">确认</el-button>
+          </div>
+        </el-dialog>
       </div>
     </div>
   </div>
 </template>
 <script>
 import vehicleBreadcrumb from './breadcrumb.vue';
-import { postTaskInfosPage, putAnalysisTask, putTaskInfosResume } from "../../api/api.analysis.js";
+import { postTaskInfosPage, putAnalysisTask, putTaskInfosResume, newTaskInfos} from "../../api/api.analysis.js";
 import { formatDate} from '@/utils/util.js';
+import { ajaxCtx } from '@/config/config.js';
 // import {mapXupuxian} from '@/config/config.js';
 export default {
   components: {vehicleBreadcrumb},
   data () {
     return {
+      uploadUrl: ajaxCtx.base + '/appendix', // 图片上传地址
       tabList: [
         {
           label: "已完成任务",
@@ -172,8 +220,15 @@ export default {
       userInfo: {}, // 存储的用户信息
       deleteDialog: false,
       interruptDialog: false,    //中断任务
+      newTaskeDialog: false,
       isLoading: false,
       taskObj: '',     //单个列表任务
+      ruleForm: {
+        value1: [],
+        taskName: ''
+      },
+      dialogImageUrl: null,
+      addloading: false
     }
   },
   created() {
@@ -183,6 +238,13 @@ export default {
     this.selectDataList();
   },
   methods: {
+    uploadPicSuccess (file) {
+      this.dialogImageUrl = file.data.sysCommonImageInfo.fileFullPath;
+      this.$message.success('上传成功！');
+    },
+    befupload () {
+      console.log('kdfnsdfkdskjfsdf')
+    },
     //tab切换
     selectTab(val) {
       this.selectIndex = val;
@@ -234,13 +296,39 @@ export default {
       this.$refs[form].resetFields();
       this.selectDataList();
     },
-    skipAddTaskPage() {
-      // 跳到新增任务页面
-      this.$router.push({ name: "portrait_xjpfcm" });
+    skipAddTaskPage(formName) {
+      this.newTaskeDialog = true
+      this.dialogImageUrl = null
+      this.$nextTick(() => {
+        this.$refs[formName].resetFields();
+      })
+      this.$refs['uploadPic'].clearFiles()
+      // $('.el-upload-list').css({"display":"none"})
     },
     // 跳至详情页面
     skipDetailPage(obj) {
       this.$router.push({ name: "portrait_nr" , query: {uid: obj.uid}});
+    },
+    // 新见任务
+    addnewtask () {
+      let params = {
+        taskName: this.ruleForm.taskName,
+        startTime: formatDate(this.ruleForm.value1[0]),
+        endTime: formatDate(this.ruleForm.value1[1]),
+        targetPicUrl: this.dialogImageUrl
+      }
+      this.addloading = true
+      newTaskInfos(params).then(res => {
+        if(res.data){
+          console.log(res.data)
+        }
+        this.$nextTick(() => {
+          this.addloading = false
+        })
+      }).catch(error => {
+        console.log(error)
+        this.addloading = false
+      })
     },
     //中断
     interrupt(obj) {
@@ -382,6 +470,67 @@ export default {
         }
       }
     }
+    .upload_pic{
+      text-align: center;
+      height: 160px;
+      margin: 0 auto;
+      width: 160px;
+      overflow: hidden;
+      .el-upload{
+        img{
+          width: 158px;
+          height: 158px;
+          border-radius: 6px;
+        }
+      }
+      .dialog_pic{
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        overflow: auto;
+        margin: 0;
+        z-index: 2002;
+        background: rgba(0, 0, 0, 0.4);
+        img{
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          z-index: 2003;
+          margin: 0 !important;
+          -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+          border-radius: 4px;
+        }
+      }
+    }
   }
-
+</style>
+<style lang="scss">
+  .upload_pic{
+  .el-upload--picture-card{
+    width: 160px;
+    height: 160px;
+    background: #F2F2F2;
+    border-radius: 20px;
+  i{
+    width: 120px;
+    height: 110px;
+  }
+  &:hover{
+     background: #0C70F8;
+  i.vl_icon_control_14{
+    background-position: -228px -570px;
+  }
+  }
+  }
+  &.hidden .el-upload--picture-card{
+     display: none!important;
+   }
+  .el-upload-list__item{
+    width: 160px;
+    height: 160px;
+  }
+  }
 </style>

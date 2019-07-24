@@ -2,36 +2,66 @@
   <!-- 特征搜车 -->
   <div class="tzsc_wrap">
     <!-- 面包屑通用样式 -->
-    <div class="link_bread">
+    <div
+      is="vlBreadcrumb"
+      :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
+          {name: '特征搜车'}]"
+    ></div>
+    <!-- <div class="link_bread">
       <el-breadcrumb separator=">" class="bread_common">
         <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
         <el-breadcrumb-item>特征搜车</el-breadcrumb-item>
       </el-breadcrumb>
-    </div>
+    </div>-->
     <div class="sc_content">
       <!-- 通用的左边菜单 -->
       <div class="left_menu">
         <!-- 菜单表单 -->
         <vue-scroll>
-          <div style="padding: 20px;">
-            <!-- 选择设备 -->
-            <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
-            <div class="selected_device" @click="treeTabShow = true;">
-              <i class="el-icon-arrow-down" v-show="!treeTabShow"></i>
-              <i class="el-icon-arrow-up" v-show="treeTabShow"></i>
-              <div class="device_list" v-if="selectDeviceArr.length > 0 && !checkAllTree">
-                <span>{{ selectDeviceArr[0]['label'] }}</span>
-                <span
-                  v-show="selectDeviceArr.length > 1"
-                  title="展开选中的设备"
-                  class="device_count"
-                >+{{ selectDeviceArr.length - 1 }}</span>
+          <div style="padding: 12px 20px 20px 20px;">
+            <!-- 表单 -->
+            <el-form :model="tzscMenuForm" ref="tzscMenuForm" :rules="rules">
+              <div class="selectDate date-comp">
+                <el-form-item label prop="startTime">
+                  <el-date-picker
+                    v-model="tzscMenuForm.startTime"
+                    type="date"
+                    :clearable="false"
+                    :picker-options="startDateOpt"
+                    placeholder="开始时间"
+                    class="width232 vl_date"
+                  ></el-date-picker>
+                </el-form-item>
+                <el-form-item label prop="endTime">
+                  <el-date-picker
+                    v-model="tzscMenuForm.endTime"
+                    type="date"
+                    :clearable="false"
+                    :picker-options="endDateOpt"
+                    placeholder="结束时间"
+                    class="width232 vl_date vl_date_end"
+                  ></el-date-picker>
+                </el-form-item>
               </div>
-              <div class="no_device" v-else-if="selectDeviceArr.length > 0 && checkAllTree">全部设备</div>
-              <div class="no_device" v-else>选择设备</div>
-              <!-- 树tab页面 -->
-              <div class="device_tree_tab" v-show="treeTabShow">
-                <!-- <div style="overflow: hidden;">
+
+              <!-- 选择设备 -->
+              <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
+              <div class="selected_device" @click="treeTabShow = true;">
+                <i class="el-icon-arrow-down" v-show="!treeTabShow"></i>
+                <i class="el-icon-arrow-up" v-show="treeTabShow"></i>
+                <div class="device_list" v-if="selectDeviceArr.length > 0 && !checkAllTree">
+                  <span>{{ selectDeviceArr[0]['label'] }}</span>
+                  <span
+                    v-show="selectDeviceArr.length > 1"
+                    title="展开选中的设备"
+                    class="device_count"
+                  >+{{ selectDeviceArr.length - 1 }}</span>
+                </div>
+                <div class="no_device" v-else-if="selectDeviceArr.length > 0 && checkAllTree">全部设备</div>
+                <div class="no_device" v-else>选择设备</div>
+                <!-- 树tab页面 -->
+                <div class="device_tree_tab" v-show="treeTabShow">
+                  <!-- <div style="overflow: hidden;">
                   <div
                     class="tab_title"
                     :class="{ 'current_title': index === selectedTreeTab }"
@@ -39,30 +69,30 @@
                     v-for="(item, index) in treeTabArr"
                     :key="'tab_title' + index"
                   >{{ item.name }}</div>
-                </div>-->
-                <!-- 视频树 -->
-                <div class="tree_content">
-                  <vue-scroll>
-                    <div class="checked_all">
-                      <el-checkbox
-                        :indeterminate="isIndeterminate"
-                        v-model="checkAllTree"
-                        @change="handleCheckedAll"
-                      >全选</el-checkbox>
-                    </div>
-                    <el-tree
-                      @check="listenChecked"
-                      :data="cameraTree"
-                      show-checkbox
-                      default-expand-all
-                      node-key="label"
-                      ref="cameraTree"
-                      highlight-current
-                      :props="defaultProps"
-                    ></el-tree>
-                  </vue-scroll>
-                </div>
-                <!-- <div class="tree_content" v-show="selectedTreeTab === 1">
+                  </div>-->
+                  <!-- 视频树 -->
+                  <div class="tree_content">
+                    <vue-scroll>
+                      <div class="checked_all">
+                        <el-checkbox
+                          :indeterminate="isIndeterminate"
+                          v-model="checkAllTree"
+                          @change="handleCheckedAll"
+                        >全选</el-checkbox>
+                      </div>
+                      <el-tree
+                        @check="listenChecked"
+                        :data="cameraTree"
+                        show-checkbox
+                        default-expand-all
+                        node-key="label"
+                        ref="cameraTree"
+                        highlight-current
+                        :props="defaultProps"
+                      ></el-tree>
+                    </vue-scroll>
+                  </div>
+                  <!-- <div class="tree_content" v-show="selectedTreeTab === 1">
                   <vue-scroll>
                     <div class="checked_all">
                       <el-checkbox
@@ -82,36 +112,8 @@
                         :props="defaultProps"
                       ></el-tree>
                   </vue-scroll>
-                </div>-->
-              </div>
-            </div>
-            <!-- 表单 -->
-            <el-form :model="tzscMenuForm" ref="tzscMenuForm" :rules="rules">
-              <div class="selectDate date-comp">
-                <el-form-item label prop="startTime">
-                  <el-date-picker
-                    v-model="tzscMenuForm.startTime"
-                    type="datetime"
-                    :clearable="false"
-                    value-format="yyyy-MM-dd"
-                    format="yyyy-MM-dd"
-                    :picker-options="startDateOpt"
-                    placeholder="开始时间"
-                    class="width232 vl_date"
-                  ></el-date-picker>
-                </el-form-item>
-                <el-form-item label prop="endTime">
-                  <el-date-picker
-                    v-model="tzscMenuForm.endTime"
-                    type="datetime"
-                    :clearable="false"
-                    value-format="yyyy-MM-dd"
-                    format="yyyy-MM-dd"
-                    :picker-options="endDateOpt"
-                    placeholder="结束时间"
-                    class="width232 vl_date vl_date_end"
-                  ></el-date-picker>
-                </el-form-item>
+                  </div>-->
+                </div>
               </div>
               <!-- 选择搜车的类型 -->
               <div class="select_type">
@@ -120,7 +122,6 @@
                   <el-radio :label="2">自定义特征</el-radio>
                 </el-radio-group>
               </div>
-
               <div v-show="selectType === 1">
                 <!-- 上传车像图片 -->
                 <div class="upload_warp" @drop="drop($event)" @dragover="allowDrop($event)">
@@ -345,13 +346,13 @@
                 </div>
                 <div class="text_wrap">
                   <h3 class="text_name">检索资料</h3>
-                  <div class="text_message">
+                  <div class="text_message" :title="item.shotTime">
                     <i class="vl_icon vl_icon_retrieval_01"></i>
-                    <span>{{item.shotTime}}</span>
+                    {{item.shotTime}}
                   </div>
-                  <div class="text_message">
+                  <div class="text_message" :title="item.deviceName">
                     <i class="vl_icon vl_icon_retrieval_02"></i>
-                    <span>{{item.deviceName}}</span>
+                    {{item.deviceName}}
                   </div>
                 </div>
               </div>
@@ -563,6 +564,8 @@
   </div>
 </template>
 <script>
+import vlBreadcrumb from "@/components/common/breadcrumb.vue";
+
 import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入溆浦县地图
 import { formatDate } from "@/utils/util.js";
 
@@ -620,7 +623,9 @@ export default {
       startDateOpt: {
         disabledDate: time => {
           if (this.tzscMenuForm.endTime) {
-            return time.getTime() > new Date(this.tzscMenuForm.endTime).getTime();
+            return (
+              time.getTime() > new Date(this.tzscMenuForm.endTime).getTime()
+            );
           } else {
             return time.getTime() > new Date().getTime();
           }
@@ -630,13 +635,12 @@ export default {
         disabledDate: time => {
           if (this.tzscMenuForm.startTime) {
             return (
-              time.getTime() < new Date(this.tzscMenuForm.startTime).getTime() ||
+              time.getTime() <
+                new Date(this.tzscMenuForm.startTime).getTime() ||
               time.getTime() > new Date().getTime()
             );
           } else {
-            return (
-              time.getTime() > new Date().getTime()
-            );
+            return time.getTime() > new Date().getTime();
           }
         }
       },
@@ -833,6 +837,7 @@ export default {
       }
     }
   },
+  components: { vlBreadcrumb },
   mounted() {
     // 初始化地图
     let map = new AMap.Map("capMap", {
@@ -891,6 +896,7 @@ export default {
           // console.log('表单数据', this.tzscMenuForm);
           if (isClick) {
             this.getStrucInfoLoading = true; // 打开加载效果
+            this.pageNum = 1;
           }
           if (this.selectCameraArr.length <= 0 && this.selectBayonetArr <= 0) {
             this.$message.warning("请选择至少一个卡口与摄像头");
@@ -1070,7 +1076,7 @@ export default {
                   }
                 }
               }
-              console.log("characteristicList", this.characteristicList);
+              // console.log("characteristicList", this.characteristicList);
             } else {
               this.characteristicList = [];
             }
@@ -1127,8 +1133,14 @@ export default {
     /*选择日期的方法 */
     setDTime() {
       //设置默认时间
-      this.tzscMenuForm.startTime = formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd");
-      this.tzscMenuForm.endTime = formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd");
+      this.tzscMenuForm.startTime = formatDate(
+        new Date().getTime() - 3600 * 1000 * 24,
+        "yyyy-MM-dd"
+      );
+      this.tzscMenuForm.endTime = formatDate(
+        new Date().getTime() - 3600 * 1000 * 24,
+        "yyyy-MM-dd"
+      );
     },
     /*选择设备的方法*/
     initCheckTree() {
@@ -1481,16 +1493,16 @@ export default {
   height: 100%;
   position: relative;
   // 面包屑样式
-  .link_bread {
-    height: 60px;
-    background: #fff;
-    .bread_common {
-      padding: 23px 0 0 20px;
-    }
-  }
+  // .link_bread {
+  //   height: 60px;
+  //   background: #fff;
+  //   .bread_common {
+  //     padding: 23px 0 0 20px;
+  //   }
+  // }
   // 搜车主体页面
   .sc_content {
-    height: calc(100% - 60px);
+    height: calc(100% - 49px);
     overflow: hidden;
     display: -webkit-box;
     display: -ms-flexbox;
@@ -1508,9 +1520,6 @@ export default {
       }
       .el-form-item {
         margin-bottom: 12px;
-      }
-      .selectDate .el-form-item {
-        margin-bottom: 20px;
       }
       // 选择搜车类型
       .select_type {
@@ -1597,7 +1606,7 @@ export default {
           z-index: 100;
           background: #fff;
           width: 232px;
-          height: 350px;
+          height: 330px;
           border-radius: 4px;
           border: 1px solid #d3d3d3;
           .tab_title {
@@ -1614,7 +1623,7 @@ export default {
           }
           // 树
           .tree_content {
-            height: 340px;
+            height: 320px;
             padding-top: 10px;
             .checked_all {
               padding: 0 0 8px 23px;
@@ -1825,21 +1834,21 @@ export default {
             }
             // 检索的资料信息
             .text_message {
+              width: 184px;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+              overflow: hidden;
               margin-top: 8px;
               padding: 0 12px;
               font-size: 12px;
               background: #fafafa;
               border: 1px solid #f2f2f2;
               border-radius: 3px;
-              overflow: hidden;
               > i {
                 margin-top: 3px;
                 float: left;
               }
-              > span {
-                line-height: 26px;
-                float: left;
-              }
+              line-height: 26px;
             }
           }
         }

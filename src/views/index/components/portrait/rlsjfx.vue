@@ -87,10 +87,12 @@
           <div class="face_snap_form">
             <div ref="devSelect" is="devSelect" @sendSelectData="getSelectData" @allSelectLength="allSelectLength"></div>
             <el-date-picker
+              class="vl_date"
+              :clearable="false"
               v-model="faceSnapForm.queryDate"
               @change="validationDate(faceSnapForm)"
               type="daterange"
-              range-separator="-"
+              range-separator="至"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
               value-format="yyyy-MM-dd HH:mm:ss"
@@ -130,10 +132,12 @@
           </div>
           <div class="face_control_form">
             <el-date-picker
+              :clearable="false"
+              class="vl_date"
               v-model="faceControlQueryDate"
               @change="validationDate(faceControlQueryDate)"
               type="daterange"
-              range-separator="-"
+              range-separator="至"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
               value-format="yyyy-MM-dd HH:mm:ss"
@@ -234,6 +238,8 @@ export default {
     this.getFaceTotal();
     this.getFaceControlSta();
     this.drawChart2();
+    // 进入页面滚动条保持在最顶部
+    document.getElementById('rlsjfxBox').scrollTop = 0;
   },
   watch: {
     selectLength () {
@@ -287,7 +293,8 @@ export default {
     // 重置人脸抓拍统计表单
     resetFaceSnapForm () {     
       this.faceSnapForm.queryDate = [startTime, endTime]
-      // this.getFaceSnapSta();
+      // 设备全选
+      this.$refs['devSelect'].checkedAll();
     },
     // 重置人脸布控告警数据分析表单
     resetFaceControlDate () {
@@ -359,7 +366,7 @@ export default {
     },
     // 画抓拍人脸数图表
     drawChart1 () {
-      if (this.chartData1.length === 0) return;
+      // if (this.chartData1.length === 0) return;
       let chart = null,_this = this;
       if (this.charts.chart1) {
         this.charts.chart1.clear();
@@ -417,7 +424,7 @@ export default {
           } else {
             str += `<h1>${_this.transformTime(title)}-${title}</h1>`;
           }
-          str += `<span><span>${items[0].value}</span><span>辆</span></span></div>`;
+          str += `<span><span>${items[0].value}</span><span>张</span></span></div>`;
           return str;
         }
       });
@@ -429,7 +436,7 @@ export default {
     },
     // 画布控告警次数图表
     drawChart2 () {
-      if (this.chartData2.length === 0) return;
+      // if (this.chartData2.length === 0) return;
       let chart = null,_this = this;
       if (this.charts.chart2) {
         this.charts.chart2.clear();
@@ -485,7 +492,7 @@ export default {
           } else {
             str += `<h1>${_this.transformTime(title)}-${title}</h1>`;
           }
-          str += `<span><span>${items[0].value}</span><span>辆</span></span></div>`;
+          str += `<span><span>${items[0].value}</span><span>次</span></span></div>`;
           return str;
         }
       });
@@ -506,6 +513,7 @@ export default {
   .rlsjfx_box{
     width: 100%;
     height: 100%;
+    overflow-y: auto;
     padding: 5px;
     display: flex;
     flex-flow: row wrap;
@@ -664,11 +672,8 @@ export default {
     .el-range-input{
       width: 42%!important;
     }
-    .el-input__icon{
-      display: none;
-    }
     .el-range-separator{
-      width: 16px!important;
+      width: 22px!important;
     }
   } 
   .my_tooltip{

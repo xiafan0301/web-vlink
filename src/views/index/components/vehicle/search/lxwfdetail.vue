@@ -254,10 +254,19 @@ export default {
       })
     },
     goToPage(v){
+      if(v=='control_create'){
+        this.$router.push({name:v,query:{
+            plateNo:this.$route.query.plateNo,
+            imgurl:this.$route.query.imgurl || '',
+            modelName:'车辆追踪'
+        } });
+      }else{
         this.$router.push({name:v,query:{
             plateNo:this.$route.query.plateNo,
             imgurl:this.$route.query.imgurl || ''
         } });
+      }
+        
     },
     getViolationInfo(){
       let today = new Date()

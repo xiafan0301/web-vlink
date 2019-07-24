@@ -15,10 +15,6 @@
       <!-- 搜索条件 -->
       <div class="info-left">
         <vue-scroll>
-          <!-- 车牌号搜索 -->
-          <div class="license-plate-search">
-            <el-input v-model="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" clearable></el-input>
-          </div>
           <!-- 时间 -->
           <div class="time-search date-comp">
             <el-date-picker
@@ -27,7 +23,8 @@
                 type="date"
                 :picker-options="startDateOpt"
                 placeholder="开始时间"
-                :clearable="false">
+                :clearable="false"
+                format="yyyy-MM-dd HH:mm:ss">
             </el-date-picker>
             <!-- <el-date-picker
               class="vl_date"
@@ -49,8 +46,14 @@
                 type="date"
                 :picker-options="endDateOpt"
                 placeholder="结束时间"
-                :clearable="false">
+                :clearable="false"
+                format="yyyy-MM-dd HH:mm:ss"
+                @change="dateChange">
             </el-date-picker>
+          </div>
+          <!-- 车牌号搜索 -->
+          <div class="license-plate-search">
+            <el-input v-model="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" clearable></el-input>
           </div>
           <div class="search-btn">
             <el-button @click="resetSearch">重置</el-button>
@@ -210,14 +213,15 @@ export default {
     checkPlateNumber(value) {
       let reg = /^([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})$/;
       if (value) {
-        if (!reg.test(value)) {
+        /* if (!reg.test(value)) {
           if (!document.querySelector(".el-message")) {
             this.$message.info("请正确输入车牌号码");
           }
-          return false;
+          return true;
         } else {
           return true;
-        }
+        } */
+        return true;
       } else {
         if (!document.querySelector(".el-message")) {
           this.$message.info("请输入车牌号码");
@@ -227,19 +231,15 @@ export default {
     },
     //设置默认时间
     setDTime() {
-      let date = new Date();
-      let curDate = date.getTime();
+      let curDate = new Date(new Date().toLocaleDateString()).getTime()
       let curS = 30 * 24 * 3600 * 1000;
-      let _s =
-        new Date(curDate - curS).getFullYear() +
-        "-" +
-        (new Date(curDate - curS).getMonth() + 1) +
-        "-" +
-        new Date(curDate - curS).getDate();
-      let _e =
-        date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
+      let _s = curDate - curS;
+      let _e = curDate + 24 * 3600 * 1000 - 1;
       this.searchData.startTime = formatDate(_s);
       this.searchData.endTime = formatDate(_e);
+    },
+    dateChange() {
+      this.searchData.endTime = new Date(this.searchData.endTime).getTime() + 1 * 24 * 3600 * 1000 - 1;
     },
     //重置
     resetSearch() {
@@ -256,8 +256,8 @@ export default {
     },
     getSearchData() {
       let params = {
-        dateStart: formatDate(this.searchData.startTime, "yyyy-MM-dd") + " 00:00:00",
-        dateEnd: formatDate(this.searchData.endTime, "yyyy-MM-dd") + " 23:59:59",
+        dateStart: formatDate(this.searchData.startTime, "yyyy-MM-dd HH:mm:ss"),
+        dateEnd: formatDate(this.searchData.endTime, "yyyy-MM-dd HH:mm:ss"),
       };
       if (this.searchData.licensePlateNum) {
         params["plateNo"] = this.searchData.licensePlateNum;
@@ -444,6 +444,7 @@ export default {
   .search-btn {
     width: 232px;
     text-align: center;
+    padding-top: 10px;
     .el-button {
       width: 45%;
     }

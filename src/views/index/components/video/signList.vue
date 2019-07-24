@@ -2,7 +2,7 @@
   <div class="vl_vid">
     <div class="sign_list">
       <div>
-        <div class="show_search">
+        <div class="show_search" style="z-index: 4;">
           <div class="show_search_ti">
             <el-date-picker
               class="vl_vid_sdater vl_date"
@@ -254,14 +254,19 @@ export default {
     getData () {
       this.searchLoading = true;
       this.delSignActive = {};
-      apiVideoList({
+      let params = {
         'where.startTime': formatDate(this.startTime),
         'where.endTime': formatDate(this.endTime),
-        'where.userId': this.signPeople,
-        'where.contentId': this.signContent,
         pageNum: this.pagination.currentPage,
         pageSize: this.pagination.pageSize
-      }).then(res => {
+      };
+      if (this.signPeople) {
+        params['where.userId'] = this.signPeople;
+      }
+      if (this.signContent) {
+        params['where.contentId'] = this.signContent;
+      }
+      apiVideoList(params).then(res => {
         if (res && res.data) {
           this.pagination.total = res.data.total;
           this.signList = res.data.list;
@@ -380,8 +385,8 @@ export default {
   > .show_search_se { margin-bottom: 5px; }
 }
 .sign_content_list {
-  position: relative;
-  height: 100%; padding-top: 240px; padding-bottom: 30px;
+  position: relative; z-index: 3;
+  height: 100%; padding-top: 226px; padding-bottom: 30px;
   > ul {
     height: 100%;
     overflow: auto;

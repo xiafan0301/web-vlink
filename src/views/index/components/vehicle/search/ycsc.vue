@@ -2,18 +2,23 @@
   <!-- 以图搜车 -->
   <div class="ytsc_wrap">
     <!-- 面包屑通用样式 -->
-    <div class="link_bread">
+    <div
+        is="vlBreadcrumb"
+        :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
+          {name: '以图搜车'}]"
+      ></div>
+    <!-- <div class="link_bread">
       <el-breadcrumb separator=">" class="bread_common">
         <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
         <el-breadcrumb-item>以图搜车</el-breadcrumb-item>
       </el-breadcrumb>
-    </div>
+    </div> -->
     <div class="sc_content">
       <!-- 通用的左边菜单 -->
       <div class="left_menu">
         <!-- 菜单表单 -->
         <vue-scroll>
-          <div style="padding: 20px;">
+          <div style="padding: 12px 20px 20px 20px;">
             <!-- 表单 -->
             <div class="form_warp">
               <el-form :model="ytscMenuForm" ref="ytscMenuForm" :rules="rules">
@@ -21,10 +26,8 @@
                   <el-form-item label prop="startTime">
                     <el-date-picker
                       v-model="ytscMenuForm.startTime"
-                      type="datetime"
+                      type="date"
                       :clearable="false"
-                      value-format="yyyy-MM-dd"
-                      format="yyyy-MM-dd"
                       :picker-options="startDateOpt"
                       placeholder="开始时间"
                       class="width232 vl_date"
@@ -33,10 +36,8 @@
                   <el-form-item label prop="endTime">
                     <el-date-picker
                       v-model="ytscMenuForm.endTime"
-                      type="datetime"
+                      type="date"
                       :clearable="false"
-                      value-format="yyyy-MM-dd"
-                      format="yyyy-MM-dd"
                       :picker-options="endDateOpt"
                       placeholder="结束时间"
                       class="width232 vl_date vl_date_end"
@@ -198,13 +199,13 @@
                 </div>
                 <div class="text_wrap">
                   <h3 class="text_name">检索资料</h3>
-                  <div class="text_message">
+                  <div class="text_message" :title="item.shotTime">
                     <i class="vl_icon vl_icon_retrieval_01"></i>
-                    <span>{{item.shotTime}}</span>
+                    {{item.shotTime}}
                   </div>
-                  <div class="text_message">
+                  <div class="text_message" :title="item.deviceName">
                     <i class="vl_icon vl_icon_retrieval_02"></i>
-                    <span>{{item.deviceName}}</span>
+                    {{item.deviceName}}
                   </div>
                 </div>
               </div>
@@ -450,6 +451,8 @@
   </div>
 </template>
 <script>
+import vlBreadcrumb from "@/components/common/breadcrumb.vue";
+
 import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入一个地图的地址
 import { formatDate } from "@/utils/util.js";
 import {
@@ -598,6 +601,7 @@ export default {
       videoUrl: "" // 弹窗视频回放里的视频
     };
   },
+  components: { vlBreadcrumb },
   mounted() {
     //获取摄像头卡口数据
     this.getMonitorList();
@@ -620,13 +624,13 @@ export default {
     }
   },
   methods: {
-    bigImg(v) {
-      if (v == 1) {
-        this.isChoose = !this.isChoose;
-      } else {
-        this.isChoose2 = !this.isChoose2;
-      }
-    },
+    // bigImg(v) {
+    //   if (v == 1) {
+    //     this.isChoose = !this.isChoose;
+    //   } else {
+    //     this.isChoose2 = !this.isChoose2;
+    //   }
+    // },
     /*重置菜单的数据 */
     resetMenu() {
       // 置空数据数量
@@ -646,6 +650,7 @@ export default {
         this.$refs.ytscMenuForm.validate(valid => {
           if (isClick) {
             this.getStrucInfoLoading = true; // 打开加载效果
+            this.pageNum = 1;
           }
           if (valid) {
             if (
@@ -1115,16 +1120,16 @@ export default {
   height: 100%;
   position: relative;
   // 面包屑样式
-  .link_bread {
-    height: 60px;
-    background: #fff;
-    .bread_common {
-      padding: 23px 0 0 20px;
-    }
-  }
+  // .link_bread {
+  //   height: 60px;
+  //   background: #fff;
+  //   .bread_common {
+  //     padding: 23px 0 0 20px;
+  //   }
+  // }
   // 搜车主体页面
   .sc_content {
-    height: calc(100% - 60px);
+    height: calc(100% - 49px);
     overflow: hidden;
     display: -webkit-box;
     display: -ms-flexbox;
@@ -1136,6 +1141,10 @@ export default {
       background: #fff;
       box-shadow: 2px 3px 10px 0px rgba(131, 131, 131, 0.28);
       height: 100%;
+      // 表单选项间隔
+      .el-form-item {
+        margin-bottom: 12px;
+      }
       // 菜单的表单
       .width232 {
         width: 232px;
@@ -1145,7 +1154,7 @@ export default {
       }
       // 选择设备下拉
       .selected_device {
-        margin-bottom: 20px;
+        margin-bottom: 12px;
         position: relative;
         width: 232px;
         height: 40px;
@@ -1183,7 +1192,7 @@ export default {
           z-index: 100;
           background: #fff;
           width: 232px;
-          height: 350px;
+          height: 330px;
           border-radius: 4px;
           border: 1px solid #d3d3d3;
           .tab_title {
@@ -1200,7 +1209,7 @@ export default {
           }
           // 树
           .tree_content {
-            height: 340px;
+            height: 320px;
             padding-top: 10px;
             .checked_all {
               padding: 0 0 8px 23px;
@@ -1416,21 +1425,21 @@ export default {
             }
             // 检索的资料信息
             .text_message {
+              width: 184px;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+              overflow: hidden;
               margin-top: 8px;
               padding: 0 12px;
               font-size: 12px;
               background: #fafafa;
               border: 1px solid #f2f2f2;
               border-radius: 3px;
-              overflow: hidden;
               > i {
                 margin-top: 3px;
                 float: left;
               }
-              > span {
-                line-height: 26px;
-                float: left;
-              }
+              line-height: 26px;
             }
           }
         }

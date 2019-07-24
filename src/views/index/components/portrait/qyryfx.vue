@@ -1,12 +1,17 @@
 <template>
   <div class="qyryfx_wrap">
     <!-- 面包屑通用样式 -->
-    <div class="link_bread">
+    <div
+      is="vlBreadcrumb"
+      :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
+          {name: '区域人员分析'}]"
+    ></div>
+    <!-- <div class="link_bread">
       <el-breadcrumb separator=">" class="bread_common">
         <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像检索</el-breadcrumb-item>
         <el-breadcrumb-item :to="{ path: '/portrait/pfcm' }">区域人员分析</el-breadcrumb-item>
       </el-breadcrumb>
-    </div>
+    </div>-->
     <div class="qyryfx_content">
       <!-- 页面的左边 -->
       <div class="info_left" v-show="videoMenuStatus">
@@ -148,7 +153,6 @@
                     :picker-options="startDateOptArr[index]"
                     placeholder="开始时间"
                     class="width232 vl_date"
-                    @change="timeChange(index)"
                   ></el-date-picker>
                 </div>
                 <div class="time-search">
@@ -161,7 +165,6 @@
                     default-time="23:59:59"
                     placeholder="结束时间"
                     class="width232 vl_date vl_date_end"
-                    @change="timeChange(index, 'end')"
                   ></el-date-picker>
                 </div>
               </div>
@@ -201,7 +204,7 @@
               class="sd_search_input"
               autocomplete="off"
               id="map-sd-search-input"
-            ></el-input> -->
+            ></el-input>-->
             <span @click="selectArea(searchPlace)">
               <i class="el-icon-search"></i>
             </span>
@@ -355,6 +358,8 @@
   </div>
 </template>
 <script>
+import vlBreadcrumb from "@/components/common/breadcrumb.vue";
+
 import swiper from "vue-awesome-swiper";
 import { mapXupuxian } from "@/config/config.js";
 import { formatDate } from "@/utils/util.js";
@@ -399,9 +404,7 @@ export default {
                 time.getTime() > new Date(this.drawObj[0].endTime).getTime()
               );
             } else {
-              return (
-                time.getTime() > new Date().getTime()
-              );
+              return time.getTime() > new Date().getTime();
             }
           }
         }
@@ -543,6 +546,7 @@ export default {
       swiper: null
     };
   },
+  components: { vlBreadcrumb },
   mounted() {
     //获取数据
     this.getTreeList();
@@ -858,9 +862,7 @@ export default {
                 time.getTime() > new Date(this.drawObj[index].endTime).getTime()
               );
             } else {
-              return (
-                time.getTime() > new Date().getTime()
-              );
+              return time.getTime() > new Date().getTime();
             }
           }
         }
@@ -872,12 +874,11 @@ export default {
             if (this.drawObj[index].startTime) {
               return (
                 time.getTime() <
-                  new Date(this.drawObj[index].startTime).getTime() || time.getTime() > new Date().getTime()
-              );
-            } else {
-              return (
+                  new Date(this.drawObj[index].startTime).getTime() ||
                 time.getTime() > new Date().getTime()
               );
+            } else {
+              return time.getTime() > new Date().getTime();
             }
           }
         }
@@ -1293,7 +1294,7 @@ export default {
     },
     selectArea(e) {
       // if (this.searchPlace) {
-        this.searchPlace = e;
+      this.searchPlace = e;
       // }
       if (e.poi && e.poi.location) {
         this.amap.setZoom(15);
@@ -2107,16 +2108,16 @@ export default {
 
 .qyryfx_wrap {
   position: relative;
-  height: calc(100% - 60px);
+  height: calc(100% - 49px);
   font-size: 14px;
   // 面包屑样式
-  .link_bread {
-    height: 60px;
-    background: #fff;
-    .bread_common {
-      padding: 23px 0 0 20px;
-    }
-  }
+  // .link_bread {
+  //   height: 60px;
+  //   background: #fff;
+  //   .bread_common {
+  //     padding: 23px 0 0 20px;
+  //   }
+  // }
   // 搜索结果展示
   .search_result {
     position: absolute;
