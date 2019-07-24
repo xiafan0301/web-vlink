@@ -342,7 +342,8 @@ export default {
               start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
             }
             threeMonths = new Date(start).getTime();
-            return time.getTime() > Date.now() || time.getTime() < threeMonths;
+            //return time.getTime() > Date.now() || time.getTime() < threeMonths;
+            return time.getTime() > Date.now() ;
           }
         },
         isNull:true,
