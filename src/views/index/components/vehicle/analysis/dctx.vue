@@ -361,12 +361,12 @@ export default {
     // 获取基准车辆的抓拍数据
     getVehicleList () {
       const params = {
-        // startTime: formatDate(this.searchForm.startTime),
-        // endTime: formatDate(this.searchForm.endTime),
-        // baseNumber: this.searchForm.basicVehicleNumber,
-        startTime: '2019-07-13 00:54:29',
-        endTime: '2019-07-13 23:54:59',
-        baseNumber: '湘LYV366',
+        startTime: formatDate(this.searchForm.startTime),
+        endTime: formatDate(this.searchForm.endTime),
+        baseNumber: this.searchForm.basicVehicleNumber,
+        // startTime: '2019-07-13 00:54:29',
+        // endTime: '2019-07-13 23:54:59',
+        // baseNumber: '湘LYV366',
       };
       getBaseVehicleList(params)
         .then(res => {
