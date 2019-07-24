@@ -51,6 +51,7 @@ export default {
 .vl_manage {
   position: relative;
   height: 100%;
+  overflow: hidden;
   > .manage_content {
     height: 100%;
     padding-left: 200px;

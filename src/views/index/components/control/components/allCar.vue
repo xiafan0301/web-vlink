@@ -89,7 +89,7 @@
         title="删除提示">
         <h1 class="vl_f_16 vl_f_333" style="margin-bottom: 4px;">是否删除布控库中已选的{{allIsChecked}}条对象数据？</h1>
         <div slot="footer">
-          <el-button @click="delCarDialog = false" class="reset_btn btn_140">取消</el-button>
+          <el-button @click="delCarDialog = false" class="   btn_140">取消</el-button>
           <el-button :loading="loadingBtn" class="select_btn btn_140" @click="delVehicle">确认</el-button>
         </div>
       </el-dialog>
