@@ -15,7 +15,7 @@
       </router-link>
     </li>
     <li>
-      <router-link :to="{name: 'portrait_ytsr_list'}">
+      <router-link :to="{name: ytsrRoute}">
         <img src="../../../../assets/img/portrait_li_bg.png" alt="">
         <span class="ptt_li_icon vl_icon2 vl_icon2_103"></span>
         <span class="ptt_li_text">以图搜人</span>
@@ -98,12 +98,15 @@
 export default {
   data () {
     return {
+      ytsrRoute: 'portrait_ytsr_moment'
     }
   },
   mounted () {
     PortraitGetDispatch().then(res => {
       if (res) {
-        console.log(res.data)
+        if (res.data === 2) {
+          this.ytsrRoute = 'portrait_ytsr_list'
+        }
       }
     })
   },

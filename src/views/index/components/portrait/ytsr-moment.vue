@@ -11,15 +11,15 @@
       <div class="vl_jtc_img_box">
         <div class="vl_judge_tc_c_item"  @drop="drop($event)" @dragover="allowDrop($event)">
           <el-upload
-                  :class="{'vl_jtc_upload_ytsr': true}"
-                  :show-file-list="false"
-                  accept="image/*"
-                  :action="uploadAcion"
-                  list-type="picture-card"
-                  @drop="drop($event)"
-                  :before-upload="beforeAvatarUpload"
-                  :on-success="uploadSucess"
-                  :on-error="handleError">
+            :class="{'vl_jtc_upload_ytsr': true}"
+            :show-file-list="false"
+            accept="image/*"
+            :action="uploadAcion"
+            list-type="picture-card"
+            @drop="drop($event)"
+            :before-upload="beforeAvatarUpload"
+            :on-success="uploadSucess"
+            :on-error="handleError">
             <i v-if="uploading" class="el-icon-loading"></i>
             <img v-else-if="curImageUrl" :src="curImageUrl">
             <i style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;" class="vl_icon vl_icon_vehicle_01" v-else></i>
