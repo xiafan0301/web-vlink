@@ -43,8 +43,9 @@
                 </div>
                 <div>
                   <el-select size="small" style="width: 100%;" v-model="targetType" placeholder="选择目标类型">
-                    <el-option :label="'人员'" :value="'人员'"></el-option>
-                    <el-option :label="'车辆'" :value="'车辆'"></el-option>
+                    <el-option :label="'全部'" :value="''"></el-option>
+                    <el-option :label="'人员'" :value="'0'"></el-option>
+                    <el-option :label="'车辆'" :value="'1'"></el-option>
                   </el-select>
                 </div>
               </div>
@@ -200,12 +201,14 @@ import videoEmpty from './videoEmpty.vue';
 import relayNew from './relay-new.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 import { apiAreaServiceDeviceList, getAllMonitorList, getAllBayonetList } from "@/views/index/api/api.base.js";
-  import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList} from '@/views/index/api/api.judge.js'
+  import {selectVideoContinue, JtcPOSTAppendixInfo, JtcGETAppendixInfoList} from '@/views/index/api/api.judge.js'
 export default {
   components: {videoEmpty, flvplayer, relayNew},
   data () {
     let _ndate = new Date();
     return {
+      relayList: [],
+      relayList2: [],
       pageType: 1, // 1展示 2新建
       // {video: {}, title: ''},
       videoList: [{}, {}, {}, {}],
@@ -214,7 +217,7 @@ export default {
       showConTitle: 1,
       startTime: '',
       endTime: '',
-      targetType: '人员',
+      targetType: '',
       searchVal2: '',
       dragActiveObj: null,
 
@@ -258,10 +261,32 @@ export default {
     this.showMenuActive = true;
     this.startTime = this.initTime[0];
     this.endTime = this.initTime[1];
+
+    this.getRelayList();
   },
   mounted () {
   },
   methods: {
+    getRelayList (isFinished) {
+      let params = {
+        type: '0',
+        isFinished: isFinished ? '1' : '0'
+      }
+      // 0是人 1是车
+      if (this.targetType === '1' || this.targetType === '0') {
+        params.type = this.targetType;
+      }
+      selectVideoContinue(params).then((res) => {
+        if (res && res.data) {
+          if (isFinished) {
+            this.relayList2 = res.data;
+          } else {
+            this.relayList = res.data;
+          }
+        }
+      }).catch((error => {
+      }));
+    },
     closeNew () {
       this.changePage(1);
     },
