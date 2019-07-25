@@ -32,6 +32,7 @@
             <i
               style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
               class="vl_icon vl_icon_vehicle_01"
+              v-else
             ></i>
           </el-upload>
           <p @click="showHistoryPic(1)">从上传记录中选择</p>
@@ -54,6 +55,7 @@
             <i
                     style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
                     class="vl_icon vl_icon_vehicle_01"
+                    v-else
             ></i>
           </el-upload>
           <!--<div class="vl_jtc_ic_input" v-show="!curImageUrl2">-->
