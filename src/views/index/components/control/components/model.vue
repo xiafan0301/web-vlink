@@ -1171,7 +1171,7 @@ export default {
       if (!type && (_this.modelType === '1' || _this.modelType === '2')) {
         setTimeout(() => {
           _this.trackPointData.forEach(f => {
-            _this.markLocation(f.marker.C.position.lng, f.marker.C.position.lat, f.address, f.index);
+            _this.markLocation(f.marker.getPosition().lng, f.marker.getPosition().lat, f.address, f.index);
           })
           _this.trackPointList.forEach(f => f.isDropdown = false);//首先全置为false
         }, 50)
@@ -1431,6 +1431,7 @@ export default {
         this.$message.error('无法获取到经纬度！');
         return;
       }
+      console.log(e, 'eeeee')
       this.markLocation(e.location.lng, e.location.lat, e.address, this.pointIndex);
     },
      // 添加追踪点
@@ -1466,7 +1467,7 @@ export default {
       }
 
       // 移除追踪点的点标记
-      const delMakerObjIndex = _this.trackPointData.findIndex(f => f.marker.C.position.lat == circle.C.center.lat && f.marker.C.position.lng == circle.C.center.lng);
+      const delMakerObjIndex = _this.trackPointData.findIndex(f => f.marker.getPosition().lat == circle.getCenter().lat && f.marker.getPosition().lng == circle.getCenter().lng);
       if (delMakerObjIndex !== -1) {
         const delMakerObj = _this.trackPointData.splice(delMakerObjIndex, 1);
         _this.map.remove(delMakerObj[0].marker);
@@ -1477,7 +1478,7 @@ export default {
       }
      
 
-      const delEquIndex = _this.trackPointList.findIndex(p => p.latitude == circle.C.center.lat && p.longitude == circle.C.center.lng);
+      const delEquIndex = _this.trackPointList.findIndex(p => p.latitude == circle.getCenter().lat && p.longitude == circle.getCenter().lng);
       if (delEquIndex !== -1) {
         // 移除追踪点左侧的列表数据
         const _obj = _this.trackPointList.splice(delEquIndex, 1);
@@ -1488,7 +1489,7 @@ export default {
           f.address = _this.modelForm.points[index].point;
         })
         // 覆盖物中还有追踪点时不能把里面设备全部置为未选中
-        if (_this.selAreaCircle.findIndex(f => f._circle.C.center.lat == circle.C.center.lat && f._circle.C.center.lng == circle.C.center.lng) === -1) {
+        if (_this.selAreaCircle.findIndex(f => f._circle.getCenter().lat == circle.getCenter().lat && f._circle.getCenter().lng == circle.getCenter().lng) === -1) {
           // 把覆盖物内的设备置为未选中
           _obj[0].devList.forEach(f => {
             if (f.isSelected) {
@@ -1515,7 +1516,7 @@ export default {
         const delObjIndex = _this.trackPointList.findIndex(p => p.tid === index);
         const _obj = _this.trackPointList.splice(delObjIndex, 1);
         // 覆盖物中还有追踪点时不能把里面设备全部置为未选中
-        if (_this.selAreaCircle.findIndex(f => f._circle.C.center.lat == circle.C.center.lat && f._circle.C.center.lng == circle.C.center.lng) === -1) {
+        if (_this.selAreaCircle.findIndex(f => f._circle.getCenter().lat == circle.getCenter().lat && f._circle.getCenter().lng == circle.getCenter().lng) === -1) {
           // 把覆盖物内的设备置为未选中
           _obj[0].devList.forEach(f => {
             if (f.isSelected) {
@@ -1557,7 +1558,8 @@ export default {
           }
         });
         marker.setMap(_this.map);
-        _this.trackPointData = _this.trackPointData.filter(f => f.marker.C.position.lng != lng && f.marker.C.position.lat != lat);// 切换设备特性筛选时，过滤掉相同的追踪点marker
+        console.log(_this.trackPointData, '_this.trackPointData')
+        _this.trackPointData = _this.trackPointData.filter(f => f.marker.getPosition().lng != lng && f.marker.getPosition().lat != lat);// 切换设备特性筛选时，过滤掉相同的追踪点marker
         _this.trackPointData.splice(index, 0, {marker, index, address});
         _this.lnglat = [lng, lat];
         _this.map.setCenter([lng, lat]);

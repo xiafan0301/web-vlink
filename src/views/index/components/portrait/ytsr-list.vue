@@ -182,21 +182,6 @@
           </div>
           <div class="right">
             <div class="line-box"><el-input v-model="addData.taskName" placeholder="请设置任务名称，最多20字" maxlength="20"></el-input></div>
-            <div class="line-box">
-              <el-select
-                v-model="addData.portraitGroupId"
-                placeholder="选择人员组"
-                multiple
-                collapse-tags
-              >
-                <el-option
-                  v-for="item in portraitGroupList"
-                  :key="item.id"
-                  :label="item.groupName"
-                  :value="item.uid">
-                </el-option>
-              </el-select>
-            </div>
             <div class="line-box left_num">
               <div class="per_semblance"><span>相似度</span><el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100" v-model="addData.minSemblance"></el-input> <i></i> 100</div>
             </div>
@@ -214,8 +199,7 @@
   // eslint-disable-next-line no-unused-vars
   import vlBreadcrumb from "@/components/common/breadcrumb.vue";
   import { getShotDevice, getTailBehindList, JtcPOSTAppendixInfo } from '@/views/index/api/api.judge.js';
-  import { ScpGETstrucInfoList } from '@/views/index/api/api.search.js';
-  import {getGroupListIsPortrait} from '../../api/api.control.js';
+  import { PortraitPostByphotoTask } from '@/views/index/api/api.portrait.js';
   import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
   import { ajaxCtx, mapXupuxian } from '@/config/config.js';
   import { MapGETmonitorList } from "@/views/index/api/api.map.js";
@@ -259,8 +243,7 @@
         portraitGroupList: [],
         addData: {
           taskName: '',
-          minSemblance: 85,
-          portraitGroupId: []
+          minSemblance: 85
         },
         taskTime: [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()],
         // 选择设备的数据
@@ -310,15 +293,6 @@
         })
         this.imgList = x;
       }
-      // 获取人员组，跟车辆组列表
-      getGroupListIsPortrait().then(res => {
-        if (res) {
-          this.portraitGroupList = res.data.splice(1);
-          this.addData.portraitGroupId = this.portraitGroupList.map(x => {
-            return x.uid
-          })
-        }
-      })
       this.getDataList();
     },
     methods: {
@@ -412,7 +386,9 @@
       },
       // 删除图片
       onConfirmAddTask () {
-        let params = {};
+        let params = {
+          taskType: 1
+        };
         if (!this.imgList) {
           if (!document.querySelector('.el-message--info')) {
             this.$message.info('请上传图片')
@@ -420,6 +396,7 @@
           return false;
         } else {
           params['appendixIds'] = this.imgList.uid;
+          params['uploadImgUrls'] = this.imgList.path;
         }
         if (!this.addData.taskName) {
           if (!document.querySelector('.el-message--info')) {
@@ -429,17 +406,9 @@
         } else {
           params['taskName'] = this.addData.taskName;
         }
-        if(!this.addData.portraitGroupId.length){
-          if (!document.querySelector('.el-message--info')) {
-            this.$message.info('请选择人员组')
-          }
-          return false;
-        }else {
-          params['portraitGroupId'] = this.addData.portraitGroupId.join(',')
-        }
         params['minSemblance'] = this.addData.minSemblance ? this.addData.minSemblance : 0;
         this.isAddLoading = true;
-        ScpGETstrucInfoList(params).then(res => {
+        PortraitPostByphotoTask(params).then(res => {
           if (res && res.data) {
             this.$message({
               type: 'success',

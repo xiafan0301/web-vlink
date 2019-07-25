@@ -44,12 +44,12 @@
                     style="width: 100%;"
                     class="vl_date"
                     :picker-options="pickerOptions"
-                    type="datetime"
+                    type="date"
                     value-format="timestamp"
                     placeholder="选择日期时间">
             </el-date-picker>
           </el-form-item>
-          <el-form-item prop="data2">
+          <el-form-item>
             <el-date-picker
                     style="width: 100%;"
                     class="vl_date vl_date_end"
@@ -57,7 +57,7 @@
                     v-model="ruleForm.data2"
                     @change="chooseEndTime"
                     value-format="timestamp"
-                    type="datetime"
+                    type="date"
                     placeholder="选择日期时间">
             </el-date-picker>
           </el-form-item>
@@ -331,6 +331,7 @@
         timeOrder: false,
         ruleForm: {
           data1:null,
+          data2: null,
           input3: '',
           input5: "1",
           value1: null,
@@ -438,21 +439,8 @@
         let date = new Date();
         let curDate = date.getTime();
         let curS = 1 * 24 * 3600 * 1000;
-        let sM = '', sD = '';
-        if ((new Date(curDate - curS).getMonth() + 1) < 10 ) {
-          sM = '0' + (new Date(curDate - curS).getMonth() + 1);
-        } else {
-          sM = (new Date(curDate - curS).getMonth() + 1)
-        }
-        if ( new Date(curDate - curS).getDate() < 10 ) {
-          sD = '0' +  new Date(curDate - curS).getDate();
-        } else {
-          sD =  new Date(curDate - curS).getDate()
-        }
-        let _s = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD + '  00:00:00';
-        let _e = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD + ' 23:59:59';
-        this.ruleForm.data1 = new Date(_s);
-        this.ruleForm.data2 = new Date(_e);
+        this.ruleForm.data1 = curDate - curS;
+        this.ruleForm.data2 = curDate;
       },
       hideResult() {
         this.reselt = false;
@@ -492,7 +480,6 @@
           case 'cut2' :
             this.mouseTool.circle({
               strokeColor: "#FA453A",
-              strokeOpacity: 1,
               strokeWeight: 1,
               strokeOpacity: 0.2,
               fillColor: '#FA453A',
@@ -541,8 +528,8 @@
 //            this.$message.info('选择的区域没有设备，请重新选择区域');
 //            return false;
 //          }
-          pg['startTime'] = formatDate(this.ruleForm.data1, 'yyyy-MM-dd HH:mm:ss');
-          pg['endTime'] = formatDate(this.ruleForm.data2, 'yyyy-MM-dd HH:mm:ss')
+          pg['startTime'] = formatDate(this.ruleForm.data1, 'yyyy-MM-dd') + ' 00:00:00';
+          pg['endTime'] = formatDate(this.ruleForm.data2, 'yyyy-MM-dd') + ' 23:59:59';
 //          pg['imageUrl'] = 'http://file.aorise.org/vlink/image/18c70cc3-424a-43fc-92ee-a6c6de4248f2.jpg';
           pg['imageUrl'] = this.ruleForm.input3;
 //          if(this.ruleForm.input5 == "1"){

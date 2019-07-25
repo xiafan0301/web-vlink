@@ -79,3 +79,30 @@ export function PortraitPostPersonTrace(data) {
   })
 }
 /*================人脸检索 --- 轨迹分析 end=================== */
+
+/*================人脸检索 --- 以图搜人 start=================== */
+
+/**
+ * 以图搜人实时/离线判断
+ * @data {object} data
+ */
+export function PortraitGetDispatch() {
+  return request({
+    url: '/portrait/by-photo/dispatch',
+    method: 'get',
+    mode: 'judge'
+  })
+}
+/**
+ * 以图搜人实时/离线判断
+ * @data {object} data
+ */
+export function PortraitPostByphotoTask(data) {
+  return request({
+    url: '/portrait/by-photo/task',
+    method: 'post',
+    data,
+    mode: 'judge'
+  })
+}
+/*================人脸检索 --- 以图搜人 end=================== */
