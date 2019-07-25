@@ -242,6 +242,7 @@ export default {
         }
       ]
     },
+    // 摄像头管理
     {
       path: 'cameraManage',
       name: 'camera_manage',
@@ -256,6 +257,12 @@ export default {
       path: 'addCamera',
       name: 'add_camera',
       component: () => import('@/views/index/components/manage/addCamera.vue')
+    },
+    // 参数设置
+    {
+      path: 'paramsSetting',
+      name: 'params_setting',
+      component: () => import('@/views/index/components/manage/paramsSetting.vue')
     },
   ]
 }

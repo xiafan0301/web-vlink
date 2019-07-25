@@ -13,7 +13,7 @@
           <span class="name">{{detailInfo.deviceName}}</span>
           <span class="status online-status">在线</span>
         </div>
-        <p class="create_time">创建于{{detailInfo.constructTime}}，最近更新于{{detailInfo.updateTime}}</p>
+        <p class="create_time">创建于{{detailInfo.createTime}}，最近更新于{{detailInfo.updateTime}}</p>
       </div>
       <div class="basic_info">
         <p class="title_p">基本信息</p>
@@ -211,7 +211,7 @@ export default {
               });
               this.delCameraDialog = false;
               this.isDeleteLoading = false;
-              this.$router.pusn({name: 'camera_manage'});
+              this.$router.push({name: 'camera_manage'});
             } else {
               this.isDeleteLoading = false;
             }

@@ -161,7 +161,7 @@
             <template slot-scope="scope">
               <span class="operation_btn" @click="skipDetailPage(scope.row)">查看</span>
               <span style="color: #f2f2f2">|</span>
-              <span class="operation_btn" @click="skipDetailPage(scope.row)" >编辑</span>
+              <span class="operation_btn" @click="skipAddCameraPage(scope.row)" >编辑</span>
               <span style="color: #f2f2f2">|</span>
               <span class="operation_btn" @click="showDeleteDialog(scope.row)">删除</span>
             </template>
@@ -352,7 +352,7 @@ export default {
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
         order: 'desc',
-        orderBy: 'constructTime'
+        orderBy: 'create_time'
       };
       console.log('params', params)
       this.isSearchLoading = true;
@@ -411,8 +411,12 @@ export default {
       this.selectDataList();
     },
     // 跳至新增摄像头页面
-    skipAddCameraPage () {
-      this.$router.push({name: 'add_camera'});
+    skipAddCameraPage (obj) {
+      let id;
+      if (obj) {
+        id = obj.uid;
+      }
+      this.$router.push({name: 'add_camera', query: { id: id }});
     },
     // 跳至查看详情页面
     skipDetailPage (obj) {

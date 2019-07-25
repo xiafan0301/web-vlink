@@ -46,7 +46,7 @@ export const getPersonShotDev = (params) => {
   return request({
     url: '/person/shot-dev',
     method: 'post',
-    params,
+    data: params,
     mode: 'judge'
   });
 }

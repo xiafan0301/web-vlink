@@ -221,7 +221,7 @@ export default {
   },
   mounted () {
     this.getList();
-    this.getAllList();
+    
   },
   methods: {
     // 播放视频
@@ -391,6 +391,7 @@ export default {
       let _this = this;
 
       _this.$nextTick(() => {
+        _this.getAllList();
         _this.initMap(obj);
       console.log('refs', _this.$refs)
 
@@ -411,6 +412,7 @@ export default {
       this.sturcDetail = {};
       this.curImgIndex = obj.uid;
       this.sturcDetail = obj;
+      this.playing = false;
       this.$nextTick(() => {
         this.initMap(obj);
       })

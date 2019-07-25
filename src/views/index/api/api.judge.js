@@ -585,3 +585,28 @@ export function getFaceRetrievalPerson(params) {
   })
 }
 
+/*--------------------------  参数设置  ---------------------------------*/
+/**
+ * 获取落脚点分析距离和停留时间
+ * @param {object} params
+ */
+export function getLjdDistanceAndTime() {
+  return request({
+    url: '/params',
+    method: 'get',
+    mode: 'judge'
+  })
+}
+/**
+ * 设置落脚点分析距离和停留时间
+ * @param {object} params
+ */
+export function setLjdDistanceAndTime(data) {
+  return request({
+    url: '/params',
+    method: 'post',
+    data,
+    mode: 'judge'
+  })
+}
+
