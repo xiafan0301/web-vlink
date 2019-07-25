@@ -911,6 +911,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.el-radio__label { padding-left: 0; }
 .fz12{
   font-size: 12px;
 }
@@ -976,6 +977,9 @@ export default {
     padding: 20px;
     position: relative;
     height: 100%;
+    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
   .line40 {
     line-height: 40px;
@@ -1398,4 +1402,7 @@ export default {
     }
   }
 }
+</style>
+<style>
+.ljd .demo-ruleForm .el-radio__label { padding-left: 0; }
 </style>
