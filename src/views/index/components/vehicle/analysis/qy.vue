@@ -44,7 +44,7 @@
                         <span class="">抓拍区域:</span>
                         <span>
                       <i class="choose_btn el-icon-location-outline" @click="setFitV(index)" :class="{'not-active': !item.area}"></i>
-                      <i class="choose_btn el-icon-delete" @click="clearArea(index)"></i>
+                      <i class="choose_btn el-icon-delete" v-show="index > 1" @click="clearArea(index)"></i>
                     </span>
                       </div>
                       <div class="drawBox">
@@ -60,13 +60,13 @@
                     <div class="search_line">
                       <!--<span class="time">开始</span>-->
                       <el-date-picker
-                              v-model="item.startTime"
-                              style="width: 100%;"
-                              class="vl_date"
-                              :picker-options="pickerOptions"
-                              type="datetime"
-                              value-format="timestamp"
-                              placeholder="选择日期时间">
+                        v-model="item.startTime"
+                        style="width: 100%;"
+                        class="vl_date"
+                        :picker-options="pickerOptions"
+                        type="datetime"
+                        value-format="timestamp"
+                        placeholder="选择日期时间">
                       </el-date-picker>
                     </div>
                     <!--<p class="red_star"></p>-->
@@ -107,7 +107,7 @@
       title="清除确认"
       :visible.sync="delDialog"
       width="30%">
-      <span>是否要清除地图上{{clearAll ? '全部时间和' : '该条'}}已选区域？</span>
+      <span>是否要清除地图上{{clearAll ? '全部时间和' : '该条'}}抓拍区域？</span>
       <span slot="footer" class="dialog-footer">
     <el-button @click="delDialog = false">取 消</el-button>
     <el-button type="primary" @click="confirmClear">确 定</el-button>
@@ -205,6 +205,7 @@
 //        x.endTime = this.setDTime().endTime;
 //      })
       this.getAllDevice();
+      this.resetZoom();
     },
     methods: {
       hideLeft() {
@@ -549,9 +550,9 @@
         let date = new Date();
         let curDate = date.getTime();
         let curS = 1 * 24 * 3600 * 1000;
-        let _s = new Date(curDate - curS).getFullYear() + '-' + (new Date(curDate - curS).getMonth() + 1) + '-' + new Date(curDate - curS).getDate();
-        let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
-        return {startTime: _s,endTime: _e}
+//        let _s = new Date(curDate - curS).getFullYear() + '-' + (new Date(curDate - curS).getMonth() + 1) + '-' + new Date(curDate - curS).getDate();
+//        let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+        return {startTime: curDate - curS,endTime: curDate}
       },
       // 选择区域
       selArea (v) {
@@ -622,7 +623,8 @@
           this.delAllArea();
         } else {
           this.mouseTool.close(false);
-          this.map.remove(this.searchData[this.curDrawIndex].area)
+          this.map.remove(this.searchData[this.curDrawIndex].area);
+          this.searchData.splice(this.curDrawIndex, 1)
         }
       },
       tcDiscuss () {

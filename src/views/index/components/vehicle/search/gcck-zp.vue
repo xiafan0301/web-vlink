@@ -67,7 +67,7 @@
                   <div class="vc_gcck_rbl">
                     <div class="gcck_rbl_i">
                       <div>
-                        <div @click="goToDetail(sitem.plateNo)">
+                        <div @click="goToDetail(sitem, item, sindex)">
                           <img :title="sitem.deviceName" :alt="sitem.deviceName" :src="sitem.subStoragePath">
                         </div>
                       </div>
@@ -103,9 +103,11 @@
         </ul>
       </div>
     </div>
+    <div is="vehicleDetail" :oData="detailData"></div>
   </div>
 </template>
 <script>
+import vehicleDetail from './gcck-detail.vue';
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 import {formatDate, getDate} from '@/utils/util.js';
@@ -114,10 +116,13 @@ import {getDiciData} from '../../../api/api.js';
 import {getSpecialGroup} from '../../../api/api.manage.js';
 import { constants } from 'crypto';
 export default {
-  components: {vlBreadcrumb, flvplayer},
+  components: {vlBreadcrumb, flvplayer, vehicleDetail},
   data () {
     let nDate = new Date();
     return {
+
+      detailData: null,
+
       formInline: {
         time: [nDate, nDate],
         lb: '',
@@ -172,31 +177,12 @@ export default {
     this.getCppList();
   },
   methods: {
-    goToDetail (plateNo) {
-      this.$store.commit('setBreadcrumbData', {
-        breadcrumbData: [
-          {name: '车辆侦查', routerName: 'vehicle'},
-          {name: '过车查看', routerName: 'vehicle_search_gcck', query: {'deviceIds': this.$route.query.deviceIds, bId: this.$route.query.bId}},
-          { name: '全部抓拍', routerName: 'vehicle_search_gcck_zp', 
-            query: {
-              deviceIds: this.$route.query.deviceIds,
-              bId: this.$route.query.bId,
-              st: formatDate(this.formInline.time[0], 'yyyy-MM-dd'),
-              et: formatDate(this.formInline.time[1], 'yyyy-MM-dd'),
-              lb: this.formInline.lb,
-              lx: this.formInline.lx,
-              no: this.formInline.no ? 1 : 2,
-              cpp: this.formInline.cpp,
-              cp: this.formInline.cp
-            }
-          },
-          {name: '车辆详情'}
-        ]
+    goToDetail (item, sday, index) {
+      let _o = Object.assign({}, this.daysList[sday], {
+        day: sday,
+        index: index
       });
-      this.$router.push({name: 'vehicle_search_clcxdetail', query: {
-        breadcrumb: 2,
-        plateNo: plateNo
-      }});
+      this.detailData = _o;
     },
     getLxList () {
       getDiciData(44).then(res => {

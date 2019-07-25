@@ -48,20 +48,38 @@
             </div>
             <div class="struc_c_d_info">
               <h2>抓拍信息</h2>
-              <div class="struc_cdi_line">
-                <span><font>车牌号码</font>{{sturcDetail.plateNo}}</span>
-              </div>
-              <div class="struc_cdi_line">
-                <span><font>车辆特征</font>{{sturcDetail.vehicleColor}} {{sturcDetail.vehicleClass}} {{sturcDetail.vehicleBrand}} {{sturcDetail.vehicleStyles}}</span>
-              </div>
-              <div class="struc_cdi_line">
-                <span><font>抓拍设备</font>{{sturcDetail.deviceName}}</span>
-              </div>
-              <div class="struc_cdi_line">
-                <span><font>抓拍时间</font>{{sturcDetail.shotTime}}</span>
-              </div>
-              <div class="struc_cdi_line">
-                <span><font>抓拍地址</font>{{sturcDetail.address}}</span>
+              <div class="struc_cd_info_main">
+                <vue-scroll>
+                  <div class="scroll_box">
+                    <div class="struc_cdi_line">
+                      <span><font>抓拍时间</font>{{sturcDetail.shotTime}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span><font>抓拍设备</font>{{sturcDetail.deviceName}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span><font>抓拍地址</font>{{sturcDetail.address}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span><font>车牌号码</font>{{sturcDetail.plateNo}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span><font>号牌颜色</font>{{sturcDetail.plateColor}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span><font>车辆型号</font>{{sturcDetail.vehicleStyles}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span><font>车辆颜色</font>{{sturcDetail.vehicleColor}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span><font>车辆类型</font>{{sturcDetail.vehicleColor}} {{sturcDetail.vehicleClass}} {{sturcDetail.vehicleBrand}} {{sturcDetail.vehicleStyles}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span><font>号牌类型</font>{{sturcDetail.vehicleColor}} {{sturcDetail.vehicleClass}} {{sturcDetail.vehicleBrand}} {{sturcDetail.vehicleStyles}}</span>
+                    </div>
+                  </div>
+                </vue-scroll>
               </div>
               <div class="struc_cdi_line">
                 <p v-if="curInSur">该车牌信息已存在布控库中</p>
@@ -69,7 +87,7 @@
             </div>
           </div>
           <div class="download_btn">
-            <a  @click="gotoControl(sturcDetail)" v-if="!curInSur">加入布控库</a>
+            <a class="is_active" @click="gotoControl(sturcDetail)" v-if="!curInSur">加入布控库</a>
             <a class="disabled"  v-else>加入布控库</a>
           </div>
         </div>
@@ -86,7 +104,7 @@
               <i class="vl_icon vl_icon_control_09" v-else></i>
             </div>
           </div>
-          <div class="download_btn"><a @click="downloadVideo(sturcDetail.videoPath)">下载视频</a></div>
+          <div class="download_btn"><a class="is_active" @click="downloadVideo(sturcDetail.videoPath)">下载视频</a></div>
         </div>
       </div>
       <div class="struc-list">
@@ -155,12 +173,14 @@
     },
     methods: {
       downloadVideo (path) {
-        var wind = window.open('path', 'newwindow', 'height=800, width=1100, top=100, left=100, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=n o, status=no');
+        console.log(path)
+        var wind = window.open(path, 'newwindow', 'height=800, width=1100, top=100, left=100, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=n o, status=no');
         let domA = document.createElement('a');
         domA.setAttribute('download', '下载视频');
         domA.setAttribute('href', path);
-        wind.document.body.appendChild(domA);
-        console.log(wind)
+        wind.onload = () => {
+          console.log('fsfds')
+        }
       },
       gotoControl (data){
         this.$router.push({ name: 'control_create', query: {imgurl: data.subStoragePath, plateNo: data.plateNo} })
@@ -179,21 +199,19 @@
             console.log(res)
             if(res.data.list.length === 0) {
               this.$message.info('抱歉，没有找到匹配结果');
-//              this.$router.push({name: "vehicle_search_qyph"})
+              this.$router.push({name: "vehicle_search_qyph"})
             }
             this.strucInfoList = res.data.list;
             this.pagination.pageNum = res.data.pageNum;
             this.pagination.total = this.strucInfoList.length;
           } else {
-            if(res.data.list.length === 0) {
-              this.$message.info('抱歉，没有找到匹配结果');
-//              this.$router.push({name: "vehicle_search_qyph"})
-            }
+            this.$message.info('抱歉，没有找到匹配结果');
+            this.$router.push({name: "vehicle_search_qyph"})
           }
         }).catch(err => {
           this.$_hideLoading();
           this.$message.info('抱歉，没有找到匹配结果');
-//          this.$router.push({name: "vehicle_search_qyph"})
+          this.$router.push({name: "vehicle_search_qyph"})
         })
       },
       searchSubmit () {
@@ -466,6 +484,7 @@
             width: calc(100% - 3.6rem);
             padding-left: .24rem;
             color: #333333;
+            height: 3.2rem;
             h2 {
               font-weight: bold;
               line-height: .74rem;
@@ -483,6 +502,9 @@
                   font-weight: normal;
                 }
               }
+            }
+            .struc_cd_info_main {
+              height: calc(100% - 0.74rem);
             }
             .struc_cdi_line {
               >span {
@@ -550,16 +572,19 @@
           line-height: .4rem;
           cursor: pointer;
           color: #666666;
-          padding: 0 .1rem;
           position: relative;
-          &:hover {
-            color: #FFFFFF;
-            background: #0C70F8;
-            border-color: #0C70F8;
-          }
           a {
-            display: block;
             text-decoration: none;
+            display: block;
+            padding: 0 .1rem;
+            border-radius: 4px;
+          }
+          .is_active {
+            &:hover {
+              color: #FFFFFF;
+              background: #0C70F8;
+              border-color: #0C70F8;
+            }
           }
           .disabled {
             cursor:not-allowed;

@@ -731,7 +731,7 @@ export default {
       if (this.tape.active) { return; }
       this.tape.active = true;
       this.tape.loading  = true;
-      this.$message('开始录像。');
+      // this.$message('开始录像。');
       this.tape.tapeTime = 0;
       getVideoPlayRecordStart({
         deviceId: this.oData.video.uid
@@ -878,7 +878,8 @@ export default {
       if (this.download.downlaodInval) {
         window.clearInterval(this.download.downlaodInval);
       }
-      let ti = (Math.floor((this.download.currentM / 30) * 5) + 2) * 1000;
+      // let ti = (Math.floor((this.download.currentM / 30) * 5) + 2) * 1000;
+      let ti = 3000;
       console.log(ti);
       this.download.downlaodInval = window.setInterval(() => {
         this.playerDownloadProgress();

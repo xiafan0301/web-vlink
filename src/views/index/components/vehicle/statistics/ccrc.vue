@@ -9,36 +9,37 @@
     <div class="ccrc_content">
       <div class="ccrc_content_left">
         <div class="kaishi">
-          <span style="display: inline-block; width: 14px; margin-right: 4px; color: #999999">开 始</span>
           <el-date-picker
               v-model="value1"
               value-format="yyyy-MM-dd HH:mm:ss"
               :picker-options="pickerOptions"
-              style="width: 212px; vertical-align: top"
+              style="width: 230px; vertical-align: top"
+              class="full vl_date"
               type="datetime"
               placeholder="选择日期时间">
           </el-date-picker>
         </div>
         <div class="jiesu">
-          <span style="display: inline-block; width: 14px; margin-right: 4px; color: #999999">结 束</span>
           <el-date-picker
               v-model="value2"
               format="yyyy-MM-dd HH:mm:ss"
               :picker-options="pickerOptions1"
               value-format="yyyy-MM-dd HH:mm:ss"
-              style="width: 212px; vertical-align: top"
+              class="full vl_date vl_date_end"
+              style="width: 230px; vertical-align: top"
               type="datetime"
               placeholder="选择日期时间">
           </el-date-picker>
         </div>
         <div class="kakou">
-          <el-select v-model="lll" placeholder="请选择卡口" style="width: 230px" multiple collapse-tags>
-              <el-option
-                  v-for="item in kakou"
-                  :key="item.uid"
-                  :label="item.label"
-                  :value="item.uid">
-              </el-option>
+          <el-select v-model="lll" placeholder="请选择卡口" style="width: 230px" multiple collapse-tags @change="selchange">
+            <el-option key="全选" lable="全选" value="全选"  :class="{selected: showselected}"></el-option>
+            <el-option
+                v-for="item in kakou"
+                :key="item.uid"
+                :label="item.label"
+                :value="item.uid">
+            </el-option>
           </el-select>
 <!--          <div class="search_item" v-show="isShowSelectList">-->
 <!--            <vue-scroll>-->
@@ -60,6 +61,24 @@
 <!--            </vue-scroll>-->
 <!--          </div>-->
         </div>
+        <div class="kakou">
+          <el-select
+              v-model="carType"
+              multiple
+              collapse-tags
+              class="width232"
+              clearable
+              placeholder="全部车辆类别"
+              style="width: 230px"
+          >
+            <el-option
+                v-for="item in vehicleClassOptions"
+                :key="item.enumField"
+                :label="item.enumValue"
+                :value="item.enumField"
+            ></el-option>
+          </el-select>
+        </div>
         <div class="cpai">
           <span style="display: inline-block; width: 42px;color: #999999">车牌：</span>
           <el-checkbox v-model="unvehicleFlag" style="float: right; margin-right: 3px"><span style="color: #999999;">排除</span></el-checkbox>
@@ -77,7 +96,7 @@
           </el-input>
         </div>
         <div style="padding-top: 10px">
-          <el-checkbox v-model="onlySurveillance"><span style="color: #999999">只查看布控库内车辆</span></el-checkbox>
+          <el-checkbox v-model="onlySurveillance"><span style="color: #999999">只查看初次入城记录</span></el-checkbox>
         </div>
         <div class="kakou">
           <el-button style="width: 110px" @click="reset">重置</el-button>
@@ -156,6 +175,7 @@ import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import { objDeepCopy, formatDate } from "@/utils/util.js";
 import { JfoGETCity } from '../../../api/api.judge.js';
 import { cityCode } from "@/utils/data.js";
+import { getGroupsByType } from "@/views/index/api/api.js";
 export default {
   data () {
     return {
@@ -216,6 +236,19 @@ export default {
         children: "children",
         label: "label"
       },
+      showselected: true,
+      vehicleClassOptions: [
+        // 车辆类别下拉
+        {
+          enumField: "无牌车",
+          enumValue: "无牌车"
+        },
+        {
+          enumField: "布控库车辆",
+          enumValue: "布控库车辆"
+        }
+      ],
+      carType: []
     }
   },
   created () {
@@ -225,8 +258,40 @@ export default {
   mounted() {
     this.getMonitorList()
     this.setDTime();
+    // 获取到车辆类别
+    getGroupsByType({ groupType: 9 }).then(res => {
+      if (res.data) {
+        this.vehicleClassOptions = [
+          ...this.vehicleClassOptions,
+          ...res.data.map(item => {
+            return {
+              enumField: item.groupName,
+              enumValue: item.groupName // uid
+            };
+          })
+        ];
+      }
+    });
   },
   methods: {
+    selchange (val) {
+      console.log(val)
+      if (val.indexOf("全选") !== -1 && this.lll.length - 1 < this.kakou.length) {
+        this.showselected = true
+        this.lll = this.kakou.map((item)=> {
+          return item.uid
+        })
+      }else if (val.indexOf("全选") !== -1 && this.lll.length === this.kakou.length + 1) {
+        this.lll = []
+        this.showselected = false
+      }
+      if (this.lll.length !== this.kakou.length) {
+        console.log(23423523525)
+        this.showselected = false
+      }else {
+        this.showselected = true
+      }
+    },
     changval1 (val) {
       let time = val.replace(/-/g, '/');
       let time1 = new Date(time)
@@ -461,11 +526,14 @@ export default {
         startTime: this.value1,
         endTime: this.value2,
         unvehicleFlag: this.unvehicleFlag,
-        onlySurveillance: this.onlySurveillance,
+        onlyFirstEnterCity: this.onlySurveillance,
         vehicleNumber: this.v
       }
       if (this.lll&& this.lll.length > 0) {
         params['bayonetUid'] = this.lll.join(',')
+      }
+      if (this.carType&& this.carType.length > 0) {
+        params['vehicleType'] = this.carType.join(',')
       }
       if (this.vehicleNumber) {
         params.vehicleNumber = this.v + this.vehicleNumber
