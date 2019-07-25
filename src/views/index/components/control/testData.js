@@ -82,12 +82,12 @@ export const nationData = [
   {value: 56, label: "基诺族"}
 ]
 
-export const bonDataOne = [
+export const cameraData = [
   {
-    bayonetAddress: "string",
-    bayonetName: "卡口1",
-    bayonetNo: "0",
-    bayonetType: 0,
+    cameraAddress: "string",
+    cameraName: "摄像头1",
+    cameraNo: "0",
+    cameraType: 0,
     createTime: 1553587805000,
     delFlag: false,
     desci: "string",
@@ -101,7 +101,7 @@ export const bonDataOne = [
   },
   {
     bayonetAddress: "string22222",
-    bayonetName: "卡口2",
+    bayonetName: "摄像头2",
     bayonetNo: "0",
     bayonetType: 0,
     createTime: 1553587805000,
@@ -115,20 +115,17 @@ export const bonDataOne = [
     updateTime: 1553587805000,
     updateUserId: 1
   },
-]
-
-export const bonDataTwo = [
   {
-    bayonetAddress: "string",
-    bayonetName: "卡口3",
-    bayonetNo: "0",
-    bayonetType: 0,
+    cameraAddress: "string",
+    cameraName: "摄像头3",
+    cameraNo: "0",
+    cameraType: 0,
     createTime: 1553587805000,
     delFlag: false,
     desci: "string",
     isEnabled: false,
-    latitude: 28.126192,
-    longitude: 112.926317,
+    latitude: 28.129192,
+    longitude: 112.923317,
     opUserId: 1,
     uid: 3,
     updateTime: 1553587805000,
@@ -136,18 +133,18 @@ export const bonDataTwo = [
   },
   {
     bayonetAddress: "string22222",
-    bayonetName: "卡口4",
+    bayonetName: "摄像头4",
     bayonetNo: "0",
     bayonetType: 0,
     createTime: 1553587805000,
     delFlag: false,
     desci: "string",
     isEnabled: false,
-    latitude: 28.128192,
-    longitude: 112.929317,
+    latitude: 28.130192,
+    longitude: 112.923317,
     opUserId: 1,
     uid: 4,
     updateTime: 1553587805000,
     updateUserId: 1
-  },
+  }
 ]

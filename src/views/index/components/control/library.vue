@@ -491,14 +491,14 @@
             </div>
           </div>
           <div slot="footer">
-            <el-button @click="toGiveUpDialog = true" class="reset_btn btn_100">取消</el-button>
+            <el-button @click="toGiveUpDialog = true" class="reset_btn btn_140">取消</el-button>
             <template v-if="tabType === '1'">
-              <el-button v-if="operationType === '1'" :loading="loadingBtn" class="select_btn btn_100" @click="savePortrait('portraitForm')">保存</el-button>
-              <el-button v-else :loading="loadingBtn" class="reset_btn btn_100" @click="putPortrait('portraitForm')">确定</el-button>
+              <el-button v-if="operationType === '1'" :loading="loadingBtn" class="select_btn btn_140" @click="savePortrait('portraitForm')">保存</el-button>
+              <el-button v-else :loading="loadingBtn" class="select_btn btn_140" @click="putPortrait('portraitForm')">确定</el-button>
             </template>
             <template v-else>
-              <el-button v-if="operationType === '1'" :loading="loadingBtn" class="select_btn btn_100" @click="saveCar('carForm')">保存</el-button>
-              <el-button v-else :loading="loadingBtn" class="reset_btn btn_100" @click="putCar('carForm')">确定</el-button>
+              <el-button v-if="operationType === '1'" :loading="loadingBtn" class="select_btn btn_140" @click="saveCar('carForm')">保存</el-button>
+              <el-button v-else :loading="loadingBtn" class="select_btn btn_140" @click="putCar('carForm')">确定</el-button>
             </template>
           </div>
         </el-dialog>
