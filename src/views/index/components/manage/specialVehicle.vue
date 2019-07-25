@@ -466,6 +466,7 @@ export default {
       successNumber: 0, // 成功导入多少条数据
       failNumber: 0, // 导入失败多少条数据
       showFailFile: false, // 是否显示错误文件
+      errorFile: null, // 错误文件地址
       fileList: [],
       dialogImageUrl: null,
       uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
@@ -1200,37 +1201,29 @@ export default {
 
         this.getGroupList();
 
-      } else if(res.data.code === 1) {
+      } else if (res.data.code === 1) {
         this.importDialog = false;
         this.successNumber = res.data.result.successSize;
         this.failNumber = res.data.result.failSize;
         this.showFailFile = true;
-        this.importFinishDialog = true;
-        // this.errorFile = res.data.result.errorFileUrl;
+
         if (res.data.result.errorFileUrl) {
-          this.downloadErrorFile(res.data.result.errorFileUrl);
+          this.errorFile = res.data.result.errorFileUrl;
         }
+        this.importFinishDialog = true;
       }
     },
     // 下载错误文件
-    downloadErrorFile (file) {
-      // if (this.errorFile) {
-        autoDownloadUrl(file);
-        // if (this.delErrorFile) {
-          // 下载成功后删除动态模板
-          // this.timerError = setTimeout(() => {
-          //   deleteDownLoadFile(this.delErrorFile)
-          //   .then(res => {
-          //     console.log('res', res)
-          //   });
-          // }, 30000)
-        // }
-      // }
+    downloadErrorFile () {
+      if (this.errorFile) {
+        this.importFinishDialog = false;
+        autoDownloadUrl(this.errorFile);
+      }
     },
     // 下载模板
     downloadModel () {
       const file = 'http://file.aorise.org/vlink/file/8dc4e25f-5f7b-4021-9a19-a58f8708b4fd.xls';
-      autoDownloadUrl(file)
+      autoDownloadUrl(file);
     }
   }
 }
@@ -1602,9 +1595,6 @@ export default {
     height: 32px;
     line-height: 32px;
     border-radius: 5px;
-    a {
-      color: #fff;
-    }
   }
 }
 </style>

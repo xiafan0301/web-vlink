@@ -45,7 +45,7 @@
             multiple
             collapse-tags
             clearable
-            placeholder="全部车辆类别"
+            placeholder="全部车辆分组"
             style="width: 100%;margin-top: 10px;"
           >
             <el-option
@@ -118,7 +118,7 @@
               show-overflow-tooltip
               >
               <template slot-scope="scope">
-                <span class="operation_btn" @click="showStrucInfo(scope.row, scope.$index)">出城信息</span>
+                <span class="operation_btn" @click="showStrucInfo(scope.row, scope.$index)">查看</span>
               </template>
             </el-table-column>
           </el-table>
