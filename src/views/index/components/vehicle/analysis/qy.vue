@@ -107,7 +107,7 @@
       title="清除确认"
       :visible.sync="delDialog"
       width="30%">
-      <span>是否要清除地图上{{clearAll ? '全部时间和' : '该条'}}抓拍区域？</span>
+      <span>是否要清除{{clearAll ? '全部时间和' : '该条'}}抓拍区域？</span>
       <span slot="footer" class="dialog-footer">
     <el-button @click="delDialog = false">取 消</el-button>
     <el-button type="primary" @click="confirmClear">确 定</el-button>
@@ -623,7 +623,9 @@
           this.delAllArea();
         } else {
           this.mouseTool.close(false);
-          this.map.remove(this.searchData[this.curDrawIndex].area);
+          if (this.searchData[this.curDrawIndex].area) {
+            this.map.remove(this.searchData[this.curDrawIndex].area);
+          }
           this.searchData.splice(this.curDrawIndex, 1)
         }
       },

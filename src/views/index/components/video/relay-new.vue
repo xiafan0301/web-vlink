@@ -56,7 +56,23 @@
               </div>
             </div>
             <div class="relay_task_mtr">
-              <div v-show="false"></div>
+              <div v-if="xjType === 1 && uploadPersonObj">
+                <h3>图片信息：</h3>
+                <ul>
+                  <li><span>性别：</span>{{uploadPersonObj.sex}}</li>
+                  <li><span>年龄段：</span>{{uploadPersonObj.age}}</li>
+                  <li><span>是否戴眼镜：</span>{{uploadPersonObj.glasses}}</li>
+                  <li><span>是否戴帽子：</span>{{uploadPersonObj.hat}}</li>
+                  <li><span>是否戴口罩：</span>{{uploadPersonObj.mask}}</li>
+                  <li><span>发型：</span>{{uploadPersonObj.hair}}</li>
+                  <li><span>上身款式：</span>{{uploadPersonObj.upperType}}</li>
+                  <li><span>上身颜色：</span>{{uploadPersonObj.upperColor}}</li>
+                  <li><span>下身款式：</span>{{uploadPersonObj.bottomType}}</li>
+                  <li><span>下身颜色：</span>{{uploadPersonObj.bottomColor}}</li>
+                  <li><span>是否抱小孩：</span>{{uploadPersonObj.baby}}</li>
+                  <li><span>是否拎东西：</span>{{uploadPersonObj.bag}}</li>
+                </ul>
+              </div>
             </div>
           </div>
           <div class="relay_task_mm">
@@ -121,7 +137,7 @@
         </div>
       </div>
       <div class="relay_task_b">
-        <el-button size="small" type="primary">&nbsp;&nbsp;&nbsp;&nbsp;确&nbsp;&nbsp;定&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
+        <el-button size="small" @click="xjSubmit" type="primary">&nbsp;&nbsp;&nbsp;&nbsp;确&nbsp;&nbsp;定&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
         <el-button size="small" @click="xjClose">&nbsp;&nbsp;&nbsp;&nbsp;取&nbsp;&nbsp;消&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
       </div>
     </div>
@@ -153,7 +169,8 @@
 import {ajaxCtx} from '@/config/config';
 import {mapXupuxian} from '@/config/config.js';
 import { apiAreaServiceDeviceList, getAllMonitorList, getAllBayonetList } from "@/views/index/api/api.base.js";
-  import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList} from '@/views/index/api/api.judge.js'
+import {JtcGETAppendixInfoList, addPersonVideoContinue, addVhicleVideoContinue} from '@/views/index/api/api.judge.js'
+import {getPicRecognize} from '../../api/api.structuring.js';
 export default {
   data () {
     return {
@@ -183,6 +200,8 @@ export default {
       curImageUrl2: '', // 当前上传的图片 车辆
       uploading: false, // 是否上传中
       uploadFileList: [],
+      uploadPersonObj: null,
+      uploadVhicleObj: null,
       imgData: {
         imgOne: null,
         imgTwo: null
@@ -436,17 +455,28 @@ export default {
             thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
             // uid: '' //  附件标识
           };
-          JtcPOSTAppendixInfo(x).then(jRes => {
-            if (jRes) {
-              x['uid'] = jRes.data;
-              console.log(x);
-            }
-          })
+          this.getPicInfo(x);
           this.imgData.imgOne = x;
           this.curImageUrl = x.path;
         }
       }
       this.uploadFileList = fileList;
+    },
+    getPicInfo (data) {
+      if (this.xjType === 1) {
+        getPicRecognize({
+          bussType: 'person', // vehicle机动车、face人脸、person人体
+          url: data.path
+        }).then(jRes => {
+          if (jRes && jRes.data) {
+            this.uploadPersonObj = Object.assign(jRes.data, {
+              img_path: data.path,
+              img_thumbnailPath: data.thumbnailPath
+            });
+          }
+        }).catch(() => {
+        })
+      }
     },
     handleError () {
       this.uploading = false;
@@ -505,6 +535,44 @@ export default {
       }
       // JtcPUTAppendixsOrder(_obj);
     },
+    xjSubmit () {
+      if (this.xjType === 1) {
+        let params = {
+          // spotLists: '', // 监控点(集合形式‘；’号分隔)
+          imgUrl: this.uploadPersonObj.img_path,
+          subStoragePath: this.uploadPersonObj.img_thumbnailPath,
+          // personStoragePath: this.curImageUrl,
+          // type: '0', // 0是人 1是车
+          sex: this.uploadPersonObj.sex,
+          sexCode: this.uploadPersonObj.sexCode,
+          hair: this.uploadPersonObj.hair,
+          hairCode: this.uploadPersonObj.hairCode,
+          age: this.uploadPersonObj.age,
+          ageCode: this.uploadPersonObj.ageCode,
+          upperType: this.uploadPersonObj.upperType,
+          upperTypeCode: this.uploadPersonObj.upperTypeCode,
+          upperColor: this.uploadPersonObj.upperColor,
+          upperColorCode: this.uploadPersonObj.upperColorCode,
+          bottomType: this.uploadPersonObj.bottomType,
+          bottomTypeCode: this.uploadPersonObj.bottomTypeCode,
+          bottomColor: this.uploadPersonObj.bottomColor,
+          bottomColorCode: this.uploadPersonObj.bottomColorCode,
+          hat: this.uploadPersonObj.hat,
+          hatCode: this.uploadPersonObj.hatCode,
+          bag: this.uploadPersonObj.bag,
+          bagCode: this.uploadPersonObj.bagCode,
+          baby: this.uploadPersonObj.baby,
+          babyCode: this.uploadPersonObj.babyCode,
+          glasses: this.uploadPersonObj.glasses,
+          glassesCode: this.uploadPersonObj.glassesCode,
+          mask: this.uploadPersonObj.mask,
+          maskCode: this.uploadPersonObj.maskCode
+        }
+        addPersonVideoContinue(params).then((res) => {
+        }).catch((error => {
+        }));
+      }
+    }
   },
   destroyed () {
   }
@@ -675,8 +743,24 @@ export default {
   height: 330px;
   > div {
     width: 100%; height: 100%;
+    padding: 10px 15px;
     border-radius:4px 4px 0px 0px;
     border:1px solid rgba(211,211,211,1);
+    > h3 { padding-top: 5px; }
+    > ul {
+      overflow: hidden;
+      padding-top: 10px;
+      > li {
+        width: 25%; float: left;
+        height: 40px; line-height: 40px;
+        > span {
+          display: inline-block;
+          width: 95px; padding-right: 5px;
+          text-align: right;
+          color: #666;
+        }
+      }
+    }
   }
 }
 .relay_task_t {
