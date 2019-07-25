@@ -308,7 +308,8 @@ export default {
         "-" + _sm + "-" +_sd;
           
           let threeMonths = new Date(start).getTime();
-          return time.getTime() > Date.now() || time.getTime() < threeMonths;
+          //return time.getTime() > Date.now() || time.getTime() < threeMonths;
+          return time.getTime() > Date.now();
         }
       },
       switchType: 0, // 0活动范围，1关联事件

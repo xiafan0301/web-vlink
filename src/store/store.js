@@ -16,6 +16,7 @@ const state = {
   // 视频通话相关
   oAdd: {},
   oDel: {},
+  oWaitAdd: {},
   stateHandler: {}, // 监听是否有状态改变，具体是哪一个通话的状态变化，从传入的通话对象来判断
   switchCall: {}, // 切换语音聊天
   callingList: [] // 通话状态下的人员列表，{}包含

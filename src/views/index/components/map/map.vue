@@ -15,10 +15,10 @@
           <div class="map_lc_d" v-show="tabType === 1">
             <div class="map_lc_dt">
               <el-input
-                size="small"
-                placeholder="搜索"
-                clearable
-                v-model="mapInfoVal">
+                      size="small"
+                      placeholder="搜索"
+                      clearable
+                      v-model="mapInfoVal">
               </el-input>
               <el-button type="primary" @click="filterMapTree" icon="el-input__icon el-icon-search" style="font-size: .2rem;line-height: .32rem;cursor:pointer;"></el-button>
             </div>
@@ -158,17 +158,17 @@
           <li :class="{'vl_icon_sed': activeType ===  1}" @click="selArea">
             <i class="vl_icon vl_icon_041"></i>
             <el-popover
-              placement="left"
-              trigger="hover"
-              content="单击选择范围，双击完成">
+                    placement="left"
+                    trigger="hover"
+                    content="单击选择范围，双击完成">
               <span slot="reference">选择区域</span>
             </el-popover>
           </li>
           <li :class="{'vl_icon_sed': activeType ===  2}" @click="ranging">
             <i class="vl_icon vl_icon_042"></i>
             <el-popover
-              placement="left"
-              trigger="hover">
+                    placement="left"
+                    trigger="hover">
               <p>点击×删除当前测距点，点击<span class="el-icon-delete"></span>删除全部测距点</p>
               <span slot="reference">测距</span>
             </el-popover>
@@ -191,10 +191,10 @@
     </div>
     <!--删除标注确定弹窗-->
     <el-dialog
-      title="提示"
-      :visible.sync="deleteMarkDialog"
-      :show-close="false"
-      width="400px">
+            title="提示"
+            :visible.sync="deleteMarkDialog"
+            :show-close="false"
+            width="400px">
       <span>确定清除{{delMessage}}标注吗？</span>
       <span slot="footer" class="dialog-footer">
         <el-button :disabled="delLoading" @click="deleteMarkDialog = false">取 消</el-button>
@@ -392,7 +392,9 @@
           if (oData.mark) {
             this.map.remove(oData.mark);
           }
-          $('#' + oData._mid).removeClass('vl_icon_map_mark_calling');
+          setTimeout(() => {
+            $('#' + oData._mid).removeClass('vl_icon_map_mark_calling');
+          }, 100)
         } else if (oData.state === 20) {
           let domT = document.getElementsByClassName('vl_map_time_' + oData._id)
           setTimeout(() => {
@@ -423,26 +425,27 @@
       _this.mouseTool = mouseTool;
       // 添加事件
       window.AMap.event.addListener(mouseTool, 'draw', function (e) {
-        console.log(e)
-        if (_this.selAreaPolygon) {_this.map.remove(_this.selAreaPolygon);}
-        if (_this.delSelAreaIcon) {_this.map.remove(_this.delSelAreaIcon);}
-        _this.selAreaPolygon = e.obj;
-        // delete icon
-        _this.delSelAreaIcon = new window.AMap.Marker({
-          map: _this.map,
-          position: e.obj.getPath()[e.obj.getPath().length - 1],
-          offset: new window.AMap.Pixel(-15, -16),
-          draggable: false, // 是否可拖动
-          content: '<div  class="vl_map_hover"><span class="del_area_icon el-icon-circle-close"></span></div>'
-        })
+        if(_this.activeType === 1) {
+          if (_this.selAreaPolygon) {_this.map.remove(_this.selAreaPolygon);}
+          if (_this.delSelAreaIcon) {_this.map.remove(_this.delSelAreaIcon);}
+          _this.selAreaPolygon = e.obj;
+          // delete icon
+          _this.delSelAreaIcon = new window.AMap.Marker({
+            map: _this.map,
+            position: e.obj.getPath()[e.obj.getPath().length - 1],
+            offset: new window.AMap.Pixel(-15, -16),
+            draggable: false, // 是否可拖动
+            content: '<div  class="vl_map_hover"><span class="del_area_icon el-icon-circle-close"></span></div>'
+          })
 
-        _this.isInAreaAndCheckBox();
-        _this.updateNumberss();
-        _this.operClassToEL();
-        _this.showSearchList = true;
-        // 给范围内的marker加class
-        _this.activeType = 0;
-        _this.resetTools(1)
+          _this.isInAreaAndCheckBox();
+          _this.updateNumberss();
+          _this.operClassToEL();
+          _this.showSearchList = true;
+          // 给范围内的marker加class
+          _this.activeType = 0;
+          _this.resetTools(1)
+        }
       });
       this.getMonitorList();
       this.getMarkHistory();
@@ -682,16 +685,16 @@
                 // x['lineArr'] = this.drivingPath([[_s.lng, _s.lat], [x.gpsLongitude, x.gpsLatitude]]); // 路线纠偏
                 x['lineArr'] = [[_s.lng, _s.lat], [x.gpsLongitude, x.gpsLatitude]];
                 // 判断车辆是否在画轨迹
-                new window.AMap.Polyline({
-                  map: this.map,
-                  path: x.lineArr,
-//                        showDir:true,
-                  strokeColor: "#28F",  //线颜色
-                  strokeOpacity: 0,     //线透明度
-                  strokeWeight: 6,      //线宽
-                  bubble: true
-                  // strokeStyle: "solid"  //线样式
-                });
+//                new window.AMap.Polyline({
+//                  map: this.map,
+//                  path: x.lineArr,
+////                        showDir:true,
+//                  strokeColor: "#28F",  //线颜色
+//                  strokeOpacity: 0,     //线透明度
+//                  strokeWeight: 6,      //线宽
+//                  bubble: true
+//                  // strokeStyle: "solid"  //线样式
+//                });
                 // console.log('line------------', x, _carL.carList[oldDIndex])
                 moveMark.moveAlong(x.lineArr, x.speed);
                 if (x.isDrawLine) {
@@ -1493,9 +1496,8 @@
           bubble: true,
           strokeWeight: 1,
           fillColor: '#FA453A',
-          fillOpacity: 0.2,
-          isRing: false
-        });
+          fillOpacity: 0.2
+      });
       },
       // 标注
       mark () {
@@ -1592,8 +1594,7 @@
           strokeStyle: "solid",
           strokeColor: "#61C772",
           strokeOpacity: 1,
-          strokeWeight: 8,
-          isRing: true
+          strokeWeight: 8
         };
         let rulerOptions = {
           startMarkerOptions: startMarkerOptions,
@@ -1747,7 +1748,7 @@
         if (this.hoverWindow ){this.hoverWindow.close()}
         // let _m = this.markCalling(_obj);
         // _obj.mark = _m;
-        this.$store.commit('ADD_WEBRTC', {oAdd: _obj})
+        this.$store.commit('WAIT_ADD', {oAdd: _obj})
         /// $('#' + _obj._mid).addClass('vl_icon_map_mark_calling')
       },
       // 检测到视频通话

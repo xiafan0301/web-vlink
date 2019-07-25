@@ -16,6 +16,10 @@ export default {
   },
 
   // 视频通话
+  // 准备添加的通话
+  WAIT_ADD (state, options) {
+    state.oWaitAdd = Object.assign({}, options.oAdd);
+  },
   // 新增通话
   ADD_WEBRTC (state, options) {
     let _obj = Object.assign({}, options.oAdd)
