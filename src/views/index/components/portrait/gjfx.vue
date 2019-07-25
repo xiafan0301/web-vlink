@@ -61,39 +61,39 @@
                     placeholder="选择日期时间">
             </el-date-picker>
           </el-form-item>
-          <el-form-item label="抓拍区域：" class="quyu" label-width="68px"  prop="input5">
-            <el-radio-group v-model="ruleForm.input5">
-              <el-row :gutter="10">
-                <el-col :span="12">
-                  <el-radio label="1">列表选择</el-radio>
-                </el-col>
-                <el-col :span="12">
-                  <div @click="clickTabCh">
-                    <el-radio label="2">地图选择</el-radio>
-                  </div>
-                </el-col>
-              </el-row>
-            </el-radio-group>
-          </el-form-item>
-          <el-form-item v-if="ruleForm.input5=='1'" prop="value1">
-            <el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="全部区域" class="full">
-              <el-option-group
-                v-for="group in options"
-                :key="group.areaName"
-                :label="group.areaName">
-                <el-option
-                  v-for="item in group.areaTreeList"
-                  :key="item.areaId"
-                  :label="item.areaName"
-                  :value="item.areaId">
-                </el-option>
-              </el-option-group>
-            </el-select>
-          </el-form-item>
-          <el-form-item v-if="ruleForm.input5=='2'" >
-            <el-input  v-model="curChooseNum" :disabled="true">
-            </el-input>
-          </el-form-item>
+          <!--<el-form-item label="抓拍区域：" class="quyu" label-width="90px"  prop="input5">-->
+            <!--<el-radio-group v-model="ruleForm.input5">-->
+              <!--<el-row :gutter="10">-->
+                <!--&lt;!&ndash;<el-col :span="12">&ndash;&gt;-->
+                  <!--&lt;!&ndash;<el-radio label="1">列表选择</el-radio>&ndash;&gt;-->
+                <!--&lt;!&ndash;</el-col>&ndash;&gt;-->
+                <!--<el-col :span="12">-->
+                  <!--<div @click="clickTabCh">-->
+                    <!--<el-radio label="2">地图选择</el-radio>-->
+                  <!--</div>-->
+                <!--</el-col>-->
+              <!--</el-row>-->
+            <!--</el-radio-group>-->
+          <!--</el-form-item>-->
+          <!--<el-form-item v-if="ruleForm.input5=='1'" prop="value1">-->
+            <!--<el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="全部区域" class="full">-->
+              <!--<el-option-group-->
+                <!--v-for="group in options"-->
+                <!--:key="group.areaName"-->
+                <!--:label="group.areaName">-->
+                <!--<el-option-->
+                  <!--v-for="item in group.areaTreeList"-->
+                  <!--:key="item.areaId"-->
+                  <!--:label="item.areaName"-->
+                  <!--:value="item.areaId">-->
+                <!--</el-option>-->
+              <!--</el-option-group>-->
+            <!--</el-select>-->
+          <!--</el-form-item>-->
+          <!--<el-form-item>-->
+            <!--<el-input  v-model="curChooseNum" :disabled="true">-->
+            <!--</el-input>-->
+          <!--</el-form-item>-->
           <el-form-item>
             <el-row :gutter="10">
               <el-col :span="12">
@@ -234,7 +234,7 @@
       </div>
     </el-dialog>
     <!-- D设备 B卡口  这里是设备和卡口 -->
-    <div is="mapSelector" :open="dialogVisible" :clear="selectMapClear" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div>
+    <!--<div is="mapSelector" :open="dialogVisible" :clear="selectMapClear" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div>-->
     <div id="capMap"></div>
     <!--人工筛选-->
     <el-dialog
@@ -280,7 +280,7 @@
 </template>
 <script>
   import vlBreadcrumb from '@/components/common/breadcrumb.vue';
-  import mapSelector from '@/components/common/mapSelector.vue';
+//  import mapSelector from '@/components/common/mapSelector.vue';
   import { mapXupuxian,ajaxCtx } from "@/config/config.js";
   import { objDeepCopy, random14, formatDate } from "@/utils/util.js";
   import { cityCode } from "@/utils/data.js";
@@ -288,7 +288,7 @@
   import { MapGETmonitorList } from "@/views/index/api/api.map.js";
   import { getAllBayonetList } from "@/views/index/api/api.base.js";
   export default {
-    components: {mapSelector, vlBreadcrumb},
+    components: {vlBreadcrumb},
     data() {
       return {
         mapPicShow: false, // 地图图片显示开关
@@ -537,21 +537,21 @@
         if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data2 && this.ruleForm.input3){
           let pg = {
           }
-          if (this.pointData.bayonetList.length === 0 && this.pointData.deviceList.length === 0 && this.ruleForm.input5 === "2") {
-            this.$message.info('选择的区域没有设备，请重新选择区域');
-            return false;
-          }
+//          if (this.pointData.bayonetList.length === 0 && this.pointData.deviceList.length === 0) {
+//            this.$message.info('选择的区域没有设备，请重新选择区域');
+//            return false;
+//          }
           pg['startTime'] = formatDate(this.ruleForm.data1, 'yyyy-MM-dd HH:mm:ss');
           pg['endTime'] = formatDate(this.ruleForm.data2, 'yyyy-MM-dd HH:mm:ss')
 //          pg['imageUrl'] = 'http://file.aorise.org/vlink/image/18c70cc3-424a-43fc-92ee-a6c6de4248f2.jpg';
           pg['imageUrl'] = this.ruleForm.input3;
-          if(this.ruleForm.input5 == "1"){
-            pg['areaIds']=this.ruleForm.value1.join(",")
-          }
-          if(this.ruleForm.input5 == "2"){
+//          if(this.ruleForm.input5 == "1"){
+//            pg['areaIds']=this.ruleForm.value1.join(",")
+//          }
+//          if(this.ruleForm.input5 == "2"){
             pg['bayonetIds'] = this.pointData.bayonetList.map(y => {return y.uid}).join(',');
             pg['cameraIds'] = this.pointData.deviceList.map(y => {return y.uid}).join(',');
-          }
+//          }
           this.storeParam = objDeepCopy(pg);
           this.getVehicleShot(pg);
         }else{

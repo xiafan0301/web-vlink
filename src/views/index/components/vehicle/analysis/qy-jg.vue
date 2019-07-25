@@ -73,22 +73,39 @@
             </div>
             <div class="struc_c_d_info">
               <h2>抓拍信息</h2>
-              <div class="struc_cdi_line">
-                <span><font>车牌号码</font>{{sturcDetail.plateNo}}</span>
+              <div class="struc_cd_info_main">
+                <vue-scroll>
+                  <div class="scroll_box">
+                    <div class="struc_cdi_line">
+                      <span><font>抓拍时间</font>{{sturcDetail.shotTime}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span><font>抓拍设备</font>{{sturcDetail.deviceName}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span><font>抓拍地址</font>{{sturcDetail.address}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span><font>车牌号码</font>{{sturcDetail.plateNo}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span><font>号牌颜色</font>{{sturcDetail.plateColor}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span><font>车辆型号</font>{{sturcDetail.vehicleStyles}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span><font>车辆颜色</font>{{sturcDetail.vehicleColor}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span><font>车辆类型</font>{{sturcDetail.vehicleColor}} {{sturcDetail.vehicleClass}} {{sturcDetail.vehicleBrand}} {{sturcDetail.vehicleStyles}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span><font>号牌类型</font>{{sturcDetail.vehicleColor}} {{sturcDetail.vehicleClass}} {{sturcDetail.vehicleBrand}} {{sturcDetail.vehicleStyles}}</span>
+                    </div>
+                  </div>
+                </vue-scroll>
               </div>
-              <div class="struc_cdi_line">
-                <span><font>车辆特征</font>{{sturcDetail.vehicleColor}} {{sturcDetail.vehicleClass}} {{sturcDetail.vehicleBrand}} {{sturcDetail.vehicleStyles}}</span>
-              </div>
-              <div class="struc_cdi_line">
-                <span><font>抓拍设备</font>{{sturcDetail.deviceName}}</span>
-              </div>
-              <div class="struc_cdi_line">
-                <span><font>抓拍时间</font>{{sturcDetail.shotTime}}</span>
-              </div>
-              <div class="struc_cdi_line">
-                <span><font>抓拍地址</font>{{sturcDetail.address}}</span>
-              </div>
-              <div class="struc_cdi_line"></div>
             </div>
           </div>
         </div>
@@ -637,6 +654,7 @@
             width: calc(100% - 3.6rem);
             padding-left: .24rem;
             color: #333333;
+            height: 3.2rem;
             h2 {
               font-weight: bold;
               line-height: .74rem;
@@ -654,6 +672,9 @@
                   font-weight: normal;
                 }
               }
+            }
+            .struc_cd_info_main {
+              height: calc(100% - 0.74rem);
             }
             .struc_cdi_line {
               >span {
