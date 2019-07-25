@@ -94,10 +94,18 @@
   </ul>
 </template>
 <script>
+  import {PortraitGetDispatch} from '@/views/index/api/api.portrait.js';
 export default {
   data () {
     return {
     }
+  },
+  mounted () {
+    PortraitGetDispatch().then(res => {
+      if (res) {
+        console.log(res.data)
+      }
+    })
   },
   methods: {
   }

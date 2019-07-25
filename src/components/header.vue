@@ -288,8 +288,8 @@ export default {
     let taskStatusL = this.dicFormater(dataList.taskStatus)
     this.taskStatusList = taskStatusL[0].dictList
     this.getAlarm()
-//    this.getTaskCount();
-//    this.getTaskData();
+    this.getTaskCount();
+    this.getTaskData();
   },
   methods: {
     // 将输入框的type改为password
