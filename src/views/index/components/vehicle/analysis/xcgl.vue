@@ -165,7 +165,7 @@
           </div>
           <div v-show="selectIndex === 1">
             <!-- 车牌颜色搜索 -->
-            <div class="license-plate-color">
+            <!-- <div class="license-plate-color">
               <el-select v-model="searchData.licensePlateColor" clearable placeholder="全部车牌颜色">
                 <el-option
                   v-for="item in colorList"
@@ -174,7 +174,7 @@
                   :value="item.enumValue"
                 ></el-option>
               </el-select>
-            </div>
+            </div> -->
             <!-- 车牌号搜索 -->
             <div class="license-plate-search">
               <el-input v-model="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" clearable></el-input>
@@ -620,7 +620,7 @@ export default {
     //重置
     resetSearch() {
       this.searchData.licensePlateNum = null;
-      this.searchData.licensePlateColor = "";
+      /* this.searchData.licensePlateColor = ""; */
       this.uploadFileList.splice(0, this.uploadFileList.length);
       this.imgData = null;
       this.curImageUrl = "";
@@ -732,8 +732,8 @@ export default {
         if (this.searchData.licensePlateNum) {
           params["vehicleNumber"] = this.searchData.licensePlateNum;
         }
-        this.searchData.licensePlateColor &&
-          (params["plateColor"] = this.searchData.licensePlateColor);
+        /* this.searchData.licensePlateColor &&
+          (params["plateColor"] = this.searchData.licensePlateColor); */
       }
       this.searching = true;
       console.log(
@@ -791,8 +791,8 @@ export default {
         if (this.searchData.licensePlateNum) {
           drivingDiscipline["vehicleNumber"] = this.searchData.licensePlateNum;
         }
-        this.searchData.licensePlateColor &&
-          (drivingDiscipline["plateColor"] = this.searchData.licensePlateColor);
+        /* this.searchData.licensePlateColor &&
+          (drivingDiscipline["plateColor"] = this.searchData.licensePlateColor); */
       }
       params = {
         drivingDisciplineAnalysisQueryDto: drivingDiscipline,
