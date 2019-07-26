@@ -382,7 +382,9 @@ export default {
     // 按回车添加同行车辆
     keyDownVehicle (e) {
       if (e.keyCode === 13) {
-        this.onAddVehicleNumber();
+        if (this.searchForm.peerVehicleNumber) {
+          this.onAddVehicleNumber();
+        }
       }
     },
     // 添加同行车辆
@@ -393,13 +395,15 @@ export default {
       //     this.$message.info('请输入正确的车牌号码');
       //   }
       // } else {
-        this.searchForm.peerVehicleNumber = null;
-        this.vehicleNumberList.push(vehicleNumber);
-        if (this.vehicleNumberList.length >= 7) {
-          this.isDisabled = true;
-          return;
-        } else {
-          this.isDisabled = false;
+        if (vehicleNumber) {
+          this.searchForm.peerVehicleNumber = null;
+          this.vehicleNumberList.push(vehicleNumber);
+          if (this.vehicleNumberList.length >= 7) {
+            this.isDisabled = true;
+            return;
+          } else {
+            this.isDisabled = false;
+          }
         }
       // }
     },
@@ -438,8 +442,13 @@ export default {
         this.mapPeerVehicleNumber = obj.peerNumber;
         this.mapPeerPercent = obj.peerPercent;
         this.isCheckedVehicle = obj.peerNumber; // 默认选中同行车辆车牌号
-        this.drawPoint(obj.pathRecords, obj.peerNumber);
-        this.drawPoint(this.resultList.basePathRecords, this.resultList.baseNumber);
+        if (obj.pathRecords && obj.pathRecords.length > 0) {
+          this.drawPoint(obj.pathRecords, obj.peerNumber);
+        }
+        if (this.resultList.basePathRecords && this.resultList.basePathRecords.length > 0) {
+          // this.drawPoint(obj.pathRecords, obj.peerNumber);
+          this.drawPoint(this.resultList.basePathRecords, this.resultList.baseNumber);
+        }
       })
     },
     /**
