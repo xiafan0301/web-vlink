@@ -26,6 +26,17 @@ export function JtcPOSTAppendtpInfo(data) {
   })
 }
 /**
+ * JtcPOSTAppendixInfo 套牌车查询接（分页）
+ * @param {object} params
+ */
+export function getbayonet() {
+  return request({
+    url: '/analysis-device/enter-city-bayonet',
+    method: 'get',
+    mode: 'judge'
+  })
+}
+/**
  * JfoGETGroup 分组列表查询接口
  * @param {object} params
  */
