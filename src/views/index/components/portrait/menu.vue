@@ -102,13 +102,13 @@ export default {
     }
   },
   mounted () {
-    PortraitGetDispatch().then(res => {
+    /* PortraitGetDispatch().then(res => {
       if (res) {
         if (res.data === 2) {
           this.ytsrRoute = 'portrait_ytsr_list'
         }
       }
-    })
+    }) */
   },
   methods: {
   }
