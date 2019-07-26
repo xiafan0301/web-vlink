@@ -21,8 +21,7 @@
                     type="date"
                     time-arrow-control
                     :editable="false" :clearable="false"
-                    :picker-options="startTimeOptions"
-                    @change="startTimeChange"
+                    @change="searchSubmit"
                     placeholder="选择开始时间">
                   </el-date-picker>
                 </div>
@@ -36,13 +35,12 @@
                     type="date"
                     time-arrow-control
                     :editable="false" :clearable="false"
-                    :picker-options="endTimeOptions"
-                    @change="endTimeChange"
+                    @change="searchSubmit"
                     placeholder="选择结束时间">
                   </el-date-picker>
                 </div>
                 <div>
-                  <el-select size="small" style="width: 100%;" v-model="targetType" placeholder="选择目标类型">
+                  <el-select @change="searchSubmit" size="small" style="width: 100%;" v-model="targetType" placeholder="选择目标类型">
                     <el-option :label="'全部'" :value="''"></el-option>
                     <el-option :label="'人员'" :value="'0'"></el-option>
                     <el-option :label="'车辆'" :value="'1'"></el-option>
@@ -101,12 +99,11 @@
                     class="vl_vid_sdater vl_date"
                     style="width: 100%"
                     size="small"
-                    v-model="startTime"
+                    v-model="startTime2"
                     type="date"
                     time-arrow-control
                     :editable="false" :clearable="false"
-                    :picker-options="startTimeOptions"
-                    @change="startTimeChange"
+                    @change="searchSubmit"
                     placeholder="选择开始时间">
                   </el-date-picker>
                 </div>
@@ -116,19 +113,19 @@
                     class="vl_vid_sdater vl_date vl_date_end"
                     style="width: 100%"
                     size="small"
-                    v-model="endTime"
+                    v-model="endTime2"
                     type="date"
                     time-arrow-control
                     :editable="false" :clearable="false"
-                    :picker-options="endTimeOptions"
-                    @change="endTimeChange"
+                    @change="searchSubmit"
                     placeholder="选择结束时间">
                   </el-date-picker>
                 </div>
                 <div>
-                  <el-select size="small" style="width: 100%;" v-model="targetType" placeholder="选择目标类型">
-                    <el-option :label="'人员'" :value="'人员'"></el-option>
-                    <el-option :label="'车辆'" :value="'车辆'"></el-option>
+                  <el-select @change="searchSubmit" size="small" style="width: 100%;" v-model="targetType2" placeholder="选择目标类型">
+                    <el-option :label="'全部'" :value="''"></el-option>
+                    <el-option :label="'人员'" :value="'0'"></el-option>
+                    <el-option :label="'车辆'" :value="'1'"></el-option>
                   </el-select>
                 </div>
               </div>
@@ -208,7 +205,9 @@ export default {
     let _ndate = new Date();
     return {
       relayList: [],
+      relayListIntval: null,
       relayList2: [],
+
       pageType: 1, // 1展示 2新建
       // {video: {}, title: ''},
       videoList: [{}, {}, {}, {}],
@@ -218,14 +217,15 @@ export default {
       startTime: '',
       endTime: '',
       targetType: '',
-      searchVal2: '',
       dragActiveObj: null,
 
       videoRecordList: [],
 
       initTime: [new Date(_ndate.getTime() - 3600 * 1000 * 24 * 2), _ndate],
-      startTime: '',
-      endTime: '',
+      
+      startTime2: '',
+      endTime2: '',
+      targetType2: '',
 
       startTimeOptions: {
         disabledDate: (d) => {
@@ -261,12 +261,32 @@ export default {
     this.showMenuActive = true;
     this.startTime = this.initTime[0];
     this.endTime = this.initTime[1];
+    this.startTime2 = this.initTime[0];
+    this.endTime2 = this.initTime[1];
 
     this.getRelayList();
+    this.intvalRelayList(false);
+
+    this.getRelayList(true); // 已结束
   },
   mounted () {
   },
   methods: {
+    // bClear 关闭定时器
+    intvalRelayList (bClear) {
+      if (this.relayListIntval) {
+        window.clearInterval(this.relayListIntval);
+      }
+      if (!bClear) {
+        this.relayListIntval = window.setInterval(() => {
+          this.getRelayList();
+        }, 5 * 1000);
+      }
+    },
+    searchSubmit () {
+      this.getRelayList();
+      this.intvalRelayList(false);
+    },
     getRelayList (isFinished) {
       let params = {
         type: '0',
@@ -401,6 +421,9 @@ export default {
     },
   },
   destroyed () {
+    if (this.relayListIntval) {
+      window.clearInterval(this.relayListIntval);
+    }
   }
 }
 </script>
