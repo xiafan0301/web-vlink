@@ -149,6 +149,8 @@
   </div>
 </template>
 <script>
+import { dataList } from '@/utils/data.js';
+import { getDiciData } from '@/views/index/api/api.js';
 import noResult from '@/components/common/noResult.vue';
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { getNightVehicleRecordList, getSnapDetail  }from "@/views/index/api/api.judge.js";
@@ -201,7 +203,8 @@ export default {
       dataList: [], // 分页抓拍记录
       allDataList: [], // 所有的抓拍记录
       playing: false, // 视频播放是否
-      queryObj: {}
+      queryObj: {},
+      numberTypeList: [], // 号牌种类列表
     }
   },
   created () {
@@ -220,10 +223,20 @@ export default {
     }
   },
   mounted () {
+    this.getNumberTypeList();
     this.getList();
-    
   },
   methods: {
+    // 获取号牌种类列表
+    getNumberTypeList () {
+      const type = dataList.numberType;
+      getDiciData(type)
+        .then(res => {
+          if (res) {
+            this.numberTypeList = res.data;
+          }
+        })
+    },
     // 播放视频
     videoTap() {
       // 播放视频
@@ -254,8 +267,6 @@ export default {
         .then(res => {
           if (res && res.data) {
             this.allDataList = res.data.list;
-
-            console.log('allDataList', this.allDataList)
           }
         })
         .catch(() => {})
@@ -263,7 +274,6 @@ export default {
     // 获取抓拍记录
     getList () {
       this.queryObj['vehicleNumber'] = this.$route.query.vehicleNumber;
-      // this.queryObj['pageSize'] = this.pagination.pageSize;
       this.queryObj['pageNum'] = this.pagination.pageNum;
       this.queryObj['order'] = this.pagination.order;
       this.queryObj['orderBy'] = this.pagination.orderBy;
@@ -271,7 +281,6 @@ export default {
         ...this.queryObj,
         pageSize: this.pagination.pageSize
       }
-      console.log('params', params)
       getNightVehicleRecordList(params)
         .then(res => {
           if (res && res.data) {
@@ -376,6 +385,12 @@ export default {
      * 打开抓拍弹框
      */
     onOpenDetail (obj) {
+      console.log('obj', obj)
+      this.numberTypeList.map(item => {
+        if (item.enumField === obj.plateClass) {
+          obj.plateClass = item.enumValue;
+        }
+      });
       this.sturcDetail = obj;
       this.curImgIndex = obj.uid;
 
@@ -393,7 +408,6 @@ export default {
       _this.$nextTick(() => {
         _this.getAllList();
         _this.initMap(obj);
-      console.log('refs', _this.$refs)
 
         _this.$refs.mySwiper.slideTo(currentIndex);
       })
@@ -409,7 +423,14 @@ export default {
      * 图片切换
      */
     imgListTap (obj) {
-      this.sturcDetail = {};
+      // this.sturcDetail = {};
+
+      this.numberTypeList.map(item => {
+        if (item.enumField === obj.plateClass) {
+          obj.plateClass = item.enumValue;
+        }
+      });
+      
       this.curImgIndex = obj.uid;
       this.sturcDetail = obj;
       this.playing = false;

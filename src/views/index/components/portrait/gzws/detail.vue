@@ -198,6 +198,15 @@ export default {
           
           let obj = data[i];
           if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
+            let iconType;
+            if (i === 0) {
+              iconType = 'vl_icon_04_019';
+            } else if (i === (data.length - 1)) {
+              iconType = 'vl_icon_05_019';
+            } else {
+              iconType = 'vl_icon_sxt';
+            }
+
             let offSet = [-20.5, -55];
             
             let _idBtn = 'vlJtcPlayBtn' + i;
@@ -210,7 +219,7 @@ export default {
               draggable: false, // 是否可拖动
               extData: '', // 用户自定义属性
               // 自定义点标记覆盖物内容
-              content: '<div id="vehicle' + i + '"  title="'+ obj.deviceName +'" class="vl_icon vl_icon_sxt"></div>'
+              content: '<div id="vehicle' + i + '"  title="'+ obj.deviceName +'" class="vl_icon '+ iconType +'"></div>'
             });
   
             path.push(new window.AMap.LngLat(obj.shotPlaceLongitude, obj.shotPlaceLatitude));
@@ -381,11 +390,11 @@ export default {
           { name: '以图搜人' }
         ]
       });
-      if (this.portraitStatus === 1) { // 离线
-        this.$router.push({name: 'portrait_ytsr_list', query: { imgurl: this.detailInfo.subStoragePath }});
-      } else if (this.portraitStatus === 2) { // 实时
+      // if (this.portraitStatus === 1) { // 离线
+      //   this.$router.push({name: 'portrait_ytsr_list', query: { imgurl: this.detailInfo.subStoragePath }});
+      // } else if (this.portraitStatus === 2) { // 实时
         this.$router.push({name: 'portrait_ytsr_moment', query: { imgurl: this.detailInfo.subStoragePath }});
-      }
+      // }
     },
     // 跳至轨迹分析页面
     skipPjfxPortraitPage () {
