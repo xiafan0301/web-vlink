@@ -368,7 +368,7 @@ export default {
         this.jrZpIntval = window.setInterval(() => {
           this.getDeviceSnapSum (dId);
           this.getDeviceSnapPage (dId);
-        }, 10 * 1000);
+        }, 5 * 1000);
       }
     },
 
