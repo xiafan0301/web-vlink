@@ -13,8 +13,8 @@
       <i class="el-icon-close" @click="strucDetailDialog = false"></i>
     </div>
     <div class="struc_main" >
-      <i class="el-icon-arrow-left" @click="sliderDetail(false)" :class="{'slider_dis': strucIndex === 0 && pagination.pageNum === 1}"></i>
-      <i class="el-icon-arrow-right" @click="sliderDetail(true)" :class="{'slider_dis': strucIndex === (strucInfoList.length - 1) && pagination.total <= (pagination.pageSize * (pagination.pageNum - 1) + strucIndex + 1)}"></i>
+      <i class="el-icon-arrow-left" title="上一个搜索结果" @click="sliderDetail(false)" :class="{'slider_dis': strucIndex === 0 && pagination.pageNum === 1}"></i>
+      <i class="el-icon-arrow-right" title="下一个搜索结果" @click="sliderDetail(true)" :class="{'slider_dis': strucIndex === (strucInfoList.length - 1) && pagination.total <= (pagination.pageSize * (pagination.pageNum - 1) + strucIndex + 1)}"></i>
       <div v-show="strucCurTab === 1" class="struc_c_detail">
         <ul>
           <!-- <li><span>抓拍设备：{{sturcDetail.deviceName}}</span></li> -->
@@ -264,7 +264,7 @@ export default {
 .rx_detail_dialog {
   .el-dialog {
     width: 1000px;
-    margin-left: -500px !important; margin-top: -210px !important;
+    margin-left: -500px !important; margin-top: -225px !important;
     /* 祖先元素设置了transform属性则会导致固定定位属性position: fixed失效。 */
     transform: none !important;
   }
@@ -275,13 +275,13 @@ export default {
     padding: 0 30px;
   }
   .struc_tab {
-    padding: 20px 20px 20px 20px;
+    padding: 30px 20px 30px 20px;
     position: relative;
     color: #999999;
     span {
       display: inline-block;
       margin-right: 30px; padding-bottom: 8px;
-      font-size: 16px;
+      font-size: 15px;
       cursor: pointer;
     }
     .active {
@@ -290,7 +290,7 @@ export default {
     }
     i {
       display: block;
-      position: absolute; top: 20px; right: 30px;
+      position: absolute; top: 20px; right: 0;
       cursor: pointer;
       font-size: 20px;
     }
@@ -313,12 +313,12 @@ export default {
       }
       &.slider_dis {
         color: #999;
-        cursor: default;
+        cursor: not-allowed;
       }
     }
     .struc_c_detail {
       width: 100%;
-      padding: 0 0 30px 0;
+      padding: 0 0 40px 0;
       overflow: hidden;
       > ul {
         > li {
@@ -445,7 +445,7 @@ export default {
     }
     // 抓拍视频
     .struc_c_video {
-      height: 348px;
+      height: 358px;
       padding: 0 0 0 50px;
       position: relative;
       .struc_c_d_box {
@@ -484,8 +484,8 @@ export default {
       }
     }
     .struc_c_address {
-      height: 348px;
-      padding-bottom: 30px;
+      height: 358px;
+      padding-bottom: 40px;
       #capMap {
         width: 100%;
         height: 100%;

@@ -7,9 +7,8 @@
       </div>
     </div>
     <div class="vl_j_left">
-      <div class="per_semblance_ytsr"><span>相似度：≥</span><el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100" placeholder="填写相似度数字" v-model="searchData.minSemblance"></el-input>%</div>
       <div class="vl_jtc_img_box">
-        <div class="vl_judge_tc_c_item"  @drop="drop($event)" @dragover="allowDrop($event)">
+        <div style="margin-left: 17px;" class="vl_judge_tc_c_item"  @drop="drop($event)" @dragover="allowDrop($event)">
           <el-upload
             :class="{'vl_jtc_upload_ytsr': true}"
             :show-file-list="false"
@@ -27,6 +26,7 @@
           <p @click="showHistoryPic">从上传记录中选择</p>
         </div>
       </div>
+      <div class="per_semblance_ytsr"><span>相似度：≥</span><el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100" placeholder="填写相似度数字" v-model="searchData.minSemblance"></el-input>%</div>
       <div class="vl_jtc_search">
         <div style="text-align: center;margin-bottom: 0px;">
           <el-button @click="resetSearch">重置</el-button>
@@ -468,10 +468,9 @@
       .vl_jtc_img_box {
         width: 100%;
         height: auto;
-        border-top: 1px solid #D3D3D3;
-        padding-top: 30px;
-        padding-bottom: 0px;
-        margin-top: 30px;
+        border-bottom: 1px solid #D3D3D3;
+        padding-bottom: 30px;
+        margin-bottom: 30px;
         .vl_judge_tc_c_item {
           width: 238px;
           height: 238px;
@@ -625,7 +624,7 @@
       .vl_jtc_search {
         width: 100%;
         height: auto;
-        padding: 20px;
+        padding: 30px 0 20px 0;
         .el-input__inner {
           height: 40px!important;
           line-height: 40px!important;

@@ -134,7 +134,11 @@
         <el-table :data="evData" style="width: 100%">
           <el-table-column  type="index" :show-overflow-tooltip="true" label="序号"></el-table-column>
           <el-table-column  prop="address" :show-overflow-tooltip="true" label="落脚点位置"></el-table-column>
-          <el-table-column prop="stopOverTime" width="80px" sortable label="停留时长"></el-table-column>
+          <el-table-column prop="stopOverTime" width="110px" sortable label="停留时长">
+            <template slot-scope="scope">
+              <span>{{ scope.row.stopOverTime | transMinute }}</span>
+            </template>
+          </el-table-column>
         </el-table>
         <div class="insetLeft2" @click="hideResult"></div>
       </div>
