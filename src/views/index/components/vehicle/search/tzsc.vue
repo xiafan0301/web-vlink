@@ -671,6 +671,9 @@ export default {
       vehicleClassOptions: [], // 车辆类型
       vehicleColorOptions: [], // 车辆颜色
       carModelOptions: [], // 车辆型号
+      carModelProps: {
+        checkStrictly: true
+      },
       // sunvisorOptions: [ // 遮阳板
       //   {
       //     enumField: "打开",
@@ -932,7 +935,7 @@ export default {
                 vehicleNumber: null, // 车牌号码
                 vehicleModel:
                   this.tzscMenuForm.carModel.length > 0
-                    ? this.tzscMenuForm.carModel.join("-")
+                    ? this.tzscMenuForm.carModel[1]
                     : null // 车辆型号
               },
               pageNum: this.pageNum,

@@ -234,7 +234,7 @@
           </ul>
         </div>
         <ul class="rlcx_r_list clearfix" v-if="dataList && dataList.length > 0">
-          <li v-for="(item, index) in dataList" :key="'tzsr_list_' + index" @click="goToDetail(item)">
+          <li v-for="(item, index) in dataList" :key="'tzsr_list_' + index" @click="goToDetail(item, index)">
             <div>
               <img :src="item.subStoragePath" :alt="item.deviceName">
               <div>
@@ -265,7 +265,7 @@
       </div>
     </div>
     <!-- 详情 -->
-    <portraitDetail :open="showDetail" @closeDialog="onCloseDetail" :detailData="deData"  @nextPage="nextData" :scrollData="seData" :conditions="condition" ></portraitDetail>
+    <portraitDetail :detailData="detailData"></portraitDetail>
     <!-- D设备 B卡口  这里是设备和卡口 -->
     <div is="mapSelector" :open="openMap" :clear="msClear" :showTypes="'DB'" @mapSelectorEmit="mapSelectorEmit"></div>
     <!--历史记录弹窗-->
@@ -299,7 +299,7 @@ import {getFaceRetrievalPerson, JtcGETAppendixInfoList} from '../../api/api.judg
 import {getPicRecognize} from '../../api/api.structuring.js';
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import {formatDate} from '@/utils/util.js';
-import portraitDetail from '@/components/common/portraitDetail.vue';
+import portraitDetail from './common/portraitDetail.vue';
 import {ajaxCtx} from '@/config/config';
 export default {
   components: {vehicleBreadcrumb, mapSelector,portraitDetail, noResult},
@@ -379,7 +379,9 @@ export default {
           return d > new Date() || d < new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000);
         }
       },
-      condition:{}
+      condition:{},
+
+      detailData: null
     }
   },
   created () {
@@ -539,12 +541,25 @@ export default {
     onCloseDetail () {
       this.showDetail=false
     },
-    goToDetail(v){
+    goToDetail(v, index){
       // console.log(v);
-      this.showDetail=true;
-      this.deData = v
-      this.seData = this.alldataList
-      
+      /* type: 1, // 1特征搜人 2
+
+      params: {}, // 查询参数
+      list: // 列表
+      index: // 第几个
+      pageSize: //
+      total: // 
+      pageNum: // */
+      this.detailData = {
+        type: 1, // 1特征搜人 2
+        params: this.searchParams(), // 查询参数
+        list: this.dataList, // 列表
+        index: index, // 第几个
+        pageSize: this.pagination.pageSize,
+        total: this.pagination.total,
+        pageNum: this.pagination.pageNum
+      }
     },
     //查询行政区域
     getMapGETmonitorList(){
@@ -634,36 +649,15 @@ export default {
       }
       return false;
     },
-    searchSubmit (pageNum) {
-      let smsg = this.searchAble();
-      if (smsg) {
-        let nMsg = $('.el-message--info');
-        if (nMsg && nMsg.length > 0) {
-          nMsg.find('.el-message__content').text(smsg);
-        } else {
-          this.$message({
-            message: smsg,
-            type: 'info'
-          });
-        }
-        return false;
-      }
-
-      if (pageNum > 0) {
-        this.pagination.pageNum = pageNum;
-      }
-      this.searchLoading = true;
+    searchParams () {
       let params = {
         where: {
           startDate: formatDate(this.searchForm.time[0], 'yyyy-MM-dd 00:00:00'),
           endDate: formatDate(this.searchForm.time[1], 'yyyy-MM-dd 23:59:59')
         },
         orderBy: this.orderType === 1 ? 'shotTime' : 'deviceNamePinyin',
-        order: this.order === 1 ? 'desc' : 'asc',
-        pageNum: this.pagination.pageNum,
-        pageSize: this.pagination.pageSize
-      }
-
+        order: this.order === 1 ? 'desc' : 'asc'
+      };
       if (this.searchForm.type === 1) {
         params.where = Object.assign(params.where, {
           areaUid: this.searchForm.area.join(',')
@@ -719,8 +713,32 @@ export default {
           params.where.bag = this.searchForm.bag;
         }
       }
-      this.condition=params
-      // getFaceRetrieval getFaceRetrievalPerson
+      return params;
+    },
+    searchSubmit (pageNum) {
+      let smsg = this.searchAble();
+      if (smsg) {
+        let nMsg = $('.el-message--info');
+        if (nMsg && nMsg.length > 0) {
+          nMsg.find('.el-message__content').text(smsg);
+        } else {
+          this.$message({
+            message: smsg,
+            type: 'info'
+          });
+        }
+        return false;
+      }
+
+      if (pageNum > 0) {
+        this.pagination.pageNum = pageNum;
+      }
+      this.searchLoading = true;
+      let params = Object.assign(this.searchParams(), {
+        pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize
+      });
+      // this.condition=params
       getFaceRetrievalPerson(params).then(res => {
         this.isInitPage = false;
         if (res && res.data) {
