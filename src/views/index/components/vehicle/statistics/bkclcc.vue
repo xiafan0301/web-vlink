@@ -69,7 +69,7 @@
         </div>
         <div class="left_btn">
           <el-button class="reset_btn" @click="resetQueryForm">重置</el-button>
-          <el-button class="select_btn" @click="getControlCarSta" :loading="loadingBtn">查询</el-button>
+          <el-button class="select_btn" type="primary" @click="getControlCarSta" :loading="loadingBtn">查询</el-button>
         </div>
       </div>
       <div class="con_right">
@@ -311,8 +311,10 @@
   </div>
 </template>
 <script>
-let startTime = formatDate(new Date().getTime() - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss');
-let endTime = formatDate(new Date().getTime() + (24 * 60 * 60 * 1000 - 1) - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss');
+// let startTime = formatDate(new Date().getTime() - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss');
+// let endTime = formatDate(new Date().getTime() + (24 * 60 * 60 * 1000 - 1) - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss');
+let startTime = formatDate(new Date(new Date(new Date().toLocaleDateString())).getTime() - 24*60*60*1000, 'yyyy-MM-dd HH:mm:ss');
+let endTime = formatDate(new Date(new Date(new Date().toLocaleDateString())).getTime() - 1, 'yyyy-MM-dd HH:mm:ss');
 import {getOutCityBayonet, apiOutCityStatistics} from '@/views/index/api/api.vehicle.js';
 import {dataList} from '@/utils/data.js';
 import {formatDate} from '@/utils/util.js';
@@ -633,15 +635,6 @@ export default {
         padding-top: 10px;
         .select_btn, .reset_btn {
           width: 110px;
-        }
-        .select_btn {
-          background-color: #0C70F8;
-          color: #ffffff;
-        }
-        .reset_btn {
-          background-color: #ffffff;
-          color: #666666;
-          border-color: #DDDDDD;
         }
       }
     }

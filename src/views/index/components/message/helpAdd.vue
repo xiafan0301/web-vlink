@@ -81,9 +81,9 @@
         </div>
       </div>
       <div class="add_footer">
-        <el-button v-if="pageType === 2" class="select_btn btn_100" :loading="loadingBtn" @click="addMutualHelp('addForm')">确定发布</el-button>
-        <el-button v-if="pageType === 4" class="select_btn btn_100" :loading="loadingBtn" @click="putMutualHelp('addForm')">确定发布</el-button>
-        <el-button @click.native="toGiveUpDialog = true" class="reset_btn btn_100">返回</el-button>
+        <el-button v-if="pageType === 2" class="btn_100" type="primary" :loading="loadingBtn" @click="addMutualHelp('addForm')">确定发布</el-button>
+        <el-button v-if="pageType === 4" class="btn_100" type="primary" :loading="loadingBtn" @click="putMutualHelp('addForm')">确定发布</el-button>
+        <el-button @click.native="toGiveUpDialog = true" class="btn_100">返回</el-button>
       </div>
     </div>
     <el-dialog
@@ -93,8 +93,8 @@
       top="40vh">
       <h4>是否放弃本次操作？</h4>
       <div slot="footer">
-        <el-button :loading="loadingBtn" @click="skip(1)" class="select_btn btn_140">放弃</el-button>
-        <el-button class="reset_btn btn_140" @click="toGiveUpDialog = false">取消</el-button>
+        <el-button :loading="loadingBtn" @click="skip(1)" class="btn_140" type="primary">放弃</el-button>
+        <el-button class="btn_140" @click="toGiveUpDialog = false">取消</el-button>
       </div>
     </el-dialog>
   </div>

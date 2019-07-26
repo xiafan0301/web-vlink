@@ -297,11 +297,11 @@ export const objDeepCopy = (obj) => { //递归拷贝
   return t;
 }
 // 数组去重
-export const unique = (array) => {
+export const unique = (array, key) => {
   let obj = {}, resultArray = [];
   resultArray = array.reduce((item, next) => {
-    if (!obj[next.uid]) {
-      obj[next.uid] = true;
+    if (!obj[next[key]]) {
+      obj[next[key]] = true;
       item.push(next);
     }
     return item;

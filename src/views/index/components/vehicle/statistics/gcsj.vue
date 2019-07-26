@@ -35,7 +35,7 @@
         </div>
         <div class="left_btn">
           <el-button class="reset_btn" @click="resetQueryForm">重置</el-button>
-          <el-button class="select_btn" @click="search" :loading="loadingBtn">统计</el-button>
+          <el-button class="select_btn" type="primary" @click="search" :loading="loadingBtn">统计</el-button>
         </div>
       </div>
       <div class="con_right">
@@ -546,15 +546,6 @@ export default {
         padding-top: 10px;
         .select_btn, .reset_btn {
           width: 110px;
-        }
-        .select_btn {
-          background-color: #0C70F8;
-          color: #ffffff;
-        }
-        .reset_btn {
-          background-color: #ffffff;
-          color: #666666;
-          border-color: #DDDDDD;
         }
       }
     }

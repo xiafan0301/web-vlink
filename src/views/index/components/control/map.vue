@@ -89,8 +89,8 @@
           </el-date-picker>
         </el-form-item>
         <el-form-item style="width: 192px;">
-          <el-button class="reset_btn btn_90" @click="resetForm()">重置</el-button>
-          <el-button class="select_btn btn_90" :loading="loadingBtn" @click="getControlMap">搜索</el-button>
+          <el-button class="btn_90" @click="resetForm()">重置</el-button>
+          <el-button class="btn_90" type="primary" :loading="loadingBtn" @click="getControlMap">搜索</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -175,7 +175,7 @@
       <div class="create_control">
         <img src="../../../../assets/img/video/vi_101.png" alt="">
         <p>没有进行中的布控</p>
-        <el-button @click="skipIsCreateControl" class="reset_btn btn_100">新建布控</el-button>
+        <el-button @click="skipIsCreateControl" class="btn_100">新建布控</el-button>
       </div>
     </el-dialog>
   </div>

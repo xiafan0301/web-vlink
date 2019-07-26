@@ -13,9 +13,20 @@
             </el-option>
           </el-select>
         </el-form-item>
+        <el-form-item prop="bayonetType">
+          <el-select v-model="queryForm.bayonetType">
+            <el-option label="出入城卡口" :value="null"></el-option>
+            <el-option
+              v-for="item in bayonetTypeList"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item prop="use">
           <el-select v-model="queryForm.use">
-            <el-option label="全部用途" :value="null"></el-option>
+            <el-option label="卡口用途" :value="null"></el-option>
             <el-option
               v-for="item in useList"
               :key="item.value"
@@ -24,9 +35,20 @@
             </el-option>
           </el-select>
         </el-form-item>
+        <el-form-item prop="isStartUsing">
+          <el-select v-model="queryForm.isStartUsing">
+            <el-option label="是否启用" :value="null"></el-option>
+            <el-option
+              v-for="item in isStartUsingList"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item prop="state">
           <el-select v-model="queryForm.state">
-            <el-option label="全部状态" :value="null"></el-option>
+            <el-option label="在线状态" :value="null"></el-option>
             <el-option
               v-for="item in stateList"
               :key="item.value"
@@ -39,14 +61,13 @@
           <el-input v-model="queryForm.bayonetName" placeholder="请输入卡口名称搜索"></el-input>
         </el-form-item>
         <el-form-item>
+          <el-button class="select_btn" type="primary">查询</el-button>
           <el-button class="reset_btn">重置</el-button>
-          <el-button class="select_btn">查询</el-button>
         </el-form-item>
       </el-form>
     </div>
     <div class="operate_btn">
-      <el-button class="select_btn" @click="skipIsAdd(1)">新增</el-button>
-      <el-button class="reset_btn">导入</el-button>
+      <el-button class="select_btn" type="primary" @click="skipIsAdd(1)">新增</el-button>
       <el-button class="reset_btn">导出</el-button>
     </div>
     <div class="table_box">
@@ -72,6 +93,22 @@
           >
         </el-table-column>
         <el-table-column
+          label="卡口IP"
+          :show-overflow-tooltip="true"
+          >
+        </el-table-column>
+        <el-table-column
+          label="出入城卡口"
+          :show-overflow-tooltip="true"
+          >
+        </el-table-column>
+        <el-table-column
+          label="卡口用途"
+          prop="eventCode"
+          show-overflow-tooltip
+          >
+        </el-table-column>
+        <el-table-column
           label="卡口地址"
           prop="time"
           show-overflow-tooltip
@@ -83,20 +120,14 @@
           >
         </el-table-column>
         <el-table-column
-          label="用途"
-          prop="eventCode"
-          show-overflow-tooltip
-          >
-        </el-table-column>
-        <el-table-column
-          label="描述"
-          prop="alarmLevel"
-          show-overflow-tooltip
-          >
-        </el-table-column>
-        <el-table-column
-          label="使用状况"
+          label="是否启用"
           prop="updateTime"
+          show-overflow-tooltip
+          >
+        </el-table-column>
+        <el-table-column
+          label="在线状态"
+          prop="alarmLevel"
           show-overflow-tooltip
           >
         </el-table-column>
@@ -122,8 +153,8 @@
       top="40vh">
       <h4>是否确定删除该卡口及相关信息？</h4>
       <div slot="footer">
-        <el-button @click="delBayonetDialog = false" class="reset_btn btn_140">取消</el-button>
-        <el-button :loading="loadingBtn" class="select_btn btn_140">确认</el-button>
+        <el-button @click="delBayonetDialog = false" class="btn_140">取消</el-button>
+        <el-button :loading="loadingBtn" class="btn_140" type="primary">确认</el-button>
       </div>
     </el-dialog>
   </div>
@@ -136,6 +167,8 @@ export default {
       queryForm: {
         organ: null,
         use: null,
+        bayonetType: null,
+        isStartUsing: null,
         state: null,
         bayonetName: null
       },
@@ -143,6 +176,8 @@ export default {
       organList: [],
       useList: [],
       stateList: [],
+      bayonetTypeList: [],
+      isStartUsingList: [],
       bayonetManageList: [{}],//卡口列表
       loading: false,
       // 删除弹出框参数
@@ -168,29 +203,16 @@ export default {
 </script>
 <style lang="scss" scoped>
 .bayonet_manage_list{
+  margin: 20px;
   padding: 20px;
-  background: #fff;
+  height: calc(100% - 40px);
+  background: #ffffff;
+  box-shadow: 4px 0px 10px 0px rgba(131,131,131,0.28);
   .operate_btn{
     
   }
   .table_box{
     margin-top: 20px;
-  }
-  // 重置按钮样式
-  .select_btn, .reset_btn {
-    width: 110px;
-  }
-  .btn_100{
-    width: 100px!important;
-  }
-  .select_btn {
-    background-color: #0C70F8;
-    color: #ffffff;
-  }
-  .reset_btn {
-    background-color: #ffffff;
-    color: #666666;
-    border-color: #DDDDDD;
   }
 }
 </style>

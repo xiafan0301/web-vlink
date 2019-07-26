@@ -130,10 +130,10 @@
     </div>
     <div class="create_f_box">
       <!-- 新增布控 -->
-      <el-button v-if=" pageType !== 2" class="select_btn btn_100" :loadingBtn="loadingBtn" @click="saveControl('createForm')">保存</el-button>
+      <el-button v-if=" pageType !== 2" class="btn_100" type="primary" :loadingBtn="loadingBtn" @click="saveControl('createForm')">保存</el-button>
       <!-- 编辑布控 -->
-      <el-button v-if="pageType === 2" class="select_btn btn_100" :loadingBtn="loadingBtn" @click="putControl('createForm')">保存</el-button>
-      <el-button  @click="toGiveUpDialog = true" class="reset_btn btn_100">取消</el-button>
+      <el-button v-if="pageType === 2" class="btn_100" type="primary" :loadingBtn="loadingBtn" @click="putControl('createForm')">保存</el-button>
+      <el-button  @click="toGiveUpDialog = true" class="btn_100">取消</el-button>
     </div>
     <el-dialog
       :visible.sync="toGiveUpDialog"
@@ -142,8 +142,8 @@
       top="40vh">
       <h4>是否放弃本次操作？</h4>
       <div slot="footer">
-        <el-button :loading="loadingBtn" @click="skipIsList" class="select_btn btn_140">放弃</el-button>
-        <el-button class="reset_btn btn_140" @click="toGiveUpDialog = false">取消</el-button>
+        <el-button :loading="loadingBtn" @click="skipIsList" class="btn_140" type="primary">放弃</el-button>
+        <el-button class="btn_140" @click="toGiveUpDialog = false">取消</el-button>
       </div>
     </el-dialog>
   </div>

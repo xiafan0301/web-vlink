@@ -248,8 +248,8 @@
           </template>
         </el-select>
         <div slot="footer">
-          <el-button @click="createSelDialog = false" class="reset_btn btn_140">取消</el-button>
-          <el-button :loading="loadingBtn" class="select_btn btn_140" @click="seltarget">确认</el-button>
+          <el-button @click="createSelDialog = false" class="btn_140">取消</el-button>
+          <el-button :loading="loadingBtn" class="btn_140" type="primary" @click="seltarget">确认</el-button>
         </div>
       </el-dialog>
     </div>

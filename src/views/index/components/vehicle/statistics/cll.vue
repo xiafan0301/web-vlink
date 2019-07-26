@@ -73,7 +73,7 @@
         </div>
         <div class="left_btn">
           <el-button class="reset_btn" @click="resetQueryForm">重置</el-button>
-          <el-button class="select_btn" @click="getCarTrafficSta" :disabled="!queryForm.bayonet.value" :loading="loadingBtn">统计</el-button>
+          <el-button class="select_btn" type="primary" @click="getCarTrafficSta" :disabled="!queryForm.bayonet.value" :loading="loadingBtn">统计</el-button>
         </div>
       </div>
       <div class="con_right">
@@ -85,7 +85,7 @@
               <i class="vl_icon vl_icon_vehicle_cll_03" @click="tabIndex = 3" :class="{'active': tabIndex === 3}" v-show="queryForm.statementType !== 5"></i>
             </div>
             <h1>({{dateTitle}})车流量统计</h1>
-            <el-button class="select_btn btn_100" @click="exportExcel" :loading="loadingBtnExport">导出</el-button>
+            <el-button class="btn_100" type="primary" @click="exportExcel" :loading="loadingBtnExport">导出</el-button>
           </div>
           <div class="main_box" v-show="tabIndex === 1">
             <p>车流量（辆）</p>
@@ -115,8 +115,8 @@
   </div>
 </template>
 <script>
-let startTime = formatDate(new Date().getTime() - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss'); //默认开始时间为当前时间前24小时
-let endTime = formatDate(new Date().getTime() + (24 * 60 * 60 * 1000 - 1) - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss');
+let startTime = formatDate(new Date(new Date(new Date().toLocaleDateString())).getTime() - 24*60*60*1000, 'yyyy-MM-dd HH:mm:ss');
+let endTime = formatDate(new Date(new Date(new Date().toLocaleDateString())).getTime() - 1, 'yyyy-MM-dd HH:mm:ss');
 import G2 from '@antv/g2';
 import { View } from '@antv/data-set';
 import {apiCarFlow, exportExcel} from '@/views/index/api/api.vehicle.js';
@@ -691,15 +691,6 @@ export default {
   }
   .btn_100{
     width: 100px!important;
-  }
-  .select_btn {
-    background-color: #0C70F8;
-    color: #ffffff;
-  }
-  .reset_btn {
-    background-color: #ffffff;
-    color: #666666;
-    border-color: #DDDDDD;
   }
   .my_tooltip{
     > h1{
