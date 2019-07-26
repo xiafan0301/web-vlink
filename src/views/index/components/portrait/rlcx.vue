@@ -797,7 +797,11 @@ export default {
           bag: ''
         });
       }
-      this.searchSubmit();
+      this.dataList = [];
+      this.isInitPage = true;
+      this.pagination.pageNum = 1;
+      this.pagination.total = 0;
+      // this.searchSubmit();
     },
     orderHandler (type) {
       if (type === this.orderType) {
