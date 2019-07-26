@@ -16,6 +16,7 @@
               class="full vl_date"
               @change="changval1"
               style="width: 230px; vertical-align: top"
+              default-time="00:00:00"
               type="datetime"
               placeholder="选择日期时间">
           </el-date-picker>
@@ -28,6 +29,7 @@
               style="width: 230px; vertical-align: top"
               class="full vl_date vl_date_end"
               type="datetime"
+              default-time="23:59:59"
               :picker-options="pickerOptions"
               placeholder="选择日期时间">
           </el-date-picker>
@@ -71,7 +73,7 @@
               <div style="width: 70px; white-space:nowrap" class="smalltitle">
                 车身颜色：
               </div>
-              <div class="ttt-2">{{vehicleArch.vehicleColor}}</div>
+              <div class="ttt-2">{{vehicleArch.color}}</div>
             </div>
             <div>
               <div style="width: 70px; white-space:nowrap" class="smalltitle">
@@ -150,7 +152,7 @@
                   <img :src="item.vehicleDto.subStoragePath" alt="">
                   <p class="time"><i></i>{{item.vehicleDto.shotTime}}</p>
                   <p class="address"><i></i>{{item.vehicleDto.deviceName}}</p>
-                  <p class="address1" style="color: red; padding-top: 5px"><i class="vl_icon vl_icon_retrieval_09"></i>{{item.fakeReason}}</p>
+                  <p class="address1" style="color: red; padding-top: 5px"><i></i>{{item.fakeReason}}</p>
                 </div>
                 <el-pagination
                     class="cum_pagination th-center-pagination"
@@ -187,25 +189,39 @@
                       <span>全景图</span>
                     </div>
                     <div class="struc_c_d_info">
-                      <h2>抓拍信息</h2>
-                      <div class="struc_cdi_line">
-                        <span><b>抓拍时间</b>{{sturcDetail.vehicleDto.shotTime}}</span>
-                      </div>
-                      <div class="struc_cdi_line">
-                        <span><b>抓拍设备</b>{{sturcDetail.vehicleDto.deviceName}}</span>
-                      </div>
-                      <div class="struc_cdi_line">
-                        <span><b>抓拍地址</b>{{sturcDetail.vehicleDto.address}}</span>
-                      </div>
-                      <div class="struc_cdi_line">
-                        <span><b>车牌号</b>{{sturcDetail.vehicleDto.plateNo}}</span>
-                      </div>
-                      <div class="struc_cdi_line">
-                        <span><b>特征</b>{{sturcDetail.vehicleDto.vehicleColor + sturcDetail.vehicleDto.vehicleClass + sturcDetail.vehicleDto.vehicleStyles}}</span>
-                      </div>
-                      <div class="struc_cdi_line">
-                        <span><b>套牌依据</b>{{sturcDetail.fakeReason}}</span>
-                      </div>
+                      <vue-scroll>
+                        <h2>抓拍信息</h2>
+                        <div class="struc_cdi_line">
+                          <span><b>抓拍时间</b>{{sturcDetail.vehicleDto.shotTime}}</span>
+                        </div>
+                        <div class="struc_cdi_line">
+                          <span><b>抓拍设备</b>{{sturcDetail.vehicleDto.deviceName}}</span>
+                        </div>
+                        <div class="struc_cdi_line">
+                          <span><b>抓拍地址</b>{{sturcDetail.vehicleDto.address}}</span>
+                        </div>
+                        <div class="struc_cdi_line">
+                          <span><b>车牌号</b>{{sturcDetail.vehicleDto.plateNo}}</span>
+                        </div>
+                        <div class="struc_cdi_line">
+                          <span><b>号牌颜色</b>{{sturcDetail.vehicleDto.plateColor}}</span>
+                        </div>
+                        <div class="struc_cdi_line">
+                          <span><b>车辆型号</b>{{sturcDetail.vehicleDto.vehicleBrand}}</span>
+                        </div>
+                        <div class="struc_cdi_line">
+                          <span><b>车辆颜色</b>{{sturcDetail.vehicleDto.vehicleColor}}</span>
+                        </div>
+                        <div class="struc_cdi_line">
+                          <span><b>车辆类型</b>{{sturcDetail.vehicleDto.vehicleStyles}}</span>
+                        </div>
+                        <div class="struc_cdi_line">
+                          <span><b>号牌类型</b>{{sturcDetail.vehicleDto.plateClass}}</span>
+                        </div>
+                        <div class="struc_cdi_line">
+                          <span><b>套牌依据</b>{{sturcDetail.fakeReason}}</span>
+                        </div>
+                      </vue-scroll>
                     </div>
                   </div>
                 </div>
@@ -346,12 +362,23 @@ export default {
       // return  time.getTime() > this.value1 + 3*24*60*60*1000 || time.getTime() < this.value1 - 24*60*60*1000
     },
     setDTime () {
-      let _s = new Date().getTime() - 86400000;
-      let _e = formatDate(Date.now())
-      // let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + " 00:00:00";
-      // let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + " 23:59:59";
-      // this.ruleForm.data1 = [_s, _e];
-      this.value1 = _s
+      let date = new Date();
+      let curDate = date.getTime();
+      let curS = 1 * 24 * 3600 * 1000;
+      let sM = '', sD = '';
+      if ((new Date(curDate - curS).getMonth() + 1) < 10 ) {
+        sM = '0' + (new Date(curDate - curS).getMonth() + 1);
+      } else {
+        sM = (new Date(curDate - curS).getMonth() + 1)
+      }
+      if ( new Date(curDate - curS).getDate() < 10 ) {
+        sD = '0' +  new Date(curDate - curS).getDate();
+      } else {
+        sD =  new Date(curDate - curS).getDate()
+      }
+      let _s = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD + ' 00:00:00';
+      let _e = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD + ' 23:59:59';
+      this.value1 = new Date(_s)
       this.value2 = _e
     },
     //查询
@@ -678,6 +705,7 @@ export default {
             i {
               width: 15px;
               height: 15px;
+              background: url("../../../../../assets/img/vehicle/chepai.png") no-repeat;
             }
           }
         }
