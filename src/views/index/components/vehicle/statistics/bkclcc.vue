@@ -3,7 +3,7 @@
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{name: 'vehicle'}">车辆侦查</el-breadcrumb-item>
-        <el-breadcrumb-item>布控车辆出城查询</el-breadcrumb-item>
+        <el-breadcrumb-item>出城统计</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="con_box">
@@ -45,7 +45,7 @@
             multiple
             collapse-tags
             clearable
-            placeholder="全部车辆类别"
+            placeholder="全部车辆分组"
             style="width: 100%;margin-top: 10px;"
           >
             <el-option
@@ -65,7 +65,7 @@
               :value="item">
             </el-option>
           </el-select>
-          <el-input v-model="queryForm.provinceName"></el-input>
+          <el-input v-model="queryForm.provinceName" placeholder="请输入车牌号码"></el-input>
         </div>
         <div class="left_btn">
           <el-button class="reset_btn" @click="resetQueryForm">重置</el-button>
@@ -118,7 +118,7 @@
               show-overflow-tooltip
               >
               <template slot-scope="scope">
-                <span class="operation_btn" @click="showStrucInfo(scope.row, scope.$index)">出城信息</span>
+                <span class="operation_btn" @click="showStrucInfo(scope.row, scope.$index)">查看</span>
               </template>
             </el-table-column>
           </el-table>
@@ -536,19 +536,22 @@ export default {
     },
     // 获取布控车辆出城统计
     getControlCarSta () {
-      console.log(this.queryForm.bayonet, 'this.queryForm.bayonet')
-      const params = {
+      const data = {
         'startTime': this.queryForm.startTime,
         'endTime': this.queryForm.endTime,
         'vehicleNumber': this.queryForm.province.label + this.queryForm.provinceName,
-        'unvehicleFlag': this.queryForm.radio,
+        'unvehicleFlag': this.queryForm.radio
       }
       if(this.queryForm.bayonet && this.queryForm.bayonet.length > 0) {
         let bayonet = this.queryForm.bayonet.map(r => r.value)
-        params['bayonetUid'] = bayonet.join(',')
+        data['bayonetUid'] = bayonet.join(',')
       }
+      if(this.queryForm.carType && this.queryForm.carType.length > 0) {
+        data['vehicleType'] = this.queryForm.carType.join(',')
+      }
+      console.log(JSON.stringify(data))
       this.loadingBtn = true;
-      apiOutCityStatistics(params).then(res => {
+      apiOutCityStatistics(data).then(res => {
         if (res) {
           this.bkclccList = res.data;
           this.strucInfoList = res.data;
@@ -572,11 +575,12 @@ export default {
       this.playing = !this.playing;
     },
     showStrucInfo(data, index) {
+      console.log(data, index, 'index')
       this.curImgIndex = index;
       this.strucDetailDialog = true;
       this.sturcDetail = data;
       this.drawPoint(data);
-      console.log(index, 'index')
+      
     },
     imgListTap(data, index) {
       this.curImgIndex = index;

@@ -596,3 +596,64 @@ export function getFaceRetrievalPerson(params) {
   })
 }
 
+/*--------------------------  参数设置  ---------------------------------*/
+/**
+ * 获取落脚点分析距离和停留时间
+ * @param {object} params
+ */
+export function getLjdDistanceAndTime() {
+  return request({
+    url: '/params',
+    method: 'get',
+  })
+}
+/* 视频接力接口 */
+/**
+ * 添加人员视频接力任务
+ * @param {object} params
+ */
+export function addPersonVideoContinue(params) {
+  return request({
+    url: '/add/person/video/continue',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+/**
+ * 设置落脚点分析距离和停留时间
+ * @param {object} params
+ */
+export function setLjdDistanceAndTime(data) {
+  return request({
+    url: '/params',
+    method: 'post',
+    data,
+    mode: 'judge'
+  })
+}
+ /* 添加车辆视频接力任务
+ * @param {object} params
+ */
+export function addVhicleVideoContinue(params) {
+  return request({
+    url: '/add/vhicle/video/continue',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+/**
+ * 搜素所有视频接力任务
+ * @param {object} params
+ */
+export function selectVideoContinue(params) {
+  return request({
+    url: '/select/video/continue',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
+
+

@@ -20,6 +20,7 @@ const dataList = {
   taskType: 25, // 任务类型
   ctcStatus: 26, // 调度事件状态
   deviceStatus: 33, // 设备状态
+  maxPixel: 34, // 最大像素
   cameraType: 35, // 摄像头类型
   manufacturer: 37, // 厂商
   intelCharac: 38, // 智能特性

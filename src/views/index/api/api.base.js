@@ -130,12 +130,45 @@ export function getVehicleList() {
 /*******    摄像头管理       ******** */
 
 /**
- * 获取摄像头列表
+ * 获取设备列表
  */
-export function getCameraList() {
+export function getDeviceList(params) {
   return request({
     url: '/device-service/deviceBasicPageList',
     method: 'get',
+    params,
+    mode: baseModeName
+  });
+}
+/**
+ * 删除设备
+ */
+export function delDevice(uid) {
+  return request({
+    url: '/device-service/deviceBasic/' + uid,
+    method: 'delete',
+    mode: baseModeName
+  });
+}
+/**
+ * 添加设备
+ */
+export function addDeviceInfo (data) {
+  return request({
+    url: '/device-service/deviceBasic',
+    data,
+    method: 'post',
+    mode: baseModeName
+  });
+}
+/**
+ * 修改设备
+ */
+export function editDeviceInfo (data) {
+  return request({
+    url: '/device-service/deviceBasic',
+    data,
+    method: 'put',
     mode: baseModeName
   });
 }

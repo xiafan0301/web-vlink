@@ -72,7 +72,7 @@
           </el-form-item>
           <el-form-item>
             <el-button class="reset_btn" @click="resetData('searchForm')">重置</el-button>
-            <el-button class="select_btn" type="primary" @click="searchData('searchForm')">查询</el-button>
+            <el-button class="select_btn" type="primary" :loading="isSearchLoading" @click="searchData('searchForm')">查询</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -129,6 +129,7 @@ export default {
   data () {
     const startTime = new Date() - 24 * 60 * 60 *1000;
     return {
+      isSearchLoading: false,
       isInitPage: true, // 是否是初始化页面
       isShowDeviceTip: false, // 显示设备列表无数据提示
       deviceStartTime: null, // 起点设备抓拍时间
@@ -148,10 +149,10 @@ export default {
         { label: '10分钟', value: 10 }
       ],
       rules: {
-        // plateNo: [
-        //   { required: true, message: '请输入正确的车牌号码', trigger: 'blur' },
-        //   { validator: checkPlateNumber, trigger: 'blur' }
-        // ]
+        plateNo: [
+          { required: true, message: '请输入正确的车牌号码', trigger: 'blur' },
+          // { validator: checkPlateNumber, trigger: 'blur' }
+        ]
       },
       pickerStart: {
         disabledDate (time) {
@@ -213,6 +214,7 @@ export default {
     // 车牌号码change
     handlePlateNo (form) {
       this.$refs[form].validateField('plateNo', (error) => {
+
         if (!error) {
           if (this.searchForm.shotTime && this.searchForm.dateEnd) {
             this.getDeviceList();
@@ -314,7 +316,7 @@ export default {
     },
     // 搜索数据
     searchData (form) {
-      this.dataList = [];
+      
       this.$refs[form].validate(valid => {
         if (valid) {
           if (!this.searchForm.plateNo) {
@@ -329,13 +331,17 @@ export default {
             }
             return;
           };
-          let deviceCode;
+          let deviceCode, vehicleType;
           this.deviceList.map(item => {
+            console.log('asdasdd')
+            console.log(this.searchForm.deviceCode)
             if (item.deviceName === this.searchForm.deviceCode) {
               deviceCode = item.deviceID;
             }
           })
-          const vehicleType = this.searchForm.vehicleClass.join(',');
+          if (this.searchForm.vehicleClass.length > 0) {
+            vehicleType = this.searchForm.vehicleClass.join(',');
+          }
           const params = {
             deviceCode: deviceCode,
             startTime: formatDate(this.searchForm.shotTime),
@@ -345,16 +351,25 @@ export default {
             vehicleClass: vehicleType,
             interval: this.searchForm.interval
           };
+          this.isSearchLoading = true;
           getTailBehindList(params)
             .then(res => {
               if (res && res.data ) {
                 if (res.data.length > 0) {
                   this.dataList = res.data;
+                  this.isSearchLoading = false;
                 } else {
-                  this.isInitPage = false;
+                  // this.dataList = [];
+                  // this.isInitPage = false;
+                  // this.isSearchLoading = false;
                 }
+              } else {
+                this.dataList = [];
+                this.isInitPage = false;
+                this.isSearchLoading = false;
               }
             })
+            .catch(() => {this.isSearchLoading = false;})
         }
       });
     }

@@ -111,6 +111,9 @@ export default {
     },
     callingList () {
       return this.$store.state.callingList;
+    },
+    oWaitAdd () {
+      return this.$store.state.oWaitAdd;
     }
   },
   watch: {
@@ -123,6 +126,33 @@ export default {
     oDel () {
       console.log('watch oDel:', this.oDel); // remoteId
       this.wrClose(Object.assign({}, this.oAdd), true);
+    },
+    oWaitAdd () {
+      console.log('watch oAdd:', this.oWaitAdd);
+      let flag = false; // 是否已经在通话中
+      for (let i = 0; i < this.aWRData.length; i++) {
+        if (this.aWRData[i].remoteId === obj.remoteId) {
+          flag = true;
+          break;
+        }
+      }
+      if (flag) {
+        this.$message({
+          message: '您已经在与 ' + obj.remoteName + '（' + obj.remoteId + '）进行通话！',
+          type: 'warning'
+        });
+        // this.$emit('wrClose', {uid: obj.uid, _mid: obj._mid});
+        return;
+      }
+      if (this.aWRData && this.aWRData.length >= this.wsObj.wsLimit) {
+        this.$message({
+          message: '您最多一次与 ' + this.wsObj.wsLimit + ' 个人进行通话！',
+          type: 'info'
+        });
+        return;
+      } else {
+        this.$store.commit('ADD_WEBRTC', {oAdd: this.oWaitAdd})
+      }
     }
   },
   created () {
@@ -239,29 +269,29 @@ export default {
       if (obj && obj.remoteId) {
         // 添加isOpen字段，是否最小化
         obj['isOpen'] = true;
-        if (this.aWRData && this.aWRData.length >= this.wsObj.wsLimit) {
-          this.$message({
-            message: '您最多一次与 ' + this.wsObj.wsLimit + ' 个人进行通话！',
-            type: 'warning'
-          });
-          this.wrClose({uid: obj.uid, _mid: obj._mid});
-          return;
-        }
-        let flag = false; // 是否已经在通话中
-        for (let i = 0; i < this.aWRData.length; i++) {
-          if (this.aWRData[i].remoteId === obj.remoteId) {
-            flag = true;
-            break;
-          }
-        }
-        if (flag) {
-          this.$message({
-            message: '您已经在与 ' + obj.remoteName + '（' + obj.remoteId + '）进行通话！',
-            type: 'warning'
-          });
-          // this.$emit('wrClose', {uid: obj.uid, _mid: obj._mid});
-          return;
-        }
+//        if (this.aWRData && this.aWRData.length >= this.wsObj.wsLimit) {
+//          this.$message({
+//            message: '您最多一次与 ' + this.wsObj.wsLimit + ' 个人进行通话！',
+//            type: 'warning'
+//          });
+//          this.wrClose(obj);
+//          return;
+//        }
+//        let flag = false; // 是否已经在通话中
+//        for (let i = 0; i < this.aWRData.length; i++) {
+//          if (this.aWRData[i].remoteId === obj.remoteId) {
+//            flag = true;
+//            break;
+//          }
+//        }
+//        if (flag) {
+//          this.$message({
+//            message: '您已经在与 ' + obj.remoteName + '（' + obj.remoteId + '）进行通话！',
+//            type: 'warning'
+//          });
+//          // this.$emit('wrClose', {uid: obj.uid, _mid: obj._mid});
+//          return;
+//        }
         // this.aWRData.push(obj);
         this.$nextTick(() => {
           this.wrMediaStream(obj.type, obj, desc);
@@ -433,7 +463,7 @@ export default {
         // 设备还没被唤醒
         navigator.getMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
         if (!navigator.getMedia) {
-          _this.wrClose({uid: obj.uid, _mid: obj._mid});
+          _this.wrClose(obj);
           alert('对不起，您的浏览器不支持视频通话。');
           return;
         }
@@ -471,8 +501,8 @@ export default {
             });
           }, function (_error) {
             console.log(_error)
-            _this.wrClose({uid: obj.uid, _mid: obj._mid});
-            _this.$message.error('您的设备没有摄像头也没有麦，无法通话')
+            _this.wrClose(obj);
+            _this.$message.info('您的设备没有摄像头也没有麦，无法通话')
           })
         });
       } else {

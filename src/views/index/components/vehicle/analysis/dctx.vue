@@ -94,7 +94,7 @@
                 show-overflow-tooltip
                 >
                 <template slot-scope="scope">
-                  <span>{{scope.row.peerPercent}}%</span>
+                  <span>{{scope.row.peerPercent * 100 }}%</span>
                 </template>
               </el-table-column>
               <el-table-column label="操作">
@@ -135,10 +135,10 @@
             <div class="vehicle_box">
               <span class="vehicle_span" :class="[isCheckedVehicle === mapPeerVehicleNumber ? 'is_checked' : '']" @click="handleChangeVeNumber(mapPeerVehicleNumber)">{{mapPeerVehicleNumber}}</span>
               与
-              <span class="vehicle_span" :class="[isCheckedVehicle === resultList && resultList.baseNumber ? 'is_checked' : '']" @click="handleChangeVeNumber(resultList.baseNumber)">{{resultList && resultList.baseNumber}}</span>
+              <span class="vehicle_span" :class="[isCheckedVehicle === (resultList && resultList.baseNumber) ? 'is_checked' : '']" @click="handleChangeVeNumber(resultList.baseNumber)">{{resultList && resultList.baseNumber}}</span>
             </div>
             <div class="peer_possiable">
-              <span>{{mapPeerPercent}}%</span>同行
+              <span>{{mapPeerPercent * 100}}%</span>同行
             </div>
           </div>
         </div>
@@ -361,12 +361,12 @@ export default {
     // 获取基准车辆的抓拍数据
     getVehicleList () {
       const params = {
-        // startTime: formatDate(this.searchForm.startTime),
-        // endTime: formatDate(this.searchForm.endTime),
-        // baseNumber: this.searchForm.basicVehicleNumber,
-        startTime: '2019-07-13 00:54:29',
-        endTime: '2019-07-13 23:54:59',
-        baseNumber: '湘LYV366',
+        startTime: formatDate(this.searchForm.startTime),
+        endTime: formatDate(this.searchForm.endTime),
+        baseNumber: this.searchForm.basicVehicleNumber,
+        // startTime: '2019-07-13 00:54:29',
+        // endTime: '2019-07-13 23:54:59',
+        // baseNumber: '湘LYV366',
       };
       getBaseVehicleList(params)
         .then(res => {
@@ -486,7 +486,7 @@ export default {
 
             }
             
-            let idName = obj.deviceId + '_' + number;
+            let idName = obj.deviceID + '_' + number;
             let content;
 
             if (_this.isCheckedVehicle === number) {
@@ -544,6 +544,7 @@ export default {
     },
     // 点击车牌号码高亮显示相对应的轨迹
     handleChangeVeNumber (number) {
+      console.log('number', number);
       this.isCheckedVehicle = number;
       for(let i in this.polylineObj) {
         if (i === number) {
@@ -571,23 +572,25 @@ export default {
     },
     // 查询数据
     searchData () {
-      this.resultList = null;
-      // if (!reg.test(this.searchForm.basicVehicleNumber)) {
-      //   if (!document.querySelector('.el-message--info')) {
-      //     this.$message.info('请输入正确的车牌号码');
-      //   }
-      // }
-      if (this.vehicleNumberList.length === 0) {
+      if (!this.searchForm.basicVehicleNumber) {
         if (!document.querySelector('.el-message--info')) {
-          this.$message.info('请输入同行车辆车牌号码');
+          this.$message.info('请输入基准车辆的车牌号码');
         }
+        return;
       }
-      // console.log(this.searchForm)
       if (this.isShowTip) {
         if (!document.querySelector('.el-message--info')) {
           this.$message.info('该基准车辆在该时间内无抓拍数据');
         }
+        return;
       }
+      if (this.vehicleNumberList.length === 0) {
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('请输入同行车辆车牌号码');
+        }
+        return;
+      }
+      
       const params = {
         // startTime: '2019-07-13 00:54:29',
         // endTime: '2019-07-13 23:54:59',
@@ -599,12 +602,15 @@ export default {
         peerNumbers: this.vehicleNumberList.join(','),
         timeSlot: this.searchForm.timeSlot
       };
-      // console.log(params)
+      this.isSearchLoading = true;
       getMultiVehicleList(params)
         .then(res => {
           if (res && res.data) {
             this.resultList = res.data;
+            this.isSearchLoading = false;
           } else {
+            this.resultList = null;
+            this.isSearchLoading = false;
             this.isInitPage = false;
           }
         })

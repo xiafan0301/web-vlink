@@ -115,6 +115,17 @@
         </div>
       </el-table>
     </div>
+    <el-dialog
+      :visible.sync="delBayonetDialog"
+      :close-on-click-modal="false"
+      width="482px"
+      top="40vh">
+      <h4>是否确定删除该卡口及相关信息？</h4>
+      <div slot="footer">
+        <el-button @click="delBayonetDialog = false" class="reset_btn btn_140">取消</el-button>
+        <el-button :loading="loadingBtn" class="select_btn btn_140">确认</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -133,7 +144,10 @@ export default {
       useList: [],
       stateList: [],
       bayonetManageList: [{}],//卡口列表
-      loading: false
+      loading: false,
+      // 删除弹出框参数
+      loadingBtn: false,
+      delBayonetDialog: false,
     }
   },
   methods: {
@@ -146,7 +160,9 @@ export default {
       this.$router.push({name: 'bayonet_manage_add', query: {type}});
     },
     // 删除卡口
-    deleteBayonet () {},
+    deleteBayonet () {
+      this.delBayonetDialog = true;
+    },
   }
 }
 </script>
