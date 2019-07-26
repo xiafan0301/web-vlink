@@ -43,7 +43,6 @@
       <div class="right">
         <template v-if="dataDetail">
           <vue-scroll>
-
             <div class="result_box">
               <div class="result_img">
                 <div class="img_box img_box_1">
@@ -51,7 +50,7 @@
                   <img :src="dataDetail.upPhotoUrl" alt="">
                 </div>
                 <div class="img_box img_box_2">
-                  <span>来源库图</span>
+                  <span>证件照片</span>
                   <img :src="dataDetail.photoUrl" alt="">
                 </div>
               </div>
@@ -61,7 +60,7 @@
                 <span class="percent">%</span>
               </div>
               <div class="result_detail">
-                <p>来源库信息</p>
+                <p>证件对应信息</p>
                 <div>
                   <ul class="result_left">
                     <li>
@@ -103,7 +102,6 @@
               </div>
             </div>
           </vue-scroll>
-
         </template>
         <template v-else>
           <div is="noResult" :isInitPage="isInitPage"></div>

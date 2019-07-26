@@ -43,6 +43,8 @@ import {validatePhone, validatePwd} from '@/utils/validator.js';
 import vlFooter from '@/components/footer.vue';
 import { login } from '@/views/index/api/api.user.js';
 import { getDicts } from '@/views/index/api/api.js';
+import { cookieUserId, cookieUserName, cookieTime, cookiePassword } from '@/config/config.js';
+import { setCookie, getCookie } from '@/utils/util.js';
 export default {
   components: {QRCode, vlFooter},
   data () {
@@ -50,8 +52,8 @@ export default {
       downloadHandler: false,
       dlQRcode: null,
       loginForm: {
-        userMobile: '17744444444',
-        userPassword: '123456'
+        userMobile: '',
+        userPassword: ''
       },
       loginBtnLoading: false,
       isRemember: false, // 是否记住用户名
@@ -69,6 +71,16 @@ export default {
     }
   },
   mounted () {
+    const userName = getCookie('AS.VLINK.USERNAME');
+    const pwd = getCookie('AS.VLINK.PASSWORD');
+    if (userName && pwd) {
+      this.loginForm.userMobile = userName;
+      this.loginForm.userPassword = pwd;
+    } else {
+      this.loginForm.userMobile = '';
+      this.loginForm.userPassword = '';
+    }
+
     this.downloadQRcode();
     this.getAllDics()
   },
@@ -81,6 +93,12 @@ export default {
           login(this.loginForm)
             .then(res => {
               if (res) {
+                setCookie(cookieUserId, res.data.uid, cookieTime, '/');
+                // 保存用户姓名到cookie
+                setCookie(cookieUserName, res.data.userMobile, cookieTime, '/');
+
+                setCookie(cookiePassword, this.loginForm.userPassword, cookieTime, '/');
+
                 localStorage.setItem('as_vlink_user_info', JSON.stringify(res.data));
                 // console.log('item', localStorage.getItem('as_vlink_user_info'))
                 this.$store.commit('setLoginUser', {

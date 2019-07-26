@@ -150,7 +150,7 @@
                   </li>
                 </ul>
               </el-form-item>
-              <el-form-item label="所在位置:" prop="locationName">
+              <el-form-item label="所在位置:" prop="address">
                 <el-cascader v-model="onlineForm.locationName" :options="options" ref="cascaderAddr" style="width:100%" @change="handleChangeAddress" clearable placeholder="请选择省/市/县/乡"></el-cascader>
               </el-form-item>
               <el-form-item label="" prop="address">
@@ -405,6 +405,15 @@ export default {
               this.onlineForm.address = obj.address;
               this.onlineForm.deviceSip = obj.deviceSip;
 
+              if (obj.location) {
+                let arr = [];
+                let location = obj.location.split(',');
+                location.map(val => {
+                 arr.push(parseInt(val));
+                })
+                this.onlineForm.locationName = arr;
+              }
+
               if (obj.intelligentCharac) {
                 let arr = obj.intelligentCharac.split(',');
                 arr.map(val => {
@@ -421,12 +430,7 @@ export default {
                   this.onlineForm.ip[index].value = item;
                 })
               }
-              if (obj.location) {
-                let location = obj.location.split(',');
-                location.map(val => {
-                  this.onlineForm.locationName.push(parseInt(val))
-                })
-              }
+              
               
               if (this.$route.query.id) {
                 this.addMarker([this.onlineForm.longitude, this.onlineForm.latitude]);
@@ -450,7 +454,7 @@ export default {
     submitBasicData (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-          this.departmentList.map(item => {
+          this.organList.map(item => {
             if (item.uid === this.cameraForm.dutyUnitId) {
               this.cameraForm.dutyUserId = item.chargeUserName;
             }
@@ -653,7 +657,7 @@ export default {
         _this.map.add(marker);
         marker.setPosition(lnglatXY);
         _this.map.setCenter(lnglatXY);
-        _this.map.setZoom(18);
+        _this.map.setZoom(14);
         marker.setMap(_this.map);
         _this.map.setFitView();// 执行定位
       }  
@@ -691,7 +695,7 @@ export default {
     },
     resetZoom () {
       if (this.map) {
-        this.map.setZoomAndCenter(18, mapXupuxian.center);
+        this.map.setZoomAndCenter(14, mapXupuxian.center);
         this.map.setFitView();
       }
     },
@@ -704,7 +708,7 @@ export default {
     initMap () {
       let _this = this;
       let map = new window.AMap.Map("mapContainer", {
-        zoom: 18, // 级别
+        zoom: 14, // 级别
         resizeEnable: true,
         center: mapXupuxian.center, // 中心点坐标[110.596015, 27.907662]
         // viewMode: '3D' // 使用3D视图
@@ -841,7 +845,7 @@ export default {
           })
           let location = this.onlineForm.locationName && this.onlineForm.locationName.join(',');
           let intelligentCharac = this.cameraForm.intelligentCharaInfo.join(',');
-          this.onlineForm.rtspPort = parseInt(this.onlineForm.rtspPort);
+          this.onlineForm.rtspPort = this.onlineForm.rtspPort && parseInt(this.onlineForm.rtspPort);
 
           if (!this.$route.query.id) {
             this.$delete(this.cameraForm, 'uid');
@@ -896,6 +900,7 @@ export default {
         if (valid) {
           this.isSelectTab = 2;
           console.log('cameraForm', this.cameraForm)
+          console.log('onlineForm', this.onlineForm)
         }
       })
     },
@@ -945,11 +950,11 @@ export default {
       display: flex;
       flex-wrap: wrap;
       .left {
-        width: 40%;
+        width: 600px;
         height: 100%;
         padding-right: 10px;
         .online_form {
-          width: 97%;
+          width: 90%;
           //IP地址样式
           .ip-adress{
             display: flex;
@@ -984,7 +989,7 @@ export default {
         }
       }
       .right {
-        width: 60%;
+        width: calc(100% - 600px);
         height: 100%;
         position: relative;
         .close_btn {
@@ -1056,7 +1061,7 @@ export default {
   .lng-lat {
     display: flex;
     li {
-      margin-right: 30px;
+      margin-right: 8px;
       &:last-child {
         margin-right: 0;
       }
@@ -1074,7 +1079,7 @@ export default {
     }
     .el-input {
       display: inline-block;
-      width: 120px;
+      width: 110px;
     }
   }
 }

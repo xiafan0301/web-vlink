@@ -151,7 +151,7 @@
                       <el-table-column label="设备名称" prop="deviceName"></el-table-column>
                       <el-table-column label="过车时间" prop="shotTime" show-overflow-tooltip></el-table-column>
                       <el-table-column label="时间间隔" prop="timeSlot" show-overflow-tooltip></el-table-column>
-                      <el-table-column label="参考时间" prop="refTime" show-overflow-tooltip></el-table-column>
+                      <el-table-column label="常规行驶时间" prop="refTime" show-overflow-tooltip></el-table-column>
                     </el-table>
                   </div>
                   <h3>5.2 出没点分布</h3>
@@ -223,7 +223,7 @@
                       <el-table-column label="序号" type="index" width="100"></el-table-column>
                       <el-table-column label="摄像头安装地点" prop="address" show-overflow-tooltip></el-table-column>
                       <el-table-column label="车辆出没次数（次）" prop="nums" show-overflow-tooltip></el-table-column>
-                      <el-table-column label="较多出没时间" prop="timeSegment" show-overflow-tooltip></el-table-column>
+                      <el-table-column label="频繁出没时间段" prop="timeSegment" show-overflow-tooltip></el-table-column>
                     </el-table>
                   </div>
                 </div>

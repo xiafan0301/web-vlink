@@ -317,6 +317,9 @@
 
 .vl_icon_position_1{width: 17px; height: 17px;background-position: -686px -668px;} /*定位 地图图标*/
 
+.vl_icon_04_019{width: 90px; height: 90px;background-position: -318px -1071px;} /* 地图---起点图标 */
+.vl_icon_05_019{width: 90px; height: 90px;background-position: -422px -1071px} /* 地图---终点图标 */
+
 .vl_icon2 {
   display: inline-block;
   width: 102px; height: 108px;
