@@ -605,18 +605,6 @@ export function getLjdDistanceAndTime() {
   return request({
     url: '/params',
     method: 'get',
-  })
-}
-/* 视频接力接口 */
-/**
- * 添加人员视频接力任务
- * @param {object} params
- */
-export function addPersonVideoContinue(params) {
-  return request({
-    url: '/add/person/video/continue',
-    method: 'post',
-    data: params,
     mode: 'judge'
   })
 }
@@ -632,6 +620,22 @@ export function setLjdDistanceAndTime(data) {
     mode: 'judge'
   })
 }
+
+
+/* 视频接力接口 */
+/**
+ * 添加人员视频接力任务
+ * @param {object} params
+ */
+export function addPersonVideoContinue(params) {
+  return request({
+    url: '/add/person/video/continue',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+
  /* 添加车辆视频接力任务
  * @param {object} params
  */

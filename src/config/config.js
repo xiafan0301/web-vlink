@@ -170,6 +170,7 @@ export const webrtcConfig = {
 // cookie名
 export const cookieUserId = 'AS.VLINK.USERID';
 export const cookieUserName = 'AS.VLINK.USERNAME';
+export const cookiePassword = 'AS.VLINK.PASSWORD';
 // cookie默认有效时间（小时）
 export const cookieTime = 24;
 
