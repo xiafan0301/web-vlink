@@ -148,7 +148,7 @@
           <div class="th-ycxc-record">
             <div class="th-ycxc-record-list">
               <div class="list-box">
-                <div class="list-item" v-for="item in regulationsList" :key="item.vehicleDto.uid" @click="onOpenDetail(item)">
+                <div class="list-item" v-for="(item, index) in regulationsList" :key="item.vehicleDto.uid" @click="onOpenDetail(index)">
                   <img :src="item.vehicleDto.subStoragePath" alt="">
                   <p class="time"><i></i>{{item.vehicleDto.shotTime}}</p>
                   <p class="address"><i></i>{{item.vehicleDto.deviceName}}</p>
@@ -165,94 +165,6 @@
                 </el-pagination>
               </div>
             </div>
-            <el-dialog
-                :visible.sync="strucDetailDialog"
-                class="struc_detail_dialog"
-                :close-on-click-modal="false"
-                top="4vh"
-                :show-close="false">
-              <div class="struc_tab">
-                <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">抓拍详情</span>
-                <span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>
-                <span :class="{'active': strucCurTab === 3}" @click="strucCurTab = 3">视频回放</span>
-                <i class="el-icon-close" @click="onCloseDetail"></i>
-              </div>
-              <div class="struc_main">
-                <div v-show="strucCurTab === 1" class="struc_c_detail">
-                  <div class="struc_c_d_qj struc_c_d_img">
-                    <img :src="sturcDetail.vehicleDto.subStoragePath" alt="" class="bigImg">
-                    <span>抓拍图</span>
-                  </div>
-                  <div class="struc_c_d_box">
-                    <div class="struc_c_d_qii struc_c_d_img">
-                      <img :src="sturcDetail.vehicleDto.storagePath" alt="" class="bigImg">
-                      <span>全景图</span>
-                    </div>
-                    <div class="struc_c_d_info">
-                      <vue-scroll>
-                        <h2>抓拍信息</h2>
-                        <div class="struc_cdi_line">
-                          <span><b>抓拍时间</b>{{sturcDetail.vehicleDto.shotTime}}</span>
-                        </div>
-                        <div class="struc_cdi_line">
-                          <span><b>抓拍设备</b>{{sturcDetail.vehicleDto.deviceName}}</span>
-                        </div>
-                        <div class="struc_cdi_line">
-                          <span><b>抓拍地址</b>{{sturcDetail.vehicleDto.address}}</span>
-                        </div>
-                        <div class="struc_cdi_line">
-                          <span><b>车牌号</b>{{sturcDetail.vehicleDto.plateNo}}</span>
-                        </div>
-                        <div class="struc_cdi_line">
-                          <span><b>号牌颜色</b>{{sturcDetail.vehicleDto.plateColor}}</span>
-                        </div>
-                        <div class="struc_cdi_line">
-                          <span><b>车辆型号</b>{{sturcDetail.vehicleDto.vehicleBrand}}</span>
-                        </div>
-                        <div class="struc_cdi_line">
-                          <span><b>车辆颜色</b>{{sturcDetail.vehicleDto.vehicleColor}}</span>
-                        </div>
-                        <div class="struc_cdi_line">
-                          <span><b>车辆类型</b>{{sturcDetail.vehicleDto.vehicleStyles}}</span>
-                        </div>
-                        <div class="struc_cdi_line">
-                          <span><b>号牌类型</b>{{sturcDetail.vehicleDto.plateClass}}</span>
-                        </div>
-                        <div class="struc_cdi_line">
-                          <span><b>套牌依据</b>{{sturcDetail.fakeReason}}</span>
-                        </div>
-                      </vue-scroll>
-                    </div>
-                  </div>
-                </div>
-                <div v-show="strucCurTab === 2" class="struc_c_address">
-                  <div id="container"></div>
-                </div>
-                <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
-                  <div class="struc_c_d_qj struc_c_d_img">
-                    <img :src="sturcDetail.vehicleDto.subStoragePath" alt="" class="bigImg">
-                    <span>抓拍图</span>
-                  </div>
-                  <div class="struc_c_d_box">
-                    <span class="th-video-text">视频回放</span>
-                    <div is="flvplayer" :index="1" :oData="playUrl" :bResize="bResize" :oConfig="{sign: false, close: false, pause: true}" ></div>
-                  </div>
-                  <a class="download_btn" target="_blank" download="视频" :href="videoUrl">下载视频</a>
-                </div>
-              </div>
-              <div class="struc-list">
-                <swiper :options="swiperOption" ref="mySwiper">
-                  <!-- slides -->
-                  <swiper-slide v-for="(item, index) in regulationsList" :key="index + 'isgm'">
-                    <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
-                      <img style="display: block; width: 100%; height: .88rem;" :src="item.vehicleDto.subStoragePath" alt="">
-                    </div>
-                  </swiper-slide>
-                  <div class="swiper-button-prev" slot="button-prev"></div>
-                  <div class="swiper-button-next" slot="button-next"></div>
-                </swiper>
-              </div>
-            </el-dialog>
           </div>
         </div>
       </div>
@@ -262,19 +174,23 @@
         <p style="color: #666666; margin-top: 30px;">{{nodata}}</p>
       </div>
     </div>
+    <div is="vehicleDetail" :detailData="detailData"></div>
   </div>
 </template>
 <script>
 import { formatDate } from "@/utils/util.js";
-import flvplayer from '@/components/common/flvplayer.vue';
 import {getArchives} from '../../../api/api.analysis.js';
 import {JtcPOSTAppendtpInfo} from '../../../api/api.judge.js';
+import vehicleDetail from '../common/vehicleDetail.vue';
 export default {
   components: {
-    flvplayer
+    vehicleDetail
   },
   data () {
     return {
+
+      detailData: null,
+
       value1: '',
       nodata: '请在左侧输入查询条件',
       showimgnull: true,
@@ -296,29 +212,6 @@ export default {
       currentPage: 1,
       sortTimeType: null, // 时间排序active
       sortMonitoryType: null, // 监控排序active
-      /* 抓拍记录页面参数 */
-      strucDetailDialog: false, // 抓拍记录弹窗
-      strucCurTab: 1, // 抓拍记录弹窗tab
-      curImgIndex: 0, // 当前选择的图片index
-      strucInfoList: [{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县兴隆路5号154(故障)","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":90,"shotTime":"2019-06-03 16:12:44","panoramaPath":"http://10.116.126.13/parastor300s/public/PRH259/f00000.jpg","feature":"粤PRH259；轿车；橘色；福特-福睿斯-2012","deviceId":null,"address":"溆浦县兴隆路5号","longitude":110.595111,"latitude":27.90289,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"龙潭镇神龙大酒店","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":94,"shotTime":"2019-06-09 01:29:16","panoramaPath":"http://10.116.126.13/parastor300s/public/PJH119/f00007.jpg","feature":"粤PRH259；轿车；橘色；福特-福睿斯-2012","deviceId":null,"address":"溆浦县龙潭镇神龙大酒店","longitude":110.542891,"latitude":27.411462,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"长沙创谷广告园44","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":90,"shotTime":"2019-06-10 11:41:04","panoramaPath":"http://10.116.126.13/parastor300s/public/PRH259/f00008.jpg","feature":"粤PRH259；轿车；橘色；福特-福睿斯-2012","deviceId":null,"address":"长沙市创谷广告软件园","longitude":112.973795,"latitude":28.094549,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县第一中学48","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":90,"shotTime":"2019-06-07 13:25:00","panoramaPath":"http://10.116.126.13/parastor300s/public/PYR682/f00026.jpg","feature":"粤P8A566；轿车；绿色；大众-捷达-2015","deviceId":null,"address":"溆浦县第一中学","longitude":110.612834,"latitude":27.910003,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县张家湾路口(故障)","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":94,"shotTime":"2019-06-06 09:28:55","panoramaPath":"http://10.116.126.13/parastor300s/public/PCS113/f00021.jpg","feature":"粤P8A566；轿车；绿色；大众-捷达-2015","deviceId":null,"address":"溆浦县张家湾路口","longitude":110.587558,"latitude":27.930365,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县气象局(故障)","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","feature":"粤P8A566；轿车；绿色；大众-捷达-2015","deviceId":null,"address":"溆浦县气象局","longitude":110.604443,"latitude":27.908643,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县张家湾路口(故障)","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":93,"shotTime":"2019-06-07 14:22:36","panoramaPath":"http://10.116.126.13/parastor300s/public/PHD376/f00039.jpg","feature":"粤P9E163；轿车；白色；现代-瑞纳-2016","deviceId":null,"address":"溆浦县张家湾路口","longitude":110.587558,"latitude":27.930365,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县兴隆路5号154(故障)","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":93,"shotTime":"2019-06-10 14:24:28","panoramaPath":"http://10.116.126.13/parastor300s/public/PHD376/f00042.jpg","feature":"粤P9E163；轿车；白色；现代-瑞纳-2016","deviceId":null,"address":"溆浦县兴隆路5号","longitude":110.595111,"latitude":27.90289,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县龙潭镇汽车站(故障)","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":93,"shotTime":"2019-06-03 04:30:08","panoramaPath":"http://10.116.126.13/parastor300s/public/PYR682/f00033.jpg","feature":"粤P9E163；轿车；白色；现代-瑞纳-2016","deviceId":null,"address":"溆浦县龙潭镇汽车站","longitude":110.539961,"latitude":27.411443,"cname":null,"uploadPath":null}],
-      sturcDetail: {vehicleDto:{},"id":null,"vehicleNumber": "粤PRH259","deviceCode":null,"structureType":null,"deviceName":"溆浦县政府41","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":90,"shotTime":"2019-06-10 19:29:55","panoramaPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","feature":"粤PRH259；轿车；橘色；福特-福睿斯-2012","deviceId":null,"address":"溆浦县警予东路169号","longitude":110.597638,"latitude":27.910355,"cname":null,"uploadPath":'http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg'},
-      bResize: {},
-      markerPoint: null, // 地图icon
-      playUrl: {},
-      videoUrl: null, // 下载地址
-      map: null,
-      swiperOption: {
-        slidesPerView: 10,
-        spaceBetween: 18,
-        slidesPerGroup: 10,
-        loop: false,
-        slideToClickedSlide: true,
-        loopFillGroupWithBlank: true,
-        navigation: {
-          nextEl: '.swiper-button-next',
-          prevEl: '.swiper-button-prev',
-        },
-      },
     }
   },
   created () {
@@ -451,47 +344,6 @@ export default {
       })
     },
     /**
-     * 弹框地图初始化
-     */
-    initMap () {
-      // this.map.setZoomAndCenter(iZoom, aCenter);
-      let map = new window.AMap.Map('container', {
-        zoom: 14, // 级别
-        center: [this.sturcDetail.vehicleDto.shotPlaceLongitude, this.sturcDetail.vehicleDto.shotPlaceLatitude,], // 中心点坐标
-      });
-      map.setMapStyle('amap://styles/whitesmoke');
-      this.map = map;
-      this.drawPoint(this.sturcDetail.vehicleDto)
-    },
-    /**
-     * 地图描点
-     */
-    drawPoint (data) {
-      console.log(data)
-      if (this.markerPoint) {
-        this.map.remove(this.markerPoint)
-      }
-      let _content = '<div class="vl_icon vl_icon_judge_02"></div>'
-      this.markerPoint = new window.AMap.Marker({ // 添加自定义点标记
-        map: this.map,
-        position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-        offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
-        draggable: false, // 是否可拖动
-        // 自定义点标记覆盖物内容
-        content: _content
-      });
-      this.map.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
-      let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`
-      this.infoWindow = new window.AMap.InfoWindow({
-        map: this.map,
-        isCustom: true,
-        closeWhenClickMap: false,
-        position: [data.shotPlaceLongitude, data.shotPlaceLatitude],
-        offset: new window.AMap.Pixel(0, -70),
-        content: sConent
-      })
-    },
-    /**
      * 按照时间排序
      */
     onSortByTime (type) {
@@ -519,39 +371,26 @@ export default {
     /**
      * 打开抓拍弹框
      */
-    onOpenDetail (obj) {
-      this.$_showLoading({text: '加载中...'})
-      console.log(obj)
-      this.sturcDetail = obj
-      console.log(this.sturcDetail.videoPath)
-      this.videoUrl = this.sturcDetail.vehicleDto.videoPath
-      this.playUrl = {
-        type: 3,
-        title: '',
-        video: {
-          uid: 1,
-          downUrl: this.sturcDetail.vehicleDto.videoPath
-        }
+    onOpenDetail (index) {
+      /* pagination: {
+        pageNum: 1,
+        pageSize: 10,
+        total: 0
+      }, */
+      let params = {
+        startDate: formatDate(this.value1),
+        endDate: this.value2,
+        vehicleNumber: this.searchData.licensePlateNum
+      };
+      this.detailData = {
+        type: 5, // 5套牌车
+        params: params, // 查询参数
+        list: this.regulationsList, // 列表
+        index: index, // 第几个
+        pageSize: this.pagination.pageNum,
+        total: this.pagination.total,
+        pageNum: this.pagination.pageNum
       }
-      this.strucDetailDialog = true
-      this.$nextTick(() => {
-        this.initMap()
-      })
-      this.$_hideLoading()
-    },
-    /**
-     * 关闭抓拍弹框
-     */
-    onCloseDetail () {
-      this.strucCurTab = 1
-      this.strucDetailDialog = false
-    },
-    /**
-     * 图片切换
-     */
-    imgListTap (obj, i) {
-      this.curImgIndex = i
-      this.sturcDetail = obj
     }
   }
 }

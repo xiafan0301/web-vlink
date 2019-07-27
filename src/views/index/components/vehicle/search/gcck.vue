@@ -86,7 +86,7 @@
               <template v-if="zpList && zpList.length > 0">
                 <li v-for="(item, index) in zpList" :key="'jrzp_' + index">
                   <div class="vc_gcck_rbl">
-                    <p @click="goToDetail(item, index)">
+                    <p @click="goToDetail(index)">
                       <img :title="item.deviceName" :alt="item.deviceName" :src="item.subStoragePath">
                     </p>
                     <div class="com_ellipsis"><i class="vl_icon vl_icon_sm_sj"></i>{{item.shotTime}}</div>
@@ -177,12 +177,12 @@
         </div>
       </div>
     </div>
-    <div is="vehicleDetail" :oData="detailData"></div>
+    <div is="vehicleDetail" :detailData="detailData"></div>
   </div>
 </template>
 <script>
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
-import vehicleDetail from './gcck-detail.vue';
+import vehicleDetail from '../common/vehicleDetail.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 import dbTree from '@/components/common/dbTree.vue';
 import {getDeviceByBayonetUid, getDeviceDetailById} from '../../../api/api.base.js';
@@ -258,13 +258,16 @@ export default {
     }
   },
   methods: {
-    goToDetail (item, index) {
-      // this.zpList
-      let _o = Object.assign({}, {
-        list: this.zpList,
-        index: index
-      });
-      this.detailData = _o;
+    goToDetail (index) {
+      this.detailData = {
+        type: 1, // 1过车查看
+        params: this.getSearchParams(), // 查询参数
+        list: this.zpList, // 列表
+        index: index, // 第几个
+        pageSize: 8,
+        total: this.zpTotal,
+        pageNum: 1
+      }
     },
 
     goToZP () {
@@ -372,9 +375,21 @@ export default {
       }
     },
 
-    getDeviceSnapSum (dId) {
+
+    getSearchParams () {
+      return {
+        where: {
+          deviceIds: this.zpDeviceIds,
+          startTime: formatDate(new Date(), 'yyyy-MM-dd 00:00:00'),
+          endTime: formatDate(new Date(), 'yyyy-MM-dd 23:59:59')
+        }
+      }
+    },
+
+    getDeviceSnapSum () {
+      /* let params = this.getSearchParams();
       getDeviceSnapImagesSum({
-        deviceIds: dId,
+        deviceIds: this.zpDeviceIds,
         startTime: formatDate(new Date(), 'yyyy-MM-dd 00:00:00'),
         endTime: formatDate(new Date(), 'yyyy-MM-dd 23:59:59'),
       }).then(res => {
@@ -385,24 +400,21 @@ export default {
         } else {
           this.zpTotal = 0;
         }
-      });
+      }); */
     },
 
-    getDeviceSnapPage (dId) {
-      getDeviceSnapImagesPage({
-        where: {
-          deviceIds: dId,
-          startTime: formatDate(new Date(), 'yyyy-MM-dd 00:00:00'),
-          // startTime: '2019-01-01 00:00:00',
-          endTime: formatDate(new Date(), 'yyyy-MM-dd 23:59:59')
-        },
+    getDeviceSnapPage () {
+      let params = Object.assign(this.getSearchParams(), {
         pageNum: 1,
         pageSize: 8
-      }).then(res => {
+      });
+      getDeviceSnapImagesPage(params).then(res => {
         if (res && res.data) {
           this.zpList = res.data.list;
+          this.zpTotal = res.data.total;
         } else {
           this.zpList = [];
+          this.zpTotal = 0;
         }
       });
     },

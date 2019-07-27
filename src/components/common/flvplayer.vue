@@ -3,7 +3,7 @@
     <div class="flvplayer_player" :id="flvplayerId + '_container'">
       <!-- poster="videojs/eguidlogo.png" -->
       <div class="flvplayer_player_c" :id="flvplayerId + '_c'" @dblclick="playerFullScreen(!fullScreen)">
-        <video crossOrigin="anonymous" :id="flvplayerId" style="width: 100%; height: 100%; object-fit: fill;" autoplay="autoplay" muted>
+        <video crossOrigin="anonymous" :id="flvplayerId" style="width: 100%; height: 100%;" :class="{'player_fit': config.fit}" autoplay="autoplay" muted>
         </video>
       </div>
     </div>
@@ -251,6 +251,7 @@ export default {
    *    tape: 是否可录像，默认为true
    *    download: 是否可下载(回放)，默认为true
    *    ptz: 是否开启云台控制（直播、全屏），默认为true
+   *    fit: 视频是否填充，，默认为true
    * },
    * optDis: 是否隐藏所有的操作按钮
    * bResize: 播放容器尺寸变化
@@ -283,7 +284,8 @@ export default {
         cut: true, // 是否可截屏
         tape: true, // 是否可录像
         download: true, // 是否可下载(回放)
-        ptz: true
+        ptz: true,
+        fit: true
       },
 
       startPlayTime: null,
@@ -1286,6 +1288,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 /* 视频接力 begin */
+.player_fit { object-fit: fill; }
 .player_relay_i {
   position: absolute; top: 10px; left: 10px; z-index: 100;
   > .player_relay_icp {

@@ -67,7 +67,7 @@
                   <div class="vc_gcck_rbl">
                     <div class="gcck_rbl_i">
                       <div>
-                        <div @click="goToDetail(sitem, item, sindex)">
+                        <div @click="goToDetail(item, sindex)">
                           <img :title="sitem.deviceName" :alt="sitem.deviceName" :src="sitem.subStoragePath">
                         </div>
                       </div>
@@ -103,11 +103,11 @@
         </ul>
       </div>
     </div>
-    <div is="vehicleDetail" :oData="detailData"></div>
+    <div is="vehicleDetail" :detailData="detailData"></div>
   </div>
 </template>
 <script>
-import vehicleDetail from './gcck-detail.vue';
+import vehicleDetail from '../common/vehicleDetail.vue';
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 import {formatDate, getDate} from '@/utils/util.js';
@@ -177,12 +177,37 @@ export default {
     this.getCppList();
   },
   methods: {
-    goToDetail (item, sday, index) {
-      let _o = Object.assign({}, this.daysList[sday], {
+    goToDetail (sday, index) {
+      /* let _o = Object.assign({}, this.daysList[sday], {
         day: sday,
         index: index
       });
-      this.detailData = _o;
+      this.detailData = _o; */
+      // console.log('daysList[item]', this.daysList[sday]);
+      // console.log('sday', sday);
+      if (this.daysList[sday]) {
+        let _o = this.daysList[sday];
+        let dId = this.$route.query.deviceIds;
+        this.detailData = {
+          type: 1, // 1过车查看
+          params: {
+            where: {
+              deviceIds: dId,
+              startTime: sday + ' 00:00:00',
+              endTime: sday + ' 23:59:59',
+              vehicleClass: this.formInline.lx,
+              vehicleGroupUid: this.formInline.lb,
+              isPlateNo: this.formInline.no ? 2 : 1,
+              plateNo: this.formInline.cpp + this.formInline.cp
+            }
+          }, // 查询参数
+          list: _o.list, // 列表
+          index: index, // 第几个
+          pageSize: _o.pageSize,
+          total: _o.total,
+          pageNum: _o.pageNum
+        }
+      }
     },
     getLxList () {
       getDiciData(44).then(res => {
