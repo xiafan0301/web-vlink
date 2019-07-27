@@ -1,7 +1,10 @@
 <template>
   <div class="vl_vehicle clearfix">
     <div class="vc_content">
-      <router-view></router-view>
+      <keep-alive>
+      <router-view v-if="$route.meta.keepAlive"></router-view>
+      </keep-alive>
+      <router-view v-if="!$route.meta.keepAlive"></router-view>
     </div>
   </div>
 </template>
@@ -28,7 +31,7 @@ export default {
 
 <!-- 车辆侦察公用CSS -->
 <style lang="scss">
-.vehicle_content { height: 100%; position: relative; }
+.vehicle_content { height: 100%; position: relative; overflow: hidden; }
 .my_tooltip{
   position: absolute;
   background:rgba(255,255,255,1);

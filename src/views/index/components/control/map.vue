@@ -9,7 +9,7 @@
             <el-option
               v-for="item in stateList"
               :key="item.value"
-              :label="item.label"
+              :label="item.label" 
               :value="item.value">
             </el-option>
           </el-select>
@@ -64,21 +64,33 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item prop="time" class="time">
+        <el-form-item prop="startTime" class="time">
           <el-date-picker
             style="width: 192px;"
-            v-model="mapForm.time"
-            type="daterange"
-            range-separator="-"
-            start-placeholder="开始时间"
-            end-placeholder="结束时间"
+            :clearable="false"
+            :picker-options="pickerOptions"
+            v-model="mapForm.startTime"
+            type="date"
             value-format="yyyy-MM-dd"
-            :default-time="['00:00:00', '23:59:59']">
+            placeholder="开始日期"
+            class="vl_date">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item prop="endTime" class="time">
+          <el-date-picker
+            style="width: 192px;"
+            :clearable="false"
+            :picker-options="pickerOptions1"
+            v-model="mapForm.endTime"
+            type="date"
+            value-format="yyyy-MM-dd"
+            placeholder="结束日期"
+            class="vl_date vl_date_end">
           </el-date-picker>
         </el-form-item>
         <el-form-item style="width: 192px;">
-          <el-button class="reset_btn btn_90" @click="resetForm()">重置</el-button>
-          <el-button class="select_btn btn_90" :loading="loadingBtn" @click="getControlMap">搜索</el-button>
+          <el-button class="btn_90" @click="resetForm()">重置</el-button>
+          <el-button class="btn_90" type="primary" :loading="loadingBtn" @click="getControlMap">搜索</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -163,7 +175,7 @@
       <div class="create_control">
         <img src="../../../../assets/img/video/vi_101.png" alt="">
         <p>没有进行中的布控</p>
-        <el-button @click="skipIsCreateControl" class="reset_btn btn_100">新建布控</el-button>
+        <el-button @click="skipIsCreateControl" class="btn_100">新建布控</el-button>
       </div>
     </el-dialog>
   </div>
@@ -208,7 +220,38 @@ export default {
         state: 1,
         type: null,
         alarmId: [],
-        time: null
+        startTime: null,
+        endTime: null
+      },
+      pickerOptions: {
+        disabledDate: time => {
+          if (this.mapForm.endTime) {
+            return (
+              time.getTime() > new Date(this.mapForm.endTime).getTime() ||
+              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90
+            );
+          } else {
+            return (
+              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90 ||
+              time.getTime() > new Date().getTime()
+            );
+          }
+        }
+      },
+      pickerOptions1: {
+        disabledDate: time => {
+          if (this.mapForm.startTime) {
+            return (
+              time.getTime() < new Date(this.mapForm.startTime).getTime() ||
+              time.getTime() > new Date().getTime()
+            );
+          } else {
+            return (
+              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 30 ||
+              time.getTime() > new Date().getTime()
+            );
+          }
+        }
       },
       controlNameList: [],
       eventList: [],
@@ -316,7 +359,7 @@ export default {
     getControlObjBySelect () {
       getControlObjBySelect({surveillanceStatus: this.mapForm.state}).then(res => {
         if (res) {
-          this.controlObjDropdownList = res.data;
+          this.controlObjDropdownList = res.data.filter(f => f.name);
         }
       })
     },
@@ -383,8 +426,8 @@ export default {
         deviceType: this.mapForm.type,//设备类型
         surveillanceStatus: this.mapForm.state,//布控状态
         alarmLevel: this.mapForm.alarmId.length > 0 ? this.mapForm.alarmId.join(',') : null,//告警级别
-        surveillanceDateStart: this.mapForm.time && this.mapForm.time[0],//布控开始时间
-        surveillanceDateEnd: this.mapForm.time && this.mapForm.time[1],//布控结束时间
+        surveillanceDateStart: this.mapForm.startTime,//布控开始时间
+        surveillanceDateEnd: this.mapForm.endTime,//布控结束时间
         surveillanceName: this.mapForm.name,//布控名称
         eventId: this.mapForm.event,//事件Id
         surveillanceObjectId: this.mapForm.obj.objId,//布控对象id
@@ -614,7 +657,7 @@ export default {
           clickWindow = new window.AMap.InfoWindow({
             isCustom: true,
             closeWhenClickMap: false,
-            offset: new window.AMap.Pixel(-2, -60), // 相对于基点的偏移位置
+            offset: new window.AMap.Pixel(-2, -80), // 相对于基点的偏移位置
             content: sContent
           });
           // 打开弹窗
@@ -629,11 +672,12 @@ export default {
           this.clickWindow = clickWindow;
           // 跳转至布控详情页
           $('#mapBox').on('click', '.vl_map_name', function (e) {
-            const { href } = _this.$router.resolve({
-              name: 'control_manage',
-              query: {pageType: 2, state: obj.surveillanceStatus, controlId: e.currentTarget.id }
-            })
-            window.open(href, '_blank', 'toolbar=no,location=no,width=1300,height=900')
+            // const { href } = _this.$router.resolve({
+            //   name: 'control_manage',
+            //   query: {pageType: 2, state: obj.surveillanceStatus, controlId: e.currentTarget.id }
+            // })
+            // window.open(href, '_blank', 'toolbar=no,location=no,width=1300,height=900')
+            _this.$router.push({name: 'control_manage', query: {pageType: 2, state: obj.surveillanceStatus, controlId: e.currentTarget.id }});
           })
           // 跳转至视频回放页面
           $('#mapBox').on('click', '.vl_map_btn', function () {
@@ -733,7 +777,7 @@ export default {
           content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_sxt_not_choose"></div>';
         }
         if (obj.longitude > 0 && obj.latitude > 0) {
-          let offSet = [-20.5, -48];
+          let offSet = [-20.5, -70];
           let marker = new window.AMap.Marker({ // 添加自定义点标记
             map: _this.map,
             position: [obj.longitude, obj.latitude],
@@ -790,11 +834,12 @@ export default {
     },
     // 跳转至视频回放页面
     skipIsVideo (uid, deviceName) {
-      const { href } = this.$router.resolve({
-        name: 'video_playback',
-        query: {uid, deviceName}
-      })
-      window.open(href, '_blank', 'toolbar=no,location=no,width=1300,height=900')
+      // const { href } = this.$router.resolve({
+      //   name: 'video_playback',
+      //   query: {uid, deviceName}
+      // })
+      // window.open(href, '_blank', 'toolbar=no,location=no,width=1300,height=900')
+      this.$router.push({name: 'video_playback', query: {uid, deviceName}});
     },
     // 重置表单
     resetForm () {
@@ -1028,8 +1073,7 @@ export default {
       margin-bottom: 10px!important;
     }
     .time input{
-      width: 70px;
-      font-size: 12px;
+      width: 100%;
     }
   }
   .map_box{

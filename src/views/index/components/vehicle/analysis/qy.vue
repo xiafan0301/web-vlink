@@ -1,82 +1,98 @@
 <template>
   <div class="vl_ph_main">
-    <div class="breadcrumb_heaer">
-      <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
-        <el-breadcrumb-item>区域碰撞</el-breadcrumb-item>
-      </el-breadcrumb>
+    <div class="">
+      <!--<el-breadcrumb separator=">">-->
+        <!--<el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>-->
+        <!--<el-breadcrumb-item>区域碰撞</el-breadcrumb-item>-->
+      <!--</el-breadcrumb>-->
+      <div
+              is="vlBreadcrumb"
+              :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
+          {name: '区域碰撞'}]"
+      ></div>
     </div>
 
     <div class="vl_ph_content">
-      <div class="mapbox" id="mapSelect"></div>
-      <div class="setPost">
-        <div>
-          <el-autocomplete
-            class="inline-input"
-            v-model="input3"
-            :fetch-suggestions="querySearch"
-            placeholder="请输入地名，快速定位地址"
-            value-key="name"
-            :trigger-on-focus="false"
-            @select="handleSelect"
-          ></el-autocomplete>
-          <!--<el-input placeholder="请输入地名，快速定位地址" v-model="input3" class="input-with-select">-->
-          <el-button slot="append" icon="el-icon-search" class="select_btn" @click="setCenter()"></el-button>
-          <!--</el-input>-->
-        </div>
-        <div style="width: 272px;height: calc(100% - 40px)">
-          <vue-scroll>
-            <div class="search_main">
-              <div class="search_top">
-                <span  @click="addArea"><i class="el-icon-circle-plus-outline"></i>增加区域列表</span>
-                <span  @click="clearAllArea"><i class="el-icon-delete"></i></span>
-              </div>
-              <!--区域选择-->
-              <div class="search_item" v-for="(item, index) in searchData" :key="item.id">
-                <div class="search_line_ts">
-                  <div class="title">
-                    <span class="red_star">区域:</span>
-                    <span class="choose_btn el-icon-location-outline" @click="setFitV(index)" :class="{'not-active': !item.area}"></span>
+      <div :class="['right',{hide:!hideleft}]" id="mapSelect"></div>
+      <div :class="['left',{hide:hideleft}]">
+        <div class="plane">
+          <div class="setPost">
+            <div class="top_search_input">
+              <el-autocomplete
+                    class="inline-input"
+                    v-model="input3"
+                    :fetch-suggestions="querySearch"
+                    placeholder="请输入地名，快速定位地址"
+                    value-key="name"
+                    :trigger-on-focus="false"
+                    @select="handleSelect"
+              ></el-autocomplete>
+              <!--<el-input placeholder="请输入地名，快速定位地址" v-model="input3" class="input-with-select">-->
+              <el-button slot="append" icon="el-icon-search" class="select_btn" @click="setCenter()"></el-button>
+              <!--</el-input>-->
+            </div>
+            <div style="width: 272px;height: calc(100% - 40px);">
+              <vue-scroll>
+                <div class="search_main">
+                  <div class="search_top">
+                    <span  @click="addArea"><i class="el-icon-circle-plus-outline"></i>增加区域列表</span>
                   </div>
-                  <div class="drawBox">
-                    <div class="items">
-                      <span @click="clickTab('cut1', index)" :class="['cut1',{'hover':hover[index]=='cut1' && index === curDrawIndex}]"></span>
-                      <span @click="clickTab('cut2', index)"  :class="['cut2',{'hover':hover[index]=='cut2' && index === curDrawIndex}]"></span>
-                      <span @click="clickTab('cut3', index)"  :class="['cut3',{'hover':hover[index]=='cut3' && index === curDrawIndex}]"></span>
-                      <span @click="clickTab('cut4', index)"  :class="['cut4',{'hover':hover[index]=='cut4' && index === curDrawIndex}]"></span>
-                      <span @click="clickTab('cut5', index)"  :class="['cut5',{'hover':hover[index]=='cut5' && index === curDrawIndex}]"></span>
+                  <!--区域选择-->
+                  <div class="search_item" v-for="(item, index) in searchData" :key="item.id">
+                    <div class="search_line_ts">
+                      <div class="title">
+                        <span class="">抓拍区域:</span>
+                        <span>
+                      <i class="choose_btn el-icon-location-outline" @click="setFitV(index)" :class="{'not-active': !item.area}"></i>
+                      <i class="choose_btn el-icon-delete" v-show="index > 1" @click="clearArea(index)"></i>
+                    </span>
+                      </div>
+                      <div class="drawBox">
+                        <div class="items">
+                          <span @click="clickTab('cut1', index)" :class="['cut1',{'hover':hover[index]=='cut1' && index === curDrawIndex}]"></span>
+                          <span @click="clickTab('cut2', index)"  :class="['cut2',{'hover':hover[index]=='cut2' && index === curDrawIndex}]"></span>
+                          <span @click="clickTab('cut3', index)"  :class="['cut3',{'hover':hover[index]=='cut3' && index === curDrawIndex}]"></span>
+                          <span @click="clickTab('cut4', index)"  :class="['cut4',{'hover':hover[index]=='cut4' && index === curDrawIndex}]"></span>
+                          <span @click="clickTab('cut5', index)"  :class="['cut5',{'hover':hover[index]=='cut5' && index === curDrawIndex}]"></span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="search_line">
+                      <!--<span class="time">开始</span>-->
+                      <el-date-picker
+                        v-model="item.startTime"
+                        style="width: 100%;"
+                        class="vl_date"
+                        :picker-options="pickerOptions"
+                        type="datetime"
+                        value-format="timestamp"
+                        placeholder="选择日期时间">
+                      </el-date-picker>
+                    </div>
+                    <!--<p class="red_star"></p>-->
+                    <div class="search_line">
+                      <!--<span class="time">结束</span>-->
+                      <el-date-picker
+                              style="width: 100%;"
+                              class="vl_date vl_date_end"
+                              :picker-options="pickerOptions1"
+                              v-model="item.endTime"
+                              value-format="timestamp"
+                              type="datetime"
+                              placeholder="选择日期时间">
+                      </el-date-picker>
                     </div>
                   </div>
+                  <!--按钮-->
+                  <div class="search_btn">
+                    <el-button @click="clearAllArea">重置</el-button>
+                    <el-button type="primary" @click="tcDiscuss">区域碰撞</el-button>
+                  </div>
                 </div>
-                <div class="search_line">
-                  <span class="time">开始</span>
-                  <el-date-picker
-                    v-model="item.startTime"
-                    style="width: 212px;"
-                    :picker-options="pickerOptions"
-                    type="datetime"
-                    placeholder="选择日期时间">
-                  </el-date-picker>
-                </div>
-                <p class="red_star"></p>
-                <div class="search_line">
-                  <span class="time">结束</span>
-                  <el-date-picker
-                    style="width: 212px;"
-                    :picker-options="pickerOptions1"
-                    v-model="item.endTime"
-                    type="datetime"
-                    placeholder="选择日期时间">
-                  </el-date-picker>
-                </div>
-                <el-divider></el-divider>
-              </div>
-              <!--按钮-->
-              <div class="search_btn">
-                <el-button type="primary" @click="tcDiscuss">区域碰撞</el-button>
-              </div>
+              </vue-scroll>
             </div>
-          </vue-scroll>
+          </div>
+          <div class="insetLeft" @click="hideLeft"></div>
         </div>
       </div>
       <!--地图操作按钮-->
@@ -91,7 +107,7 @@
       title="清除确认"
       :visible.sync="delDialog"
       width="30%">
-      <span>是否要清除地图上{{clearAll ? '全部时间和' : '该条'}}已选区域？</span>
+      <span>是否要清除{{clearAll ? '全部时间和' : '该条'}}抓拍区域？</span>
       <span slot="footer" class="dialog-footer">
     <el-button @click="delDialog = false">取 消</el-button>
     <el-button type="primary" @click="confirmClear">确 定</el-button>
@@ -100,13 +116,17 @@
   </div>
 </template>
 <script>
+  import vlBreadcrumb from "@/components/common/breadcrumb.vue";
   import { mapXupuxian } from "@/config/config.js";
   import {getAllDevice} from '../../../api/api.judge.js';
   import {getAllBayonetList} from '../../../api/api.base.js';
   import { objDeepCopy, formatDate} from '../../../../../utils/util.js';
   export default {
+    components: {vlBreadcrumb},
     data() {
       return {
+        hideleft: false,
+        tipInfo: null,
         map: null,
         input3: null,
         hover:{
@@ -142,9 +162,9 @@
             let threeMonths = '';
             let start = '';
             if (parseFloat(m) >= 4) {
-              start = y + '-' + (m - 3) + '-' + d;
+              start = y + '-' + (m - 1) + '-' + d;
             } else {
-              start = (y - 1) + '-' + (m - 3 + 12) + '-' + d;
+              start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
             }
             threeMonths = new Date(start).getTime();
             return time.getTime() > Date.now() || time.getTime() < threeMonths;
@@ -159,9 +179,9 @@
             let threeMonths = '';
             let start = '';
             if (parseFloat(m) >= 4) {
-              start = y + '-' + (m - 3) + '-' + d;
+              start = y + '-' + (m - 1) + '-' + d;
             } else {
-              start = (y - 1) + '-' + (m - 3 + 12) + '-' + d;
+              start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
             }
             threeMonths = new Date(start).getTime();
             return time.getTime() > Date.now() || time.getTime() < threeMonths;
@@ -177,7 +197,6 @@
         clearAll: false,
       };
     },
-
     mounted() {
       this.renderMap();
       // this.setDTime();
@@ -186,8 +205,12 @@
 //        x.endTime = this.setDTime().endTime;
 //      })
       this.getAllDevice();
+      this.resetZoom();
     },
     methods: {
+      hideLeft() {
+        this.hideleft = !this.hideleft;
+      },
       mapZoomSet (val) {
         if (this.map) {
           this.map.setZoom(this.map.getZoom() + val);
@@ -235,7 +258,7 @@
         };
       },
       seacher(v) {
-        var placeSearch = new AMap.PlaceSearch({
+        var placeSearch = new window.AMap.PlaceSearch({
           // city 指定搜索所在城市，支持传入格式有：城市名、citycode和adcode
           city: "湖南"
         });
@@ -252,9 +275,6 @@
           });
         }
         //return pois
-      },
-      setFitV () {
-        this.map.setFitView([this.searchData.area]);
       },
       setFitV (index) {
         this.map.setFitView([this.searchData[index].area]);
@@ -411,7 +431,7 @@
         this.pointData[this.curDrawIndex] = [];
         if(type!="AMap.Polyline"){
           this.mapTreeData.forEach(el=>{
-            let myLngLat=new AMap.LngLat(el.longitude,el.latitude);
+            let myLngLat=new window.AMap.LngLat(el.longitude,el.latitude);
             //  var isPointInRing = window.AMap.GeometryUtil.isPointInRing(myLngLat,obj.C.path);
             let isPointInRing = obj.contains(myLngLat);
             // console.log(marker.getPosition());
@@ -450,7 +470,7 @@
           var pois = result.poiList.pois;
           if(pois.length>0){
             let new_center=pois[0].location
-            _this.amap.setZoomAndCenter(16, new_center);
+            _this.map.setZoomAndCenter(16, new_center);
           }
 
           // for(var i = 0; i < pois.length; i++){
@@ -506,10 +526,10 @@
         })
         this.hover = {
           0: null,
-          1: null,
-          2: null,
-          3: null,
-          4: null,
+            1: null,
+            2: null,
+            3: null,
+            4: null,
         }
         this.pointData.splice(2);
         this.searchData.splice(2);
@@ -520,8 +540,8 @@
             {
               activeArea: false,
               area: null, // 区域
-              startTime: this.setDTime().startTime,
-              endTime:  this.setDTime().endTime,
+              startTime: '',
+              endTime:  '',
             }
         )
         this.pointData.push([]);
@@ -529,10 +549,10 @@
       setDTime () {
         let date = new Date();
         let curDate = date.getTime();
-        let curS = 3 * 24 * 3600 * 1000;
-        let _s = new Date(curDate - curS).getFullYear() + '-' + (new Date(curDate - curS).getMonth() + 1) + '-' + new Date(curDate - curS).getDate();
-        let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
-        return {startTime: _s,endTime: _e}
+        let curS = 1 * 24 * 3600 * 1000;
+//        let _s = new Date(curDate - curS).getFullYear() + '-' + (new Date(curDate - curS).getMonth() + 1) + '-' + new Date(curDate - curS).getDate();
+//        let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+        return {startTime: curDate - curS,endTime: curDate}
       },
       // 选择区域
       selArea (v) {
@@ -551,7 +571,6 @@
           case 'cut2' :
             this.mouseTool.circle({
               strokeColor: "#FA453A",
-              strokeOpacity: 1,
               strokeWeight: 1,
               strokeOpacity: 0.2,
               fillColor: '#FA453A',
@@ -582,7 +601,6 @@
               strokeWeight: 1,
               fillColor: '#FA453A',
               fillOpacity: 0.2,
-              isRing: false
             });
             break ;
           case 'cut5' :
@@ -605,18 +623,30 @@
           this.delAllArea();
         } else {
           this.mouseTool.close(false);
-          this.map.remove(this.searchData[this.curDrawIndex].area)
+          if (this.searchData[this.curDrawIndex].area) {
+            this.map.remove(this.searchData[this.curDrawIndex].area);
+          }
+          this.searchData.splice(this.curDrawIndex, 1)
         }
       },
       tcDiscuss () {
         let supQuery = {'where': {dtoList: []}};
         if (this.searchData.find((x, index) => !x.area || !x.startTime || !x.endTime)) {
-          this.$message.info('列表的每个区域跟起止时间都必须选择');
+          if (!document.querySelector('.el-message--info')) {
+            this.$message.info('列表的每个区域跟起止时间都必须选择');
+          }
           return false;
         } else  {
           for (let i = 0; i < this.searchData.length; i++) {
             if(this.pointData[i].length === 0) {
-              this.$message.info('第' + (i + 1) + '个区域没有框选中设备，请重新选择第' + (i + 1) + '个区域');
+              if (!document.querySelector('.el-message--info')) {
+                this.$message.info('第' + (i + 1) + '个区域没有框选中设备，请重新选择第' + (i + 1) + '个区域');
+              }
+              return false;
+            } else if (this.searchData[i].endTime > this.searchData[i].startTime + 3 * 3600 * 24 * 1000 || this.searchData[i].endTime < this.searchData[i].startTime ) {
+              if (!document.querySelector('.el-message--info')) {
+                this.$message.info('结束时间必须大于开始时间并且区间小于三天');
+              }
               return false;
             }
           }
@@ -635,6 +665,72 @@
   };
 </script>
 <style lang="scss" scoped>
+  .right.hide {
+    width: calc(100% - 272px);
+    height: 100%;
+    float: right;
+  }
+  .right {
+    width: 100%;
+    height: 100%;
+    float: right;
+  }
+  .left.hide {
+    margin-left: -272px;
+    transition: marginLeft 0.3s ease-in;
+    position: relative;
+    z-index: 2;
+    // animation: fadeOutLeft 0.4s ease-out 0.3s both;
+  }
+  .left {
+    position: relative;
+    width: 272px;
+    height: 100%;
+    background-color: #ffffff;
+    float: left;
+    z-index: 1;
+    margin-left: 0px;
+    /*box-shadow: 4px 0px 10px 0px #838383;*/
+    /*box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);*/
+    animation: fadeInLeft 0.4s ease-out 0.3s both;
+    transition: marginLeft 0.3s ease-in;
+    .plane {
+      padding: 10px;
+      position: relative;
+      height: 100%;
+    }
+    .line40 {
+      line-height: 40px;
+    }
+    .inset {
+      display: inline-block;
+      line-height: 40px;
+      font-style: normal;
+    }
+    .firstItem {
+      margin-bottom: 5px;
+    }
+  }
+  .insetLeft {
+    position: absolute;
+    right: -28px;
+    width: 25px;
+    height: 178px;
+    top: 50%;
+    margin-top: -89px;
+    display: inline-block;
+    background-repeat: no-repeat;
+    transform: rotate(180deg);
+    background-image: url(../../../../../assets/img/icons.png);
+    background-position: -380px -1269px;
+    cursor: pointer;
+  }
+  .hide {
+    .insetLeft {
+      transform: rotate(180deg);
+      background-position: -504px -1269px;
+    }
+  }
   .map_rrt_u2 {
     position: absolute; right: 30px;
     bottom: 30px;
@@ -679,19 +775,26 @@
       position: absolute;
       left: 0px;
       top: 0px;
-      width: 328px;
-      height: 100%;
+      width: 272px;
+      height: calc(100% - 10px);
+      .top_search_input {
+        position: absolute;
+        left: 302px;
+        top: 30px;
+      }
       .inline-input {
-        width: 272px;
+        width: 336px;
       }
       .select_btn {
         background-color: #0c70f8;
         color: #ffffff;
+        width: 64px;
+        position: absolute;
+        right: 0;
       }
       .search_main {
         width: 272px;
         min-height: 569px;
-        margin-top: 20px;
         background: #ffffff;
         .search_top {
           height: 48px;
@@ -703,13 +806,6 @@
             width: 50%;
             color: #0C70F8;
             cursor: pointer;
-            &:last-child {
-              text-align: right;
-              color: #CCCCCC;
-              &:hover {
-                color: #0C70F8;
-              }
-            }
           }
         }
         .search_btn {
@@ -722,6 +818,9 @@
             height: 10px;
             line-height: 10px;
           }
+          border-bottom: 1px solid #F2F2F2;
+          padding-bottom: 20px;
+          margin-bottom: 20px;
         }
         .search_line_ts {
           width: 232px;
@@ -740,9 +839,11 @@
               padding-left: 10px;
               &:last-child {
                 text-align: right;
-                padding-right: 10px;
-                padding-top: 10px;
+                padding-top: 2px;
                 color: #999999;
+                i{
+                  margin-right: 10px;
+                }
               }
             }
             .choose_btn {

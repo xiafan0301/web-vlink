@@ -5,11 +5,6 @@
         <span>查询</span>
         <ul class="ji_anm ji_anm1">
           <li>
-            <router-link :to="{name: 'vehicle_search_clcx'}">
-              <i class="vl_icon2 vl_icon2_001"></i><span>车辆查询</span>
-            </router-link>
-          </li>
-          <li>
             <router-link :to="{name: 'vehicle_search_tzsc'}">
               <i class="vl_icon2 vl_icon2_002"></i><span>特征搜车</span>
             </router-link>
@@ -30,13 +25,18 @@
             </router-link>
           </li>
           <li>
-            <router-link :to="{name: 'vehicle_search_clxx'}">
-              <i class="vl_icon2 vl_icon2_005"></i><span>车辆信息</span>
+            <router-link :to="{name: 'vehicle_search_clcx'}">
+              <i class="vl_icon2 vl_icon2_001"></i><span>车辆查询</span>
             </router-link>
           </li>
           <li>
             <router-link :to="{name: 'vehicle_search_lxwf'}">
-              <i class="vl_icon2 vl_icon2_006"></i><span>连续违法</span>
+              <i class="vl_icon2 vl_icon2_006"></i><span>连续违章</span>
+            </router-link>
+          </li>
+          <li>
+            <router-link :to="{name: 'vehicle_search_clxx'}">
+              <i class="vl_icon2 vl_icon2_005"></i><span>车辆档案</span>
             </router-link>
           </li>
           <!-- <li>
@@ -44,11 +44,6 @@
               <i class="vl_icon2 vl_icon2_007"></i><span>频繁过车</span>
             </router-link>
           </li> -->
-          <li>
-            <router-link :to="{name: 'vehicle_search_qyph'}">
-              <i class="vl_icon2 vl_icon2_007"></i><span>区域徘徊</span>
-            </router-link>
-          </li>
         </ul>
       </li>
       <li>
@@ -94,6 +89,11 @@
               <i class="vl_icon2 vl_icon2_018"></i><span>多车同行分析</span>
             </router-link>
           </li>
+          <li>
+            <router-link :to="{name: 'vehicle_search_qyph'}">
+              <i class="vl_icon2 vl_icon2_007"></i><span>区域徘徊</span>
+            </router-link>
+          </li>
         </ul>
       </li>
       <li>
@@ -106,12 +106,12 @@
           </li>
           <li>
             <router-link :to="{name: 'vehicle_search_ccrc'}">
-              <i class="vl_icon2 vl_icon2_022"></i><span>初次入城统计</span>
+              <i class="vl_icon2 vl_icon2_022"></i><span>入城统计</span>
             </router-link>
           </li>
           <li>
             <router-link :to="{name: 'vehicle_search_bkclcc'}">
-              <i class="vl_icon2 vl_icon2_023"></i><span>布控车辆出城</span>
+              <i class="vl_icon2 vl_icon2_023"></i><span>出城统计</span>
             </router-link>
           </li>
           <li>
@@ -126,7 +126,7 @@
           </li>
           <li>
             <router-link :to="{name: 'vehicle_report'}">
-              <i class="vl_icon2 vl_icon2_027"></i><span>车辆侦察报告</span>
+              <i class="vl_icon2 vl_icon2_026"></i><span>车辆综合分析报告</span>
             </router-link>
           </li>
         </ul>

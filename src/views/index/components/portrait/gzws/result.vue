@@ -11,7 +11,7 @@
       <div class="left">
         <ul>
           <li>
-            <img src="../../../../../assets/img/temp/vis-eg.png" alt="">
+            <img :src="taskDetail.taskWebParam && taskDetail.taskWebParam.targetPicUrl" alt="" class="bigImg">
           </li>
           <li>
             <span>任务名称：</span>
@@ -58,8 +58,8 @@
                   <p class="detail_info">
                     <span v-show="item.sex">{{item.sex}}性</span>
                     <span v-show="item.age">{{item.age}}</span>
-                    <span v-show="item.hat">{{item.hat}}</span>
-                    <!-- <span v-show="item.mask">{{item.mask}}</span> -->
+                    <span v-show="item.hat" :title="item.hat">{{item.hat}}</span>
+                    <span v-show="item.mask" :title="item.mask">{{item.mask}}</span>
                   </p>
                   <div class="record_btn" @click="skipWsReocrdPage(item)">查看尾随记录</div>
                 </div>
@@ -184,14 +184,14 @@ export default {
             margin-bottom: 20px;
             box-shadow: 0px 5px 16px 0px #A9A9A9;
             .de_left {
-              width: 50%;
+              width: 45%;
               img {
-                width: 140px;
-                height: 140px;
+                width: 130px;
+                height: 130px;
               }
             }
             .de_right {
-              width: 50%;
+              width: 55%;
               line-height: 30px;
               .title {
                 color: #999999;
@@ -214,11 +214,11 @@ export default {
                   background-color: #FAFAFA;
                   color: #333333;
                   font-size: 12px;
-                  margin-right: 5px;
+                  margin-right: 3px;
                   border-radius:3px;
                   // padding: 5px 8px;
-                  padding: 0 3px;
-                  max-width: 50px;
+                  padding: 0 2px;
+                  max-width: 43px;
                   cursor: pointer;
                   overflow: hidden;
                   text-overflow:ellipsis;

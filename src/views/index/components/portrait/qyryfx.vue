@@ -1,28 +1,33 @@
 <template>
   <div class="qyryfx_wrap">
     <!-- 面包屑通用样式 -->
-    <div class="link_bread">
+    <div
+      is="vlBreadcrumb"
+      :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
+          {name: '区域人员分析'}]"
+    ></div>
+    <!-- <div class="link_bread">
       <el-breadcrumb separator=">" class="bread_common">
         <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像检索</el-breadcrumb-item>
         <el-breadcrumb-item :to="{ path: '/portrait/pfcm' }">区域人员分析</el-breadcrumb-item>
       </el-breadcrumb>
-    </div>
+    </div>-->
     <div class="qyryfx_content">
       <!-- 页面的左边 -->
       <div class="info_left" v-show="videoMenuStatus">
         <vue-scroll>
           <div class="left_top">
             <!-- 搜索 -->
-            <div class="search_wrap">
+            <!-- <div class="search_wrap">
               <el-input
                 class="width232"
-                v-model="searchCamera"
+                v-model="searchPlace"
                 suffix-icon="el-icon-search"
                 placeholder="搜索地点名称"
                 @focus="isSearchResult = true;"
                 id="map-sd-search-input"
               ></el-input>
-            </div>
+            </div>-->
             <!-- 搜索条件 -->
             <div class="search_condition">
               <div class="condition_title">设定分析条件</div>
@@ -85,10 +90,10 @@
               <div class="sd-opts">
                 <div class="sd-opts-title">
                   <h4>区域选择</h4>
-                  <i class="vl_icon vl_icon_portrait_02"></i>
+                  <i class="vl_icon vl_icon_portrait_02" title="定位当前选中区域" @click="setFitV(index)"></i>
                 </div>
                 <ul>
-                  <li>
+                  <li title="选择矩形范围内的设备">
                     <div
                       :class="{'sd-opts-sed': item.drawActiveType === 1 }"
                       @click="selDrawType(1, index)"
@@ -96,7 +101,7 @@
                       <span class="sd-opts-icon sd-opts-icon1"></span>
                     </div>
                   </li>
-                  <li>
+                  <li title="选择圆形范围内的设备">
                     <div
                       :class="{'sd-opts-sed': item.drawActiveType === 2 }"
                       @click="selDrawType(2, index)"
@@ -104,7 +109,7 @@
                       <span class="sd-opts-icon sd-opts-icon2"></span>
                     </div>
                   </li>
-                  <li>
+                  <li title="选择折线100米范围内的设备">
                     <div
                       :class="{'sd-opts-sed': item.drawActiveType === 3 }"
                       @click="selDrawType(3, index)"
@@ -112,7 +117,7 @@
                       <span class="sd-opts-icon sd-opts-icon3"></span>
                     </div>
                   </li>
-                  <li>
+                  <li title="选择多边形范围内的设备">
                     <div
                       :class="{'sd-opts-sed': item.drawActiveType === 4 }"
                       @click="selDrawType(4, index)"
@@ -120,7 +125,7 @@
                       <span class="sd-opts-icon sd-opts-icon4"></span>
                     </div>
                   </li>
-                  <li>
+                  <li title="选择10公里圆形范围内的设备">
                     <div
                       :class="{'sd-opts-sed': item.drawActiveType === 5 }"
                       @click="selDrawType(5, index)"
@@ -129,11 +134,17 @@
                     </div>
                   </li>
                 </ul>
+                <p class="tips">
+                  <span v-if="item.drawActiveType === 1">在地图上按住鼠标左键拖动鼠标框选，松开鼠标完成选择</span>
+                  <span v-else-if="item.drawActiveType === 2">在地图上按住鼠标左键选择圆心，拖动鼠标作为半径，松开鼠标完成选择</span>
+                  <span v-else-if="item.drawActiveType === 3">在地图上鼠标左键选择两个或两个以上点形成折线，双击或右键完成选择</span>
+                  <span v-else-if="item.drawActiveType === 4">在地图上鼠标左键选择三个或三个以上点形成封闭区域，双击或右键完成选择</span>
+                  <span v-else-if="item.drawActiveType === 5">在地图上鼠标左键选择圆心，形成10公里大小的圆形区域</span>
+                </p>
               </div>
               <!-- 选择时间 -->
               <div class="select_date">
                 <div class="time-search">
-                  <p>开始</p>
                   <el-date-picker
                     v-model="item.startTime"
                     type="datetime"
@@ -141,12 +152,10 @@
                     value-format="yyyy-MM-dd HH:mm:ss"
                     :picker-options="startDateOptArr[index]"
                     placeholder="开始时间"
-                    class="width212px"
-                    @change="timeChange(index)"
+                    class="width232 vl_date"
                   ></el-date-picker>
                 </div>
                 <div class="time-search">
-                  <p>结束</p>
                   <el-date-picker
                     v-model="item.endTime"
                     :clearable="false"
@@ -155,8 +164,7 @@
                     type="datetime"
                     default-time="23:59:59"
                     placeholder="结束时间"
-                    class="width212px"
-                    @change="timeChange(index, 'end')"
+                    class="width232 vl_date vl_date_end"
                   ></el-date-picker>
                 </div>
               </div>
@@ -165,7 +173,7 @@
           <!-- 按钮 -->
           <div class="search_btn">
             <el-button @click="resetLeftMenu">重置</el-button>
-            <el-button type="primary" @click="submitData">确定</el-button>
+            <el-button type="primary" :loading="submitLoading" @click="submitData">确定</el-button>
           </div>
         </vue-scroll>
       </div>
@@ -182,6 +190,25 @@
         <!-- 地图信息 -->
         <div class="gis_content" id="gis_content">
           <div class="map_rm" id="mapMap"></div>
+          <div class="sd_search">
+            <input
+              type="text"
+              placeholder="请输入地名，快速定位地址"
+              autocomplete="off"
+              class="sd_search_input"
+              id="map-sd-search-input"
+            />
+            <!-- <el-input
+              v-model="searchPlace"
+              placeholder="请输入地名，快速定位地址"
+              class="sd_search_input"
+              autocomplete="off"
+              id="map-sd-search-input"
+            ></el-input>-->
+            <span @click="selectArea(searchPlace)">
+              <i class="el-icon-search"></i>
+            </span>
+          </div>
           <!-- 地图控制按钮（放大，缩小，定位） -->
           <div class="map_control">
             <!-- 摄像头拍摄数量 -->
@@ -229,13 +256,11 @@
       <div class="info_right" v-show="infoRightShow">
         <div class="danger_people_wrap">
           <vue-scroll>
-            <h3
-              class="camera_name"
-            >
-            <span>{{ selectedDevice.deviceName }}</span>
-            &nbsp;
-            <span>{{'(' + currentClickDevice.shotNum + '次)'}}</span>
-            <i class="el-icon-close" @click="infoRightShow = false;" title="关闭"></i>
+            <h3 class="camera_name">
+              <span>{{ selectedDevice.deviceName }}</span>
+              &nbsp;
+              <span>{{'(' + currentClickDevice.shotNum + '次)'}}</span>
+              <i class="el-icon-close" @click="infoRightShow = false;" title="关闭"></i>
             </h3>
             <div class="danger_people_list">
               <div
@@ -245,8 +270,9 @@
               >
                 <div v-for="(sItem, sIndex) in item.detailList" :key="'my_swiper' + sIndex">
                   <div class="swiper_contents" v-if="item.currentIndex === sIndex">
+                    <div class="shot_times">{{ item.detailList.length + '次'}}</div>
                     <div class="img_warp">
-                      <img :src="sItem.upPhotoUrl" alt />
+                      <img :src="sItem.upPhotoUrl" title="点击放大图片" class="bigImg" alt />
                     </div>
                     <div class="similarity">
                       <p class="similarity_count">{{sItem.semblance}}</p>
@@ -267,7 +293,7 @@
                       </div>
                     </div>
                     <div class="img_warp">
-                      <img :src="sItem.subStoragePath" alt />
+                      <img :src="sItem.subStoragePath" title="点击放大图片" class="bigImg" alt />
                     </div>
                     <div class="people_message">
                       <h2 class="name">{{item.name}}</h2>
@@ -294,8 +320,8 @@
                         <p class="similarity_title">相似度</p>
                         <div class="select_time">
                           <el-select
-                            v-model="searchCamera"
-                            @change="slideToIndex(index, searchCamera)"
+                            v-model="searchPlace"
+                            @change="slideToIndex(index, searchPlace)"
                             placeholder="请选择"
                           >
                             <el-option
@@ -332,6 +358,8 @@
   </div>
 </template>
 <script>
+import vlBreadcrumb from "@/components/common/breadcrumb.vue";
+
 import swiper from "vue-awesome-swiper";
 import { mapXupuxian } from "@/config/config.js";
 import { formatDate } from "@/utils/util.js";
@@ -346,6 +374,7 @@ import {
 import { getGroupAllList } from "@/views/index/api/api.control.js";
 import { validatePersonNum, validateInteger } from "@/utils/validator.js";
 import { random14, objDeepCopy } from "@/utils/util.js";
+import { constants } from "crypto";
 
 export default {
   data() {
@@ -358,12 +387,14 @@ export default {
         }
       },
       /*左边搜索表单变量 */
-      searchCamera: "",
+      searchPlace: "",
       qyryfxFrom: {
-        personGroupId: null,
+        personGroupId: "",
         sex: null,
-        age: null
+        age: ""
       },
+      submitLoading: false, // 提交loading
+      getDetailLoading: false,
       cameraPhotoList: [],
       startDateOptArr: [
         {
@@ -371,15 +402,9 @@ export default {
             if (this.drawObj[0].endTime) {
               return (
                 time.getTime() > new Date(this.drawObj[0].endTime).getTime()
-                // ||
-                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
               );
             } else {
-              return (
-                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
-                // ||
-                time.getTime() > new Date().getTime()
-              );
+              return time.getTime() > new Date().getTime();
             }
           }
         }
@@ -481,6 +506,7 @@ export default {
       drawType: 0,
       amap: null, // 地图对象
       markerList: [], // 设备卡口标记的数组
+      areaList: [], // 点击定位的数组
       mouseTool: null,
       drawType: 0,
       currenDrawobj: 0, // 当前的时间区域
@@ -520,10 +546,11 @@ export default {
       swiper: null
     };
   },
+  components: { vlBreadcrumb },
   mounted() {
     //获取数据
     this.getTreeList();
-    this.mapEvents();
+    // this.mapEvents();
     //加载地图
     this.initMap();
     // 获取到监控人群分组
@@ -536,6 +563,10 @@ export default {
     });
   },
   methods: {
+    // searchPlaceClick() {
+    //   // 地图搜索
+    //   console.log("this.searchPlace", this.searchPlace);
+    // },
     // 日期控制
     timeChange(ind, type = "start") {
       this.$nextTick(() => {
@@ -593,12 +624,12 @@ export default {
     },
     /**重置左边菜单的方法 */
     resetLeftMenu() {
-      this.searchCamera = "";
+      this.searchPlace = "";
       // 清空表单
       this.qyryfxFrom = {
-        personGroupId: null,
+        personGroupId: "",
         sex: null,
-        age: null
+        age: ""
       };
       // 清空选中的区域
       for (let i = 0; i < this.drawObj.length; i++) {
@@ -607,13 +638,7 @@ export default {
       // 初始化时间区域数组
       this.drawObj = [
         {
-          rectangle: {
-            /* 'id': {
-            marker: null, // 标记对象 (编辑、完成、删除等)
-            obj: null // 矩形图层对象
-            edtor: null // 编辑对象
-          } */
-          },
+          rectangle: {},
           circle: {},
           polyline: {},
           polygon: {},
@@ -665,6 +690,8 @@ export default {
         }
       ];
       this.totalData = [];
+      this.clearMarkList(); // 清除地图标记
+      this.setMarks();
       this.infoRightShow = false; // 关闭右边的菜单数据
     },
     /** 操作左边菜单方法 */
@@ -677,6 +704,8 @@ export default {
     /** 提交搜索摄像头抓拍记录 */
     submitData() {
       this.totalData = []; // 先清空数据
+      this.mouseTool.close(false);
+      this.amap.setDefaultCursor();
       for (let i = 0; i < this.drawObj.length; i++) {
         this.selSubmit(i);
       }
@@ -694,7 +723,6 @@ export default {
             ...deviceAndTimeList,
             {
               deviceIds: area.ad.map(item => item.uid).join(),
-              // deviceIds: "5",
               bayonetIds: area.ab.map(item => item.uid).join(),
               startTime: this.drawObj[j].startTime,
               endTime: this.drawObj[j].endTime
@@ -702,54 +730,54 @@ export default {
           ];
         }
       }
-      // 处理下拉框
-      if (this.qyryfxFrom.personGroupId) {
-        this.qyryfxFrom.personGroupId = this.qyryfxFrom.personGroupId.join();
-      }
-      if (this.qyryfxFrom.age) {
-        this.qyryfxFrom.age = this.qyryfxFrom.age.join();
-      }
       const queryParams = {
-        ...this.qyryfxFrom,
+        sex: this.qyryfxFrom.sex,
+        age: this.qyryfxFrom.age !== "" ? this.qyryfxFrom.age.join() : "",
+        personGroupId:
+          this.qyryfxFrom.personGroupId !== ""
+            ? this.qyryfxFrom.personGroupId.join()
+            : "",
         deviceAndTimeList: deviceAndTimeList
       };
+      this.submitLoading = true; // 打开加载效果
       postShotNumArea(queryParams)
         .then(res => {
           if (res && res.data) {
+            this.submitLoading = false; // 关闭加载效果
             if (res.data.length) {
               this.clearMarkList(); // 清除地图标记
               this.setMarks(res.data, false);
             } else {
               this.clearMarkList(); // 清除地图标记
               this.setMarks();
+              this.$message.warning("您选择的设备没有数据");
             }
           } else {
+            this.submitLoading = false; // 关闭加载效果
             this.clearMarkList(); // 清除地图标记
             this.setMarks();
+            this.$message.warning("您选择的设备没有数据");
           }
         })
         .catch(() => {
           this.clearMarkList(); // 清除地图标记
           this.setMarks();
+          this.submitLoading = false; // 关闭加载效果
         });
     },
     /** 点击摄像头查看此摄像头抓拍详情信息 */
     clickGetCameraData(device) {
-      // console.log("总的摄像头数据", this.totalData);
-      // console.log("设备详情", device);
-      // 处理下拉框
-      if (this.qyryfxFrom.personGroupId) {
-        this.qyryfxFrom.personGroupId = this.qyryfxFrom.personGroupId.join();
-      }
-      if (this.qyryfxFrom.age) {
-        this.qyryfxFrom.age = this.qyryfxFrom.age.join();
-      }
       // 点击设备获取到人员的信息
       let queryParams;
       if (this.drawObj.length === 1) {
         // 只有一个时间区域
         queryParams = {
-          ...this.qyryfxFrom,
+          sex: this.qyryfxFrom.sex,
+          age: this.qyryfxFrom.age !== "" ? this.qyryfxFrom.age.join() : "",
+          personGroupId:
+            this.qyryfxFrom.personGroupId !== ""
+              ? this.qyryfxFrom.personGroupId.join()
+              : "",
           deviceCode: device.viewClassCode,
           startTime: this.drawObj[0].startTime,
           endTime: this.drawObj[0].endTime
@@ -802,6 +830,10 @@ export default {
               const item = this.cameraPhotoList[i];
               if (item.detailList.length) {
                 item.currentIndex = item.detailList.length - 1;
+                item.detailList = item.detailList.map(item => {
+                  item.semblance = Number(item.semblance).toFixed(2); // 保留2位小数点
+                  return item;
+                });
               } else {
                 item.currentIndex = 0;
               }
@@ -828,15 +860,9 @@ export default {
             if (this.drawObj[index].endTime) {
               return (
                 time.getTime() > new Date(this.drawObj[index].endTime).getTime()
-                //   ||
-                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
               );
             } else {
-              return (
-                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
-                // ||
-                time.getTime() > new Date().getTime()
-              );
+              return time.getTime() > new Date().getTime();
             }
           }
         }
@@ -852,10 +878,7 @@ export default {
                 time.getTime() > new Date().getTime()
               );
             } else {
-              return (
-                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3 ||
-                time.getTime() > new Date().getTime()
-              );
+              return time.getTime() > new Date().getTime();
             }
           }
         }
@@ -946,36 +969,168 @@ export default {
       this.mouseTool.on("draw", event => {
         // event.obj 为绘制出来的覆盖物对象
         let _sid = random14();
+        this.drawClear(this.currenDrawobj);
+        // console.log('监听鼠标');
         //  return
         let drawActive = this.drawObj[this.currenDrawobj].drawActiveType; // 获取到当前要画的图形
         if (drawActive === 1) {
           this.drawObj[this.currenDrawobj].rectangle[_sid] = {};
           this.drawObj[this.currenDrawobj].rectangle[_sid].obj = event.obj;
           this.drawObj[this.currenDrawobj].rectangle["sid"] = _sid;
-          this.drawRectangleMark(_sid, event.obj);
+          // this.drawRectangleMark(_sid, event.obj);
         } else if (drawActive === 2) {
           this.drawObj[this.currenDrawobj].circle[_sid] = {};
           this.drawObj[this.currenDrawobj].circle[_sid].obj = event.obj;
           this.drawObj[this.currenDrawobj].circle["sid"] = _sid;
-          this.drawCircleMark(_sid, event.obj);
+          // this.drawCircleMark(_sid, event.obj);
         } else if (drawActive === 3) {
           this.drawObj[this.currenDrawobj].polyline[_sid] = {};
           this.drawObj[this.currenDrawobj].polyline[_sid].obj = event.obj;
           this.drawObj[this.currenDrawobj].polyline["sid"] = _sid;
-          this.drawPolylineMark(_sid, event.obj);
+          // this.drawPolylineMark(_sid, event.obj);
         } else if (drawActive === 4) {
           this.drawObj[this.currenDrawobj].polygon[_sid] = {};
           this.drawObj[this.currenDrawobj].polygon[_sid].obj = event.obj;
           this.drawObj[this.currenDrawobj].polygon["sid"] = _sid;
-          this.drawPolygonMark(_sid, event.obj);
+          // this.drawPolygonMark(_sid, event.obj);
         } else if (drawActive === 5) {
-          this.drawObj[this.currenDrawobj].circle10km[_sid] = {};
-          this.drawObj[this.currenDrawobj].circle10km[_sid].obj = event.obj;
-          this.drawObj[this.currenDrawobj].circle10km["sid"] = _sid;
+          // this.drawObj[this.currenDrawobj].circle10km[_sid] = {};
+          // this.drawObj[this.currenDrawobj].circle10km[_sid].obj = event.obj;
+          // this.drawObj[this.currenDrawobj].circle10km["sid"] = _sid;
         }
-        this.mouseTool.close(false);
-        this.amap.setDefaultCursor();
+        // this.mouseTool.close(false);
+        // this.amap.setDefaultCursor();
       });
+    },
+    drawClear(ind) {
+      // 矩形
+      if (this.drawObj[ind].rectangle) {
+        for (let k in this.drawObj[ind].rectangle) {
+          this.drawClearDo(this.drawObj[ind].rectangle[k]);
+        }
+        this.drawObj[ind].rectangle = {};
+      }
+      // 圆形
+      if (this.drawObj[ind].circle) {
+        for (let k in this.drawObj[ind].circle) {
+          this.drawClearDo(this.drawObj[ind].circle[k]);
+        }
+        this.drawObj[ind].circle = {};
+      }
+      // 线
+      if (this.drawObj[ind].polyline) {
+        for (let k in this.drawObj[ind].polyline) {
+          this.drawClearDo(this.drawObj[ind].polyline[k]);
+        }
+        this.drawObj[ind].polyline = {};
+      }
+      // 多边形
+      if (this.drawObj[ind].polygon) {
+        for (let k in this.drawObj[ind].polygon) {
+          this.drawClearDo(this.drawObj[ind].polygon[k]);
+        }
+        this.drawObj[ind].polygon = {};
+      }
+      if (this.drawObj[ind].circle10km) {
+        for (let k in this.drawObj[ind].circle10km) {
+          this.drawClearDo(this.drawObj[ind].circle10km[k]);
+        }
+        this.drawObj[ind].circle10km = {};
+      }
+    },
+    drawClearDo(obj) {
+      if (obj.obj) {
+        this.amap.remove(obj.obj);
+        obj.obj = null;
+      }
+      if (obj.marker) {
+        this.amap.remove(obj.marker);
+        obj.marker = null;
+      }
+      if (obj.editor) {
+        obj.editor.close();
+        this.amap.remove(obj.editor);
+        obj.editor = null;
+      }
+      obj = null;
+    },
+    setFitV(ind) {
+      this.getArea(ind);
+      this.$nextTick(() => {
+        this.amap.setFitView(this.areaList[ind]);
+      });
+    },
+    getArea(ind) {
+      // 矩形
+      const curInd = this.drawObj[ind].drawActiveType;
+      if (curInd === 1) {
+        if (this.areaList.length < ind + 1) {
+          this.areaList[ind] = this.drawObj[ind].rectangle[
+            this.drawObj[ind].rectangle.sid
+          ].obj;
+        } else {
+          this.areaList.splice(
+            ind,
+            1,
+            this.drawObj[ind].rectangle[this.drawObj[ind].rectangle.sid].obj
+          );
+        }
+      }
+      // 圆形
+      if (curInd === 2) {
+        if (this.areaList.length < ind + 1) {
+          this.areaList[ind] = this.drawObj[ind].circle[
+            this.drawObj[ind].circle.sid
+          ].obj;
+        } else {
+          this.areaList.splice(
+            ind,
+            1,
+            this.drawObj[ind].circle[this.drawObj[ind].circle.sid].obj
+          );
+        }
+      }
+      // 线
+      if (curInd === 3) {
+        if (this.areaList.length < ind + 1) {
+          this.areaList[ind] = this.drawObj[ind].polyline[
+            this.drawObj[ind].polyline.sid
+          ].obj;
+        } else {
+          this.areaList.splice(
+            ind,
+            1,
+            this.drawObj[ind].polyline[this.drawObj[ind].polyline.sid].obj
+          );
+        }
+      }
+      // 多边形
+      if (curInd === 4) {
+        if (this.areaList.length < ind + 1) {
+          this.areaList[ind] = this.drawObj[ind].polygon[
+            this.drawObj[ind].polygon.sid
+          ].obj;
+        } else {
+          this.areaList.splice(
+            ind,
+            1,
+            this.drawObj[ind].polygon[this.drawObj[ind].polygon.sid].obj
+          );
+        }
+      }
+      if (curInd === 5) {
+        if (this.areaList.length < ind + 1) {
+          this.areaList[ind] = this.drawObj[ind].circle10km[
+            this.drawObj[ind].circle10km.sid
+          ].obj;
+        } else {
+          this.areaList.splice(
+            ind,
+            1,
+            this.drawObj[ind].circle10km[this.drawObj[ind].circle10km.sid].obj
+          );
+        }
+      }
     },
     mapEvents() {
       let _this = this,
@@ -1138,15 +1293,26 @@ export default {
       }
     },
     selectArea(e) {
-      console.log(e);
+      // if (this.searchPlace) {
+      this.searchPlace = e;
+      // }
       if (e.poi && e.poi.location) {
         this.amap.setZoom(15);
         this.amap.setCenter(e.poi.location);
       }
     },
     selDrawType(drawType, index) {
-      this.currenDrawobj = index; // 确定当前的时间区域
-      this.drawObj[index].drawActiveType = drawType; // 当前要画的图形类别
+      // const old = this.drawObj[index].drawActiveType;
+      if (this.drawObj[index].drawActiveType === drawType) {
+        this.drawObj[index].drawActiveType = 0;
+        this.mouseTool.close(false);
+        this.amap.setDefaultCursor();
+        return;
+      } else {
+        this.drawObj[index].drawActiveType = drawType; // 当前要画的图形类别
+        this.currenDrawobj = index; // 确定当前的时间区域
+      }
+      // console.log("点击干掉", this.drawObj[this.currenDrawobj].drawActiveType);
       if (drawType === 1) {
         // 矩形
         this.drawRectangle();
@@ -1161,6 +1327,9 @@ export default {
         this.drawPolygon();
       } else if (drawType === 5) {
         // 多边形
+        // if (old === 3) {
+        //   console.log("点击干掉", 123);
+        // }
         this.drawCircle10km();
       }
     },
@@ -1512,7 +1681,8 @@ export default {
       this.amap.on("click", this.drawCircle10kmClick);
     },
     drawCircle10kmClick(e) {
-      // e.lnglat.getLng()+','+e.lnglat.getLat()
+      this.drawClear(this.currenDrawobj);
+      this.mouseTool.close(false);
       let circle = new AMap.Circle({
         center: e.lnglat,
         radius: 1000 * 10, //半径
@@ -1532,10 +1702,8 @@ export default {
       let _sid = random14();
       this.drawObj[this.currenDrawobj].circle10km[_sid] = {};
       this.drawObj[this.currenDrawobj].circle10km[_sid].obj = circle;
-      this.amap.setDefaultCursor();
-      this.drawObj[this.currenDrawobj].drawActiveType = 0;
+      this.drawObj[this.currenDrawobj].circle10km["sid"] = _sid;
       this.amap.off("click", this.drawCircle10kmClick);
-      this.drawCircle10kmMark(_sid, circle);
     },
     drawCircle10kmEditor(sid) {
       if (this.drawObj.circle10km[sid]) {
@@ -1606,7 +1774,7 @@ export default {
       }
     },
     selSubmit(index) {
-      this.submitLoading = true;
+      this.getDetailLoading = true;
       let dObj = {},
         bObj = {};
       if (this.listDevice && this.listDevice.length > 0) {
@@ -1615,6 +1783,9 @@ export default {
           // 矩形
           if (this.drawObj[index].rectangle) {
             for (let k in this.drawObj[index].rectangle) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].rectangle[k];
               if (
                 so.obj &&
@@ -1627,6 +1798,9 @@ export default {
           // 圆形
           if (this.drawObj[index].circle) {
             for (let k in this.drawObj[index].circle) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].circle[k];
               if (
                 so.obj &&
@@ -1639,8 +1813,10 @@ export default {
           // 线
           if (this.drawObj[index].polyline) {
             for (let k in this.drawObj[index].polyline) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].polyline[k];
-              console.log('线', so);
               if (
                 window.AMap.GeometryUtil.distanceToLine(
                   new window.AMap.LngLat(o.longitude, o.latitude),
@@ -1654,6 +1830,9 @@ export default {
           // 多边形
           if (this.drawObj[index].polygon) {
             for (let k in this.drawObj[index].polygon) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].polygon[k];
               if (
                 so.obj &&
@@ -1665,6 +1844,9 @@ export default {
           }
           if (this.drawObj[index].circle10km) {
             for (let k in this.drawObj[index].circle10km) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].circle10km[k];
               if (
                 so.obj &&
@@ -1682,6 +1864,9 @@ export default {
           // 矩形
           if (this.drawObj[index].rectangle) {
             for (let k in this.drawObj[index].rectangle) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].rectangle[k];
               if (
                 so.obj &&
@@ -1694,6 +1879,9 @@ export default {
           // 圆形
           if (this.drawObj[index].circle) {
             for (let k in this.drawObj[index].circle) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].circle[k];
               if (
                 so.obj &&
@@ -1706,6 +1894,9 @@ export default {
           // 线
           if (this.drawObj[index].polyline) {
             for (let k in this.drawObj[index].polyline) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].polyline[k];
               if (
                 window.AMap.GeometryUtil.distanceToLine(
@@ -1720,6 +1911,9 @@ export default {
           // 多边形
           if (this.drawObj[index].polygon) {
             for (let k in this.drawObj[index].polygon) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].polygon[k];
               if (
                 so.obj &&
@@ -1731,6 +1925,9 @@ export default {
           }
           if (this.drawObj[index].circle10km) {
             for (let k in this.drawObj[index].circle10km) {
+              if (k === "sid") {
+                continue;
+              }
               let so = this.drawObj[index].circle10km[k];
               if (
                 so.obj &&
@@ -1829,7 +2026,7 @@ export default {
     // 地图标记
     doMark(obj, device, sClass, init = true) {
       let marker;
-      if (!init) {
+      if (!init && device.shotNum > 0) {
         // 非初始化的状态
         let level;
         if (device.shotNum < 20) {
@@ -1853,12 +2050,12 @@ export default {
           draggable: false, // 是否可拖动
           // extData: obj,
           // 自定义点标记覆盖物内容
-          content: `<div class='qyryfx_vl_icon_wrap'> <div class="map_icons ${sClass}"></div> <div class='people_counts_l1 ${level}'> ${device.shotNum}人次 </div> </div>`
+          content: `<div class='qyryfx_vl_icon_wrap' title="点击查询设备抓拍照片"> <div class="map_icons ${sClass}"></div> <div class='people_counts_l1 ${level}'> ${device.shotNum}人次 </div> </div>`
         });
-        this.currentClickDevice = device;
         let _this = this;
         // 给标记绑定一个点击事件
         marker.on("click", function() {
+          _this.currentClickDevice = device;
           _this.selectedDevice = obj;
           _this.clickGetCameraData(obj);
         });
@@ -1872,7 +2069,7 @@ export default {
           draggable: false, // 是否可拖动
           // extData: obj,
           // 自定义点标记覆盖物内容
-          content: `<div class="map_icons ${sClass}"></div>`
+          content: `<div style="cursor:not-allowed;" class="map_icons ${sClass}"></div>`
         });
         this.markerList = [...this.markerList, marker];
       }
@@ -1911,16 +2108,16 @@ export default {
 
 .qyryfx_wrap {
   position: relative;
-  height: calc(100% - 60px);
+  height: calc(100% - 49px);
   font-size: 14px;
   // 面包屑样式
-  .link_bread {
-    height: 60px;
-    background: #fff;
-    .bread_common {
-      padding: 23px 0 0 20px;
-    }
-  }
+  // .link_bread {
+  //   height: 60px;
+  //   background: #fff;
+  //   .bread_common {
+  //     padding: 23px 0 0 20px;
+  //   }
+  // }
   // 搜索结果展示
   .search_result {
     position: absolute;
@@ -2035,7 +2232,7 @@ export default {
       .left_top {
         width: 232px;
         margin: 0 20px;
-        padding: 20px 0;
+        padding-bottom: 20px;
         // 搜索框
         .search_wrap {
           position: relative;
@@ -2097,6 +2294,9 @@ export default {
               color: #333;
               background-color: #fafafa;
               border-bottom: 1px solid #d3d3d3;
+              > i {
+                cursor: pointer;
+              }
             }
             > ul {
               padding: 22px 0 18px 0;
@@ -2125,6 +2325,12 @@ export default {
                   }
                 }
               }
+            }
+            .tips {
+              font-size: 14px;
+              padding: 0 10px 10px 10px;
+              color: #999;
+              // margin: 0 auto;
             }
           }
           .sd-opts-icon {
@@ -2165,7 +2371,6 @@ export default {
               }
             }
           }
-
           .select_date {
             margin-top: 10px;
             .time-search {
@@ -2206,6 +2411,42 @@ export default {
         .map_rm {
           width: 100%;
           height: 100%;
+        }
+        // 地图搜索
+        .sd_search {
+          position: absolute;
+          top: 0.3rem;
+          left: 0.3rem;
+          z-index: 1000;
+          background-color: #fff;
+          overflow: hidden;
+
+          > .sd_search_input {
+            float: left;
+            width: 360px;
+            height: 36px;
+            line-height: 36px;
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0px 3px 10px 0px rgba(99, 99, 99, 0.39);
+            border: 0;
+            padding: 0 15px;
+            border: none;
+          }
+          > span {
+            float: left;
+            width: 60px;
+            height: 36px;
+            line-height: 36px;
+            background-color: #0c70f8;
+            cursor: pointer;
+            text-align: center;
+            > i {
+              position: relative;
+              top: 2px;
+              color: #fff;
+              font-size: 20px;
+            }
+          }
         }
         //定位
         .map_control {
@@ -2313,7 +2554,7 @@ export default {
           border-bottom: 1px solid #d3d3d3;
           width: 428px;
           position: relative;
-          >i {
+          > i {
             position: absolute;
             z-index: 10;
             right: 0;
@@ -2336,6 +2577,19 @@ export default {
             margin-bottom: 25px;
             .swiper_contents {
               padding-left: 50px;
+              position: relative;
+              .shot_times {
+                position: absolute;
+                right: 0;
+                top: -30px;
+                padding: 0 16px;
+                line-height: 20px;
+                border-radius: 10px 0px 0px 10px;
+                background: #e9e9e9;
+                font-size: 12px;
+                color: #555;
+                text-align: center;
+              }
             }
             .change_img {
               position: absolute;
@@ -2509,11 +2763,9 @@ html {
 }
 .qyryfx_wrap {
   // 搜索框
-  .search_wrap {
+  .sd_search {
     .el-input__inner {
-      background: #f2f2f2;
-      border-width: 0;
-      border-radius: 20px;
+      border: none;
     }
   }
   //查询按钮

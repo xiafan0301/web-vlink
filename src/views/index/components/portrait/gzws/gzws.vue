@@ -8,7 +8,6 @@
             {name: '跟踪尾随'}]">
         </div>
       </div>
-      <el-button class="add_btn" type="primary" @click="showAddTaskDialog('add')">新建任务</el-button>
     </div>
     <div class="content_box">
       <ul class="tab-menu">
@@ -31,6 +30,7 @@
           </el-form-item>
           <el-form-item label="创建时间:" prop="reportTime">
             <el-date-picker
+              class="vl_date"
               v-model="searchForm.reportTime"
               type="datetimerange"
               value-format="yyyy-MM-dd HH:mm:ss"
@@ -49,6 +49,7 @@
         <div class="divide"></div>
       </div>
       <div class="table_box">
+        <el-button class="add_btn" type="primary" @click="showAddTaskDialog">新建任务</el-button>
         <el-table :data="list">
           <el-table-column label="序号" type="index" width="100"></el-table-column>
           <el-table-column label="任务名称" prop="taskName" show-overflow-tooltip></el-table-column>
@@ -87,7 +88,7 @@
               >恢复任务</span>
               <span
                 class="operation_btn"
-                @click="showAddTaskDialog('edit', scope.row)"
+                @click="recoveryTask(scope.row)"  
                 v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 3"
               >重启任务</span>
               <span
@@ -143,7 +144,7 @@
     </el-dialog>
     <!--新建任务弹出框-->
     <el-dialog
-      :title="isAddTaskTitle === true ? '新增分析任务' : '重启分析任务'"
+      title="新增分析任务"
       :visible.sync="addTaskDialog"
       width="720px"
       :close-on-click-modal="false"
@@ -170,14 +171,12 @@
         </div>
         <div class="right">
           <el-form class="left_form" :model="addForm" ref="addForm" :rules="rules">
-            <el-form-item prop="taskName">
-              <el-input placeholder="请输入任务名称，最多20字" maxlength="20" v-model="addForm.taskName"></el-input>
-            </el-form-item>
             <el-form-item  prop="dateTime">
               <el-date-picker
                 v-model="addForm.dateTime"
                 style="width: 100%"
                 :clearable="false"
+                class="vl_date"
                 @change="handleDateTime"
                 :picker-options="pickerDateTime"
                 value-format="yyyy-MM-dd HH:mm:ss"
@@ -195,10 +194,13 @@
                   v-for="(item, index) in deviceList"
                   :key="index"
                   :label="item.deviceName"
-                  :value="item.deviceID"
+                  :value="item.deviceName"
                 ></el-option>
               </el-select>
               <span class="span_tips" v-show="isShowDeviceTip">该人像在该时间内无抓拍设备</span>
+            </el-form-item>
+            <el-form-item prop="taskName">
+              <el-input placeholder="请输入任务名称，最多20字" maxlength="20" v-model="addForm.taskName"></el-input>
             </el-form-item>
             <el-form-item prop="interval">
               <el-select placeholder="请选择尾随时间间隔" style="width: 100%" v-model="addForm.interval">
@@ -244,7 +246,6 @@ export default {
         }
       ],
       isShowDeviceTip: false, // 是否显示设备有否提示
-      isAddTaskTitle: true, // 是否是新增任务
       selectIndex: 1, // 默认选中已完成的任务
       taskId: null, // 要操作的任务id
       deleteDialog: false, // 删除任务弹出框
@@ -301,18 +302,18 @@ export default {
   methods: {
     // 时间选择change
     handleDateTime (val) {
-      if (val) {
-        if ( (new Date(val[1]).getTime() - new Date(val[0]).getTime()) >= 3* 24 * 3600 * 1000) {
-          if (!document.querySelector('.el-message--info')) {
-            this.$message.info('最多选择3天');
-          }
-          this.addForm.dateTime = [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()];
-        } else {
-          if (this.dialogImageUrl) {
-            this.getDeviceList();
-          }
-        }
-      }
+      // if (val) {
+      //   if ( (new Date(val[1]).getTime() - new Date(val[0]).getTime()) >= 3* 24 * 3600 * 1000) {
+      //     if (!document.querySelector('.el-message--info')) {
+      //       this.$message.info('最多选择3天');
+      //     }
+      //     this.addForm.dateTime = [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()];
+      //   } else {
+      //     if (this.dialogImageUrl) {
+      //       this.getDeviceList();
+      //     }
+      //   }
+      // }
     },
     // 获取离线任务
     getDataList () {
@@ -335,8 +336,6 @@ export default {
             this.list.map(item => {
               item.taskWebParam = JSON.parse(item.taskWebParam);
             })
-
-            console.log(this.list)
           }
         })
         .catch(() => {})
@@ -379,12 +378,12 @@ export default {
     getDeviceList () {
       this.deviceList = [];
       const params = {
-        // targetPicUrl : this.dialogImageUrl,
-        targetPicUrl: 'http://10.116.126.10/root/image/2019/07/10/34020000001320000016414920190709100000000009_1_1.jpeg',
-        startTime : '2019-07-09 09:59:00',
-        endTime: '2019-07-09 10:03:00'
-        // startTime : formatDate(this.addForm.dateTime[0]),
-        // endTime: formatDate(this.addForm.dateTime[1])
+        targetPicUrl : this.dialogImageUrl,
+        // targetPicUrl: 'http://file.aorise.org/vlink/image/810ddc87-f9db-4e60-9da2-4e1ffc076683.jpg',
+        // startTime : '2019-07-09 09:59:00',
+        // endTime: '2019-07-09 10:03:00'
+        startTime : formatDate(this.addForm.dateTime[0]),
+        endTime: formatDate(this.addForm.dateTime[1])
       };
       console.log('params', params)
       getPersonShotDev(params)
@@ -409,7 +408,7 @@ export default {
     handleChangeDeviceCode (obj) {
       if (obj) {
         this.deviceList.map(item => {
-          if (item.deviceID === obj) {
+          if (item.deviceName === obj) {
             this.addForm.deviceName = item.deviceName;
           }
         })
@@ -418,13 +417,6 @@ export default {
     // 跳至尾随记录页面
     skipWsReocrdPage (obj) {
       this.$router.push({name: 'gzws_detail'})
-      // this.$router.push({name: 'gzws_detail', query: { 
-      //   plateNo: this.addForm.plateNo,
-      //   dateStart: this.deviceStartTime,
-      //   dateEnd: this.addForm.dateEnd,
-      //   plateNoTb: obj.plateNo,
-      //   dateStartTb: obj.shotTime
-      //  }});
     },
     // 取消新建
     cancelAdd (form) {
@@ -448,16 +440,21 @@ export default {
             }
             return;
           };
-          // const vehicleType = this.addForm.vehicleClass.join(':');
+          let deviceCode;
+          this.deviceList.map(item => {
+            if (item.deviceName === this.addForm.deviceCode) {
+              deviceCode = item.deviceID;
+            }
+          })
           const params = {
-            targetPicUrl: 'http://10.116.126.10/root/image/2019/07/10/34020000001320000016414920190709100000000009_1_1.jpeg',
-            startTime : '2019-07-09 09:59:00',
-            endTime: '2019-07-09 10:03:00',
-            // targetPicUrl: this.dialogImageUrl,
-            deviceId: this.addForm.deviceCode,
+            // targetPicUrl: 'http://10.116.126.10/root/image/2019/07/10/34020000001320000016414920190709100000000009_1_1.jpeg',
+            // startTime : '2019-07-09 09:59:00',
+            // endTime: '2019-07-09 10:03:00',
+            targetPicUrl: this.dialogImageUrl,
+            deviceId: deviceCode,
             deviceName: this.addForm.deviceName,
-            // startTime: formatDate(this.addForm.dateTime[0]),
-            // endTime: formatDate(this.addForm.dateTime[1]),
+            startTime: formatDate(this.addForm.dateTime[0]),
+            endTime: formatDate(this.addForm.dateTime[1]),
             taskName: this.addForm.taskName,
             interval: this.addForm.interval
           };
@@ -473,10 +470,6 @@ export default {
               this.isAddLoading = false;
               this.addTaskDialog = false;
               this.getDataList();
-              // if (res && res.data) {
-              // } else {
-              //   this.isAddLoading = false;
-              // }
             })
             .catch(() => {this.isAddLoading = false;})
         }
@@ -487,14 +480,19 @@ export default {
       this.$router.push({name: 'gzws_result', query: { id: obj.uid }});
     },
     // 显示新建任务弹出框
-    showAddTaskDialog (type, obj) {
-      if (type === 'add') {
-        this.isAddTaskTitle = true;
-      } else {
-        this.isAddTaskTitle = false;
-
-      }
+    showAddTaskDialog () {
       this.addTaskDialog = true;
+
+      this.addForm = {
+        taskName: null, // 任务名称
+        deviceCode: null, // 起点设备编号
+        deviceName: null, // 起点设备名称
+        dateTime: [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()],
+        interval: 3 // 尾随间隔
+      };
+      this.dialogImageUrl = null;
+      this.fileList = [];
+      
     },
     // 显示中断任务弹出框
     showInterruptDialog (obj) {
@@ -560,13 +558,12 @@ export default {
           .catch(() => {this.isDeleteLoading = false;})
       }
     },
-    // 恢复任务
+    // 恢复任务 --- 重启任务
     recoveryTask (obj) {
-      console.log(obj)
       if (obj.uid) {
         putTaskInfosResume(obj.uid)
           .then(res => {
-            if (res && res.data) {
+            if (res) {
               this.getDataList();
             }
           })
@@ -604,9 +601,7 @@ export default {
     .vc_gcck_bd {
       width: 100%;
     }
-    .add_btn {
-      margin-right: 10px;
-    }
+    
   }
   .content_box {
     height: calc(100% - 100px);
@@ -642,6 +637,9 @@ export default {
     }
     .table_box {
       margin: 0 20px;
+      .add_btn {
+        margin-bottom: 10px;
+      }
       .operation_btn {
         display: inline-block;
         padding: 0 10px;

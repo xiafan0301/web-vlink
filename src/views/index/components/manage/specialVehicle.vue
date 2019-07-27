@@ -29,12 +29,13 @@
         <el-form :inline="true" :model="searchForm" class="search_form clearfix" ref="searchForm">
           <el-form-item prop="dateTime">
             <el-date-picker
+              class="vl_date"
               style="width: 250px;"
               v-model="searchForm.dateTime"
               type="daterange"
               value-format="yyyy-MM-dd HH:mm:ss"
               format="yyyy-MM-dd HH:mm:ss"
-              range-separator="-"
+              range-separator="至"
               start-placeholder="开始日期"
               :default-time="['00:00:00', '23:59:59']"
               end-placeholder="结束日期">
@@ -164,7 +165,7 @@
     </div>
     <!--新建/修改车辆弹出框-->
     <el-dialog
-      :title="`${vehicleTitle}车辆`"
+      :title="`${vehicleTitle}车像`"
       :visible.sync="dialogVisiable"
       width="722px"
       :close-on-click-modal="false"
@@ -186,7 +187,7 @@
               :on-remove="handleRemove"
               :before-upload="beforeAvatarUpload"
               :file-list="fileList">
-              <i class="vl_icon vl_icon_control_14"></i>
+              <i class="vl_icon vl_icon_012_012"></i>
             </el-upload>
           </div>
           <template v-if="!isAddImgDisabled">
@@ -368,7 +369,7 @@
           <ul class="upload_box">
             <li>
               <p class="header">1、请下载导入模板，填写车辆信息。</p>
-              <div class="main_content download_box">
+              <div class="main_content download_box" @click="downloadModel">
                 <i class="vl_icon_manage_17 vl_icon"></i>
                 <span>下载模板</span>
               </div>
@@ -465,6 +466,7 @@ export default {
       successNumber: 0, // 成功导入多少条数据
       failNumber: 0, // 导入失败多少条数据
       showFailFile: false, // 是否显示错误文件
+      errorFile: null, // 错误文件地址
       fileList: [],
       dialogImageUrl: null,
       uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
@@ -747,6 +749,8 @@ export default {
 
             this.carForm.vehicleNumber = carInfo.vehicleNumber;
             this.carForm.desci = carInfo.desci;
+            this.carForm.ownerIdCard = carInfo.ownerIdCard;
+            this.carForm.ownerName = carInfo.ownerName;
             this.carForm.ownerIdType = carInfo.ownerIdType || null;
 
 
@@ -1193,26 +1197,33 @@ export default {
         this.failNumber = res.data.result.failSize;
         this.showFailFile = false;
         this.importFinishDialog = true;
+        this.errorFile = null;
 
         this.getGroupList();
-      } else {
 
+      } else if (res.data.code === 1) {
+        this.importDialog = false;
+        this.successNumber = res.data.result.successSize;
+        this.failNumber = res.data.result.failSize;
+        this.showFailFile = true;
+
+        if (res.data.result.errorFileUrl) {
+          this.errorFile = res.data.result.errorFileUrl;
+        }
+        this.importFinishDialog = true;
       }
     },
     // 下载错误文件
     downloadErrorFile () {
-      // if (this.errorFile) {
-      //   autoDownloadUrl(this.errorFile);
-      //   if (this.delErrorFile) {
-      //     // 下载成功后删除动态模板
-      //     // this.timerError = setTimeout(() => {
-      //     //   deleteDownLoadFile(this.delErrorFile)
-      //     //   .then(res => {
-      //     //     console.log('res', res)
-      //     //   });
-      //     // }, 30000)
-      //   }
-      // }
+      if (this.errorFile) {
+        this.importFinishDialog = false;
+        autoDownloadUrl(this.errorFile);
+      }
+    },
+    // 下载模板
+    downloadModel () {
+      const file = 'http://file.aorise.org/vlink/file/8dc4e25f-5f7b-4021-9a19-a58f8708b4fd.xls';
+      autoDownloadUrl(file);
     }
   }
 }
@@ -1450,15 +1461,16 @@ export default {
         /deep/ .el-upload {
           width: 160px;
           height: 160px;
-          
+          line-height: 160px;
           i {
-             width: 120px;
-            height: 110px;
+            width: 104px;
+            height: 87px;
+            vertical-align: middle;
           }
           &:hover{
             background: #0C70F8;
-            i.vl_icon_control_14{
-              background-position: -228px -570px;
+            i.vl_icon_012_012 {
+              background-position: -965px -611px;
             }
           }
         }
@@ -1583,9 +1595,6 @@ export default {
     height: 32px;
     line-height: 32px;
     border-radius: 5px;
-    a {
-      color: #fff;
-    }
   }
 }
 </style>

@@ -218,5 +218,51 @@ export default {
       name: 'room_detail',
       component: () => import('@/views/index/components/manage/components/roomAndStall/detail.vue')
     },
+    {
+      path: 'bayonetManage',
+      name: 'bayonet_manage',
+      component: () => import('@/views/index/components/manage/bayonetManage.vue'),
+      redirect: {
+        name: 'bayonet_manage_list'
+      },
+      children: [{
+          path: 'list',
+          name: 'bayonet_manage_list',
+          component: () => import('@/views/index/components/manage/components/bayonet/list.vue')
+        },
+        {
+          path: 'add',
+          name: 'bayonet_manage_add',
+          component: () => import('@/views/index/components/manage/components/bayonet/add.vue')
+        },
+        {
+          path: 'detail',
+          name: 'bayonet_manage_detail',
+          component: () => import('@/views/index/components/manage/components/bayonet/detail.vue')
+        }
+      ]
+    },
+    // 摄像头管理
+    {
+      path: 'cameraManage',
+      name: 'camera_manage',
+      component: () => import('@/views/index/components/manage/cameraManage.vue')
+    },
+    {
+      path: 'cameraDetail',
+      name: 'camera_detail',
+      component: () => import('@/views/index/components/manage/cameraDetail.vue')
+    },
+    {
+      path: 'addCamera',
+      name: 'add_camera',
+      component: () => import('@/views/index/components/manage/addCamera.vue')
+    },
+    // 参数设置
+    {
+      path: 'paramsSetting',
+      name: 'params_setting',
+      component: () => import('@/views/index/components/manage/paramsSetting.vue')
+    },
   ]
 }

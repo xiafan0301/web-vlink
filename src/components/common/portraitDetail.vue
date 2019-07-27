@@ -1,6 +1,7 @@
 <template>
+<div>
   <el-dialog
-  class="struc_detail_dialog"
+  class="struc_detail_dialog_prot"
     :visible.sync="strucDetailDialog"
     :append-to-body="true"
     :close-on-click-modal="false"
@@ -17,12 +18,12 @@
               <div class="struc_main" v-if="sturcDetail">
                 <div v-show="strucCurTab === 1" class="struc_c_detail">
                   <div class="struc_c_d_qj struc_c_d_img">
-                    <img :src="sturcDetail.storagePath" alt="">
+                    <img :src="sturcDetail.subStoragePath" class="bigImg"  >
                     <span>抓拍图</span>
                   </div>
                   <div class="struc_c_d_box">
-                    <div class="struc_c_d_qii struc_c_d_img">
-                      <img :src="sturcDetail.personStoragePath" alt="">
+                    <div class="struc_c_d_qii struc_c_d_img"> 
+                      <img :src="sturcDetail.storagePath" class="bigImg" >
                       <span>全景图</span>
                     </div>
                     <div class="struc_c_d_info">
@@ -39,15 +40,19 @@
                       <!-- <div class="struc_cdi_line">
                         <span><b>性别</b>{{sturcDetail.sex}}</span>
                       </div> -->
-                      <div class="struc_cdi_line" v-if="sturcDetail.semblance">
+                      <!-- <div class="struc_cdi_line" v-if="sturcDetail.semblance">
                         <span ><b>相似度</b>{{(sturcDetail.semblance*1).toFixed(2)}}%</span>
-                      </div>
+                      </div> -->
                       <div class="struc_cdi_line">
-                        <span v-if="sturcDetail.features"><b>特征</b>{{sturcDetail.features}}</span>
-                        <span v-else><b>特征</b>{{sturcDetail.sex+" "+(sturcDetail.age || "")+ " "+ (sturcDetail.baby || "")+ " " + (sturcDetail.bag || "")+ " " + (sturcDetail.bottomColor || "") +(sturcDetail.bottomType || "")+ " " + (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+ " "+(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")}}</span>
+                        <span class='tz' v-if="sturcDetail.features"><b>特征</b>{{sturcDetail.features}}</span>
+                        <span class="tz" v-else><b>特征</b>{{sturcDetail.sex+" "+(sturcDetail.age || "")+ " "+ (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+ " "+ (sturcDetail.baby || "")+ " " + (sturcDetail.bag || "")+ " " + (sturcDetail.bottomColor || "") +" " +(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")+" "+(sturcDetail.bottomType || "")}}</span>
                       </div>
                       <div class="struc_cdi_line"></div>
                     </div>
+                  </div>
+                  <div class="tablink" v-if="show">
+                    <a @click="goToPage('portrait_gjfx')">轨迹分析</a>
+                    <a @click="goToPage('control_create')">新建布控</a>
                   </div>
                 </div>
                 <div v-show="strucCurTab === 2" class="struc_c_address">
@@ -66,22 +71,28 @@
                 </div>
               </div>
               <div class="struc-list" v-if="strucInfoList && strucInfoList.length>1">
-                <swiper :options="swiperOption" ref="mySwiper">
+                <swiper :options="swiperOption" ref="mySwiper" class="btf">
                   <!-- slides -->
                   <swiper-slide v-for="(item, index) in strucInfoList" :key="index + 'isgm'">
-                    <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
+                    <div class="swiper_img_item" :class="{'active': item.uid === curImgIndex.uid}" @click="imgListTap(item, index)">
                       <img style="display: block; width: 100%; height: .88rem;" :src="item.subStoragePath" alt="">
                     </div>
                   </swiper-slide>
                   <div class="swiper-button-prev" slot="button-prev"></div>
-                  <div class="swiper-button-next" slot="button-next"></div>
+                  <div class="swiper-button-next" slot="button-next" >
+                    <div class="nextboxs" style="width:40px;height:60px;" @click="nextPage"></div>
+                  </div>
+                   
                 </swiper>
+                <!-- <div class="nextbox" @click="nextPage"></div> -->
               </div>
-      
+              
   </el-dialog>
+  </div>
 </template>
 <script>
 import flvplayer from '@/components/common/flvplayer.vue';
+import { setTimeout } from 'timers';
 export default {
   /* 提交成功后通过在父组件 emit mapSelectorEmit 事件获取所框选的东西 */
   /* 
@@ -120,14 +131,17 @@ export default {
    
   */
  components: {
-    flvplayer,
+    flvplayer
   },
-  props: ['open', 'detailData','scrollData'],
+  props: ['open', 'detailData','scrollData','showItem','conditions'],
   data () {
     return {
+      bigurl:'',
+      openBig: false,
+      show: false,
       strucDetailDialog:this.open, // 抓拍记录弹窗
       strucCurTab: 1, // 抓拍记录弹窗tab
-      curImgIndex: 0, // 当前选择的图片index
+      curImgIndex: null, // 当前选择的图片index
       strucInfoList:null ,
       sturcDetail:null,
       bResize: {},
@@ -145,6 +159,7 @@ export default {
           prevEl: '.swiper-button-prev',
         },
       },
+      cond:this.conditions,
       videoUrl: null, // 下载地址
       map: null,
     }
@@ -158,15 +173,23 @@ export default {
         }, 200)
       }
     },
+   goToPage(v){
+      this.$router.push({
+        name: v,
+        query: { imgurl: this.sturcDetail.subStoragePath, modelName: '人员追踪' }
+      });
+   },
     scrollData (v) {
      
      this.strucInfoList=v
-     this.curImgIndex = v.findIndex(el=>el.uid==this.detailData.uid)
+     this.curImgIndex = v.find(el=>el.uid==this.detailData.uid)
+     //console.log(this.curImgIndex);
+     
      
     },
     detailData (){
       // console.log(12345);
-      
+      this.curImgIndex = this.detailData
       this.sturcDetail=this.detailData
       // console.log(this.sturcDetail)
        
@@ -180,10 +203,17 @@ export default {
         }
       }
       this.strucDetailDialog = this.open
+    },
+     conditions (v) {
+      this.cond=v
+     // console.log(this.cond);
     }
     
   },
   mounted () {
+    
+    this.show=this.showItem
+
     // this.getTreeList();
     // this.mapEvents();
    // this.$_showLoading({text: '加载中...'})
@@ -195,6 +225,24 @@ export default {
       //this.$_hideLoading()
   },
   methods: {
+   
+   nextPage(){
+      //console.log("1111111111111111");
+      let a=false
+      let _this=this
+      setTimeout(function(){
+         a = $(".swiper-button-next").hasClass("swiper-button-disabled")
+         console.log("1111111111111111"+a);
+         if(a){
+           _this.$emit("nextPage")
+         }
+         
+      },500)
+      
+
+    // this.$emit("nextPage")
+     
+   },
     /**
      * 弹框地图初始化
      */
@@ -256,7 +304,7 @@ export default {
      * 图片切换
      */
     imgListTap (obj, i) {
-      this.curImgIndex = i
+      this.curImgIndex = obj
       this.sturcDetail = obj
     },
   },
@@ -271,13 +319,22 @@ export default {
 
 </style>
 <style lang="scss" >
+.nextbox{
+  height: 60px;
+  width: 40px;
+  position: absolute;
+  top: 20px;
+  right: 0px;
+  z-index: 2;
+ 
+}
  html {font-size: 100px;}
   @media screen and (min-width: 960px) and (max-width: 1119px) {html {font-size: 60px !important;}}
   @media screen and (min-width: 1200px) and (max-width: 1439px) {html {font-size: 70px !important;}}
   @media screen and (min-width: 1440px) and (max-width: 1679px) {html {font-size: 80px !important;}}
   @media screen and (min-width: 1680px) and (max-width: 1919px) {html {font-size: 90px !important;}}
   @media screen and (min-width: 1920px) {html {font-size: 100px !important;} }
-  .struc_detail_dialog {
+  .struc_detail_dialog_prot {
     .el-dialog {
       max-width: 13.06rem;
       width: 100%!important;
@@ -354,6 +411,15 @@ export default {
             right: 0;
             bottom: 0;
             margin: auto;
+            transform: scale(1);         
+            transition: all ease 0.2s;
+          }
+          img.active{
+             transform: scale(3);          /*图片需要放大3倍*/
+              position: absolute;           /*是相对于前面的容器定位的，此处要放大的图片，不能使用position：relative；以及float，否则会导致z-index无效*/
+              z-index: 100;
+              left: 50%;
+              
           }
           i {
             display: block;
@@ -439,7 +505,7 @@ export default {
           box-shadow: 0px 5px 16px 0px rgba(169,169,169,0.2);
           border-radius: 1px;
           position: relative;
-          overflow: hidden;
+          // overflow: hidden;
           &:before {
             display: block;
             content: '';
@@ -486,8 +552,8 @@ export default {
                 /*position: relative;*/
                 max-width: 100%;
                 display: inline-block;
-                height: .4rem;
-                line-height: .4rem;
+                height: .5rem;
+                line-height: .5rem;
                 margin-bottom: .08rem;
                 border: 1px solid #F2F2F2;
                 background: #ffffff;
@@ -502,8 +568,8 @@ export default {
                 > b {
                   display :inline-block;
                    border-right: 1px solid #F2F2F2;
-                   height: .4rem;
-                  line-height: .4rem;
+                   height: .5rem;
+                  line-height: .5rem;
                   background: #FAFAFA;
                   color: #999;
                   font-weight: normal;
@@ -511,6 +577,20 @@ export default {
                   padding-left: 10px;
                   margin-right: 5px;
                 }
+              }
+              span.tz{
+                    white-space: normal;
+                    display: flex;
+                    overflow: auto;
+                    height: auto;
+                    align-items: center;
+                    line-height: 0.25rem;
+                    b{
+                      white-space: nowrap;
+                      display: inline-block;
+                      height: 0.5rem;
+                      line-height: 0.5rem;
+                    }
               }
             }
           }
@@ -526,6 +606,7 @@ export default {
       }
     }
     .struc-list {
+      position: relative;
       width: 12.46rem;
       margin: 0 auto;
       padding: .44rem 0 .34rem 0;
@@ -613,6 +694,33 @@ export default {
     margin-left: -50vw; margin-top: -50vh;
   }
   }
+  .tablink {
+      height: 50px;
+      width:100%;
+      background: #ffffff;
+      margin: 0px auto;
+      padding: 0px 0px;
+      text-align: right;
+      a {
+        display: inline-block;
+        text-align: center;
+        line-height: 38px;
+        border: solid 1px #eeeeee;
+        border-radius: 4px;
+        margin-top: 10px;
+        padding: 0px 15px;
+        text-decoration: none;
+        margin-left: 10px;
+        background: rgba(246, 248, 249, 1);
+        border: 1px solid rgba(211, 211, 211, 1);
+        cursor: pointer;
+      }
+      a:hover {
+        background: #0c70f8;
+        border: solid 1px #0c70f8;
+        color: #ffffff;
+      }
+    }
 </style>
 
 

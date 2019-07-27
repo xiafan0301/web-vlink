@@ -1,11 +1,12 @@
 <template>
-  <div class="vehicle_content">
-    <div class="vc_rep_bd" is="vehicleBreadcrumb" :oData="[{name: '车辆侦察报告'}]"></div>
+  <div class="vehicle_content" :class="{'map_pic_show': mapPicShow}">
+    <div class="vc_rep_bd" is="vehicleBreadcrumb" :oData="[{name: '车辆综合分析报告'}]"></div>
     <div class="vc_rep">
       <div class="vc_rep_t">
         <div class="vc_rep_sc">
           <el-input style="width: 200px;" v-model="searchForm.plateNo" placeholder="请输入车牌信息" size="small"></el-input>&nbsp;&nbsp;&nbsp;&nbsp;
           <el-date-picker style="width: 280px;" size="small" 
+            class="vl_date"
             v-model="searchForm.time"
             type="daterange"
             align="left"
@@ -22,11 +23,11 @@
           <!-- <el-button style="float: right;" size="small" :disabled="!clInfo || searchLoading" type="primary" @click="vehicleExport">导出为PDF</el-button> -->
           
           <router-link v-if="clInfo && !searchLoading" target="_blank" class="vc_rep_cs_dc" :to="{name: 'vehicle_report_save', query: {
-            pn: clInfo.plateno,
+            pn: searchForm.plateNo,
             st: timeStr[0],
             et: timeStr[1]
-            }}">导出</router-link>
-          <a v-else class="vc_rep_cs_dc vc_rep_cs_dc_dis">导出</a>
+            }}">导出报告</router-link>
+          <a v-else class="vc_rep_cs_dc vc_rep_cs_dc_dis">导出报告</a>
         </div>
         <ul class="vc_rep_mu">
           <li><span :class="{'vc_rep_mu_sed': showType === 1}" @click="changeShowType(1)">车辆档案信息</span></li>
@@ -36,18 +37,19 @@
           <li><span :class="{'vc_rep_mu_sed': showType === 5}" @click="changeShowType(5)">夜间活动规律</span></li>
           <li><span :class="{'vc_rep_mu_sed': showType === 6}" @click="changeShowType(6)">频繁出没分析</span></li>
           <li><span :class="{'vc_rep_mu_sed': showType === 7}" @click="changeShowType(7)">套牌车分析</span></li>
-          <li><span :class="{'vc_rep_mu_sed': showType === 8}" @click="changeShowType(8)">同行车辆分析</span></li>
-          <li><span :class="{'vc_rep_mu_sed': showType === 9}" @click="changeShowType(9)">区域碰撞</span></li>
+          <!-- <li><span :class="{'vc_rep_mu_sed': showType === 8}" @click="changeShowType(8)">同行车辆分析</span></li> -->
+          <!-- <li><span :class="{'vc_rep_mu_sed': showType === 9}" @click="changeShowType(9)">区域碰撞</span></li> -->
         </ul>
       </div>
       <div class="vc_rep_c">
         <div id="report_content">
           <div>
-            <!-- 车辆档案信息-车辆信息  showType 1 -->
+            <!-- 车辆档案信息  showType 1 -->
             <div class="vc_rep_cl" id="report_showtype_1">
               <div>
-                <h2>车辆档案信息-车辆信息</h2>
+                <h2>1、车辆档案信息</h2>
                 <div>
+                  <h3>1.1 车辆信息</h3>
                   <ul class="rep_clxx" v-if="clInfo">
                     <li><span>车牌号码：</span><p>{{clInfo.plateno}}</p></li>
                     <li><span>车辆所有人：</span><p>{{clInfo.owner}}</p></li>
@@ -66,68 +68,71 @@
                     <li><span>有效期止：</span><p>{{clInfo.validuntil}}</p></li>
                   </ul>
                   <div class="rep_cl_empty" v-else>暂无数据</div>
+                  <h3>1.2 违章信息</h3>
+                  <div class="rep_cl_tbl">
+                    <el-table :data="wzList" max-height="300">
+                      <el-table-column label="序号" type="index" width="80"></el-table-column>
+                      <el-table-column label="违法时间" prop="vioDate" show-overflow-tooltip></el-table-column>
+                      <el-table-column label="违法地点" prop="address" show-overflow-tooltip></el-table-column>
+                      <el-table-column label="城市名称" prop="city" show-overflow-tooltip></el-table-column>
+                      <el-table-column label="罚款金额" prop="fine" show-overflow-tooltip></el-table-column>
+                      <el-table-column label="违章归属地" prop="vioAsPlace" show-overflow-tooltip></el-table-column>
+                      <el-table-column label="违法行为" prop="vioName" show-overflow-tooltip></el-table-column>
+                      <el-table-column label="分类类型" prop="vioCategory" show-overflow-tooltip></el-table-column>
+                      <el-table-column label="采集机关" prop="vioCollectionOffice" show-overflow-tooltip></el-table-column>
+                    </el-table>
+                  </div>
                 </div>
               </div>
             </div>
-            <!-- 车辆档案信息-违章信息 -->
-            <div class="vc_rep_cl">
-              <div>
-                <h2>车辆档案信息-违章信息</h2>
-                <div>
-                  <el-table :data="wzList" max-height="300">
-                    <el-table-column label="序号" type="index" width="80"></el-table-column>
-                    <el-table-column label="违法时间" prop="vioDate" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="违法地点" prop="address" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="城市名称" prop="city" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="罚款金额" prop="fine" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="违章归属地" prop="vioAsPlace" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="违法行为" prop="vioName" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="分类类型" prop="vioCategory" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="采集机关" prop="vioCollectionOffice" show-overflow-tooltip></el-table-column>
-                  </el-table>
-                </div>
-              </div>
-            </div>
-            <!-- 车辆入城分析-入城记录 showType 2 -->
+            <!-- 车辆入城分析 showType 2 -->
             <div class="vc_rep_cl" id="report_showtype_2">
               <div>
-                <h2>车辆入城分析-入城记录</h2>
+                <h2>2、车辆入城分析</h2>
                 <div>
-                  <el-table :data="rcList">
-                    <el-table-column label="序号" type="index" width="100"></el-table-column>
-                    <el-table-column label="入城时间" prop="inOutTime" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="入城卡口" prop="inOutBayonetName" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="抓拍摄像头" prop="inOutDeviceName" show-overflow-tooltip></el-table-column>
-                  </el-table>
+                  <h3>2.1 入城记录</h3>
+                  <div class="rep_cl_tbl">
+                    <el-table :data="rcList">
+                      <el-table-column label="序号" type="index" width="100"></el-table-column>
+                      <el-table-column label="入城时间" prop="inOutTime" show-overflow-tooltip></el-table-column>
+                      <el-table-column label="入城卡口" prop="inOutBayonetName" show-overflow-tooltip></el-table-column>
+                      <el-table-column label="抓拍摄像头" prop="inOutDeviceName" show-overflow-tooltip></el-table-column>
+                    </el-table>
+                  </div>
                 </div>
               </div>
             </div>
-            <!-- 车辆出城分析-出城记录 showType 3 -->
+            <!-- 车辆出城分析 showType 3 -->
             <div class="vc_rep_cl" id="report_showtype_3">
               <div>
-                <h2>车辆出城分析-出城记录</h2>
+                <h2>3、车辆出城分析</h2>
                 <div>
-                  <el-table :data="ccList">
-                    <el-table-column label="序号" type="index" width="100"></el-table-column>
-                    <el-table-column label="出城时间" prop="inOutTime" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="出城卡口" prop="inOutBayonetName" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="抓拍摄像头" prop="inOutDeviceName" show-overflow-tooltip></el-table-column>
-                  </el-table>
+                  <h3>3.1 出城记录</h3>
+                  <div class="rep_cl_tbl">
+                    <el-table :data="ccList">
+                      <el-table-column label="序号" type="index" width="100"></el-table-column>
+                      <el-table-column label="出城时间" prop="inOutTime" show-overflow-tooltip></el-table-column>
+                      <el-table-column label="出城卡口" prop="inOutBayonetName" show-overflow-tooltip></el-table-column>
+                      <el-table-column label="抓拍摄像头" prop="inOutDeviceName" show-overflow-tooltip></el-table-column>
+                    </el-table>
+                  </div>
                 </div>
               </div>
             </div>
-            <!-- 车辆行驶轨迹-车辆轨迹 showType 4 -->
+            <!-- 车辆行驶轨迹 showType 4 -->
             <div class="vc_rep_cl" id="report_showtype_4">
               <div>
-                <h2>车辆行驶轨迹-车辆轨迹</h2>
-                <div style="padding: 0;">
+                <h2>4、车辆行驶轨迹</h2>
+                <div>
+                  <h3 style="margin: 0 0 15px 0;">4.1 车辆轨迹</h3>
                   <div class="rep_map">
                     <div class="rep_map_c" id="map_report_clgj"></div>
                     <ul class="rep_map_o">
-                      <li><i class="vl_icon vl_icon_map_o01" @click="mapChangeState('clgj', 1)"></i></li>
-                      <li><i class="vl_icon vl_icon_map_o02" @click="mapChangeState('clgj', 2)"></i></li>
+                      <li @click="mapPicShow = !mapPicShow" style="font-size: 12px;" :style="{'color': mapPicShow ? '#0C70F8' : '#999'}">显示图片</li>
+                      <li><i class="el-icon-aim" @click="mapChangeState('clgj', 1)"></i></li>
+                      <li><i class="el-icon-plus" @click="mapChangeState('clgj', 2)"></i></li>
                       <li>
-                        <i class="vl_icon vl_icon_map_o03" @click="mapChangeState('clgj', 3)"></i>
+                        <i class="el-icon-minus" @click="mapChangeState('clgj', 3)"></i>
                         <span></span>
                       </li>
                     </ul>
@@ -135,33 +140,28 @@
                 </div>
               </div>
             </div>
-            <!-- 夜间活动规律-夜间出没记录 showType 5 -->
+            <!-- 夜间活动规律 showType 5 -->
             <div class="vc_rep_cl" id="report_showtype_5">
               <div>
-                <h2>夜间活动规律-夜间出没记录</h2>
+                <h2>5、夜间活动规律</h2>
                 <div>
-                  <el-table :data="yjcmList.allRecords">
-                    <el-table-column label="设备名称" prop="deviceName"></el-table-column>
-                    <el-table-column label="过车时间" prop="shotTime" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="时间间隔" prop="timeQuantum" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="参考时间" prop="timeSlot" show-overflow-tooltip></el-table-column>
-                  </el-table>
-                </div>
-              </div>
-            </div>
-            <!-- 夜间活动规律-出没点分布 -->
-            <div class="vc_rep_cl">
-              <div>
-                <h2>夜间活动规律-出没点分布</h2>
-                <div style="padding: 0;">
+                  <h3>5.1 夜间出没记录</h3>
+                  <div class="rep_cl_tbl">
+                    <el-table :data="yjcmList.allRecords">
+                      <el-table-column label="设备名称" prop="deviceName"></el-table-column>
+                      <el-table-column label="过车时间" prop="shotTime" show-overflow-tooltip></el-table-column>
+                      <el-table-column label="时间间隔" prop="timeSlot" show-overflow-tooltip></el-table-column>
+                      <el-table-column label="常规行驶时间" prop="refTime" show-overflow-tooltip></el-table-column>
+                    </el-table>
+                  </div>
+                  <h3>5.2 出没点分布</h3>
                   <div class="rep_map">
                     <div class="rep_map_c" id="map_report_yjcm"></div>
                     <ul class="rep_map_o">
-                      <li><i class="vl_icon vl_icon_map_o01" @click="mapChangeState('yjcm', 1)"></i></li>
-                      <li><i class="vl_icon vl_icon_map_o02" @click="mapChangeState('yjcm', 2)"></i></li>
+                      <li><i class="el-icon-aim" @click="mapChangeState('yjcm', 1)"></i></li>
+                      <li><i class="el-icon-plus" @click="mapChangeState('yjcm', 2)"></i></li>
                       <li>
-                        <i class="vl_icon vl_icon_map_o03" @click="mapChangeState('yjcm', 3)"></i>
-                        <span></span>
+                        <i class="el-icon-minus" @click="mapChangeState('yjcm', 3)"></i>
                       </li>
                     </ul>
                     <div class="rep_map_sk">
@@ -194,31 +194,18 @@
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-            <!-- 夜间活动规律-夜间出没结论 -->
-            <div class="vc_rep_cl">
-              <div>
-                <h2>夜间活动规律-夜间出没结论</h2>
-                <div>
+                  <h3>5.3 夜间出没结论</h3>
                   <ul class="rep_yjcm">
                     <li>
                       <span>较常出没时间段：</span>
                       <div>
-                        <template v-for="(item, index) in yjcmjlList">
-                          <template v-if="index != 0">|</template>
-                          <span :key="'yjcmjl1_' + index">{{item.timeSegment}}</span>
-                        </template>
+                        <span>{{yjcmjlList ? yjcmjlList.timeSegment : ''}}</span>
                       </div>
                     </li>
                     <li>
                       <span>较常出没地点为：</span>
                       <div>
-                        <template v-for="(item, index) in yjcmjlList">
-                          <template v-if="index != 0">|</template>
-                          <span :key="'yjcmjl2_' + index">{{item.address}}</span>
-                        </template>
+                        <span>{{yjcmjlList ? yjcmjlList.address : ''}}</span>
                       </div>
                     </li>
                   </ul>
@@ -228,84 +215,85 @@
             <!-- 频繁出没分析 showType 6 -->
             <div class="vc_rep_cl" id="report_showtype_6">
               <div>
-                <h2>频繁出没分析</h2>
+                <h2>6、频繁出没分析</h2>
                 <div>
-                  <el-table :data="pfcmList">
-                    <el-table-column label="序号" type="index" width="100"></el-table-column>
-                    <el-table-column label="摄像头安装地点" prop="address" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="车辆出没次数（次）" prop="nums" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="较多出没时间" prop="timeSegment" show-overflow-tooltip></el-table-column>
-                  </el-table>
+                  <h3>6.1 车辆频繁出没地点</h3>
+                  <div class="rep_cl_tbl">
+                    <el-table :data="pfcmList">
+                      <el-table-column label="序号" type="index" width="100"></el-table-column>
+                      <el-table-column label="摄像头安装地点" prop="address" show-overflow-tooltip></el-table-column>
+                      <el-table-column label="车辆出没次数（次）" prop="nums" show-overflow-tooltip></el-table-column>
+                      <el-table-column label="频繁出没时间段" prop="timeSegment" show-overflow-tooltip></el-table-column>
+                    </el-table>
+                  </div>
                 </div>
               </div>
             </div>
             <!-- 套牌车分析 showType 7 -->
             <div class="vc_rep_cl" id="report_showtype_7">
               <div>
-                <h2>套牌车分析</h2>
-                <div style="padding: 10px;" v-if="tpcList && tpcList.length > 0">
-                  <ul class="rep_tpc_list">
-                    <li v-for="(item, index) in tpcList" :key="'tpc_list_' + index">
-                      <div>
-                        <div class="com_width_to_height" style="margin-bottom: 5px;">
-                          <div>
+                <h2>7、套牌车分析</h2>
+                <div>
+                  <h3>7.1 套牌车抓拍信息</h3>
+                  <div style="padding: 10px;" v-if="tpcList && tpcList.length > 0">
+                    <ul class="rep_tpc_list">
+                      <li v-for="(item, index) in tpcList" :key="'tpc_list_' + index">
+                        <div>
+                          <div class="com_width_to_height" style="margin-bottom: 5px;">
                             <div>
-                              <img :src="item.vehicleDto.subStoragePath" :alt="item.vehicleDto.plateNo" :title="item.vehicleDto.plateNo">
+                              <div>
+                                <img :src="item.vehicleDto.subStoragePath" :alt="item.vehicleDto.plateNo" :title="item.vehicleDto.plateNo">
+                              </div>
                             </div>
                           </div>
+                          <p class="tpc_list_fst com_ellipsis"><i class="vl_icon vl_icon_sm_sj"></i>&nbsp;&nbsp;{{ item.vehicleDto.shotTime }}</p>
+                          <p class="com_ellipsis"><i class="vl_icon vl_icon_sm_sxt"></i>&nbsp;&nbsp;{{ item.vehicleDto.deviceName }}</p>
+                          <p class="com_ellipsis" style="color: #FA453A;"><i class="vl_icon tpc_fake_res"></i>&nbsp;&nbsp;{{ item.fakeReason }}</p>
                         </div>
-                        <p class="tpc_list_fst com_ellipsis"><i class="vl_icon vl_icon_sm_sj"></i>&nbsp;&nbsp;{{ item.vehicleDto.shotTime }}</p>
-                        <p class="com_ellipsis"><i class="vl_icon vl_icon_sm_sxt"></i>&nbsp;&nbsp;{{ item.vehicleDto.deviceName }}</p>
-                        <p class="com_ellipsis"><i class="vl_icon vl_icon_sm_sxt"></i>&nbsp;&nbsp;{{ item.fakeReason }}</p>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
-                <div v-else>
-                  <div class="rep_cl_empty">暂无数据</div>
+                      </li>
+                    </ul>
+                  </div>
+                  <div v-else>
+                    <div class="rep_cl_empty">暂无数据</div>
+                  </div>
                 </div>
               </div>
             </div>
             <!-- 同行车辆分析 showType 8 -->
-            <div class="vc_rep_cl" id="report_showtype_8">
+            <!-- <div class="vc_rep_cl" id="report_showtype_8">
               <div>
                 <h2>同行车辆分析</h2>
                 <div>
                   <el-table :data="txclList">
                     <el-table-column label="序号" type="index" width="100"></el-table-column>
                     <el-table-column label="车牌号码" prop="plateNo" show-overflow-tooltip></el-table-column>
-                    <!-- <el-table-column label="号牌颜色" prop="plateColor" show-overflow-tooltip></el-table-column> -->
                     <el-table-column label="车辆颜色" prop="vehicleColor" show-overflow-tooltip></el-table-column>
                     <el-table-column label="车辆类型" prop="vehicleClass" show-overflow-tooltip></el-table-column>
                     <el-table-column label="同行次数" prop="shotNum" show-overflow-tooltip></el-table-column>
-                   <!--  <el-table-column
-                      label="操作"
-                      width="120">
-                      <template slot-scope="scope">
-                        <el-button
-                          @click.native.prevent="cktxjlEvent(scope.$index, tableData)"
-                          type="text" size="small">
-                          查看同行记录
-                        </el-button>
-                      </template>
-                    </el-table-column> -->
                   </el-table>
                 </div>
               </div>
-            </div>
+            </div> -->
             <!-- 区域碰撞 showType 9 -->
-            <div class="vc_rep_cl" id="report_showtype_9">
+            <!-- <div class="vc_rep_cl" id="report_showtype_9">
               <div>
                 <h2>区域碰撞</h2>
-                <div>
+                <div v-if="clInfo && !searchLoading">
                   请前往
-                   <router-link :to="{name: 'vehicle_search_qy'}">
+                   <span @click="goToQypz" style="color: #0C70F8; cursor: pointer;">
                     区域碰撞
-                  </router-link>
+                  </span>
+                  进行操作查看
+                </div>
+                <div v-else>
+                  请前往
+                  <span>
+                    区域碰撞
+                  </span>
                   进行操作查看
                 </div>
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
@@ -314,13 +302,15 @@
 </template>
 <script>
 import vehicleBreadcrumb from '../breadcrumb.vue';
-import {formatDate} from '@/utils/util.js';
+import {getDate, formatDate} from '@/utils/util.js';
 import {mapXupuxian} from '@/config/config.js';
-import {getVehicleInvestigationReport, JfoGETSurveillanceObject} from '@/views/index/api/api.judge.js';
+import {getVehicleInvestigationReport} from '@/views/index/api/api.judge.js';
 export default {
   components: {vehicleBreadcrumb},
   data () {
     return {
+      mapPicShow: false,
+      mapPicShow2: false,
       searchForm: {
         plateNo: '', // 沪D008CP 沪A009CP 湘AN8888
         time: [new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000), new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000)]
@@ -334,7 +324,7 @@ export default {
       rcList: [], // 入城记录
       ccList: [], // 出城记录
       yjcmList: {}, // 夜间出没记录
-      yjcmjlList: [],  // 夜间出没结论
+      yjcmjlList: {},  // 夜间出没结论
       yjcmHoverWindow: null,
       pfcmList: [], // 频繁出没分析
       txclList: [], // 同行车分析
@@ -359,8 +349,26 @@ export default {
   mounted () {
     this.initClgjMap();
     this.initYjcmMap();
+    if (this.$route.query.pn && this.$route.query.st && this.$route.query.et) {
+      this.searchForm.plateNo = this.$route.query.pn;
+      this.searchForm.time = [getDate(this.$route.query.st), getDate(this.$route.query.et)];
+      this.searchSubmit();
+    } 
   },
   methods: {
+    goToQypz () {
+        // vehicle_search_qy
+      this.$store.commit('setBreadcrumbData', {
+        breadcrumbData: [
+          {name: '车辆侦查', routerName: 'vehicle'},
+          {name: '车辆综合分析报告', routerName: 'vehicle_report', query: {pn: this.searchForm.plateNo, st: formatDate(this.searchForm.time[0], 'yyyy-MM-dd'), et: formatDate(this.searchForm.time[1], 'yyyy-MM-dd')}},
+          {name: '区域碰撞'}
+        ]
+      });
+      this.$router.push({name: 'vehicle_search_qy', query: {
+        breadcrumb: 2
+      }});
+    },
     // 湘AN8888 2019-07-01 00:00:00 2019-07-04 00:00:00
     searchSubmit () {
       this.searchLoading = true;
@@ -378,7 +386,7 @@ export default {
           this.rcList = data.inCityDtoList;
           this.ccList = data.outCityDtoList;
           this.yjcmList = data.analysisResultDto;
-          this.yjcmjlList = data.nightHauntConclusionList;
+          this.yjcmjlList = data.nightHauntConclusionDto;
           this.pfcmList = data.oftenCarAnalysisDtoList;
           this.tpcList = data.fakePlateResultDtoList;
           this.txclList =  data.tailBehindListForReportList; // 同行车
@@ -428,7 +436,7 @@ export default {
           let _oo = oList[key];
           if (_oo.longitude > 0 && _oo.latitude > 0) {
             // console.log('_oo', _oo);
-            let marker = new window.AMap.Marker({ // 添加自定义点标记
+            new window.AMap.Marker({ // 添加自定义点标记
               map: _this.yjcmMap,
               position: [_oo.longitude, _oo.latitude], // 基点位置 [116.397428, 39.90923]
               offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
@@ -441,32 +449,7 @@ export default {
                 '<h3>' + _oo.CM_shotTimes.length + '次</h3>' +
                 '</div></div></div>'
             });
-            /* marker.on('mouseover', function (mEvent) {
-              // let iW = Math.round($(window).width() * 0.15);
-              // let extD = mEvent.target.F.extData;
-              // console.log('mEvent', mEvent);
-              let sContent = '<div class="cl_report_hw"><div>' +
-                '<p>' + _oo.deviceName + '</p>' +
-                '<h3>' + _oo.CM_shotTimes.length + '次</h3>' +
-                '<ul><li>出没时间:</li>';
-              for (let j = 0; j < _oo.CM_shotTimes.length; j++) {
-                sContent += '<li>' + _oo.CM_shotTimes[j] + '</li>';
-              }
-              sContent += '</ul></div></div>';
-              let aOffSet = [0, -50];
-              _this.yjcmHoverWindow = new AMap.InfoWindow({
-                isCustom: true,
-                closeWhenClickMap: true,
-                offset: new AMap.Pixel(aOffSet[0], aOffSet[1]), // 相对于基点的偏移位置
-                content: sContent
-              });
-              let aCenter = mEvent.target.B.position;
-              _this.yjcmHoverWindow.open(_this.yjcmMap, aCenter);
-            }); */
           }
-          /* marker.on('mouseout', function (mEvent) {
-            // if (_this.yjcmHoverWindow) { _this.yjcmHoverWindow.close(); }
-          }); */
         }
         this.yjcmMap.setFitView();
       }
@@ -480,9 +463,10 @@ export default {
         if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
           let  sVideo = '';
           if (obj.storagePath) {
-            sVideo = '<div><img src="' + obj.storagePath + '" controls></img></div>';
+            sVideo = '<div><img src="' + obj.storagePath + '" controls></img></div>' +
+              '<p>' + obj.shotTime + '</p>';
           }
-          let marker = new window.AMap.Marker({ // 添加自定义点标记
+          new window.AMap.Marker({ // 添加自定义点标记
             map: this.clgjMap,
             position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
             offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
@@ -497,7 +481,7 @@ export default {
         }
       }
       // 绘制轨迹
-      var polyline = new window.AMap.Polyline({
+      new window.AMap.Polyline({
           map: this.clgjMap,
           path: gjPath,
           showDir: true,
@@ -560,10 +544,10 @@ export default {
       }
     },
     pickerChanged () {
-      if ((this.searchForm.time[1].getTime() - this.searchForm.time[0].getTime()) > 2 * 24 * 60 * 60 * 1000) {
+      /* if ((this.searchForm.time[1].getTime() - this.searchForm.time[0].getTime()) > 2 * 24 * 60 * 60 * 1000) {
         this.searchForm.time[1] = new Date(this.searchForm.time[0].getTime() + 2 * 24 * 60 * 60 * 1000);
         this.$message('最多不能超过3天.');
-      }
+      } */
     },
 
     /* vehicleExport () {
@@ -622,20 +606,22 @@ export default {
 .vc_rep_mu {
   overflow: hidden;
   border-bottom: 1px solid #eee;
+  padding: 6px 20px 0 20px;
   > li {
     float: left;
-    padding: 0 20px;
+    padding: 0 5px;
     > span {
       color: #333;
       display: inline-block;
-      height: 40px; line-height: 40px;
-      padding: 0 2px;
-      border-bottom: 2px solid #fff;
+      height: 34px; line-height: 34px;
+      padding: 0 25px;
+      border-radius:2px 2px 0px 0px;
+      background-color: #F7F7F7;
       cursor: pointer;
       &.vc_rep_mu_sed {
         cursor: default;
-        color: #0C70F8;
-        border-bottom-color: #0C70F8;
+        color: #fff;
+        background-color: #0C70F8;
       }
     }
   }
@@ -649,18 +635,23 @@ export default {
     > h2 {
       height: 48px; line-height: 48px;
       color: #333; font-size: 16px; font-weight: bold;
-      padding-left: 20px;
-      border-bottom: 1px solid #eee;
+      padding-left: 18px;
     }
     > div {
-      padding: 20px 20px;
+      padding: 5px 20px 0 20px;
+      > h3 {
+        color: #333; font-size: 16px;
+        padding: 0 0 15px 0;
+        border-bottom: 1px solid #eee;
+      }
     }
   }
 
-  .rep_cl_empty { text-align: center; color: #999; }
-
+  .rep_cl_empty { text-align: center; color: #999; padding: 20px 0 20px 0; }
+  .rep_cl_tbl { padding: 20px 0 20px 0; }
   .rep_clxx {
     overflow: hidden;
+    padding-top: 10px; padding-bottom: 20px;
     > li {
       width: 25%;
       float: left;
@@ -679,6 +670,7 @@ export default {
     }
   }
   .rep_yjcm {
+    padding-top: 10px; padding-bottom: 20px;
     > li {
       overflow: hidden;
       padding: 5px 0;
@@ -722,20 +714,25 @@ export default {
   }
   .rep_map {
     position: relative;
-    width: 100%; height: 500px;
+    width: 100%; height: 520px; padding-bottom: 20px;
     > .rep_map_c {
       width: 100%; height: 100%;
     }
     > .rep_map_o {
-      position: absolute; bottom: 10px; right: 10px;
+      position: absolute; bottom: 30px; right: 10px;
+      padding: 5px 10px;
+      background-color: #fff;
       > li {
-        padding: 10px;
-        background-color: #fff;
-        box-shadow: 0px 5px 5px 0px rgba(131,131,131,0.28);
-        &:nth-child(1) { margin-bottom: 10px; }
-        &:nth-child(2) { border-bottom: 0; }
+        padding: 10px 0;
+        width: 60px;
+        font-size: 20px; font-weight: bold;
+        text-align: center;
+        cursor: pointer;
+        color: #999;
+        border-top: 1px solid #F2F2F2;
+        &:nth-child(1) { padding: 15px 0; border-top: 0; font-weight: normal; }
+        &:nth-child(2) { }
         &:nth-child(3) { 
-          border-top: 0;
           position: relative;
           > span {
             display: block;
@@ -745,6 +742,7 @@ export default {
             overflow: hidden;
           }
         }
+        &:hover { color: #0C70F8; }
       }
     }
     > .rep_map_sk {
@@ -819,14 +817,26 @@ export default {
     border-color: #a0cfff;
   }
 }
+.tpc_fake_res { width: 14px; height: 15px; background-position: -863px -530px; }
 </style>
 <style lang="scss">
+.map_pic_show, .map_pic_show2 {
+  .cl_report_gj {
+    > div {
+      display: block;
+    }
+    > p {
+      display: none;
+    }
+  }
+}
 .cl_report_gj {
   position: relative;
   display: inline-block;
   width: 42px; height: 49px;
   background: url(../../../../../assets/img/icons/icons_sxt.png) center center no-repeat;
   > div {
+    display: none;
     position: absolute; bottom: -20px; left: 95%; z-index: 1;
     width: 160px; height: 120px;
     background-color: #fff;
@@ -835,6 +845,15 @@ export default {
     > img {
       width: 100%; height: 100%;
     }
+  }
+  > p {
+    position: absolute; bottom: 17px; left: 95%; z-index: 1;
+    width: 150px; height: 20px; line-height: 20px;
+    background-color: #0C70F8;
+    border-radius: 10px;
+    color: #fff; font-size: 12px;
+    text-align: center;
+    &:hover { z-index: 2; }
   }
 }
 .cl_report_cm {

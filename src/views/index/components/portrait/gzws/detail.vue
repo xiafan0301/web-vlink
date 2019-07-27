@@ -87,6 +87,12 @@
           <p @click="skipLjdPortraitPage">落脚点分析</p>
         </div>
         <div id="rightMap"></div>
+        <!--地图操作按钮-->
+        <ul class="map_rrt_u2">
+          <li @click="resetZoom"><i class="el-icon-aim"></i></li>
+          <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
+          <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
+        </ul>
       </div>
     </div>
     <!-- 视频全屏放大 -->
@@ -118,7 +124,9 @@
 </template>
 <script>
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+import { mapXupuxian } from "@/config/config.js";
 import { random14 } from '@/utils/util.js';
+import { PortraitGetDispatch } from '@/views/index/api/api.portrait.js';
 export default {
   components: { vlBreadcrumb },
   data () {
@@ -130,13 +138,25 @@ export default {
       flvplayerId: 'flv_' + random14(),
       map: null,
       marker: {},
-      detailInfo: {}
+      detailInfo: {},
+      portraitStatus: null // 以图搜人状态
     }
   },
   mounted () {
+    this.getPortraitGetDispatch();
     this.getDetail();
   },
   methods: {
+    // 以图搜人实时/离线判断
+    getPortraitGetDispatch () {
+      PortraitGetDispatch()
+        .then(res => {
+          console.log('111', res)
+          if (res && res.data) {
+            this.portraitStatus = res.data;
+          }
+        })
+    },
     // 获取尾随车辆详情
     getDetail () {
       if (this.$route.query.obj) {
@@ -147,12 +167,23 @@ export default {
         }
       }
     },
+    mapZoomSet (val) {
+      if (this.map) {
+        this.map.setZoom(this.map.getZoom() + val);
+      }
+    },
+    resetZoom () {
+      if (this.map) {
+        this.map.setZoomAndCenter(18, mapXupuxian.center);
+        this.map.setFitView();
+      }
+    },
     // 初始化地图
     initMap (obj) {
       let _this = this;
       let map = new window.AMap.Map('rightMap', {
         zoom: 15, // 级别
-        center: [110.596015, 27.907662], // 中心点坐标[110.596015, 27.907662]
+        center: mapXupuxian.center, // 中心点坐标[110.596015, 27.907662]
       });
       map.setMapStyle('amap://styles/whitesmoke');
 
@@ -167,6 +198,15 @@ export default {
           
           let obj = data[i];
           if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
+            let iconType;
+            if (i === 0) {
+              iconType = 'vl_icon_04_019';
+            } else if (i === (data.length - 1)) {
+              iconType = 'vl_icon_05_019';
+            } else {
+              iconType = 'vl_icon_sxt';
+            }
+
             let offSet = [-20.5, -55];
             
             let _idBtn = 'vlJtcPlayBtn' + i;
@@ -179,7 +219,7 @@ export default {
               draggable: false, // 是否可拖动
               extData: '', // 用户自定义属性
               // 自定义点标记覆盖物内容
-              content: '<div id="vehicle' + i + '"  title="'+ obj.deviceName +'" class="vl_icon vl_icon_sxt"></div>'
+              content: '<div id="vehicle' + i + '"  title="'+ obj.deviceName +'" class="vl_icon '+ iconType +'"></div>'
             });
   
             path.push(new window.AMap.LngLat(obj.shotPlaceLongitude, obj.shotPlaceLatitude));
@@ -190,7 +230,7 @@ export default {
               let sContent = "<div class='tip_box'><div class='select_target'><p class='select_p'>查询目标</p>"
                     +"<img src="+ obj.targetStoragePath +" /><div class='mongolia'>"
                     +"<span>"+ obj.shotTime +"</span><i id="+ _id +" class='vl_icon vl_icon_control_09'></i></div></div>"
-                    +"<div class='tail_vehicle'><p class='tail_p'>尾随车辆</p><img src="+ obj.peerStoragePath +" />"
+                    +"<div class='tail_vehicle'><p class='tail_p'>尾随人员</p><img src="+ obj.peerStoragePath +" />"
                     +"<div class='mongolia'><span>"+ obj.shotTime +"</span><i id="+ _idBtn +" class='vl_icon vl_icon_control_09'></i></div></div>"
                     +"<div class='divide'></div><div class='device_name'>"+ obj.deviceName +"</div></div>";
 
@@ -208,11 +248,11 @@ export default {
                 }, 500);
             });
             marker.on('mouseout', function () {
-              $('#vehicle' + obj.i).removeClass('vl_icon_map_hover_mark0');
+              $('#vehicle' + i).removeClass('vl_icon_map_hover_mark0');
             });
-            _this.map.setZoom(13)
+            // _this.map.setZoom(13)
             // marker.setPosition([obj.shotPlaceLongitude, obj.shotPlaceLatitude]);
-             _this.map.setCenter([obj.shotPlaceLongitude, obj.shotPlaceLatitude]);
+            //  _this.map.setCenter([obj.shotPlaceLongitude, obj.shotPlaceLatitude]);
             // marker.setMap(_this.map);
             //_this.map.setFitView();// 执行定位
 
@@ -220,12 +260,14 @@ export default {
           // 绘制线条
           let polyline = new window.AMap.Polyline({
             path: path,
-            strokeWeight: 4,
+            strokeWeight: 8,
+            showDir: true,
             strokeColor: '#61C772',
-            strokeStyle: 'dashed'
+            strokeStyle: 'solid'
           });
 
           _this.map.add(polyline);
+          _this.map.setFitView();
         }
       }
     },
@@ -337,7 +379,7 @@ export default {
       });
       this.$router.push({name: 'control_create', query: { imgurl: this.detailInfo.subStoragePath, modelName: '人员追踪' }});
     },
-    // 跳至人像检索页面
+    // 跳至以图搜人页面
     skipYtsrPortraitPage () {
       this.$store.commit('setBreadcrumbData', {
         breadcrumbData: [
@@ -348,7 +390,11 @@ export default {
           { name: '以图搜人' }
         ]
       });
-      this.$router.push({name: 'portrait_ytsr', query: { imgurl: this.detailInfo.subStoragePath }});
+      // if (this.portraitStatus === 1) { // 离线
+      //   this.$router.push({name: 'portrait_ytsr_list', query: { imgurl: this.detailInfo.subStoragePath }});
+      // } else if (this.portraitStatus === 2) { // 实时
+        this.$router.push({name: 'portrait_ytsr_moment', query: { imgurl: this.detailInfo.subStoragePath }});
+      // }
     },
     // 跳至轨迹分析页面
     skipPjfxPortraitPage () {
@@ -522,9 +568,32 @@ export default {
         }
       }
       #rightMap {
-        z-index: 1000;
+        // z-index: 1000;
         width: 100%;
         height: 100%;
+      }
+      .map_rrt_u2 {
+        position: absolute; right: 30px;
+        bottom: 30px;
+        margin-top: .2rem;
+        font-size: 26px;
+        background: #ffffff;
+        width: 78px;
+        padding: 0 10px;
+        > li {
+          line-height: 70px;
+          text-align: center;
+          cursor: pointer;
+          border-bottom: 1px solid #F2F2F2;
+          > i {
+            margin-top: 0;
+            display: inline-block;
+          }
+          color: #999999;
+          &:hover {
+            color: #0C70F8;
+          }
+        }
       }
     }
   }

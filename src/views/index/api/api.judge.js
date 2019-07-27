@@ -26,6 +26,17 @@ export function JtcPOSTAppendtpInfo(data) {
   })
 }
 /**
+ * JtcPOSTAppendixInfo 套牌车查询接（分页）
+ * @param {object} params
+ */
+export function getbayonet() {
+  return request({
+    url: '/analysis-device/enter-city-bayonet',
+    method: 'get',
+    mode: 'judge'
+  })
+}
+/**
  * JfoGETGroup 分组列表查询接口
  * @param {object} params
  */
@@ -116,6 +127,14 @@ export function JigGETEventAreas(params) {
 export function JigGETAlarmSnapList(params) {
   return request({
     url: '/surveillances/alarm-snaps',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
+export function newGETAlarmSnapList(params) {
+  return request({
+    url: '/portrait/shot-num/focus/detail',
     method: 'get',
     params: params,
     mode: 'judge'
@@ -457,6 +476,18 @@ export function getMultiVehicleList(params) {
     mode: 'judge'
   })
 }
+/**
+ * 判断基准车辆是否有抓拍数据
+ * @param {object} params
+ */
+export function getBaseVehicleList(params) {
+  return request({
+    url: '/base-vehicle-check',
+    method: 'get',
+    params,
+    mode: 'judge'
+  })
+}
 /*--------------------------  车辆侦查--多车同行分析end  ---------------------------------*/
 
 /*--------------------------  车辆侦查--夜间行车分析start  ---------------------------------*/
@@ -564,4 +595,69 @@ export function getFaceRetrievalPerson(params) {
     mode: 'judge'
   })
 }
+
+/*--------------------------  参数设置  ---------------------------------*/
+/**
+ * 获取落脚点分析距离和停留时间
+ * @param {object} params
+ */
+export function getLjdDistanceAndTime() {
+  return request({
+    url: '/params',
+    method: 'get',
+    mode: 'judge'
+  })
+}
+/**
+ * 设置落脚点分析距离和停留时间
+ * @param {object} params
+ */
+export function setLjdDistanceAndTime(data) {
+  return request({
+    url: '/params',
+    method: 'post',
+    data,
+    mode: 'judge'
+  })
+}
+
+
+/* 视频接力接口 */
+/**
+ * 添加人员视频接力任务
+ * @param {object} params
+ */
+export function addPersonVideoContinue(params) {
+  return request({
+    url: '/add/person/video/continue',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+
+ /* 添加车辆视频接力任务
+ * @param {object} params
+ */
+export function addVhicleVideoContinue(params) {
+  return request({
+    url: '/add/vhicle/video/continue',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+/**
+ * 搜素所有视频接力任务
+ * @param {object} params
+ */
+export function selectVideoContinue(params) {
+  return request({
+    url: '/select/video/continue',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
+
 

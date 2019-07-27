@@ -17,7 +17,7 @@
               </el-select>
             </el-form-item>
             <el-form-item prop="state">
-              <el-select v-model="manageForm.state" placeholder="布控状态">
+              <el-select v-model="manageForm.state" placeholder="布控状态" @change="changeControlState">
                 <el-option label="全部状态" :value="null"></el-option>
                 <el-option
                   v-for="item in stateList"
@@ -40,10 +40,12 @@
             </el-form-item>
             <el-form-item prop="time">
               <el-date-picker
+                class="vl_date"
+                :clearable="false"
                 placeholder="创建时间"
                 v-model="manageForm.time"
                 type="daterange"
-                range-separator="-"
+                range-separator="至"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
                 value-format="yyyy-MM-dd"
@@ -51,45 +53,27 @@
               </el-date-picker>
             </el-form-item>
             <el-form-item prop="controlObj">
-              <el-select
-                @clear="controlObjList = []"
-                v-model="manageForm.controlObj"
-                filterable
-                remote
-                clearable
-                value-key="value"
-                placeholder="请输入对象搜索"
-                :remote-method="getControlObject"
-                :loading="loading">
+              <el-select v-model="manageForm.controlObj" value-key="uid" filterable placeholder="请输入布控对象搜索">
                 <el-option
                   v-for="item in controlObjList"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item">
+                  :key="item.uid"
+                  :label="item.name"
+                  :value="item">  
                 </el-option>
               </el-select>
             </el-form-item>
             <el-form-item prop="deviceId">
-              <el-select
-                @clear="facilityNameList = []"
-                v-model="manageForm.deviceId"
-                filterable
-                remote
-                value-key="value"
-                clearable
-                placeholder="请输入设备名搜索"
-                :remote-method="getControlDevice"
-                :loading="loading">
+              <el-select v-model="manageForm.deviceId" value-key="value" filterable placeholder="请输入设备名搜索">
                 <el-option
                   v-for="item in facilityNameList"
-                  :key="item.value"
+                  :key="item.uid"
                   :label="item.label"
-                  :value="item.value">
+                  :value="item.value">  
                 </el-option>
               </el-select>
             </el-form-item>
             <el-form-item>
-              <el-button class="select_btn" @click="getControlList">查询</el-button>
+              <el-button class="select_btn" type="primary" @click="getControlList" :loading="loading">查询</el-button>
               <el-button class="reset_btn" @click="resetForm">重置</el-button>
             </el-form-item>
           </el-form>
@@ -221,8 +205,9 @@ import manageDetail from './components/manageDetail.vue';
 import create from './create.vue';
 import delDialog from './components/delDialog.vue';
 import stopDialog from './components/stopDialog.vue';
-import {getControlList, getControlObject, getControlDevice} from '@/views/index/api/api.control.js';
+import {getControlObjBySelect, getControlList, getControlDevice} from '@/views/index/api/api.control.js';
 import {dataList} from '@/utils/data.js';
+import {unique} from '@/utils/util.js';
 export default {
   components: {manageDetail, create, delDialog, stopDialog},
   data () {
@@ -235,7 +220,7 @@ export default {
         state: null,
         alarmId: null,
         time: null,
-        controlObj: null,
+        controlObj: {},
         deviceId: null
       },
       lastManageForm: {
@@ -243,10 +228,11 @@ export default {
         state: null,
         alarmId: null,
         time: null,
-        controlObj: null,
+        controlObj: {},
         deviceId: null
       },//用来记录之前的搜索参数，对比是否需要置为第一页
       loading: false,
+      loadingBtn: false,
       controlObjList: [],//布控对象列表
       facilityNameList: [],//设备列表
       stateList: [
@@ -274,7 +260,9 @@ export default {
     }
   },
   created () {
+    this.changeControlState();
     this.getControlList();
+    this.getControlDevice();
     const data = this.$route.query;
     // 外部跳转到详情页
     if (data.pageType && data.controlId) {
@@ -294,6 +282,20 @@ export default {
     }
   },
   methods: {
+    // 获取布控对象下拉列表
+    getControlObjBySelect () {
+      getControlObjBySelect({surveillanceStatus: this.manageForm.state}).then(res => {
+        if (res) {
+          this.controlObjList = unique(res.data.filter(f => f.name), 'objId');
+        }
+      })
+    },
+    // 切换布控状态后，重新获取布控名称列表、事件列表、布控对象列表数据
+    changeControlState () {
+      this.controlObjList = [];
+      this.manageForm.controlObj = {};
+      this.getControlObjBySelect();
+    },
     handleCurrentChange (page) {
       this.pageNum = page;
       this.currentPage = page;
@@ -328,48 +330,20 @@ export default {
       for (let key in this.manageForm) {
         this.manageForm[key] = null;
       }
-      this.controlObjList = [];
-      this.facilityNameList = [];
       this.getControlList();
     },
-    // 获取所有布控对象
-    getControlObject (query) {
-      const _query = this.Trim(query, 'g');
-      if (_query) {
-        const params = {
-          name: query
-        }
-        getControlObject(params).then(res => {
-          if (res && res.data) {
-            this.controlObjList = res.data.map(m => {
-              return {
-                value: m.objId,
-                label: m.name,
-                type: m.objType
-              }
-            });
-          }
-        })
-      }
-    },
     // 获取所有布控设备
-    getControlDevice (query) {
-      const _query = this.Trim(query, 'g');
-      if (_query) {
-        const params = {
-          name: query
+    getControlDevice () {
+      getControlDevice().then(res => {
+        if (res && res.data) {
+          this.facilityNameList = res.data.map(m => {
+            return {
+              value: m.uid,
+              label: m.name
+            }
+          });
         }
-        getControlDevice(params).then(res => {
-          if (res && res.data) {
-            this.facilityNameList = res.data.map(m => {
-              return {
-                value: m.uid,
-                label: m.name
-              }
-            });
-          }
-        })
-      }
+      })
     },
     // 获取布控列表
     getControlList () {
@@ -400,8 +374,8 @@ export default {
         'where.level': this.manageForm.alarmId,//告警级别
         'where.dateStart': this.manageForm.time && this.manageForm.time[0],//布控开始时间
         'where.dateEnd': this.manageForm.time && this.manageForm.time[1],//布控结束时间
-        'where.surveillanceObjectId': this.manageForm.controlObj && this.manageForm.controlObj.value,//布控对象id
-        'where.objType': this.manageForm.controlObj && this.manageForm.controlObj.type,//布控对象类型【当布控对象id传了则必传】 1人像 2车辆
+        'where.surveillanceObjectId': this.manageForm.controlObj && this.manageForm.controlObj.objId,//布控对象id
+        'where.objType': this.manageForm.controlObj && this.manageForm.controlObj.objType,//布控对象类型【当布控对象id传了则必传】 1人像 2车辆
         'where.deviceId': this.manageForm.deviceId//布控设备id
       }
       this.loading = true;

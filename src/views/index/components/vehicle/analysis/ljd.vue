@@ -17,28 +17,51 @@
           label-width="0px"
           class="demo-ruleForm"
         >
-          <el-form-item class="firstItem" prop="data1">
+        <el-form-item  prop="data1">
+            <el-date-picker
+              v-model="ruleForm.data1"
+              type="date"
+              placeholder="开始时间"
+              :picker-options="pickerOptions"
+              class="full vl_date"
+              :clearable="false"
+              value-format="yyyy-MM-dd"
+            ></el-date-picker>
+          </el-form-item>
+          <el-form-item  prop="data2">
+            <el-date-picker
+              v-model="ruleForm.data2"
+              :clearable="false"
+              type="date"
+              :picker-options="pickerOptions"
+              placeholder="结束时间"
+              class="full vl_date vl_date_end"
+              value-format="yyyy-MM-dd"
+            ></el-date-picker>
+          </el-form-item>
+          <!-- <el-form-item class="firstItem" prop="data1">
             <el-date-picker
           v-model="ruleForm.data1"
           type="daterange"
-          class="full"
+          :clearable="false"
+          class="full vl_date"
           value-format="yyyy-MM-dd"
           :picker-options="pickerOptions"
           range-separator="至"
           start-placeholder="开始日期"
           end-placeholder="结束日期">
         </el-date-picker>
-          </el-form-item>
+          </el-form-item> -->
 
           <el-form-item prop="input3">
             <p class="carCold">车牌：</p>
             <el-input placeholder="请输入车牌号" v-model="ruleForm.input3" class="input-with-select">
-              <el-select v-model="select" slot="prepend" placeholder="请选择">
+              <el-select>
                 <el-option v-for="(item, index) in pricecode" :label="item" :value="item" :key="'cph_' + index"></el-option>
               </el-select>
             </el-input>
           </el-form-item>
-          <el-form-item prop="input4" >
+          <!-- <el-form-item prop="input4" >
             <el-row :gutter="5">
               <el-col :span="22">
                 <div>
@@ -52,8 +75,7 @@
               </el-col>
             </el-row>
           </el-form-item>
-          <el-form-item label="区域：" label-width="60px" prop="input5">
-            <!-- <el-radio-group v-model="input5" @change="changeTab"> -->
+          <el-form-item label="抓拍区域：" label-width="72px" prop="input5">
             <el-radio-group v-model="ruleForm.input5" @change="changeTab">
                <el-row :gutter="10">
                 <el-col :span="12">
@@ -68,7 +90,7 @@
             </el-radio-group>
           </el-form-item>
           <el-form-item v-if="ruleForm.input5=='1'" prop="value1">
-            <el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="全部区域" class="full">
+            <el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="请选择" class="full">
             <el-option-group
               v-for="group in options"
               :key="group.areaName"
@@ -85,7 +107,7 @@
           <el-form-item v-if="ruleForm.input5=='2'" >
             <el-input  v-model="selectValue" :disabled="true">
             </el-input>
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item>
             <el-row :gutter="10">
               <el-col :span="12">
@@ -101,29 +123,43 @@
       </div>
     </div>
     <div :class="['right',{hide:!hideleft}]" id="mapBox"></div>
+    <ul class="map_rrt_u2">
+        <li  @click="resemt"><i class="el-icon-aim"></i></li>
+        <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
+        <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
+      </ul>
     <div class="reselt" v-if="reselt">
       <div class="plane insetPadding">
         <h3 class="title">分析结果</h3>
         <el-table :data="evData" style="width: 100%">
           <el-table-column  type="index" :show-overflow-tooltip="true" label="序号"></el-table-column>
-          <el-table-column  prop="address" :show-overflow-tooltip="true" label="地址"></el-table-column>
-          <el-table-column prop="shotNum" width="80px" sortable label="次数"></el-table-column>
+          <el-table-column  prop="address" :show-overflow-tooltip="true" label="落脚点位置"></el-table-column>
+          <el-table-column prop="stopOverTime" width="110px" sortable label="停留时长">
+            <template slot-scope="scope">
+              <span>{{ scope.row.stopOverTime | transMinute }}</span>
+            </template>
+          </el-table-column>
         </el-table>
         <div class="insetLeft2" @click="hideResult"></div>
       </div>
     </div>
-
+<!-- 视频播放 -->
+  <div class="video_box" v-if="dialogVisible">
+    <div is="flvplayer" class="vl_map_video_box" :oData="playUrl" @playerClose="playerClose" :showFullScreen="true" :oConfig="{fit: false, sign: false, pause: true,fullscreen:false}"></div>
+  </div>
     <!-- 地图选择 -->
     <!-- <el-dialog :visible.sync="dialogVisible" width="80%">
         <mapselect @selectMap="mapPoint" @closeMap="hideMap" :allPoints="allDevice" :allBayonets="allBayonet"></mapselect>
     </el-dialog> -->
     <!-- D设备 B卡口  这里是设备和卡口 -->
-    <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div>
+    <!-- <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div> -->
   </div>
 </template>
 <script>
+import flvplayer from '@/components/common/flvplayer.vue';
 import { mapXupuxian } from "@/config/config.js";
 import { cityCode } from "@/utils/data.js";
+import { transMinute } from '@/utils/util.js';
 import { getVehicleShot,getAllDevice } from "@/views/index/api/api.judge.js";
 import { getAllBayonetList } from "@/views/index/api/api.base.js";
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
@@ -131,7 +167,8 @@ import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import mapSelector from '@/components/common/mapSelector.vue';
 export default {
   components: {
-    mapSelector
+    mapSelector,
+    flvplayer
   },
   data() {
     return {
@@ -143,15 +180,17 @@ export default {
       selectDevice:[],
       selectBayonet:[],
       selectValue:"已选设备0个",
-      select: "湘",
       reselt: false,
       hideleft: false,
+      bResize: {},
+      playUrl: {},
       ruleForm: {
         data1:null,
+        data2:null,
         input3: null,
         input4: 3,
         input5: "1",
-        value1: null,
+        value1: [],
       },
       rules: {input4: [ {
               pattern:  /^[1-9]\d*$/,
@@ -162,7 +201,7 @@ export default {
           input3:[{
              required: true, message: '请输入正确车牌', trigger: 'blur'
           },{
-            pattern:/(^[A-Z0-9]{6}$)|(^[A-Z]{2}[A-Z0-9]{2}[A-Z0-9\u4E00-\u9FA5]{1}[A-Z0-9]{4}$)|(^[A-Z0-9]{5}[挂学警军港澳]{1}$)|(^[A-Z]{2}[0-9]{5}$)|(^(08|38){1}[A-Z0-9]{4}[A-Z0-9挂学警军港澳]{1}$)/,
+            pattern:/([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})/,
             message: '常规格式：湘A12345',
             trigger: 'blur'
             }]
@@ -194,8 +233,8 @@ export default {
     //this.getControlMap(1);
     this.setDTime();
     let pNo=this.$route.query.plateNo
-    this.select = pNo?pNo.substring(0,1):"湘";
-    this.ruleForm.input3 = pNo?pNo.substr(1,6):"";
+    //this.select = pNo?pNo.substring(0,1):"湘";
+    this.ruleForm.input3 = pNo;
     let map = new window.AMap.Map("mapBox", {
       zoom: 10,
       center: mapXupuxian.center
@@ -208,6 +247,21 @@ export default {
     
   },
   methods: {
+    // 关闭视频
+    playerClose () {
+      this.dialogVisible = false;
+    },
+    mapZoomSet(val) {
+      if (this.amap) {
+        this.amap.setZoom(this.amap.getZoom() + val);
+      }
+    },
+    resemt(){
+      if (this.amap) {
+          this.amap.setZoomAndCenter(14, mapXupuxian.center);
+        }
+      
+    },
     setDTime () {
       
       let date = new Date();
@@ -221,7 +275,8 @@ export default {
       let _s = new Date(curDate - curS).getFullYear() +
         "-" + _sm + "-" +_sd;
       let _e = date.getFullYear() + "-" + _em + "-" + _ed;
-      this.ruleForm.data1 = [_s, _e]
+      this.ruleForm.data1 = _s
+      this.ruleForm.data2 =  _s
     },
     hideResult() {
       this.reselt = false;
@@ -239,28 +294,34 @@ export default {
     // hideMap(){
     //   this.dialogVisible=false
     // },
-    mapPoint(data){
-      let v = data.deviceList;
-      let p = data.bayonetList;
-      this.selectDevice=[]
-      this.selectBayonet=[]
-      //返回有效点集合
-      if(v && v.length>0){
-        v.forEach(element => {
-          this.selectDevice.push(element.uid)
-        });
-      }
-      if(p && p.length>0){
-        p.forEach(element => {
-          this.selectBayonet.push(element.uid)
-        });
-      }
-      this.selectValue="已选设备"+(this.selectDevice.length+this.selectBayonet.length)+"个"
-      //this.selectDevice=v
+    // mapPoint(data){
+    //   let v = data.deviceList;
+    //   let p = data.bayonetList;
+    //   this.selectDevice=[]
+    //   this.selectBayonet=[]
+    //   //返回有效点集合
+    //   if(v && v.length>0){
+    //     v.forEach(element => {
+    //       this.selectDevice.push(element.uid)
+    //     });
+    //   }
+    //   if(p && p.length>0){
+    //     p.forEach(element => {
+    //       this.selectBayonet.push(element.uid)
+    //     });
+    //   }
+    //   if(p.length==0 && v.length==0){
+    //     if(!document.querySelector('.el-message--info')){
+    //        this.$message.info("选择的区域没有设备，请重新选择区域");
+    //     }
+    //     return
+    //   }
+    //   this.selectValue="已选设备"+(this.selectDevice.length+this.selectBayonet.length)+"个"
+    //   //this.selectDevice=v
 
-      // console.log(this.selectDevice);
+    //   // console.log(this.selectDevice);
       
-    },
+    // },
     changeTab(v) {
       //console.log(v);
       // if (v == "2") {
@@ -270,45 +331,50 @@ export default {
       // }
     },
     submitForm(v) {
-      let isP=/(^[A-Z0-9]{6}$)|(^[A-Z]{2}[A-Z0-9]{2}[A-Z0-9\u4E00-\u9FA5]{1}[A-Z0-9]{4}$)|(^[A-Z0-9]{5}[挂学警军港澳]{1}$)|(^[A-Z]{2}[0-9]{5}$)|(^(08|38){1}[A-Z0-9]{4}[A-Z0-9挂学警军港澳]{1}$)/
+      let isP=/([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})/
       let  result = isP.test(this.ruleForm.input3);
-      if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data1.length>0 && this.ruleForm.input3 && this.select){
+      if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data2 && this.ruleForm.input3){
       let pg={
         //shotTime:+"_"+this.ruleForm.data1[1]+" 23:59:59",
-        startTime:this.ruleForm.data1[0]+" 00:00:00",
-        endTime:this.ruleForm.data1[1]+" 23:59:59",
+        startTime:this.ruleForm.data1+" 00:00:00",
+        endTime:this.ruleForm.data2+" 23:59:59",
         //shotTime:this.ruleForm.data1[0]+"_"+this.ruleForm.data1[1],
-        minSnapNum: this.ruleForm.input4 || 0,
-        plateNo:this.select+ this.ruleForm.input3 ,
+        // minSnapNum: this.ruleForm.input4 || 0,
+        plateNo: this.ruleForm.input3 ,
       }
-      if(this.ruleForm.input5==1 && this.ruleForm.value1.length!=0){
-        pg.areaIds=this.ruleForm.value1.join(",")
-      }
-      if(this.ruleForm.input5==2){
-         pg.deviceIds=this.selectDevice.join(",")
-         pg.bayonetIds=this.selectBayonet.join(",")
-      }
+      // if(this.ruleForm.input5==1 && this.ruleForm.value1.length!=0){
+      //   pg.areaIds=this.ruleForm.value1.join(",")
+      // }
+      // if(this.ruleForm.input5==2){
+      //    pg.deviceIds=this.selectDevice.join(",")
+      //    pg.bayonetIds=this.selectBayonet.join(",")
+      // }
       
       if(!result){
-         this.$message.info("请输入正确的车牌号码。");
+        if(!document.querySelector('.el-message--info')){
+           this.$message.info("请输入正确的车牌号码。");
+        }
+        
          return;
       }
 
       this.getVehicleShot(pg);
       }else{
+        if(!document.querySelector('.el-message--info')){
          this.$message.info("请输入开始时间和车牌号码。");
+        }
       }
     },
     resetForm(v){
-      this.select="湘"
+     
       this.setDTime() 
       this.ruleForm.input3=null
-      this.ruleForm.input4=3
-      this.ruleForm.input5="1"
-      this.ruleForm.value1=null
-      this.selectDevice=[]
-      this.selectBayonet=[]
-      this.selectValue="已选设备0个"
+      // this.ruleForm.input4=3
+      // this.ruleForm.input5="1"
+      // this.ruleForm.value1=null
+      // this.selectDevice=[]
+      // this.selectBayonet=[]
+      // this.selectValue="已选设备0个"
     },
     //查询行政区域
     getMapGETmonitorList(){
@@ -317,9 +383,11 @@ export default {
       }
       MapGETmonitorList(d).then(res=>{
         if(res && res.data){
-          
-          
           this.options.push(res.data)
+           res.data.areaTreeList.forEach(el=>{
+            this.ruleForm.value1.push(el.areaId)
+          })
+          
         }
       })
     },
@@ -348,7 +416,10 @@ export default {
           // console.log(res);
           this.reselt = true;
           if (!res.data || res.data.length === 0) {
-            this.$message.info("抱歉，没有找到匹配结果");
+            if(!document.querySelector('.el-message--info')){
+           this.$message.info("抱歉，没有找到匹配结果");
+          }
+            
             this.evData=[]
             this.amap.clearMap();
             //this.searching = false;
@@ -393,39 +464,47 @@ export default {
     },
     drawMarkers(data) {
       //console.log(data);
-      let limit = 0
-      if(data.length > 3){
-         limit= data[2].shotNum
-      }
-      
+      // let limit = 0
+      // if(data.length > 3){
+      //    limit= data[2].shotNum
+      // }
+      let _this = this
       for (let i = 0; i < data.length; i++) {
         let obj = data[i];
         let _idWin = "vlJfoImg" + i;
-        let isBig = obj.shotNum >= limit?true:false
-        if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
-          if( isBig){
-            let _sContent = `<div id="${_idWin}" class="vl_jig_mk_p"><p>${
-              obj.deviceName
-            }</p><p class="big">${obj.shotNum}次</p></div>`;
+        // let isBig = obj.shotNum >= limit?true:false
+       // if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
+            let _sContent = `<div id="${_idWin}" class="vl_jig_mk_p"><img class="igm" src="${obj.storagePath}"><p class='addres'>${obj.address} <i class='el-icon-caret-right'></i></p><p class='times'>${transMinute(obj.stopOverTime)}</p></div>`;
             // 窗体
-            new AMap.Marker({
+            let marker = new AMap.Marker({
               // 添加自定义点标记
               map: this.amap,
               position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-              offset: new AMap.Pixel(-90, -124), // 相对于基点的偏移位置
+              offset: new AMap.Pixel(-90, -184), // 相对于基点的偏移位置
               draggable: false, // 是否可拖动
               extData: obj,
               // 自定义点标记覆盖物内容
-              content: _sContent
+              content: _sContent,
+              zIndex: 1000
             });
-          // }
+            // let clickWindow = new window.AMap.InfoWindow({
+            //   isCustom: true,
+            //   closeWhenClickMap: false,
+            //   offset: new window.AMap.Pixel(0, -40), // 相对于基点的偏移位置
+            //   content: obj.sContent
+            // });
+            // clickWindow.open(self.amap, new window.AMap.LngLat(obj.shotPlaceLongitude, obj.shotPlaceLatitude));
+            //obj.sContent=_sContent
+            
+          // 打开弹窗
+          
           // 摄像头
             let _id = "vlJfoSxt" + i;
             let _content =
               "<div id=" +
               _id +
               ' class="vl_icon vl_jfo_sxt vl_icon_judge_04"></div>';
-            new AMap.Marker({
+            marker = new AMap.Marker({
               // 添加自定义点标记
               map: this.amap,
               position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
@@ -433,15 +512,20 @@ export default {
               draggable: false, // 是否可拖动
               extData: obj,
               // 自定义点标记覆盖物内容
-              content: _content
+              content: _content,
+              zIndex: 100
             });
             setTimeout(() => {
-              this.addListen($("#" + _id), "mouseover", i);
+              this.addListen($("#" + _id), "mouseover", i,obj);
               this.addListen($("#" + _id), "mouseout", i, obj);
-              this.addListen($("#" + _id), "click", i, obj);
+              // this.addListen($("#" + _id), "click", i, obj);
+              this.addListen($("#" + _idWin), "click", i, obj);
+              this.addListen($("#" + _idWin), "mouseover", i, obj);
+              this.addListen($("#" + _idWin), "mouseout", i, obj);
+              //this.addListen($("#" + _id), "click", i, obj);
             }, 300);
-          }
-        }
+          // }
+      //  }
       }
       this.amap.setFitView();
     },
@@ -449,38 +533,66 @@ export default {
       let self = this;
       let _key;
       el.bind(evType, function() {
+        
         switch (evType) {
           case "mouseover":
-            $("#vlJfoImg" + key).addClass("vl_jig_mk_img_hover");
+            $("#vlJfoImg" + key).addClass("vl_jig_mk_img_show");
             $("#vlJfoSxt" + key).addClass("vl_icon_judge_02");
             break;
           case "mouseout":
             if (!obj.checked) {
-              $("#vlJfoImg" + key).removeClass("vl_jig_mk_img_hover");
+              $("#vlJfoImg" + key).removeClass("vl_jig_mk_img_show");
               $("#vlJfoSxt" + key).removeClass("vl_icon_judge_02");
             }
             break;
-          // case "click":
-          //   _key = self.curVideo.indexNum;
-          //   self.evData.forEach(z => {
-          //     z.checked = false;
-          //   });
-          //   obj.checked = true;
-          //   if (_key !== null) {
-          //     $("#vlJfoImg" + _key).removeClass("vl_jig_mk_img_hover");
-          //     $("#vlJfoSxt" + _key).removeClass("vl_icon_judge_02");
-          //   }
-          //   $("#vlJfoImg" + key).addClass("vl_jig_mk_img_hover");
-          //   $("#vlJfoSxt" + key).addClass("vl_icon_judge_02");
-          //   self.showVideo(obj);
-          //   break;
+          case "click":
+            self.showVideo(obj);
+            break;
         }
       });
+    },
+    
+    showVideo(v){
+
+     // console.log(v);
+      this.dialogVisible=true
+      this.playUrl = {
+            type: 3,
+            title: '',
+            video: {
+              uid: 1,
+              downUrl: v.videoPath
+            }
+          }
+      
     }
   }
 };
 </script>
 <style lang="scss" scoped>
+.map_rrt_u2 {
+    position: absolute; right: 30px;
+    bottom: 30px;
+    margin-top: .2rem;
+    font-size: 26px;
+    background: #ffffff;
+    width: 78px;
+    padding: 0 10px;
+    > li {
+      line-height: 70px;
+      text-align: center;
+      cursor: pointer;
+      border-bottom: 1px solid #F2F2F2;
+      > i {
+        margin-top: 0;
+        display: inline-block;
+      }
+      color: #999999;
+      &:hover {
+        color: #0C70F8;
+      }
+    }
+  }
 .point {
   width: 100%;
   height: 100%;
@@ -540,7 +652,7 @@ export default {
   animation: fadeInLeft 0.4s ease-out 0.3s both;
   transition: marginLeft 0.3s ease-in;
   .plane {
-    padding: 10px;
+    padding: 20px;
     position: relative;
     height: 100%;
   }
@@ -602,9 +714,34 @@ export default {
 .select_btn:hover {
    background-color: #0466de;
 }
+.video_box {
+  position: fixed;
+  left:0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 99999;
+}
+.vl_map_video_box {
+  // position: fixed!important;
+  width: 100%;
+  height: 100%;
+  // top: 0!important;
+}
 </style>
 <style lang="scss">
+.ljd{
+  .el-dialog__wrapper{
+  .el-dialog{
+    height: auto;
+    min-height: 80vh;
+  }
+}
+}
+
 .vl_jig_mk_p {
+  display: none;
+  position: relative;
   width: 180px;
   height: auto;
   background: #ffffff;
@@ -613,6 +750,32 @@ export default {
   text-align: center;
   box-shadow: 4px 0px 10px 0px #838383;
   box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);
+  .times{
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    background: #50CC62;
+    padding: 0px 8px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    color: #ffffff;
+  }
+  .addres{
+    right: 10px;
+    text-align: left;
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    color: #ffffff;
+    i{
+      float: right;
+      font-size: 24px;;
+    }
+  }
+  .igm{
+    width: 100%;
+    height: 100px;
+  }
   .big {
     font-size: 16px;
     font-weight: bold;
@@ -628,6 +791,9 @@ export default {
     border-top: 10px solid #fff;
     border-left: 10px solid transparent;
     border-right: 10px solid transparent;
+  }
+  &.vl_jig_mk_img_show{
+    display: block;
   }
   &.vl_jig_mk_img_hover {
     &:after {
@@ -651,6 +817,9 @@ export default {
   }
 }
 .ljd {
+  .el-date-editor .el-range-input{
+    font-size: 13px;
+  }
   .el-dialog__wrapper .el-dialog__body {
     padding: 0px;
   }
@@ -660,5 +829,8 @@ export default {
   .el-dialog__headerbtn {
     z-index: 1;
   }
+  .el-form-item__label{
+  padding-right: 0px;
+}
 }
 </style>

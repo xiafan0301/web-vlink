@@ -1,78 +1,91 @@
 <template>
   <div class="vl_ph_main">
-    <div class="breadcrumb_heaer">
-      <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
-        <el-breadcrumb-item>区域徘徊</el-breadcrumb-item>
-      </el-breadcrumb>
+    <div class="">
+      <div
+              is="vlBreadcrumb"
+              :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
+          {name: '区域徘徊'}]"
+      ></div>
     </div>
 
     <div class="vl_ph_content">
-      <div class="mapbox" id="mapSelect"></div>
-      <div class="setPost">
-        <div>
-          <el-autocomplete
-            class="inline-input"
-            v-model="input3"
-            :fetch-suggestions="querySearch"
-            placeholder="请输入地名，快速定位地址"
-            value-key="name"
-            :trigger-on-focus="false"
-            @select="handleSelect"
-          ></el-autocomplete>
-          <!--<el-input placeholder="请输入地名，快速定位地址" v-model="input3" class="input-with-select">-->
-            <el-button slot="append" icon="el-icon-search" class="select_btn" @click="setCenter()"></el-button>
-          <!--</el-input>-->
-        </div>
-        <div style="width: 272px;height: 100%;">
-          <div class="search_main">
-              <!--区域选择-->
-              <div class="search_line_ts">
-                <div class="title">
-                  <span class="red_star">区域:</span>
-                  <span class="choose_btn el-icon-location-outline" @click="setFitV" :class="{'not-active': !searchData.area}"></span>
-                </div>
-                <div class="drawBox">
-                  <div class="items">
-                    <span @click="clickTab('cut1')" :class="['cut1',{'hover':hover=='cut1'}]"></span>
-                    <span @click="clickTab('cut2')"  :class="['cut2',{'hover':hover=='cut2'}]"></span>
-                    <span @click="clickTab('cut3')"  :class="['cut3',{'hover':hover=='cut3'}]"></span>
-                    <span @click="clickTab('cut4')"  :class="['cut4',{'hover':hover=='cut4'}]"></span>
-                    <span @click="clickTab('cut5')"  :class="['cut5',{'hover':hover=='cut5'}]"></span>
+      <div :class="['right',{hide:!hideleft}]" id="mapSelect"></div>
+      <div :class="['left',{hide:hideleft}]">
+        <div class="plane">
+          <div class="setPost">
+            <div class="top_search_input">
+              <el-autocomplete
+                      class="inline-input"
+                      v-model="input3"
+                      :fetch-suggestions="querySearch"
+                      placeholder="请输入地名，快速定位地址"
+                      value-key="name"
+                      :trigger-on-focus="false"
+                      @select="handleSelect"
+              ></el-autocomplete>
+              <!--<el-input placeholder="请输入地名，快速定位地址" v-model="input3" class="input-with-select">-->
+              <el-button slot="append" icon="el-icon-search" class="select_btn" @click="setCenter()"></el-button>
+              <!--</el-input>-->
+            </div>
+            <div style="width: 272px;height: 100%;">
+              <div class="search_main">
+                <!--区域选择-->
+                <div class="search_line_ts">
+                  <div class="title">
+                    <span class="">抓拍区域:</span>
+                    <span>
+                    <i class="choose_btn el-icon-location-outline" @click="setFitV" :class="{'not-active': !searchData.area}"></i>
+                    <i class="choose_btn el-icon-delete" @click="delDialog = true"></i>
+                  </span>
+                  </div>
+                  <div class="drawBox">
+                    <div class="items">
+                      <span @click="clickTab('cut1')" :class="['cut1',{'hover':hover=='cut1'}]"></span>
+                      <span @click="clickTab('cut2')"  :class="['cut2',{'hover':hover=='cut2'}]"></span>
+                      <span @click="clickTab('cut3')"  :class="['cut3',{'hover':hover=='cut3'}]"></span>
+                      <span @click="clickTab('cut4')"  :class="['cut4',{'hover':hover=='cut4'}]"></span>
+                      <span @click="clickTab('cut5')"  :class="['cut5',{'hover':hover=='cut5'}]"></span>
+                    </div>
                   </div>
                 </div>
+                <div class="search_line">
+                  <!--<span class="time">从</span>-->
+                  <el-date-picker
+                          v-model="searchData.startTime"
+                          style="width: 100%;"
+                          class="vl_date"
+                          :picker-options="pickerOptions"
+                          type="datetime"
+                          value-format="timestamp"
+                          placeholder="选择日期时间">
+                  </el-date-picker>
+                </div>
+                <!--<p class="red_star"></p>-->
+                <div class="search_line">
+                  <!--<span class="time">至</span>-->
+                  <el-date-picker
+                          style="width: 100%;"
+                          class="vl_date vl_date_end"
+                          :picker-options="pickerOptions1"
+                          v-model="searchData.endTime"
+                          type="datetime"
+                          @change="chooseEndTime"
+                          value-format="timestamp"
+                          placeholder="选择日期时间">
+                  </el-date-picker>
+                </div>
+                <div class="search_line">
+                  <div class="per_semblance"><span>频次 <b>期间不少于</b></span><el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 200)value = 200;"  v-model="searchData.minTimes"></el-input> 次</div>
+                </div>
+                <!--按钮-->
+                <div class="search_btn">
+                  <el-button @click="resetS">重置</el-button>
+                  <el-button type="primary" @click="tcDiscuss">徘徊分析</el-button>
+                </div>
               </div>
-              <div class="search_line">
-                <span class="time">开始</span>
-                <el-date-picker
-                    v-model="searchData.startTime"
-                    style="width: 212px;"
-                    :picker-options="pickerOptions"
-                    type="datetime"
-                    placeholder="选择日期时间">
-                </el-date-picker>
-              </div>
-              <p class="red_star"></p>
-              <div class="search_line">
-                <span class="time">结束</span>
-                <el-date-picker
-                  style="width: 212px;"
-                  :picker-options="pickerOptions1"
-                  v-model="searchData.endTime"
-                  type="datetime"
-                  placeholder="选择日期时间">
-                </el-date-picker>
-              </div>
-              <div class="search_line">
-                <span class="red_star">频次：期间不少于 <el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 200)value = 200" style="width: 65px;" v-model="searchData.minTimes"></el-input> 次</span>
-              </div>
-              <el-divider></el-divider>
-              <!--按钮-->
-              <div class="search_btn">
-                <el-button @click="resetS">重置</el-button>
-                <el-button type="primary" @click="tcDiscuss">徘徊分析</el-button>
-              </div>
+            </div>
           </div>
+          <div class="insetLeft" @click="hideLeft"></div>
         </div>
       </div>
       <!--地图操作按钮-->
@@ -95,13 +108,16 @@
   </div>
 </template>
 <script>
+  import vlBreadcrumb from "@/components/common/breadcrumb.vue";
   import { mapXupuxian } from "@/config/config.js";
   import {getAllDevice} from '../../../api/api.judge.js';
   import {getAllBayonetList} from '../../../api/api.base.js';
   import { objDeepCopy, formatDate} from '../../../../../utils/util.js';
   export default {
+    components: {vlBreadcrumb},
     data() {
       return {
+        hideleft: false,
         delDialog: false,
         map: null,
         input3: null,
@@ -114,7 +130,7 @@
           area: null, // 区域
           startTime: '',
           endTime: '',
-          minTimes: 5// 最少次数
+          minTimes: 3// 最少次数
         },
         pickerOptions: {
           disabledDate (time) {
@@ -161,9 +177,18 @@
       this.renderMap();
       this.setDTime();
       this.getAllDevice() //查询所有的设备
+      this.resetZoom();
 
     },
     methods: {
+      chooseEndTime (e) {
+        if (new Date(e).getTime() < this.searchData.startTime) {
+          this.$message.info('结束时间必须大于开始时间才会有结果')
+        }
+      },
+      hideLeft() {
+        this.hideleft = !this.hideleft;
+      },
       mapZoomSet (val) {
         if (this.map) {
           this.map.setZoom(this.map.getZoom() + val);
@@ -461,20 +486,8 @@
         let date = new Date();
         let curDate = date.getTime();
         let curS = 1 * 24 * 3600 * 1000;
-        let sM = '', sD = '';
-        if ((new Date(curDate - curS).getMonth() + 1) < 10 ) {
-          sM = '0' + (new Date(curDate - curS).getMonth() + 1);
-        } else {
-          sM = (new Date(curDate - curS).getMonth() + 1)
-        }
-        if ( new Date(curDate - curS).getDate() < 10 ) {
-          sD = '0' +  new Date(curDate - curS).getDate();
-        } else {
-          sD =  new Date(curDate - curS).getDate()
-        }
-        let _s = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD;
-        this.searchData.startTime = _s + " 00:00:00";
-        this.searchData.endTime = _s + " 23:59:59";
+        this.searchData.startTime = curDate - curS;
+        this.searchData.endTime = curDate;
       },
       // 选择区域
       selArea (v) {
@@ -492,7 +505,6 @@
           case 'cut2' :
             this.mouseTool.circle({
               strokeColor: "#FA453A",
-              strokeOpacity: 1,
               strokeWeight: 1,
               strokeOpacity: 0.2,
               fillColor: '#FA453A',
@@ -542,32 +554,104 @@
         this.searchData.area = null;
       },
       tcDiscuss () {
-        if (!this.searchData.minTimes) {
-          this.$message.info('请输入频次');
+        if (!this.searchData.minTimes || this.searchData.minTimes < 3) {
+          if (!document.querySelector('.el-message--info')) {
+            this.$message.info('频次必须是3-200的数字');
+          }
           return false;
         }
         if (!this.searchData.area) {
-          this.$message.info('请先选择区域');
+          if (!document.querySelector('.el-message--info')) {
+            this.$message.info('请先选择区域');
+          }
           return false;
         }
         if (this.pointData.length === 0) {
-          this.$message.info('选择的区域没有设备，请重新选择区域');
+          if (!document.querySelector('.el-message--info')) {
+            this.$message.info('选择的区域没有设备，请重新选择区域');
+          }
           return false;
         }
         let sT = formatDate(this.searchData.startTime, 'yyyy-MM-dd HH:mm:ss');
         let eT = formatDate(this.searchData.endTime, 'yyyy-MM-dd HH:mm:ss');
-        let query = {'where': {}};
-        query.where.startTime = sT;
-        query.where.endTime = eT;
-        query.where.frequence = this.searchData.minTimes;
-        query.where['bayonetIds'] = this.pointData.filter(x => x.dataType === 1).map(y => {return y.uid}).join(',');
-        query.where['cameraIds'] = this.pointData.filter(x => x.dataType === 0).map(y => {return y.uid}).join(',');
+        let query = {};
+        query.startTime = sT;
+        query.endTime = eT;
+        query.frequence = this.searchData.minTimes;
+        query['bayonetIds'] = this.pointData.filter(x => x.dataType === 1).map(y => {return y.uid}).join(',');
+        query['cameraIds'] = this.pointData.filter(x => x.dataType === 0).map(y => {return y.uid}).join(',');
         this.$router.push({name: 'vehicle_search_qyph_jg', query: query})
       }
     }
   };
 </script>
 <style lang="scss" scoped>
+  .right.hide {
+    width: calc(100% - 272px);
+    height: 100%;
+    float: right;
+  }
+  .right {
+    width: 100%;
+    height: 100%;
+    float: right;
+  }
+  .left.hide {
+    margin-left: -272px;
+    transition: marginLeft 0.3s ease-in;
+    position: relative;
+    z-index: 2;
+    // animation: fadeOutLeft 0.4s ease-out 0.3s both;
+  }
+  .left {
+    position: relative;
+    width: 272px;
+    height: 100%;
+    background-color: #ffffff;
+    float: left;
+    z-index: 1;
+    margin-left: 0px;
+    /*box-shadow: 4px 0px 10px 0px #838383;*/
+    /*box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);*/
+    animation: fadeInLeft 0.4s ease-out 0.3s both;
+    transition: marginLeft 0.3s ease-in;
+    .plane {
+      padding: 10px;
+      position: relative;
+      height: 100%;
+    }
+    .line40 {
+      line-height: 40px;
+    }
+    .inset {
+      display: inline-block;
+      line-height: 40px;
+      font-style: normal;
+    }
+    .firstItem {
+      margin-bottom: 5px;
+    }
+  }
+  .insetLeft {
+    position: absolute;
+    right: -28px;
+    width: 25px;
+    height: 178px;
+    top: 50%;
+    margin-top: -89px;
+    display: inline-block;
+    background-repeat: no-repeat;
+    transform: rotate(180deg);
+    background-image: url(../../../../../assets/img/icons.png);
+    background-position: -380px -1269px;
+    cursor: pointer;
+  }
+  .hide {
+    .insetLeft {
+      transform: rotate(180deg);
+      background-position: -504px -1269px;
+    }
+  }
   .map_rrt_u2 {
     position: absolute; right: 30px;
     bottom: 30px;
@@ -612,24 +696,32 @@
       position: absolute;
       left: 0px;
       top: 0px;
-      width: 328px;
+      width: 272px;
       /*height: 100%;*/
+      .top_search_input {
+        position: absolute;
+        left: 302px;
+        top: 30px;
+      }
       .inline-input {
-        width: 272px;
+        width: 336px;
       }
       .select_btn {
         background-color: #0c70f8;
         color: #ffffff;
+        width: 64px;
+        position: absolute;
+        right: 0;
       }
       .search_main {
         width: 272px;
-        height: 394px;
-        margin-top: 20px;
+        height: 370px;
+        margin-top: 16px;
         background: #ffffff;
         padding-top: 20px;
         .search_btn {
           text-align: center;
-          /*margin-top: 255px;*/
+          margin-top: 18px;
         }
         >p {
           padding-left: 10px;
@@ -653,9 +745,11 @@
               padding-left: 10px;
               &:last-child {
                 text-align: right;
-                padding-right: 10px;
-                padding-top: 10px;
+                padding-top: 2px;
                 color: #999999;
+                i {
+                  margin-right: 10px;
+                }
               }
             }
             .choose_btn {
@@ -767,6 +861,37 @@
          display: none;
        }
      }
+    }
+  }
+  .per_semblance {
+    position: relative;
+    >span {
+      position: absolute;
+      left: 10px;
+      display: block;
+      height: 50px;
+      line-height: 50px;
+      z-index: 9;
+      b {
+        color: #D3D3D3;
+        font-weight: normal;
+        margin-left: 10px;
+      }
+    }
+    >i {
+      display: inline-block;
+      width: 20px;
+      height: 1px;
+      background: #999;
+      margin: 19px 16px;
+      vertical-align: middle;
+    }
+    .el-input {
+      width: 198px;
+      margin-right: 10px;
+      input{
+        text-indent: 130px;
+      }
     }
   }
 }

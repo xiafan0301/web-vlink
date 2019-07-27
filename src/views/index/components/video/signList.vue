@@ -2,12 +2,11 @@
   <div class="vl_vid">
     <div class="sign_list">
       <div>
-        <div class="show_search">
+        <div class="show_search" style="z-index: 4;">
           <div class="show_search_ti">
-            <span>开始</span>
             <el-date-picker
-              class="vl_vid_sdater"
-              style="width: 175px"
+              class="vl_vid_sdater vl_date"
+              style="width: 100%"
               size="small"
               v-model="startTime"
               type="datetime"
@@ -18,10 +17,9 @@
             </el-date-picker>
           </div>
           <div class="show_search_ti">
-            <span>结束</span>
             <el-date-picker
-              class="vl_vid_sdater"
-              style="width: 175px"
+              class="vl_vid_sdater vl_date vl_date_end"
+              style="width: 100%"
               size="small"
               v-model="endTime"
               type="datetime"
@@ -31,8 +29,8 @@
               placeholder="选择结束时间">
             </el-date-picker>
           </div>
-          <div class="show_search_se" style="padding-left: 20px;">
-            <el-select style="width: 191px;" v-model="signPeople" filterable placeholder="选择标记人" size="small">
+          <div class="show_search_se">
+            <el-select style="width: 100%;" v-model="signPeople" filterable placeholder="选择标记人" size="small">
               <el-option
                 v-for="item in signPeopleList"
                 :key="'people_list_' + item.userId"
@@ -41,8 +39,8 @@
               </el-option>
             </el-select>
           </div>
-          <div class="show_search_se" style="padding-left: 20px;">
-            <el-select style="width: 191px;" v-model="signContent" filterable placeholder="选择标记内容" size="small">
+          <div class="show_search_se">
+            <el-select style="width: 100%;" v-model="signContent" filterable placeholder="选择标记内容" size="small">
               <el-option
                 v-for="item in signContentList"
                 :key="'content_list_' + item.uid"
@@ -256,14 +254,19 @@ export default {
     getData () {
       this.searchLoading = true;
       this.delSignActive = {};
-      apiVideoList({
+      let params = {
         'where.startTime': formatDate(this.startTime),
         'where.endTime': formatDate(this.endTime),
-        'where.userId': this.signPeople,
-        'where.contentId': this.signContent,
         pageNum: this.pagination.currentPage,
         pageSize: this.pagination.pageSize
-      }).then(res => {
+      };
+      if (this.signPeople) {
+        params['where.userId'] = this.signPeople;
+      }
+      if (this.signContent) {
+        params['where.contentId'] = this.signContent;
+      }
+      apiVideoList(params).then(res => {
         if (res && res.data) {
           this.pagination.total = res.data.total;
           this.signList = res.data.list;
@@ -380,20 +383,10 @@ export default {
     }
   }
   > .show_search_se { margin-bottom: 5px; }
-  > .show_search_ti {
-    position: relative;
-    padding-left: 36px;
-    margin-bottom: 10px;
-    > span {
-      position: absolute; top: 2px; left: 17px;
-      width: 18px;
-      color: #666; font-size: 12px;
-    }
-  }
 }
 .sign_content_list {
-  position: relative;
-  height: 100%; padding-top: 240px; padding-bottom: 30px;
+  position: relative; z-index: 3;
+  height: 100%; padding-top: 226px; padding-bottom: 30px;
   > ul {
     height: 100%;
     overflow: auto;

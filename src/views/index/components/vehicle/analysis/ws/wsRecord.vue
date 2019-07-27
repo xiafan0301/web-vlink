@@ -4,13 +4,13 @@
       <div is="vlBreadcrumb" 
         :breadcrumbData="[
           {name: '车辆侦查', routerName: 'vehicle'},
-          {name: '尾随分析', routerName: 'vehicle_search_ws', params: {
-            plateNo: $route.params.plateNo,
-            dateStart: $route.params.dateStart,
-            dateEnd: $route.params.dateEnd,
-            vehicleClass: $route.params.vehicleClass,
-            interval: $route.params.interval,
-            deviceCode: $route.params.deviceCode
+          {name: '尾随分析', routerName: 'vehicle_search_ws', query: {
+            plateNo: $route.query.plateNo,
+            dateStart: $route.query.dateStart,
+            dateEnd: $route.query.dateEnd,
+            vehicleClass: $route.query.vehicleClass,
+            interval: $route.query.interval,
+            deviceCode: $route.query.deviceCode
           }},
           {name: '尾随记录'}]">
       </div>
@@ -21,7 +21,7 @@
           <h2>尾随车辆的特征信息</h2>
           <ul class="left_ul">
             <li>
-              <img :src="resultList.length > 0 && resultList[0].struVehicleDto.storagePath" alt="">
+              <img :src="resultList.length > 0 && resultList[0].struVehicleDto.storagePath" alt="" class="bigImg">
             </li>
             <li>
               <span>有无车牌：</span>
@@ -99,6 +99,12 @@
           <!-- <p>以车搜车</p> -->
         </div>
         <div id="rightMap"></div>
+        <!--地图操作按钮-->
+        <ul class="map_rrt_u2">
+          <li @click="resetZoom"><i class="el-icon-aim"></i></li>
+          <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
+          <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
+        </ul>
       </div>
     </div>
     <!-- 视频全屏放大 -->
@@ -130,6 +136,7 @@
 </template>
 <script>
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+import { mapXupuxian } from "@/config/config.js";
 import { getTailBehindDetail, getVehicleArchives } from '@/views/index/api/api.judge.js'
 import { random14 } from '@/utils/util.js';
 export default {
@@ -150,14 +157,14 @@ export default {
   },
   created () {
     this.queryObj = {
-      plateNo: this.$route.params.plateNo,
-      dateStart: this.$route.params.dateStart,
-      dateEnd: this.$route.params.dateEnd,
-      plateNoTb: this.$route.params.dateStart,
-      vehicleClass: this.$route.params.vehicleClass,
-      interval: this.$route.params.interval,
-      deviceCode: this.$route.params.deviceCode,
-      dateStartTb: this.$route.params.dateStartTb
+      plateNo: this.$route.query.plateNo,
+      dateStart: this.$route.query.dateStart,
+      dateEnd: this.$route.query.dateEnd,
+      plateNoTb: this.$route.query.dateStart,
+      vehicleClass: this.$route.query.vehicleClass,
+      interval: this.$route.query.interval,
+      deviceCode: this.$route.query.deviceCode,
+      dateStartTb: this.$route.query.dateStartTb
     };
   },
   mounted () {
@@ -173,44 +180,44 @@ export default {
       this.$store.commit('setBreadcrumbData', {
         breadcrumbData: [
           {name: '车辆侦查', routerName: 'vehicle'},
-          {name: '尾随分析', routerName: 'vehicle_search_ws', params: { ...this.queryObj }},
-          { name: '尾随记录', routerName: 'ws_record', params: { ...this.queryObj }},
+          {name: '尾随分析', routerName: 'vehicle_search_ws', query: { ...this.queryObj }},
+          { name: '尾随记录', routerName: 'ws_record', query: { ...this.queryObj }},
           { name: '新建布控' }
         ]
       });
-      this.$router.push({name: 'control_create', query: { plateNo: this.$route.params.plateNo, modelName: '车辆追踪' }});
+      this.$router.push({name: 'control_create', query: { plateNo: this.$route.query.plateNo, modelName: '车辆追踪' }});
     },
     // 跳至轨迹分析页面
     skipTrajectoryPage () {
       this.$store.commit('setBreadcrumbData', {
         breadcrumbData: [
           {name: '车辆侦查', routerName: 'vehicle'},
-          {name: '尾随分析', routerName: 'vehicle_search_ws', params: { ...this.queryObj }},
-          { name: '尾随记录', routerName: 'ws_record', params: { ...this.queryObj }},
+          {name: '尾随分析', routerName: 'vehicle_search_ws', query: { ...this.queryObj }},
+          { name: '尾随记录', routerName: 'ws_record', query: { ...this.queryObj }},
           { name: '车辆轨迹' }
         ]
       });
-      this.$router.push({name: 'vehicle_analysis_clgj', query: { plateNo: this.$route.params.plateNo }});
+      this.$router.push({name: 'vehicle_analysis_clgj', query: { plateNo: this.$route.query.plateNo }});
     },
     // 跳至落脚点分析页面
     skipFootholdPage () {
       this.$store.commit('setBreadcrumbData', {
         breadcrumbData: [
           {name: '车辆侦查', routerName: 'vehicle'},
-          {name: '尾随分析', routerName: 'vehicle_search_ws', params: { ...this.queryObj }},
-          { name: '尾随记录', routerName: 'ws_record', params: { ...this.queryObj }},
+          {name: '尾随分析', routerName: 'vehicle_search_ws', query: { ...this.queryObj }},
+          { name: '尾随记录', routerName: 'ws_record', query: { ...this.queryObj }},
           { name: '落脚点分析' }
         ]
       });
-      this.$router.push({name: 'vehicle_search_ljd', query: { plateNo: this.$route.params.plateNo }});
+      this.$router.push({name: 'vehicle_search_ljd', query: { plateNo: this.$route.query.plateNo }});
     },
     // 获取尾随车辆详情
     getDetail () {
-      const plateNo = this.$route.params.plateNo;
-      const startTime = this.$route.params.dateStart;
-      const endTime = this.$route.params.dateEnd;
-      const plateNoTb = this.$route.params.plateNoTb;
-      const startTimeTb = this.$route.params.dateStartTb;
+      const plateNo = this.$route.query.plateNo;
+      const startTime = this.$route.query.dateStart;
+      const endTime = this.$route.query.dateEnd;
+      const plateNoTb = this.$route.query.plateNoTb;
+      const startTimeTb = this.$route.query.dateStartTb;
       const params = {
         plateNo,
         startTime,
@@ -232,12 +239,23 @@ export default {
     initMap () {
       let _this = this;
       let map = new window.AMap.Map('rightMap', {
-        zoom: 15, // 级别
-        center: [110.596015, 27.907662], // 中心点坐标[110.596015, 27.907662]
+        zoom: 14, // 级别
+        center: mapXupuxian.center, // 中心点坐标[110.596015, 27.907662]
       });
       map.setMapStyle('amap://styles/whitesmoke');
 
       _this.map = map;
+    },
+    mapZoomSet (val) {
+      if (this.map) {
+        this.map.setZoom(this.map.getZoom() + val);
+      }
+    },
+    resetZoom () {
+      if (this.map) {
+        this.map.setZoomAndCenter(18, mapXupuxian.center);
+        this.map.setFitView();
+      }
     },
     mapMark (data) {
       if (data && data.length > 0) {
@@ -247,9 +265,17 @@ export default {
           let obj = data[i];
           if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
             let offSet = [-20.5, -55];
-            console.log('obj', obj)
             let _idBtn = 'vlJtcPlayBtn' + obj.struVehicleDto.deviceID;
             let _id = 'vlJtcVideo' + obj.deviceID;
+
+            let iconType;
+            if (i === 0) {
+              iconType = 'vl_icon_04_019';
+            } else if (i === (data.length - 1)) {
+              iconType = 'vl_icon_05_019';
+            } else {
+              iconType = 'vl_icon_sxt';
+            }
 
             let marker = new window.AMap.Marker({
               map: _this.map,
@@ -258,7 +284,7 @@ export default {
               draggable: false, // 是否可拖动
               extData: '', // 用户自定义属性
               // 自定义点标记覆盖物内容
-              content: '<div id="vehicle' + obj.deviceID + '"  title="'+ obj.deviceName +'" class="vl_icon vl_icon_sxt"></div>'
+              content: '<div id="vehicle' + obj.deviceID + '"  title="'+ obj.deviceName +'" class="vl_icon '+ iconType +'"></div>'
             });
   
             path.push(new window.AMap.LngLat(obj.shotPlaceLongitude, obj.shotPlaceLatitude));
@@ -289,9 +315,9 @@ export default {
             marker.on('mouseout', function () {
               $('#vehicle' + obj.deviceID).removeClass('vl_icon_map_hover_mark0');
             });
-            _this.map.setZoom(13)
+            // _this.map.setZoom(13)
             // marker.setPosition([obj.shotPlaceLongitude, obj.shotPlaceLatitude]);
-             _this.map.setCenter([obj.shotPlaceLongitude, obj.shotPlaceLatitude]);
+            //  _this.map.setCenter([obj.shotPlaceLongitude, obj.shotPlaceLatitude]);
             // marker.setMap(_this.map);
             //_this.map.setFitView();// 执行定位
 
@@ -299,12 +325,15 @@ export default {
           // 绘制线条
           let polyline = new window.AMap.Polyline({
             path: path,
-            strokeWeight: 4,
+            strokeWeight: 8,
+            showDir: true,
             strokeColor: '#61C772',
-            strokeStyle: 'dashed'
+            strokeStyle: 'solid'
           });
 
           _this.map.add(polyline);
+
+          _this.map.setFitView();
         }
       }
     },
@@ -554,9 +583,32 @@ export default {
         }
       }
       #rightMap {
-        z-index: 1000;
+        // z-index: 1000;
         width: 100%;
         height: 100%;
+      }
+      .map_rrt_u2 {
+        position: absolute; right: 30px;
+        bottom: 30px;
+        margin-top: .2rem;
+        font-size: 26px;
+        background: #ffffff;
+        width: 78px;
+        padding: 0 10px;
+        > li {
+          line-height: 70px;
+          text-align: center;
+          cursor: pointer;
+          border-bottom: 1px solid #F2F2F2;
+          > i {
+            margin-top: 0;
+            display: inline-block;
+          }
+          color: #999999;
+          &:hover {
+            color: #0C70F8;
+          }
+        }
       }
     }
   }

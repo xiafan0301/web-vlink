@@ -2,7 +2,7 @@
   <div class="vl_judge_tc">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">检索</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像侦查</el-breadcrumb-item>
         <el-breadcrumb-item>人像比对</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -10,7 +10,7 @@
     <div class="vl_judge_ct">
       <div class="vl_judge_tc_h">
         <div class="judge_title"><i></i>CONTRAST<span>人像<br/>比对</span><i></i></div>
-        <p>两张人脸比对，或一张人像与证件号比对</p>
+        <p>两张人脸比对</p>
       </div>
       <div class="vl_judge_tc_c">
         <div class="vl_judge_cmp_result">
@@ -19,17 +19,21 @@
         </div>
         <div class="vl_judge_tc_c_item">
           <el-upload
-            :class="{'vl_jtc_upload': true}"
-            :show-file-list="false"
-            accept="image/*"
-            :action="uploadAcion"
-            list-type="picture-card"
-            :before-upload="beforeAvatarUpload"
-            :on-success="uploadSucess"
-            :on-error="handleError">
+                  :class="{'vl_jtc_upload': true}"
+                  :show-file-list="false"
+                  accept="image/*"
+                  :action="uploadAcion"
+                  list-type="picture-card"
+                  :before-upload="beforeAvatarUpload"
+                  :on-success="uploadSucess"
+                  :on-error="handleError">
             <i v-if="uploading" class="el-icon-loading"></i>
             <img v-else-if="curImageUrl" :src="curImageUrl">
-            <i style="width: 140px;height: 114px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;" class="vl_icon vl_icon_retrieval_07" v-else></i>
+            <i
+              style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
+              class="vl_icon vl_icon_vehicle_01"
+              v-else
+            ></i>
           </el-upload>
           <p @click="showHistoryPic(1)">从上传记录中选择</p>
           <div v-show="curImageUrl" class="del_icon">
@@ -38,46 +42,50 @@
         </div>
         <div class="vl_judge_tc_c_item">
           <el-upload
-            :class="{'vl_jtc_upload': true}"
-            :show-file-list="false"
-            accept="image/*"
-            :action="uploadAcion"
-            list-type="picture-card"
-            :before-upload="beforeAvatarUpload2"
-            :on-success="uploadSucess2"
-            :on-error="handleError2">
+                  :class="{'vl_jtc_upload': true}"
+                  :show-file-list="false"
+                  accept="image/*"
+                  :action="uploadAcion"
+                  list-type="picture-card"
+                  :before-upload="beforeAvatarUpload2"
+                  :on-success="uploadSucess2"
+                  :on-error="handleError2">
             <i v-if="uploading2" class="el-icon-loading"></i>
             <img v-else-if="curImageUrl2" :src="curImageUrl2">
-            <i style="width: 140px;height: 114px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;" class="vl_icon vl_icon_retrieval_07" v-else></i>
+            <i
+                    style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
+                    class="vl_icon vl_icon_vehicle_01"
+                    v-else
+            ></i>
           </el-upload>
-          <div class="vl_jtc_ic_input" v-show="!curImageUrl2">
-            <el-form :model="numberValidateForm" ref="vlJtcIdCard"  class="demo-ruleForm">
-              <el-form-item
-                      label=""
-                      prop="idCard"
-                      :rules="[
-                  { validator: validateIdCard, trigger: 'blur' }
-                ]"
-              >
-                <el-input type="idCard" @blur="checkId" v-model="numberValidateForm.idCard" autocomplete="off"></el-input>
-              </el-form-item>
-            </el-form>
-          </div>
+          <!--<div class="vl_jtc_ic_input" v-show="!curImageUrl2">-->
+            <!--<el-form :model="numberValidateForm" ref="vlJtcIdCard"  class="demo-ruleForm">-->
+              <!--<el-form-item-->
+                      <!--label=""-->
+                      <!--prop="idCard"-->
+                      <!--:rules="[-->
+                  <!--{ validator: validateIdCard, trigger: 'blur' }-->
+                <!--]"-->
+              <!--&gt;-->
+                <!--<el-input type="idCard" placeholder="请输入证件号" @blur="checkId" v-model="numberValidateForm.idCard" autocomplete="off"></el-input>-->
+              <!--</el-form-item>-->
+            <!--</el-form>-->
+          <!--</div>-->
           <p @click="showHistoryPic(2)">从上传记录中选择</p>
           <div v-show="curImageUrl2" class="del_icon">
             <i class="el-icon-delete" @click="delPic(2)"></i>
           </div>
         </div>
       </div>
-      <el-button class="vl_judge_tc_btn" @click="beginComp" type="primary" :disabled="!this.curImageUrl || !this.curImageUrl2" :loading="compLoading">立即对比</el-button>
+      <el-button class="vl_judge_tc_btn" @click="beginComp" type="primary" :disabled="!this.curImageUrl || !this.curImageUrl2" :loading="compLoading">立即比对</el-button>
     </div>
     <!--历史记录弹窗-->
     <el-dialog
-        :visible.sync="historyPicDialog"
-        class="history-pic-dialog"
-        :close-on-click-modal="false"
-        top="4vh"
-        title="最近上传的图片">
+      :visible.sync="historyPicDialog"
+      class="history-pic-dialog"
+      :close-on-click-modal="false"
+      top="4vh"
+      title="最近上传的图片">
       <div style="text-align: center;font-size: 20px;" v-if="loadingHis"><i class="el-icon-loading"></i></div>
       <vue-scroll class="his-pic-box" v-else-if="historyPicList.length">
         <div class="his-pic-item" :class="{'active': item.checked}" v-for="item in historyPicList" :key="item.id" @click="chooseHisPic(item)">
@@ -458,9 +466,7 @@
         height: 3.4rem;
         display: inline-block;
         position: relative;
-        -webkit-box-shadow: 0 5px 20px 0px rgba(169, 169, 169, .3);
-        -moz-box-shadow: 0 5px 20px 0px rgba(169, 169, 169, .3);
-        box-shadow: 0 5px 20px 0px rgba(169, 169, 169, .3);
+        background: #f2f2f2;
         -webkit-border-radius: 10px;
         -moz-border-radius: 10px;
         border-radius: 10px;
@@ -484,6 +490,9 @@
           width: 100%;
           height: 100%;
           background: none;
+          .el-upload--picture-card {
+            border: none;
+          }
           .el-upload {
             width: 100%;
             height: 100%;

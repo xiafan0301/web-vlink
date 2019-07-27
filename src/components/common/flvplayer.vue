@@ -2,8 +2,8 @@
   <div class="vl_flvplayer" :class="{'flvplayer_fullscreen': fullScreen}">
     <div class="flvplayer_player" :id="flvplayerId + '_container'">
       <!-- poster="videojs/eguidlogo.png" -->
-      <div class="flvplayer_player_c" :id="flvplayerId + '_c'">
-        <video crossOrigin="anonymous" :id="flvplayerId" style="width: 100%; height: 100%; object-fit: fill;" autoplay="autoplay" muted>
+      <div class="flvplayer_player_c" :id="flvplayerId + '_c'" @dblclick="playerFullScreen(!fullScreen)">
+        <video crossOrigin="anonymous" :id="flvplayerId" style="width: 100%; height: 100%;" :class="{'player_fit': config.fit}" autoplay="autoplay" muted>
         </video>
       </div>
     </div>
@@ -36,7 +36,7 @@
     <!-- 暂停按钮（遮盖） -->
     <span class="vl_icon vl_icon_v51" v-show="!playActive" @click="playerPlay(true)"></span>
     <!-- 录像提示 -->
-    <span class="flvplayer_lux" v-if="tape.active" @click="tapeEnd" title="点击停止录像">{{tape.tapeTime | transSeconds}}</span>
+    <span class="flvplayer_lux" v-if="tape.active" @click="tapeEnd" title="点击停止录像">{{tape.tapeTime | transSeconds}}<span></span></span>
     <!-- 右下操作合集 -->
     <div class="flvplayer_bot" :class="{'flvplayer_bot_dis': videoLoading}">
       <div class="flvplayer_bot_t com_ellipsis">{{oData.title}}</div>
@@ -251,6 +251,7 @@ export default {
    *    tape: 是否可录像，默认为true
    *    download: 是否可下载(回放)，默认为true
    *    ptz: 是否开启云台控制（直播、全屏），默认为true
+   *    fit: 视频是否填充，，默认为true
    * },
    * optDis: 是否隐藏所有的操作按钮
    * bResize: 播放容器尺寸变化
@@ -283,7 +284,8 @@ export default {
         cut: true, // 是否可截屏
         tape: true, // 是否可录像
         download: true, // 是否可下载(回放)
-        ptz: true
+        ptz: true,
+        fit: true
       },
 
       startPlayTime: null,
@@ -370,6 +372,9 @@ export default {
   watch: {
     oData (newData, oldData) {
       console.log('watch oData', newData);
+      if (oldData && oldData.video.uid === newData.video.uid) {
+        return false;
+      }
       // 去掉暂停按钮
       this.playActive = true;
       // 取消录像
@@ -427,7 +432,9 @@ export default {
     }
     this.initPlayer();
     // $(window).on('unload', this.videoUnloadSave);
-    this.sizeHandler();
+    window.setTimeout(() => {
+      this.sizeHandler();
+    }, 300);
   },
   methods: {
     // sizeHandler
@@ -726,7 +733,7 @@ export default {
       if (this.tape.active) { return; }
       this.tape.active = true;
       this.tape.loading  = true;
-      this.$message('开始录像。');
+      // this.$message('开始录像。');
       this.tape.tapeTime = 0;
       getVideoPlayRecordStart({
         deviceId: this.oData.video.uid
@@ -873,7 +880,8 @@ export default {
       if (this.download.downlaodInval) {
         window.clearInterval(this.download.downlaodInval);
       }
-      let ti = (Math.floor((this.download.currentM / 30) * 5) + 2) * 1000;
+      // let ti = (Math.floor((this.download.currentM / 30) * 5) + 2) * 1000;
+      let ti = 3000;
       console.log(ti);
       this.download.downlaodInval = window.setInterval(() => {
         this.playerDownloadProgress();
@@ -1280,6 +1288,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 /* 视频接力 begin */
+.player_fit { object-fit: fill; }
 .player_relay_i {
   position: absolute; top: 10px; left: 10px; z-index: 100;
   > .player_relay_icp {
@@ -1486,12 +1495,35 @@ export default {
   transform: translate3d(50%, 0, 0);
 }
 .flvplayer_lux {
-  position: absolute; left: 15px; top: 15px;
-  width: 99px; height: 24px; line-height: 24px;
+  position: absolute; left: 50%; top: 15px;
+  margin-left: -77px; padding-left: 28px;
+  width: 154px; height: 36px; line-height: 36px;
   background: url(../../assets/img/video/vi_110.png);
-  color: #0C70F8; text-align: center; font-size: 14px;
-  padding-left: 20px;
+  background-size: contain;
+  color: #0C70F8; text-align: center; font-size: 20px;
   cursor: default;
+  > span {
+    position: absolute; top: 11px; left: 11px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background-color: #FF0000;
+    animation: twinkle_lux 1.5s linear infinite both;
+  }
+}
+/* 闪烁 */
+@-webkit-keyframes twinkle_lux {
+  0% { opacity: 0; }
+  40% { opacity: 0; }
+  50%{ opacity: 1; }
+  60%{ opacity: 0; }
+  100%{ opacity: 0; }
+}
+@keyframes twinkle_lux {
+  0% { opacity: 0; }
+  40% { opacity: 0; }
+  50%{ opacity: 1; }
+  60%{ opacity: 0; }
+  100%{ opacity: 0; }
 }
 </style>
 <style>

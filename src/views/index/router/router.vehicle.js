@@ -14,6 +14,7 @@ export default {
     {
       path: 'clcx', // 车辆查询
       name: 'vehicle_search_clcx',
+      meta:{keepAlive: true},
       component: () => import('@/views/index/components/vehicle/search/clcx.vue')
     },{
       path: 'clcxdetail', // 车辆详情
@@ -43,10 +44,12 @@ export default {
     }, {
       path: 'clxx', // 车辆信息
       name: 'vehicle_search_clxx',
+      
       component: () => import('@/views/index/components/vehicle/search/clxx.vue')
     }, {
       path: 'lxwf', // 连续违法
       name: 'vehicle_search_lxwf',
+      meta:{keepAlive: true},
       component: () => import('@/views/index/components/vehicle/search/lxwf.vue')
     },{
       path: 'lxwfdetail', // 连续违法详情
@@ -74,9 +77,9 @@ export default {
       path: 'ljd', // 落脚点分析
       name: 'vehicle_search_ljd',
       component: () => import('@/views/index/components/vehicle/analysis/ljd.vue'),
-      // meta: {
-      //   unrequireLogin: true
-      // }
+      meta: {
+        unrequireLogin: true
+      }
     }, {
       path: 'qy', // 区域分析
       name: 'vehicle_search_qy',

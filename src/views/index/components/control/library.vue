@@ -40,17 +40,26 @@
         </vue-scroll>
         <!-- 人像库左侧组合搜索 -->
         <el-form :model="libPortraitForm" class="lib_form" ref="portraitLibForm" v-show="tabType === '1'">
-          <el-form-item prop="perTime">
+          <el-form-item prop="startTime">
             <el-date-picker
+              class="vl_date"
               style="width: 192px;"
-              v-model="libPortraitForm.perTime"
-              type="daterange"
-              format="yy-MM-dd"
-              range-separator="-"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              value-format="yyyy-MM-dd"
-              :default-time="['00:00:00', '23:59:59']">
+              v-model="libPortraitForm.startTime"
+              type="date"
+              format="yyyy-MM-dd"
+              placeholder="开始日期"
+              value-format="yyyy-MM-dd">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item prop="endTime">
+            <el-date-picker
+              class="vl_date vl_date_end"
+              style="width: 192px;"
+              v-model="libPortraitForm.endTime"
+              type="date"
+              format="yyyy-MM-dd"
+              placeholder="结束日期"
+              value-format="yyyy-MM-dd">
             </el-date-picker>
           </el-form-item>
           <el-form-item style="width: 192px;" prop="sex">
@@ -93,23 +102,32 @@
             </el-select>
           </el-form-item>
           <el-form-item style="width: 192px;">
-            <el-button class="reset_btn btn_90" @click.native="reset">重置</el-button>
-            <el-button class="select_btn btn_90" @click.native="getPortraitList(groupId, groupIndex)">搜索</el-button>
+            <el-button class="btn_90" @click.native="reset">重置</el-button>
+            <el-button class="btn_90" :loading="loading" type="primary" @click.native="getPortraitList(groupId, groupIndex)">搜索</el-button>
           </el-form-item>
         </el-form>
         <!-- 车像库左侧组合搜索 -->
         <el-form :model="libVehicleForm" class="lib_form" v-show="tabType === '2'" ref="carLibForm">
-          <el-form-item prop="carTime">
+          <el-form-item prop="startTime">
             <el-date-picker
+              class="vl_date"
               style="width: 192px;"
-              v-model="libVehicleForm.carTime"
-              type="daterange"
-              format="yy-MM-dd"
-              range-separator="-"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              value-format="yyyy-MM-dd"
-              :default-time="['00:00:00', '23:59:59']">
+              v-model="libVehicleForm.startTime"
+              type="date"
+              format="yyyy-MM-dd"
+              placeholder="开始日期"
+              value-format="yyyy-MM-dd">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item prop="endTime">
+            <el-date-picker
+              class="vl_date vl_date_end"
+              style="width: 192px;"
+              v-model="libVehicleForm.endTime"
+              type="date"
+              format="yyyy-MM-dd"
+              placeholder="结束日期"
+              value-format="yyyy-MM-dd">
             </el-date-picker>
           </el-form-item>
           <el-form-item style="width: 192px;" prop="vehicleColor">
@@ -162,8 +180,8 @@
             </el-select>
           </el-form-item>
           <el-form-item style="width: 192px;">
-            <el-button class="reset_btn btn_90" @click.native="reset">重置</el-button>
-            <el-button class="select_btn btn_90" @click.native="getVehicleList(groupId, groupIndex)">搜索</el-button>
+            <el-button class="btn_90" @click.native="reset">重置</el-button>
+            <el-button class="btn_90" type="primary" :loading="loading" @click.native="getVehicleList(groupId, groupIndex)">搜索</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -171,8 +189,8 @@
       <div class="member_list">
         <div class="member_title">
           <div><span class="vl_f_333">布控库</span><span class="vl_f_666">({{memberNum}})</span></div>
-          <el-button v-if="tabType === '1'" class="select_btn btn_100" @click.native="clearForm('portraitForm', '1')">新建人像</el-button>
-          <el-button v-else class="select_btn btn_100" @click.native="clearForm('carForm', '1')">新建车像</el-button>
+          <el-button v-if="tabType === '1'" class="btn_100" type="primary" @click.native="clearForm('portraitForm', '1')">新建人像</el-button>
+          <el-button v-else class="btn_100" type="primary" @click.native="clearForm('carForm', '1')">新建车像</el-button>
         </div>
         <div class="list_box" v-loading="loading">
           <template v-if="tabType === '1'">
@@ -473,14 +491,14 @@
             </div>
           </div>
           <div slot="footer">
-            <el-button @click="toGiveUpDialog = true" class="reset_btn btn_100">取消</el-button>
+            <el-button @click="toGiveUpDialog = true" class="btn_140">取消</el-button>
             <template v-if="tabType === '1'">
-              <el-button v-if="operationType === '1'" :loading="loadingBtn" class="select_btn btn_100" @click="savePortrait('portraitForm')">保存</el-button>
-              <el-button v-else :loading="loadingBtn" class="reset_btn btn_100" @click="putPortrait('portraitForm')">确定</el-button>
+              <el-button v-if="operationType === '1'" :loading="loadingBtn" class="btn_140" type="primary" @click="savePortrait('portraitForm')">保存</el-button>
+              <el-button v-else :loading="loadingBtn" class="btn_140" type="primary" @click="putPortrait('portraitForm')">确定</el-button>
             </template>
             <template v-else>
-              <el-button v-if="operationType === '1'" :loading="loadingBtn" class="select_btn btn_100" @click="saveCar('carForm')">保存</el-button>
-              <el-button v-else :loading="loadingBtn" class="reset_btn btn_100" @click="putCar('carForm')">确定</el-button>
+              <el-button v-if="operationType === '1'" :loading="loadingBtn" class="btn_140" type="primary" @click="saveCar('carForm')">保存</el-button>
+              <el-button v-else :loading="loadingBtn" class="btn_140" type="primary" @click="putCar('carForm')">确定</el-button>
             </template>
           </div>
         </el-dialog>
@@ -495,8 +513,8 @@
         top="40vh">
         <h4>是否放弃本次操作？</h4>
         <div slot="footer">
-          <el-button :loading="loadingBtn" @click="toGiveUpDialog = false;addPortraitDialog = false;" class="select_btn btn_140">放弃</el-button>
-          <el-button class="reset_btn btn_140" @click="toGiveUpDialog = false">取消</el-button>
+          <el-button :loading="loadingBtn" @click="toGiveUpDialog = false;addPortraitDialog = false;" class="btn_140" type="primary">放弃</el-button>
+          <el-button class="btn_140" @click="toGiveUpDialog = false">取消</el-button>
         </div>
       </el-dialog>
     </template>
@@ -538,14 +556,16 @@ export default {
       group: null,//搜索组
       // 人像库筛选参数
       libPortraitForm: {
-        perTime: null,
+        startTime: null,
+        endTime: null,
         sex: null,
         nation: null,
         card: null
       },
       // 车像库筛选参数
       libVehicleForm: {
-        carTime: null,
+        startTime: null,
+        endTime: null,
         vehicleColor: null,
         vehicleType: null,
         numberType: null,
@@ -1162,8 +1182,8 @@ export default {
         pageSize: this.pageSize,
         orderBy: null,
         order: null,
-        'where.dateStart': this.libPortraitForm.perTime && this.libPortraitForm.perTime[0],
-        'where.dateEnd': this.libPortraitForm.perTime && this.libPortraitForm.perTime[1],
+        'where.dateStart': this.libPortraitForm.startTime,
+        'where.dateEnd': this.libPortraitForm.endTime,
         'where.sex': this.libPortraitForm.sex,
         'where.nation': this.libPortraitForm.nation,
         'where.groupId': groupId
@@ -1198,8 +1218,8 @@ export default {
         pageSize: this.pageSize,
         orderBy: null,
         order: null,
-        'where.dateStart': this.libVehicleForm.carTime && this.libVehicleForm.carTime[0],
-        'where.dateEnd': this.libVehicleForm.carTime && this.libVehicleForm.carTime[1],
+        'where.dateStart': this.libVehicleForm.startTime,
+        'where.dateEnd': this.libVehicleForm.endTime,
         'where.vehicleColor': this.libVehicleForm.vehicleColor,
         'where.vehicleType': this.libVehicleForm.vehicleType,
         'where.numberType': this.libVehicleForm.numberType,
@@ -1480,6 +1500,13 @@ export default {
         border-radius: 15px!important;
         background:rgba(242,242,242,1)!important;
         border: none;
+      }
+      .el-icon-search{
+        cursor: pointer;
+        font-size: 20px!important;
+        &:hover{
+          color: #0C70F8;
+        }
       }
     }
     .lib_form .el-form-item{

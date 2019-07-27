@@ -1,72 +1,54 @@
 <template>
   <div class="point">
-    <div class="breadcrumb_heaer">
-      <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
-        <el-breadcrumb-item>车辆轨迹</el-breadcrumb-item>
-      </el-breadcrumb>
+    <div class="">
+      <div
+              is="vlBreadcrumb"
+              :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
+          {name: '车辆轨迹'}]"
+      ></div>
     </div>
 
     <div :class="['left',{hide:hideleft}]">
       <div class="plane">
         <el-form
-          :model="ruleForm"
-          status-icon
-          ref="ruleForm"
-          :rules="rules"
-          label-width="0px"
-          class="demo-ruleForm"
+            :model="ruleForm"
+            status-icon
+            ref="ruleForm"
+            label-width="0px"
+            class="demo-ruleForm_clgj"
         >
-          <el-form-item class="firstItem" prop="data1">
+          <el-form-item class="" prop="data1">
             <el-date-picker
               v-model="ruleForm.data1"
-              type="daterange"
-              class="full data_range"
-              value-format="yyyy-MM-dd"
+              style="width: 100%;"
+              class="vl_date"
               :picker-options="pickerOptions"
-              range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期">
+              type="datetime"
+              value-format="timestamp"
+              placeholder="选择日期时间">
             </el-date-picker>
           </el-form-item>
-
-          <el-form-item prop="input3">
-            <el-input placeholder="请输入车牌号" v-model="ruleForm.input3" class="input-with-select">
-            </el-input>
+          <el-form-item>
+            <el-date-picker
+              style="width: 100%;"
+              class="vl_date vl_date_end"
+              :picker-options="pickerOptions"
+              v-model="ruleForm.data2"
+              @change="chooseEndTime"
+              value-format="timestamp"
+              type="datetime"
+              placeholder="选择日期时间">
+            </el-date-picker>
           </el-form-item>
-          <el-form-item label="区域：" label-width="60px" prop="input5">
-            <el-radio-group v-model="ruleForm.input5">
-              <el-row :gutter="10">
-                <el-col :span="12">
-                  <el-radio label="1">列表选择</el-radio>
-                </el-col>
-                <el-col :span="12">
-                  <div @click="clickTabCh">
-                    <el-radio label="2">地图选择</el-radio>
-                  </div>
-                </el-col>
-              </el-row>
-            </el-radio-group>
+          <el-form-item prop="input5">
+            <div class="per-semblance per-semblance-is-max" v-if="ruleForm.input3.length >= 6"><el-input placeholder="已添加6辆车" :disabled="true"></el-input><i class="el-icon-circle-plus"></i></div>
+            <div class="per-semblance" v-else><el-input placeholder="输入车牌号" v-model="ruleForm.input5"></el-input><i class="el-icon-circle-plus" @click="addPlateNo"></i></div>
           </el-form-item>
-          <el-form-item v-if="ruleForm.input5=='1'" prop="value1">
-            <el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="请选择" class="full">
-              <el-option-group
-                v-for="group in options"
-                :key="group.areaName"
-                :label="group.areaName">
-                <el-option
-                  v-for="item in group.areaTreeList"
-                  :key="item.areaId"
-                  :label="item.areaName"
-                  :value="item.areaId">
-                </el-option>
-              </el-option-group>
-            </el-select>
-          </el-form-item>
-          <el-form-item v-if="ruleForm.input5=='2'" >
-            <el-input  v-model="curChooseNum" :disabled="true">
-            </el-input>
-          </el-form-item>
+          <div class="add-plate-no">
+            <div class="plate-item" v-for="(item, index) in ruleForm.input3" :key="item.id">
+              <div>车牌号码{{index + 1}}：<span>{{item}}</span></div><i class="el-icon-remove" @click="removePlateNo(index)"></i>
+            </div>
+          </div>
           <el-form-item>
             <el-row :gutter="10">
               <el-col :span="12">
@@ -79,55 +61,24 @@
           </el-form-item>
         </el-form>
         <div class="insetLeft" @click="hideLeft"></div>
+        <!--车辆切换列表-->
+        <div class="clgj-s-list">
+          <div v-for="(item, index) in evData" :key="item.id" :class="{'active': index === activeList}" @click="plateTap(index)">{{item.plateNo}}</div>
+        </div>
       </div>
     </div>
     <div :class="['right',{hide:!hideleft}]" id="rightMap"></div>
-    <div class="reselt" v-if="reselt">
-      <div class="plane insetPadding">
-          <h3 class="title">分析结果</h3>
-          <div class="sup_title">
-            <div  @click="timeOrderS">时间排序 <span><i class="el-icon-caret-top" :class="{'active': !timeOrder}"></i><i :class="{'active': timeOrder}" class="el-icon-caret-bottom"></i></span></div>
-            <div>抓拍地址</div>
-          </div>
-          <div class="plane_main_box">
-            <vue-scroll>
-              <div class="plane_main">
-                <!--可以展开列表-->
-                <div class="p_main_list"  :class="{'is_open': item.isOpen}" v-for="item in leftEvData" :key="item.id">
-                  <div class="p_main_head" @click="item.isOpen = !item.isOpen"><i :class="{'el-icon-caret-right': !item.isOpen, 'el-icon-caret-bottom': item.isOpen}"></i>{{item.label}}</div>
-                  <div class="p_main_item" v-for="sItem in item.list" :key="sItem.id" @click="showStrucInfo(sItem, evData.findIndex(function (u) {return u === sItem}))">
-                    <div>{{sItem.shotTime.slice(-8)}}</div>
-                    <div :title="sItem.address">{{sItem.address ? sItem.address : '无'}}</div>
-                  </div>
-                </div>
-                <p v-show="leftEvData.length === 0" style="line-height: 40px;color: #999999;text-align: center;">暂无数据</p>
-                <el-pagination
-                  v-show="pagination.total > 10"
-                  class="cum_pagination th-center-pagination"
-                  @current-change="onPageChange"
-                  :current-page.sync="pagination.pageNum"
-                  :page-size="pagination.pageSize"
-                  layout="prev, pager, next"
-                  :total="pagination.total">
-                </el-pagination>
-              </div>
-            </vue-scroll>
-          </div>
-          <div class="insetLeft2" @click="hideResult"></div>
-      </div>
-    </div>
-    <!--地图操作按钮-->
     <ul class="map_rrt_u2">
       <li @click="resetZoom"><i class="el-icon-aim"></i></li>
       <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
       <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
     </ul>
     <el-dialog
-        :visible.sync="strucDetailDialog"
-        class="struc_detail_dialog"
-        :close-on-click-modal="false"
-        top="4vh"
-        :show-close="false">
+      :visible.sync="strucDetailDialog"
+      class="struc_detail_dialog"
+      :close-on-click-modal="false"
+      top="4vh"
+      :show-close="false">
       <div class="struc_tab">
         <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">抓拍详情</span>
         <span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>
@@ -137,39 +88,56 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt="">
+            <img class="bigImg"  :src="sturcDetail.subStoragePath" alt="">
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img">
-              <img :src="sturcDetail.storagePath" alt="">
+              <img class="bigImg"  :src="sturcDetail.storagePath" alt="">
               <span>全景图</span>
             </div>
             <div class="struc_c_d_info">
               <h2>抓拍信息</h2>
-              <div class="struc_cdi_line">
-                <span>{{sturcDetail.shotTime}} <font>抓拍时间</font></span>
+              <div class="struc_cd_info_main">
+                <vue-scroll>
+                  <div class="scroll_box">
+                    <div class="struc_cdi_line">
+                      <span :title="sturcDetail.shotTime"><font>抓拍时间</font>{{sturcDetail.shotTime}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span :title="sturcDetail.deviceName"><font>抓拍设备</font>{{sturcDetail.deviceName}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span :title="sturcDetail.address"><font>抓拍地址</font>{{sturcDetail.address}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span :title="sturcDetail.plateNo"><font>车牌号码</font>{{sturcDetail.plateNo}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span :title="sturcDetail.plateColor"><font>号牌颜色</font>{{sturcDetail.plateColor}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span :title="sturcDetail.vehicleModel"><font>车辆型号</font>{{sturcDetail.vehicleModel}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span :title="sturcDetail.vehicleColor"><font>车辆颜色</font>{{sturcDetail.vehicleColor}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span :title="sturcDetail.vehicleClass"><font>车辆类型</font>{{sturcDetail.vehicleClass}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span :title="sturcDetail.plateClass"><font>号牌类型</font>{{sturcDetail.plateClass}}</span>
+                    </div>
+                  </div>
+                </vue-scroll>
               </div>
-              <div class="struc_cdi_line">
-                <span>{{sturcDetail.deviceName}} <font>抓拍设备</font></span>
-              </div>
-              <div class="struc_cdi_line">
-                <span>{{sturcDetail.address}} <font>抓拍地址</font></span>
-              </div>
-              <div class="struc_cdi_line">
-                <span>{{sturcDetail.plateNo}} <font>车牌号</font></span>
-              </div>
-              <div class="struc_cdi_line">
-                <span>{{sturcDetail.vehicleColor}} {{sturcDetail.vehicleClass}} {{sturcDetail.vehicleBrand}} {{sturcDetail.vehicleStyles}} <font>特征</font></span>
-              </div>
-              <div class="struc_cdi_line"></div>
             </div>
           </div>
         </div>
         <div v-show="strucCurTab === 2" class="struc_c_address"></div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt="">
+            <img class="bigImg"  :src="sturcDetail.subStoragePath" alt="">
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
@@ -185,7 +153,7 @@
       <div class="struc-list">
         <swiper :options="swiperOption" ref="mySwiper">
           <!-- slides -->
-          <swiper-slide v-for="(item, index) in evData" :key="item.id">
+          <swiper-slide v-for="(item, index) in curEvData" :key="item.id">
             <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
               <img style="width: 100%; height: .88rem;" :src="item.subStoragePath" alt="">
               <!--<div class="vl_jfo_sim" ><i class="vl_icon vl_icon_retrieval_05" :class="{'vl_icon_retrieval_06':  index === curImgIndex}"></i>{{item.semblance ? item.semblance : 92}}<span style="font-size: 12px;">%</span></div>-->
@@ -197,30 +165,22 @@
       </div>
     </el-dialog>
     <!-- D设备 B卡口  这里是设备和卡口 -->
-    <div is="mapSelector" :open="dialogVisible" :clear="selectMapClear" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div>
     <div id="capMap"></div>
   </div>
 </template>
 <script>
-  import mapSelector from '@/components/common/mapSelector.vue';
+  import vlBreadcrumb from "@/components/common/breadcrumb.vue";
   import { mapXupuxian } from "@/config/config.js";
-  import { objDeepCopy, random14 } from "@/utils/util.js";
-  import { cityCode } from "@/utils/data.js";
+  import { objDeepCopy, random14, formatDate } from "@/utils/util.js";
+  import { cityCode, dataList } from "@/utils/data.js";
   import { InvestigateGetTrace } from "@/views/index/api/api.judge.js";
-  import { MapGETmonitorList } from "@/views/index/api/api.map.js";
-  import { getAllBayonetList } from "@/views/index/api/api.base.js";
+  import { getDiciData } from '@/views/index/api/api.js';
   export default {
-    components: {mapSelector},
+    components: {vlBreadcrumb},
     data() {
       return {
+        activeList: 0,
         serarchLoading: false,
-        rules: {
-          input3:{
-            pattern:/^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领]([A-Z0-9]{6}$)|(^[A-Z]{2}[A-Z0-9]{2}[A-Z0-9\u4E00-\u9FA5]{1}[A-Z0-9]{4}$)|(^[A-Z0-9]{5}[挂学警军港澳]{1}$)|(^[A-Z]{2}[0-9]{5}$)|(^(08|38){1}[A-Z0-9]{4}[A-Z0-9挂学警军港澳]{1}$)/,
-            message: '常规格式：湘A12345',
-            trigger: 'blur'
-          }
-        },
         selectMapClear: '',
         curChooseNum: '已选择0个设备',
         hover:null,
@@ -239,26 +199,21 @@
             prevEl: '.swiper-button-prev',
           },
         },
-        pagination: { total: 0, pageSize: 10, pageNum: 1 },
-        dialogVisible: false,
         amap: null,
         map: null,
         pointData: {
           deviceList: [],
           bayonetList: []
         },
-        reselt: false,
         hideleft: false,
         timeOrder: false,
         ruleForm: {
           data1:null,
-          input3: '',
-          input5: "1",
-          value1: null,
+          data2: null,
+          input5: '', // 当前输入的车牌号
+          input3: [],
         },
         pricecode:cityCode,
-        storeParam: {}, // 暂存上一次搜索的入参
-        options: [],
         pickerOptions: {
           disabledDate (time) {
             let date = new Date();
@@ -277,7 +232,8 @@
           }
         },
         evData: [],
-        leftEvData: [],
+        curEvData: [],
+        originEvData: [],
         marks: [[], []],
         markerLine: [], // 地图线集合
         markerPoint: [], // 地图点集合
@@ -288,18 +244,58 @@
         sturcDetail: {},
         playing: false, // 视频播放是否
         strucDetailDialog: false,
-        videoUrl: '' // 弹窗视频回放里的视频
+        videoUrl: '', // 弹窗视频回放里的视频
+        numberTypeList: [], // 号牌种类列表
       };
     },
     mounted() {
       if (this.$route.query.plateNo) {
-        this.ruleForm.input3 = this.$route.query.plateNo;
+        this.ruleForm.input5.push(this.$route.query.plateNo);
       }
-      this.getMapGETmonitorList()//查询行政区域
       this.renderMap();
       this.setDTime();
+      this.getNumberTypeList();
     },
     methods: {
+      // 获取号牌种类列表
+      getNumberTypeList () {
+        const type = dataList.numberType;
+        getDiciData(type)
+          .then(res => {
+            if (res) {
+              this.numberTypeList = res.data;
+            }
+          })
+      },
+      plateTap (index) {
+        this.amap.clearMap();
+        this.activeList = index;
+        this.filterData();
+        this.drawLine();
+      },
+      addPlateNo () {
+        if (!this.ruleForm.input5.replace(/\s+|\s+$/g, '')) {
+          if (!document.querySelector('.el-message--info')) {
+            this.$message.info('车牌号码不能为空')
+          }
+        }else {
+          if (this.ruleForm.input3.includes(this.ruleForm.input5.replace(/\s+|\s+$/g, ''))) {
+            if (!document.querySelector('.el-message--info')) {
+              this.$message.info('该车牌号码已经添加了')
+            }
+          } else {
+            this.ruleForm.input3.push(this.ruleForm.input5.replace(/\s+|\s+$/g, ''))
+          }
+        }
+      },
+      removePlateNo (index) {
+        this.ruleForm.input3.splice(index, 1)
+      },
+      chooseEndTime (e) {
+        if (e < this.ruleForm.data1) {
+          this.$message.info('结束时间必须大于开始时间才会有结果')
+        }
+      },
       mapZoomSet (val) {
         if (this.amap) {
           this.amap.setZoom(this.amap.getZoom() + val);
@@ -314,173 +310,33 @@
         let date = new Date();
         let curDate = date.getTime();
         let curS = 1 * 24 * 3600 * 1000;
-        let sM = '', sD = '';
-        if ((new Date(curDate - curS).getMonth() + 1) < 10 ) {
-          sM = '0' + (new Date(curDate - curS).getMonth() + 1);
-        } else {
-          sM = (new Date(curDate - curS).getMonth() + 1)
-        }
-        if ( new Date(curDate - curS).getDate() < 10 ) {
-          sD = '0' +  new Date(curDate - curS).getDate();
-        } else {
-          sD =  new Date(curDate - curS).getDate()
-        }
-        let _s = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD;
-//        let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() - 1;
-        this.ruleForm.data1 = [_s, _s];
-      },
-      onPageChange (page) {
-        this.pagination.pageNum = page;
-        this.operData();
-      },
-      hideResult() {
-        this.reselt = false;
-        this.hideLeft();
+        this.ruleForm.data1 = curDate - curS;
+        this.ruleForm.data2 = curDate;
       },
       hideLeft() {
         this.hideleft = !this.hideleft;
-        if (!this.hideleft && this.evData.length > 0) {
-          this.reselt = true;
-        }
-      },
-      clickTabCh() {
-        this.dialogVisible = !this.dialogVisible;
-      },
-      clickTab(val){
-        this.hover = this.hover==val?'':val
-        if(!this.hover){
-          this.map.setDefaultCursor();
-          this.mouseTool.close(false);
-        }else{
-          this.selArea(val)
-        }
-
-      },
-      selArea (v) {
-        this.map.setDefaultCursor('crosshair');
-        switch (v){
-          case 'cut1' :
-            this.mouseTool.rectangle({
-              strokeColor:'#FA453A',
-              strokeWeight: 1,
-              fillColor:'#FA453A',
-              fillOpacity:0.2,
-              strokeStyle: 'solid',
-            })
-            break ;
-          case 'cut2' :
-            this.mouseTool.circle({
-              strokeColor: "#FA453A",
-              strokeOpacity: 1,
-              strokeWeight: 1,
-              strokeOpacity: 0.2,
-              fillColor: '#FA453A',
-              fillOpacity: 0.2,
-              strokeStyle: 'solid',
-              // 线样式还支持 'dashed'
-              // strokeDasharray: [30,10],
-            })
-            break ;
-          case 'cut3' :
-            this.mouseTool.polyline({
-              strokeColor: "#FA453A",
-              strokeOpacity: 1,
-              strokeWeight: 2,
-              // 线样式还支持 'dashed'
-              strokeStyle: "solid",
-              // strokeStyle是dashed时有效
-              // strokeDasharray: [10, 5],
-            })
-
-            break ;
-          case 'cut4' :
-            this.mouseTool.polygon({
-              zIndex: 13,
-              strokeColor: '#FA453A',
-              strokeOpacity: 1,
-              bubble: true,
-              strokeWeight: 1,
-              fillColor: '#FA453A',
-              fillOpacity: 0.2,
-              isRing: false
-            });
-            break ;
-          case 'cut5' :
-            break ;
-        }
-      },
-      hideMap(){
-        this.dialogVisible=false
       },
       submitForm(v) {
-        this.$refs[v].validate((valid) => {
-          if (valid) {
-            if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data1.length>0 && this.ruleForm.input3){
-              let pg = {
-                pageSize: 9999,
-                where: {}
-              }
-              if (this.pointData.bayonetList.length === 0 && this.pointData.deviceList.length === 0 && this.ruleForm.input5 === "2") {
-                this.$message.info('选择的区域没有设备，请重新选择区域');
-                return false;
-              } else if (this.ruleForm.input5 === "1" && this.ruleForm.value1.length === 0) {
-                this.$message.info('您没有选择区域，请点击下拉框选择镇');
-                return false;
-              }
-              console.log(this.ruleForm.data1);
-              pg.where['startTime'] = this.ruleForm.data1[0]+" 00:00:00";
-              pg.where['endTime'] = this.ruleForm.data1[1]+" 23:59:59";
-              pg.where['vehicleNumber'] = this.ruleForm.input3;
-              if(this.ruleForm.input5==1 && this.ruleForm.value1.length!=0){
-                pg.where['areaUid']=this.ruleForm.value1.join(",")
-              }
-              if(this.ruleForm.input5==2){
-                pg.where['bayonetIds'] = this.pointData.bayonetList.map(y => {return y.uid}).join(',');
-                pg.where['deviceUid'] = this.pointData.deviceList.map(y => {return y.uid}).join(',');
-              }
-              this.storeParam = objDeepCopy(pg);
-              this.getVehicleShot(pg);
-            }else{
-              this.$message.info("请输入开始时间和车牌号码。");
-            }
-          } else {
-            return false;
+        if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data2 && this.ruleForm.input3.length){
+          let pg = {
           }
-        });
+          pg['startTime'] = formatDate(this.ruleForm.data1, 'yyyy-MM-dd HH:mm:ss');
+          pg['endTime'] = formatDate(this.ruleForm.data2, 'yyyy-MM-dd HH:mm:ss');
+          pg['vehicleNumber'] = this.ruleForm.input3.join(',');
+          this.getVehicleShot(pg);
+        }else{
+          if (!document.querySelector('.el-message--info')) {
+            this.$message.info("请输入开始时间和车牌号码。");
+          }
+        }
       },
       resetForm(){
-        this.ruleForm.input5 = '1';
-        this.ruleForm.input3 = '';
-        this.ruleForm.value1 = [];
-        this.options[0].areaTreeList.forEach(x => {
-          this.ruleForm.value1.push(x.areaId)
-        })
-        this.selectMapClear = random14();
-        this.pointData = {
-          deviceList: [],
-          bayonetList: []
-        }
-        this.curChooseNum = '已选择0个设备';
+        this.ruleForm.input3 = [];
+        this.ruleForm.input5 = '';
         this.setDTime ();
         //this.$refs[v].resetFields();
       },
-      confirmMap(){
-        this.dialogVisible = false;
-      },
-      //查询行政区域
-      getMapGETmonitorList(){
-        let d={
-          areaUid:mapXupuxian.adcode
-        }
-        MapGETmonitorList(d).then(res=>{
-          if(res && res.data){
-            res.data.areaTreeList.forEach(x => {
-              this.ruleForm.value1.push(x.areaId)
-            })
-            this.options.push(res.data)
-          }
-        })
-      },
+
       renderMap() {
         let map = new window.AMap.Map("rightMap", {
           zoom: 10,
@@ -495,100 +351,90 @@
         });
         supMap.setMapStyle('amap://styles/whitesmoke');
         this.map = supMap;
+
       },
-      mapPoint (data) {
-        console.log(data);
-        let num = data.deviceList.length + data.bayonetList.length;
-        this.curChooseNum = '已选择' + num + '个设备';
-        this.pointData = data;
-      },
-      compare  (prop, bool) {
-        return function (obj1, obj2) {
-          var val1 = obj1[prop];
-          var val2 = obj2[prop];
-          if (!isNaN(Number(val1)) && !isNaN(Number(val2))) {
-            val1 = Number(val1);
-            val2 = Number(val2);
-          }
-          if (val1 < val2) {
-            if (bool) {
-              return -1;
-            } else {
-              return 1;
-            }
-          } else if (val1 > val2) {
-            if (bool) {
-              return 1;
-            } else {
-              return -1;
-            }
-          } else {
-            return 0;
-          }
+      getVehicleShot(d, bool) {
+        this.activeList = 0;
+        if (!bool) {
+          this.serarchLoading = true;
         }
-      },
-      getVehicleShot(d) {
-        this.serarchLoading = true;
+        this.count = 10;
         InvestigateGetTrace(d).then(res => {
           this.serarchLoading = false;
           if (res) {
             // console.log(res);
+            this.amap.clearMap();
             if (!res.data || res.data.length === 0) {
               this.$message.info("抱歉，没有找到匹配结果");
-              this.amap.clearMap();
-              //this.searching = false;
               return false;
             }
-            this.reselt = true;
-            this.evData = res.data.list;
-            this.evData.sort(this.compare("shotTime", this.timeOrder ? false : true));
-            this.pagination.total = res.data.total;
-            //  重组数据，给左边列表使用
-            this.operData();
-            this.amap.clearMap();
-            this.drawMapMarker(this.evData);
-            //this.showEventList();
+            this.evData = res.data;
+            this.originEvData = objDeepCopy(res.data);
+            this.filterData();
+            this.drawLine();
           }
         }).catch(() => {
           this.serarchLoading = false;
         });
       },
-      operData () {
-        this.leftEvData = [];
-        let keyArr = [];
-        this.evData.forEach((x, index) => {
-          if ((index + 1) <= this.pagination.pageNum * (this.pagination.pageSize) && (index + 1) > (this.pagination.pageNum - 1) * (this.pagination.pageSize)) {
-            let key = x.shotTime.slice(0, 10);
-            if (!keyArr.includes(key)) {
-              keyArr.push(key);
-              let obj = {label: key,isOpen: true};
-              obj.list = [];
-              obj.list.push(x);
-              this.leftEvData.push(obj);
+      filterData () {
+        let _arr = [];
+        this.evData = objDeepCopy(this.originEvData);
+        this.evData.forEach((z, index) => {
+          z.traceList.forEach(x => {
+            // 是否显示时间
+            if (index === this.activeList) {
+              x['showTime'] = true;
             } else {
-              this.leftEvData.find(y => y.label === key).list.push(x);
+              x['showTime'] = false;
+            }
+            // 判断是不是有卡口
+            if (x.bayonetName) {
+              x['dataType'] = 8;
+            } else {
+              x['dataType'] = 0;
+            }
+            let _i = _arr.findIndex(y => y.deviceID === x.deviceID);
+            if (_i === -1) {
+              _arr.push(x);
+            } else {
+              if (index === this.activeList) {
+                // 判断出现的重复点是不是同一辆车的
+                if (x.plateNo === _arr[_i].plateNo) {
+                  _arr[_i]['shotTime'] += ',' + x.shotTime;
+                } else {
+                  x['simLength'] += 1;
+                  _arr.splice(_i, 1, x);
+                }
+              } else {
+                if (x.plateNo === _arr[_i].plateNo) {
+                  _arr[_i]['shotTime'] += ',' + x.shotTime;
+                } else {
+                  _arr[_i]['simLength'] += 1;
+                }
+              }
+            }
+          })
+        });
+        _arr.forEach(x => {
+          let b = true;
+          this.evData.forEach(y => {
+            if (y.traceList.findIndex(z => z.deviceID === x.deviceID) === -1){
+              b = false;
+            }
+          })
+          if (b) {
+            if (x.bayonetName) {
+              x['dataType'] = 12;
+            } else {
+              x['dataType'] = 13;
             }
           }
         })
-      },
-      objSetItem (list, obj) {
-        list.map(z => {
-          for (let key in obj) {
-            z[key] = z[obj[key]] ? z[obj[key]] : obj[key]
-          }
-          // 都加上markSid , 方便处理移动端发起的通话
-          if (!z['markSid']) {
-            z['markSid'] = 'mapMark' + z['dataType'] + z['uid'];
-          }
-          return z;
-        })
-        return list;
+        this.curEvData = this.originEvData[this.activeList].traceList;
+        this.drawMapMarker(_arr);
       },
       //查询所有的卡口设备
-      timeOrderS () {
-        this.timeOrder = !this.timeOrder;
-        this.getVehicleShot(this.storeParam)
-      },
       // 地图标记
       mapHoverInfo (data) {
         let str = '<div class="vl_map_hover_main"><ul>';
@@ -606,54 +452,73 @@
         return str;
       },
       drawMapMarker (data) {
-        console.log(data)
         let path = [];
         for (let  i = 0; i < data.length; i++) {
           let obj = data[i];
           let _path = [obj.shotPlaceLongitude, obj.shotPlaceLatitude];
           if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
-            let _sContent = `
-            <div class="vl_jtc_mk">
-              <img src="${obj.subStoragePath}"/>
-              <p>${obj.shotTime}</p>
-            </div>`;
-            // 窗体
-            let winInfo = new AMap.Marker({ // 添加自定义点标记
-              map: this.amap,
-              position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-              offset: new AMap.Pixel(20, -80), // 相对于基点的偏移位置
-              draggable: false, // 是否可拖动
-              extData: obj,
-              content: _sContent
-            });
-            winInfo.on('click', () => {
-              this.showStrucInfo(obj, i)
-            })
             path.push(_path);
-            let _content = `<div class="vl_icon vl_icon_sxt"></div>`
-            let point = new AMap.Marker({ // 添加自定义点标记
+            let $id = 'mapMark' + obj.dataType + obj.uid;
+            let _time = '';
+            if (obj.showTime) {
+              _time = '<p class="vl_map_mark_time">';
+              obj.shotTime.split(',').forEach(j => {
+                _time += `<span>${j}</span>`
+              })
+              _time += '</p>';
+            }
+            let _content = `<div id="${$id}" class="vl_icon right_map_icon vl_icon_map_mark` + obj.dataType + `">` + _time + `</div>`
+            let point = new window.AMap.Marker({ // 添加自定义点标记
               map: this.amap,
               position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-              offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+              offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
               draggable: false, // 是否可拖动
               // 自定义点标记覆盖物内容
               content: _content
             });
+            point.on('click', () => {
+              if (obj.showTime) {
+                let newObj = objDeepCopy(obj);
+                newObj.shotTime = newObj.shotTime.split(',')[0];
+                this.showStrucInfo(newObj, i)
+              }
+            })
             this.markerPoint[i] = point;
+            point.on('mouseover', function () {
+              $('#' + $id).addClass('vl_icon_map_hover_mark' + obj.dataType)
+            })
+            point.on('mouseout', function () {
+              $('#' + $id).removeClass('vl_icon_map_hover_mark' + obj.dataType)
+            })
           }
         }
         this.amap.setFitView()
-        this.drawLine(path);
-      }, // 覆盖物（窗体和checkbox
-      drawLine (path) {
-        var polyline = new AMap.Polyline({
-          path: path,
-          showDir: true,
-          strokeColor: '#61C772',
-          strokeWeight: 6
-        });
-        this.markerLine.push(polyline);
-        this.amap.add([polyline]);
+      },
+      drawLine () {
+        this.evData.forEach((x, index)  => {
+          let path = [];
+          x.traceList.forEach(y => {
+            let _path = [y.shotPlaceLongitude, y.shotPlaceLatitude];
+            path.push(_path);
+          })
+          var polyline = new window.AMap.Polyline({
+            path: path,
+            showDir: true,
+            strokeColor: index === this.activeList ? '#61C772' : '#086AEA',
+            strokeWeight: index === this.activeList ? 6 : 3,
+            zIndex: index === this.activeList ? 6 : 4,
+            extData: index
+//            strokeOpacity: index === this.activeList ? 1 : 0,
+          });
+          polyline.on('click', ()=> {
+            let aIndex = polyline.getExtData();
+            if(aIndex !== this.activeList) {
+              this.plateTap(aIndex)
+            }
+          })
+          this.markerLine.push(polyline);
+          this.amap.add([polyline]);
+        })
       }, // 画线
       videoTap () {
         let vDom = document.getElementById('capVideo')
@@ -668,10 +533,17 @@
         })
         this.playing = !this.playing;
       },
-      showStrucInfo (data, index) {
+      showStrucInfo (data) {
         this.amap.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude])
-        this.curImgIndex = index;
+        this.curImgIndex = this.curEvData.findIndex(x => x.deviceID === data.deviceID);
         this.strucDetailDialog = true;
+
+        this.numberTypeList.map(item => {
+          if (item.enumField === data.plateClass) {
+            data.plateClass = item.enumValue;
+          }
+        });
+
         this.sturcDetail = data;
         this.strucCurTab = 1;
         this.drawPoint(data);
@@ -684,34 +556,86 @@
           this.map.remove(this.supMarkerPoint)
         }
         let _content = '<div class="vl_icon vl_icon_judge_02"></div>'
-        this.supMarkerPoint = new AMap.Marker({ // 添加自定义点标记
+        this.supMarkerPoint = new window.AMap.Marker({ // 添加自定义点标记
           map: this.map,
           position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-          offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+          offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
           draggable: false, // 是否可拖动
           // 自定义点标记覆盖物内容
           content: _content
         });
         this.map.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
         let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`
-        new AMap.InfoWindow({
+        new window.AMap.InfoWindow({
           map: this.map,
           isCustom: true,
           closeWhenClickMap: false,
           position: [data.shotPlaceLongitude, data.shotPlaceLatitude],
-          offset: new AMap.Pixel(0, -70),
+          offset: new window.AMap.Pixel(0, -70),
           content: sConent
         })
       },
       imgListTap (data, index) {
+        this.numberTypeList.map(item => {
+          if (item.enumField === data.plateClass) {
+            data.plateClass = item.enumValue;
+          }
+        });
+
         this.curImgIndex = index;
         this.sturcDetail = data;
+        this.playing = false;
         this.drawPoint(data);
       }
     }
   };
 </script>
+<style lang="scss">
+  #rightMap {
+    .vl_icon.right_map_icon {
+      width: 47px;
+      position: relative;
+      > .vl_map_mark_time {
+        position: absolute; top: 10px; left: 98%;
+        width: 130px;
+        word-break:keep-all; 
+        font-size: 12px; color: #fff;
+        background-color: rgba(0, 0, 0, 0.4);
+        border-radius: 2px;
+        padding: 2px 5px;
+        span{
+          display: block;
+        }
+      }
+    }
+  }
+</style>
 <style lang="scss" scoped>
+  .add-plate-no {
+    padding-left: 10px;
+    .plate-item {
+      height: 32px;
+      line-height: 32px;
+      margin-bottom: 10px;
+      >div {
+        width: 194px;
+        display: inline-block;
+        margin-right: 8px;
+        color: #999999;
+        span {
+          color: #333333;
+        }
+      }
+      > i{
+        color: #D3D3D3;
+        cursor: pointer;
+        font-size: 20px;
+        &:hover {
+          color: #FA453A;
+        }
+      }
+    }
+  }
   .map_rrt_u2 {
     position: absolute; right: 30px;
     bottom: 30px;
@@ -760,50 +684,6 @@
     height: calc(100% - 55px);
     float: right;
   }
-  .reselt {
-    width: 272px;
-    height: calc(100% - 55px);
-    background-color: #ffffff;
-    position: absolute;
-    left: 275px;
-    z-index: 2;
-    /*box-shadow: 4px 0px 10px 0px #838383;*/
-    /*box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);*/
-    animation: fadeInLeft 0.4s ease-out 0.3s both;
-    .title {
-      font-size: 16px;
-      font-weight: bold;
-      padding-top: 10px;
-      padding-bottom: 19px;
-      color: #333333;
-    }
-    .sup_title {
-      height: 40px;
-      line-height: 40px;
-      background: #F6F6F6;
-      color: #333333;
-      > div {
-        display: inline-block;
-        width: 50%;
-        text-align: center;
-        &:first-child {
-          cursor: pointer;
-          >span {
-            display: inline-block;
-            height: 25px;
-            vertical-align: middle;
-            i {
-              display: block;
-              height: 10px;
-            }
-            .active {
-              color: #2580FC;
-            }
-          }
-        }
-      }
-    }
-  }
   .left.hide {
     margin-left: -272px;
     transition: marginLeft 0.3s ease-in;
@@ -824,7 +704,7 @@
     animation: fadeInLeft 0.4s ease-out 0.3s both;
     transition: marginLeft 0.3s ease-in;
     .plane {
-      padding: 10px;
+      padding: 20px;
       position: relative;
       height: 100%;
     }
@@ -854,6 +734,36 @@
     background-position: -380px -1269px;
     cursor: pointer;
   }
+  .clgj-s-list {
+    position: absolute;
+    top: 15px;
+    left: 298px;
+    display: flex;
+    > div {
+      width: 92px;
+      height: 40px;
+      background: #F6F8F9;
+      border: 1px solid #D3D3D3;
+      -webkit-border-radius: 4px;
+      -moz-border-radius: 4px;
+      border-radius: 4px;
+      text-align: center;
+      line-height: 40px;
+      color: #999999;
+      cursor: pointer;
+      margin-right: 10px;
+      &:hover {
+        background: #0C70F8;
+        color: #ffffff;
+        border-color: #0C70F8;
+      }
+    }
+    .active {
+      background: #0C70F8;
+      color: #ffffff;
+      border-color: #0C70F8;
+    }
+  }
   .hide {
     .insetLeft {
       transform: rotate(180deg);
@@ -881,6 +791,8 @@
   .plane_main_box {
     height: calc(100% - 100px);
     padding-top: 10px;
+    overflow-y: scroll;
+    overflow-x: hidden;
   }
   .plane_main {
     .p_main_list {
@@ -1049,6 +961,27 @@
   }
 </style>
 <style lang="scss">
+  .cap_info_win {
+    background: #FFFFFF;
+    padding: .18rem;
+    font-size: .14rem;
+    color: #666666;
+    position: relative;
+    &:after {
+      display: block;
+      content: '';
+      border: .1rem solid #FFFFFF;
+      border-color: #FFFFFF transparent transparent;
+      position: absolute;
+      bottom: -.2rem;
+      left: calc(50% - .05rem);
+    }
+  }
+  .demo-ruleForm_clgj {
+    .el-form-item {
+      margin-bottom: 10px;
+    }
+  }
   .data_range {
     .el-range__close-icon {
       display: none;
@@ -1126,9 +1059,6 @@
             font-size: 12px;
             padding: 0 .1rem;
           }
-        }
-        .struc_c_d_qj {
-          margin-right: .3rem;
           &:before {
             display: block;
             content: '';
@@ -1158,6 +1088,13 @@
             z-index: 99;
           }
         }
+        .struc_c_d_qj {
+          margin-right: .3rem;
+          &:before {
+            border: .5rem solid #50CC62;
+            border-color: transparent transparent #50CC62;
+          }
+        }
         .struc_c_d_box {
           width: calc(100% - 3.9rem);
           box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
@@ -1171,6 +1108,7 @@
             width: calc(100% - 3.6rem);
             padding-left: .24rem;
             color: #333333;
+            height: 3.2rem;
             h2 {
               font-weight: bold;
               line-height: .74rem;
@@ -1189,6 +1127,9 @@
                 }
               }
             }
+            .struc_cd_info_main {
+              height: calc(100% - 0.74rem);
+            }
             .struc_cdi_line {
               >span {
                 /*position: relative;*/
@@ -1198,22 +1139,26 @@
                 line-height: .3rem;
                 margin-bottom: .08rem;
                 border: 1px solid #F2F2F2;
-                background: #FAFAFA;
                 color: #333333;
                 white-space: nowrap;
                 text-overflow: ellipsis;
                 border-radius:3px;
                 font-size: 12px;
                 overflow: hidden;
-                padding: 0 .1rem;
+                padding-right: .1rem;
                 margin-right: .08rem;
                 > i {
                   vertical-align: middle;
                   margin-left: .1rem;
                 }
-                font {
+                > font {
+                  width: 75px;
+                  text-align: center;
+                  border-right: 1px solid #F2F2F2;
                   color: #999999;
-                  margin-left: 20px;
+                  background: #FAFAFA;
+                  display: inline-block;
+                  margin-right: .1rem;
                 }
               }
               p {
@@ -1403,6 +1348,7 @@
     }
   }
   .vl_jtc_mk {
+    display: none;
     width: 218px;
     height: 122px;
     position: relative;
@@ -1480,6 +1426,36 @@
     }
     .el-dialog__headerbtn {
       z-index: 1;
+    }
+  }
+  .per-semblance {
+    position: relative;
+    >span {
+      position: absolute;
+      left: 10px;
+      display: block;
+      height: 40px;
+      line-height: 40px;
+      z-index: 9;
+      color: #999999;
+    }
+    >i {
+      color: #0C70F8;
+      cursor: pointer;
+      font-size: 20px;
+    }
+    .el-input {
+      width: 204px;
+      margin-right: 8px;
+      /*input{*/
+        /*text-indent: 10px;*/
+      /*}*/
+    }
+  }
+  .per-semblance-is-max {
+    >i {
+      color: #D3D3D3;
+      cursor: not-allowed;
     }
   }
 </style>

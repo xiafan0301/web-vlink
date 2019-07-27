@@ -7,8 +7,10 @@
             <el-form-item prop="noticeDate">
               <el-date-picker
                 v-model="noticeForm.noticeDate"
+                :clearable="false"
+                class="vl_date"
                 type="daterange"
-                range-separator="-"
+                range-separator="至"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
                 value-format="yyyy-MM-dd"
@@ -39,13 +41,13 @@
               </el-select>
             </el-form-item>
             <el-form-item style="padding-right: 0;">
-              <el-button class="select_btn" @click="getMsgNoteList">查询</el-button>
+              <el-button class="select_btn" type="primary" @click="getMsgNoteList" :loading="loading">查询</el-button>
               <el-button class="reset_btn" @click="resetForm">重置</el-button>
             </el-form-item>
           </el-form>
         </div>
         <div class="notice_content">
-          <el-button class="select_btn" style="width:145px;" icon="el-icon-plus" @click.native="skip(2)">新增公告消息</el-button>
+          <el-button class="select_btn" type="primary" style="width:145px;" icon="el-icon-plus" @click.native="skip(2)">新增公告消息</el-button>
             <div class="table_box">
             <el-table
               v-loading="loading"

@@ -20,12 +20,15 @@ import '@/utils/method.js';
 import '@/utils/antv.shape.js';
 // 混入
 import '@/utils/mixins.js';
+// import '@/utils/extendBig.js';
 import store from '@/store/store.js'
 
 import vuePicturePreview from 'vue-picture-preview';
+
 // use element-ui
-Vue.use(ElementUI);
+Vue.use(ElementUI); 
 Vue.use(vuePicturePreview);
+
 
 const loginInfo = localStorage.getItem('as_vlink_user_info');
 

@@ -6,7 +6,7 @@
         <vue-scroll>
           <div class="list-box">
             <div class="list-item" v-for="(item, index) in strucInfoList" :key="item.id" @click="showStrucInfo(item, index)">
-              <img :src="item.vehicleDetailList[0].subStoragePath" alt="">
+              <img :src="item.vehicleDetailList[0] ? item.vehicleDetailList[0].subStoragePath : ''" alt="">
               <p class="time">车牌号:{{item.groupName}}</p>
               <p class="address">次数:{{item.totalNum}}</p>
             </div>
@@ -38,42 +38,63 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt="">
+            <img :src="sturcDetail.subStoragePath"  class="bigImg" alt="">
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img ">
-              <img :src="sturcDetail.storagePath" alt="">
+              <img :src="sturcDetail.storagePath"  class="bigImg" alt="">
               <span>全景图</span>
             </div>
             <div class="struc_c_d_info">
               <h2>抓拍信息</h2>
-              <div class="struc_cdi_line">
-                <span>{{sturcDetail.shotTime}} <font>抓拍时间</font></span>
-              </div>
-              <div class="struc_cdi_line">
-                <span>{{sturcDetail.deviceName}} <font>抓拍设备</font></span>
-              </div>
-              <div class="struc_cdi_line">
-                <span>{{sturcDetail.address}} <font>抓拍地址</font></span>
-              </div>
-              <div class="struc_cdi_line">
-                <span>{{sturcDetail.plateNo}} <font>车牌号</font></span>
-              </div>
-              <div class="struc_cdi_line">
-                <span>{{sturcDetail.vehicleColor}} {{sturcDetail.vehicleClass}} {{sturcDetail.vehicleBrand}} {{sturcDetail.vehicleStyles}} <font>特征</font></span>
+              <div class="struc_cd_info_main">
+                <vue-scroll>
+                  <div class="scroll_box">
+                    <div class="struc_cdi_line">
+                      <span :title="sturcDetail.shotTime"><font>抓拍时间</font>{{sturcDetail.shotTime}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span :title="sturcDetail.deviceName"><font>抓拍设备</font>{{sturcDetail.deviceName}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span :title="sturcDetail.address"><font>抓拍地址</font>{{sturcDetail.address}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span :title="sturcDetail.plateNo"><font>车牌号码</font>{{sturcDetail.plateNo}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span :title="sturcDetail.plateColor"><font>号牌颜色</font>{{sturcDetail.plateColor}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span :title="sturcDetail.vehicleModel"><font>车辆型号</font>{{sturcDetail.vehicleModel}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span :title="sturcDetail.vehicleColor"><font>车辆颜色</font>{{sturcDetail.vehicleColor}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span :title="sturcDetail.vehicleClass"><font>车辆类型</font>{{sturcDetail.vehicleClass}}</span>
+                    </div>
+                    <div class="struc_cdi_line">
+                      <span :title="sturcDetail.plateClass"><font>号牌类型</font>{{sturcDetail.plateClass}}</span>
+                    </div>
+                  </div>
+                </vue-scroll>
               </div>
               <div class="struc_cdi_line">
                 <p v-if="curInSur">该车牌信息已存在布控库中</p>
-                <el-button :disabled="curInSur" type="primary" size="mini">加入布控库</el-button>
               </div>
             </div>
+          </div>
+          <div class="download_btn">
+            <a class="is_active" @click="gotoControl(sturcDetail)" v-if="!curInSur">加入布控库</a>
+            <a class="disabled"  v-else>加入布控库</a>
           </div>
         </div>
         <div v-show="strucCurTab === 2" class="struc_c_address"></div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt="">
+            <img :src="sturcDetail.subStoragePath" class="bigImg"  alt="">
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
@@ -83,7 +104,7 @@
               <i class="vl_icon vl_icon_control_09" v-else></i>
             </div>
           </div>
-          <div class="download_btn"><a download="视频" :href="videoUrl"></a>下载视频</div>
+          <div class="download_btn"><a class="is_active" @click="downloadVideo(sturcDetail.videoPath)">下载视频</a></div>
         </div>
       </div>
       <div class="struc-list">
@@ -104,6 +125,8 @@
   </div>
 </template>
 <script>
+  import { dataList } from '@/utils/data.js';
+  import { getDiciData } from '@/views/index/api/api.js';
   import vehicleBreadcrumb from '../breadcrumb.vue';
   import flvplayer from '@/components/common/flvplayer.vue';
   import {QyphGetAreaWander} from '@/views/index/api/api.judge.js'
@@ -136,7 +159,8 @@
         curImgIndex: 0,
         sturcDetail: {},
         strucDetailDialog: false,
-        videoUrl: '' // 弹窗视频回放里的视频
+        videoUrl: '', // 弹窗视频回放里的视频
+        numberTypeList: [], // 号牌种类列表
       }
     },
     mounted () {
@@ -148,11 +172,35 @@
       this.amap = map;
       console.log(this.$route.query);
       this.$_showLoading('.vehicle_content')
+      this.getNumberTypeList();
       this.getTheList();
     },
     methods: {
+      // 获取号牌种类列表
+      getNumberTypeList () {
+        const type = dataList.numberType;
+        getDiciData(type)
+          .then(res => {
+            if (res) {
+              this.numberTypeList = res.data;
+            }
+          })
+      },
+      downloadVideo (path) {
+        console.log(path)
+        var wind = window.open(path, 'newwindow', 'height=800, width=1100, top=100, left=100, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=n o, status=no');
+        let domA = document.createElement('a');
+        domA.setAttribute('download', '下载视频');
+        domA.setAttribute('href', path);
+        wind.onload = () => {
+          console.log('fsfds')
+        }
+      },
+      gotoControl (data){
+        this.$router.push({ name: 'control_create', query: {imgurl: data.subStoragePath, plateNo: data.plateNo} })
+      },
       getTheList () {
-        let params = this.$route.query;
+        let params = {where: this.$route.query};
         params.pageNum = this.pagination.pageNum;
         params.pageSize = this.pagination.pageSize;
         params.firstSetted = true;
@@ -171,10 +219,8 @@
             this.pagination.pageNum = res.data.pageNum;
             this.pagination.total = this.strucInfoList.length;
           } else {
-            if(res.data.list.length === 0) {
-              this.$message.info('抱歉，没有找到匹配结果');
-              this.$router.push({name: "vehicle_search_qyph"})
-            }
+            this.$message.info('抱歉，没有找到匹配结果');
+            this.$router.push({name: "vehicle_search_qyph"})
           }
         }).catch(err => {
           this.$_hideLoading();
@@ -197,6 +243,12 @@
         this.curShowIndex = index;
         this.curStrucList = this.strucInfoList[index].vehicleDetailList;
         this.strucDetailDialog = true;
+
+        this.numberTypeList.map(item => {
+          if (item.enumField === this.curStrucList[0].plateClass) {
+            this.curStrucList[0].plateClass = item.enumValue;
+          }
+        });
         this.sturcDetail = this.curStrucList[0];
         this.drawPoint(this.sturcDetail);
       },
@@ -242,8 +294,15 @@
         this.playing = !this.playing;
       },
       imgListTap (data, index) {
+        this.numberTypeList.map(item => {
+          if (item.enumField === data.plateClass) {
+            data.plateClass = item.enumValue;
+          }
+        });
+
         this.curImgIndex = index;
         this.sturcDetail = data;
+        this.playing = false;
         this.drawPoint(data);
       }
     },
@@ -452,6 +511,7 @@
             width: calc(100% - 3.6rem);
             padding-left: .24rem;
             color: #333333;
+            height: 3.2rem;
             h2 {
               font-weight: bold;
               line-height: .74rem;
@@ -470,6 +530,9 @@
                 }
               }
             }
+            .struc_cd_info_main {
+              height: calc(100% - 0.74rem);
+            }
             .struc_cdi_line {
               >span {
                 /*position: relative;*/
@@ -479,18 +542,26 @@
                 line-height: .3rem;
                 margin-bottom: .08rem;
                 border: 1px solid #F2F2F2;
-                background: #FAFAFA;
                 color: #333333;
                 white-space: nowrap;
                 text-overflow: ellipsis;
                 border-radius:3px;
                 font-size: 12px;
                 overflow: hidden;
-                padding: 0 .1rem;
+                padding-right: .1rem;
                 margin-right: .08rem;
                 > i {
                   vertical-align: middle;
                   margin-left: .1rem;
+                }
+                > font {
+                  width: 75px;
+                  text-align: center;
+                  border-right: 1px solid #F2F2F2;
+                  color: #999999;
+                  background: #FAFAFA;
+                  display: inline-block;
+                  margin-right: .1rem;
                 }
               }
               p {
@@ -514,6 +585,36 @@
             -o-transform: rotate(45deg);
             transform: rotate(45deg);
             z-index: 99;
+          }
+        }
+        .download_btn {
+          text-align: center;
+          width: auto;
+          height: .4rem;
+          float: right !important;
+          margin-top: .2rem;
+          background: #f6f8f9;
+          border: 1px solid lightgray;
+          border-radius: 4px;
+          line-height: .4rem;
+          cursor: pointer;
+          color: #666666;
+          position: relative;
+          a {
+            text-decoration: none;
+            display: block;
+            padding: 0 .1rem;
+            border-radius: 4px;
+          }
+          .is_active {
+            &:hover {
+              color: #FFFFFF;
+              background: #0C70F8;
+              border-color: #0C70F8;
+            }
+          }
+          .disabled {
+            cursor:not-allowed;
           }
         }
       }
@@ -573,31 +674,6 @@
           -webkit-box-shadow: 0 0 0!important;
           -moz-box-shadow: 0 0 0!important;
           box-shadow: 0 0 0!important;
-        }
-        .download_btn {
-          text-align: center;
-          width: 1.1rem;
-          height: .4rem;
-          float: right!important;
-          margin-top: .2rem;
-          background: rgba(246,248,249,1);
-          border: 1px solid rgba(211,211,211,1);
-          border-radius: 4px;
-          line-height: .4rem;
-          cursor: pointer;
-          color: #666666;
-          position: relative;
-          &:hover {
-            color: #FFFFFF;
-            background: #0C70F8;
-            border-color: #0C70F8;
-          }
-          a {
-            display: block;
-            position: absolute;
-            width: 100%;
-            height: 100%;
-          }
         }
       }
     }

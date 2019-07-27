@@ -24,7 +24,7 @@
             :hide-required-asterisk="true"
           >
             <!-- 搜索 -->
-            <el-form-item prop="address">
+            <!-- <el-form-item prop="address">
               <div class="search-wrap">
                 <el-input
                   class="width232"
@@ -34,11 +34,11 @@
                   id="map-sd-search-input"
                 ></el-input>
               </div>
-            </el-form-item>
+            </el-form-item> -->
             <!-- 下划线 -->
-            <el-form-item class="under-line">
+            <!-- <el-form-item class="under-line">
               <div class="line"></div>
-            </el-form-item>
+            </el-form-item> -->
             <!-- 任务名称 -->
             <el-form-item prop="taskName">
               <div class="task-name">
@@ -50,60 +50,91 @@
               <div class="sd-opts">
                 <div class="sd-opts-title">
                   <h4>区域选择</h4>
-                  <i class="vl_icon vl_icon_portrait_02" @click="setFitV"></i>
+                  <span class="location-btn el-icon-location-outline" @click="setFitV"></span>
                 </div>
                 <ul>
                   <li>
-                    <div :class="{'sd-opts-sed': drawActiveType === 1 }" @click="selDrawType(1)">
+                    <div
+                      title="选择矩形范围内的设备"
+                      :class="{'sd-opts-sed': drawActiveType === 1 }"
+                      @click="selDrawType(1)"
+                    >
                       <span class="sd-opts-icon sd-opts-icon1"></span>
                     </div>
                   </li>
                   <li>
-                    <div :class="{'sd-opts-sed': drawActiveType === 2 }" @click="selDrawType(2)">
+                    <div
+                      title="选择圆形范围内的设备"
+                      :class="{'sd-opts-sed': drawActiveType === 2 }"
+                      @click="selDrawType(2)"
+                    >
                       <span class="sd-opts-icon sd-opts-icon2"></span>
                     </div>
                   </li>
                   <li>
-                    <div :class="{'sd-opts-sed': drawActiveType === 3 }" @click="selDrawType(3)">
+                    <div
+                      title="选择折线200米范围内的设备"
+                      :class="{'sd-opts-sed': drawActiveType === 3 }"
+                      @click="selDrawType(3)"
+                    >
                       <span class="sd-opts-icon sd-opts-icon3"></span>
                     </div>
                   </li>
                   <li>
-                    <div :class="{'sd-opts-sed': drawActiveType === 4 }" @click="selDrawType(4)">
+                    <div
+                      title="选择多边形范围内的设备"
+                      :class="{'sd-opts-sed': drawActiveType === 4 }"
+                      @click="selDrawType(4)"
+                    >
                       <span class="sd-opts-icon sd-opts-icon4"></span>
                     </div>
                   </li>
                   <li>
-                    <div :class="{'sd-opts-sed': drawActiveType === 5 }" @click="selDrawType(5)">
+                    <div
+                      title="选择10公里圆形范围内的设备"
+                      :class="{'sd-opts-sed': drawActiveType === 5 }"
+                      @click="selDrawType(5)"
+                    >
                       <span class="sd-opts-icon sd-opts-icon5"></span>
                     </div>
                   </li>
                 </ul>
+                <p v-if="drawActiveType > 0">
+                  <span v-if="drawActiveType === 1">在地图上按住鼠标左键拖动鼠标框选，松开鼠标完成选择</span>
+                  <span v-else-if="drawActiveType === 2">在地图上按住鼠标左键选择圆心，拖动鼠标作为半径，松开鼠标完成选择</span>
+                  <span v-else-if="drawActiveType === 3">在地图上鼠标左键选择两个或两个以上点形成折线，双击或右键完成选择</span>
+                  <span v-else-if="drawActiveType === 4">在地图上鼠标左键选择三个或三个以上点形成封闭区域，双击或右键完成选择</span>
+                  <span v-else-if="drawActiveType === 5">在地图上鼠标左键选择圆心，形成10公里大小的圆形区域</span>
+                </p>
               </div>
             </el-form-item>
             <!-- 时间 -->
             <el-form-item prop="startTime">
               <div class="time-search">
-                <p>开始</p>
+                <!-- <p>开始</p> -->
                 <el-date-picker
+                  class="vl_date"
                   v-model="searchData.startTime"
                   type="datetime"
                   value-format="yyyy-MM-dd HH:mm:ss"
                   :picker-options="startDateOpt"
                   placeholder="开始时间"
+                  :clearable="false"
                 ></el-date-picker>
               </div>
             </el-form-item>
             <el-form-item prop="endTime">
               <div class="time-search">
-                <p>结束</p>
+                <!-- <p>结束</p> -->
                 <el-date-picker
+                  class="vl_date vl_date_end"
                   v-model="searchData.endTime"
                   :picker-options="endDateOpt"
                   value-format="yyyy-MM-dd HH:mm:ss"
                   type="datetime"
                   default-time="23:59:59"
                   placeholder="结束时间"
+                  :clearable="false"
                 ></el-date-picker>
               </div>
             </el-form-item>
@@ -112,7 +143,7 @@
               <div class="similarity">
                 <ul class="similarity-input">
                   <li class="input-name">
-                    <el-input placeholder="相似度"></el-input>
+                    <el-input placeholder="相似度" readonly v-model="searchData.similarityName"></el-input>
                   </li>
                   <li class="input-value">
                     <el-input v-model="searchData.similarity" placeholder></el-input>
@@ -125,8 +156,15 @@
             <!-- 频次搜索 -->
             <el-form-item prop="frequency">
               <div class="frequency">
-                期间频次不少于&nbsp;
-                <el-input v-model="searchData.frequency" placeholder></el-input>&nbsp;次
+                <ul class="frequency-input">
+                  <li class="input-name">
+                    <el-input placeholder="频次不少于" readonly v-model="searchData.frequencyName"></el-input>
+                  </li>
+                  <li class="input-value">
+                    <el-input v-model="searchData.frequency" placeholder></el-input>
+                  </li>
+                </ul>
+                <p class="another-value">次</p>
               </div>
             </el-form-item>
             <el-form-item>
@@ -165,6 +203,10 @@
         <!-- 地图信息 -->
         <div class="gis_content" id="gis_content">
           <div class="map_rm" id="mapMap"></div>
+          <div class="sd_search">
+            <input type="text" placeholder="请输入地名，快速定位地址" autocomplete="off" class="sd_search_input" id="map-sd-search-input">
+            <span @click="searchBtn"><i class="el-icon-search"></i></span>
+          </div>
           <!-- 地图控制按钮（放大，缩小，定位） -->
           <div class="map_control">
             <ul class="map_rrt_u2">
@@ -204,8 +246,10 @@ export default {
         taskName: "",
         startTime: "",
         endTime: "",
+        similarityName: "相似度",
         similarity: "85", // 相似度
-        frequency: "" //频次
+        frequency: "", //频次
+        frequencyName: "频次不少于"
       },
       rules: {
         taskName: [
@@ -286,7 +330,8 @@ export default {
       showTypes: "DB", //设备类型
       cameraIds: [], //摄像头
       bayonetIds: [], //卡口
-      area: []
+      area: [],
+      searchTip: {},      //地图搜索选择数据
     };
   },
   computed: {},
@@ -301,8 +346,12 @@ export default {
   methods: {
     //设置时间
     setDate() {
-      let startTime = new Date() - 3600 * 1000 * 24 * 1;
-      let endTime = new Date();
+      let curDate = new Date(new Date().toLocaleDateString()).getTime()
+      let curS = 1 * 24 * 3600 * 1000;
+      let startTime = curDate - curS;
+      let endTime = curDate - 1
+      /* let startTime = new Date() - 3600 * 1000 * 24 * 1;
+      let endTime = new Date(); */
       this.searchData.startTime = formatDate(startTime);
       this.searchData.endTime = formatDate(endTime);
     },
@@ -336,7 +385,10 @@ export default {
               this.bayonetIds.length > 0 &&
               (params["bayonetIds"] = this.bayonetIds.join(","));
           } else {
-            this.$message.error("请选择区域");
+            /* console.log("11111111111111",document.querySelector('.el-message--info')) */
+            if (!document.querySelector(".el-message")) {
+              this.$message.info("请选择区域");
+            }
             return false;
           }
           console.log("-------submitForm-------", params);
@@ -346,8 +398,7 @@ export default {
               console.log(res);
               if (res && res.data) {
                 this.$router.push({
-                  name: "portrait_pfcm",
-                  query: { selectIndex: 0 }
+                  name: "portrait_pfcm"
                 });
               }
               this.$nextTick(() => {
@@ -370,6 +421,7 @@ export default {
       this.amap.setFitView(this.area);
     },
     getArea() {
+      this.area = [];
       // 矩形
       if (this.drawObj.rectangle) {
         for (let k in this.drawObj.rectangle) {
@@ -489,6 +541,13 @@ export default {
 
       // 在地图中添加MouseTool插件
       this.mouseTool = new window.AMap.MouseTool(map);
+      this.amap.on("click", event => {
+        if(this.drawActiveType === 5) {
+          this.mouseTool.close(true);
+          this.drawClear();
+          this.drawCircle10kmClick(event)
+        }
+      });
       this.mouseTool.on("draw", event => {
         // event.obj 为绘制出来的覆盖物对象
         // console.log('draw event', event);
@@ -522,10 +581,16 @@ export default {
     },
     selectArea(e) {
       console.log(e);
+      this.searchTip = e;
       if (e.poi && e.poi.location) {
         this.amap.setZoom(15);
         this.amap.setCenter(e.poi.location);
       }
+    },
+    searchBtn() {
+      if(this.searchTip.poi && this.searchTip.poi.location) {
+        this.selectArea(this.searchTip)
+      }   
     },
     mapEvents() {
       let _this = this,
@@ -665,7 +730,7 @@ export default {
           this.drawPolygon();
         } else if (drawType === 5) {
           // 多边形
-          this.drawCircle10km();
+          // this.drawCircle10km();
         }
       }
     },
@@ -992,10 +1057,15 @@ export default {
     },
     drawCircle10km() {
       this.amap.setDefaultCursor("crosshair");
-      this.amap.on("click", this.drawCircle10kmClick);
+      this.amap.on("click", event => {
+        this.mouseTool.close(false);
+        this.drawClear();
+        this.drawCircle10kmClick(event)
+      });
     },
     drawCircle10kmClick(e) {
       // e.lnglat.getLng()+','+e.lnglat.getLat()
+      this.amap.setDefaultCursor("crosshair");
       let circle = new AMap.Circle({
         center: e.lnglat,
         radius: 1000 * 10, //半径
@@ -1011,14 +1081,15 @@ export default {
       this.zIndex += 1;
       circle.setMap(this.amap);
       // 缩放地图到合适的视野级别
-      this.amap.setFitView([circle]);
+      // this.amap.setFitView([circle]);
       let _sid = random14();
       this.drawObj.circle10km[_sid] = {};
       this.drawObj.circle10km[_sid].obj = circle;
-      this.amap.setDefaultCursor();
+      this.map.setDefaultCursor();
       /* this.drawActiveType = 0; */
       this.amap.off("click", this.drawCircle10kmClick);
-      this.drawCircle10kmMark(_sid, circle);
+      // this.drawCircle10kmMark(_sid, circle);
+      this.checkout(_this.circle,'AMap.circle')
     },
     drawCircle10kmEditor(sid) {
       if (this.drawObj.circle10km[sid]) {
@@ -1417,7 +1488,6 @@ export default {
         margin: 6px 0;
       }
       //相似度,频次,任务名称搜索
-      .frequency,
       .task-name {
         width: 232px;
       }
@@ -1452,6 +1522,32 @@ export default {
           line-height: 40px;
         }
       }
+      .frequency {
+        width: 232px;
+        display: flex;
+        .frequency-input {
+          display: flex;
+          border: 1px solid #dcdfe6;
+          width: 202px;
+          height: 40px;
+          border-radius: 4px;
+          &:hover,
+          &:focus {
+            border-color: #0c70f8;
+          }
+          .input-name {
+            width: 88px;
+          }
+          .input-value {
+            width: 112px;
+          }
+        }
+        .another-value {
+          color: #333;
+          line-height: 40px;
+          margin-left: 8px;
+        }
+      }
       .sd-opts {
         width: 232px;
         border: 1px solid #d3d3d3;
@@ -1462,6 +1558,14 @@ export default {
           color: #333;
           background-color: #fafafa;
           border-bottom: 1px solid #d3d3d3;
+          .location-btn {
+            cursor: pointer;
+            font-size: 20px;
+            color: #999;
+            &:hover {
+              color: #0c70f8;
+            }
+          }
         }
         > ul {
           padding: 22px 0 18px 0;
@@ -1490,6 +1594,9 @@ export default {
               }
             }
           }
+        }
+        > p {
+          margin: -18px 5px 18px 5px;
         }
       }
       .sd-opts-icon {
@@ -1600,6 +1707,30 @@ export default {
             }
           }
         }
+        .sd_search {
+        position: absolute; top: 0.3rem; left: 0.3rem; z-index: 1000;
+        background-color: #fff;
+        overflow: hidden;
+        > .sd_search_input {
+          float: left;
+          width: 360px; height: 36px; line-height: 36px;
+          background:rgba(255,255,255,1);
+          box-shadow:0px 3px 10px 0px rgba(99,99,99,0.39);
+          border: 0;
+          padding: 0 15px;
+        }
+        > span {
+          float: left;
+          width: 60px; height: 36px; line-height: 36px;
+          background-color: #0C70F8;
+          cursor: pointer;
+          text-align: center;
+          > i {
+            position: relative; top: 2px;
+            color: #fff; font-size: 20px;
+          }
+        }
+      }
       }
     }
     //关闭按钮
@@ -1630,7 +1761,7 @@ export default {
     }
   }
   //相似度搜索
-  .similarity {
+  .similarity,.frequency {
     .el-input__inner {
       border: none;
       height: 38px;
@@ -1642,11 +1773,11 @@ export default {
     }
   }
   //频次
-  .frequency {
+  /* .frequency {
     .el-input {
-      width: 104px;
+      width: 126px;
     }
-  }
+  } */
   //车牌颜色
   .license-plate-color {
     .el-select {
@@ -1657,7 +1788,7 @@ export default {
   .time-search {
     .el-date-editor.el-input,
     .el-date-editor.el-input__inner {
-      width: 212px;
+      width: 232px;
     }
   }
   //搜索按钮

@@ -2,7 +2,7 @@
   <div class="ljd point">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">人像</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像侦查</el-breadcrumb-item>
         <el-breadcrumb-item>落脚点分析</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -10,6 +10,7 @@
     <div :class="['left',{hide:hideleft}]">
       <div class="plane">
         <el-form
+        :rules="rules"
           :model="ruleForm"
           status-icon
           ref="ruleForm"
@@ -39,24 +40,47 @@
                   <span>点击上传图片</span>
                 </div>
               </el-upload>
-              <!-- <p @click="showHistoryPic">从上传记录中选择</p> -->
+              <p @click="showHistoryPic">从上传记录中选择</p>
               <div v-show="curImageUrl" class="del_icon">
                 <i class="el-icon-delete" @click="delPic"></i>
               </div>
             </div>
           </el-form-item>
-          <el-form-item prop="data1">
+          <el-form-item  prop="data1">
             <el-date-picker
               v-model="ruleForm.data1"
+              type="date"
+              :clearable="false"
+              placeholder="开始时间"
+              :picker-options="pickerOptions"
+              class="full vl_date"
+              value-format="yyyy-MM-dd"
+            ></el-date-picker>
+          </el-form-item>
+          <el-form-item  prop="data2">
+            <el-date-picker
+              v-model="ruleForm.data2"
+              type="date"
+              :clearable="false"
+              :picker-options="pickerOptions"
+              placeholder="结束时间"
+              class="full vl_date vl_date_end"
+              value-format="yyyy-MM-dd"
+            ></el-date-picker>
+          </el-form-item>
+          <!-- <el-form-item prop="data2">
+            <el-date-picker
+              v-model="ruleForm.data2"
               type="daterange"
-              class="full"
+              class="full vl_date"
               value-format="yyyy-MM-dd"
               :picker-options="pickerOptions"
               range-separator="至"
+              :clearable="false"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
             ></el-date-picker>
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item prop="minFootholdTimes" class="firstItem">
             <el-row :gutter="5">
               <el-col :span="22">
@@ -71,7 +95,7 @@
               </el-col>
             </el-row>
           </el-form-item>
-          <el-form-item class="firstItem" label="区域：" label-width="60px" prop="input5">
+          <el-form-item class="firstItem" label="抓拍区域：" label-width="72px" prop="input5">
             <!-- <el-radio-group v-model="input5" @change="changeTab"> -->
             <el-radio-group v-model="ruleForm.input5" @change="changeTab">
               <el-row :gutter="10">
@@ -126,6 +150,11 @@
       </div>
     </div>
     <div :class="['right',{hide:!hideleft}]" id="mapBox"></div>
+    <ul class="map_rrt_u2">
+        <li  @click="resemt"><i class="el-icon-aim"></i></li>
+        <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
+        <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
+      </ul>
     <div class="reselt" v-if="reselt">
       <div class="plane insetPadding">
         <h3 class="title">分析结果</h3>
@@ -133,9 +162,9 @@
           <vue-scroll>
           <el-collapse v-model="activeNames" @change="handleChange">
             <el-collapse-item  v-for="(item,index) in evData" :key="index" :title="item.groupName+'（'+item.totalNum+'次）'" :name="index">
-              <div class="itembox" v-for="(v,d) in item.personDetailList" @click="onOpenDetail(v , item)">
-                <div class="imgInfo">
-                   <img :src="v.personStoragePath" class="img">
+              <div class="itembox" v-for="(v,d) in item.personDetailList">
+                <div class="imgInfo"  @click.stop="onOpenDetail(v , item)">
+                   <img :src="v.subStoragePath" class="img">
                    <div>
                      <p class="timedata"><i class="el-icon-time"></i>{{v.shotTime}}</p>
                     <span class="subdata">
@@ -143,7 +172,7 @@
                       <b v-if="v.semblance">{{(v.semblance*1).toFixed(2)}}</b>%
                     </span>
                    </div>
-                  <!-- <i class="del el-icon-delete" @click="delItem(d,index)"></i> -->
+                  <i class="del el-icon-delete" @click.stop="delItems(d,index)"></i>
                 </div>
               </div>
               
@@ -158,7 +187,7 @@
 
     <!-- 地图选择 -->
     <!-- D设备 B卡口  这里是设备和卡口 -->
-    <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" @mapSelectorEmit="mapPoint" ></div>
     <!-- <el-dialog :visible.sync="dialogVisible" width="80%">
       <mapselect
         @selectMap="mapPoint"
@@ -179,7 +208,7 @@
             <el-collapse-item  v-for="(item,index) in chooseData" :key="index" :title="item.groupName+'（'+item.totalNum+'次）'" :name="index">
               <div class="itembox" v-for="(v,d) in item.personDetailList">
                 <div class="imgInfo">
-                   <img :src="v.personStoragePath" class="img">
+                   <img :src="v.subStoragePath" class="img">
                    <div>
                      <p class="timedata"><i class="el-icon-time"></i>{{v.shotTime}}</p>
                     <span class="subdata">
@@ -203,9 +232,40 @@
         <el-button type="primary" @click="chooseOk">确 定</el-button>
       </span>
     </el-dialog>
+
+    
+    <!--上传记录弹窗-->
+    <el-dialog
+      :visible.sync="historyPicDialog"
+      class="history-pic-dialog"
+      :close-on-click-modal="false"
+      top="4vh"
+      title="最近上传的图片"
+    >
+      <div style="text-align: center;font-size: 20px;" v-if="loadingHis">
+        <i class="el-icon-loading"></i>
+      </div>
+      <vue-scroll class="his-pic-box" v-else-if="historyPicList.length">
+        <div
+          class="his-pic-item"
+          :class="{'active': item.checked}"
+          v-for="item in historyPicList"
+          :key="item.uid"
+          @click="chooseHisPic(item)"
+        >
+          <img :src="item.path" alt>
+        </div>
+        <div style="clear: both;"></div>
+      </vue-scroll>
+      <p v-else>暂无历史记录</p>
+      <div slot="footer">
+        <el-button @click="historyPicDialog = false">取消</el-button>
+        <el-button type="primary" @click="addHisToImg" :disabled="choosedHisPic.length === 0">确认</el-button>
+      </div>
+    </el-dialog>
 <!-- 抓拍信息 -->
      
-    <portraitDetail :open="showDetail" @closeDialog="onCloseDetail" :detailData="deData" :scrollData="seData" ></portraitDetail>
+    <portraitDetail :open="showDetail" @closeDialog="onCloseDetail" :detailData="deData" :scrollData="seData" :showItem="true" ></portraitDetail>
   </div>
 </template>
 <script>
@@ -215,7 +275,8 @@ import flvplayer from '@/components/common/flvplayer.vue';
 import {
   getVehicleShot,
   getAllDevice,
-  JtcPOSTAppendixInfo,getFoothold
+  JtcPUTAppendixsOrder,
+  JtcPOSTAppendixInfo,getFoothold,JtcGETAppendixInfoList
 } from "@/views/index/api/api.judge.js";
 import { getAllBayonetList } from "@/views/index/api/api.base.js";
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
@@ -231,6 +292,16 @@ export default {
   },
   data() {
     return {
+      rules: {
+        minFootholdTimes: [
+          {
+            //pattern: /^[0-9]?$/,
+            pattern: /^(0|([1-9]\d{0,2}))$/,
+            trigger: "blur",
+            message: "请输入不大于999的整数值"
+          }
+        ]
+      },
       deData:null,
       seData:null,
       isload:false,
@@ -239,23 +310,15 @@ export default {
       pickerOptions: {
         disabledDate (time) {
           let date = new Date();
-          let y = date.getFullYear();
-          let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
-          let d = date.getDate();
-          let threeMonths = '';
-          let start = '';
-          if (parseFloat(d) >= 3) {
-            start = y + '-' + m + '-' + (d - 2);
-          } else {
-            let o =30
-            if(m==1 || m==3 || m==5 || m==7 || m==8 || m==10 || m==12){
-              o=31
-            }else if(m == 2){
-              o=28
-            }
-            start = (y - 1) + '-' + m + '-' + (d - 2 + o);
-          }
-          threeMonths = new Date(start).getTime();
+          let curDate = date.getTime();
+          let curS = 30 * 24 * 3600 * 1000;
+            let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
+          let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
+          let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
+          let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
+          let start = new Date(curDate - curS).getFullYear() +
+        "-" + _sm + "-" +_sd;
+          let threeMonths = new Date(start).getTime();
           return time.getTime() > Date.now() || time.getTime() < threeMonths;
         }
       },
@@ -281,6 +344,7 @@ export default {
       hideleft: false,
       ruleForm: {
         data1: null,
+        data2: null,
         minFootholdTimes: 3,
         input5: "1",
         value1: null
@@ -294,7 +358,11 @@ export default {
     };
   },
   mounted() {
-    this.curImageUrl= this.$route.query.path
+    if( this.$route.query.imgurl || this.$route.query.path){
+      let a =  this.$route.query.imgurl || this.$route.query.path ;
+      this.curImageUrl= a
+    }
+    
 
     //this.getControlMap(1);
     this.setDTime()
@@ -308,12 +376,27 @@ export default {
     // this.getAllDevice(); //查询所有的设备
     // this.getAllBayonetList(); //查询所有的卡口
   },
+   computed: {
+    choosedHisPic() {
+      return this.historyPicList.filter(x => x.checked);
+    }
+  },
   methods: {
-
+    mapZoomSet(val) {
+      if (this.amap) {
+        this.amap.setZoom(this.amap.getZoom() + val);
+      }
+    },
+    resemt(){
+      if (this.amap) {
+          this.amap.setZoomAndCenter(14, mapXupuxian.center);
+        }
+      
+    },
     setDTime () {
       let date = new Date();
       let curDate = date.getTime();
-      let curS = 3 * 24 * 3600 * 1000;
+      let curS = 1 * 24 * 3600 * 1000;
         let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
       let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
       let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
@@ -322,7 +405,8 @@ export default {
       let _s = new Date(curDate - curS).getFullYear() +
         "-" + _sm + "-" +_sd;
       let _e = date.getFullYear() + "-" + _em + "-" + _ed;
-      this.ruleForm.data1 = [_s, _e]
+      this.ruleForm.data1 = _s
+      this.ruleForm.data2 = _s
     },
     /**
      * 弹框地图初始化
@@ -427,6 +511,12 @@ export default {
           this.selectBayonet.push(element.uid);
         });
       }
+      if(p.length==0 && v.length==0){
+        if(!document.querySelector('.el-message--info')){
+           this.$message.info("选择的区域没有设备，请重新选择区域");
+        }
+        return
+      }
       this.selectValue =
         "已选设备" +
         (this.selectDevice.length + this.selectBayonet.length) +
@@ -449,12 +539,12 @@ export default {
       if (
         this.ruleForm &&
         this.ruleForm.data1 &&
-        this.ruleForm.data1.length > 0 &&
+        this.ruleForm.data2  &&
         this.curImageUrl
       ) {
         let pg = {
-          startDate: this.ruleForm.data1[0] + " 00:00:00",
-          endDate: this.ruleForm.data1[1] + " 23:59:59",
+          startDate: this.ruleForm.data1 + " 00:00:00",
+          endDate: this.ruleForm.data2 + " 23:59:59",
           minFootholdTimes: this.ruleForm.minFootholdTimes || 0,
         };
         if (this.ruleForm.input5 == 1 && this.ruleForm.value1.length != 0) {
@@ -472,12 +562,13 @@ export default {
     },
     resetForm(v) {
       this.curImageUrl = "";
-      this.ruleForm = {
-        data1: null,
-        minFootholdTimes: null,
-        input5: "1",
-        value1: null
-      };
+      this.setDTime()
+      this.ruleForm.minFootholdTimes=3 
+      this.ruleForm.input5='1'
+      this.ruleForm.value1=[]
+      this.options[0].areaTreeList.forEach(el=>{
+            this.ruleForm.value1.push(el.areaId)
+          })
       //this.$refs[v].resetFields();
     },
     //查询行政区域
@@ -488,6 +579,12 @@ export default {
       MapGETmonitorList(d).then(res => {
         if (res && res.data) {
           this.options.push(res.data);
+          //res.data.
+          // console.log(res.data);
+          res.data.areaTreeList.forEach(el=>{
+            this.ruleForm.value1.push(el.areaId)
+          })
+          //this.ruleForm.value1=[]
         }
       });
     },
@@ -508,6 +605,18 @@ export default {
         }
       };
     },
+    //分析结果删除
+    delItems(d,index){ 
+      //this.chooseData.
+      let arr=this.evData[index].personDetailList
+      arr.splice(d, 1)
+      this.evData[index].totalNum -=1;
+      if(this.evData[index].totalNum==0){
+        this.evData.splice(index,1)
+      }
+      this.amap.clearMap();
+      this.drawMarkers(this.evData);
+    },
     //人工筛选删除
     delItem(d,index){ 
       //this.chooseData.
@@ -517,7 +626,6 @@ export default {
       if(this.chooseData[index].totalNum==0){
         this.chooseData.splice(index,1)
       }
-      
     },
     chooseOk(){
       this.reselt = true;
@@ -550,19 +658,21 @@ export default {
           if (!res.data || res.data.length === 0) {
             this.$message.info("抱歉，没有找到匹配结果");
             this.amap.clearMap();
+            this.chooseData=[]
+            this.evData=[]
             //this.searching = false;
             return false;
           }else{
             for(let i=0; i<res.data.length;i++){
               this.activeChoose.push(i)
             }
-            
+             this.chooseData=res.data
           }
           // this.evData = res.data.map(x => {
           //   x.checked = false;
           //   return x;
           // });
-          this.chooseData=res.data
+         
           this.amap.clearMap();
           //this.evData.sort(this.compare("shotNum"));
           //this.drawMarkers(this.evData);
@@ -751,6 +861,48 @@ export default {
       this.uploading = false;
       this.$message.error("上传失败");
     },
+     //选择最近上传的图片
+    chooseHisPic(item) {
+      this.historyPicList.forEach(x => {
+        x.checked = false;
+      });
+      item.checked = true;
+    },
+    //获取上传记录
+    showHistoryPic() {
+      this.loadingHis = true;
+      this.historyPicDialog = true;
+      let params = {
+        userId: this.$store.state.loginUser.uid,
+        fileType: 1
+      };
+      JtcGETAppendixInfoList(params)
+        .then(res => {
+          if (res) {
+            this.loadingHis = false;
+            res.data.forEach(x => (x.checked = false));
+            this.historyPicList = res.data;
+          }
+        })
+        .catch(() => {
+          this.historyPicDialog = false;
+        });
+    },
+    //从历史上传图片中上传
+    addHisToImg() {
+      this.historyPicDialog = false;
+      let _ids = [];
+      this.choosedHisPic.forEach(x => {
+        _ids.push(x.uid);
+        this.curImageUrl = x.path;
+        this.disab = false;
+        this.imgData = x;
+      });
+      let _obj = {
+        appendixInfoIds: _ids.join(",")
+      };
+      JtcPUTAppendixsOrder(_obj);
+    },
     delPic() {
       //删除图片
       this.curImageUrl = "";
@@ -759,6 +911,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.el-radio__label { padding-left: 0; }
 .fz12{
   font-size: 12px;
 }
@@ -821,9 +974,12 @@ export default {
   animation: fadeInLeft 0.4s ease-out 0.3s both;
   transition: marginLeft 0.3s ease-in;
   .plane {
-    padding: 10px;
+    padding: 20px;
     position: relative;
     height: 100%;
+    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
   .line40 {
     line-height: 40px;
@@ -970,7 +1126,7 @@ export default {
   }
     .itembox{
       
-        width: 33%;
+        width: 32.3%;
         margin-right: 1%;
         border: solid 1px rgba(211,211,211,1);
         padding: 10px 5px; 
@@ -998,6 +1154,15 @@ export default {
   }
   }
 }
+.del{
+            position: absolute;
+            bottom: -10px;
+            right: -5px;
+            background: #999;
+            color: #ffffff;
+            padding: 4px;
+            cursor: pointer;
+          }
 .limitBox{
   height: 96%;
   .el-collapse-item{
@@ -1014,6 +1179,7 @@ export default {
   height: 100%;
 }
 .imgInfo{
+  position: relative;
   .timedata{
     padding: 2px 6px;
     display: inline-block;
@@ -1054,11 +1220,36 @@ export default {
     margin-top: 10px;
     border-bottom: solid 1px #f2f2f2;
   }
+  .map_rrt_u2 {
+    position: absolute; right: 30px;
+    bottom: 30px;
+    margin-top: .2rem;
+    font-size: 26px;
+    background: #ffffff;
+    width: 78px;
+    padding: 0 10px;
+    > li {
+      line-height: 70px;
+      text-align: center;
+      cursor: pointer;
+      border-bottom: 1px solid #F2F2F2;
+      > i {
+        margin-top: 0;
+        display: inline-block;
+      }
+      color: #999999;
+      &:hover {
+        color: #0C70F8;
+      }
+    }
+  }
 </style>
 <style lang="scss">
 .choose{
   .el-collapse-item__content{
     display: flex;
+        flex-direction: row;
+    flex-wrap: wrap;
   }
 }
 .limitBox{
@@ -1123,6 +1314,9 @@ export default {
   }
 }
 .ljd {
+  .el-date-editor .el-range-input{
+    font-size: 13px;
+  }
   .insetIput.el-input--prefix .el-input__inner {
     padding-left: 90px;
   }
@@ -1163,5 +1357,52 @@ export default {
       }
     }
   }
+  .el-form-item__label{
+  padding-right: 0px;
 }
+.history-pic-dialog {
+    .el-dialog {
+      max-width: 12.6rem;
+      width: 100% !important;
+    }
+    .el-dialog__title {
+      font-size: 0.16rem;
+      color: #333333;
+    }
+    .el-dialog__body {
+      padding: 0 0.76rem 0.3rem;
+    }
+    .his-pic-box {
+      width: 100%;
+      height: 4.6rem !important;
+      .his-pic-item {
+        float: left;
+        width: 1.38rem;
+        height: 1.38rem;
+        border: 0.02rem solid #ffffff;
+        margin-right: 0.2rem;
+        margin-bottom: 0.2rem;
+        cursor: pointer;
+        img {
+          width: 100%;
+          height: 100%;
+        }
+      }
+      .active {
+        border-color: #0c70f8;
+      }
+    }
+    .el-dialog__footer {
+      button {
+        width: 1.4rem !important;
+        height: 0.4rem;
+        line-height: 0.4rem;
+        padding: 0;
+      }
+    }
+  }
+}
+</style>
+<style>
+.ljd .demo-ruleForm .el-radio__label { padding-left: 0; }
 </style>

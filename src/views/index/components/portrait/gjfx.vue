@@ -1,24 +1,24 @@
 <template>
   <div class="point">
-    <div class="breadcrumb_heaer">
-      <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像侦查</el-breadcrumb-item>
-        <el-breadcrumb-item>轨迹分析</el-breadcrumb-item>
-      </el-breadcrumb>
+    <div class="">
+      <div is="vlBreadcrumb"
+           :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
+            {name: '轨迹分析'}]">
+      </div>
     </div>
 
     <div :class="['left',{hide:hideleft}]">
       <div class="plane">
         <el-form
-                :model="ruleForm"
-                status-icon
-                ref="ruleForm"
-                label-width="0px"
-                class="demo-ruleForm"
+          :model="ruleForm"
+          status-icon
+          ref="ruleForm"
+          label-width="0px"
+          class="demo-ruleForm"
         >
           <el-form-item>
             <el-upload
-                :class="{'vl_jtc_upload': true}"
+                class="vl_jtc_upload_gjfx gjfx_upload"
                 multiple
                 :show-file-list="false"
                 accept="image/*"
@@ -29,55 +29,71 @@
                 :on-error="handleError">
               <i v-if="uploading" class="el-icon-loading"></i>
               <img v-else-if="ruleForm.input3" :src="ruleForm.input3">
-              <i class="el-icon-plus avatar-uploader-icon" v-else></i>
+              <div v-else>
+                <i
+                        style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
+                        class="vl_icon vl_icon_vehicle_01"
+                ></i>
+                <span>点击上传图片</span>
+              </div>
             </el-upload>
           </el-form-item>
-          <el-form-item class="firstItem" prop="data1">
+          <el-form-item class="" prop="data1">
             <el-date-picker
-              style="padding-left: 0px;padding-right: 0px;"
-              v-model="ruleForm.data1"
-              type="daterange"
-              class="full data_range"
-              value-format="yyyy-MM-dd"
-              :picker-options="pickerOptions"
-              range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期">
+                    v-model="ruleForm.data1"
+                    style="width: 100%;"
+                    class="vl_date"
+                    :picker-options="pickerOptions"
+                    type="date"
+                    value-format="timestamp"
+                    placeholder="选择日期时间">
             </el-date-picker>
           </el-form-item>
-          <el-form-item label="区域：" class="quyu" label-width="42px"  prop="input5">
-            <el-radio-group v-model="ruleForm.input5">
-              <el-row :gutter="10">
-                <el-col :span="12">
-                  <el-radio label="1">列表选择</el-radio>
-                </el-col>
-                <el-col :span="12">
-                  <div @click="clickTabCh">
-                    <el-radio label="2">地图选择</el-radio>
-                  </div>
-                </el-col>
-              </el-row>
-            </el-radio-group>
+          <el-form-item>
+            <el-date-picker
+                    style="width: 100%;"
+                    class="vl_date vl_date_end"
+                    :picker-options="pickerOptions"
+                    v-model="ruleForm.data2"
+                    @change="chooseEndTime"
+                    value-format="timestamp"
+                    type="date"
+                    placeholder="选择日期时间">
+            </el-date-picker>
           </el-form-item>
-          <el-form-item v-if="ruleForm.input5=='1'" prop="value1">
-            <el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="请选择" class="full">
-              <el-option-group
-                      v-for="group in options"
-                      :key="group.areaName"
-                      :label="group.areaName">
-                <el-option
-                        v-for="item in group.areaTreeList"
-                        :key="item.areaId"
-                        :label="item.areaName"
-                        :value="item.areaId">
-                </el-option>
-              </el-option-group>
-            </el-select>
-          </el-form-item>
-          <el-form-item v-if="ruleForm.input5=='2'" >
-            <el-input  v-model="curChooseNum" :disabled="true">
-            </el-input>
-          </el-form-item>
+          <!--<el-form-item label="抓拍区域：" class="quyu" label-width="90px"  prop="input5">-->
+            <!--<el-radio-group v-model="ruleForm.input5">-->
+              <!--<el-row :gutter="10">-->
+                <!--&lt;!&ndash;<el-col :span="12">&ndash;&gt;-->
+                  <!--&lt;!&ndash;<el-radio label="1">列表选择</el-radio>&ndash;&gt;-->
+                <!--&lt;!&ndash;</el-col>&ndash;&gt;-->
+                <!--<el-col :span="12">-->
+                  <!--<div @click="clickTabCh">-->
+                    <!--<el-radio label="2">地图选择</el-radio>-->
+                  <!--</div>-->
+                <!--</el-col>-->
+              <!--</el-row>-->
+            <!--</el-radio-group>-->
+          <!--</el-form-item>-->
+          <!--<el-form-item v-if="ruleForm.input5=='1'" prop="value1">-->
+            <!--<el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="全部区域" class="full">-->
+              <!--<el-option-group-->
+                <!--v-for="group in options"-->
+                <!--:key="group.areaName"-->
+                <!--:label="group.areaName">-->
+                <!--<el-option-->
+                  <!--v-for="item in group.areaTreeList"-->
+                  <!--:key="item.areaId"-->
+                  <!--:label="item.areaName"-->
+                  <!--:value="item.areaId">-->
+                <!--</el-option>-->
+              <!--</el-option-group>-->
+            <!--</el-select>-->
+          <!--</el-form-item>-->
+          <!--<el-form-item>-->
+            <!--<el-input  v-model="curChooseNum" :disabled="true">-->
+            <!--</el-input>-->
+          <!--</el-form-item>-->
           <el-form-item>
             <el-row :gutter="10">
               <el-col :span="12">
@@ -92,53 +108,57 @@
         <div class="insetLeft" @click="hideLeft"></div>
       </div>
     </div>
-    <div :class="['right',{hide:!hideleft}]" id="rightMap"></div>
-    <div class="reselt" v-if="reselt">
+    <div :class="['right',{hide:!hideleft}, {'clgj_map_show_pic': mapPicShow}]" id="rightMap"></div>
+    <div class="reselt" v-if="reselt && showLeft">
       <div class="plane insetPadding">
-        <h3 class="title">分析结果</h3>
+        <h3 class="title">分析结果<p>共经过{{totalAddressNum}}个地方，出现{{totalMapNum}}次</p></h3>
         <!--<div class="sup_title">-->
           <!--<div  @click="timeOrderS">时间排序 <span><i class="el-icon-caret-top" :class="{'active': !timeOrder}"></i><i :class="{'active': timeOrder}" class="el-icon-caret-bottom"></i></span></div>-->
           <!--<div>({{}}次)</div>-->
         <!--</div>-->
-        <div class="plane_main_box">
-          <vue-scroll>
+        <div class="plane_main_box"  @scroll="scrollIt">
+          <!--<vue-scroll>-->
             <div class="plane_main">
               <!--可以展开列表-->
-              <div class="p_main_list" v-if="item.list.length" :class="{'is_open': item.isOpen}" v-for="item in leftEvData" :key="item.id">
-                <div class="p_main_head" @click="item.isOpen = !item.isOpen"><i :class="{'el-icon-caret-right': !item.isOpen, 'el-icon-caret-bottom': item.isOpen}"></i>{{item.label}}({{item.times}}次)</div>
-                <div class="p_main_item" v-for="(sItem, sIndex) in item.list" :key="sItem.id" @click="showStrucInfo(sItem, evData.findIndex(function (u) {return u === sItem}))">
-                  <div class="info">
-                    <div class="info_left">
-                      <img :src="sItem.subStoragePath" alt="">
+              <div class="infinite-list-wrapper" v-if="leftEvData.length" >
+                <ul>
+                  <li class="p_main_list" :class="{'is_open': item.isOpen}" v-for="item in leftEvData" :key="item.id">
+                    <div class="p_main_head" @click="item.isOpen = !item.isOpen"><i :class="{'el-icon-caret-right': !item.isOpen, 'el-icon-caret-bottom': item.isOpen}"></i>{{item.label}}({{item.times}}次)</div>
+                    <div class="p_main_item" v-for="(sItem, sIndex) in item.list" :key="sItem.id" @click="showStrucInfo(sItem, evData.findIndex(function (u) {return u === sItem}))">
+                      <div class="info">
+                        <div class="info_left">
+                          <img :src="sItem.subStoragePath" alt="">
+                        </div>
+                        <div class="info_right">
+                          <p class="time"><i class="vl_icon vl_icon_retrieval_01"></i>{{sItem.shotTime.slice(-8)}}</p>
+                          <div><i class="vl_icon vl_icon_retrieval_03"></i>{{sItem.semblance ? (sItem.semblance * 1).toFixed(2) : '0.00'}}%</div>
+                        </div>
+                      </div>
+                      <div :title="sItem.address" class="address"><i class="el-icon-location-outline"></i>{{sItem.address ? sItem.address : '无'}}</div>
+                      <div class="del_icon el-icon-delete" @click.stop="updateLine(sItem, item.list, sIndex)"></div>
                     </div>
-                    <div class="info_right">
-                      <p class="time"><i class="vl_icon vl_icon_retrieval_01"></i>{{sItem.shotTime.slice(-8)}}</p>
-                      <div><i class="vl_icon vl_icon_retrieval_03"></i>{{sItem.semblance}}%</div>
-                    </div>
-                  </div>
-                  <div :title="sItem.address" class="address"><i class="el-icon-location-outline"></i>{{sItem.address ? sItem.address : '无'}}</div>
-                  <div class="del_icon el-icon-delete" @click.stop="updateLine(sItem, item.list, sIndex)"></div>
-                </div>
+                  </li>
+                </ul>
+                <p style="line-height: 40px;color: #0C70F8;text-align: center;" v-if="loading">加载中...</p>
+                <p style="line-height: 40px;color: #999999;text-align: center;" v-if="noMore">没有更多了</p>
               </div>
               <p v-show="leftEvData.length === 0" style="line-height: 40px;color: #999999;text-align: center;">暂无数据</p>
-              <el-pagination
-                v-show="pagination.total > 5"
-                class="cum_pagination th-center-pagination"
-                @current-change="onPageChange"
-                :current-page.sync="pagination.pageNum"
-                :page-size="pagination.pageSize"
-                layout="prev, pager, next"
-                :total="pagination.total">
-              </el-pagination>
             </div>
-          </vue-scroll>
+          <!--</vue-scroll>-->
         </div>
         <div class="insetLeft2" @click="hideResult"></div>
       </div>
     </div>
+    <!--地图操作按钮-->
+    <ul class="map_rrt_u2">
+      <li @click="mapPicShow = !mapPicShow" style="font-size: 14px;" :style="{'color': mapPicShow ? '#0C70F8' : '#999'}">显示图片</li>
+      <li @click="resetZoom"><i class="el-icon-aim"></i></li>
+      <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
+      <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
+    </ul>
     <el-dialog
         :visible.sync="strucDetailDialog"
-        class="struc_detail_dialog"
+        class="struc_detail_dialog_gjfx"
         :close-on-click-modal="false"
         top="4vh"
         :show-close="false">
@@ -152,39 +172,35 @@
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
             <img :src="sturcDetail.subStoragePath" alt="">
-            <span>上传图</span>
+            <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img">
               <img :src="sturcDetail.storagePath" alt="">
-              <span>抓拍图</span>
+              <span>全景图</span>
             </div>
             <div class="struc_c_d_info">
-              <h2>对比信息<div class="vl_jfo_sim"><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? sturcDetail.semblance : 98.32}}<span style="font-size: 12px;">%</span></div></h2>
+              <h2>对比信息</h2>
               <div class="struc_cdi_line">
-                <span v-show="sturcDetail.age">{{sturcDetail.age}}</span>
-                <span v-show="sturcDetail.baby">{{sturcDetail.baby}}</span>
-                <span v-show="sturcDetail.mask">{{sturcDetail.mask}}</span>
-                <span v-show="sturcDetail.hat">{{sturcDetail.hat}}</span>
-                <span v-show="sturcDetail.glasses">{{sturcDetail.glasses}}</span>
-                <span v-show="sturcDetail.hair">{{sturcDetail.hair}}</span>
-                <span v-show="sturcDetail.umberlla">{{sturcDetail.umberlla}}</span>
-                <span v-show="sturcDetail.sex">{{sturcDetail.sex}}</span>
-                <span v-show="sturcDetail.bottomType">{{sturcDetail.bottomColor}}{{sturcDetail.bottomType}}</span>
-                <span v-show="sturcDetail.upperType">{{sturcDetail.upperColor}}{{sturcDetail.upperTexture}}{{sturcDetail.upperType}}</span>
+                <span><font>抓拍时间</font>{{sturcDetail.shotTime}}</span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.shotTime}}<i class="vl_icon vl_icon_retrieval_01"></i></span>
+                <span><font>抓拍设备</font>{{sturcDetail.deviceName}}</span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.deviceName}}<i class="vl_icon vl_icon_retrieval_02"></i></span>
+                <span><font>抓拍地址</font>{{sturcDetail.address}}</span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.address}}<i class="vl_icon vl_icon_retrieval_04"></i></span>
+                <span class="tz"><font>特征</font><p>{{sturcDetail.sex+" "+(sturcDetail.age || "")+ " "+ (sturcDetail.baby || "")+ " " + (sturcDetail.bag || "")+ " " + (sturcDetail.bottomColor || "") +(sturcDetail.bottomType || "")+ " " + (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+ " "+(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")}}</p></span>
               </div>
               <div class="struc_cdi_line"></div>
             </div>
             <span>抓拍信息</span>
+          </div>
+          <!--跳转按钮-->
+          <div class="struc_t_btn">
+            <a @click="gotoControl(sturcDetail.subStoragePath)">新建布控</a>
+            <a @click="gotoLjd(sturcDetail.subStoragePath)">落脚地分析</a>
           </div>
         </div>
         <div v-show="strucCurTab === 2" class="struc_c_address"></div>
@@ -218,22 +234,71 @@
       </div>
     </el-dialog>
     <!-- D设备 B卡口  这里是设备和卡口 -->
-    <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div>
+    <!--<div is="mapSelector" :open="dialogVisible" :clear="selectMapClear" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div>-->
     <div id="capMap"></div>
+    <!--人工筛选-->
+    <el-dialog
+      title="人工筛选"
+      :visible.sync="filterDialog"
+      :close-on-click-modal="false"
+      width="900px">
+      <div style="height: 350px;">
+        <div style="height: 96%">
+          <vue-scroll>
+            <div class="plane_main">
+              <!--可以展开列表-->
+              <div class="infinite-list-wrapper">
+                <ul>
+                  <li class="p_main_list" :class="{'is_open': item.isOpen}" v-for="item in allLeftEvData" :key="item.id">
+                    <div class="p_main_head" @click="item.isOpen = !item.isOpen"><i :class="{'el-icon-caret-right': !item.isOpen, 'el-icon-caret-bottom': item.isOpen}"></i>{{item.label}}({{item.times}}次)</div>
+                    <div class="p_main_item p_main_dialog_item" v-for="(sItem, sIndex) in item.list" :key="sItem.id">
+                      <div class="info">
+                        <div class="info_left">
+                          <img :src="sItem.subStoragePath" alt="">
+                        </div>
+                        <div class="info_right">
+                          <p class="time"><i class="vl_icon vl_icon_retrieval_01"></i>{{sItem.shotTime.slice(-8)}}</p>
+                          <div><i class="vl_icon vl_icon_retrieval_03"></i>{{sItem.semblance ? (sItem.semblance * 1).toFixed(2) : '0.00'}}%</div>
+                        </div>
+                      </div>
+                      <div :title="sItem.address" class="address"><i class="el-icon-location-outline"></i>{{sItem.address ? sItem.address : '无'}}</div>
+                      <div class="del_icon el-icon-delete" @click.stop="delSitem(item, sItem, sIndex)"></div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </vue-scroll>
+        </div>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="filterDialog = false">取 消</el-button>
+        <el-button type="primary" @click="chooseOk">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
-  import mapSelector from '@/components/common/mapSelector.vue';
+  import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+//  import mapSelector from '@/components/common/mapSelector.vue';
   import { mapXupuxian,ajaxCtx } from "@/config/config.js";
-  import { objDeepCopy, random14 } from "@/utils/util.js";
+  import { objDeepCopy, random14, formatDate } from "@/utils/util.js";
   import { cityCode } from "@/utils/data.js";
   import {PortraitPostPersonTrace} from "@/views/index/api/api.portrait.js";
   import { MapGETmonitorList } from "@/views/index/api/api.map.js";
   import { getAllBayonetList } from "@/views/index/api/api.base.js";
   export default {
-    components: {mapSelector},
+    components: {vlBreadcrumb},
     data() {
       return {
+        mapPicShow: false, // 地图图片显示开关
+        filterDialog: false,
+        showLeft: false,
+        selectMapClear: '',
+        loading: false,
+        count: 3,
+        totalAddressNum: 0,
+        totalMapNum: 4,
         searchLoading: false,
         curChooseNum: '已选择0个设备',
         uploadAcion: ajaxCtx.base + '/new',
@@ -254,7 +319,6 @@
             prevEl: '.swiper-button-prev',
           },
         },
-        pagination: { total: 0, pageSize: 5, pageNum: 1 },
         dialogVisible: false,
         amap: null,
         map: null,
@@ -267,6 +331,7 @@
         timeOrder: false,
         ruleForm: {
           data1:null,
+          data2: null,
           input3: '',
           input5: "1",
           value1: null,
@@ -293,6 +358,7 @@
         },
         evData: [],
         leftEvData: [],
+        allLeftEvData: [],
         marks: [[], []],
         markerLine: [], // 地图线集合
         markerPoint: [], // 地图点集合
@@ -306,15 +372,44 @@
         videoUrl: '' // 弹窗视频回放里的视频
       };
     },
+    computed: {
+      noMore () {
+        return this.count >= this.totalMapNum;
+      }
+    },
     mounted() {
       this.getMapGETmonitorList()//查询行政区域
       this.renderMap();
       this.setDTime();
-      if (this.$route.query.plateNo) {
-        this.ruleForm.input3 = this.$route.query.plateNo;
+      if (this.$route.query.imgurl) {
+        this.ruleForm.input3 = this.$route.query.imgurl;
       }
     },
     methods: {
+      chooseEndTime (e) {
+        if (e < this.ruleForm.data1) {
+          this.$message.info('结束时间必须大于开始时间才会有结果')
+        }
+      },
+      gotoControl (url) {
+        this.$router.push({ name: 'control_create', query: {modelName: "人员追踪", imgurl: url} })
+      },
+      gotoLjd (url) {
+        this.$router.push({ name: 'portrait_ljd', query: {imgurl: url} })
+      },
+      scrollIt (e) {
+        if(e.srcElement.scrollTop + e.srcElement.offsetHeight > e.srcElement.scrollHeight - 10){
+         console.log('到底了');
+         if (!this.loading && !this.noMore) {
+           this.loading = true;
+           setTimeout(() => {
+             this.count += 2;
+             this.operData();
+             this.loading = false;
+           }, 2000)
+         }
+        }
+      },
       beforeAvatarUpload (file) {
         const isJPG = (file.type === 'image/jpeg' || file.type === 'image/png');
         const isLt = file.size / 1024 / 1024 < 100;
@@ -344,24 +439,8 @@
         let date = new Date();
         let curDate = date.getTime();
         let curS = 1 * 24 * 3600 * 1000;
-        let sM = '', sD = '';
-        if ((new Date(curDate - curS).getMonth() + 1) < 10 ) {
-          sM = '0' + (new Date(curDate - curS).getMonth() + 1);
-        } else {
-          sM = (new Date(curDate - curS).getMonth() + 1)
-        }
-        if ( new Date(curDate - curS).getDate() < 10 ) {
-          sD = '0' +  new Date(curDate - curS).getDate();
-        } else {
-          sD =  new Date(curDate - curS).getDate()
-        }
-        let _s = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD;
-//        let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() - 1;
-        this.ruleForm.data1 = [_s, _s];
-      },
-      onPageChange (page) {
-        this.pagination.pageNum = page;
-        this.operData();
+        this.ruleForm.data1 = curDate - curS;
+        this.ruleForm.data2 = curDate;
       },
       hideResult() {
         this.reselt = false;
@@ -401,7 +480,6 @@
           case 'cut2' :
             this.mouseTool.circle({
               strokeColor: "#FA453A",
-              strokeOpacity: 1,
               strokeWeight: 1,
               strokeOpacity: 0.2,
               fillColor: '#FA453A',
@@ -443,26 +521,24 @@
         this.dialogVisible=false
       },
       submitForm(v) {
-        if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data1.length>0 && this.ruleForm.input3){
+        if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data2 && this.ruleForm.input3){
           let pg = {
           }
-          if (this.pointData.bayonetList.length === 0 && this.pointData.deviceList.length === 0 && this.ruleForm.input5 === "2") {
-            this.$message.info('选择的区域没有设备，请重新选择区域');
-            return false;
-          } else if (this.ruleForm.input5 === "1" && this.ruleForm.value1.length === 0) {
-            this.$message.info('您没有选择区域，请点击下拉框选择镇');
-            return false;
-          }
-          pg['startTime'] = this.ruleForm.data1[0]+" 00:00:00";
-          pg['endTime'] = this.ruleForm.data1[1]+" 23:59:59";
+//          if (this.pointData.bayonetList.length === 0 && this.pointData.deviceList.length === 0) {
+//            this.$message.info('选择的区域没有设备，请重新选择区域');
+//            return false;
+//          }
+          pg['startTime'] = formatDate(this.ruleForm.data1, 'yyyy-MM-dd') + ' 00:00:00';
+          pg['endTime'] = formatDate(this.ruleForm.data2, 'yyyy-MM-dd') + ' 23:59:59';
+//          pg['imageUrl'] = 'http://file.aorise.org/vlink/image/18c70cc3-424a-43fc-92ee-a6c6de4248f2.jpg';
           pg['imageUrl'] = this.ruleForm.input3;
-          if(this.ruleForm.input5 == "1" && this.ruleForm.value1.length!=0){
-            pg['areaIds']=this.ruleForm.value1.join(",")
-          }
-          if(this.ruleForm.input5 == "2"){
+//          if(this.ruleForm.input5 == "1"){
+//            pg['areaIds']=this.ruleForm.value1.join(",")
+//          }
+//          if(this.ruleForm.input5 == "2"){
             pg['bayonetIds'] = this.pointData.bayonetList.map(y => {return y.uid}).join(',');
-            pg['deviceUid'] = this.pointData.deviceList.map(y => {return y.uid}).join(',');
-          }
+            pg['cameraIds'] = this.pointData.deviceList.map(y => {return y.uid}).join(',');
+//          }
           this.storeParam = objDeepCopy(pg);
           this.getVehicleShot(pg);
         }else{
@@ -470,13 +546,16 @@
         }
       },
       resetForm(){
-        this.ruleForm= {
-          data1:null,
-          input3: null,
-          input5: "1",
-          value1: null,
+        this.ruleForm.input5 = '1';
+        this.ruleForm.input3 = '';
+        this.ruleForm.value1 = [];
+        this.selectMapClear = random14();
+        this.pointData = {
+          deviceList: [],
+          bayonetList: []
         }
-        //this.$refs[v].resetFields();
+        this.curChooseNum = '已选择0个设备';
+        this.setDTime ();
       },
       //查询行政区域
       getMapGETmonitorList(){
@@ -485,9 +564,6 @@
         }
         MapGETmonitorList(d).then(res=>{
           if(res && res.data){
-            res.data.areaTreeList.forEach(x => {
-              this.ruleForm.value1.push(x.areaId)
-            })
             this.options.push(res.data)
           }
         })
@@ -540,6 +616,7 @@
       },
       getVehicleShot(d) {
         this.searchLoading = true;
+        this.count = 3;
         PortraitPostPersonTrace(d).then(res => {
           this.searchLoading = false;
           if (res) {
@@ -551,21 +628,51 @@
             this.reselt = true;
             this.evData = res.data.list;
             this.evData.sort(this.compare("shotTime", this.timeOrder ? false : true));
-            this.pagination.total = res.data.total;
+            this.totalMapNum = res.data.total;
+            // 计算经过多少个地方
+            let dvIds = [];
+            this.totalAddressNum = 0;
+            res.data.list.forEach(x => {
+              if(!dvIds.includes(x.deviceID)) {
+                this.totalAddressNum += 1;
+                dvIds.push(x.deviceID);
+              }
+            })
+
             //  重组数据，给左边列表使用
-            this.operData();
+            this.operData(true);
+            if (this.evData.length) {
+              this.filterDialog = true;
+            } else {
+              this.$message.info('抱歉，没有找到匹配结果')
+            }
             this.amap.clearMap();
-            this.drawMapMarker(this.evData);
           }
         }).catch(() => {
           this.searchLoading = false;
         });
       },
-      operData () {
+      operData (isAll) {
         this.leftEvData = [];
+        this.allLeftEvData = [];
         let keyArr = [];
         this.evData.forEach((x, index) => {
-          if ((index + 1) <= this.pagination.pageNum * (this.pagination.pageSize) && (index + 1) > (this.pagination.pageNum - 1) * (this.pagination.pageSize)) {
+          if (!isAll) {
+            if (index <= this.count) {
+              let key = x.shotTime.slice(0, 10);
+              if (!keyArr.includes(key)) {
+                keyArr.push(key);
+                let obj = {label: key,isOpen: true};
+                obj.list = [];
+                obj.times = 1;
+                obj.list.push(x);
+                this.leftEvData.push(obj);
+              } else {
+                this.leftEvData.find(y => y.label === key).list.push(x);
+                this.leftEvData.find(y => y.label === key).times += 1;
+              }
+            }
+          } else {
             let key = x.shotTime.slice(0, 10);
             if (!keyArr.includes(key)) {
               keyArr.push(key);
@@ -573,13 +680,23 @@
               obj.list = [];
               obj.times = 1;
               obj.list.push(x);
-              this.leftEvData.push(obj);
+              this.allLeftEvData.push(obj);
             } else {
-              this.leftEvData.find(y => y.label === key).list.push(x);
-              this.leftEvData.find(y => y.label === key).times += 1;
+              this.allLeftEvData.find(y => y.label === key).list.push(x);
+              this.allLeftEvData.find(y => y.label === key).times += 1;
             }
           }
         })
+      },
+      delSitem (item, sItem, index) {
+        item.list.splice(index, 1);
+        this.evData.splice(this.evData.findIndex(x => x === sItem), 1);
+      },
+      chooseOk () {
+        this.showLeft = true;
+        this.filterDialog = false;
+        this.drawMapMarker(this.evData);
+        this.operData();
       },
       //查询所有的设备
       objSetItem (list, obj) {
@@ -640,7 +757,7 @@
               this.showStrucInfo(obj, i)
             })
             path.push(_path);
-            let _content = `<div class="vl_icon vl_icon_sxt"></div>`
+            let _content = `<div class="vl_icon vl_icon_sxt"><p>${obj.shotTime}</p></div>`
             let point = new AMap.Marker({ // 添加自定义点标记
               map: this.amap,
               position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
@@ -670,7 +787,7 @@
         let _i = this.evData.indexOf(obj);
         // list.splice(index, 1)
         this.evData.splice(_i, 1);
-        this.pagination.total = this.evData.length;
+        this.totalMapNum = this.evData.length;
         this.operData();
         this.drawMapMarker(this.evData)
       }, // 更新画线
@@ -726,11 +843,44 @@
         this.curImgIndex = index;
         this.sturcDetail = data;
         this.drawPoint(data);
-      }
+      },
+      mapZoomSet (val) {
+        if (this.amap) {
+          this.amap.setZoom(this.amap.getZoom() + val);
+        }
+      },
+      resetZoom () {
+        if (this.amap) {
+          this.amap.setZoomAndCenter(14, mapXupuxian.center);
+        }
+      },
     }
   };
 </script>
 <style lang="scss" scoped>
+  .map_rrt_u2 {
+    position: absolute; right: 30px;
+    bottom: 30px;
+    margin-top: .2rem;
+    font-size: 26px;
+    background: #ffffff;
+    width: 78px;
+    padding: 0 10px;
+    > li {
+      line-height: 70px;
+      text-align: center;
+      cursor: pointer;
+      border-bottom: 1px solid #F2F2F2;
+      > i {
+        margin-top: 0;
+        display: inline-block;
+      }
+      color: #999999;
+      &:hover {
+        color: #0C70F8;
+      }
+    }
+  }
   .point {
     width: 100%;
     height: 100%;
@@ -738,6 +888,7 @@
   .breadcrumb_heaer {
     background: #ffffff;
     border-bottom: 1px solid #D3D3D3;
+    padding: 19px 20px;
   }
   .full {
     width: 100%;
@@ -750,6 +901,7 @@
     width: calc(100% - 226px);
     height: calc(100% - 54px);
     float: right;
+    min-height: 560px;
   }
   .right {
     width: 100%;
@@ -757,7 +909,7 @@
     float: right;
   }
   .reselt {
-    width: 272px;
+    width: 290px;
     height: calc(100% - 54px);
     background-color: #ffffff;
     position: absolute;
@@ -772,6 +924,14 @@
       padding-top: 10px;
       padding-bottom: 19px;
       color: #333333;
+      p {
+        color: #999999;
+        font-size: 12px;
+        font-weight: normal;
+        margin-left: 20px;
+        display: inline-block;
+        vertical-align: middle;
+      }
     }
     .sup_title {
       height: 40px;
@@ -823,6 +983,7 @@
       padding: 10px;
       position: relative;
       height: 100%;
+      min-height: 560px;
     }
     .line40 {
       line-height: 40px;
@@ -875,10 +1036,13 @@
     color: #ffffff;
   }
   .plane_main_box {
-    height: calc(100% - 100px);
+    height: calc(100% - 44px);
     padding-top: 10px;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
   .plane_main {
+    min-height: 700px;
     .p_main_list {
       height: 40px;
       overflow: hidden;
@@ -980,6 +1144,10 @@
             color: #0C70F8;
           }
         }
+      }
+      .p_main_dialog_item {
+        width: 33%;
+        display: inline-block;
       }
     }
     .is_open {
@@ -1105,14 +1273,42 @@
   }
 </style>
 <style lang="scss">
+  #rightMap {
+    .vl_icon.vl_icon_sxt {
+      position: relative;
+      > p {
+        position: absolute; top: 10px; left: 98%;
+        width: auto;
+        word-break:keep-all; white-space:nowrap;
+        font-size: 12px; color: #fff;
+        background-color: rgba(0, 0, 0, 0.4);
+        border-radius: 2px;
+        padding: 2px 5px;
+      }
+    }
+  }
+  .clgj_map_show_pic {
+    .vl_jtc_mk { display: block !important; }
+    &#rightMap {
+      .vl_icon.vl_icon_sxt {
+        > p {
+          display: none;
+        }
+      }
+    }
+  }
   .demo-ruleForm {
     .quyu {
       .el-form-item__label {
         padding: 0;
+        white-space: nowrap;
+      }
+      .el-radio__label {
+        padding: 0;
       }
     }
   }
-  .vl_jtc_upload {
+  .vl_jtc_upload_gjfx {
     text-align: center;
     .el-upload--picture-card {
       width: 100%;
@@ -1138,12 +1334,19 @@
       }
     }
   }
+  .gjfx_upload {
+    &:hover {
+      .el-upload--picture-card {
+        background: #0C70F8;
+      }
+    }
+  }
   .data_range {
     .el-range__close-icon {
       display: none;
     }
   }
-  .struc_detail_dialog {
+  .struc_detail_dialog_gjfx {
     .el-dialog {
       max-width: 13.06rem;
       width: 100%!important;
@@ -1182,6 +1385,7 @@
       .struc_c_detail {
         width:  100%;
         height: 3.6rem;
+        position: relative;
         >div {
           float: left;
         }
@@ -1215,9 +1419,6 @@
             font-size: 12px;
             padding: 0 .1rem;
           }
-        }
-        .struc_c_d_qj {
-          margin-right: .3rem;
           &:before {
             display: block;
             content: '';
@@ -1225,7 +1426,7 @@
             top: -.5rem;
             left: -.5rem;
             transform: rotate(-45deg);
-            border: .5rem solid #0c70f8;
+            border: .5rem solid #0C70F8;
             border-color: transparent transparent #0C70F8;
             z-index: 9;
           }
@@ -1245,6 +1446,13 @@
             -o-transform: rotate(-45deg);
             transform: rotate(-45deg);
             z-index: 99;
+          }
+        }
+        .struc_c_d_qj {
+          margin-right: .3rem;
+          &:before {
+            border: .5rem solid #50CC62;
+            border-color: transparent transparent #50CC62;
           }
         }
         .struc_c_d_box {
@@ -1287,22 +1495,51 @@
                 line-height: .3rem;
                 margin-bottom: .08rem;
                 border: 1px solid #F2F2F2;
-                background: #FAFAFA;
                 color: #333333;
                 white-space: nowrap;
                 text-overflow: ellipsis;
                 border-radius:3px;
                 font-size: 12px;
                 overflow: hidden;
-                padding: 0 .1rem;
+                padding-right: .1rem;
                 margin-right: .08rem;
                 > i {
                   vertical-align: middle;
                   margin-left: .1rem;
                 }
-                font {
+                > font {
+                  width: 75px;
+                  text-align: center;
+                  border-right: 1px solid #F2F2F2;
                   color: #999999;
-                  margin-left: 20px;
+                  background: #FAFAFA;
+                  display: inline-block;
+                  margin-right: .1rem;
+                }
+              }
+              .tz {
+                display: flex;
+                white-space: normal;
+                overflow: visible;
+                height: auto;
+                border: none;
+                font {
+                  flex-shrink: 0;
+                  width: 75px;
+                  border: 1px solid #F2F2F2;
+                  -webkit-border-radius: 3px 0 0 3px;
+                  -moz-border-radius: 3px 0 0 3px;
+                  border-radius: 3px 0 0 3px;
+                  margin-right: 0px;
+                  border-right: none;
+                }
+                >p{
+                  color: #333333;
+                  border: 1px solid #F2F2F2;
+                  -webkit-border-radius: 0 3px 3px 0;
+                  -moz-border-radius: 0 3px 3px 0;
+                  border-radius: 0 3px 3px 0;
+                  padding-left: .1rem;
                 }
               }
               p {
@@ -1346,6 +1583,29 @@
             -o-transform: rotate(45deg);
             transform: rotate(45deg);
             z-index: 99;
+          }
+        }
+        .struc_t_btn {
+          margin-top: .2rem;
+          float: right;
+          a {
+            display: inline-block;
+            text-align: center;
+            line-height: .38rem;
+            border: solid 1px #eeeeee;
+            border-radius: 4px;
+            margin-top: 10px;
+            padding: 0px .15rem;
+            text-decoration: none;
+            margin-left: 10px;
+            background: rgba(246, 248, 249, 1);
+            border: 1px solid rgba(211, 211, 211, 1);
+            cursor: pointer;
+          }
+          a:hover {
+            background: #0c70f8;
+            border: solid 1px #0c70f8;
+            color: #ffffff;
           }
         }
       }
@@ -1505,6 +1765,7 @@
     width: 218px;
     height: 122px;
     position: relative;
+    display: none;
     > img {
       width: 100%;
       height: 100%;

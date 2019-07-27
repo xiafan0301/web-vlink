@@ -1,58 +1,66 @@
-export const testData = {
-    sxt: [
-        {
-            name: '摄像头111',
-            addr: '长沙市天心区', 
-            latitude: 28.093856,
-            longitude: 112.974557
-        }, {
-            name: '摄像头222',
-            addr: '创谷广告园', 
-            latitude: 28.093804,
-            longitude: 112.975828
-        }
-    ],
-    kakou: [
-        {
-            name: '卡口111',
-            addr: '长沙市天心区', 
-            latitude: 28.093222,
-            longitude: 112.974718
-        }, {
-            name: '卡口222',
-            addr: '创谷广告园', 
-            latitude: 28.093537,
-            longitude: 112.975628
-        }
-    ],
-    cheliang: [
-        {
-            name: '车辆111',
-            addr: '长沙市天心区', 
-            latitude: 28.094869,
-            longitude: 112.975227
-        }, {
-            name: '车辆222',
-            addr: '创谷广告园', 
-            latitude: 28.093596,
-            longitude: 112.97623
-        }
-
-    ],
-    renyuan: [
-        {
-            name: '人员111',
-            addr: '长沙市天心区',
-            type: 1,
-            latitude: 28.09466,
-            longitude: 112.974315
-        }, {
-            name: '人员222',
-            addr: '创谷广告园',
-            type: 2,
-            latitude: 28.09335,
-            longitude: 112.974122
-        }
-
+export const testData = [{
+    areaName: '溆浦县',
+    infoList: [
+      {areaId: '001', infoName: '卢峰镇', infoList: [
+          {infoName: '设备11', uid: '123', longitude: 110.60105 + Math.random() / 30,
+            latitude: 27.888218 + Math.random() / 30,dataType: 0,deviceStatus: 1,isShow: true},
+          {infoName: '设备12', uid: '124', longitude: 110.60105 + Math.random() / 30,deviceStatus: 2,
+            latitude: 27.888218 + Math.random() / 30,dataType: 0,isShow: true},
+          {infoName: '卡口1', uid: '125', longitude: 110.60105 + Math.random() / 30,
+            latitude: 27.888218 + Math.random() / 30,dataType: 1,isShow: true},
+          {infoName: '人员11', uid: '126', longitude: 110.60105 + Math.random() / 30,userSex: 1,
+            latitude: 27.888218 + Math.random() / 30,dataType: 3,isShow: true},
+          {infoName: '人员12', uid: '127', longitude: 110.60105 + Math.random() / 30,userSex: 2,
+            latitude: 27.888218 + Math.random() / 30,dataType: 3,isShow: true},
+          ]
+      },
+      {areaId: '002', infoName: '低庄镇', infoList: [
+        {infoName: '设备21', uid: '223', longitude: 110.60105 + Math.random() / 30,deviceStatus: 1,
+          latitude: 27.888218 + Math.random() / 30,dataType: 0,isShow: true},
+        {infoName: '设备22', uid: '224', longitude: 110.60105 + Math.random() / 30,deviceStatus: 2,
+          latitude: 27.888218 + Math.random() / 30,dataType: 0,isShow: true},
+        {infoName: '卡口2', uid: '225', longitude: 110.60105 + Math.random() / 30,
+          latitude: 27.888218 + Math.random() / 30,dataType: 1,isShow: true},
+        {infoName: '人员21', uid: '226', longitude: 110.60105 + Math.random() / 30,userSex: 1,
+          latitude: 27.888218 + Math.random() / 30,dataType: 3,isShow: true},
+        {infoName: '人员22', uid: '227', longitude: 110.60105 + Math.random() / 30,userSex: 2,
+          latitude: 27.888218 + Math.random() / 30,dataType: 3,isShow: true},
+      ]},
+      {areaId: '003', infoName: '桥江镇', infoList: [
+        {infoName: '设备31', uid: '323', longitude: 110.60105 + Math.random() / 30,deviceStatus: 1,
+          latitude: 27.888218 + Math.random() / 30,dataType: 0,isShow: true},
+        {infoName: '设备32', uid: '324', longitude: 110.60105 + Math.random() / 30,deviceStatus: 2,
+          latitude: 27.888218 + Math.random() / 30,dataType: 0,isShow: true},
+        {infoName: '卡口3', uid: '325', longitude: 110.60105 + Math.random() / 30,
+          latitude: 27.888218 + Math.random() / 30,dataType: 1,isShow: true},
+        {infoName: '人员31', uid: '326', longitude: 110.60105 + Math.random() / 30,userSex: 1,
+          latitude: 27.888218 + Math.random() / 30,dataType: 3,isShow: true},
+        {infoName: '人员32', uid: '327', longitude: 110.60105 + Math.random() / 30,userSex: 2,
+          latitude: 27.888218 + Math.random() / 30,dataType: 3,isShow: true},
+      ]},
+      {areaId: '004', infoName: '双井镇', infoList: [
+        {infoName: '设备41', uid: '423', longitude: 110.60105 + Math.random() / 30,deviceStatus: 1,
+          latitude: 27.888218 + Math.random() / 30,dataType: 0,isShow: true},
+        {infoName: '设备42', uid: '424', longitude: 110.60105 + Math.random() / 30,deviceStatus: 2,
+          latitude: 27.888218 + Math.random() / 30,dataType: 0,isShow: true},
+        {infoName: '卡口4', uid: '445', longitude: 110.60105 + Math.random() / 30,
+          latitude: 27.888218 + Math.random() / 30,dataType: 1,isShow: true},
+        {infoName: '人员41', uid: '426', longitude: 110.60105 + Math.random() / 30,userSex: 1,
+          latitude: 27.888218 + Math.random() / 30,dataType: 3,isShow: true},
+        {infoName: '人员42', uid: '427', longitude: 110.60105 + Math.random() / 30,userSex: 2,
+          latitude: 27.888218 + Math.random() / 30,dataType: 3,isShow: true},
+      ]},
+      {areaId: '005', infoName: '龙潭镇', infoList: [
+        {infoName: '设备51', uid: '524', longitude: 110.60105 + Math.random() / 30,deviceStatus: 1,
+          latitude: 27.888218 + Math.random() / 30,dataType: 0,isShow: true},
+        {infoName: '设备52', uid: '524', longitude: 110.60105 + Math.random() / 30,deviceStatus: 2,
+          latitude: 27.888218 + Math.random() / 30,dataType: 0,isShow: true},
+        {infoName: '卡口5', uid: '255', longitude: 110.60105 + Math.random() / 30,
+          latitude: 27.888218 + Math.random() / 30,dataType: 1,isShow: true},
+        {infoName: '人员51', uid: '526', longitude: 110.60105 + Math.random() / 30,userSex: 1,
+          latitude: 27.888218 + Math.random() / 30,dataType: 3,isShow: true},
+        {infoName: '人员52', uid: '527', longitude: 110.60105 + Math.random() / 30,userSex: 2,
+          latitude: 27.888218 + Math.random() / 30,dataType: 3,isShow: true},
+      ]}
     ]
-}
+}]

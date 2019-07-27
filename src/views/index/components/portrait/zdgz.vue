@@ -1,6 +1,13 @@
 <template>
 <div class="judge_content">
   <div class="vl_judge_tc">
+    <div class="Breadc">
+      <div is="vlBreadcrumb" 
+        :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
+          {name: '重点人群关注'}]">
+      </div>
+    </div>
+    
     <div :class="['vl_j_left',{hideleft:hideleft}]">
       <div class="vl_jtc_search" style="padding-top: 0;">
           <el-select class="full" v-model="searchData.portraitGroupId" placeholder="关注人群">
@@ -28,17 +35,36 @@
             </el-option>
           </el-select>
        
-        <el-date-picker
-          v-model="searchData.time"
-          class="full"
+
+       <!-- <el-date-picker
+         v-model="searchData.time"
           type="daterange"
-          range-separator="-"
+          :clearable="false"
+          class="full vl_date"
           value-format="yyyy-MM-dd"
-          format="yy/MM/dd"
           :picker-options="pickerOptions"
+          range-separator="至"
           start-placeholder="开始日期"
           end-placeholder="结束日期">
-        </el-date-picker>
+        </el-date-picker> -->
+            <el-date-picker
+              v-model="searchData.time1"
+              type="date"
+              placeholder="开始时间"
+              :picker-options="pickerOptions"
+              class="full vl_date"
+              :clearable="false"
+              value-format="yyyy-MM-dd"
+            ></el-date-picker>
+            <el-date-picker
+              v-model="searchData.time2"
+              type="date"
+              :clearable="false"
+              :picker-options="pickerOptions"
+              placeholder="结束时间"
+              class="full vl_date vl_date_end"
+              value-format="yyyy-MM-dd"
+            ></el-date-picker>
         <!-- <el-form-item label="区域：" label-width="60px" prop="input5"> -->
             <!-- <el-radio-group v-model="input5" @change="changeTab"> -->
             <el-radio-group v-model="input5" @change="changeTab">
@@ -54,6 +80,10 @@
               </el-row>
             </el-radio-group>
           <!-- </el-form-item> -->
+          <div v-if="input5==2" >
+            <el-input  v-model="selectValue" :disabled="true">
+            </el-input>
+          </div>
         <el-select 
           v-model="areaIds"
           class="camera-select full"
@@ -91,12 +121,13 @@
       <div class="vl_jfo_right" v-show="showVideoList">
         <div class="vl_jig_right_title">
           <span>{{curSXT.deviceName}}</span>
-          <span>抓拍{{curSXT.snapNum}}次</span>
+          <span>抓拍{{curSXT.shotNum}}次</span>
         </div>
         <vue-scroll>
           <div class="vl_jtc_mk" v-for="(item, index) in curVideo.videoList" :key="item.id">
-            <video :id="'vlJigVideo' + index" :src="item.snapVideo"></video>
-            <p>{{item.snapTime}}</p>
+            <p>{{item.shotTime}}</p>
+            <video :id="'vlJigVideo' + index" :src="item.videoPath"></video>
+            <p>{{item.shotTime}}</p>
             <div class="vl_jig_right_btn">
               <span class="vl_icon vl_icon_judge_01" @click="playVideo(index)" v-if="item.playing"></span>
               <span class="vl_icon vl_icon_control_09" @click="playVideo(index)" v-else></span>
@@ -212,13 +243,15 @@
 </template>
 <script>
 let AMap = window.AMap;
-import {getFocusList, JigGETAlarmSnapList, JfoGETEventList,getAllDevice } from "@/views/index/api/api.judge.js";
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+import {getFocusList, newGETAlarmSnapList, JfoGETEventList,getAllDevice } from "@/views/index/api/api.judge.js";
 import {MapGETmonitorList} from '../../api/api.map.js';
 import {getGroupListIsPortrait, getGroupListIsVehicle} from '../../api/api.control.js';
 import mapSelector from '@/components/common/mapSelector.vue';
 export default {
    components: {
-    mapSelector
+    mapSelector,
+    vlBreadcrumb
   },
   data() {
     return {
@@ -236,27 +269,28 @@ export default {
         portraitGroupId: '',  // 人员组
         sex: null, // 1男，2女
         ageGroup: null, // 年龄段
-        time: null
+        time1: null,
+        time2: null
       },
       sexList: [
-        {value: 0, label: '不限'},
-        {value: 1, label: '男'},
-        {value: 2, label: '女'}
+        {value: null, label: '不限'},
+        {value: '男', label: '男'},
+        {value: '女', label: '女'}
       ],
       portraitGroupList: [],
       vehicleGroupList: [],
       focusType: [
-        {value: 0, label: '不限'},
+        {value: null, label: '不限'},
         {value: 1, label: '布控人员'},
         {value: 2, label: '布控车辆'}
       ],
       ageGroupList: [
-        {value: 0, label: '不限'},
-        {value: 1, label: '儿童'},
-        {value: 2, label: '少年'},
-        {value: 3, label: '青年'},
-        {value: 4, label: '中年'},
-        {value: 5, label: '老年'},
+        {value: null, label: '不限'},
+        {value: '儿童', label: '儿童'},
+        {value: '少年', label: '少年'},
+        {value: '青年', label: '青年'},
+        {value: '中年', label: '中年'},
+        {value: '老年', label: '老年'},
         // {value: 6, label: '50-70'},
         // {value: 7, label: '70-'}
       ],
@@ -264,26 +298,18 @@ export default {
       pickerOptions: {
         disabledDate (time) {
           let date = new Date();
-          let y = date.getFullYear();
-          let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
-          let d = date.getDate();
-          let threeMonths = '';
-          let start = '';
-          if (parseFloat(d) >= 4) {
-            start = y + '-' + m + '-' + (d - 3);
-            // console.log(888888888888,start);
-            
-          } else {
-            let o =30
-            if(m==1 || m==3 || m==5 || m==7 || m==8 || m==10 || m==12){
-              o=31
-            }else if(m == 2){
-              o=28
-            }
-            start = (y - 1) + '-' + m + '-' + (d - 3 + o);
-          }
-          threeMonths = new Date(start).getTime();
-          return time.getTime() > Date.now() || time.getTime() < threeMonths;
+          let curDate = date.getTime();
+          let curS = 3 * 24 * 3600 * 1000;
+            let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
+          let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
+          let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
+          let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
+          let start = new Date(curDate - curS).getFullYear() +
+        "-" + _sm + "-" +_sd;
+          
+          let threeMonths = new Date(start).getTime();
+          //return time.getTime() > Date.now() || time.getTime() < threeMonths;
+          return time.getTime() > Date.now();
         }
       },
       switchType: 0, // 0活动范围，1关联事件
@@ -299,8 +325,8 @@ export default {
       showVideoList: false,
       curSXT: {
         deviceName: '',
-        snapNum: '',
-        snapTime: ''
+        shotNum: '',
+        // snapTime: ''
       }, // 显示的摄像头数据
       showLarge: false,
       showCut: false,
@@ -414,9 +440,11 @@ export default {
       let _s = new Date(curDate - curS).getFullYear() +
         "-" + _sm + "-" +_sd;
       let _e = date.getFullYear() + "-" + _em + "-" + _ed;
-      this.searchData.time = [_s, _e]
+      this.searchData.time1 = _s
+      this.searchData.time2 = _s
     },
     resetSearch () {
+      this.setDTime()
       this.searchData.type = null;
       this.searchData.portraitGroupId = '';
       this.searchData.sex = null;
@@ -429,7 +457,7 @@ export default {
     beginSearch () {
       let _todo = false;
       for (let key in this.searchData) {
-        if (this.searchData[key] && key !== 'time') {
+        if (this.searchData[key] && key !== 'time1') {
           _todo = true;
         }
       }
@@ -443,11 +471,19 @@ export default {
         target: '.se_hi_box'
       })
       let params = {
-        startTime: this.searchData.time[0] + " 00:00:00",
-        endTime: this.searchData.time[1] + " 23:59:59" ,
+        startTime: this.searchData.time1 + " 00:00:00",
+        endTime: this.searchData.time2 + " 23:59:59" ,
         personGroupId: this.searchData.portraitGroupId || "" ,
-        sex: this.searchData.sex || "",
-        age: this.searchData.ageGroup || "" ,
+        // sex: this.searchData.sex || "",
+        // age: this.searchData.ageGroup || "" ,
+      }
+      console.log(this.searchData.ageGroup);
+      
+      if(this.searchData.sex){
+          params.sex=this.searchData.sex
+      }
+      if(this.searchData.ageGroup){
+           params.age=this.searchData.ageGroup
       }
       // for (let key in this.searchData) {
       //   if (this.searchData[key] && key !== 'time') {
@@ -556,7 +592,7 @@ export default {
             }
             $('#vlJfoImg' + key).addClass('vl_jig_mk_img_hover')
             $('#vlJfoSxt' + key).addClass('vl_icon_judge_02')
-           // self.showVideo(obj);
+            self.showVideo(obj);
             break;
         }
       })
@@ -567,19 +603,27 @@ export default {
       this.curSXT = data;
       this.showVideoList = true;
       const params = {
-        surveillanceId: this.curSXT.surveillanceId ? this.curSXT.surveillanceId : '',
-        deviceId: this.curSXT.deviceId,
-        dateStart: this.searchData.time ? this.searchData.time[0] : null,
-        dateEnd: this.searchData.time ? this.searchData.time[1] : null
+        personGroupId:this.searchData.portraitGroupId,
+        deviceCode:data.groupName,
+        sex:this.searchData.sex,
+        startTime :this.searchData.time1?(this.searchData.time1 + " 00:00:00"):null,
+        endTime :this.searchData.time2?(this.searchData.time2 + " 23:59:59"):null,
+        age:this.searchData.ageGroup,
+        // surveillanceId: this.curSXT.surveillanceId ? this.curSXT.surveillanceId : '',
+        // deviceId: this.curSXT.deviceId,
+        // dateStart: this.searchData.time ? this.searchData.time[0] : null,
+        // dateEnd: this.searchData.time ? this.searchData.time[1] : null
       }
       this.$_showLoading({target: '.__vuescroll'});
-      JigGETAlarmSnapList(params)
+      newGETAlarmSnapList(params)
           .then(res => {
             if (res) {
               this.curVideo.videoList = res.data.map(x => {
                 x.playing = false;
                 return x;
               });
+              console.log(this.curVideo);
+              
               this.$_hideLoading();
             }
           })
@@ -866,8 +910,18 @@ export default {
       }
     }
   }
-
+ 
+ 
   .vl_judge_tc {
+    .Breadc{
+      position: absolute;
+      top: 0px;
+      width: 100%;
+      height: 50px;
+      left: 0px;
+    }
+    position: relative;
+   
     width: 100%;
     height: 100%;
     .camera-select {
@@ -884,13 +938,13 @@ export default {
       }
     }
     .hideleft.vl_j_left{
-      margin-left: -3rem;
+      margin-left: -272px;
     }
     .vl_j_left {
       position: relative;
       z-index: 11;
       float: left;
-      width: 3rem;
+      width: 272px;
       padding-top: 24px;
       height: 100%;
       // margin-left: 0.2rem;
@@ -1000,7 +1054,7 @@ export default {
       .vl_jtc_search {
         width: 100%;
         height: auto;
-        padding: 0 .2rem;
+        padding: 0 20px;
         padding-top: .4rem;
         // .el-input__inner {
         //   height: .4rem!important;
@@ -1011,20 +1065,20 @@ export default {
         //   line-height: .4rem!important;
         // }
         .el-range-editor {
-          width: 100%;
-          padding: 0;
-          > i {
-            display: none;
-          }
+          // width: 100%;
+          // padding: 0;
+          // > i {
+          //   display: none;
+          // }
           > input {
             width: 50%;
           }
-          .el-range-separator {
-            height: .4rem;
-            line-height: .4rem;
-            width: 10px;
-            padding: 0;
-          }
+          // .el-range-separator {
+          //   height: .4rem;
+          //   line-height: .4rem;
+          //   width: 10px;
+          //   padding: 0;
+          // }
         }
         button {
           height: .5rem;
@@ -1045,7 +1099,7 @@ export default {
     }
     .vl_j_right {
       display: inline-block;
-      width: calc(100% - 3rem);
+      width: calc(100% - 272px);
       height: calc(100% - 5px);
       position: relative;
       #tcMap {
@@ -1286,6 +1340,9 @@ export default {
 }
 </style>
 <style lang="scss" scoped="scoped">
+ .vl_judge_tc{
+    padding-top: 50px;
+  }
 .hideleft {
   .insetLeft2 {
     transform: rotate(180deg);

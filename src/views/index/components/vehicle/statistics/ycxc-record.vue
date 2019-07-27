@@ -2,7 +2,7 @@
   <div class="th-ycxc-record">
     <div class="vc_gcck_bd">
       <div is="vlBreadcrumb" :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle'},
-        {name: '夜间行车分析', routerName: 'vehicle_search_ycxc', params: {
+        {name: '夜间行车分析', routerName: 'vehicle_search_ycxc', query: {
           ... this.queryObj
         }}, {name: '抓拍记录'}]"></div>
     </div>
@@ -27,7 +27,7 @@
           </div>
         </div>
         <div class="list-box">
-          <div class="list-item" v-for="item in dataList" :key="item.id" @click="onOpenDetail(item)">
+          <div class="list-item" v-for="item in dataList" :key="item.uid" @click="onOpenDetail(item)">
             <img :src="item.subStoragePath" alt="">
             <p class="time"><i></i>{{item.shotTime}}</p>
             <p class="address"><i></i>抓拍设备:{{item.deviceName}}</p>
@@ -61,38 +61,56 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt="">
-            <span>抓拍图</span>
+            <img :src="sturcDetail.storagePath" alt="" class="bigImg">
+            <span>全景图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_qii struc_c_d_img">
-              <img :src="sturcDetail.storagePath" alt="">
-              <span>全景图</span>
+              <img :src="sturcDetail.subStoragePath" alt="" class="bigImg">
+              <span>抓拍图</span>
             </div>
             <div class="struc_c_d_info">
               <h2>抓拍信息</h2>
-                <div class="struc_cdi_line" v-show="sturcDetail.snapTime">
-                <span>{{sturcDetail.snapTime}}<b>抓拍时间</b></span>
-              </div>
-              <div class="struc_cdi_line" v-show="sturcDetail.snapDevice">
-                <span>{{sturcDetail.snapDevice}}<b>抓拍设备</b></span>
-              </div>
-              <div class="struc_cdi_line" v-show="sturcDetail.snapAddress">
-                <span>{{sturcDetail.snapAddress}}<b>抓拍地址</b></span>
-              </div>
-              <div class="struc_cdi_line" v-show="sturcDetail.plateNo">
-                <span>{{sturcDetail.plateNo}}<b>车牌号</b></span>
-              </div>
-              <div class="struc_cdi_line">
-                <span>{{sturcDetail.vehicleBrand}}</span>
-                <span>{{sturcDetail.vehicleModel}}</span>
-                <span>{{sturcDetail.vehicleClass}}</span>
-                <span>{{sturcDetail.vehicleColor}}</span>
-                <span>{{sturcDetail.vehicleRoof}}</span>
-                <span>{{sturcDetail.vehicleStyles}}</span>
-                <span>{{sturcDetail.feature}}<b>特征</b></span>
-              </div>
-              <div class="struc_cdi_line"></div>
+                <ul class="stru_ul">
+                  <vue-scroll>
+                    <li>
+                      <span>抓拍时间</span>
+                      <span>{{sturcDetail.shotTime ? sturcDetail.shotTime : '无'}}</span>
+                    </li>
+                    <li>
+                      <span>抓拍摄像头</span>
+                      <span :title="sturcDetail.deviceName" class="info_span">{{sturcDetail.deviceName ? sturcDetail.deviceName : '无'}}</span>
+                    </li>
+                    <li>
+                      <span>抓拍地点</span>
+                      <span :title="sturcDetail.address" class="info_span">{{sturcDetail.address ? sturcDetail.address : '无'}}</span>
+                    </li>
+                    <li>
+                      <span>车牌号码</span>
+                      <span>{{sturcDetail.plateNo ? sturcDetail.plateNo : '无'}}</span>
+                    </li>
+                    <li>
+                      <span>号牌颜色</span>
+                      <span>{{sturcDetail.plateColor ? sturcDetail.plateColor : '无'}}</span>
+                    </li>
+                    <li>
+                      <span>车辆型号</span>
+                      <span>{{sturcDetail.vehicleModel ? sturcDetail.vehicleModel : '无'}}</span>
+                    </li>
+                    <li>
+                      <span>车辆颜色</span>
+                      <span>{{sturcDetail.vehicleColor ? sturcDetail.vehicleColor : '无'}}</span>
+                    </li>
+                    <li>
+                      <span>车辆类型</span>
+                      <span>{{sturcDetail.vehicleClass ? sturcDetail.vehicleClass : '无'}}</span>
+                    </li>
+                    <li>
+                      <span>号牌类型</span>
+                      <span>{{sturcDetail.plateClass ? sturcDetail.plateClass : '无'}}</span>
+                    </li>
+                  </vue-scroll>
+                </ul>
             </div>
           </div>
         </div>
@@ -101,7 +119,7 @@
         </div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt="">
+            <img :src="sturcDetail.subStoragePath" alt="" class="bigImg">
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
@@ -118,8 +136,8 @@
       <div class="struc-list">
         <swiper :options="swiperOption" ref="mySwiper">
           <!-- slides -->
-          <swiper-slide v-for="(item, index) in dataList" :key="index + 'isgm'">
-            <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
+          <swiper-slide v-for="(item, index) in allDataList" :key="index + 'isgm'">
+            <div class="swiper_img_item" :class="{'active': item.uid === curImgIndex}" @click="imgListTap(item)">
               <img style="display: block; width: 100%; height: .88rem;" :src="item.subStoragePath" alt="">
             </div>
           </swiper-slide>
@@ -131,6 +149,8 @@
   </div>
 </template>
 <script>
+import { dataList } from '@/utils/data.js';
+import { getDiciData } from '@/views/index/api/api.js';
 import noResult from '@/components/common/noResult.vue';
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { getNightVehicleRecordList, getSnapDetail  }from "@/views/index/api/api.judge.js";
@@ -168,6 +188,7 @@ export default {
       videoUrl: null, // 下载地址
       map: null,
       swiperOption: {
+        initialSlide: 5,
         slidesPerView: 10,
         spaceBetween: 18,
         slidesPerGroup: 10,
@@ -179,30 +200,43 @@ export default {
           prevEl: '.swiper-button-prev',
         },
       },
-      dataList: [],
+      dataList: [], // 分页抓拍记录
+      allDataList: [], // 所有的抓拍记录
       playing: false, // 视频播放是否
-      queryObj: {}
+      queryObj: {},
+      numberTypeList: [], // 号牌种类列表
     }
   },
   created () {
-    console.log('aaa', this.$route.params)
+    // console.log('aaa', this.$route.params)
     this.queryObj = {
-      bayonetIds: this.$route.params.bayonetIds,
-      cameraIds: this.$route.params.cameraIds,
-      endDate: this.$route.params.endDate,
-      endhour: this.$route.params.endhour,
-      startDate: this.$route.params.startDate,
-      startHour: this.$route.params.startHour,
-      minShotTimes: this.$route.params.minShotTimes,
-      vehicleTypes: this.$route.params.vehicleTypes,
-      surveillanceIds: this.$route.params.surveillanceIds,
-      isNextDay: this.$route.params.isNextDay
+      bayonetIds: this.$route.query.bayonetIds,
+      cameraIds: this.$route.query.cameraIds,
+      endDate: this.$route.query.endDate,
+      endhour: this.$route.query.endhour,
+      startDate: this.$route.query.startDate,
+      startHour: this.$route.query.startHour,
+      minShotTimes: this.$route.query.minShotTimes,
+      vehicleTypes: this.$route.query.vehicleTypes,
+      surveillanceIds: this.$route.query.surveillanceIds,
+      isNextDay: this.$route.query.isNextDay
     }
   },
   mounted () {
+    this.getNumberTypeList();
     this.getList();
   },
   methods: {
+    // 获取号牌种类列表
+    getNumberTypeList () {
+      const type = dataList.numberType;
+      getDiciData(type)
+        .then(res => {
+          if (res) {
+            this.numberTypeList = res.data;
+          }
+        })
+    },
     // 播放视频
     videoTap() {
       // 播放视频
@@ -218,14 +252,36 @@ export default {
       });
       this.playing = !this.playing;
     },
+    // 获取所有的抓拍记录
+    getAllList () {
+    
+      this.queryObj['vehicleNumber'] = this.$route.query.vehicleNumber;
+      this.queryObj['order'] = this.pagination.order;
+      this.queryObj['orderBy'] = this.pagination.orderBy;
+
+      const params = {
+        ...this.queryObj,
+        pageSize: 0
+      }
+      getNightVehicleRecordList(params)
+        .then(res => {
+          if (res && res.data) {
+            this.allDataList = res.data.list;
+          }
+        })
+        .catch(() => {})
+    },
     // 获取抓拍记录
     getList () {
-      this.queryObj['vehicleNumber'] = this.$route.params.vehicleNumber;
-      this.queryObj['pageSize'] = this.pagination.pageSize;
+      this.queryObj['vehicleNumber'] = this.$route.query.vehicleNumber;
       this.queryObj['pageNum'] = this.pagination.pageNum;
       this.queryObj['order'] = this.pagination.order;
       this.queryObj['orderBy'] = this.pagination.orderBy;
-      getNightVehicleRecordList( this.queryObj)
+      const params = {
+        ...this.queryObj,
+        pageSize: this.pagination.pageSize
+      }
+      getNightVehicleRecordList(params)
         .then(res => {
           if (res && res.data) {
             this.dataList = res.data.list;
@@ -329,11 +385,31 @@ export default {
      * 打开抓拍弹框
      */
     onOpenDetail (obj) {
-
+      console.log('obj', obj)
+      this.numberTypeList.map(item => {
+        if (item.enumField === obj.plateClass) {
+          obj.plateClass = item.enumValue;
+        }
+      });
       this.sturcDetail = obj;
+      this.curImgIndex = obj.uid;
+
+      let currentIndex;
+      this.allDataList.map((item, index) => {
+        if (item.uid === obj.uid) {
+          currentIndex = index;
+        }
+      })
+
       this.strucDetailDialog = true;
-      this.$nextTick(() => {
-        this.initMap(obj);
+
+      let _this = this;
+
+      _this.$nextTick(() => {
+        _this.getAllList();
+        _this.initMap(obj);
+
+        _this.$refs.mySwiper.slideTo(currentIndex);
       })
     },
     /**
@@ -346,10 +422,18 @@ export default {
     /**
      * 图片切换
      */
-    imgListTap (obj, i) {
-      this.sturcDetail = {};
-      this.curImgIndex = i;
+    imgListTap (obj) {
+      // this.sturcDetail = {};
+
+      this.numberTypeList.map(item => {
+        if (item.enumField === obj.plateClass) {
+          obj.plateClass = item.enumValue;
+        }
+      });
+      
+      this.curImgIndex = obj.uid;
       this.sturcDetail = obj;
+      this.playing = false;
       this.$nextTick(() => {
         this.initMap(obj);
       })
@@ -368,6 +452,7 @@ export default {
   padding-top: 50px;
   .th-ycxc-record-list {
     width: 100%;
+    height: 100%;
     // height: calc(100% - 55px);
     padding: 0 20px;
     background: #f7f9f9;
@@ -468,9 +553,10 @@ export default {
 </style>
 
 <style lang="scss">
+
 .struc_detail_ycxc_dialog {
   .el-dialog {
-    max-width: 13.06rem;
+    max-width: 15rem;
     width: 100%!important;
   }
   .el-dialog__header {
@@ -501,7 +587,7 @@ export default {
   }
   .struc_main {
     width: 11.86rem;
-    height: 4.4rem;
+    height: 5rem;
     margin: 0 auto;
     border-bottom: 1px solid #F2F2F2;
     .download_btn {
@@ -513,26 +599,25 @@ export default {
       text-align: center;
       line-height: 40px;
       position: absolute;
-      top: 4.9rem;
-      right: 0.68rem;
+      color: #666666;
+      top: 5.5rem;
+      right: 1.6rem;
       text-decoration: none;
       color: #B2B2B2;
       cursor: pointer;
       &:hover {
-        background-color: #FFFFFF;
+        background-color: #0C70F8;
         border-color: #0C70F8;
-        color: #0C70F8;
+        color: #FFFFFF;
       }
     }
     .struc_c_detail {
       width:  100%;
-      height: 3.6rem;
-      >div {
-        float: left;
-      }
+      height: 4.2rem;
+      display: flex;
       .struc_c_d_img {
-        width: 3.6rem;
-        height: 3.6rem;
+        width: 4.2rem;
+        height: 4.2rem;
         background: #EAEAEA;
         position: relative;
         img {
@@ -626,7 +711,7 @@ export default {
       .struc_c_d_box {
         width: calc(100% - 3.9rem);
         display: flex;
-        height: 3.6rem;
+        height: 4.2rem;
         box-shadow: 0px 5px 16px 0px rgba(169,169,169,0.2);
         border-radius: 1px;
         position: relative;
@@ -700,36 +785,51 @@ export default {
           float: left;
         }
         .struc_c_d_info {
-          width: calc(100% - 3.6rem);
+          width: calc(100% - 4rem);
           padding-left: .24rem;
           color: #333333;
+
           h2 {
             font-weight: bold;
-            line-height: .74rem;
+            font-size: 18px;
+            margin: 10px 0;
             padding-right: 1rem;
           }
-          .struc_cdi_line {
-            span {
-              /*position: relative;*/
-              max-width: 100%;
-              display: inline-block;
-              height: .3rem;
-              line-height: .3rem;
-              margin-bottom: .08rem;
-              border: 1px solid #F2F2F2;
-              background: #FAFAFA;
-              color: #333333;
-              white-space: nowrap;
-              text-overflow: ellipsis;
-              border-radius:3px;
+           .stru_ul {
+            width: 100%;
+            padding-bottom: 30px;
+            height: calc(100% - 20px);
+            .__view {
+              width: 100% !important;
+              height: 100% !important;
+            }
+            li {
+              margin-bottom: 6px;
+              height: 30px;
+              line-height: 30px;
+              border-radius:2px;
               font-size: 12px;
-              overflow: hidden;
-              padding: 0 .3rem 0 .1rem;
-              margin-right: .08rem;
-              > b {
-                color: #999;
-                font-weight: normal;
-                padding-left: 18px;
+              span:first-child {
+                min-width: 70px;
+                overflow: hidden;
+                display: inline-block;
+                padding: 0 5px;
+                background-color: #FAFAFA;
+                color: #999999;
+                border: 1px solid #F2F2F2;
+              }
+              span:last-child {
+                border: 1px solid #F2F2F2;
+                border-left: none;
+                display: inline-block;
+                overflow: hidden;
+                padding: 0 7px;
+                color: #333333;
+              }
+              .info_span {
+                max-width: 2rem;
+                white-space: nowrap;
+                text-overflow: ellipsis;
               }
             }
           }

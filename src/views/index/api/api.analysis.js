@@ -180,6 +180,29 @@ export function postTaskAnalysis(data) {
   })
 }
 
+/*-------------------------- 人员侦察报告start -------------------------------*/
+/**
+ * getTaskInfosPage
+ * 离线分析任务分页查询接口
+ * @param {object} params
+ */
+export function postTaskInfosPage(params) {
+  return request({
+    url: '/personinvestigation/showtasklist',
+    method: 'post',
+    mode: 'judge',
+    params
+  })
+}
+export function newTaskInfos(params) {
+  return request({
+    url: '/personinvestigation/addinvestigationtask',
+    method: 'post',
+    mode: 'judge',
+    params
+  })
+}
+
 /*-------------------------- 区域人员分析start -------------------------------*/
 /**
  * postShotNumArea
@@ -221,6 +244,18 @@ export function postPeopleTask(data) {
     method: 'post',
     mode: 'judge',
     data
+  })
+}
+/**
+ * getPeopleTaskDetail
+ * 行人同行分析任务详情
+ * @param {String} uid
+ */
+export function getPeopleTaskDetail(data) {
+  return request({
+    url: '/analysisTaskInfos/' + data,
+    method: 'get',
+    mode: 'judge'
   })
 }
 /*-------------------------- 区域人员分析 end -------------------------------*/

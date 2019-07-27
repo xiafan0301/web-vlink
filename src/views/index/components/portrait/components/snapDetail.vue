@@ -16,54 +16,140 @@
       </div>
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
+          <ul>
+          <!-- <li><span>抓拍设备：{{sturcDetail.deviceName}}</span></li> -->
+          <li><span style="line-height: 0.24rem;">抓拍地址：{{sturcDetail.address}}</span></li>
+          <li style="color: #999;line-height: 0.24rem;">{{sturcDetail.shotTime}}</li>
+        </ul>
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt />
+            <img :src="sturcDetail.subStoragePath" class="bigImg" />
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
-            <div class="struc_c_d_img">
-              <img :src="sturcDetail.storagePath" alt />
-              <!-- <i>全景图</i> -->
+            <div class="struc_c_d_qjj struc_c_d_img">
+              <img :src="sturcDetail.storagePath" class="bigImg" />
+              <span>全景图</span>
             </div>
             <div class="struc_c_d_info">
-              <h2>对比信息</h2>
-              <div class="struc_cdi_line simple_line">
-                <span :title="sturcDetail.feature">{{sturcDetail.age}}</span>
+              <h2>分析结果</h2>
+              <div class="struc_cdi_content">
+                <vue-scroll>
+              <!-- <div class="struc_cdi_line simple_line">
+                <p>
+                  <b>抓拍时间</b>
+                  <span>{{sturcDetail.shotTime}}</span>
+                </p>
               </div>
               <div class="struc_cdi_line simple_line">
-                <span :title="sturcDetail.feature">{{sturcDetail.sex}}</span>
+                <p>
+                  <b>抓拍设备</b>
+                  <span>{{sturcDetail.deviceName}}</span>
+                </p>
               </div>
               <div class="struc_cdi_line">
-                <span>
-                  {{sturcDetail.shotTime}}
-                  <i class="vl_icon vl_icon_retrieval_01"></i>
-                </span>
+                <p>
+                  <b>抓拍地址</b>
+                  <span>{{sturcDetail.address}}</span>
+                </p>
+              </div> -->
+              <div class="struc_cdi_line" v-if="sturcDetail.sex">
+                <p>
+                  <b>性别</b>
+                  <span>{{sturcDetail.sex}}</span>
+                </p>
               </div>
-              <div class="struc_cdi_line">
-                <span>
-                  {{sturcDetail.deviceName}}
-                  <i class="vl_icon vl_icon_retrieval_02"></i>
-                </span>
+              <div class="struc_cdi_line" v-if="sturcDetail.age">
+                <p>
+                  <b>年龄段</b>
+                  <span>{{sturcDetail.age}}</span>
+                </p>
               </div>
-              <div class="struc_cdi_line">
-                <span>
-                  {{sturcDetail.address}}
-                  <i class="vl_icon vl_icon_retrieval_04"></i>
-                </span>
+              <div class="struc_cdi_line" v-if="sturcDetail.glasses">
+                <p>
+                  <b>眼镜</b>
+                  <span>{{sturcDetail.glasses}}</span>
+                </p>
               </div>
+              <div class="struc_cdi_line" v-if="sturcDetail.hat">
+                <p>
+                  <b>帽子</b>
+                  <span>{{sturcDetail.hat}}</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line" v-if="sturcDetail.mask">
+                <p>
+                  <b>口罩</b>
+                  <span>{{sturcDetail.mask}}</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line" v-if="sturcDetail.hair">
+                <p>
+                  <b>发型</b>
+                  <span>{{sturcDetail.hair}}</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line" v-if="sturcDetail.upperType">
+                <p>
+                  <b>上身款式</b>
+                  <span>{{sturcDetail.upperType}}</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line" v-if="sturcDetail.upperColor">
+                <p>
+                  <b>上身颜色</b>
+                  <span>{{sturcDetail.upperColor}}</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line" v-if="sturcDetail.bottomType">
+                <p>
+                  <b>下身款式</b>
+                  <span>{{sturcDetail.bottomType}}</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line" v-if="sturcDetail.bottomColor">
+                <p>
+                  <b>下身颜色</b>
+                  <span>{{sturcDetail.bottomColor}}</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line" v-if="sturcDetail.baby">
+                <p>
+                  <b>抱小孩</b>
+                  <span>{{sturcDetail.baby}}</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line" v-if="sturcDetail.bag">
+                <p>
+                  <b>拎东西</b>
+                  <span>{{sturcDetail.bag}}</span>
+                </p>
+              </div>
+           
+              <!-- <div class="struc_cdi_line">
+                <p v-if="sturcDetail.features">
+                  <b>特征</b>
+                  <span>{{sturcDetail.features}}</span>
+                </p>
+                <p class="tz" v-else>
+                  <b>特征</b>
+                  <span>{{sturcDetail.sex+" "+(sturcDetail.age || "")+ " " + (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+" "+ (sturcDetail.baby || "")+ " " + (sturcDetail.bag || "") + " "+(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")+ " " + (sturcDetail.bottomColor || "") +(sturcDetail.bottomType || "")}}</span>
+                </p>
+              </div> -->
               <div class="struc_cdi_line"></div>
+                </vue-scroll>
+              </div>
             </div>
             <span>抓拍信息</span>
           </div>
           <div class="operate_btn" @click="spinToRecog()">身份确认</div>
           <div class="operate_btn margin_btn" @click="spinToGJFX()">轨迹分析</div>
           <div class="operate_btn margin_btn" @click="spinToLJD()">落脚点分析</div>
-          <div class="operate_btn margin_btn" @click="spinToControl()">新建布控任务</div>
+          <div class="operate_btn margin_btn" @click="spinToControl()">新建布控</div>
         </div>
         <div v-show="strucCurTab === 2" class="struc_c_address"></div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt />
+            <img class="bigImg" :src="sturcDetail.subStoragePath" alt />
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
@@ -153,7 +239,7 @@ export default {
         } else {
           setTimeout(() => {
             this.initMap();
-          }, 200)
+          }, 200);
         }
       }
     },
@@ -164,20 +250,21 @@ export default {
         } else {
           setTimeout(() => {
             this.initMap();
-          }, 200)
+          }, 200);
         }
       } else if (e === 3) {
         this.videoUrl = document.getElementById("capVideo").src;
       }
     }
   },
-  mounted() {
-    
-  },
+  mounted() {},
   methods: {
     toogleVisiable(f) {
       this.strucDetailDialog = f;
-      if (this.snapObj.personDetailList && this.snapObj.personDetailList.length > 0) {
+      if (
+        this.snapObj.personDetailList &&
+        this.snapObj.personDetailList.length > 0
+      ) {
         console.log("99999999", this.snapObj);
         this.curImgIndex = 0;
         this.strucCurTab = 1;
@@ -188,7 +275,7 @@ export default {
         } else {
           setTimeout(() => {
             this.initMap();
-          }, 200)
+          }, 200);
         }
       }
     },
@@ -198,22 +285,24 @@ export default {
       this.sturcDetail = item;
       if (this.amap) {
         this.drawPoint(item);
-        } else {
-          setTimeout(() => {
-            this.initMap();
-          }, 200)
-        }
+      } else {
+        setTimeout(() => {
+          this.initMap();
+        }, 200);
+      }
     },
     initMap() {
-      if (this.amap) { return; }
+      if (this.amap) {
+        return;
+      }
       let _this = this;
-      let map = new AMap.Map('capMap', {
+      let map = new AMap.Map("capMap", {
         center: [112.974691, 28.093846],
         zoom: 16
       });
-      map.setMapStyle('amap://styles/whitesmoke');
+      map.setMapStyle("amap://styles/whitesmoke");
       this.amap = map;
-      this.drawPoint(this.sturcDetail);
+      this.drawPoint(_this.sturcDetail);
     },
     drawPoint(data) {
       this.$nextTick(() => {
@@ -223,29 +312,35 @@ export default {
         this.amap.remove(this.markerPoint);
       }
       let _content = '<div class="vl_icon vl_icon_judge_02"></div>';
-      if(data.shotPlaceLongitude && data.shotPlaceLatitude) {
-        console.log("--------------------",data.shotPlaceLongitude , data.shotPlaceLatitude)
+      if (data.shotPlaceLongitude && data.shotPlaceLatitude) {
+        console.log(
+          "--------------------",
+          data.shotPlaceLongitude,
+          data.shotPlaceLatitude
+        );
         this.markerPoint = new AMap.Marker({
-        // 添加自定义点标记
-        map: this.amap,
-        position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-        offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
-        draggable: false, // 是否可拖动
-        // 自定义点标记覆盖物内容
-        content: _content
-      });
-      this.amap.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
-      let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`;
-      this.infoWindow = new AMap.InfoWindow({
-        map: this.amap,
-        isCustom: true,
-        closeWhenClickMap: false,
-        position: [data.shotPlaceLongitude, data.shotPlaceLatitude],
-        offset: new AMap.Pixel(0, -70),
-        content: sConent
-      });
+          // 添加自定义点标记
+          map: this.amap,
+          position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
+          offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+          draggable: false, // 是否可拖动
+          // 自定义点标记覆盖物内容
+          content: _content
+        });
+        this.amap.setZoomAndCenter(16, [
+          data.shotPlaceLongitude,
+          data.shotPlaceLatitude
+        ]); // 自适应点位置
+        let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`;
+        this.infoWindow = new AMap.InfoWindow({
+          map: this.amap,
+          isCustom: true,
+          closeWhenClickMap: false,
+          position: [data.shotPlaceLongitude, data.shotPlaceLatitude],
+          offset: new AMap.Pixel(0, -70),
+          content: sConent
+        });
       }
-      
     },
     videoTap() {
       let vDom = document.getElementById("capVideo");
@@ -271,7 +366,10 @@ export default {
     spinToControl() {
       this.$router.push({
         name: "control_create",
-        query: { imgurl: this.sturcDetail.subStoragePath, modelName: '人员追踪' }
+        query: {
+          imgurl: this.sturcDetail.subStoragePath,
+          modelName: "人员追踪"
+        }
       });
     },
     //跳转到落脚点分析页面
@@ -287,7 +385,7 @@ export default {
         name: "portrait_gjfx",
         query: { imgurl: this.sturcDetail.subStoragePath }
       });
-    },
+    }
   }
 };
 </script>
@@ -327,7 +425,7 @@ export default {
     }
     .struc_main {
       width: 11.46rem;
-      height: 4.4rem;
+      height: 4.88rem;
       margin: 0 auto;
       border-bottom: 1px solid #f2f2f2;
       @mixin btn-style {
@@ -487,6 +585,36 @@ export default {
             z-index: 99;
           }
         }
+        .struc_c_d_qjj {
+          &:before {
+            display: block;
+            content: "";
+            position: absolute;
+            top: -0.5rem;
+            left: -0.5rem;
+            transform: rotate(-45deg);
+            border: 0.5rem solid #50cc62;
+            border-color: transparent transparent #50cc62;
+            z-index: 9;
+          }
+          span {
+            display: block;
+            position: absolute;
+            top: 0.1rem;
+            left: 0.1rem;
+            width: 0.6rem;
+            height: 0.6rem;
+            text-align: center;
+            color: #ffffff;
+            font-size: 0.12rem;
+            -webkit-transform: rotate(-45deg);
+            -moz-transform: rotate(-45deg);
+            -ms-transform: rotate(-45deg);
+            -o-transform: rotate(-45deg);
+            transform: rotate(-45deg);
+            z-index: 99;
+          }
+        }
         .struc_c_d_box {
           width: calc(100% - 3.9rem);
           box-shadow: 0px 5px 16px 0px rgba(169, 169, 169, 0.2);
@@ -495,6 +623,9 @@ export default {
           overflow: hidden;
           > div {
             float: left;
+          }
+          .struc_cdi_content {
+            height: 2.65rem;
           }
           .struc_c_d_info {
             width: calc(100% - 3.6rem);
@@ -546,29 +677,34 @@ export default {
               }
             }
             .struc_cdi_line {
-              span {
-                position: relative;
+              p {
                 max-width: 100%;
-                display: inline-block;
-                height: 0.3rem;
-                line-height: 0.3rem;
+                overflow: hidden;
+                display: table;
+                min-height: 30px;
                 margin-bottom: 0.08rem;
+                padding-right: 10px;
+                margin-right: 0.08rem;
                 border: 1px solid #f2f2f2;
-                background: #fafafa;
-                color: #333333;
                 border-radius: 3px;
                 font-size: 12px;
-                padding: 0 0.1rem;
-                margin-right: 0.08rem;
-                > i {
+                > b {
+                  width: 70px;
+                  background: #fafafa;
+                  color: #999;
+                  font-weight: normal;
+                  padding-right: 10px;
+                  padding-left: 10px;
+                  display: table-cell;
                   vertical-align: middle;
-                  margin-left: 0.1rem;
+                  border-right: 1px solid #f2f2f2;
+                }
+                >span {
+                  display: table-cell;
+                  vertical-align: middle;
+                  padding-left: 5px;
                 }
               }
-            }
-            .simple_line {
-              display: inline-block;
-              margin-right: 8px;
             }
           }
           &:before {

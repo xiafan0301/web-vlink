@@ -1,36 +1,59 @@
 <template>
   <div class="vehicle-info">
-    <div class="">
-      <div is="vlBreadcrumb" 
+    <div class>
+      <div
+        is="vlBreadcrumb"
         :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
-          {name: '车辆档案'}]">
-      </div>
+          {name: '车辆档案'}]"
+      ></div>
       <!-- <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
         <el-breadcrumb-item>车辆档案</el-breadcrumb-item>
-      </el-breadcrumb> -->
+      </el-breadcrumb>-->
     </div>
     <div class="vehicle-info-content">
       <!-- 搜索条件 -->
       <div class="info-left">
         <vue-scroll>
-          <!-- 车牌号搜索 -->
-          <div class="license-plate-search">
-            <el-input v-model="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" clearable></el-input>
-          </div>
           <!-- 时间 -->
-          <div class="time-search">
+          <div class="time-search date-comp">
             <el-date-picker
+                class="vl_date"
+                v-model="searchData.startTime"
+                type="date"
+                :picker-options="startDateOpt"
+                placeholder="开始时间"
+                :clearable="false"
+                format="yyyy-MM-dd HH:mm:ss">
+            </el-date-picker>
+            <!-- <el-date-picker
+              class="vl_date"
               v-model="searchData.time"
               type="daterange"
-              range-separator="-"
+              range-separator="至"
               value-format="yyyy-MM-dd"
-              format="yy/MM/dd"
+              format="yyyy-MM-dd"
               :picker-options="pickerOptions"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
               :clearable="false"
-            ></el-date-picker>
+            ></el-date-picker> -->
+          </div>
+          <div class="time-search date-comp">
+            <el-date-picker
+                class="vl_date vl_date_end"
+                v-model="searchData.endTime"
+                type="date"
+                :picker-options="endDateOpt"
+                placeholder="结束时间"
+                :clearable="false"
+                format="yyyy-MM-dd HH:mm:ss"
+                @change="dateChange">
+            </el-date-picker>
+          </div>
+          <!-- 车牌号搜索 -->
+          <div class="license-plate-search">
+            <el-input v-model="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" clearable></el-input>
           </div>
           <div class="search-btn">
             <el-button @click="resetSearch">重置</el-button>
@@ -116,7 +139,7 @@
                   <el-table-column label="序号" type="index" width="100"></el-table-column>
                   <el-table-column label="违法时间" prop="vioDate" show-overflow-tooltip></el-table-column>
                   <el-table-column label="违法地点" prop="address" show-overflow-tooltip></el-table-column>
-                  <el-table-column label="城市名称" prop="city" show-overflow-tooltip></el-table-column>
+                  <!-- <el-table-column label="城市名称" prop="city" show-overflow-tooltip></el-table-column> -->
                   <el-table-column label="罚款金额" prop="fine" show-overflow-tooltip></el-table-column>
                   <el-table-column label="违章归属地" prop="vioAsPlace" show-overflow-tooltip></el-table-column>
                   <el-table-column label="违法行为" prop="vioName" show-overflow-tooltip></el-table-column>
@@ -133,35 +156,43 @@
 </template>
 <script>
 import { getArchives, getViolation } from "../../../api/api.analysis.js";
-import { formatDate} from '@/utils/util.js';
-import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+import { formatDate } from "@/utils/util.js";
+import vlBreadcrumb from "@/components/common/breadcrumb.vue";
 export default {
-  components: {vlBreadcrumb},
+  components: { vlBreadcrumb },
   data() {
     return {
       searchData: {
         //搜索参数
-        time: null,
+        startTime: "",
+        endTime: "",
         licensePlateNum: null // 车牌号
       },
-      pickerOptions: {
-        disabledDate(time) {
-         /*  let date = new Date();
-          let y = date.getFullYear();
-          let m =
-            date.getMonth() + 1 < 10
-              ? "0" + (date.getMonth() + 1)
-              : date.getMonth() + 1;
-          let d = date.getDate();
-          let threeMonths = "";
-          let start = "";
-          if (parseFloat(m) >= 4) {
-            start = y + "-" + (m - 3) + "-" + d;
+      startDateOpt: {
+        disabledDate: time => {
+          if (this.searchData.endTime) {
+            return (
+              time.getTime() > new Date(this.searchData.endTime).getTime()
+            );
           } else {
-            start = y - 1 + "-" + (m - 3 + 12) + "-" + d;
+            return (
+              time.getTime() > new Date().getTime()
+            );
           }
-          threeMonths = new Date(start).getTime(); */
-          return time.getTime() > Date.now();
+        }
+      },
+      endDateOpt: {
+        disabledDate: time => {
+          if (this.searchData.startTime) {
+            return (
+              time.getTime() < new Date(this.searchData.startTime).getTime() ||
+              time.getTime() > new Date().getTime()
+            );
+          } else {
+            return (
+              time.getTime() > new Date().getTime()
+            );
+          }
         }
       },
       searching: false,
@@ -171,42 +202,44 @@ export default {
   },
   computed: {},
   mounted() {
-    if(this.$route.query.plateNo) {
-      this.searchData.licensePlateNum = this.$route.query.plateNo
+    if (this.$route.query.plateNo) {
+      this.searchData.licensePlateNum = this.$route.query.plateNo;
     }
     this.setDTime();
     this.getSearchData();
   },
   methods: {
     // 验证车牌号方法
-    checkPlateNumber (value) {
+    checkPlateNumber(value) {
       let reg = /^([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})$/;
-      if(value) {
-        if(!reg.test(value)) {
-          this.$message.error('请正确输入车牌号码');
-          return false;
-        }else {
+      if (value) {
+        /* if (!reg.test(value)) {
+          if (!document.querySelector(".el-message")) {
+            this.$message.info("请正确输入车牌号码");
+          }
           return true;
+        } else {
+          return true;
+        } */
+        return true;
+      } else {
+        if (!document.querySelector(".el-message")) {
+          this.$message.info("请输入车牌号码");
         }
-      }else {
-        this.$message.error("请输入车牌号码");
         return false;
       }
     },
     //设置默认时间
     setDTime() {
-      let date = new Date();
-      let curDate = date.getTime();
+      let curDate = new Date(new Date().toLocaleDateString()).getTime()
       let curS = 30 * 24 * 3600 * 1000;
-      let _s =
-        new Date(curDate - curS).getFullYear() +
-        "-" +
-        (new Date(curDate - curS).getMonth() + 1) +
-        "-" +
-        new Date(curDate - curS).getDate();
-      let _e =
-        date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
-      this.searchData.time = [_s, _e];
+      let _s = curDate - curS;
+      let _e = curDate + 24 * 3600 * 1000 - 1;
+      this.searchData.startTime = formatDate(_s);
+      this.searchData.endTime = formatDate(_e);
+    },
+    dateChange() {
+      this.searchData.endTime = new Date(this.searchData.endTime).getTime() + 1 * 24 * 3600 * 1000 - 1;
     },
     //重置
     resetSearch() {
@@ -217,16 +250,15 @@ export default {
     },
     //查询
     search() {
-      if(this.checkPlateNumber(this.searchData.licensePlateNum)) {
+      if (this.checkPlateNumber(this.searchData.licensePlateNum)) {
         this.getSearchData();
       }
     },
     getSearchData() {
-      let params = {};
-      if (this.searchData.time && this.searchData.time.length > 0) {
-        params["dateStart"] = formatDate(this.searchData.time[0],'yyyy-MM-dd') + " 00:00:00";
-        params["dateEnd"] = formatDate(this.searchData.time[1],'yyyy-MM-dd') + " 23:59:59";
-      }
+      let params = {
+        dateStart: formatDate(this.searchData.startTime, "yyyy-MM-dd HH:mm:ss"),
+        dateEnd: formatDate(this.searchData.endTime, "yyyy-MM-dd HH:mm:ss"),
+      };
       if (this.searchData.licensePlateNum) {
         params["plateNo"] = this.searchData.licensePlateNum;
       } else {
@@ -403,11 +435,16 @@ export default {
     .el-date-editor--timerange.el-input__inner {
       width: 232px;
     }
+    .el-date-editor.el-input,
+    .el-date-editor.el-input__inner {
+      width: 232px;
+    }
   }
   //搜索按钮
   .search-btn {
     width: 232px;
     text-align: center;
+    padding-top: 10px;
     .el-button {
       width: 45%;
     }

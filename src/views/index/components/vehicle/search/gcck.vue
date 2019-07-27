@@ -16,7 +16,6 @@
             <div class="gcck_ll_s">
               <el-input
                 placeholder="搜索设备"
-                size="small"
                 @keyup.enter.native="getTreeList1()"
                 v-model="searchVal1">
                 <i slot="suffix" @click="getTreeList1()" class="el-input__icon el-icon-search" style="font-size: 20px;"></i>
@@ -29,30 +28,34 @@
             </div>
           </div>
           <div v-show="showType === 2">
-            <div class="gcck_ll_s" style="height: 100px;">
-              <el-date-picker style="width: 236px;" size="small"
-                v-model="searchTime2"
-                type="daterange"
+            <div class="gcck_ll_s" style="height: 165px;">
+              <el-date-picker style="width: 236px;"
+                class="vl_date"
+                v-model="searchTime2[0]"
+                type="date"
                 align="left"
-                unlink-panels
                 :editable="false"
                 :clearable="false"
-                range-separator="至"
-                start-placeholder="开始日期"
-                @change="pickerChanged"
-                :picker-options="pickerOptions"
-                end-placeholder="结束日期">
+                :picker-options="pickerOptions">
+              </el-date-picker>
+              <el-date-picker style="width: 236px; margin-top: 10px"
+                class="vl_date vl_date_end"
+                v-model="searchTime2[1]"
+                type="date"
+                align="left"
+                :editable="false"
+                :clearable="false"
+                :picker-options="pickerOptions">
               </el-date-picker>
               <el-input
                 style="margin-top: 10px"
                 placeholder="搜索设备"
-                size="small"
                 @keyup.enter.native="getTreeList2()"
                 v-model="searchVal2">
                 <i slot="suffix" @click="getTreeList2()" class="el-input__icon el-icon-search" style="font-size: 20px;"></i>
               </el-input>
             </div>
-            <div class="gcck_ll_l" style="padding-top: 100px;">
+            <div class="gcck_ll_l" style="padding-top: 165px;">
               <div>
                 <div is="dbTree" @selectItem="selectItem2" :likeKey="searchVal2" :doSearch="doSearch2"></div>
               </div>
@@ -83,7 +86,7 @@
               <template v-if="zpList && zpList.length > 0">
                 <li v-for="(item, index) in zpList" :key="'jrzp_' + index">
                   <div class="vc_gcck_rbl">
-                    <p @click="goToDetail(item.plateNo)">
+                    <p @click="goToDetail(index)">
                       <img :title="item.deviceName" :alt="item.deviceName" :src="item.subStoragePath">
                     </p>
                     <div class="com_ellipsis"><i class="vl_icon vl_icon_sm_sj"></i>{{item.shotTime}}</div>
@@ -99,16 +102,23 @@
             </ul>
           </div>
           <div class="vc_gcck_r" v-else-if="videoTotal === 0">
-            <p class="vc_gcck_r_empty">暂无设备，您可以选择查看其它摄像头或卡口</p>
+            <div class="vc_gcck_r_empty">
+              <div class="com_trans50_lt">
+                <img src="../../../../../assets/img/null-content.png" alt="">
+                <p>暂无设备，您可以选择查看其它摄像头或卡口</p>
+              </div>
+            </div>
           </div>
           <div class="vc_gcck_r" v-else>
-            <p class="vc_gcck_r_empty">选择左侧的摄像头或卡口进行查看</p>
+            <div class="vc_gcck_r_empty">
+              <div class="com_trans50_lt">
+                <img src="../../../../../assets/img/null-content.png" alt="">
+                <p>选择左侧的摄像头或卡口进行查看</p>
+              </div>
+            </div>
           </div>
         </div>
         <div class="vc_gcck_r_C" v-show="showType === 2">
-          <!-- <div class="vc_gcck_r">
-            <p class="vc_gcck_r_empty">选择左侧的摄像头或卡口进行查看</p>
-          </div> -->
           <div class="gcck_rh" style="overflow: auto;" v-if="zpDeviceIdsHis && picList.length > 0">
             <div>
               <div class="gcck_rh_tos">
@@ -127,11 +137,11 @@
                   <li v-for="(item, index) in picList" :key="'p_l_' + index">
                     <div>
                       <p>
-                        <img :title="item.plateNo" :alt="item.plateNo" :src="item.imagePath">
+                        <img class="bigImg" :title="item.plateNo" :alt="item.plateNo" :src="item.storagePath">
                       </p>
-                      <div class="gcck_rh_ft"><i class="vl_icon gcck_sxt"></i>{{item.deviceName}}</div>
-                      <div><i class="vl_icon gcck_cl"></i>{{item.plateNo}}</div>
-                      <div><i class="vl_icon gcck_sj"></i>{{item.snapTime}}</div>
+                      <div class="gcck_rh_ft"><i class="vl_icon vl_icon_sm_sxt"></i>{{item.deviceName}}</div>
+                      <div><i class="vl_icon vl_icon_sm_cl"></i>{{item.plateNo}} </div>
+                      <div><i class="vl_icon vl_icon_sm_sj"></i>{{item.shotTime}} </div>
                     </div>
                   </li>
                 </ul>
@@ -141,21 +151,38 @@
             </div>
           </div>
           <div class="vc_gcck_r" v-else-if="zpDeviceIdsHis && picList.length <= 0">
-            <p class="vc_gcck_r_empty">暂无数据</p>
+            <div class="vc_gcck_r_empty">
+              <div class="com_trans50_lt">
+                <img src="../../../../../assets/img/null-content.png" alt="">
+                <p>暂无数据</p>
+              </div>
+            </div>
           </div>
           <div class="vc_gcck_r" v-else-if="!zpDeviceIdsHis && picCKEmpty">
-            <p class="vc_gcck_r_empty">该卡口没有摄像头</p>
+            <div class="vc_gcck_r_empty">
+              <div class="com_trans50_lt">
+                <img src="../../../../../assets/img/null-content.png" alt="">
+                <p>该卡口没有摄像头</p>
+              </div>
+            </div>
           </div>
           <div class="vc_gcck_r" v-else>
-            <p class="vc_gcck_r_empty">选择左侧的摄像头或卡口进行查看</p>
+            <div class="vc_gcck_r_empty">
+              <div class="com_trans50_lt">
+                <img src="../../../../../assets/img/null-content.png" alt="">
+                <p>选择左侧的摄像头或卡口进行查看</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
+    <div is="vehicleDetail" :detailData="detailData"></div>
   </div>
 </template>
 <script>
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+import vehicleDetail from '../common/vehicleDetail.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 import dbTree from '@/components/common/dbTree.vue';
 import {getDeviceByBayonetUid, getDeviceDetailById} from '../../../api/api.base.js';
@@ -163,10 +190,11 @@ import {MapGETmonitorList} from '../../../api/api.map.js';
 import {getDeviceSnapImagesSum, getDeviceSnapImagesPage} from '../../../api/api.judge.js';
 import {formatDate} from '@/utils/util.js';
 export default {
-  components: {vlBreadcrumb, flvplayer, dbTree},
+  components: {vlBreadcrumb, flvplayer, dbTree, vehicleDetail},
   data () {
     let nDate = new Date();
     return {
+      detailData: null,
       showType: 1, // 1实时过车  2历史过车
       videoTotal: null, // 1 / 2 / 8
       videoList: [],
@@ -189,11 +217,12 @@ export default {
       picListAll: [],
       zpDeviceIdsHis: '',
       zpBId: '',
+      jrZpIntval: null,
 
       picTotal: 0,
       picIndex: 1,
       picPlayTime: 3,
-      picPageSize: 100,
+      picPageSize: 30,
       picPageNum: 1,
       picPages: 0,
       
@@ -229,18 +258,16 @@ export default {
     }
   },
   methods: {
-    goToDetail (plateNo) {
-      this.$store.commit('setBreadcrumbData', {
-        breadcrumbData: [
-          {name: '车辆侦查', routerName: 'vehicle'},
-          {name: '过车查看', routerName: 'vehicle_search_gcck', query: {'deviceIds': this.zpDeviceIds, bId: this.zpBId}},
-          {name: '全部抓拍'}
-        ]
-      });
-      this.$router.push({name: 'vehicle_search_clcxdetail', query: {
-        breadcrumb: 2,
-        plateNo: plateNo
-      }});
+    goToDetail (index) {
+      this.detailData = {
+        type: 1, // 1过车查看
+        params: this.getSearchParams(), // 查询参数
+        list: this.zpList, // 列表
+        index: index, // 第几个
+        pageSize: 8,
+        total: this.zpTotal,
+        pageNum: 1
+      }
     },
 
     goToZP () {
@@ -253,6 +280,7 @@ export default {
     },
     selectItem (type, item) {
       console.log(type, item);
+      this.jrZpIntvalFn();
       let ids = '';
       if (type === 1) { // deviceName
         this.videoTotal = 1;
@@ -265,10 +293,11 @@ export default {
           }
         ];
         ids = item.uid;
-        this.getDeviceSnapSum(ids);
-        this.getDeviceSnapPage(ids);
         this.zpDeviceIds = ids;
         this.zpBId = '';
+        this.getDeviceSnapSum(ids);
+        this.getDeviceSnapPage(ids);
+        this.jrZpIntvalFn(ids);
       } else if (type === 2) {
         getDeviceByBayonetUid({
           bayonetUid: item.uid
@@ -320,10 +349,11 @@ export default {
               });
               if (ids && ids.length > 0) { ids = ids.substring(0, ids.length - 1); }
               this.videoList = vList;
-              this.getDeviceSnapSum(ids);
-              this.getDeviceSnapPage(ids);
               this.zpDeviceIds = ids;
               this.zpBId = item.uid;
+              this.getDeviceSnapSum(ids);
+              this.getDeviceSnapPage(ids);
+              this.jrZpIntvalFn(ids);
             }
             // this.zpTotal = res.data[0].snapImagesCount;
             // this.zpList = res.data.slice(0, 10);
@@ -333,9 +363,33 @@ export default {
       }
     },
 
-    getDeviceSnapSum (dId) {
+    jrZpIntvalFn (dId) {
+      if (this.jrZpIntval) {
+        window.clearInterval(this.jrZpIntval);
+      }
+      if (dId) {
+        this.jrZpIntval = window.setInterval(() => {
+          this.getDeviceSnapSum (dId);
+          this.getDeviceSnapPage (dId);
+        }, 5 * 1000);
+      }
+    },
+
+
+    getSearchParams () {
+      return {
+        where: {
+          deviceIds: this.zpDeviceIds,
+          startTime: formatDate(new Date(), 'yyyy-MM-dd 00:00:00'),
+          endTime: formatDate(new Date(), 'yyyy-MM-dd 23:59:59')
+        }
+      }
+    },
+
+    getDeviceSnapSum () {
+      /* let params = this.getSearchParams();
       getDeviceSnapImagesSum({
-        deviceIds: dId,
+        deviceIds: this.zpDeviceIds,
         startTime: formatDate(new Date(), 'yyyy-MM-dd 00:00:00'),
         endTime: formatDate(new Date(), 'yyyy-MM-dd 23:59:59'),
       }).then(res => {
@@ -346,23 +400,21 @@ export default {
         } else {
           this.zpTotal = 0;
         }
-      });
+      }); */
     },
 
-    getDeviceSnapPage (dId) {
-      getDeviceSnapImagesPage({
-        where: {
-          deviceIds: dId,
-          startTime: formatDate(new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd 00:00:00'),
-          endTime: formatDate(new Date(), 'yyyy-MM-dd 23:59:59')
-        },
+    getDeviceSnapPage () {
+      let params = Object.assign(this.getSearchParams(), {
         pageNum: 1,
         pageSize: 8
-      }).then(res => {
+      });
+      getDeviceSnapImagesPage(params).then(res => {
         if (res && res.data) {
           this.zpList = res.data.list;
+          this.zpTotal = res.data.total;
         } else {
           this.zpList = [];
+          this.zpTotal = 0;
         }
       });
     },
@@ -509,17 +561,18 @@ export default {
     getTreeList2 () {
       this.doSearch2 = {};
     },
-    pickerChanged () {
+    /* pickerChanged () {
       if ((this.searchTime2[1].getTime() - this.searchTime2[0].getTime()) > 2 * 24 * 60 * 60 * 1000) {
         this.searchTime2[1] = new Date(this.searchTime2[0].getTime() + 2 * 24 * 60 * 60 * 1000);
         this.$message('最多不能超过72小时.');
       }
-    }
+    } */
   },
   beforeDestroy () {
     if (this.picAntoPlayInval) {
       window.clearInterval(this.picAntoPlayInval);
     }
+    this.jrZpIntvalFn();
   }
 }
 </script>
@@ -697,9 +750,13 @@ export default {
           }
         }
         > .vc_gcck_r_empty {
-          padding-top: 20px;
           text-align: center;
           color: #999;
+          height: 100%;
+          position: relative;
+          > div {
+            position: absolute;
+          }
         }
       }
     }
@@ -720,7 +777,7 @@ export default {
     > .gcck_rh_list {
       position: absolute; top: 50%; left: 50%;
       margin-left: -280px; margin-top: -260px;
-      width: 520px; overflow: hidden;
+      width: 520px; height: 520px; overflow: hidden;
       > ul {
         padding: 0 20px;
         width: 60000px;
@@ -728,7 +785,7 @@ export default {
         transition: all .4s ease-in;
         > li {
           float: left;
-          height: 520px;
+          width: 500px; height: 520px;
           padding: 10px 40px;
           > div {
             height: 500px;
@@ -744,14 +801,15 @@ export default {
             }
             > div {
               position: relative;
-              padding-left: 20px; padding-bottom: 5px;
+              padding-left: 20px;
               color: #999;
+              height: 20px; line-height: 20px;
+              margin-bottom: 5px;
               > i {
                 position: absolute; left: 0; top: 2px;
               }
               &.gcck_rh_ft {
                 color: #333;
-                padding-bottom: 12px;
               }
             }
           }

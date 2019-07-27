@@ -5,9 +5,9 @@
 const oDomains = {
     // 默认ajax地址
     base: {
-      dev: 'https://apidev.aorise.org/vlink-base',
-      // dev: 'http://10.116.64.23:8081',
-      // dev: 'http://10.116.64.142:8081',
+      // dev: 'https://apidev.aorise.org/vlink-base',
+      dev: 'http://10.116.64.231:8081',
+      // dev: 'https://apidev.aorise.org/vlink-base',
       // dev: 'http://10.116.66.29:8082',// 钟赞
       test: 'https://apirel.aorise.org/vlink-base',
       prod: 'https://apirel.aorise.org/vlink-base'
@@ -47,8 +47,10 @@ const oDomains = {
     judge: {
         // dev: 'http://10.116.64.127:8082',
         // dev: 'http://10.116.64.109:8082',
-        // dev: 'https://apirel.aorise.org/vlink-judge/',
+        // dev: 'http://10.116.64.97:8081',
+        // dev: 'http://10.116.64.231:8087',
         dev: 'https://apidev.aorise.org/vlink-judge/',
+        // dev: 'https://apirel.aorise.org/vlink-judge/',
         test: 'https://apirel.aorise.org/vlink-judge/',
         prod: 'https://apirel.aorise.org/vlink-judge/',
     },
@@ -111,6 +113,11 @@ const oDomains = {
       dev: 'http://apidev.aorise.org/vlink-judge',
       test: 'http://10.116.65.15:8081',
       prod: 'https://apidev.aorise.org/vlink-buz-judge-analysis'
+    },
+    structuring: {
+      dev: 'https://apidev.aorise.org/vlink-structuring',
+      test: 'https://apirel.aorise.org/vlink-structuring',
+      prod: 'https://apirel.aorise.org/vlink-structuring',
     }
 };
 let ENV_API = process.env.VUE_APP_API;
@@ -163,6 +170,7 @@ export const webrtcConfig = {
 // cookie名
 export const cookieUserId = 'AS.VLINK.USERID';
 export const cookieUserName = 'AS.VLINK.USERNAME';
+export const cookiePassword = 'AS.VLINK.PASSWORD';
 // cookie默认有效时间（小时）
 export const cookieTime = 24;
 
