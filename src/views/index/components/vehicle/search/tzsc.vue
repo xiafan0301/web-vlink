@@ -411,160 +411,13 @@
     </el-dialog>
 
     <!--检索详情弹窗-->
-    <el-dialog
-      :visible.sync="strucDetailDialog"
-      class="struc_detail_dialog"
-      :close-on-click-modal="false"
-      top="4vh"
-      :show-close="false"
-    >
-      <div class="struc_tab">
-        <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">抓拍详情</span>
-        <span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>
-        <span :class="{'active': strucCurTab === 3}" @click="strucCurTab = 3">视频回放</span>
-        <i class="el-icon-close" @click="strucDetailDialog = false"></i>
-      </div>
-      <div class="struc_main">
-        <div v-show="strucCurTab === 1" class="struc_c_detail">
-          <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.storagePath" class="bigImg" title="点击放大图片" alt />
-            <span>全景图</span>
-          </div>
-          <div class="struc_c_d_box">
-            <div class="struc_c_d_img struc_c_d_img_green">
-              <img :src="sturcDetail.subStoragePath" class="bigImg" title="点击放大图片" alt />
-              <span>抓拍图</span>
-            </div>
-            <div class="struc_c_d_info">
-              <vue-scroll>
-                <h2>抓拍信息</h2>
-                <!-- 特征展示框 -->
-                <!-- <div class="struc_cdi_box">
-                <div
-                  class="item"
-                  v-if="sturcDetail.plateReliability"
-                >{{sturcDetail.plateReliability}}</div>
-                <div class="item" v-if="sturcDetail.vehicleBrand">{{ sturcDetail.vehicleBrand}}</div>
-                <div class="item" v-if="sturcDetail.sunvisor">{{ '遮阳板：' + sturcDetail.sunvisor}}</div>
-                <div
-                  class="item"
-                  v-if="sturcDetail.plateColor"
-                >{{ '车牌颜色：' + sturcDetail.plateColor}}</div>
-                <div class="item" v-if="sturcDetail.plateNo">{{ sturcDetail.plateNo}}</div>
-                <div class="item" v-if="sturcDetail.vehicleClass">{{ sturcDetail.vehicleClass}}</div>
-                <div
-                  class="item"
-                  v-if="sturcDetail.vehicleColor"
-                >{{ '车辆颜色：' + sturcDetail.vehicleColor}}</div>
-                <div class="item" v-if="sturcDetail.vehicleModel">{{sturcDetail.vehicleModel}}</div>
-                <div
-                  class="item"
-                  v-if="sturcDetail.vehicleRoof"
-                >{{ '车顶(天窗)：' + sturcDetail.vehicleRoof}}</div>
-                </div>-->
-                <!-- 车辆的信息栏 -->
-                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.shotTime">
-                  <p class="line_content">
-                    <span class="key">抓拍时间</span>
-                    <span class="val">{{sturcDetail.shotTime}}</span>
-                  </p>
-                </div>
-                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.deviceName">
-                  <p class="line_content">
-                    <span class="key">抓拍设备</span>
-                    <span class="val">{{sturcDetail.deviceName}}</span>
-                  </p>
-                </div>
-                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.address">
-                  <p class="line_content">
-                    <span class="key" title="抓拍地点">抓拍地点</span>
-                    <span class="val">{{sturcDetail.address}}</span>
-                  </p>
-                </div>
-                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.plateNo">
-                  <p class="line_content">
-                    <span class="key">车牌号码</span>
-                    <span class="val">{{sturcDetail.plateNo}}</span>
-                  </p>
-                </div>
-                <!-- 5个特征 -->
-                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.plateColor">
-                  <p class="line_content">
-                    <span class="key">车牌颜色</span>
-                    <span class="val">{{sturcDetail.plateColor}}</span>
-                  </p>
-                </div>
-                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.vehicleModel">
-                  <p class="line_content">
-                    <span class="key">车辆型号</span>
-                    <span class="val">{{sturcDetail.vehicleModel}}</span>
-                  </p>
-                </div>
-                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.vehicleColor">
-                  <p class="line_content">
-                    <span class="key">车辆颜色</span>
-                    <span class="val">{{sturcDetail.vehicleColor}}</span>
-                  </p>
-                </div>
-                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.vehicleClass">
-                  <p class="line_content">
-                    <span class="key">车辆类型</span>
-                    <span class="val">{{sturcDetail.vehicleClass}}</span>
-                  </p>
-                </div>
-                <div
-                  class="struc_cdi_line_tzsc"
-                  v-if="sturcDetail.plateClass || sturcDetail.plateClass === 0"
-                >
-                  <p class="line_content">
-                    <span class="key">号牌类型</span>
-                    <span class="val">{{dicFormater(45, sturcDetail.plateClass)}}</span>
-                  </p>
-                </div>
-              </vue-scroll>
-            </div>
-          </div>
-        </div>
-        <div v-show="strucCurTab === 2" class="struc_c_address"></div>
-        <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
-          <div class="struc_c_d_qj struc_c_d_img">
-            <img class="bigImg" title="点击放大图片" :src="sturcDetail.subStoragePath" alt />
-            <span>抓拍图</span>
-          </div>
-          <div class="struc_c_d_box">
-            <video id="capVideo" :src="sturcDetail.videoPath"></video>
-            <div class="play_btn" @click="videoTap" v-show="!playing">
-              <i class="vl_icon vl_icon_judge_01" v-if="playing"></i>
-              <i class="vl_icon vl_icon_control_09" v-else></i>
-            </div>
-          </div>
-          <div class="download_btn">
-            <a download="视频" :href="videoUrl"></a>下载视频
-          </div>
-        </div>
-      </div>
-      <div class="struc-list" v-show="strucInfoList.length > 1">
-        <swiper :options="swiperOption" ref="mySwiper">
-          <!-- slides -->
-          <swiper-slide v-for="(item, index) in strucInfoList" :key="'my_swiper' + index">
-            <div
-              class="swiper_img_item"
-              :class="{'active': index === curImgIndex}"
-              @click="imgListTap(item, index)"
-            >
-              <img style="width: 100%; height: .88rem;" :src="item.subStoragePath" alt />
-            </div>
-          </swiper-slide>
-          <div class="swiper-button-prev" slot="button-prev"></div>
-          <div class="swiper-button-next" slot="button-next"></div>
-        </swiper>
-      </div>
-    </el-dialog>
     <div id="capMap"></div>
+    <div is="vehicleDetail" :detailData="detailData"></div>
   </div>
 </template>
 <script>
 import vlBreadcrumb from "@/components/common/breadcrumb.vue";
+import vehicleDetail from '../common/vehicleDetail.vue';
 
 import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入溆浦县地图
 import { formatDate } from "@/utils/util.js";
@@ -586,8 +439,11 @@ import { objDeepCopy } from "../../../../../utils/util.js"; // 深拷贝方法
 import { constants } from "crypto";
 
 export default {
+  components: {vehicleDetail, vlBreadcrumb},
   data() {
     return {
+      detailData: null,
+
       selectType: 1, // 图片提取或者自定义提取
       sortType: 1, // 1为时间排序， 2为监控排序
       timeSortType: true, // true为时间降序， false为时间升序
@@ -787,29 +643,6 @@ export default {
       pageSize: 10,
       total: 0,
       /* 检索详情弹窗变量 */
-      swiperOption: {
-        // swiper配置
-        slidesPerView: 10,
-        spaceBetween: 18,
-        slidesPerGroup: 10,
-        loop: false,
-        slideToClickedSlide: true,
-        loopFillGroupWithBlank: true,
-        navigation: {
-          nextEl: ".swiper-button-next",
-          prevEl: ".swiper-button-prev"
-        }
-      },
-      amap: null, // 地图实例
-      markerPoint: null, // 地图点集合
-      InfoWindow: null,
-      strucDetailDialog: false, // 弹窗是否展示
-      playing: false, // 视频播放是否
-      strucCurTab: 1,
-      showSim: false, // 展示相似度排序
-      curImgIndex: 0, // 当前图片index
-      sturcDetail: {},
-      videoUrl: "" // 弹窗视频回放里的视频
     };
   },
   computed: {
@@ -837,7 +670,6 @@ export default {
       }
     }
   },
-  components: { vlBreadcrumb },
   mounted() {
     // 初始化地图
     let map = new AMap.Map("capMap", {
@@ -889,6 +721,108 @@ export default {
         });
       });
     },
+    getStrucParams () {
+      // 处理设备UID
+      let deviceUidArr = this.selectCameraArr.map(item => {
+        return item.id;
+      });
+      let bayonetUidArr = this.selectBayonetArr.map(item => {
+        return item.id;
+      });
+      let queryParams;
+      if (this.selectType === 2) {
+        queryParams = {
+          where: {
+            startTime:
+              formatDate(this.tzscMenuForm.startTime, "yyyy-MM-dd") +
+              " 00:00:00", // 开始时间
+            endTime:
+              formatDate(this.tzscMenuForm.endTime, "yyyy-MM-dd") +
+              " 23:59:59", // 结束时间
+            deviceUid: deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
+            bayonetUid:
+              bayonetUidArr.length > 0 ? bayonetUidArr.join() : null, // 卡口标识
+            plateClass: this.tzscMenuForm.licenseType || null, // 号牌类型
+            plateColor: this.tzscMenuForm.licenseColor || null, // 号牌颜色
+            vehicleClass: this.tzscMenuForm.carType || null, // 车辆类型
+            vehicleColor: this.tzscMenuForm.carColor || null, // 车辆颜色
+            // "sunvisor": this.tzscMenuForm.sunVisor || null, // 遮阳板
+            // "descOfRearItem": this.tzscMenuForm.inspectionCount || null, // 年检标数量
+            vehicleNumber: null, // 车牌号码
+            vehicleModel:
+              this.tzscMenuForm.carModel.length > 0
+                ? this.tzscMenuForm.carModel.join("-")
+                : null // 车辆型号
+          }
+        };
+      } else {
+        // 从图片提取
+        queryParams = {
+          where: {
+            startTime:
+              formatDate(this.tzscMenuForm.startTime, "yyyy-MM-dd") +
+              " 00:00:00", // 开始时间
+            endTime:
+              formatDate(this.tzscMenuForm.endTime, "yyyy-MM-dd") +
+              " 23:59:59", // 结束时间
+            deviceUid: deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
+            bayonetUid:
+              bayonetUidArr.length > 0 ? bayonetUidArr.join() : null // 卡口标识
+          }
+        };
+        const selectedArr = this.characteristicList.filter(item => {
+          return item.checked;
+        });
+        for (let i = 0; i < selectedArr.length; i++) {
+          if (selectedArr[i].plateClass) {
+            // 号牌类型
+            queryParams["where"].plateClass = selectedArr[i].plateClass;
+          }
+          if (selectedArr[i].plateColor) {
+            queryParams["where"].plateColor = selectedArr[i].plateColor;
+          }
+          if (selectedArr[i].vehicleClass) {
+            queryParams["where"].vehicleClass = selectedArr[i].vehicleClass;
+          }
+          if (selectedArr[i].vehicleColor) {
+            queryParams["where"].vehicleColor = selectedArr[i].vehicleColor;
+          }
+          // if (selectedArr[i].sunvisor) { // 遮阳板
+          //   queryParams['where'].sunvisor = selectedArr[i].sunvisor;
+          // }
+          // if (selectedArr[i].descOfFrontItem) { // 年检标数量
+          //   queryParams['where'].descOfRearItem = selectedArr[i].descOfFrontItem;
+          // }
+          if (selectedArr[i].plateNo) {
+            // 车牌
+            queryParams["where"].vehicleNumber = selectedArr[i].plateNo;
+          }
+          if (selectedArr[i].vehicleModel) {
+            // 车辆型号
+            queryParams["where"].vehicleModel = selectedArr[i].vehicleModel;
+          }
+        }
+      }
+      // 处理排序字段
+      if (this.sortType === 1) {
+        // 时间排序
+        queryParams.orderBy = "shotTime";
+        if (this.timeSortType) {
+          queryParams.order = "desc";
+        } else {
+          queryParams.order = "asc";
+        }
+      } else if (this.sortType === 2) {
+        // 监控排序
+        queryParams.orderBy = "deviceNamePinyin";
+        if (this.cameraSortType) {
+          queryParams.order = "desc";
+        } else {
+          queryParams.order = "asc";
+        }
+      }
+      return queryParams;
+    },
     getStrucInfo(isClick = false) {
       // 根据特征数组来获取到检索的结果
       this.$refs.tzscMenuForm.validate(valid => {
@@ -903,109 +837,10 @@ export default {
             this.getStrucInfoLoading = false; // 关闭加载效果
             return;
           }
-          // 处理设备UID
-          let deviceUidArr = this.selectCameraArr.map(item => {
-            return item.id;
+          let queryParams = Object.assign(this.getStrucParams(), {
+            pageNum: this.pageNum,
+            pageSize: this.pageSize
           });
-          let bayonetUidArr = this.selectBayonetArr.map(item => {
-            return item.id;
-          });
-          let queryParams;
-          if (this.selectType === 2) {
-            queryParams = {
-              where: {
-                startTime:
-                  formatDate(this.tzscMenuForm.startTime, "yyyy-MM-dd") +
-                  " 00:00:00", // 开始时间
-                endTime:
-                  formatDate(this.tzscMenuForm.endTime, "yyyy-MM-dd") +
-                  " 23:59:59", // 结束时间
-                deviceUid: deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
-                bayonetUid:
-                  bayonetUidArr.length > 0 ? bayonetUidArr.join() : null, // 卡口标识
-                plateClass: this.tzscMenuForm.licenseType || null, // 号牌类型
-                plateColor: this.tzscMenuForm.licenseColor || null, // 号牌颜色
-                vehicleClass: this.tzscMenuForm.carType || null, // 车辆类型
-                vehicleColor: this.tzscMenuForm.carColor || null, // 车辆颜色
-                // "sunvisor": this.tzscMenuForm.sunVisor || null, // 遮阳板
-                // "descOfRearItem": this.tzscMenuForm.inspectionCount || null, // 年检标数量
-                vehicleNumber: null, // 车牌号码
-                vehicleModel:
-                  this.tzscMenuForm.carModel.length > 0
-                    ? this.tzscMenuForm.carModel.join("-")
-                    : null // 车辆型号
-              },
-              pageNum: this.pageNum,
-              pageSize: this.pageSize
-            };
-          } else {
-            // 从图片提取
-            queryParams = {
-              where: {
-                startTime:
-                  formatDate(this.tzscMenuForm.startTime, "yyyy-MM-dd") +
-                  " 00:00:00", // 开始时间
-                endTime:
-                  formatDate(this.tzscMenuForm.endTime, "yyyy-MM-dd") +
-                  " 23:59:59", // 结束时间
-                deviceUid: deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
-                bayonetUid:
-                  bayonetUidArr.length > 0 ? bayonetUidArr.join() : null // 卡口标识
-              },
-              pageNum: this.pageNum,
-              pageSize: this.pageSize
-            };
-            const selectedArr = this.characteristicList.filter(item => {
-              return item.checked;
-            });
-            for (let i = 0; i < selectedArr.length; i++) {
-              if (selectedArr[i].plateClass) {
-                // 号牌类型
-                queryParams["where"].plateClass = selectedArr[i].plateClass;
-              }
-              if (selectedArr[i].plateColor) {
-                queryParams["where"].plateColor = selectedArr[i].plateColor;
-              }
-              if (selectedArr[i].vehicleClass) {
-                queryParams["where"].vehicleClass = selectedArr[i].vehicleClass;
-              }
-              if (selectedArr[i].vehicleColor) {
-                queryParams["where"].vehicleColor = selectedArr[i].vehicleColor;
-              }
-              // if (selectedArr[i].sunvisor) { // 遮阳板
-              //   queryParams['where'].sunvisor = selectedArr[i].sunvisor;
-              // }
-              // if (selectedArr[i].descOfFrontItem) { // 年检标数量
-              //   queryParams['where'].descOfRearItem = selectedArr[i].descOfFrontItem;
-              // }
-              if (selectedArr[i].plateNo) {
-                // 车牌
-                queryParams["where"].vehicleNumber = selectedArr[i].plateNo;
-              }
-              if (selectedArr[i].vehicleModel) {
-                // 车辆型号
-                queryParams["where"].vehicleModel = selectedArr[i].vehicleModel;
-              }
-            }
-          }
-          // 处理排序字段
-          if (this.sortType === 1) {
-            // 时间排序
-            queryParams.orderBy = "shotTime";
-            if (this.timeSortType) {
-              queryParams.order = "desc";
-            } else {
-              queryParams.order = "asc";
-            }
-          } else if (this.sortType === 2) {
-            // 监控排序
-            queryParams.orderBy = "deviceNamePinyin";
-            if (this.cameraSortType) {
-              queryParams.order = "desc";
-            } else {
-              queryParams.order = "asc";
-            }
-          }
           getFeatureSearch(queryParams)
             .then(res => {
               this.getStrucInfoLoading = false; // 关闭加载效果
@@ -1348,6 +1183,18 @@ export default {
       this.playing = !this.playing;
     },
     showStrucInfo(data, index) {
+      // strucInfoList
+      this.detailData = {
+        type: 2, // 2特征搜车
+        params: this.getStrucParams(), // 查询参数
+        list: this.strucInfoList, // 列表
+        index: index, // 第几个
+        pageSize: this.pageSize,
+        total: this.total,
+        pageNum: this.pageNum
+      }
+    },
+    /* showStrucInfo(data, index) {
       // 打开抓拍详情
       this.$nextTick(() => {
         console.log("swiper", this.$refs.mySwiper);
@@ -1357,7 +1204,7 @@ export default {
       this.strucDetailDialog = true;
       this.sturcDetail = data;
       this.drawPoint(data);
-    },
+    }, */
     imgListTap(data, index) {
       // 点击swiper图片
       this.curImgIndex = index;
