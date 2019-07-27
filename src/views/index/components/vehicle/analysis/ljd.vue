@@ -187,7 +187,7 @@ export default {
         input3: null,
         input4: 3,
         input5: "1",
-        value1: null,
+        value1: [],
       },
       rules: {input4: [ {
               pattern:  /^[1-9]\d*$/,
@@ -207,6 +207,7 @@ export default {
      
       options: [],
       evData: [],
+      markerList: [],//点标记列表
       pickerOptions: {
           disabledDate (time) {
             let date = new Date();
@@ -324,6 +325,7 @@ export default {
       // }
     },
     submitForm(v) {
+      this.markerList = [];
       let isP=/([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})/
       let  result = isP.test(this.ruleForm.input3);
       if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data2 && this.ruleForm.input3){
@@ -469,7 +471,7 @@ export default {
        // if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
             let _sContent = `<div id="${_idWin}" class="vl_jig_mk_p"><img class="igm" src="${obj.storagePath}"><p class='addres'>${obj.address} <i class='el-icon-caret-right'></i></p><p class='times'>${obj.stopOverTime}</p></div>`;
             // 窗体
-            new AMap.Marker({
+            let marker = new AMap.Marker({
               // 添加自定义点标记
               map: this.amap,
               position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
@@ -496,7 +498,7 @@ export default {
               "<div id=" +
               _id +
               ' class="vl_icon vl_jfo_sxt vl_icon_judge_04"></div>';
-            new AMap.Marker({
+            marker = new AMap.Marker({
               // 添加自定义点标记
               map: this.amap,
               position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
@@ -515,20 +517,30 @@ export default {
               this.addListen($("#" + _idWin), "mouseout", i, obj);
               //this.addListen($("#" + _id), "click", i, obj);
             }, 300);
+            this.markerList.push(marker);
           // }
       //  }
       }
+      console.log(this.markerList, 'this.markerList')
       this.amap.setFitView();
     },
     addListen(el, evType, key, obj = {}) {
       let self = this;
       let _key;
       el.bind(evType, function() {
+        
         switch (evType) {
           case "mouseover":
+            console.log(key)
+            // self.amap.remove(self.markerList[key]);
+            
+            
+            // self.amap.add(self.markerList[key]);
+            
+            self.markerList[key].setzIndex(1);
+            console.log(self.markerList[key])
             $("#vlJfoImg" + key).addClass("vl_jig_mk_img_show");
             $("#vlJfoSxt" + key).addClass("vl_icon_judge_02");
-            
             break;
           case "mouseout":
             if (!obj.checked) {
@@ -540,6 +552,7 @@ export default {
             self.showVideo(obj);
             break;
         }
+        
       });
     },
     

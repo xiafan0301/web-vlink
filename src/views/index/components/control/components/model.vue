@@ -427,7 +427,7 @@ export default {
     if (this.imgurl) {
       this.fileList.push({
         url: this.imgurl,
-        uid: random14()
+        uid: random14()//必须要文件uid，暂时用的随机数
       });
     }
     if (this.plateNo) {
