@@ -527,6 +527,9 @@ export default {
       vehicleClassOptions: [], // 车辆类型
       vehicleColorOptions: [], // 车辆颜色
       carModelOptions: [], // 车辆型号
+      carModelProps: {
+        checkStrictly: true
+      },
       // sunvisorOptions: [ // 遮阳板
       //   {
       //     enumField: "打开",

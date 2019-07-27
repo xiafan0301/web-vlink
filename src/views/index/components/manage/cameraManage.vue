@@ -7,11 +7,16 @@
             <el-date-picker
               style="width: 380px"
               class="vl_date"
-              v-model="searchForm.dateTime"
+              type="daterange"
+              align="right"
+              unlink-panels
               range-separator="至"
-              type="datetimerange"
+              format="yyyy-MM-dd"
+              value-format="yyyy-MM-dd"
+              v-model="searchForm.dateTime"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
+              :picker-options="pickerOptions"
               >
             </el-date-picker>
           </el-form-item>
@@ -106,6 +111,9 @@
             prop="deviceName"
             show-overflow-tooltip
             >
+            <template slot-scope="scope">
+              <span>{{scope.row.deviceName ? scope.row.deviceName : '-'}}</span>
+            </template>
           </el-table-column>
           <el-table-column
             label="摄像头编号"
@@ -114,48 +122,72 @@
             sortable
             show-overflow-tooltip
             >
+            <template slot-scope="scope">
+              <span>{{scope.row.deviceCode ? scope.row.deviceCode : '-'}}</span>
+            </template>
           </el-table-column>
           <el-table-column
             label="IP"
             prop="ipAddress"
             show-overflow-tooltip
             >
+            <template slot-scope="scope">
+              <span>{{scope.row.ipAddress ? scope.row.ipAddress : '-'}}</span>
+            </template>
           </el-table-column>
           <el-table-column
             label="类型"
             prop="typeStr"
             show-overflow-tooltip
             >
+            <template slot-scope="scope">
+              <span>{{scope.row.typeStr ? scope.row.typeStr : '-'}}</span>
+            </template>
           </el-table-column>
           <el-table-column
             label="所属机构"
             prop="dutyUnitName"
             show-overflow-tooltip
             >
+            <template slot-scope="scope">
+              <span>{{scope.row.dutyUnitName ? scope.row.dutyUnitName : '-'}}</span>
+            </template>
           </el-table-column>
           <el-table-column
             label="智能特性"
             prop="intelligentCharac"
             show-overflow-tooltip
             >
+            <template slot-scope="scope">
+              <span>{{scope.row.intelligentCharac ? scope.row.intelligentCharac : '-'}}</span>
+            </template>
           </el-table-column>
           <el-table-column
             label="重要级别"
             prop="importantLevelStr"
             show-overflow-tooltip
             >
+            <template slot-scope="scope">
+              <span>{{scope.row.importantLevelStr ? scope.row.importantLevelStr : '-'}}</span>
+            </template>
           </el-table-column>
           <el-table-column
             label="厂家"
-            prop="importantLevelStr"
+            prop="manufacturerStr"
             show-overflow-tooltip
             >
+            <template slot-scope="scope">
+              <span>{{scope.row.manufacturerStr ? scope.row.manufacturerStr : '-'}}</span>
+            </template>
           </el-table-column>
           <el-table-column
             label="状态"
             prop="deviceStatusStr"
             show-overflow-tooltip
             >
+            <template slot-scope="scope">
+              <span>{{scope.row.deviceStatusStr ? scope.row.deviceStatusStr : '-'}}</span>
+            </template>
           </el-table-column>
           <el-table-column label="操作" fixed="right" width="160">
             <template slot-scope="scope">
@@ -264,6 +296,36 @@ import { ajaxCtx } from '@/config/config.js';
 export default {
   data () {
     return {
+      pickerOptions: {
+        disabledDate(time) {
+          return time.getTime() > Date.now();
+        },
+        shortcuts: [{
+          text: '今天',
+          onClick(picker) {
+            const end = new Date();
+            const start = new Date();
+            start.setTime(start.getTime());
+            picker.$emit('pick', [start, end]);
+          }
+        }, {
+          text: '最近一周',
+          onClick(picker) {
+            const end = new Date();
+            const start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+            picker.$emit('pick', [start, end]);
+          }
+        }, {
+          text: '最近一个月',
+          onClick(picker) {
+            const end = new Date();
+            const start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+            picker.$emit('pick', [start, end]);
+          }
+        }]
+      },
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       searchForm: {
         dateTime: [], // 日期
@@ -639,6 +701,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+/deep/ .el-picker-panel {
+  margin-left: 300px !important;
+}
 .camera_manage{
   width: 98%;
   position: relative;

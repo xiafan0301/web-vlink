@@ -20,39 +20,39 @@
         <ul class="basic_info_ul">
           <li>
             <span>摄像头编码：</span>
-            <span>{{detailInfo.uid}}</span>
+            <span>{{detailInfo.uid ? detailInfo.uid : '无'}}</span>
           </li>
           <li>
             <span>所属机构：</span>
-            <span>{{detailInfo.dutyUnitName}}</span>
+            <span>{{detailInfo.dutyUnitName ? detailInfo.dutyUnitName : '无'}}</span>
           </li>
           <li>
             <span>摄像头编号：</span>
-            <span>{{detailInfo.deviceSeq}}</span>
+            <span>{{detailInfo.deviceSeq ? detailInfo.deviceSeq : '无'}}</span>
           </li>
           <li>
             <span>摄像头类型：</span>
-            <span>{{detailInfo.typeStr}}</span>
+            <span>{{detailInfo.typeStr ? detailInfo.typeStr : '无'}}</span>
           </li>
           <li>
             <span>厂商：</span>
-            <span>{{detailInfo.manufacturerStr}}</span>
+            <span>{{detailInfo.manufacturerStr ? detailInfo.manufacturerStr : '无'}}</span>
           </li>
           <li>
             <span>摄像头序列号：</span>
-            <span>{{detailInfo.deviceSn}}</span>
+            <span>{{detailInfo.deviceSn ? detailInfo.deviceSn : '无'}}</span>
           </li>
           <li>
             <span>最大像素：</span>
-            <span>{{detailInfo.maxPixelStr}}</span>
+            <span>{{detailInfo.maxPixelStr ? detailInfo.maxPixelStr : '无'}}</span>
           </li>
           <li>
             <span>智能特性：</span>
-            <span>{{detailInfo.intelligentCharac}}</span>
+            <span>{{detailInfo.intelligentCharac ? detailInfo.intelligentCharac : '无'}}</span>
           </li>
           <li>
             <span>拍摄方向：</span>
-            <span>{{detailInfo.filmDirection}}</span>
+            <span>{{detailInfo.filmDirection ? detailInfo.filmDirection : '无'}}</span>
           </li>
           <li>
             <span>是否启用：</span>
@@ -65,77 +65,91 @@
         <ul class="online_info_ul">
           <li>
             <span>SIP编号：</span>
-            <span>{{detailInfo.deviceSip}}</span>
+            <span>{{detailInfo.deviceSip ? detailInfo.deviceSip : '无'}}</span>
           </li>
           
           <li>
             <span>RTSP端口：</span>
-            <span>{{detailInfo.rtspPort}}</span>
+            <span>{{detailInfo.rtspPort ? detailInfo.rtspPort : '无'}}</span>
           </li>
           <li>
             <span>结构化设备编码：</span>
-            <span>{{detailInfo.viewClassCode}}</span>
+            <span>{{detailInfo.viewClassCode ? detailInfo.viewClassCode : '无'}}</span>
           </li>
           <li>
             <span>IP：</span>
-            <span>{{detailInfo.ipAddress}}</span>
+            <span>{{detailInfo.ipAddress ? detailInfo.ipAddress : '无'}}</span>
           </li>
           <li>
             <span>重要级别：</span>
-            <span>{{detailInfo.importantLevelStr}}</span>
+            <span>{{detailInfo.importantLevelStr ? detailInfo.importantLevelStr : '无'}}</span>
           </li>
-          <li>
+           <li>
+            <span>视频接入编码：</span>
+            <span>{{detailInfo.deviceCode ? detailInfo.deviceCode : '无'}}</span>
+          </li>
+          <!-- <li>
             <span>经纬度：</span>
             <span>经度{{detailInfo.longitude}},纬度{{detailInfo.latitude}}</span>
-          </li>
+          </li> -->
           <li class="position">
             <span>所在位置：</span>
-            <span>{{detailInfo.address}}</span>
+            <span>{{detailInfo.address ? detailInfo.address : '无'}}</span>
           </li>
           <li>
             <span>账户名：</span>
-            <span>{{detailInfo.account}}</span>
+            <span>{{detailInfo.account ? detailInfo.account : '无'}}</span>
           </li>
           <li>
             <span>密码：</span>
-            <span>{{detailInfo.password}}</span>
+            <span>{{detailInfo.password ? detailInfo.password : '无'}}</span>
           </li>
-          <li class="position">
+           <li class="position">
+            <span>经纬度：</span>
+            <span>经度{{detailInfo.longitude}},纬度{{detailInfo.latitude}}</span>
+          </li>
+          <!-- <li class="position">
             <span>视频接入编码：</span>
             <span>{{detailInfo.deviceCode}}</span>
-          </li>
+          </li> -->
         </ul>
       </div>
     </div>
     <div class="operation-footer">
       <el-button class="operation_btn" type="primary" @click="skipAddCameraPage">编辑资料</el-button>
-      <el-button class="operation_btn" type="primary" >查看监控</el-button>
+      <el-button class="operation_btn" type="primary" @click="selectMonitor">查看监控</el-button>
       <el-button class="operation_btn" @click="showDeleteDialog">删除</el-button>
       <el-button class="operation_btn" @click="back">返回</el-button>
     </div>
     <!--删除摄像头弹出框-->
-      <el-dialog
-        title="是否确定删除该摄像头信息?"
-        :visible.sync="delCameraDialog"
-        width="482px"
-        :close-on-click-modal="false"
-        :close-on-press-escape="false"
-        class="dialog_comp"
-        >
-        <!-- <span style="color: #999999;">删除后数据不可恢复。</span> -->
-        <div slot="footer" class="dialog-footer">
-          <el-button @click="delCameraDialog = false">取消</el-button>
-          <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="deleteCamera">确认</el-button>
-        </div>
-      </el-dialog>
+    <el-dialog
+      title="是否确定删除该摄像头信息?"
+      :visible.sync="delCameraDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <!-- <span style="color: #999999;">删除后数据不可恢复。</span> -->
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="delCameraDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="deleteCamera">确认</el-button>
+      </div>
+    </el-dialog>
+    <div v-if="isShowMonitor" is="flvplayer" class="vl_map_full_video"  @playerClose="playerClose" :index="0" :oData="oData" :showFullScreen="true" :bResize="bResize" :oConfig="{sign: true}"></div>
   </div>
 </template>
 <script>
+import flvplayer from '@/components/common/flvplayer.vue';
 import { getDepartmentList} from '@/views/index/api/api.manage.js';
 import { delDevice, getDeviceDetailById } from '@/views/index/api/api.base.js';
 export default {
+  components: { flvplayer },
   data () {
     return {
+      oData: null,
+      bResize: null,
+      isShowMonitor: false,
       isDeleteLoading: false,
       delCameraDialog: false, // 删除摄像头弹出框
       detailInfo: {}, // 摄像头详情
@@ -174,12 +188,19 @@ export default {
           .then(res => {
             if (res && res.data) {
               this.detailInfo = res.data;
-              // let dutyUnitName = '';
               this.departmentList.map(item => {
                 if (item.uid == this.detailInfo.dutyUnitId) {
                   this.detailInfo.dutyUnitName = item.organName;
                 }
               });
+              const obj = {
+                type: 1, // 直播
+                title: this.detailInfo.deviceName,
+                video: {
+                  uid: this.detailInfo.uid
+                }
+              };
+              this.oData = obj;
             }
           })
       }
@@ -218,7 +239,14 @@ export default {
           })
           .catch(() => {this.isDeleteLoading = false;})
       }
-    }
+    },
+    // 查看监控
+    selectMonitor () {
+      this.isShowMonitor = true;
+    },
+    playerClose () {
+      this.isShowMonitor = false;
+    },
   }
 }
 </script>
@@ -321,5 +349,12 @@ export default {
       text-align: center;
     }
   }
+}
+.vl_map_full_video {
+  position: fixed !important;
+  width: 100%;
+  height: 100%;
+  top: 0!important;
+  z-index: 9;
 }
 </style>
