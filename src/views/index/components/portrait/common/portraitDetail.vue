@@ -164,7 +164,7 @@ export default {
           }
         }
       } else {
-        this.this.playerData = null;
+        this.playerData = null;
       }
     },
     // flag false 上一个， true 下一个
