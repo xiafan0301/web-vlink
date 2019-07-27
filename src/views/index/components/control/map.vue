@@ -657,7 +657,7 @@ export default {
           clickWindow = new window.AMap.InfoWindow({
             isCustom: true,
             closeWhenClickMap: false,
-            offset: new window.AMap.Pixel(-2, -60), // 相对于基点的偏移位置
+            offset: new window.AMap.Pixel(-2, -80), // 相对于基点的偏移位置
             content: sContent
           });
           // 打开弹窗
@@ -777,7 +777,7 @@ export default {
           content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_sxt_not_choose"></div>';
         }
         if (obj.longitude > 0 && obj.latitude > 0) {
-          let offSet = [-20.5, -48];
+          let offSet = [-20.5, -70];
           let marker = new window.AMap.Marker({ // 添加自定义点标记
             map: _this.map,
             position: [obj.longitude, obj.latitude],

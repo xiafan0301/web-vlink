@@ -56,7 +56,7 @@
           <el-form-item prop="input3">
             <p class="carCold">车牌：</p>
             <el-input placeholder="请输入车牌号" v-model="ruleForm.input3" class="input-with-select">
-              
+              <el-select>
                 <el-option v-for="(item, index) in pricecode" :label="item" :value="item" :key="'cph_' + index"></el-option>
               </el-select>
             </el-input>
@@ -146,7 +146,7 @@
 <!-- 视频播放 -->
 <el-dialog :visible.sync="dialogVisible" width="100%" style="height:100vh;">
     <div style="width:100%; height:100%">
-      <div is="flvplayer" :index="1" :oData="playUrl" :bResize="bResize" :oConfig="{sign: false, close: false, pause: true,fullscreen:false}"  ></div>
+      <div is="flvplayer" :index="1" :oData="playUrl" :bResize="bResize" :oConfig="{fit: false, sign: false, close: false, pause: true,fullscreen:false}"  ></div>
     </div>
   </el-dialog>
     <!-- 地图选择 -->
@@ -161,6 +161,7 @@
 import flvplayer from '@/components/common/flvplayer.vue';
 import { mapXupuxian } from "@/config/config.js";
 import { cityCode } from "@/utils/data.js";
+import { transMinute } from '@/utils/util.js';
 import { getVehicleShot,getAllDevice } from "@/views/index/api/api.judge.js";
 import { getAllBayonetList } from "@/views/index/api/api.base.js";
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
@@ -211,7 +212,6 @@ export default {
      
       options: [],
       evData: [],
-      markerList: [],//点标记列表
       pickerOptions: {
           disabledDate (time) {
             let date = new Date();
@@ -329,7 +329,6 @@ export default {
       // }
     },
     submitForm(v) {
-      this.markerList = [];
       let isP=/([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})/
       let  result = isP.test(this.ruleForm.input3);
       if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data2 && this.ruleForm.input3){
@@ -473,17 +472,18 @@ export default {
         let _idWin = "vlJfoImg" + i;
         // let isBig = obj.shotNum >= limit?true:false
        // if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
-            let _sContent = `<div id="${_idWin}" class="vl_jig_mk_p"><img class="igm" src="${obj.storagePath}"><p class='addres'>${obj.address} <i class='el-icon-caret-right'></i></p><p class='times'>${obj.stopOverTime}</p></div>`;
+            let _sContent = `<div id="${_idWin}" class="vl_jig_mk_p"><img class="igm" src="${obj.storagePath}"><p class='addres'>${obj.address} <i class='el-icon-caret-right'></i></p><p class='times'>${transMinute(obj.stopOverTime)}</p></div>`;
             // 窗体
             let marker = new AMap.Marker({
               // 添加自定义点标记
               map: this.amap,
               position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-              offset: new AMap.Pixel(-90, -164), // 相对于基点的偏移位置
+              offset: new AMap.Pixel(-90, -184), // 相对于基点的偏移位置
               draggable: false, // 是否可拖动
               extData: obj,
               // 自定义点标记覆盖物内容
-              content: _sContent
+              content: _sContent,
+              zIndex: 1000
             });
             // let clickWindow = new window.AMap.InfoWindow({
             //   isCustom: true,
@@ -510,7 +510,8 @@ export default {
               draggable: false, // 是否可拖动
               extData: obj,
               // 自定义点标记覆盖物内容
-              content: _content
+              content: _content,
+              zIndex: 100
             });
             setTimeout(() => {
               this.addListen($("#" + _id), "mouseover", i,obj);
@@ -521,11 +522,9 @@ export default {
               this.addListen($("#" + _idWin), "mouseout", i, obj);
               //this.addListen($("#" + _id), "click", i, obj);
             }, 300);
-            this.markerList.push(marker);
           // }
       //  }
       }
-      console.log(this.markerList, 'this.markerList')
       this.amap.setFitView();
     },
     addListen(el, evType, key, obj = {}) {
@@ -535,14 +534,6 @@ export default {
         
         switch (evType) {
           case "mouseover":
-            console.log(key)
-            // self.amap.remove(self.markerList[key]);
-            
-            
-            // self.amap.add(self.markerList[key]);
-            
-            self.markerList[key].setzIndex(1);
-            console.log(self.markerList[key])
             $("#vlJfoImg" + key).addClass("vl_jig_mk_img_show");
             $("#vlJfoSxt" + key).addClass("vl_icon_judge_02");
             break;
@@ -556,7 +547,6 @@ export default {
             self.showVideo(obj);
             break;
         }
-        
       });
     },
     

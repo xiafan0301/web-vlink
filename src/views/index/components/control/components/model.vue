@@ -1008,7 +1008,7 @@ export default {
       }
       // 遍历列表，摄像头 或者卡口
       for (let i = 0; i < data.length; i++) {
-        let offSet = [-20.5, -48];
+        let offSet = [-20.5, -70];
         let _obj = data[i];
         if (_obj.longitude > 0 && _obj.latitude > 0) {
           let _content = null;
@@ -1051,7 +1051,7 @@ export default {
             _hoverWindow = new window.AMap.InfoWindow({
               isCustom: true,
               closeWhenClickMap: true,
-              offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
+              offset: new window.AMap.Pixel(0, -20), // 相对于基点的偏移位置
               content: _sContent
             });
             _hoverWindow.open(_this.map, new window.AMap.LngLat(_obj.longitude, _obj.latitude));
@@ -1091,6 +1091,7 @@ export default {
                   }
                 })
               })
+              
               if (objIsSel) {
                 $(`#${_this.mapId} #${_obj.uid}_sxt`).addClass('vl_icon_control_36');
               } else {
@@ -1361,7 +1362,7 @@ export default {
       _hoverWindow = new window.AMap.InfoWindow({
         isCustom: true,
         closeWhenClickMap: true,
-        offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
+        offset: new window.AMap.Pixel(0, -20), // 相对于基点的偏移位置
         content: _sContent
       });
       _hoverWindow.open(_this.map, new window.AMap.LngLat(_obj.longitude, _obj.latitude));
@@ -1534,7 +1535,7 @@ export default {
       }
      
       // 追踪点标记
-      let offSet = [-20.5, -48], pointId = index + '_' + random14(), marker = null;
+      let offSet = [-20.5, -70], pointId = index + '_' + random14(), marker = null;
       if (lng > 0 && lat > 0) {
         marker = new window.AMap.Marker({ // 添加自定义点标记
           map: _this.map,
@@ -1578,7 +1579,7 @@ export default {
       _hoverWindow = new window.AMap.InfoWindow({
         isCustom: true,
         closeWhenClickMap: true,
-        offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
+        offset: new window.AMap.Pixel(0, -20), // 相对于基点的偏移位置
         content: _sContent
       });
       _hoverWindow.open(_this.map, new window.AMap.LngLat(lng, lat));

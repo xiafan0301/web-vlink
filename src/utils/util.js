@@ -308,3 +308,12 @@ export const autoDownloadUrl = (url) => {
   a.click();
 }
 
+/*
+ * 时间戳处理
+ * */
+export const transMinute = (seconds) => {
+  let iH = Math.floor(seconds / 60);
+  let iS = seconds % 60;
+  return ((iH > 0) ? iH : '') + '小时' + 
+    ((iH > 0 && iS === 0) ? '' : (iS + '分钟'));
+};
