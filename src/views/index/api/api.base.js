@@ -151,12 +151,24 @@ export function delDevice(uid) {
   });
 }
 /**
- * 根据设备id查设备详情
+ * 添加设备
  */
-// export function getDeviceDetail(uid) {
-//   return request({
-//     url: '/device-service/deviceBasic/' + uid,
-//     method: 'delete',
-//     mode: baseModeName
-//   });
-// }
+export function addDeviceInfo (data) {
+  return request({
+    url: '/device-service/deviceBasic',
+    data,
+    method: 'post',
+    mode: baseModeName
+  });
+}
+/**
+ * 修改设备
+ */
+export function editDeviceInfo (data) {
+  return request({
+    url: '/device-service/deviceBasic',
+    data,
+    method: 'put',
+    mode: baseModeName
+  });
+}

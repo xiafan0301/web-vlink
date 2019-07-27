@@ -265,9 +265,17 @@ export default {
           let obj = data[i];
           if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
             let offSet = [-20.5, -55];
-            console.log('obj', obj)
             let _idBtn = 'vlJtcPlayBtn' + obj.struVehicleDto.deviceID;
             let _id = 'vlJtcVideo' + obj.deviceID;
+
+            let iconType;
+            if (i === 0) {
+              iconType = 'vl_icon_04_019';
+            } else if (i === (data.length - 1)) {
+              iconType = 'vl_icon_05_019';
+            } else {
+              iconType = 'vl_icon_sxt';
+            }
 
             let marker = new window.AMap.Marker({
               map: _this.map,
@@ -276,7 +284,7 @@ export default {
               draggable: false, // 是否可拖动
               extData: '', // 用户自定义属性
               // 自定义点标记覆盖物内容
-              content: '<div id="vehicle' + obj.deviceID + '"  title="'+ obj.deviceName +'" class="vl_icon vl_icon_sxt"></div>'
+              content: '<div id="vehicle' + obj.deviceID + '"  title="'+ obj.deviceName +'" class="vl_icon '+ iconType +'"></div>'
             });
   
             path.push(new window.AMap.LngLat(obj.shotPlaceLongitude, obj.shotPlaceLatitude));

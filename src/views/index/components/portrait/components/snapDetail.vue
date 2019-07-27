@@ -16,6 +16,11 @@
       </div>
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
+          <ul>
+          <!-- <li><span>抓拍设备：{{sturcDetail.deviceName}}</span></li> -->
+          <li><span style="line-height: 0.24rem;">抓拍地址：{{sturcDetail.address}}</span></li>
+          <li style="color: #999;line-height: 0.24rem;">{{sturcDetail.shotTime}}</li>
+        </ul>
           <div class="struc_c_d_qj struc_c_d_img">
             <img :src="sturcDetail.subStoragePath" class="bigImg" />
             <span>抓拍图</span>
@@ -26,8 +31,10 @@
               <span>全景图</span>
             </div>
             <div class="struc_c_d_info">
-              <h2>对比信息</h2>
-              <div class="struc_cdi_line simple_line">
+              <h2>分析结果</h2>
+              <div class="struc_cdi_content">
+                <vue-scroll>
+              <!-- <div class="struc_cdi_line simple_line">
                 <p>
                   <b>抓拍时间</b>
                   <span>{{sturcDetail.shotTime}}</span>
@@ -44,8 +51,81 @@
                   <b>抓拍地址</b>
                   <span>{{sturcDetail.address}}</span>
                 </p>
+              </div> -->
+              <div class="struc_cdi_line" v-if="sturcDetail.sex">
+                <p>
+                  <b>性别</b>
+                  <span>{{sturcDetail.sex}}</span>
+                </p>
               </div>
-              <div class="struc_cdi_line">
+              <div class="struc_cdi_line" v-if="sturcDetail.age">
+                <p>
+                  <b>年龄段</b>
+                  <span>{{sturcDetail.age}}</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line" v-if="sturcDetail.glasses">
+                <p>
+                  <b>眼镜</b>
+                  <span>{{sturcDetail.glasses}}</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line" v-if="sturcDetail.hat">
+                <p>
+                  <b>帽子</b>
+                  <span>{{sturcDetail.hat}}</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line" v-if="sturcDetail.mask">
+                <p>
+                  <b>口罩</b>
+                  <span>{{sturcDetail.mask}}</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line" v-if="sturcDetail.hair">
+                <p>
+                  <b>发型</b>
+                  <span>{{sturcDetail.hair}}</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line" v-if="sturcDetail.upperType">
+                <p>
+                  <b>上身款式</b>
+                  <span>{{sturcDetail.upperType}}</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line" v-if="sturcDetail.upperColor">
+                <p>
+                  <b>上身颜色</b>
+                  <span>{{sturcDetail.upperColor}}</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line" v-if="sturcDetail.bottomType">
+                <p>
+                  <b>下身款式</b>
+                  <span>{{sturcDetail.bottomType}}</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line" v-if="sturcDetail.bottomColor">
+                <p>
+                  <b>下身颜色</b>
+                  <span>{{sturcDetail.bottomColor}}</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line" v-if="sturcDetail.baby">
+                <p>
+                  <b>抱小孩</b>
+                  <span>{{sturcDetail.baby}}</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line" v-if="sturcDetail.bag">
+                <p>
+                  <b>拎东西</b>
+                  <span>{{sturcDetail.bag}}</span>
+                </p>
+              </div>
+           
+              <!-- <div class="struc_cdi_line">
                 <p v-if="sturcDetail.features">
                   <b>特征</b>
                   <span>{{sturcDetail.features}}</span>
@@ -54,8 +134,10 @@
                   <b>特征</b>
                   <span>{{sturcDetail.sex+" "+(sturcDetail.age || "")+ " " + (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+" "+ (sturcDetail.baby || "")+ " " + (sturcDetail.bag || "") + " "+(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")+ " " + (sturcDetail.bottomColor || "") +(sturcDetail.bottomType || "")}}</span>
                 </p>
-              </div>
+              </div> -->
               <div class="struc_cdi_line"></div>
+                </vue-scroll>
+              </div>
             </div>
             <span>抓拍信息</span>
           </div>
@@ -343,7 +425,7 @@ export default {
     }
     .struc_main {
       width: 11.46rem;
-      height: 4.4rem;
+      height: 4.88rem;
       margin: 0 auto;
       border-bottom: 1px solid #f2f2f2;
       @mixin btn-style {
@@ -542,6 +624,9 @@ export default {
           > div {
             float: left;
           }
+          .struc_cdi_content {
+            height: 2.65rem;
+          }
           .struc_c_d_info {
             width: calc(100% - 3.6rem);
             padding-left: 0.24rem;
@@ -596,7 +681,7 @@ export default {
                 max-width: 100%;
                 overflow: hidden;
                 display: table;
-                min-height: .5rem;
+                min-height: 30px;
                 margin-bottom: 0.08rem;
                 padding-right: 10px;
                 margin-right: 0.08rem;

@@ -94,7 +94,7 @@
                 show-overflow-tooltip
                 >
                 <template slot-scope="scope">
-                  <span>{{scope.row.peerPercent}}%</span>
+                  <span>{{scope.row.peerPercent * 100 }}%</span>
                 </template>
               </el-table-column>
               <el-table-column label="操作">
@@ -135,10 +135,10 @@
             <div class="vehicle_box">
               <span class="vehicle_span" :class="[isCheckedVehicle === mapPeerVehicleNumber ? 'is_checked' : '']" @click="handleChangeVeNumber(mapPeerVehicleNumber)">{{mapPeerVehicleNumber}}</span>
               与
-              <span class="vehicle_span" :class="[isCheckedVehicle === resultList && resultList.baseNumber ? 'is_checked' : '']" @click="handleChangeVeNumber(resultList.baseNumber)">{{resultList && resultList.baseNumber}}</span>
+              <span class="vehicle_span" :class="[isCheckedVehicle === (resultList && resultList.baseNumber) ? 'is_checked' : '']" @click="handleChangeVeNumber(resultList.baseNumber)">{{resultList && resultList.baseNumber}}</span>
             </div>
             <div class="peer_possiable">
-              <span>{{mapPeerPercent}}%</span>同行
+              <span>{{mapPeerPercent * 100}}%</span>同行
             </div>
           </div>
         </div>
@@ -189,145 +189,6 @@ export default {
         }
       ], // 抓拍时间间隔数据
       resultList: null,
-      // resultList: {
-        // baseNumber: '湘S22222',
-        // devNum: 300,
-        // basePathRecords: [
-        //   {
-        //     bayonetId: 422,
-        //     isAllPassed: false,
-        //     bayonetName: '金路大厦',
-        //     bayonetAddress: '金路大厦',
-        //     bayonetLongitude: 110.596817,
-        //     bayonetLatitude: 27.907682,
-        //     deviceId: 422,
-        //     shotPlaceLongitude: 110.596817,
-        //     shotPlaceLatitude: 27.907682,
-        //     shotTime: '2019-07-12 12:43:23'
-        //   },
-        //   {
-        //     bayonetId: null,
-        //     isAllPassed: false,
-        //     bayonetName: '湘运公司小区',
-        //     bayonetAddress: '湘运公司小区',
-        //     bayonetLongitude: 110.59907,
-        //     bayonetLatitude: 27.909275,
-        //     deviceId: 43333,
-        //     shotPlaceLongitude: 110.59907,
-        //     shotPlaceLatitude: 27.909275,
-        //     deviceName: '湘运公司小区',
-        //     address: '湖南省长沙市天心区创谷产业园湘运公司小区',
-        //     shotTime: '2019-05-12 12:43:23'
-        //   },
-        //   {
-        //     bayonetId: null,
-        //     isAllPassed: true,
-        //     bayonetName: '撒打撒打撒',
-        //     bayonetAddress: '撒打撒打撒',
-        //     bayonetLongitude: 110.601033,
-        //     bayonetLatitude: 27.908337,
-        //     deviceId: 4123,
-        //     shotPlaceLongitude: 110.601033,
-        //     shotPlaceLatitude: 27.908337,
-        //     deviceName: '设备1111111',
-        //     address: '湖南省长沙市天心区创谷产业园',
-        //     shotTime: '2019-03-12 12:43:23'
-        //   },
-        // ],
-        // peerVehicleInfos: [
-        //   {
-        //     peerNumber: '湘S54321',
-        //     peerDevNum: 240,
-        //     peerPercent: 80,
-        //     ExtendVehicleInfoDto: [
-        //       {
-        //         uid: 1,
-        //         bayonetId: 22,
-        //         isAllPassed: false,
-        //         bayonetName: '金路大厦',
-        //         bayonetAddress: '金路大厦',
-        //         bayonetLongitude: 110.593464,
-        //         bayonetLatitude: 27.908029,
-        //         deviceId: 122,
-        //         shotPlaceLongitude: 110.593464,
-        //         shotPlaceLatitude: 27.908029,
-        //         shotTime: '2019-07-12 23:43:23'
-        //       },
-        //       {
-        //         uid: 2,
-        //         bayonetId: 22,
-        //         isAllPassed: false,
-        //         bayonetName: '金路大厦',
-        //         bayonetAddress: '金路大厦',
-        //         bayonetLongitude: 110.593464,
-        //         bayonetLatitude: 27.908029,
-        //         deviceId: 122,
-        //         shotPlaceLongitude: 110.593464,
-        //         shotPlaceLatitude: 27.908029,
-        //         shotTime: '2019-07-24 23:43:23'
-        //       },
-        //       {
-        //         uid: 3,
-        //         bayonetId: 22,
-        //         isAllPassed: false,
-        //         bayonetName: '金路大厦',
-        //         bayonetAddress: '金路大厦',
-        //         bayonetLongitude: 110.593464,
-        //         bayonetLatitude: 27.908029,
-        //         deviceId: 122,
-        //         shotPlaceLongitude: 110.593464,
-        //         shotPlaceLatitude: 27.908029,
-        //         shotTime: '2019-01-12 23:43:23'
-        //       },
-        //       {
-        //         uid: 4,
-        //         bayonetId: null,
-        //         isAllPassed: false,
-        //         bayonetName: '湘运公司小区',
-        //         bayonetAddress: '湘运公司小区',
-        //         bayonetLongitude: 110.590981,
-        //         bayonetLatitude: 27.907475,
-        //         deviceId: 23333,
-        //         shotPlaceLongitude: 110.590981,
-        //         shotPlaceLatitude: 27.907475,
-        //         deviceName: '湘运公司小区',
-        //         address: '湖南省长沙市天心区创谷产业园湘运公司小区',
-        //         shotTime: '2019-07-12 19:43:23'
-        //       },
-        //       {
-        //         uid: 5,
-        //         bayonetId: null,
-        //         isAllPassed: true,
-        //         bayonetName: '撒打撒打撒',
-        //         bayonetAddress: '撒打撒打撒',
-        //         bayonetLongitude: 110.591496,
-        //         bayonetLatitude: 27.90901,
-        //         deviceId: 123,
-        //         shotPlaceLongitude: 110.591496,
-        //         shotPlaceLatitude: 27.908029,
-        //         deviceName: '设备1111111',
-        //         address: '湖南省长沙市天心区创谷产业园',
-        //         shotTime: '2019-02-12 12:43:23'
-        //       },
-        //       {
-        //         uid: 6,
-        //         bayonetId: 24,
-        //         isAllPassed: true,
-        //         bayonetName: '趣味请问',
-        //         bayonetAddress: '趣味请问',
-        //         bayonetLongitude: 110.590165,
-        //         bayonetLatitude: 27.909133,
-        //         deviceId: 124,
-        //         shotPlaceLongitude: 110.590165,
-        //         shotPlaceLatitude: 27.909133,
-        //         deviceName: '设备2222',
-        //         address: '湖南省长沙市天心区创谷产业园22222',
-        //         shotTime: '2018-07-12 12:43:23'
-        //       }
-        //     ]
-        //   }
-        // ]
-      // }, // 结果列表
       map: null, // 地图对象
       searchForm: {
         startTime: new Date(overStartTime),
@@ -382,7 +243,9 @@ export default {
     // 按回车添加同行车辆
     keyDownVehicle (e) {
       if (e.keyCode === 13) {
-        this.onAddVehicleNumber();
+        if (this.searchForm.peerVehicleNumber) {
+          this.onAddVehicleNumber();
+        }
       }
     },
     // 添加同行车辆
@@ -393,13 +256,15 @@ export default {
       //     this.$message.info('请输入正确的车牌号码');
       //   }
       // } else {
-        this.searchForm.peerVehicleNumber = null;
-        this.vehicleNumberList.push(vehicleNumber);
-        if (this.vehicleNumberList.length >= 7) {
-          this.isDisabled = true;
-          return;
-        } else {
-          this.isDisabled = false;
+        if (vehicleNumber) {
+          this.searchForm.peerVehicleNumber = null;
+          this.vehicleNumberList.push(vehicleNumber);
+          if (this.vehicleNumberList.length >= 7) {
+            this.isDisabled = true;
+            return;
+          } else {
+            this.isDisabled = false;
+          }
         }
       // }
     },
@@ -438,15 +303,18 @@ export default {
         this.mapPeerVehicleNumber = obj.peerNumber;
         this.mapPeerPercent = obj.peerPercent;
         this.isCheckedVehicle = obj.peerNumber; // 默认选中同行车辆车牌号
-        this.drawPoint(obj.pathRecords, obj.peerNumber);
-        this.drawPoint(this.resultList.basePathRecords, this.resultList.baseNumber);
+        if (obj.pathRecords && obj.pathRecords.length > 0) {
+          this.drawPoint(obj.pathRecords, obj.peerNumber);
+        }
+        if (this.resultList.basePathRecords && this.resultList.basePathRecords.length > 0) {
+          this.drawPoint(this.resultList.basePathRecords, this.resultList.baseNumber);
+        }
       })
     },
     /**
      * 地图描点
      */
     drawPoint (data, number) {
-      console.log('data', data)
       if (data && data.length > 0) {
         let _this = this, hoverWindow = null, path= [], shotTime = [], idName;
 
@@ -486,7 +354,7 @@ export default {
 
             }
             
-            let idName = obj.deviceId + '_' + number;
+            let idName = obj.deviceID + '_' + number;
             let content;
 
             if (_this.isCheckedVehicle === number) {
@@ -544,6 +412,7 @@ export default {
     },
     // 点击车牌号码高亮显示相对应的轨迹
     handleChangeVeNumber (number) {
+      console.log('number', number);
       this.isCheckedVehicle = number;
       for(let i in this.polylineObj) {
         if (i === number) {
@@ -571,23 +440,30 @@ export default {
     },
     // 查询数据
     searchData () {
-      this.resultList = null;
-      // if (!reg.test(this.searchForm.basicVehicleNumber)) {
-      //   if (!document.querySelector('.el-message--info')) {
-      //     this.$message.info('请输入正确的车牌号码');
-      //   }
-      // }
-      if (this.vehicleNumberList.length === 0) {
+      let vehicleNumberList = JSON.parse(JSON.stringify(this.vehicleNumberList));
+      if (!this.searchForm.basicVehicleNumber) {
         if (!document.querySelector('.el-message--info')) {
-          this.$message.info('请输入同行车辆车牌号码');
+          this.$message.info('请输入基准车辆的车牌号码');
         }
+        return;
       }
-      // console.log(this.searchForm)
       if (this.isShowTip) {
         if (!document.querySelector('.el-message--info')) {
           this.$message.info('该基准车辆在该时间内无抓拍数据');
         }
+        return;
       }
+      if (this.vehicleNumberList.length === 0 && !this.searchForm.peerVehicleNumber) {
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('请输入同行车辆车牌号码');
+        }
+        return;
+      }
+      
+      if (this.searchForm.peerVehicleNumber) {
+        vehicleNumberList.push(this.searchForm.peerVehicleNumber);
+      }
+
       const params = {
         // startTime: '2019-07-13 00:54:29',
         // endTime: '2019-07-13 23:54:59',
@@ -596,15 +472,18 @@ export default {
         startTime: formatDate(this.searchForm.startTime),
         endTime: formatDate(this.searchForm.endTime),
         baseNumber: this.searchForm.basicVehicleNumber,
-        peerNumbers: this.vehicleNumberList.join(','),
+        peerNumbers: vehicleNumberList.join(','),
         timeSlot: this.searchForm.timeSlot
       };
-      // console.log(params)
+      this.isSearchLoading = true;
       getMultiVehicleList(params)
         .then(res => {
           if (res && res.data) {
             this.resultList = res.data;
+            this.isSearchLoading = false;
           } else {
+            this.resultList = null;
+            this.isSearchLoading = false;
             this.isInitPage = false;
           }
         })
@@ -620,6 +499,7 @@ export default {
       };
       this.isDisabled = false;
       this.isInitPage = false;
+      this.isShowTip = false;
 
       this.resultList = null;
       this.vehicleNumberList = [];

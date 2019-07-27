@@ -378,8 +378,8 @@ export default {
     getDeviceList () {
       this.deviceList = [];
       const params = {
-        // targetPicUrl : this.dialogImageUrl,
-        targetPicUrl: 'http://file.aorise.org/vlink/image/810ddc87-f9db-4e60-9da2-4e1ffc076683.jpg',
+        targetPicUrl : this.dialogImageUrl,
+        // targetPicUrl: 'http://file.aorise.org/vlink/image/810ddc87-f9db-4e60-9da2-4e1ffc076683.jpg',
         // startTime : '2019-07-09 09:59:00',
         // endTime: '2019-07-09 10:03:00'
         startTime : formatDate(this.addForm.dateTime[0]),

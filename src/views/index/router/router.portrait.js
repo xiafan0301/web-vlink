@@ -85,6 +85,11 @@ export default {
       component: () => import('@/views/index/components/portrait/ytsr-list.vue')
     },
     {
+      path: 'ytsr_moment', // 以图搜人-实时
+      name: 'portrait_ytsr_moment',
+      component: () => import('@/views/index/components/portrait/ytsr-moment.vue')
+    },
+    {
       path: 'gjfx', // 轨迹分析
       name: 'portrait_gjfx',
       component: () => import('@/views/index/components/portrait/gjfx.vue')

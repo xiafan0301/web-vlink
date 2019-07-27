@@ -97,7 +97,7 @@
           <el-form-item prop="plateNo">
             <p class="carCold">车牌：<el-checkbox style="float: right;" v-model="ruleForm._include">排除</el-checkbox></p>
             <el-input placeholder="请输入车牌号" v-model="ruleForm.plateNo" class="input-with-select">
-              <!-- <el-select v-model="select" slot="prepend" placeholder=""> -->
+              <el-select v-model="select" slot="prepend" placeholder="">
                <!-- <el-option v-for="item in pricecode" :label="item" :value="item"></el-option> -->
                <el-option v-for="(item, index) in pricecode" :label="item" :value="item" :key="'cph_' + index"></el-option>
               </el-select>
@@ -163,6 +163,7 @@
        
     </div>
     <el-pagination
+      v-show="pagination.total > 0"
       class="cum_pagination"
       @size-change="handleSizeChange"
       @current-change="onPageChange"
@@ -780,7 +781,11 @@ export default {
       this.ruleForm.include="" 
       this.ruleForm._include="" 
       this.ruleForm.plateNo="" 
-      this.setDTime()
+      this.setDTime();
+      this.pagination.pageNum = 1;
+      this.pagination.total = 0;
+      this.tableData = [];
+      this.isNull = true;
     },
     submitForm(){
       this.ruleForm.include=this.ruleForm._include?0:1
@@ -857,6 +862,9 @@ export default {
   float: right;
   background: #ffffff;
   margin-top: 20px;
+  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .left {
