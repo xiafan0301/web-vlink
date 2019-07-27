@@ -102,31 +102,31 @@
                 <vue-scroll>
                   <div class="scroll_box">
                     <div class="struc_cdi_line">
-                      <span><font>抓拍时间</font>{{sturcDetail.shotTime}}</span>
+                      <span :title="sturcDetail.shotTime"><font>抓拍时间</font>{{sturcDetail.shotTime}}</span>
                     </div>
                     <div class="struc_cdi_line">
-                      <span><font>抓拍设备</font>{{sturcDetail.deviceName}}</span>
+                      <span :title="sturcDetail.deviceName"><font>抓拍设备</font>{{sturcDetail.deviceName}}</span>
                     </div>
                     <div class="struc_cdi_line">
-                      <span><font>抓拍地址</font>{{sturcDetail.address}}</span>
+                      <span :title="sturcDetail.address"><font>抓拍地址</font>{{sturcDetail.address}}</span>
                     </div>
                     <div class="struc_cdi_line">
-                      <span><font>车牌号码</font>{{sturcDetail.plateNo}}</span>
+                      <span :title="sturcDetail.plateNo"><font>车牌号码</font>{{sturcDetail.plateNo}}</span>
                     </div>
                     <div class="struc_cdi_line">
-                      <span><font>号牌颜色</font>{{sturcDetail.plateColor}}</span>
+                      <span :title="sturcDetail.plateColor"><font>号牌颜色</font>{{sturcDetail.plateColor}}</span>
                     </div>
                     <div class="struc_cdi_line">
-                      <span><font>车辆型号</font>{{sturcDetail.vehicleStyles}}</span>
+                      <span :title="sturcDetail.vehicleModel"><font>车辆型号</font>{{sturcDetail.vehicleModel}}</span>
                     </div>
                     <div class="struc_cdi_line">
-                      <span><font>车辆颜色</font>{{sturcDetail.vehicleColor}}</span>
+                      <span :title="sturcDetail.vehicleColor"><font>车辆颜色</font>{{sturcDetail.vehicleColor}}</span>
                     </div>
                     <div class="struc_cdi_line">
-                      <span><font>车辆类型</font>{{sturcDetail.vehicleColor}} {{sturcDetail.vehicleClass}} {{sturcDetail.vehicleBrand}} {{sturcDetail.vehicleStyles}}</span>
+                      <span :title="sturcDetail.vehicleClass"><font>车辆类型</font>{{sturcDetail.vehicleClass}}</span>
                     </div>
                     <div class="struc_cdi_line">
-                      <span><font>号牌类型</font>{{sturcDetail.vehicleColor}} {{sturcDetail.vehicleClass}} {{sturcDetail.vehicleBrand}} {{sturcDetail.vehicleStyles}}</span>
+                      <span :title="sturcDetail.plateClass"><font>号牌类型</font>{{sturcDetail.plateClass}}</span>
                     </div>
                   </div>
                 </vue-scroll>
@@ -172,8 +172,9 @@
   import vlBreadcrumb from "@/components/common/breadcrumb.vue";
   import { mapXupuxian } from "@/config/config.js";
   import { objDeepCopy, random14, formatDate } from "@/utils/util.js";
-  import { cityCode } from "@/utils/data.js";
+  import { cityCode, dataList } from "@/utils/data.js";
   import { InvestigateGetTrace } from "@/views/index/api/api.judge.js";
+  import { getDiciData } from '@/views/index/api/api.js';
   export default {
     components: {vlBreadcrumb},
     data() {
@@ -243,7 +244,8 @@
         sturcDetail: {},
         playing: false, // 视频播放是否
         strucDetailDialog: false,
-        videoUrl: '' // 弹窗视频回放里的视频
+        videoUrl: '', // 弹窗视频回放里的视频
+        numberTypeList: [], // 号牌种类列表
       };
     },
     mounted() {
@@ -252,8 +254,19 @@
       }
       this.renderMap();
       this.setDTime();
+      this.getNumberTypeList();
     },
     methods: {
+      // 获取号牌种类列表
+      getNumberTypeList () {
+        const type = dataList.numberType;
+        getDiciData(type)
+          .then(res => {
+            if (res) {
+              this.numberTypeList = res.data;
+            }
+          })
+      },
       plateTap (index) {
         this.amap.clearMap();
         this.activeList = index;
@@ -524,6 +537,13 @@
         this.amap.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude])
         this.curImgIndex = this.curEvData.findIndex(x => x.deviceID === data.deviceID);
         this.strucDetailDialog = true;
+
+        this.numberTypeList.map(item => {
+          if (item.enumField === data.plateClass) {
+            data.plateClass = item.enumValue;
+          }
+        });
+
         this.sturcDetail = data;
         this.strucCurTab = 1;
         this.drawPoint(data);
@@ -556,8 +576,15 @@
         })
       },
       imgListTap (data, index) {
+        this.numberTypeList.map(item => {
+          if (item.enumField === data.plateClass) {
+            data.plateClass = item.enumValue;
+          }
+        });
+
         this.curImgIndex = index;
         this.sturcDetail = data;
+        this.playing = false;
         this.drawPoint(data);
       }
     }
