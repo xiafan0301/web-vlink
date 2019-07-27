@@ -148,7 +148,6 @@
   </div>
 </template>
 <script>
-// import { testData } from './ws/testData.js';
 import noResult from '@/components/common/noResult.vue';
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { mapXupuxian } from "@/config/config.js";
@@ -412,7 +411,6 @@ export default {
     },
     // 点击车牌号码高亮显示相对应的轨迹
     handleChangeVeNumber (number) {
-      console.log('number', number);
       this.isCheckedVehicle = number;
       for(let i in this.polylineObj) {
         if (i === number) {
@@ -557,19 +555,6 @@ export default {
 </style>
 <style lang="scss">
 .search_dctx_form {
-  // .el-input__inner:hover,
-  // .el-input__inner:focus, .time_slot.is-focus {
-  //   border-color: #DCDFE6 !important;
-  // }
-  // .el-input-group__prepend {
-  //   background: #fff;
-  //   padding: 0 0 0 5px;
-  // }
-  // .left-none-border {
-  //   .el-input__inner {
-  //     border-left: none;
-  //   }
-  // }
   .device_code {
     .el-form-item__content {
       .span_tips {
@@ -701,29 +686,31 @@ export default {
             }
           }
           .shot_time_p {
-            background-color: #ffffff;
-            color: #666666;
-            padding: 5px 0 5px 5px;
+            background-color: rgba(0, 0, 0, 0.4);
+            // color: #666666;
+            padding: 3px 0 3px 3px;
             top: 15px;
             left: 55px;
             // display: none;
+            color: #fff;
             position: absolute;
             min-width: 230px;
-            &:before {
-              content: '';
-              position: absolute;
-              right: 100%;
-              bottom: 25%;
-              width: 0;
-              height: 0;
-              /* border-radius: 2%; */
-              border-width: 7px;
-              border-style: solid;
-              border-color: transparent;
-              border-right-width: 10px;
-              border-right-color: #fff;
-              color: #fff;
-            }
+            border-radius: 4px;
+            // &:before {
+            //   content: '';
+            //   position: absolute;
+            //   right: 100%;
+            //   bottom: 25%;
+            //   width: 0;
+            //   height: 0;
+            //   /* border-radius: 2%; */
+            //   border-width: 7px;
+            //   border-style: solid;
+            //   border-color: transparent;
+            //   border-right-width: 10px;
+            //   background-color: rgba(0, 0, 0, 0.4);
+            //   background-color: rgba(0, 0, 0, 0.4);
+            // }
           }
           .is_show_time {
             display: none;
