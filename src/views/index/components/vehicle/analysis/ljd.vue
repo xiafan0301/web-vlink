@@ -144,11 +144,9 @@
       </div>
     </div>
 <!-- 视频播放 -->
-<el-dialog :visible.sync="dialogVisible" width="100%" style="height:100vh;">
-    <div style="width:100%; height:100%">
-      <div is="flvplayer" :index="1" :oData="playUrl" :bResize="bResize" :oConfig="{fit: false, sign: false, close: false, pause: true,fullscreen:false}"  ></div>
-    </div>
-  </el-dialog>
+  <div class="video_box" v-if="dialogVisible">
+    <div is="flvplayer" class="vl_map_video_box" :oData="playUrl" @playerClose="playerClose" :showFullScreen="true" :oConfig="{fit: false, sign: false, pause: true,fullscreen:false}"></div>
+  </div>
     <!-- 地图选择 -->
     <!-- <el-dialog :visible.sync="dialogVisible" width="80%">
         <mapselect @selectMap="mapPoint" @closeMap="hideMap" :allPoints="allDevice" :allBayonets="allBayonet"></mapselect>
@@ -249,6 +247,10 @@ export default {
     
   },
   methods: {
+    // 关闭视频
+    playerClose () {
+      this.dialogVisible = false;
+    },
     mapZoomSet(val) {
       if (this.amap) {
         this.amap.setZoom(this.amap.getZoom() + val);
@@ -711,6 +713,20 @@ export default {
 }
 .select_btn:hover {
    background-color: #0466de;
+}
+.video_box {
+  position: fixed;
+  left:0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 99999;
+}
+.vl_map_video_box {
+  // position: fixed!important;
+  width: 100%;
+  height: 100%;
+  // top: 0!important;
 }
 </style>
 <style lang="scss">
