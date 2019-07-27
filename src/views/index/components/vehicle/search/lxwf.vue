@@ -93,7 +93,7 @@
                   @click="clickTabItem('vehicleClass')"
                   :class="{red:sou.vehicleClass}"
                   v-if="photoAnalysis.vehicleClass"
-                >{{photoAnalysis.vehicleClass}}</span>
+                >车辆类型：{{photoAnalysis.vehicleClass}}</span>
                 <!-- <span
                   @click="clickTabItem('sunvisor')"
                   :class="{red:sou.sunvisor}"
@@ -104,7 +104,7 @@
                   @click="clickTabItem('_plateClass')"
                   :class="{red:sou._plateClass}"
                   v-if="photoAnalysis._plateClass"
-                >{{photoAnalysis._plateClass}}</span>
+                >号牌类型:{{photoAnalysis._plateClass}}</span>
               </div>
             </div>
           </div>
@@ -709,10 +709,24 @@ export default {
           // console.log(res);
           this.searchings = false;
           this.photoAnalysis = res.data[0];
-          let a = this.plateType.map(
-            el => el.enumField == this.photoAnalysis.plateClass
+          this.plateType.map(
+            el => {
+              if (el.enumField == this.photoAnalysis.plateClass) {
+                this.photoAnalysis._plateClass = el.enumValue;
+              }
+            }
           );
-          this.photoAnalysis._plateClass = a.enumValue;
+
+          this.sou ={
+            plateNo: true,
+            vehicleColor: true,
+            vehicleModel: true,
+            // vehicleRoof: true,
+            vehicleClass: true,
+            // sunvisor: true,
+            plateColor: true,
+            _plateClass: true
+          }
           this.disab = true;
         } else {
           this.searchings = false;
@@ -771,6 +785,8 @@ export default {
         // sunVisor: "",
         inspectionCount: ""
       }),
+      this.photoAnalysis = null;
+      this.regulationsList = [];
         this.setDTime();
       //this.getVehicleDetail();
     },
@@ -1103,6 +1119,8 @@ export default {
     display: inline-block;
     line-height: 35px;
     height: 35px;
+    font-size: 12px;
+    color: #333333;
     background: rgba(250, 250, 250, 1);
     border: 1px solid rgba(242, 242, 242, 1);
     border-radius: 3px;
@@ -1112,7 +1130,8 @@ export default {
   }
   .red {
     border: 1px solid #F2F2F2;
-    color: #0C70F8;
+    background-color: #0C70F8;
+    color: #ffffff;
   }
 }
 .fright{

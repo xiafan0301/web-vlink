@@ -136,7 +136,9 @@
         <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="deleteCamera">确认</el-button>
       </div>
     </el-dialog>
-    <div v-if="isShowMonitor" is="flvplayer" class="vl_map_full_video"  @playerClose="playerClose" :index="0" :oData="oData" :showFullScreen="true" :bResize="bResize" :oConfig="{sign: true}"></div>
+    <div class="video_box" v-if="isShowMonitor">
+      <div  is="flvplayer" class="vl_map_video_box"  @playerClose="playerClose" :oData="oData" :showFullScreen="true"></div>
+    </div>
   </div>
 </template>
 <script>
@@ -346,15 +348,34 @@ export default {
       padding: 0;
       width: 100px;
       height: 40px;
+      cursor: pointer;
       text-align: center;
     }
   }
 }
-.vl_map_full_video {
-  position: fixed !important;
+.video_box {
+  position: fixed;
+  left:0;
+  top: 0;
   width: 100%;
   height: 100%;
-  top: 0!important;
-  z-index: 9;
+  z-index: 99999;
+}
+.vl_map_video_box {
+  // position: fixed!important;
+  width: 100%;
+  height: 100%;
+  // top: 0!important;
 }
 </style>
+<style lang="scss">
+.monitor_dialog {
+  .el-dialog__header {
+    display: none;
+  }
+  .el-dialog__body {
+    padding: 0;
+  }
+}
+</style>
+
