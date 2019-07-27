@@ -70,8 +70,8 @@
                 <el-input v-model="content" placeholder="请对事发情况进行描述，文字限制140字"></el-input>
                 <div class="con_btn">
                   <i class="vl_icon vl_icon_message_6" @click="isShowEmoji = !isShowEmoji"></i>
-                  <el-button class="select_btn btn_100" :loading="loadingBtn" @click="replyComment">回复评论</el-button>
-                  <el-button class="reset_btn btn_100" @click="commentId = null;isShowEmoji = false;">取消评论</el-button>
+                  <el-button class="btn_100" type="primary" :loading="loadingBtn" @click="replyComment">回复评论</el-button>
+                  <el-button class="btn_100" @click="commentId = null;isShowEmoji = false;">取消评论</el-button>
                 </div>
                 <!-- emoji表情选择框 -->
                 <div class="emoji_box" v-if="commentId === item.uid && isShowEmoji">
@@ -95,8 +95,8 @@
         <h1 class="vl_f_16 vl_f_333" style="margin-bottom: 4px;">是否确定屏蔽该评论？</h1>
         <el-checkbox v-model="shieldChecked">并将该用户加入黑名单</el-checkbox>
         <div slot="footer">
-          <el-button @click="shieldDialog = false" class="reset_btn btn_100">取消</el-button>
-          <el-button :loading="loadingBtn" class="select_btn btn_100" @click="shieldComment">确认</el-button>
+          <el-button @click="shieldDialog = false" class="btn_100">取消</el-button>
+          <el-button :loading="loadingBtn" class="btn_100" type="primary" @click="shieldComment">确认</el-button>
         </div>
       </el-dialog>
     </div>

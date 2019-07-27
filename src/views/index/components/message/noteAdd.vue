@@ -64,8 +64,8 @@
         </el-form>
       </div>
       <div class="add_footer">
-        <el-button class="select_btn btn_100" :loading="loadingBtn" @click="sendMsg('addForm')">发送</el-button>
-        <el-button class="reset_btn btn_100" @click.native="toGiveUpDialog = true">返回</el-button>
+        <el-button class="btn_100" type="primary" :loading="loadingBtn" @click="sendMsg('addForm')">发送</el-button>
+        <el-button class="btn_100" @click.native="toGiveUpDialog = true">返回</el-button>
       </div>
     </div>
     <div class="rec_dialog">
@@ -104,8 +104,8 @@
           </div>
         </div>
         <div slot="footer">
-          <el-button @click="recDialog = false" class="reset_btn btn_100">取消</el-button>
-          <el-button :loading="loadingBtn" class="select_btn btn_100" @click="getRecipient">确认</el-button>
+          <el-button @click="recDialog = false" class="btn_100">取消</el-button>
+          <el-button :loading="loadingBtn" class="btn_100" type="primary" @click="getRecipient">确认</el-button>
         </div>
       </el-dialog>
     </div>
@@ -116,8 +116,8 @@
       top="40vh">
       <h4>是否放弃本次操作？</h4>
       <div slot="footer">
-        <el-button :loading="loadingBtn" @click="skip(1)" class="select_btn btn_140">放弃</el-button>
-        <el-button class="reset_btn btn_140" @click="toGiveUpDialog = false">取消</el-button>
+        <el-button :loading="loadingBtn" @click="skip(1)" class="btn_140" type="primary">放弃</el-button>
+        <el-button class="btn_140" @click="toGiveUpDialog = false">取消</el-button>
       </div>
     </el-dialog>
   </div>
@@ -195,7 +195,7 @@ export default {
         this.getOrganUser(nede).then(res => {
           console.log(res)
           this.contactListTotal.push(...this.contactList);
-          this.contactListTotal = unique(this.contactListTotal);//去重
+          this.contactListTotal = unique(this.contactListTotal, 'uid');//去重
         }) 
       } else {
         this.getOrganUser(nede).then(res => {

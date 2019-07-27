@@ -324,17 +324,17 @@
     <!-- 底部操作按钮 -->
     <!-- 待开始 -->
     <div class="manage_f_box" v-if="controlState === 2">
-      <el-button class="select_btn btn_100" @click="skip(3)">编辑</el-button>
-      <el-button class="reset_btn btn_100" @click="showDialog('delDialog')">删除</el-button>
+      <el-button class="btn_100" type="primary" @click="skip(3)">编辑</el-button>
+      <el-button class="btn_100" @click="showDialog('delDialog')">删除</el-button>
     </div>
     <!-- 进行中 -->
     <div class="manage_f_box" v-if="controlState === 1">
-      <el-button class="select_btn btn_100" @click="showDialog('stopDialog')">终止</el-button>
+      <el-button class="btn_100" type="primary" @click="showDialog('stopDialog')">终止</el-button>
     </div>
     <!-- 已结束 -->
     <div class="manage_f_box" v-if="controlState === 3">
-      <el-button class="select_btn btn_100" @click="skipIsCreate">复用</el-button>
-      <el-button class="reset_btn btn_100" @click="showDialog('delDialog')">删除</el-button>
+      <el-button class="btn_100" type="primary" @click="skipIsCreate">复用</el-button>
+      <el-button class="btn_100" @click="showDialog('delDialog')">删除</el-button>
     </div>
     <div class="event_detail_dialog" v-if="eventDetail">
       <el-dialog
@@ -622,7 +622,7 @@ export default {
                   devList = devList.concat(f.devList);
                 }
               })
-              this.situList = unique(devList);//去重
+              this.situList = unique(devList, 'uid');//去重
               console.log(this.situList, 'situList')
               // 组装卡口列表数据
               let bayList = [];
