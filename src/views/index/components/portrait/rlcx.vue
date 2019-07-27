@@ -13,10 +13,9 @@
               v-model="searchForm.time[0]"
               type="date"
               :editable="false" :clearable="false"
-              :picker-options="pickerOptions"
+              :picker-options="startTimeOptions"
               range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期">
+              placeholder="开始日期">
             </el-date-picker>
           </el-form-item>
           <el-form-item>
@@ -26,10 +25,9 @@
               v-model="searchForm.time[1]"
               type="date"
               :editable="false" :clearable="false"
-              :picker-options="pickerOptions"
+              :picker-options="endTimeOptions"
               range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期">
+              placeholder="结束日期">
             </el-date-picker>
           </el-form-item>
           <el-form-item label="抓拍区域:" label-width="72px">
@@ -373,6 +371,27 @@ export default {
 
       openMap: false,
       msClear: {},
+
+      startTimeOptions: {
+        disabledDate: (d) => {
+          // console.log(d);
+          // d > new Date() || d > this.endTime
+          if (d > new Date() || d.getTime() < new Date().getTime() - 30 * 24 * 60 * 60 * 1000) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      },
+      endTimeOptions: {
+        disabledDate: (d) => {
+          if (d > new Date() || d.getTime() < (this.searchForm.time[0].getTime() - 24 * 60 * 60 * 1000 + 2000)) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      },
 
       pickerOptions: {
         disabledDate (d) {
@@ -797,7 +816,11 @@ export default {
           bag: ''
         });
       }
-      this.searchSubmit();
+      this.dataList = [];
+      this.isInitPage = true;
+      this.pagination.pageNum = 1;
+      this.pagination.total = 0;
+      // this.searchSubmit();
     },
     orderHandler (type) {
       if (type === this.orderType) {
