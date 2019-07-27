@@ -176,7 +176,7 @@ export default {
         this.doSliderDetail(flag);
         window.setTimeout(() => {
           this.slidering = false;
-        }, 1000);
+        }, 600);
       }
     },
     // flag false 上一个， true 下一个

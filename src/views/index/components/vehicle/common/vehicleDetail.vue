@@ -80,11 +80,11 @@
 import { mapXupuxian } from "@/config/config.js";
 import flvplayer from '@/components/common/flvplayer.vue';
 import {getDeviceSnapImagesPage, JtcPOSTAppendtpInfo} from '../../../api/api.judge.js';
-import {getFeatureSearch} from "../../../api/api.analysis.js"; // 车辆特征检索接口
+import {getFeatureSearch, getPhotoSearch} from "../../../api/api.analysis.js"; // 车辆特征检索接口
 export default {
   /* 
     oData
-      type: 1, // 1过车查看 2特征搜车 3入城统计 4出城统计 5套牌车
+      type: 1, // 1过车查看 2特征搜车 3入城统计 4出城统计 5套牌车 7以图搜车
       params: {}, // 查询参数  列表查询的参数，结果需保持一致
       list: [], // 列表
       index: 0, // 当前页的第几个（点击的人像所在的页的序号）
@@ -188,7 +188,7 @@ export default {
         this.doSliderDetail(flag);
         window.setTimeout(() => {
           this.slidering = false;
-        }, 1000);
+        }, 600);
       }
     },
     doSliderDetail (flag) {
@@ -286,6 +286,20 @@ export default {
                 fakeReason: this.strucInfoList[this.strucIndex].fakeReason
               }
             );
+          }
+        }).catch(() => {
+        });
+      } else if (this.type === 7) {
+        // getFeatureSearch
+        let params = Object.assign(this.params, {
+          pageSize: this.pagination.pageSize,
+          pageNum: this.pagination.pageNum
+        });
+        getPhotoSearch(params).then(res => {
+          if (res && res.data) {
+            this.pagination.total = res.data.total;
+            this.strucInfoList = res.data.list;
+            this.sturcDetail = res.data.list[this.strucIndex];
           }
         }).catch(() => {
         });

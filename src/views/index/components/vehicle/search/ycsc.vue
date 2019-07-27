@@ -268,190 +268,12 @@
       </div>
     </el-dialog>
     <!--检索详情弹窗-->
-    <el-dialog
-      :visible.sync="strucDetailDialog"
-      class="struc_detail_dialog"
-      :close-on-click-modal="false"
-      top="4vh"
-      :show-close="false"
-    >
-      <div class="struc_tab">
-        <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">抓拍详情</span>
-        <span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>
-        <span :class="{'active': strucCurTab === 3}" @click="strucCurTab = 3">视频回放</span>
-        <i class="el-icon-close" @click="strucDetailDialog = false"></i>
-      </div>
-      <div class="struc_main">
-        <div v-show="strucCurTab === 1" class="struc_c_detail">
-          <div class="struc_c_d_img struc_c_d_img_blue">
-            <img :src="curImageUrl" class="bigImg" title="点击放大图片" />
-            <span>上传图</span>
-          </div>
-          <div class="struc_c_d_box" style="margin-left: 0.3rem;">
-            <!-- 抓拍图 -->
-            <div class="struc_c_d_img struc_c_d_img_green" v-if="showSubImg">
-              <img :src="sturcDetail.subStoragePath" class="bigImg" title="点击放大图片" />
-              <!-- 切换图片 -->
-              <div class="checkout_img" @click="showSubImg = false;">切换全景图</div>
-              <span>抓拍图</span>
-            </div>
-            <!-- 全景图 -->
-            <div class="struc_c_d_img struc_c_d_img_blue" v-else>
-              <img :src="sturcDetail.storagePath" class="bigImg" title="点击放大图片" />
-              <!-- 切换图片 -->
-              <div class="checkout_img sub_img" @click="showSubImg = true;">切换抓拍图</div>
-              <span>全景图</span>
-            </div>
-            <div class="struc_c_d_info">
-              <vue-scroll>
-                <h2>
-                  抓拍信息
-                  <!-- <div class="vl_jfo_sim" v-show="showSim">
-                  <i class="vl_icon vl_icon_retrieval_03"></i>
-                  {{sturcDetail.semblance ? sturcDetail.semblance : 98.32}}
-                  <span
-                    style="font-size: 12px;"
-                  >%</span>
-                  </div>-->
-                </h2>
-                <!-- 特征展示框 -->
-                <!-- <div class="struc_cdi_box">
-                <div
-                  class="item"
-                  v-if="sturcDetail.plateReliability"
-                >{{sturcDetail.plateReliability}}</div>
-                <div class="item" v-if="sturcDetail.vehicleBrand">{{ sturcDetail.vehicleBrand}}</div>
-                <div class="item" v-if="sturcDetail.sunvisor">{{ '遮阳板：' + sturcDetail.sunvisor}}</div>
-                <div
-                  class="item"
-                  v-if="sturcDetail.plateColor"
-                >{{ '车牌颜色：' + sturcDetail.plateColor}}</div>
-                <div class="item" v-if="sturcDetail.plateNo">{{ sturcDetail.plateNo}}</div>
-                <div class="item" v-if="sturcDetail.vehicleClass">{{ sturcDetail.vehicleClass}}</div>
-                <div
-                  class="item"
-                  v-if="sturcDetail.vehicleColor"
-                >{{ '车辆颜色：' + sturcDetail.vehicleColor}}</div>
-                <div class="item" v-if="sturcDetail.vehicleModel">{{sturcDetail.vehicleModel}}</div>
-                <div
-                  class="item"
-                  v-if="sturcDetail.vehicleRoof"
-                >{{ '车顶(天窗)：' + sturcDetail.vehicleRoof}}</div>
-                </div>-->
-                <!-- 车辆的信息栏 -->
-                <div class="struc_cdi_line_ytsc" v-if="sturcDetail.shotTime">
-                  <p class="line_content">
-                    <span class="key">抓拍时间</span>
-                    <span class="val">{{sturcDetail.shotTime}}</span>
-                  </p>
-                </div>
-                <div class="struc_cdi_line_ytsc" v-if="sturcDetail.deviceName">
-                  <p class="line_content">
-                    <span class="key">抓拍设备</span>
-                    <span class="val">{{sturcDetail.deviceName}}</span>
-                  </p>
-                </div>
-                <div class="struc_cdi_line_ytsc" v-if="sturcDetail.address">
-                  <p class="line_content">
-                    <span class="key" title="抓拍地点">抓拍地点</span>
-                    <span class="val">{{sturcDetail.address}}</span>
-                  </p>
-                </div>
-                <div class="struc_cdi_line_ytsc" v-if="sturcDetail.plateNo">
-                  <p class="line_content">
-                    <span class="key">车牌号码</span>
-                    <span class="val">{{sturcDetail.plateNo}}</span>
-                  </p>
-                </div>
-                <!-- 5个特征 -->
-                <div class="struc_cdi_line_ytsc" v-if="sturcDetail.plateColor">
-                  <p class="line_content">
-                    <span class="key">车牌颜色</span>
-                    <span class="val">{{sturcDetail.plateColor}}</span>
-                  </p>
-                </div>
-                <div class="struc_cdi_line_ytsc" v-if="sturcDetail.vehicleModel">
-                  <p class="line_content">
-                    <span class="key">车辆型号</span>
-                    <span class="val">{{sturcDetail.vehicleModel}}</span>
-                  </p>
-                </div>
-
-                <div class="struc_cdi_line_ytsc" v-if="sturcDetail.vehicleColor">
-                  <p class="line_content">
-                    <span class="key">车辆颜色</span>
-                    <span class="val">{{sturcDetail.vehicleColor}}</span>
-                  </p>
-                </div>
-                <div class="struc_cdi_line_ytsc" v-if="sturcDetail.vehicleClass">
-                  <p class="line_content">
-                    <span class="key">车辆类型</span>
-                    <span class="val">{{sturcDetail.vehicleClass}}</span>
-                  </p>
-                </div>
-                <div
-                  class="struc_cdi_line_ytsc"
-                  v-if="sturcDetail.plateClass || sturcDetail.plateClass === 0"
-                >
-                  <p class="line_content">
-                    <span class="key">号牌类型</span>
-                    <span class="val">{{dicFormater(45, sturcDetail.plateClass)}}</span>
-                  </p>
-                </div>
-              </vue-scroll>
-            </div>
-          </div>
-        </div>
-        <div v-show="strucCurTab === 2" class="struc_c_address"></div>
-        <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
-          <div class="struc_c_d_img_blue struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" class="bigImg" title="点击放大图片" alt />
-            <span>抓拍图</span>
-          </div>
-          <div class="struc_c_d_box" style="margin-left: 0.3rem;">
-            <video id="capVideo" :src="sturcDetail.videoPath"></video>
-            <div class="play_btn" @click="videoTap" v-show="!playing">
-              <i class="vl_icon vl_icon_judge_01" v-if="playing"></i>
-              <i class="vl_icon vl_icon_control_09" v-else></i>
-            </div>
-          </div>
-          <div class="download_btn">
-            <a download="视频" :href="videoUrl"></a>下载视频
-          </div>
-        </div>
-      </div>
-      <div class="struc-list" v-show="strucInfoList.length > 1">
-        <swiper :options="swiperOption" ref="mySwiper">
-          <!-- slides -->
-          <swiper-slide v-for="(item, index) in strucInfoList" :key="'my_swiper' + index">
-            <div
-              class="swiper_img_item"
-              :class="{'active': index === curImgIndex}"
-              @click="imgListTap(item, index)"
-            >
-              <img style="width: 100%; height: .88rem;" :src="item.subStoragePath" alt />
-              <!-- <div class="vl_jfo_sim" v-show="showSim">
-                <i
-                  class="vl_icon vl_icon_retrieval_05"
-                  :class="{'vl_icon_retrieval_06':  index === curImgIndex}"
-                ></i>
-                {{item.semblance ? item.semblance : 92}}
-                <span
-                  style="font-size: 12px;"
-                >%</span>
-              </div>-->
-            </div>
-          </swiper-slide>
-          <div class="swiper-button-prev" slot="button-prev"></div>
-          <div class="swiper-button-next" slot="button-next"></div>
-        </swiper>
-      </div>
-    </el-dialog>
-    <div id="capMap"></div>
+    <div is="vehicleDetail" :detailData="detailData"></div>
   </div>
 </template>
 <script>
 import vlBreadcrumb from "@/components/common/breadcrumb.vue";
+import vehicleDetail from '../common/vehicleDetail.vue';
 
 import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入一个地图的地址
 import { formatDate } from "@/utils/util.js";
@@ -464,8 +286,12 @@ import { MapGETmonitorList } from "../../../api/api.map.js"; // 获取到设备�
 import { objDeepCopy } from "../../../../../utils/util.js"; // 深拷贝方法
 
 export default {
+  components: { vlBreadcrumb, vehicleDetail },
   data() {
     return {
+
+      detailData: null,
+
       selectType: 1,
       sortType: 1, // 1为时间排序， 2为监控排序
       timeSortType: true, // true为时间降序， false为时间升序
@@ -574,45 +400,13 @@ export default {
       isInit: true, // 是否是页面初始化状态
       pageNum: 1,
       pageSize: 10,
-      total: 0,
-      /* 检索详情弹窗变量 */
-      showSubImg: true, // 模态框默认展示抓拍图
-      swiperOption: {
-        // swiper配置
-        slidesPerView: 10,
-        spaceBetween: 18,
-        slidesPerGroup: 10,
-        loop: false,
-        slideToClickedSlide: true,
-        loopFillGroupWithBlank: true,
-        navigation: {
-          nextEl: ".swiper-button-next",
-          prevEl: ".swiper-button-prev"
-        }
-      },
-      amap: null, // 地图实例
-      markerPoint: null, // 地图点集合
-      InfoWindow: null,
-      strucDetailDialog: false, // 弹窗是否展示
-      playing: false, // 视频播放是否
-      strucCurTab: 1,
-      curImgIndex: 0, // 当前图片index
-      sturcDetail: {},
-      videoUrl: "" // 弹窗视频回放里的视频
+      total: 0
     };
   },
-  components: { vlBreadcrumb },
   mounted() {
     //获取摄像头卡口数据
     this.getMonitorList();
     this.setDTime();
-    // 初始化地图
-    let map = new AMap.Map("capMap", {
-      center: [112.974691, 28.093846],
-      zoom: 16
-    });
-    map.setMapStyle("amap://styles/whitesmoke");
-    this.amap = map;
     // 处理其他页面跳转的参数
     if (this.$route.query.imgurl) {
       this.curImageUrl = this.$route.query.imgurl;
@@ -644,6 +438,47 @@ export default {
       this.curImageUrl = ""; // 清空上传的图片
       this.initCheckTree(); // 初始化全选树节点
     },
+    getStrucParams () {
+      // 处理设备UID
+      let deviceUidArr = this.selectCameraArr.map(item => {
+        return item.id;
+      });
+      let bayonetUidArr = this.selectBayonetArr.map(item => {
+        return item.id;
+      });
+      let queryParams = {
+        where: {
+          startTime:
+            formatDate(this.ytscMenuForm.startTime, "yyyy-MM-dd") +
+              " 00:00:00" || null, // 开始时间
+          endTime:
+            formatDate(this.ytscMenuForm.endTime, "yyyy-MM-dd") +
+              " 23:59:59" || null, // 结束时间
+          uploadImgUrl: this.curImageUrl || null, // 车辆图片信息
+          deviceUid: deviceUidArr.join(), // 摄像头标识
+          bayonetUid: bayonetUidArr.join() // 卡口标识
+        }
+      };
+      // 处理排序字段
+      if (this.sortType === 1) {
+        // 时间排序
+        queryParams.orderBy = "shotTime";
+        if (this.timeSortType) {
+          queryParams.order = "desc";
+        } else {
+          queryParams.order = "asc";
+        }
+      } else if (this.sortType === 2) {
+        // 监控排序
+        queryParams.orderBy = "deviceNamePinyin";
+        if (this.cameraSortType) {
+          queryParams.order = "desc";
+        } else {
+          queryParams.order = "asc";
+        }
+      }
+      return queryParams;
+    },
     getStrucInfo(isClick = false) {
       // 根据特征数组来获取到检索的结果
       if (this.curImageUrl) {
@@ -661,46 +496,10 @@ export default {
               this.getStrucInfoLoading = false; // 关闭加载效果
               return;
             }
-            // 处理设备UID
-            let deviceUidArr = this.selectCameraArr.map(item => {
-              return item.id;
-            });
-            let bayonetUidArr = this.selectBayonetArr.map(item => {
-              return item.id;
-            });
-            const queryParams = {
-              where: {
-                startTime:
-                  formatDate(this.ytscMenuForm.startTime, "yyyy-MM-dd") +
-                    " 00:00:00" || null, // 开始时间
-                endTime:
-                  formatDate(this.ytscMenuForm.endTime, "yyyy-MM-dd") +
-                    " 23:59:59" || null, // 结束时间
-                uploadImgUrl: this.curImageUrl || null, // 车辆图片信息
-                deviceUid: deviceUidArr.join(), // 摄像头标识
-                bayonetUid: bayonetUidArr.join() // 卡口标识
-              },
+            let queryParams = Object.assign(this.getStrucParams(), {
               pageNum: this.pageNum,
               pageSize: this.pageSize
-            };
-            // 处理排序字段
-            if (this.sortType === 1) {
-              // 时间排序
-              queryParams.orderBy = "shotTime";
-              if (this.timeSortType) {
-                queryParams.order = "desc";
-              } else {
-                queryParams.order = "asc";
-              }
-            } else if (this.sortType === 2) {
-              // 监控排序
-              queryParams.orderBy = "deviceNamePinyin";
-              if (this.cameraSortType) {
-                queryParams.order = "desc";
-              } else {
-                queryParams.order = "asc";
-              }
-            }
+            });
             getPhotoSearch(queryParams)
               .then(res => {
                 this.getStrucInfoLoading = false; // 关闭加载效果
@@ -775,64 +574,21 @@ export default {
         this.getStrucInfo();
       }
     },
-    // 绘制地图
-    drawPoint(data) {
-      this.$nextTick(() => {
-        $(".struc_c_address").append($("#capMap"));
-      });
-      if (this.markerPoint) {
-        this.amap.remove(this.markerPoint);
-      }
-      let _content = '<div class="vl_icon vl_icon_judge_02"></div>';
-      this.markerPoint = new AMap.Marker({
-        // 添加自定义点标记
-        map: this.amap,
-        position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-        offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
-        draggable: false, // 是否可拖动
-        // 自定义点标记覆盖物内容
-        content: _content
-      });
-      this.amap.setZoomAndCenter(16, [
-        data.shotPlaceLongitude,
-        data.shotPlaceLatitude
-      ]); // 自适应点位置
-      let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`;
-      this.infoWindow = new AMap.InfoWindow({
-        map: this.amap,
-        isCustom: true,
-        closeWhenClickMap: false,
-        position: [data.shotPlaceLongitude, data.shotPlaceLatitude],
-        offset: new AMap.Pixel(0, -70),
-        content: sConent
-      });
-    },
-    videoTap() {
-      // 播放视频
-      let vDom = document.getElementById("capVideo");
-      if (this.playing) {
-        vDom.pause();
-      } else {
-        vDom.play();
-      }
-      vDom.addEventListener("ended", e => {
-        e.target.currentTime = 0;
-        this.playing = false;
-      });
-      this.playing = !this.playing;
-    },
     showStrucInfo(data, index) {
+      this.detailData = {
+        type: 7, // 以图搜车
+        params: this.getStrucParams(), // 查询参数
+        list: this.strucInfoList, // 列表
+        index: index, // 第几个
+        pageSize: this.pageSize,
+        total: this.total,
+        pageNum: this.pageNum
+      }
       // 打开抓拍详情
-      this.curImgIndex = index;
+      /* this.curImgIndex = index;
       this.strucDetailDialog = true;
       this.sturcDetail = data;
-      this.drawPoint(data); // 重新绘制地图
-    },
-    imgListTap(data, index) {
-      // 点击swiper图片
-      this.curImgIndex = index;
-      this.sturcDetail = data;
-      this.drawPoint(data); // 重新绘制地图
+      this.drawPoint(data); // 重新绘制地图 */
     },
     /*选择设备的方法*/
     getMonitorList() {

@@ -105,4 +105,17 @@ export function PortraitPostByphotoTask(data) {
     mode: 'judge'
   })
 }
+
+/**
+ * 以图搜人实时
+ * @data {object} data
+ */
+export function PortraitPostByphotoRealtime(data) {
+  return request({
+    url: '/portrait/by-photo/real-time',
+    method: 'post',
+    data,
+    mode: 'judge'
+  })
+}
 /*================人脸检索 --- 以图搜人 end=================== */
