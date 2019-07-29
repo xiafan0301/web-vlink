@@ -1267,12 +1267,15 @@ export default {
   },
   beforeDestroy () {
     if (this.player) {
+      if (this.video) {
+        this.video.pause();
+        this.video = null;
+      }
       // 销毁
       this.player.unload();
       this.player.detachMediaElement();
       this.player.destroy();
       this.player = null;
-      this.video = null;
     }
     this.saveVideoRecord();
 
