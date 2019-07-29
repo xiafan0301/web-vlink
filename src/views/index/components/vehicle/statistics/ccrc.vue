@@ -459,18 +459,11 @@ export default {
       this.vehicleNumber = ''
       this.lll = []
       this.onlySurveillance = false
-      getbayonet().then(res=>{
-        if (res.data) {
-          this.kakou = res.data.map((item)=>{
-            return item.bayonetList
-          })
-        }
-        this.kakou = this.kakou.flat(6)
-        this.lll = this.kakou.map((item)=> {
-          return item.uid
-        })
+      this.lll = this.kakou.map((item)=> {
+        return item.uid
       })
       this.carType = []
+      this.showselected =true,
       this.JfoGETCity()
     },
     hhh (val) {

@@ -870,6 +870,9 @@ export default {
           }
         }
         .struc_c_d_box {
+          video{
+            height: auto !important;
+          }
           width: calc(100% - 3.9rem);
           display: flex;
           height: 3.6rem;
