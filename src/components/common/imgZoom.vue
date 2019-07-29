@@ -1,6 +1,6 @@
 <template>
   <div class="imgz_mask" id='imgZoomMask'>
-    <i class="el-icon-circle-close"></i>
+    <i class="imgz_mask_close el-icon-circle-close" id="imgZoomMask_icon"></i>
   </div>
 </template>
 <script>
@@ -11,12 +11,14 @@ export default {
   },
   mounted () {
     let _this = this;
-    // $('#imgZoomMask').appendTo($('body'));
+    $('#imgZoomMask').appendTo($('body'));
+    $('#imgZoomMask_icon').appendTo($('body'));
     $('body').on('click', '.bigImg', function () {
       let nImg = $(this);
       if (nImg && nImg.length > 0) {
         let src = $(this).attr('src');
         $('#imgZoomMask').show();
+        $('#imgZoomMask_icon').show();
         _this.imgHandler(src);
       }
     });
@@ -29,11 +31,24 @@ export default {
         e.stopPropagation(); // 其它浏览器下阻止冒泡
       }
       $('#imgZoomMask').hide();
+      $('#imgZoomMask_icon').hide();
+      $('#imgZoomImg').fadeOut().remove();
+    });
+    $('#imgZoomMask_icon').on("click", function (event) {
+      let e = (event) ? event : window.event;
+      if (window.event && e.cancelBubble) {
+        e.cancelBubble = true; // ie下阻止冒泡
+      } else {
+        e.stopPropagation(); // 其它浏览器下阻止冒泡
+      }
+      $('#imgZoomMask').hide();
+      $('#imgZoomMask_icon').hide();
       $('#imgZoomImg').fadeOut().remove();
     });
     $(document).keyup(function (event) {
       if (event && (event.keyCode === 27 || event.keyCode === 96)) {
         $('#imgZoomMask').hide();
+        $('#imgZoomMask_icon').hide();
         $('#imgZoomImg').fadeOut().remove();
       }
     });
@@ -121,11 +136,12 @@ export default {
   position: fixed; top: 0;left: 0; z-index: 15555;
   width: 100%;height: 100%;
   background: rgba(0, 0, 0, 0.5);
-  > i {
-    position: absolute; top: 10px; right: 10px; z-index: 17000;
-    cursor: pointer;
-    color: #fff; font-size: 26px;
-  }
+}
+.imgz_mask_close {
+  display: none;
+  position: fixed; top: 10px; right: 10px; z-index: 17000;
+  cursor: pointer;
+  color: #fff; font-size: 26px;
 }
 </style>
 

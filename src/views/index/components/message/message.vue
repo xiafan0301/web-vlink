@@ -74,15 +74,6 @@ export default {
     .btn_140{
       width: 140px!important;
     }
-    .select_btn {
-      background-color: #0C70F8;
-      color: #ffffff;
-    }
-    .reset_btn {
-      background-color: #ffffff;
-      color: #666666;
-      border-color: #DDDDDD;
-    }
     .el-date-editor, .el-select{
       width: 100%;
     }

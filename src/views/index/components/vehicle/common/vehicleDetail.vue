@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     :visible.sync="strucDetailDialog"
-    class="rx_detail_dialog"
+    class="cl_detail_dialog"
     :close-on-click-modal="false"
     :append-to-body="true"
     :show-close="false"
@@ -31,27 +31,30 @@
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_info">
-            <h2>分析结果：</h2>
+            <h2>分析结果</h2>
             <ul>
-              <li v-if="sturcDetail.sex"><span>{{sturcDetail.sex}}</span></li>
-              <li v-if="sturcDetail.age"><span>{{sturcDetail.age}}</span></li>
-              <li v-if="sturcDetail.hair"><span>{{sturcDetail.hair}}</span></li>
-              <li v-if="sturcDetail.glasses"><span>{{sturcDetail.glasses}}</span></li>
-              <li v-if="sturcDetail.hat"><span>{{sturcDetail.hat}}</span></li>
-              <li v-if="sturcDetail.mask"><span>{{sturcDetail.mask}}</span></li>
-              <li v-if="sturcDetail.baby"><span>{{sturcDetail.baby}}</span></li>
-              <li v-if="sturcDetail.bag"><span>{{sturcDetail.bag}}</span></li>
-              <li v-if="sturcDetail.upperType"><span><span>上身款式：</span>{{sturcDetail.upperType}}</span></li>
-              <li v-if="sturcDetail.upperColor"><span><span>上身颜色：</span>{{sturcDetail.upperColor}}</span></li>
-              <li v-if="sturcDetail.bottomType"><span><span>下身款式：</span>{{sturcDetail.bottomType}}</span></li>
-              <li v-if="sturcDetail.bottomColor"><span><span>下身颜色：</span>{{sturcDetail.bottomColor}}</span></li>
+              <li v-if="sturcDetail.plateNo"><span>{{sturcDetail.plateNo}}</span></li>
+              <li v-if="type === 3 && sturcDetail.shotTime"><span><span>入城时间：</span>{{sturcDetail.shotTime}}</span></li>
+              <li v-if="type === 3 && sturcDetail.bayonetName"><span><span>入城卡口：</span>{{sturcDetail.bayonetName}}</span></li>
+              <li v-if="type === 3 && sturcDetail.firstEnterFlag"><span><span>初次入城：</span>{{sturcDetail.firstEnterFlag}}</span></li>
+              <li v-if="sturcDetail.plateColor"><span><span>车牌颜色：</span>{{sturcDetail.plateColor}}</span></li>
+              <li v-if="sturcDetail.vehicleModel"><span><span>车辆型号：</span>{{sturcDetail.vehicleModel}}</span></li>
+              <li v-if="sturcDetail.vehicleColor"><span><span>车辆颜色：</span>{{sturcDetail.vehicleColor}}</span></li>
+              <li v-if="sturcDetail.vehicleClass"><span><span>车辆类型：</span>{{sturcDetail.vehicleClass}}</span></li>
+              <li v-if="type === 3 && sturcDetail.vehicleStyles"><span><span>车辆分组：</span>{{sturcDetail.vehicleStyles}}</span></li>
+              <li v-if="sturcDetail.plateClass || sturcDetail.plateClass === 0">
+                <span><span>车牌类型：</span>
+                {{dicFormater(45, sturcDetail.plateClass)}}</span>
+              </li>
+              <!-- 套牌依据 -->
+              <li v-if="type === 5"><span><span>套牌依据：</span>{{sturcDetail.fakeReason}}</span></li>
             </ul>
              <!--  <span class='tz' v-if="sturcDetail.features"><b>特征码：</b>{{sturcDetail.features}}</span> -->
           </div>
         </div>
       </div>
       <div v-show="strucCurTab === 2" class="struc_c_address">
-        <div id="portraitDetail_capMap"></div>
+        <div id="vehicleDetail_capMap"></div>
       </div>
       <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video clearfix">
         <div class="struc_c_d_qj struc_c_d_img">
@@ -76,11 +79,12 @@
 <script>
 import { mapXupuxian } from "@/config/config.js";
 import flvplayer from '@/components/common/flvplayer.vue';
-import {getFaceRetrievalPerson} from '../../../api/api.judge.js';
+import {getDeviceSnapImagesPage, JtcPOSTAppendtpInfo} from '../../../api/api.judge.js';
+import {getFeatureSearch, getPhotoSearch} from "../../../api/api.analysis.js"; // 车辆特征检索接口
 export default {
   /* 
     oData
-      type: 1, // 1特征搜人 2以图搜人
+      type: 1, // 1过车查看 2特征搜车 3入城统计 4出城统计 5套牌车 7以图搜车
       params: {}, // 查询参数  列表查询的参数，结果需保持一致
       list: [], // 列表
       index: 0, // 当前页的第几个（点击的人像所在的页的序号）
@@ -115,14 +119,22 @@ export default {
   },
   watch: {
     detailData (val) {
-      console.log('detailData', val);
+      console.log('vechicle detailData', val);
       if (val) {
         this.strucCurTab = 1;
         this.strucDetailDialog = true;
         this.strucIndex = val.index;
         this.strucInfoList = val.list;
-        this.sturcDetail = this.strucInfoList[this.strucIndex];
         this.type = val.type;
+        if (this.type === 5) {
+          this.sturcDetail = Object.assign(
+            this.strucInfoList[this.strucIndex].vehicleDto, {
+              fakeReason: this.strucInfoList[this.strucIndex].fakeReason
+            }
+          );
+        } else {
+          this.sturcDetail = this.strucInfoList[this.strucIndex];
+        }
         this.pagination = {
           total: val.total,
           pageSize: val.pageSize,
@@ -179,14 +191,21 @@ export default {
         }, 600);
       }
     },
-    // flag false 上一个， true 下一个
     doSliderDetail (flag) {
       if (flag) {
         // 下一个
         if (this.strucIndex < (this.strucInfoList.length - 1)) {
           // 序号小于LIST长度-1
           this.strucIndex = this.strucIndex + 1;
-          this.sturcDetail = this.strucInfoList[this.strucIndex];
+          if (this.type === 5) {
+            this.sturcDetail = Object.assign(
+              this.strucInfoList[this.strucIndex].vehicleDto, {
+                fakeReason: this.strucInfoList[this.strucIndex].fakeReason
+              }
+            );
+          } else {
+            this.sturcDetail = this.strucInfoList[this.strucIndex];
+          }
         } else {
           // 序号超出
           if (this.pagination.total > 
@@ -200,7 +219,15 @@ export default {
       } else {
         if (this.strucIndex > 0) {
           this.strucIndex = this.strucIndex - 1;
-          this.sturcDetail = this.strucInfoList[this.strucIndex];
+          if (this.type === 5) {
+            this.sturcDetail = Object.assign(
+              this.strucInfoList[this.strucIndex].vehicleDto, {
+                fakeReason: this.strucInfoList[this.strucIndex].fakeReason
+              }
+            );
+          } else {
+            this.sturcDetail = this.strucInfoList[this.strucIndex];
+          }
         } else {
           if (this.pagination.pageNum > 1) {
             this.pagination.pageNum = this.pagination.pageNum - 1;
@@ -220,7 +247,23 @@ export default {
           pageSize: this.pagination.pageSize,
           pageNum: this.pagination.pageNum
         });
-        getFaceRetrievalPerson(params).then(res => {
+        getDeviceSnapImagesPage(params).then(res => {
+          if (res && res.data) {
+            this.pagination.total = res.data.total;
+            this.strucInfoList = res.data.list;
+            // this.sturcDetail = res.data.list[this.strucIndex];
+            this.sturcDetail = this.strucInfoList[this.strucIndex];
+           
+          }
+        }).catch(() => {
+        });
+      } else if (this.type === 2) {
+        // getFeatureSearch
+        let params = Object.assign(this.params, {
+          pageSize: this.pagination.pageSize,
+          pageNum: this.pagination.pageNum
+        });
+        getFeatureSearch(params).then(res => {
           if (res && res.data) {
             this.pagination.total = res.data.total;
             this.sturcDetail = res.data.list[this.strucIndex];
@@ -228,13 +271,48 @@ export default {
           }
         }).catch(() => {
         });
+      } else if (this.type === 5) {
+        // getFeatureSearch
+        let params = Object.assign(this.params, {
+          pageSize: this.pagination.pageSize,
+          pageNum: this.pagination.pageNum
+        });
+        JtcPOSTAppendtpInfo(params).then(res => {
+          if (res && res.data) {
+            this.pagination.total = res.data.total;
+            this.strucInfoList = res.data.list;
+            this.sturcDetail = Object.assign(
+              this.strucInfoList[this.strucIndex].vehicleDto, {
+                fakeReason: this.strucInfoList[this.strucIndex].fakeReason
+              }
+            );
+          }
+        }).catch(() => {
+        });
+      } else if (this.type === 7) {
+        // getFeatureSearch
+        let params = Object.assign(this.params, {
+          pageSize: this.pagination.pageSize,
+          pageNum: this.pagination.pageNum
+        });
+        getPhotoSearch(params).then(res => {
+          if (res && res.data) {
+            this.pagination.total = res.data.total;
+            this.strucInfoList = res.data.list;
+            this.sturcDetail = res.data.list[this.strucIndex];
+          }
+        }).catch(() => {
+        });
       }
+
     },
     // 绘制地图
     drawPoint(data) {
+      console.log(data.shotPlaceLongitude, data.shotPlaceLatitude);
       if (!this.amap) {
+        console.log(this.amap);
         // 地图不存在 初始化地图
-        let map = new AMap.Map("portraitDetail_capMap", {
+        let map = new window.AMap.Map("vehicleDetail_capMap", {
           center:mapXupuxian.center,
           zoom: 16
         });
@@ -277,7 +355,7 @@ export default {
 </script>
 <style lang="scss">
 // 抓拍详情弹窗
-.rx_detail_dialog {
+.cl_detail_dialog {
   .el-dialog {
     width: 1100px;
     margin-left: -550px !important; margin-top: -276px !important;
@@ -508,7 +586,7 @@ export default {
     .struc_c_address {
       height: 480px;
       padding-bottom: 30px;
-      #portraitDetail_capMap {
+      #vehicleDetail_capMap {
         width: 100%;
         height: 100%;
       }

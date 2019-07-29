@@ -261,11 +261,11 @@ export const objDeepCopy = (obj) => { //递归拷贝
   return t;
 }
 // 数组去重
-export const unique = (array) => {
+export const unique = (array, key) => {
   let obj = {}, resultArray = [];
   resultArray = array.reduce((item, next) => {
-    if (!obj[next.uid]) {
-      obj[next.uid] = true;
+    if (!obj[next[key]]) {
+      obj[next[key]] = true;
       item.push(next);
     }
     return item;
@@ -308,3 +308,12 @@ export const autoDownloadUrl = (url) => {
   a.click();
 }
 
+/*
+ * 时间戳处理
+ * */
+export const transMinute = (seconds) => {
+  let iH = Math.floor(seconds / 60);
+  let iS = seconds % 60;
+  return ((iH > 0) ? iH : '') + '小时' + 
+    ((iH > 0 && iS === 0) ? '' : (iS + '分钟'));
+};

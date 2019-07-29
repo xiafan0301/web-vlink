@@ -89,8 +89,8 @@
           </el-date-picker>
         </el-form-item>
         <el-form-item style="width: 192px;">
-          <el-button class="reset_btn btn_90" @click="resetForm()">重置</el-button>
-          <el-button class="select_btn btn_90" :loading="loadingBtn" @click="getControlMap">搜索</el-button>
+          <el-button class="btn_90" @click="resetForm()">重置</el-button>
+          <el-button class="btn_90" type="primary" :loading="loadingBtn" @click="getControlMap">搜索</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -175,7 +175,7 @@
       <div class="create_control">
         <img src="../../../../assets/img/video/vi_101.png" alt="">
         <p>没有进行中的布控</p>
-        <el-button @click="skipIsCreateControl" class="reset_btn btn_100">新建布控</el-button>
+        <el-button @click="skipIsCreateControl" class="btn_100">新建布控</el-button>
       </div>
     </el-dialog>
   </div>
@@ -657,7 +657,7 @@ export default {
           clickWindow = new window.AMap.InfoWindow({
             isCustom: true,
             closeWhenClickMap: false,
-            offset: new window.AMap.Pixel(-2, -60), // 相对于基点的偏移位置
+            offset: new window.AMap.Pixel(-2, -80), // 相对于基点的偏移位置
             content: sContent
           });
           // 打开弹窗
@@ -777,7 +777,7 @@ export default {
           content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_sxt_not_choose"></div>';
         }
         if (obj.longitude > 0 && obj.latitude > 0) {
-          let offSet = [-20.5, -48];
+          let offSet = [-20.5, -70];
           let marker = new window.AMap.Marker({ // 添加自定义点标记
             map: _this.map,
             position: [obj.longitude, obj.latitude],

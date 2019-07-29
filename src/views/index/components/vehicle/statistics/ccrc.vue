@@ -41,25 +41,6 @@
                 :value="item.uid">
             </el-option>
           </el-select>
-<!--          <div class="search_item" v-show="isShowSelectList">-->
-<!--            <vue-scroll>-->
-<!--              <el-checkbox-->
-<!--                  :indeterminate="isIndeterminateBayonet"-->
-<!--                  v-model="checkAllTreeBayonet"-->
-<!--                  @change="handleCheckedAllBayonet"-->
-<!--              >全选</el-checkbox>-->
-<!--              <el-tree-->
-<!--                  @check="listenCheckedBayonet"-->
-<!--                  :data="bayonetTree"-->
-<!--                  show-checkbox-->
-<!--                  default-expand-all-->
-<!--                  node-key="id"-->
-<!--                  ref="bayonetTree"-->
-<!--                  highlight-current-->
-<!--                  :props="defaultProps">-->
-<!--              </el-tree>-->
-<!--            </vue-scroll>-->
-<!--          </div>-->
         </div>
         <div class="kakou">
           <el-select
@@ -151,7 +132,7 @@
               <el-table-column
                   label="操作">
                 <template slot-scope="scope">
-                  <span class="operation_btn" @click="onOpenDetail(scope.row)">查看</span>
+                  <span class="operation_btn" @click="onOpenDetail(scope.row, scope)">查看</span>
                 </template>
               </el-table-column>
             </el-table>
@@ -167,7 +148,7 @@
         </div>
       </div>
     </div>
-    <el-dialog
+    <!-- <el-dialog
         :visible.sync="strucDetailDialog"
         class="struc_detail_dialog"
         :close-on-click-modal="false"
@@ -244,7 +225,6 @@
       </div>
       <div class="struc-list">
         <swiper :options="swiperOption" ref="mySwiper">
-          <!-- slides -->
           <swiper-slide v-for="(item, index) in regulationsList" :key="index + 'isgm'">
             <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
               <img style="display: block; width: 100%; height: .88rem;" :src="item.subStoragePath" alt="">
@@ -254,10 +234,12 @@
           <div class="swiper-button-next" slot="button-next"></div>
         </swiper>
       </div>
-    </el-dialog>
+    </el-dialog> -->
+    <div is="vehicleDetail" :detailData="detailData"></div>
   </div>
 </template>
 <script>
+import vehicleDetail from '../common/vehicleDetail.vue';
 import { mapXupuxian } from "@/config/config";
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import { objDeepCopy, formatDate } from "@/utils/util.js";
@@ -267,10 +249,14 @@ import { getGroupsByType } from "@/views/index/api/api.js";
 import flvplayer from '@/components/common/flvplayer.vue';
 export default {
   components: {
-    flvplayer
+    flvplayer,
+    vehicleDetail
   },
   data () {
     return {
+
+      detailData: null,
+
       pickerOptions: {
         disabledDate: time => {
           if (this.value2) {
@@ -345,7 +331,7 @@ export default {
       sortTimeType: null, // 时间排序active
       sortMonitoryType: null, // 监控排序active
       /* 抓拍记录页面参数 */
-      strucDetailDialog: false, // 抓拍记录弹窗
+      /* strucDetailDialog: false, // 抓拍记录弹窗
       strucCurTab: 1, // 抓拍记录弹窗tab
       curImgIndex: 0, // 当前选择的图片index
       strucInfoList: [{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县兴隆路5号154(故障)","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":90,"shotTime":"2019-06-03 16:12:44","panoramaPath":"http://10.116.126.13/parastor300s/public/PRH259/f00000.jpg","feature":"粤PRH259；轿车；橘色；福特-福睿斯-2012","deviceId":null,"address":"溆浦县兴隆路5号","longitude":110.595111,"latitude":27.90289,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"龙潭镇神龙大酒店","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":94,"shotTime":"2019-06-09 01:29:16","panoramaPath":"http://10.116.126.13/parastor300s/public/PJH119/f00007.jpg","feature":"粤PRH259；轿车；橘色；福特-福睿斯-2012","deviceId":null,"address":"溆浦县龙潭镇神龙大酒店","longitude":110.542891,"latitude":27.411462,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"长沙创谷广告园44","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":90,"shotTime":"2019-06-10 11:41:04","panoramaPath":"http://10.116.126.13/parastor300s/public/PRH259/f00008.jpg","feature":"粤PRH259；轿车；橘色；福特-福睿斯-2012","deviceId":null,"address":"长沙市创谷广告软件园","longitude":112.973795,"latitude":28.094549,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县第一中学48","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":90,"shotTime":"2019-06-07 13:25:00","panoramaPath":"http://10.116.126.13/parastor300s/public/PYR682/f00026.jpg","feature":"粤P8A566；轿车；绿色；大众-捷达-2015","deviceId":null,"address":"溆浦县第一中学","longitude":110.612834,"latitude":27.910003,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县张家湾路口(故障)","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":94,"shotTime":"2019-06-06 09:28:55","panoramaPath":"http://10.116.126.13/parastor300s/public/PCS113/f00021.jpg","feature":"粤P8A566；轿车；绿色；大众-捷达-2015","deviceId":null,"address":"溆浦县张家湾路口","longitude":110.587558,"latitude":27.930365,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县气象局(故障)","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","feature":"粤P8A566；轿车；绿色；大众-捷达-2015","deviceId":null,"address":"溆浦县气象局","longitude":110.604443,"latitude":27.908643,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县张家湾路口(故障)","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":93,"shotTime":"2019-06-07 14:22:36","panoramaPath":"http://10.116.126.13/parastor300s/public/PHD376/f00039.jpg","feature":"粤P9E163；轿车；白色；现代-瑞纳-2016","deviceId":null,"address":"溆浦县张家湾路口","longitude":110.587558,"latitude":27.930365,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县兴隆路5号154(故障)","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":93,"shotTime":"2019-06-10 14:24:28","panoramaPath":"http://10.116.126.13/parastor300s/public/PHD376/f00042.jpg","feature":"粤P9E163；轿车；白色；现代-瑞纳-2016","deviceId":null,"address":"溆浦县兴隆路5号","longitude":110.595111,"latitude":27.90289,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县龙潭镇汽车站(故障)","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":93,"shotTime":"2019-06-03 04:30:08","panoramaPath":"http://10.116.126.13/parastor300s/public/PYR682/f00033.jpg","feature":"粤P9E163；轿车；白色；现代-瑞纳-2016","deviceId":null,"address":"溆浦县龙潭镇汽车站","longitude":110.539961,"latitude":27.411443,"cname":null,"uploadPath":null}],
@@ -366,7 +352,7 @@ export default {
           nextEl: '.swiper-button-next',
           prevEl: '.swiper-button-prev',
         },
-      },
+      }, */
     }
   },
   created () {
@@ -569,7 +555,17 @@ export default {
     /**
      * 打开抓拍弹框
      */
-    onOpenDetail (obj) {
+    onOpenDetail (obj, scope) {
+      this.detailData = {
+        type: 3, // 2入城统计
+        params: {}, // 查询参数
+        list: this.tableDataAll, // 列表
+        index: ((this.pagination.pageNum - 1) * this.pagination.pageSize) + scope.$index, // 第几个
+        pageSize: this.tableDataAll.length,
+        total: this.tableDataAll.length,
+        pageNum: this.pagination.pageNum
+      }
+      /* console.log('scope', scope);
       this.$_showLoading({text: '加载中...'})
       console.log(obj)
       this.sturcDetail = obj
@@ -587,7 +583,7 @@ export default {
       this.$nextTick(() => {
         this.initMap()
       })
-      this.$_hideLoading()
+      this.$_hideLoading() */
     },
     /**
      * 关闭抓拍弹框

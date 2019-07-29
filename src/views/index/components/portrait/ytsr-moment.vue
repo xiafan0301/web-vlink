@@ -176,7 +176,7 @@
   import { formatDate } from "@/utils/util.js";
   import {ajaxCtx} from '@/config/config';
   import { MapGETmonitorList } from "../../api/api.map.js";
-  import { PortraitPostByphotoTask } from '@/views/index/api/api.portrait.js';
+  import { PortraitPostByphotoTask, PortraitPostByphotoRealtime } from '@/views/index/api/api.portrait.js';
   import { ScpGETdeviceListById, ScpGETretrievalHisById} from '../../api/api.search.js';
   import {JtcPUTAppendixsOrder, JtcPOSTAppendixInfo, JtcGETAppendixInfoList } from '../../api/api.judge'
   import { getPeopleTaskDetail } from '@/views/index/api/api.analysis.js';
@@ -377,7 +377,21 @@
         } else {
           params['minSemblance'] = 0;
         }
-        PortraitPostByphotoTask(params).then(res => {
+        PortraitPostByphotoRealtime(params)
+          .then(sRes => {
+            if (sRes) {
+              this.$set(sRes.data, 'taskResult', JSON.parse(sRes.data.taskResult));
+              this.$set(sRes.data, 'taskWebParam', JSON.parse(sRes.data.taskWebParam));
+              // res.data.taskResult.push(...res.data.taskResult)
+              this.pagination.total = sRes.data.taskResult ? sRes.data.taskResult.length : 0;
+              this.strucInfoList = sRes.data.taskResult;
+              this.taskDetail = sRes.data.taskWebParam;
+              console.log(sRes.data)
+              this.searching = false;
+              this.isInitPage = false;
+            }
+          })
+        /* PortraitPostByphotoTask(params).then(res => {
           if (res) {
             getPeopleTaskDetail(res.data)
                 .then(sRes => {
@@ -398,7 +412,7 @@
           }
         }).catch(() => {
           this.searching = false;
-        })
+        }) */
       },
       showStrucInfo (data, index) {
         this.curImgIndex = index;

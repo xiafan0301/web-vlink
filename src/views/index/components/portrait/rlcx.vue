@@ -13,10 +13,9 @@
               v-model="searchForm.time[0]"
               type="date"
               :editable="false" :clearable="false"
-              :picker-options="pickerOptions"
+              :picker-options="startTimeOptions"
               range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期">
+              placeholder="开始日期">
             </el-date-picker>
           </el-form-item>
           <el-form-item>
@@ -26,10 +25,9 @@
               v-model="searchForm.time[1]"
               type="date"
               :editable="false" :clearable="false"
-              :picker-options="pickerOptions"
+              :picker-options="endTimeOptions"
               range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期">
+              placeholder="结束日期">
             </el-date-picker>
           </el-form-item>
           <el-form-item label="抓拍区域:" label-width="72px">
@@ -129,6 +127,16 @@
               </el-select>
             </el-form-item>
             <el-form-item v-show="searchForm.type2 === 2">
+              <el-select style="width: 100%;" v-model="searchForm.hair" placeholder="选择发型">
+                <el-option :label="'不限'" :value="'不限'"></el-option>
+                <el-option :label="'长发'" :value="'长发'"></el-option>
+                <el-option :label="'短发'" :value="'短发'"></el-option>
+                <el-option :label="'平头'" :value="'平头'"></el-option>
+                <el-option :label="'光头'" :value="'光头'"></el-option>
+                <el-option :label="'未知'" :value="'未知'"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item v-show="searchForm.type2 === 2">
               <el-select style="width: 100%;" v-model="searchForm.eyeglass" placeholder="选择眼镜">
                 <el-option :label="'不限'" :value="'不限'"></el-option>
                 <el-option :label="'戴眼镜'" :value="'戴眼镜'"></el-option>
@@ -153,12 +161,18 @@
               </el-select>
             </el-form-item>
             <el-form-item v-show="searchForm.type2 === 2">
-              <el-select style="width: 100%;" v-model="searchForm.hair" placeholder="选择发型">
+              <el-select style="width: 100%;" v-model="searchForm.baby" placeholder="选择抱小孩">
                 <el-option :label="'不限'" :value="'不限'"></el-option>
-                <el-option :label="'长发'" :value="'长发'"></el-option>
-                <el-option :label="'短发'" :value="'短发'"></el-option>
-                <el-option :label="'平头'" :value="'平头'"></el-option>
-                <el-option :label="'光头'" :value="'光头'"></el-option>
+                <el-option :label="'抱小孩'" :value="'抱小孩'"></el-option>
+                <el-option :label="'未抱小孩'" :value="'未抱小孩'"></el-option>
+                <el-option :label="'未知'" :value="'未知'"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item v-show="searchForm.type2 === 2">
+              <el-select style="width: 100%;" v-model="searchForm.bag" placeholder="选择拎东西">
+                <el-option :label="'不限'" :value="'不限'"></el-option>
+                <el-option :label="'拎东西'" :value="'拎东西'"></el-option>
+                <el-option :label="'未拎东西'" :value="'未拎东西'"></el-option>
                 <el-option :label="'未知'" :value="'未知'"></el-option>
               </el-select>
             </el-form-item>
@@ -197,22 +211,6 @@
                 <el-option :label="'灰'" :value="'灰'"></el-option>
                 <el-option :label="'白'" :value="'白'"></el-option>
                 <el-option :label="'绿'" :value="'绿'"></el-option>
-                <el-option :label="'未知'" :value="'未知'"></el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item v-show="searchForm.type2 === 2">
-              <el-select style="width: 100%;" v-model="searchForm.baby" placeholder="选择抱小孩">
-                <el-option :label="'不限'" :value="'不限'"></el-option>
-                <el-option :label="'抱小孩'" :value="'抱小孩'"></el-option>
-                <el-option :label="'未抱小孩'" :value="'未抱小孩'"></el-option>
-                <el-option :label="'未知'" :value="'未知'"></el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item v-show="searchForm.type2 === 2">
-              <el-select style="width: 100%;" v-model="searchForm.bag" placeholder="选择拎东西">
-                <el-option :label="'不限'" :value="'不限'"></el-option>
-                <el-option :label="'拎东西'" :value="'拎东西'"></el-option>
-                <el-option :label="'未拎东西'" :value="'未拎东西'"></el-option>
                 <el-option :label="'未知'" :value="'未知'"></el-option>
               </el-select>
             </el-form-item>
@@ -373,6 +371,27 @@ export default {
 
       openMap: false,
       msClear: {},
+
+      startTimeOptions: {
+        disabledDate: (d) => {
+          // console.log(d);
+          // d > new Date() || d > this.endTime
+          if (d > new Date() || d.getTime() < new Date().getTime() - 30 * 24 * 60 * 60 * 1000) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      },
+      endTimeOptions: {
+        disabledDate: (d) => {
+          if (d > new Date() || d.getTime() < (this.searchForm.time[0].getTime() - 24 * 60 * 60 * 1000 + 2000)) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      },
 
       pickerOptions: {
         disabledDate (d) {
