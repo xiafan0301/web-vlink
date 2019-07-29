@@ -109,7 +109,7 @@
           </el-card>
         </div>
         <div class="snap_box_two" v-for="item in snapList" :key="item.deviceId">
-          <el-card class="pic" shadow="hover">
+          <el-card class="pic" shadow="hover" @click.native="skipIsalarmDel(item)">
             <div class="img">
               <img :src="item.snapPhoto" alt="" width="130" height="130">
             </div>
@@ -309,6 +309,10 @@ export default {
     this.map = map;
   },
   methods: {
+    // 跳转到告警详情页
+    skipIsalarmDel (item) {
+      this.$router.push({name: 'alarm_default', query: {uid: item.uid, objType: item.objType, type: 'today'}});
+    },
     hideLeft() {
       this.hideleft = !this.hideleft;
     },
@@ -950,6 +954,7 @@ export default {
             height: 100%;
             padding: 15px 0;
             box-shadow:0px -4px 10px 0px rgba(131,131,131,0.28);
+            cursor: pointer;
             ul{
               padding: 16px 0 0 16px;
               li i{

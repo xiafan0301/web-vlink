@@ -86,11 +86,11 @@
           </div>
           <div class="face_snap_form">
             <div ref="devSelect" is="devSelect" @sendSelectData="getSelectData" @allSelectLength="allSelectLength"></div>
+            <!-- @change="validationDate(faceSnapForm)" -->
             <el-date-picker
               class="vl_date"
               :clearable="false"
               v-model="faceSnapForm.queryDate"
-              @change="validationDate(faceSnapForm)"
               type="daterange"
               range-separator="至"
               start-placeholder="开始日期"
@@ -130,12 +130,12 @@
             <h1>人脸布控告警数据分析</h1>
             <span @click="skipHistoryAlarm">查看更多></span>
           </div>
+          <!-- @change="validationDate(faceControlQueryDate)" -->
           <div class="face_control_form">
             <el-date-picker
               :clearable="false"
               class="vl_date"
               v-model="faceControlQueryDate"
-              @change="validationDate(faceControlQueryDate)"
               type="daterange"
               range-separator="至"
               start-placeholder="开始日期"
@@ -173,8 +173,8 @@
   </div>
 </template>
 <script>
-let startTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss'); //默认开始时间为当前时间前一天
-let endTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() + (24 * 60 * 60 * 1000 - 1) + 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss');//默认结束时间为开始时间后第三天
+let startTime = formatDate(new Date(new Date(new Date().toLocaleDateString())).getTime() - 24*60*60*1000, 'yyyy-MM-dd HH:mm:ss');
+let endTime = formatDate(new Date(new Date(new Date().toLocaleDateString())).getTime() - 1, 'yyyy-MM-dd HH:mm:ss');
 import vehicleBreadcrumb from './breadcrumb.vue';
 import devSelect from '@/components/common/devSelect.vue';
 import G2 from '@antv/g2';
@@ -229,6 +229,11 @@ export default {
         peakValues: '',
         timeDto: []
       },
+      // pickerOptions: {
+      //   disabledDate (time) {
+      //     return time.getTime() > Date.now();
+      //   }
+      // },
       loadingBtn1: false,
       loadingBtn2: false,
       selectLength: null
