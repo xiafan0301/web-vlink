@@ -56,7 +56,7 @@
           <el-form-item prop="input3">
             <p class="carCold">车牌：</p>
             <el-input placeholder="请输入车牌号" v-model="ruleForm.input3" class="input-with-select">
-              
+              <el-select>
                 <el-option v-for="(item, index) in pricecode" :label="item" :value="item" :key="'cph_' + index"></el-option>
               </el-select>
             </el-input>
@@ -134,17 +134,19 @@
         <el-table :data="evData" style="width: 100%">
           <el-table-column  type="index" :show-overflow-tooltip="true" label="序号"></el-table-column>
           <el-table-column  prop="address" :show-overflow-tooltip="true" label="落脚点位置"></el-table-column>
-          <el-table-column prop="stopOverTime" width="80px" sortable label="停留时长"></el-table-column>
+          <el-table-column prop="stopOverTime" width="110px" sortable label="停留时长">
+            <template slot-scope="scope">
+              <span>{{ scope.row.stopOverTime | transMinute }}</span>
+            </template>
+          </el-table-column>
         </el-table>
         <div class="insetLeft2" @click="hideResult"></div>
       </div>
     </div>
 <!-- 视频播放 -->
-<el-dialog :visible.sync="dialogVisible" width="100%" style="height:100vh;">
-    <div style="width:100%; height:100%">
-      <div is="flvplayer" :index="1" :oData="playUrl" :bResize="bResize" :oConfig="{sign: false, close: false, pause: true,fullscreen:false}"  ></div>
-    </div>
-  </el-dialog>
+  <div class="video_box" v-if="dialogVisible">
+    <div is="flvplayer" class="vl_map_video_box" :oData="playUrl" @playerClose="playerClose" :showFullScreen="true" :oConfig="{fit: false, sign: false, pause: true,fullscreen:false}"></div>
+  </div>
     <!-- 地图选择 -->
     <!-- <el-dialog :visible.sync="dialogVisible" width="80%">
         <mapselect @selectMap="mapPoint" @closeMap="hideMap" :allPoints="allDevice" :allBayonets="allBayonet"></mapselect>
@@ -157,6 +159,7 @@
 import flvplayer from '@/components/common/flvplayer.vue';
 import { mapXupuxian } from "@/config/config.js";
 import { cityCode } from "@/utils/data.js";
+import { transMinute } from '@/utils/util.js';
 import { getVehicleShot,getAllDevice } from "@/views/index/api/api.judge.js";
 import { getAllBayonetList } from "@/views/index/api/api.base.js";
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
@@ -187,7 +190,7 @@ export default {
         input3: null,
         input4: 3,
         input5: "1",
-        value1: null,
+        value1: [],
       },
       rules: {input4: [ {
               pattern:  /^[1-9]\d*$/,
@@ -244,6 +247,10 @@ export default {
     
   },
   methods: {
+    // 关闭视频
+    playerClose () {
+      this.dialogVisible = false;
+    },
     mapZoomSet(val) {
       if (this.amap) {
         this.amap.setZoom(this.amap.getZoom() + val);
@@ -467,17 +474,18 @@ export default {
         let _idWin = "vlJfoImg" + i;
         // let isBig = obj.shotNum >= limit?true:false
        // if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
-            let _sContent = `<div id="${_idWin}" class="vl_jig_mk_p"><img class="igm" src="${obj.storagePath}"><p class='addres'>${obj.address} <i class='el-icon-caret-right'></i></p><p class='times'>${obj.stopOverTime}</p></div>`;
+            let _sContent = `<div id="${_idWin}" class="vl_jig_mk_p"><img class="igm" src="${obj.storagePath}"><p class='addres'>${obj.address} <i class='el-icon-caret-right'></i></p><p class='times'>${transMinute(obj.stopOverTime)}</p></div>`;
             // 窗体
-            new AMap.Marker({
+            let marker = new AMap.Marker({
               // 添加自定义点标记
               map: this.amap,
               position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-              offset: new AMap.Pixel(-90, -164), // 相对于基点的偏移位置
+              offset: new AMap.Pixel(-90, -184), // 相对于基点的偏移位置
               draggable: false, // 是否可拖动
               extData: obj,
               // 自定义点标记覆盖物内容
-              content: _sContent
+              content: _sContent,
+              zIndex: 1000
             });
             // let clickWindow = new window.AMap.InfoWindow({
             //   isCustom: true,
@@ -496,7 +504,7 @@ export default {
               "<div id=" +
               _id +
               ' class="vl_icon vl_jfo_sxt vl_icon_judge_04"></div>';
-            new AMap.Marker({
+            marker = new AMap.Marker({
               // 添加自定义点标记
               map: this.amap,
               position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
@@ -504,7 +512,8 @@ export default {
               draggable: false, // 是否可拖动
               extData: obj,
               // 自定义点标记覆盖物内容
-              content: _content
+              content: _content,
+              zIndex: 100
             });
             setTimeout(() => {
               this.addListen($("#" + _id), "mouseover", i,obj);
@@ -524,11 +533,11 @@ export default {
       let self = this;
       let _key;
       el.bind(evType, function() {
+        
         switch (evType) {
           case "mouseover":
             $("#vlJfoImg" + key).addClass("vl_jig_mk_img_show");
             $("#vlJfoSxt" + key).addClass("vl_icon_judge_02");
-            
             break;
           case "mouseout":
             if (!obj.checked) {
@@ -704,6 +713,20 @@ export default {
 }
 .select_btn:hover {
    background-color: #0466de;
+}
+.video_box {
+  position: fixed;
+  left:0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 99999;
+}
+.vl_map_video_box {
+  // position: fixed!important;
+  width: 100%;
+  height: 100%;
+  // top: 0!important;
 }
 </style>
 <style lang="scss">

@@ -10,8 +10,8 @@
         <div><el-checkbox v-model="allChecked" @change="operateAllChecked()">全选</el-checkbox><span class="vl_f_333">已选择 <span>{{allIsChecked}}</span>张</span></div>
       </div>
       <div>
-        <el-button @click="judgeIsSelectedCopy" class="reset_btn btn_100">复制到组</el-button>
-        <el-button @click="judgeIsSelectedRemove" class="reset_btn btn_100">移出该组</el-button>
+        <el-button @click="judgeIsSelectedCopy" class="btn_100">复制到组</el-button>
+        <el-button @click="judgeIsSelectedRemove" class="btn_100">移出该组</el-button>
         <el-collapse-transition>
           <ul class="group_copy" v-show="isShowGroupCopy">
             <vue-scroll>
@@ -85,8 +85,8 @@
         top="40vh">
         <h1 class="vl_f_16 vl_f_333" style="margin-bottom: 4px;">是否确定删除该组？</h1>
         <div slot="footer">
-          <el-button @click="delGroupDialog = false" class="reset_btn btn_140">取消</el-button>
-          <el-button :loading="loadingBtn" class="select_btn btn_140" @click="delPortraitGroupById">确认</el-button>
+          <el-button @click="delGroupDialog = false" class="btn_140">取消</el-button>
+          <el-button :loading="loadingBtn" class="btn_140" type="primary" @click="delPortraitGroupById">确认</el-button>
         </div>
       </el-dialog>
     </div>
@@ -100,8 +100,8 @@
         <h1 class="vl_f_16 vl_f_333" style="margin-bottom: 4px;">确定要将这 <span>{{allIsChecked}}</span>条人像数据移出该组？</h1>
         <p class="vl_f_12 vl_f_999">移出该组后将在系统默认中。</p>
         <div slot="footer">
-          <el-button @click="removeGroupDialog = false" class="reset_btn btn_140">取消</el-button>
-          <el-button :loading="loadingBtn" class="select_btn btn_140" @click="removePortrait">确认</el-button>
+          <el-button @click="removeGroupDialog = false" class="btn_140">取消</el-button>
+          <el-button :loading="loadingBtn" class="btn_140" type="primary" @click="removePortrait">确认</el-button>
         </div>
       </el-dialog>
     </div>

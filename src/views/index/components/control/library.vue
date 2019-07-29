@@ -102,8 +102,8 @@
             </el-select>
           </el-form-item>
           <el-form-item style="width: 192px;">
-            <el-button class="reset_btn btn_90" @click.native="reset">重置</el-button>
-            <el-button class="select_btn btn_90" @click.native="getPortraitList(groupId, groupIndex)">搜索</el-button>
+            <el-button class="btn_90" @click.native="reset">重置</el-button>
+            <el-button class="btn_90" :loading="loading" type="primary" @click.native="getPortraitList(groupId, groupIndex)">搜索</el-button>
           </el-form-item>
         </el-form>
         <!-- 车像库左侧组合搜索 -->
@@ -180,8 +180,8 @@
             </el-select>
           </el-form-item>
           <el-form-item style="width: 192px;">
-            <el-button class="reset_btn btn_90" @click.native="reset">重置</el-button>
-            <el-button class="select_btn btn_90" @click.native="getVehicleList(groupId, groupIndex)">搜索</el-button>
+            <el-button class="btn_90" @click.native="reset">重置</el-button>
+            <el-button class="btn_90" type="primary" :loading="loading" @click.native="getVehicleList(groupId, groupIndex)">搜索</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -189,8 +189,8 @@
       <div class="member_list">
         <div class="member_title">
           <div><span class="vl_f_333">布控库</span><span class="vl_f_666">({{memberNum}})</span></div>
-          <el-button v-if="tabType === '1'" class="select_btn btn_100" @click.native="clearForm('portraitForm', '1')">新建人像</el-button>
-          <el-button v-else class="select_btn btn_100" @click.native="clearForm('carForm', '1')">新建车像</el-button>
+          <el-button v-if="tabType === '1'" class="btn_100" type="primary" @click.native="clearForm('portraitForm', '1')">新建人像</el-button>
+          <el-button v-else class="btn_100" type="primary" @click.native="clearForm('carForm', '1')">新建车像</el-button>
         </div>
         <div class="list_box" v-loading="loading">
           <template v-if="tabType === '1'">
@@ -491,14 +491,14 @@
             </div>
           </div>
           <div slot="footer">
-            <el-button @click="toGiveUpDialog = true" class="reset_btn btn_140">取消</el-button>
+            <el-button @click="toGiveUpDialog = true" class="btn_140">取消</el-button>
             <template v-if="tabType === '1'">
-              <el-button v-if="operationType === '1'" :loading="loadingBtn" class="select_btn btn_140" @click="savePortrait('portraitForm')">保存</el-button>
-              <el-button v-else :loading="loadingBtn" class="select_btn btn_140" @click="putPortrait('portraitForm')">确定</el-button>
+              <el-button v-if="operationType === '1'" :loading="loadingBtn" class="btn_140" type="primary" @click="savePortrait('portraitForm')">保存</el-button>
+              <el-button v-else :loading="loadingBtn" class="btn_140" type="primary" @click="putPortrait('portraitForm')">确定</el-button>
             </template>
             <template v-else>
-              <el-button v-if="operationType === '1'" :loading="loadingBtn" class="select_btn btn_140" @click="saveCar('carForm')">保存</el-button>
-              <el-button v-else :loading="loadingBtn" class="select_btn btn_140" @click="putCar('carForm')">确定</el-button>
+              <el-button v-if="operationType === '1'" :loading="loadingBtn" class="btn_140" type="primary" @click="saveCar('carForm')">保存</el-button>
+              <el-button v-else :loading="loadingBtn" class="btn_140" type="primary" @click="putCar('carForm')">确定</el-button>
             </template>
           </div>
         </el-dialog>
@@ -513,8 +513,8 @@
         top="40vh">
         <h4>是否放弃本次操作？</h4>
         <div slot="footer">
-          <el-button :loading="loadingBtn" @click="toGiveUpDialog = false;addPortraitDialog = false;" class="select_btn btn_140">放弃</el-button>
-          <el-button class="reset_btn btn_140" @click="toGiveUpDialog = false">取消</el-button>
+          <el-button :loading="loadingBtn" @click="toGiveUpDialog = false;addPortraitDialog = false;" class="btn_140" type="primary">放弃</el-button>
+          <el-button class="btn_140" @click="toGiveUpDialog = false">取消</el-button>
         </div>
       </el-dialog>
     </template>

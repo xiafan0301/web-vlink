@@ -100,7 +100,7 @@
             </el-date-picker>
             <div>
               <el-button class="reset_btn" @click="resetFaceSnapForm">重置</el-button>
-              <el-button class="select_btn" @click="getFaceSnapSta" :loading="loadingBtn1">统计</el-button>
+              <el-button class="select_btn" type="primary" @click="getFaceSnapSta" :loading="loadingBtn1">统计</el-button>
             </div>
           </div>
           <div class="snap_snap">
@@ -145,7 +145,7 @@
             </el-date-picker>
             <div>
               <el-button class="reset_btn" @click="resetFaceControlDate">重置</el-button>
-              <el-button class="select_btn" @click="getFaceControlSta" :loading="loadingBtn2">统计</el-button>
+              <el-button class="select_btn" type="primary" @click="getFaceControlSta" :loading="loadingBtn2">统计</el-button>
             </div>
           </div>
           <div class="face_control_info">
@@ -658,15 +658,6 @@ export default {
   // 重置按钮样式
   .select_btn, .reset_btn {
     width: 90px;
-  }
-  .select_btn {
-    background-color: #0C70F8;
-    color: #ffffff;
-  }
-  .reset_btn {
-    background-color: #ffffff;
-    color: #666666;
-    border-color: #DDDDDD;
   }
   .el-date-editor{
     .el-range-input{

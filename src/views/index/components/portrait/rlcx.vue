@@ -13,10 +13,9 @@
               v-model="searchForm.time[0]"
               type="date"
               :editable="false" :clearable="false"
-              :picker-options="pickerOptions"
+              :picker-options="startTimeOptions"
               range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期">
+              placeholder="开始日期">
             </el-date-picker>
           </el-form-item>
           <el-form-item>
@@ -26,10 +25,9 @@
               v-model="searchForm.time[1]"
               type="date"
               :editable="false" :clearable="false"
-              :picker-options="pickerOptions"
+              :picker-options="endTimeOptions"
               range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期">
+              placeholder="结束日期">
             </el-date-picker>
           </el-form-item>
           <el-form-item label="抓拍区域:" label-width="72px">
@@ -129,6 +127,16 @@
               </el-select>
             </el-form-item>
             <el-form-item v-show="searchForm.type2 === 2">
+              <el-select style="width: 100%;" v-model="searchForm.hair" placeholder="选择发型">
+                <el-option :label="'不限'" :value="'不限'"></el-option>
+                <el-option :label="'长发'" :value="'长发'"></el-option>
+                <el-option :label="'短发'" :value="'短发'"></el-option>
+                <el-option :label="'平头'" :value="'平头'"></el-option>
+                <el-option :label="'光头'" :value="'光头'"></el-option>
+                <el-option :label="'未知'" :value="'未知'"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item v-show="searchForm.type2 === 2">
               <el-select style="width: 100%;" v-model="searchForm.eyeglass" placeholder="选择眼镜">
                 <el-option :label="'不限'" :value="'不限'"></el-option>
                 <el-option :label="'戴眼镜'" :value="'戴眼镜'"></el-option>
@@ -153,12 +161,18 @@
               </el-select>
             </el-form-item>
             <el-form-item v-show="searchForm.type2 === 2">
-              <el-select style="width: 100%;" v-model="searchForm.hair" placeholder="选择发型">
+              <el-select style="width: 100%;" v-model="searchForm.baby" placeholder="选择抱小孩">
                 <el-option :label="'不限'" :value="'不限'"></el-option>
-                <el-option :label="'长发'" :value="'长发'"></el-option>
-                <el-option :label="'短发'" :value="'短发'"></el-option>
-                <el-option :label="'平头'" :value="'平头'"></el-option>
-                <el-option :label="'光头'" :value="'光头'"></el-option>
+                <el-option :label="'抱小孩'" :value="'抱小孩'"></el-option>
+                <el-option :label="'未抱小孩'" :value="'未抱小孩'"></el-option>
+                <el-option :label="'未知'" :value="'未知'"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item v-show="searchForm.type2 === 2">
+              <el-select style="width: 100%;" v-model="searchForm.bag" placeholder="选择拎东西">
+                <el-option :label="'不限'" :value="'不限'"></el-option>
+                <el-option :label="'拎东西'" :value="'拎东西'"></el-option>
+                <el-option :label="'未拎东西'" :value="'未拎东西'"></el-option>
                 <el-option :label="'未知'" :value="'未知'"></el-option>
               </el-select>
             </el-form-item>
@@ -200,22 +214,6 @@
                 <el-option :label="'未知'" :value="'未知'"></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item v-show="searchForm.type2 === 2">
-              <el-select style="width: 100%;" v-model="searchForm.baby" placeholder="选择抱小孩">
-                <el-option :label="'不限'" :value="'不限'"></el-option>
-                <el-option :label="'抱小孩'" :value="'抱小孩'"></el-option>
-                <el-option :label="'未抱小孩'" :value="'未抱小孩'"></el-option>
-                <el-option :label="'未知'" :value="'未知'"></el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item v-show="searchForm.type2 === 2">
-              <el-select style="width: 100%;" v-model="searchForm.bag" placeholder="选择拎东西">
-                <el-option :label="'不限'" :value="'不限'"></el-option>
-                <el-option :label="'拎东西'" :value="'拎东西'"></el-option>
-                <el-option :label="'未拎东西'" :value="'未拎东西'"></el-option>
-                <el-option :label="'未知'" :value="'未知'"></el-option>
-              </el-select>
-            </el-form-item>
           <el-form-item>
             <div style="text-align: center; padding-top: 10px;">
               <el-button @click="searchReset">&nbsp;&nbsp;重&nbsp;&nbsp;置&nbsp;&nbsp;</el-button>
@@ -234,7 +232,7 @@
           </ul>
         </div>
         <ul class="rlcx_r_list clearfix" v-if="dataList && dataList.length > 0">
-          <li v-for="(item, index) in dataList" :key="'tzsr_list_' + index" @click="goToDetail(item)">
+          <li v-for="(item, index) in dataList" :key="'tzsr_list_' + index" @click="goToDetail(item, index)">
             <div>
               <img :src="item.subStoragePath" :alt="item.deviceName">
               <div>
@@ -265,7 +263,7 @@
       </div>
     </div>
     <!-- 详情 -->
-    <portraitDetail :open="showDetail" @closeDialog="onCloseDetail" :detailData="deData"  @nextPage="nextData" :scrollData="seData" :conditions="condition" ></portraitDetail>
+    <portraitDetail :detailData="detailData"></portraitDetail>
     <!-- D设备 B卡口  这里是设备和卡口 -->
     <div is="mapSelector" :open="openMap" :clear="msClear" :showTypes="'DB'" @mapSelectorEmit="mapSelectorEmit"></div>
     <!--历史记录弹窗-->
@@ -299,7 +297,7 @@ import {getFaceRetrievalPerson, JtcGETAppendixInfoList} from '../../api/api.judg
 import {getPicRecognize} from '../../api/api.structuring.js';
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import {formatDate} from '@/utils/util.js';
-import portraitDetail from '@/components/common/portraitDetail.vue';
+import portraitDetail from './common/portraitDetail.vue';
 import {ajaxCtx} from '@/config/config';
 export default {
   components: {vehicleBreadcrumb, mapSelector,portraitDetail, noResult},
@@ -374,12 +372,35 @@ export default {
       openMap: false,
       msClear: {},
 
+      startTimeOptions: {
+        disabledDate: (d) => {
+          // console.log(d);
+          // d > new Date() || d > this.endTime
+          if (d > new Date() || d.getTime() < new Date().getTime() - 30 * 24 * 60 * 60 * 1000) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      },
+      endTimeOptions: {
+        disabledDate: (d) => {
+          if (d > new Date() || d.getTime() < (this.searchForm.time[0].getTime() - 24 * 60 * 60 * 1000 + 2000)) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      },
+
       pickerOptions: {
         disabledDate (d) {
           return d > new Date() || d < new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000);
         }
       },
-      condition:{}
+      condition:{},
+
+      detailData: null
     }
   },
   created () {
@@ -539,12 +560,25 @@ export default {
     onCloseDetail () {
       this.showDetail=false
     },
-    goToDetail(v){
+    goToDetail(v, index){
       // console.log(v);
-      this.showDetail=true;
-      this.deData = v
-      this.seData = this.alldataList
-      
+      /* type: 1, // 1特征搜人 2
+
+      params: {}, // 查询参数
+      list: // 列表
+      index: // 第几个
+      pageSize: //
+      total: // 
+      pageNum: // */
+      this.detailData = {
+        type: 1, // 1特征搜人 2
+        params: this.searchParams(), // 查询参数
+        list: this.dataList, // 列表
+        index: index, // 第几个
+        pageSize: this.pagination.pageSize,
+        total: this.pagination.total,
+        pageNum: this.pagination.pageNum
+      }
     },
     //查询行政区域
     getMapGETmonitorList(){
@@ -634,36 +668,15 @@ export default {
       }
       return false;
     },
-    searchSubmit (pageNum) {
-      let smsg = this.searchAble();
-      if (smsg) {
-        let nMsg = $('.el-message--info');
-        if (nMsg && nMsg.length > 0) {
-          nMsg.find('.el-message__content').text(smsg);
-        } else {
-          this.$message({
-            message: smsg,
-            type: 'info'
-          });
-        }
-        return false;
-      }
-
-      if (pageNum > 0) {
-        this.pagination.pageNum = pageNum;
-      }
-      this.searchLoading = true;
+    searchParams () {
       let params = {
         where: {
           startDate: formatDate(this.searchForm.time[0], 'yyyy-MM-dd 00:00:00'),
           endDate: formatDate(this.searchForm.time[1], 'yyyy-MM-dd 23:59:59')
         },
         orderBy: this.orderType === 1 ? 'shotTime' : 'deviceNamePinyin',
-        order: this.order === 1 ? 'desc' : 'asc',
-        pageNum: this.pagination.pageNum,
-        pageSize: this.pagination.pageSize
-      }
-
+        order: this.order === 1 ? 'desc' : 'asc'
+      };
       if (this.searchForm.type === 1) {
         params.where = Object.assign(params.where, {
           areaUid: this.searchForm.area.join(',')
@@ -719,8 +732,32 @@ export default {
           params.where.bag = this.searchForm.bag;
         }
       }
-      this.condition=params
-      // getFaceRetrieval getFaceRetrievalPerson
+      return params;
+    },
+    searchSubmit (pageNum) {
+      let smsg = this.searchAble();
+      if (smsg) {
+        let nMsg = $('.el-message--info');
+        if (nMsg && nMsg.length > 0) {
+          nMsg.find('.el-message__content').text(smsg);
+        } else {
+          this.$message({
+            message: smsg,
+            type: 'info'
+          });
+        }
+        return false;
+      }
+
+      if (pageNum > 0) {
+        this.pagination.pageNum = pageNum;
+      }
+      this.searchLoading = true;
+      let params = Object.assign(this.searchParams(), {
+        pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize
+      });
+      // this.condition=params
       getFaceRetrievalPerson(params).then(res => {
         this.isInitPage = false;
         if (res && res.data) {
@@ -779,7 +816,11 @@ export default {
           bag: ''
         });
       }
-      this.searchSubmit();
+      this.dataList = [];
+      this.isInitPage = true;
+      this.pagination.pageNum = 1;
+      this.pagination.total = 0;
+      // this.searchSubmit();
     },
     orderHandler (type) {
       if (type === this.orderType) {

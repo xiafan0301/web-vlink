@@ -41,13 +41,13 @@
               </el-select>
             </el-form-item>
             <el-form-item style="padding-right: 0;">
-              <el-button class="select_btn" @click="getMutualHelpList">查询</el-button>
+              <el-button class="select_btn" type="primary" :loading="loading" @click="getMutualHelpList">查询</el-button>
               <el-button class="reset_btn" @click="resetForm">重置</el-button>
             </el-form-item>
           </el-form>
         </div>
         <div class="help_content">
-          <el-button class="select_btn" style="width: 145px;" icon="el-icon-plus" @click.native="skip(2)">新增民众互助</el-button>
+          <el-button class="select_btn" type="primary" style="width: 145px;" icon="el-icon-plus" @click.native="skip(2)">新增民众互助</el-button>
             <div class="table_box">
             <el-table
               v-loading="loading"
@@ -137,8 +137,8 @@
         title="结束互助">
         <h4>是否确定结束该次互助？</h4>
         <div slot="footer">
-          <el-button @click="delDialog = false" class="reset_btn btn_140">取消</el-button>
-          <el-button :loading="loadingBtn" class="select_btn btn_140" @click="endEvent">确认</el-button>
+          <el-button @click="delDialog = false" class="btn_140">取消</el-button>
+          <el-button :loading="loadingBtn" class="btn_140" type="primary" @click="endEvent">确认</el-button>
         </div>
       </el-dialog>
     </div>

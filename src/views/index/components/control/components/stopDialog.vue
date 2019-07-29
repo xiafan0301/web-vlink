@@ -18,8 +18,8 @@
         </el-form-item>
       </el-form>
       <div slot="footer">
-        <el-button @click="controlStop('stopForm')" class="select_btn btn_140">确定终止</el-button>
-        <el-button :loading="loadingBtn" class="reset_btn btn_140" @click="skipIsList">暂不终止</el-button>
+        <el-button @click="controlStop('stopForm')" class="btn_140" type="primary">确定终止</el-button>
+        <el-button :loading="loadingBtn" class="btn_140" @click="skipIsList">暂不终止</el-button>
       </div>
     </el-dialog>
   </div>

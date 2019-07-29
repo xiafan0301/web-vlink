@@ -73,7 +73,7 @@
               </el-select>
             </el-form-item>
             <el-form-item>
-              <el-button class="select_btn" @click="getControlList">查询</el-button>
+              <el-button class="select_btn" type="primary" @click="getControlList" :loading="loading">查询</el-button>
               <el-button class="reset_btn" @click="resetForm">重置</el-button>
             </el-form-item>
           </el-form>
@@ -207,6 +207,7 @@ import delDialog from './components/delDialog.vue';
 import stopDialog from './components/stopDialog.vue';
 import {getControlObjBySelect, getControlList, getControlDevice} from '@/views/index/api/api.control.js';
 import {dataList} from '@/utils/data.js';
+import {unique} from '@/utils/util.js';
 export default {
   components: {manageDetail, create, delDialog, stopDialog},
   data () {
@@ -231,6 +232,7 @@ export default {
         deviceId: null
       },//用来记录之前的搜索参数，对比是否需要置为第一页
       loading: false,
+      loadingBtn: false,
       controlObjList: [],//布控对象列表
       facilityNameList: [],//设备列表
       stateList: [
@@ -284,7 +286,7 @@ export default {
     getControlObjBySelect () {
       getControlObjBySelect({surveillanceStatus: this.manageForm.state}).then(res => {
         if (res) {
-          this.controlObjList = res.data.filter(f => f.name);
+          this.controlObjList = unique(res.data.filter(f => f.name), 'objId');
         }
       })
     },

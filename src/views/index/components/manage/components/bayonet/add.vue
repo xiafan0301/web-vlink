@@ -1,16 +1,10 @@
 <template>
   <div class="bayonet_manage_add">
     <div is="vlBreadcrumb" :breadcrumbData="breadcrumbData"></div>
-    <div class="add_form">
-      <el-form ref="addForm" :model="addForm" :rules="addFormRules" label-width="80px" :label-position="labelPosition">
-        <el-form-item prop="bayonetName" label="卡口名称">  
-          <el-input show-word-limit maxlength="20" v-model="addForm.bayonetName" placeholder="请输入卡口名称，不超过20字"></el-input>
-        </el-form-item>
-        <el-form-item prop="bayonetNum" label="卡口编号">
-          <el-input v-model="addForm.bayonetNum" placeholder="请输入卡口编号"></el-input>
-        </el-form-item>
+    <div class="basic_Info_Form" v-show="stepIndex === 1">
+      <el-form ref="basicInfoForm" :model="basicInfoForm" :rules="basicInfoFormRules" label-width="80px" :label-position="labelPosition">
         <el-form-item prop="organ" label="所属机构">
-          <el-select v-model="addForm.organ" placeholder="请搜索选择所属机构单位">
+          <el-select v-model="basicInfoForm.organ" placeholder="请搜索选择所属机构单位">
             <el-option
               v-for="item in organList"
               :key="item.value"
@@ -19,8 +13,23 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item prop="use" label="卡口用途">
-          <el-select v-model="addForm.use" placeholder="请输入用途">
+        <el-form-item prop="bayonetName" label="卡口名称">  
+          <el-input show-word-limit maxlength="20" v-model="basicInfoForm.bayonetName" placeholder="请输入卡口名称，不超过20字"></el-input>
+        </el-form-item>
+        <el-form-item label="卡口编号">
+          <el-input v-model="basicInfoForm.bayonetNum" placeholder="请输入卡口编号"></el-input>
+        </el-form-item>
+
+        <el-form-item prop="bayonetType" label="出入城卡口" required>
+          <el-radio-group v-model="basicInfoForm.bayonetType">
+            <el-radio :label="1">入城卡口</el-radio>
+            <el-radio :label="2">出城卡口</el-radio>
+            <el-radio :label="3">其他</el-radio>
+          </el-radio-group>
+        </el-form-item>
+
+        <el-form-item label="卡口用途">
+          <el-select v-model="basicInfoForm.use" placeholder="请输入用途">
             <el-option
               v-for="item in useList"
               :key="item.value"
@@ -29,13 +38,18 @@
             </el-option>
           </el-select>
         </el-form-item>
+
+        <el-form-item prop="bayonetIP" label="卡口IP" required>
+          <el-input v-model="basicInfoForm.bayonetIP"></el-input>
+        </el-form-item>
+
         <el-form-item label="经纬度" required class="longlat">
           <el-form-item prop="longitude">
-            <el-input v-model="addForm.longitude" placeholder="请输入经度"></el-input>
+            <el-input v-model="basicInfoForm.longitude" placeholder="请输入经度"></el-input>
           </el-form-item>
           <span>(经度)</span>
           <el-form-item prop="Latitude">
-            <el-input v-model="addForm.Latitude" placeholder="请输入纬度"></el-input>
+            <el-input v-model="basicInfoForm.Latitude" placeholder="请输入纬度"></el-input>
           </el-form-item>
           <span>(纬度)</span>
           <span><i class="el-icon-circle-plus-outline"></i> 地图选择</span>
@@ -43,7 +57,7 @@
 
         <el-form-item label="卡口地址" required class="bayonet_address">
           <el-form-item prop="county">
-            <el-select v-model="addForm.county">
+            <el-select v-model="basicInfoForm.county">
               <el-option
                 v-for="item in countyList"
                 :key="item.value"
@@ -53,7 +67,7 @@
             </el-select>
           </el-form-item>
           <el-form-item prop="town">
-            <el-select v-model="addForm.town">
+            <el-select v-model="basicInfoForm.town">
               <el-option
                 v-for="item in townList"
                 :key="item.value"
@@ -63,7 +77,7 @@
             </el-select>
           </el-form-item>
           <el-form-item prop="community">
-            <el-select v-model="addForm.community">
+            <el-select v-model="basicInfoForm.community">
               <el-option
                 v-for="item in communityList"
                 :key="item.value"
@@ -73,158 +87,292 @@
             </el-select>
           </el-form-item>
           <el-form-item prop="address">
-            <el-input v-model="addForm.address" placeholder="请输入详细地址"></el-input>
+            <el-input v-model="basicInfoForm.address" placeholder="请输入详细地址"></el-input>
           </el-form-item>
         </el-form-item>
-        <el-form-item prop="describe" label="描述">
-          <el-input show-word-limit maxlength="150" type="textarea" v-model="addForm.describe" placeholder="请输入描述"></el-input>
+        <el-form-item label="管理车道数">
+          <el-input-number v-model="basicInfoForm.laneNum" @change="handleChange" :min="1" :max="10"></el-input-number>
         </el-form-item>
-        <el-form-item label="卡口设备" required></el-form-item>
-        <div class="main_tab_box">
-          <ul class="tab_list">
-            <li :class="{'active_li': tabState === 1}" @click="tabState = 1">地图选择</li>
-            <li :class="{'active_li': tabState === 2}" @click="tabState = 2">列表选择</li>
-          </ul>
-          <div class="select_map_area" v-show="tabState === 1">
-            <div class="select_map_left">
-              <div class="select_top">
-                <span>已有设备 ()</span>
-                <template>
-                  <p style="color: #0C70F8">移除设备</p>
-                </template>
-                <template v-if="false">
-                  <p style="cursor:default;">移除设备</p>
-                </template>
-              </div>
-              <vue-scroll style="height: calc(100% - 45px)">
-                <ul class="dev_box">
-                  <li v-for="item in '1234567897891231'" :key="item.id">
-                    <el-checkbox style="margin-right: 10px;"></el-checkbox>
-                    <span>广场监控点1-300</span>
-                  </li>
-                </ul>
-              </vue-scroll>
-            </div>
-            <div class="select_map_right">
-              <div class="select_map_right_title">
-                <span>可选设备</span>
-                <span>()</span>
-              </div>
-              <div id="mapMap"></div>
-              <div class="right-flag">
-                <ul class="map-rrt map_rrt_u1">
-                  <li :class="{'vl_icon_sed': selAreaAcitve}" @click="selArea">
-                    <i class="vl_icon vl_icon_041"></i>
-                    <span>选择区域</span>
-                  </li>
-                </ul>
-                <ul class="map-rrt">
-                  <li><i class="vl_icon vl_icon_control_23" @click="resetMapTwo"></i></li>
-                </ul>
-                <ul class="map-rrt map_rrt_u2">
-                  <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
-                  <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <div class="select_list_area" v-show="tabState === 2">
-            <div class="select_list_left">
-              <div class="select_top">
-                <span>已有设备 ()</span>
-                <template>
-                  <p style="color: #0C70F8">移除设备</p>
-                </template>
-                <template v-if="false">
-                  <p style="cursor:default;">移除设备</p>
-                </template>
-              </div>
-              <vue-scroll style="height: calc(100% - 45px)">
-                <ul class="dev_box">
-                  <li v-for="item in '1234567897891231'" :key="item.id">
-                    <el-checkbox style="margin-right: 10px;"></el-checkbox>
-                    <span>广场监控点1-300</span>
-                  </li>
-                </ul>
-              </vue-scroll>
-            </div>
-            <div class="select_list_right">
-              <div class="select_top">
-                <span>可选设备 ()</span>
-                <template>
-                  <p style="color: #0C70F8">添加设备</p>
-                </template>
-                <template v-if="false">
-                  <p style="cursor:default;">添加设备</p>
-                </template>
-              </div>
-              <vue-scroll style="height: calc(100% - 45px)">
-                <ul class="dev_box">
-                  <li v-for="item in '1234567897891231'" :key="item.id">
-                    <el-checkbox style="margin-right: 10px;"></el-checkbox>
-                    <span>广场监控点1-300</span>
-                  </li>
-                </ul>
-              </vue-scroll>
-            </div>
-          </div>
-
-        </div>
+        <el-form-item label="描述">
+          <el-input show-word-limit maxlength="150" type="textarea" v-model="basicInfoForm.describe" placeholder="请输入描述"></el-input>
+        </el-form-item>
+        <el-form-item label="使用状况">
+          <el-radio-group v-model="basicInfoForm.usage">
+            <el-radio :label="1">启用</el-radio>
+            <el-radio :label="2">停用</el-radio>
+          </el-radio-group>
+        </el-form-item>
       </el-form>
       <div id="mapBox"></div>
       <div class="operate_btn">
-        <el-button class="reset_btn">取消</el-button>
-        <el-button class="select_btn">确定</el-button>
+        <el-button class="reset_btn" @click="toGiveUpDialog = true">取消</el-button>
+        <el-button class="select_btn" type="primary" @click="stepIndex = 2">下一步</el-button>
       </div>
     </div>
+    <div class="bayonet_dev_list" v-show="stepIndex === 2">
+      <h1>卡口设备</h1>
+      <el-button class="btn_120" type="primary" @click="popEditDevDialog()">添加卡口设备</el-button>
+      <div class="table_box">
+        <el-table
+          v-loading="loading"
+          :data="bayonetDevList"
+          >
+          <el-table-column
+            label="摄像头名称"
+            prop="surveillanceName"
+            show-overflow-tooltip
+            >
+          </el-table-column>
+          <el-table-column
+            label="类型"
+            prop="num"
+            show-overflow-tooltip
+            >
+          </el-table-column>
+          <el-table-column
+            label="智能特性"
+            :show-overflow-tooltip="true"
+            >
+          </el-table-column>
+          <el-table-column
+            label="厂家"
+            :show-overflow-tooltip="true"
+            >
+          </el-table-column>
+          <el-table-column
+            label="拍摄方向"
+            :show-overflow-tooltip="true"
+            >
+          </el-table-column>
+          <el-table-column
+            label="服务端口"
+            prop="eventCode"
+            show-overflow-tooltip
+            >
+          </el-table-column>
+          <el-table-column
+            label="车道号"
+            prop="eventCode"
+            show-overflow-tooltip
+            >
+          </el-table-column>
+          <el-table-column label="操作">
+            <template slot-scope="scope">
+              <span class="operation_btn" @click="popEditDevDialog(scope.row)">编辑</span>
+              <span class="operation_wire">|</span>
+              <span class="operation_btn" @click="popDeleteBayonetDevDialog()">删除</span>
+            </template>
+          </el-table-column>
+          <div class="not_content" slot="empty">
+            <img src="../../../../../../assets/img/not-content.png" alt="">
+            <p>暂无相关数据</p>
+          </div>
+        </el-table>
+      </div>
+      <div class="operate_btn">
+        <el-button class="reset_btn" @click="toGiveUpDialog = true">取消</el-button>
+        <el-button class="select_btn" type="primary" @click="stepIndex = 1">上一步</el-button>
+        <el-button class="select_btn" type="primary" @click="skipIsList">确定</el-button>
+      </div>
+    </div>
+    <el-dialog
+      :visible.sync="toGiveUpDialog"
+      :close-on-click-modal="false"
+      width="482px"
+      top="40vh">
+      <h4>是否放弃本次操作？</h4>
+      <div slot="footer">
+        <el-button :loading="loadingBtn" @click="skipIsList" class="btn_140" type="primary">放弃</el-button>
+        <el-button class="btn_140" @click="toGiveUpDialog = false">取消</el-button>
+      </div>
+    </el-dialog>
+    <el-dialog
+      :visible.sync="delBayonetDevDialog"
+      :close-on-click-modal="false"
+      width="482px"
+      top="40vh">
+      <h4>是否确定删除该设备信息？</h4>
+      <div slot="footer">
+        <el-button @click="delBayonetDevDialog = false" class="btn_140">取消</el-button>
+        <el-button :loading="loadingBtn" class="btn_140" type="primary">确认</el-button>
+      </div>
+    </el-dialog>
+    <el-dialog
+      :visible.sync="editDevDialog"
+      :close-on-click-modal="false"
+      width="800px"
+      height="600px"
+      top="40vh"
+      title="添加卡口设备">
+      <vue-scroll style="height: 500px">
+        <el-form ref="bayonetDevForm" :model="bayonetDevForm" :rules="bayonetDevFormRules" label-width="100px" :label-position="labelPosition">
+          <el-form-item prop="cameraName" label="摄像头名称">
+            <el-input v-model="bayonetDevForm.cameraName" placeholder="请输入摄像头名称，不超过20字"></el-input>
+          </el-form-item>
+          <el-form-item label="摄像头类型">
+            <el-select v-model="bayonetDevForm.cameraType">
+              <el-option
+                v-for="item in cameraTypeList"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="厂家">
+            <el-select v-model="bayonetDevForm.manufacturers">
+              <el-option
+                v-for="item in manufacturersList"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="最大像素">
+            <el-select v-model="bayonetDevForm.pixel">
+              <el-option
+                v-for="item in pixelList"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="拍摄方向">
+            <el-select v-model="bayonetDevForm.direction">
+              <el-option
+                v-for="item in directionList"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="智能特性">
+            <el-select v-model="bayonetDevForm.features">
+              <el-option
+                v-for="item in featuresList"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item prop="SIPNum" label="SIP编号">
+            <el-input v-model="bayonetDevForm.SIPNum" placeholder="请输入SIP编号"></el-input>
+          </el-form-item>
+          <el-form-item prop="accessCode" label="视频接入编码">
+            <el-input v-model="bayonetDevForm.accessCode" placeholder="请输入视频接入编码"></el-input>
+          </el-form-item>
+          <el-form-item label="结构化设备编码">
+            <el-input v-model="bayonetDevForm.devCode" placeholder="请输入结构化设备编码"></el-input>
+          </el-form-item>
+          <el-form-item prop="servicePort" label="服务端口">
+            <el-input v-model="bayonetDevForm.servicePort" placeholder="请输入服务端口"></el-input>
+          </el-form-item>
+          <el-form-item label="用途">
+            <el-radio-group v-model="bayonetDevForm.use">
+              <el-radio :label="1">抓拍摄像头</el-radio>
+              <el-radio :label="2">全景摄像头</el-radio>
+            </el-radio-group>
+          </el-form-item>
+
+          <el-form-item class="driving_info">
+            <div v-for="(item, index) in bayonetDevForm.drivingInfo" :key="index">
+              <el-form-item label="车道号" :prop="'drivingInfo.' + index + '.laneNum'" :rules="{ required: true, message: '请选择车道号', trigger: 'change'}" >
+                <el-select v-model="item.laneNum">
+                  <el-option
+                    v-for="item in laneNumList"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                  </el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="行车方向" :prop="'drivingInfo.' + index + '.drivingDirection'" :rules="{ required: true, message: '请输入行车方向', trigger: 'change'}" >
+                <el-select v-model="item.drivingDirection">
+                  <el-option
+                    v-for="item in drivingDirectionList"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                  </el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="大车最低限速" :prop="'drivingInfo.' + index + '.cartMinSpeedLimit'">
+                <el-input v-model="item.cartMinSpeedLimit"></el-input>
+              </el-form-item>
+              <el-form-item label="大车最高限速" :prop="'drivingInfo.' + index + '.cartMaxSpeedLimit'">
+                <el-input v-model="item.cartMaxSpeedLimit"></el-input>
+              </el-form-item>
+              <el-form-item label="小车最低限速" :prop="'drivingInfo.' + index + '.smallCarMinSpeedLimit'">
+                <el-input v-model="item.smallCarMinSpeedLimit"></el-input>
+              </el-form-item>
+              <el-form-item label="小车最高限速" :prop="'drivingInfo.' + index + '.smallCarMaxSpeedLimit'">
+                <el-input v-model="item.smallCarMaxSpeedLimit"></el-input>
+              </el-form-item>
+            </div>
+            <el-form-item class="driving_info_btn_box">
+              <div @click="addDrivingInfo"><i class="vl_icon vl_icon_control_22"></i><span>添加</span></div>
+              <div @click="delDrivingInfo"><i class="vl_icon vl_icon_control_28"></i><span>删除</span></div>
+            </el-form-item>
+          </el-form-item>
+
+        </el-form>
+      </vue-scroll>
+      <div slot="footer">
+        <el-button @click="toGiveUpDialog = true" class="btn_140">取消</el-button>
+        <el-button :loading="loadingBtn" class="btn_140" type="primary">确认</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
 import vlBreadcrumb from "@/components/common/breadcrumb.vue";
 import {mapXupuxian} from '@/config/config.js';
-import { getAllMonitorList } from '@/views/index/api/api.control.js';
-import {cameraData} from '@/views/index/components/control/testData.js';
-import {random14} from '@/utils/util.js';
 export default {
   components: {vlBreadcrumb},
   data () {
     return {
       breadcrumbData: [{name: '系统管理', routerName: 'manage'}, {name: '卡口管理', routerName: 'bayonet_manage'}],
       pageType: null,// 1为新增，2为编辑
+      stepIndex: 1,//步骤1为卡口基本信息，2位添加卡口设备
       labelPosition: 'right',
-      // 表单参数
-      addForm: {
+      // 卡口基本信息表单参数
+      basicInfoForm: {
         bayonetName: null,
         bayonetNum: null,
         organ: null,
+        bayonetType: null,
         use: null,
+        bayonetIP: null,
         longitude: null,
         Latitude: null,
         county: null,
         town: null,
         community: null,
         address: null,
-        describe: null
+        laneNum: null,
+        describe: null,
+        usage: null
       },
-      // 表单列表参数
+      // 卡口基本信息表单列表参数
       organList: [],// 机构列表
       useList: [],// 用途列表
       countyList: [],// 县列表
       townList: [],// 镇列表
       communityList: [],// 社区列表
-      // 表单验证规则
-      addFormRules: {
+      // 卡口基本信息表单验证规则
+      basicInfoFormRules: {
         bayonetName: [{required: true, message: '请填写姓名', trigger: 'blur'}],
-        bayonetNum: [{required: true, message: '请选择证件类型', trigger: 'blur'}],
         organ: [{required: true, message: '请填写证件号码', trigger: 'blur'}],
-        use: [{required: true, message: '请填写证件号码', trigger: 'blur'}],
         longitude: [{required: true, message: '请填写证件号码', trigger: 'blur'}],
         Latitude: [{required: true, message: '请填写证件号码', trigger: 'blur'}],
         county: [{required: true, message: '请填写证件号码', trigger: 'blur'}],
         town: [{required: true, message: '请填写证件号码', trigger: 'blur'}],
         community: [{required: true, message: '请填写证件号码', trigger: 'blur'}],
-        address: [{required: true, message: '请填写证件号码', trigger: 'blur'}],
-        describe: [{required: true, message: '请填写证件号码', trigger: 'blur'}]
+        address: [{required: true, message: '请填写证件号码', trigger: 'blur'}]
       },
       // 地图参数
       mapOne: null,
@@ -232,24 +380,57 @@ export default {
       lngLat: null,//经纬度
       autoComplete: null,
       marker: null,
-      // 卡口设备选择参数
-      tabState: 1,
-      // 选择区域
-      mapTwo: null,
-      selAreaAcitve: false,
-      selAreaPolygon: null,
-      mouseTool: null,
-      selAreaAble: false,
-     
-      finalDeviceList: [],
-      selectDeviceList: [],
-      unCheckDeviceList: [],
-      isSelected: false,
-      kkList: [],
-      sxtList: [],
-      sxtMapMarkers: [],
-      kkMapMarkers: [],
+      // 放弃本次操作弹窗参数
+      toGiveUpDialog: false,
+      loadingBtn: false,
+      // 卡口设备列表参数
+      loading: false,
+      bayonetDevList: [{}],
+      // 删除卡口设备弹窗参数
+      delBayonetDevDialog: false,
 
+      // 编辑卡口设备弹窗参数
+      editDevDialog: false,
+      // 编辑卡口表单参数
+      bayonetDevForm: {
+        cameraName: null,
+        cameraType: null,
+        manufacturers: null,
+        pixel: null,
+        direction: null,
+        features: null,
+        SIPNum: null,
+        accessCode: null,
+        devCode: null,
+        servicePort: null,
+        use: null,
+        drivingInfo: [
+          {
+            laneNum: null,
+            drivingDirection: null,
+            cartMinSpeedLimit: null,
+            cartMaxSpeedLimit: null,
+            smallCarMinSpeedLimit: null,
+            smallCarMaxSpeedLimit: null
+          }
+        ]
+      },
+      // 编辑卡口表单列表参数
+      cameraTypeList: [],
+      manufacturersList: [],
+      pixelList: [],
+      directionList: [],
+      featuresList: [],
+      laneNumList: [],
+      drivingDirectionList: [],
+
+      // 编辑卡口表单验证规则
+      bayonetDevFormRules: {
+        cameraName: [{required: true, message: '请填写姓名', trigger: 'blur'}],
+        SIPNum: [{required: true, message: '请填写证件号码', trigger: 'blur'}],
+        accessCode: [{required: true, message: '请填写证件号码', trigger: 'blur'}],
+        servicePort: [{required: true, message: '请填写证件号码', trigger: 'blur'}]
+      }
     }
   },
   
@@ -260,16 +441,18 @@ export default {
     } else {
       this.breadcrumbData.push({name: '编辑卡口'});
     }
-    this.resetMapOne();
-    
-    this.getAllMonitorList();
-    this.initMapTwo();
-    
-    
+    this.resetMap();
   },
   methods: {
+    handleChange(value) {
+      console.log(value);
+    },
+    // 跳转到卡口列表
+    skipIsList () {
+      this.$router.push({name: 'bayonet_manage_list'});
+    },
     /* 地图选择经纬度方法start */
-    resetMapOne () {
+    resetMap () {
       let _this = this;
       let map = new window.AMap.Map('mapBox', {
         zoom: this.zoomLevel,
@@ -291,8 +474,8 @@ export default {
                 city: ""//城市，默认：“全国”
             });
             var lnglatXY = [e.lnglat.getLng(), e.lnglat.getLat()];//地图上所标点的坐标
-            _this.addForm.longitude = lnglatXY[0];
-            _this.addForm.Latitude = lnglatXY[1];
+            _this.basicInfoForm.longitude = lnglatXY[0];
+            _this.basicInfoForm.Latitude = lnglatXY[1];
             geocoder.getAddress(lnglatXY, function(status, result) {
                 if (status === 'complete' && result.info === 'OK') {
                     //获得了有效的地址信息:
@@ -310,7 +493,7 @@ export default {
       _this.mapOne = map;
     },
     // 输入追踪点定位圆形覆盖物的中心点
-    markLocation(lng, lat, address) {
+    markLocation (lng, lat, address) {
       let _this = this;
       if (_this.marker) {
         _this.mapOne.remove(_this.marker);
@@ -351,193 +534,29 @@ export default {
     },
     /* 地图选择经纬度方法end */
 
-    /* 卡口设备选择方法start */
-    initMapTwo () {
-      let _this = this;
-      let map = new window.AMap.Map('mapMap', {
-        zoom: 18, // 级别
-        // center: [112.974691, 28.093846], // 中心点坐标
-        center: [110.596015, 27.907662], // 中心点坐标
-        // viewMode: '3D' // 使用3D视图
-      });
-      map.setMapStyle('amap://styles/whitesmoke');
-      this.mapTwo = map;
-      // 在地图中添加MouseTool插件
-      let mouseTool = new window.AMap.MouseTool(map);
-      _this.mouseTool = mouseTool;
-      // 添加事件
-      window.AMap.event.addListener(mouseTool, 'draw', function (e) { // 画
-        setTimeout(() => {
-          _this.selAreaRest(true);
-          let polygon = new window.AMap.Polygon({ // 构造多边形对象
-            map: map, // 地图对象
-            strokeColor: '#FA453A', // 线条颜色
-            strokeOpacity: 1, // 轮廓线透明度 [0,1]
-            strokeWeight: 1, // 轮廓线宽度
-            fillColor: '#FA453A', //多边形填充颜色
-            fillOpacity: 0.2, // 多边形填充透明度
-            path: e.obj.getPath(), // 多边形轮廓线的节点坐标数组
-            zIndex: 12 // 多边形覆盖物的叠加顺序,级别高的在上层显示
-          });
-
-          _this.selAreaPolygon = polygon;
-          _this.selAreaAble = true;
-          _this.mapMarkHandler();
-
-        }, 100);
+    // 弹出删除卡口设备弹窗
+    popDeleteBayonetDevDialog () {
+      this.delBayonetDevDialog = true;
+    },
+    // 弹出新增/编辑卡口设备弹窗
+    popEditDevDialog () {
+      this.editDevDialog = true;
+    },
+    // 添加行车信息的动态表单
+    addDrivingInfo () {
+      this.bayonetDevForm.drivingInfo.push({
+        laneNum: null,
+        drivingDirection: null,
+        cartMinSpeedLimit: null,
+        cartMaxSpeedLimit: null,
+        smallCarMinSpeedLimit: null,
+        smallCarMaxSpeedLimit: null
       });
     },
-    // 获取所有监控设备列表
-    getAllMonitorList () {
-      const params = {ccode: mapXupuxian.adcode}
-      // getAllMonitorList(params).then(res => {
-      //   if (res && res.data) {
-
-      //   }
-      // })
-      this.sxtList = cameraData;
-      console.log(cameraData, 'cameraData')
-      this.mapMarkHandler();
-      
-    },
-    // 地图标记处理
-    mapMarkHandler () {
-      // 摄像头
-      this.mapClearMarkers(this.sxtMapMarkers);
-      this.mapMark(this.sxtList, this.sxtMapMarkers, 'sxt');
-      
-      // 卡口
-      // this.mapClearMarkers(this.kkMapMarkers);
-      // this.mapMark(this.kkList, this.kkMapMarkers, 'kk');
-      
-    },
-    // 地图标记
-    mapMark (data, aMarkers, keyWord) {
-      console.log(1111111111111)
-      if (data && data.length > 0) {
-        
-        let _this = this;
-        // _this.finalDeviceList = [];
-        for (let i = 0; i < data.length; i++) {
-          let obj = data[i];
-          obj.sid = keyWord + '_' + i + '_' + random14();
-          if (obj.longitude > 0 && obj.latitude > 0) {
-
-            _this.mapTwo && _this.mapTwo.setCenter([obj.longitude, obj.latitude]);
-
-            let offSet = [-20.5, -48], selClass = '', hoverWindow = null;
-            if (_this.selAreaPolygon && !_this.selAreaPolygon.contains(new window.AMap.LngLat(obj.longitude, obj.latitude))) {
-              // 多边形存在且不在多边形之中
-              selClass = "vl_map_selarea_hide";
-              this.unCheckDeviceList.push(obj); // 没有选中的设备
-            }
-            if (_this.selAreaPolygon && _this.selAreaPolygon.contains(new window.AMap.LngLat(obj.longitude, obj.latitude))) { // 在多边形中且选中的设备
-              _this.finalDeviceList.push(obj);
-            }
-            let marker = new window.AMap.Marker({ // 添加自定义点标记
-              map: _this.mapTwo,
-              // 110.601394, 27.909162
-              position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
-              // position: [110.601394, 27.909162], // 基点位置 [116.397428, 39.90923]
-              offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
-              draggable: false, // 是否可拖动
-              extData: obj, // 用户自定义属性
-              // 自定义点标记覆盖物内容
-              content: '<div id="' + obj.sid + '" class="vl_icon vl_icon_' + keyWord + ' ' + selClass + '"></div>'
-            });
-            // myAMap.hoverMarkerHandler(map, marker, obj);
-            _this.marker = marker;
-
-            let title = '';
-            if (keyWord === 'kk') {
-              title = '卡口名称：' + obj.deviceName;
-            } else {
-              title = '摄像头名称：' + obj.deviceName;
-            }
-            _this.marker.on('mouseover', function () {
-              let sContent = '<div class="vl_map_hover" >' +
-                '<div class="vl_main_hover_address" style="min-width: 300px;padding: 15px"><p>' + title + '</p></div></div>';
-              hoverWindow = new window.AMap.InfoWindow({
-                isCustom: true,
-                closeWhenClickMap: true,
-                offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-                content: sContent
-              });
-              hoverWindow.open(_this.mapTwo, new window.AMap.LngLat(obj.longitude, obj.latitude));
-            });
-            _this.marker.on('mouseout', function () {
-              if (hoverWindow) { hoverWindow.close(); }
-            });
-            if (!aMarkers) { aMarkers = []; }
-            aMarkers.push(marker);
-            
-          }
-        }
-        if ( _this.selAreaPolygon) {
-          setTimeout(() => {
-            _this.mapTwo.remove(_this.selAreaPolygon);
-            _this.selAreaPolygon = null;
-            _this.mapTwo.remove(_this.marker);
-
-            _this.mapMarkHandler();
-          }, 1000);
-
-        }
-      }
-    },
-    // 清除所有
-    resetTools () {
-      this.selAreaRest();
-    },
-    // 清除地图标记
-    mapClearMarkers (aMarkers) {
-      if (this.mapTwo && aMarkers && aMarkers.length > 0) {
-        this.mapTwo.remove(aMarkers);
-        aMarkers = [];
-      }
-    },
-    // 选择区域
-    selArea () {
-      if (this.selAreaAcitve) {
-        this.resetTools();
-        return false;
-      }
-      this.resetTools();
-      if (this.mapTwo && this.mouseTool) {
-        this.selAreaAcitve = true;
-        this.mouseTool.close(true);
-        this.mapTwo.setDefaultCursor('crosshair');
-        this.mouseTool.polygon({
-          zIndex: 13,
-          strokeColor: '#FA453A',
-          strokeOpacity: 1,
-          strokeWeight: 1,
-          fillColor: '#FA453A',
-          fillOpacity: 0.2
-        });
-      }
-    },
-    // 重置选择区域
-    selAreaRest (notClearPolygon) {
-      this.selAreaAcitve = false;
-      this.mouseTool.close(true);
-      this.mapTwo.setDefaultCursor('');
-      if (!notClearPolygon && this.selAreaPolygon) {
-        this.mapTwo.remove(this.selAreaPolygon);
-        this.selAreaPolygon = null;
-        this.selAreaAble = false;
-      }
-    },
-    // 重置地图
-    resetMapTwo () {
-      this.initMapTwo();
-    },
-    mapZoomSet (val) {
-      if (this.mapTwo) {
-        this.mapTwo.setZoom(this.mapTwo.getZoom() + val);
-      }
-    },
-    /* 卡口设备选择方法end */
+    // 删除行车信息的动态表单
+    delDrivingInfo () {
+       this.bayonetDevForm.drivingInfo.pop();
+    }
   }
 }
 </script>
@@ -547,7 +566,7 @@ export default {
   height: 100%;
   overflow: hidden;
   position: relative;
-  .add_form{
+  .basic_Info_Form{
     padding: 20px;
     width: 100%;
     height: calc(100% - 50px);
@@ -556,235 +575,11 @@ export default {
       width: 100%;
       height: 500px;
     }
-    .main_tab_box {
-      height: 100%;
-      margin-top: 10px;
-      border: 1px solid #D3D3D3;
-      margin-bottom: 20px;
-      border-radius:4px 4px 0px 0px;
-      .tab_list {
-        height: 44px;
-        line-height: 44px;
-        background-color: #FAFAFA;
-        border-bottom: 1px solid #F2F2F2;
-        >li {
-          display: inline-block;
-          margin: 0 20px;
-          color: #333333;
-          cursor: pointer;
-          &.active_li {
-            color: #0C70F8;
-            border-bottom: 2px solid #0C70F8;
-          }
-        }
-      }
-      .select_map_area{
-        width: 100%;
-        display: flex;
-        height: 490px;
-        .select_map_left{
-          width: 300px;
-          height: 100%;
-          .select_top {
-            display: flex;
-            justify-content: space-between;
-            height: 45px;
-            line-height: 45px;
-            padding: 0 10px;
-            border-top: 1px solid #F2F2F2;
-            border-bottom: 1px solid #F2F2F2;
-            border-right: 1px solid #F2F2F2;
-            >span {
-              color: #333333;
-            }
-            >p {
-              color: #B2B2B2;
-              cursor: pointer;
-            }
-          }
-          .dev_box{
-            height: 100%;
-            padding: 10px 20px;
-            li{
-              height: 36px;
-              line-height: 36px;
-              > span{
-                color: #666;
-              }
-            } 
-          }
-        } 
-        .select_map_right {
-          width: calc(100% - 300px);
-          height: 100%;
-          position: relative;
-          .select_map_right_title {
-            width: 100%;
-            left: 0;
-            top: 0;
-            z-index: 1;
-            position: absolute;
-            color: #333333;
-            height: 45px;
-            line-height: 45px;
-            padding: 0 5px;
-            border-top: 1px solid #f2f2f2;
-          }
-          #mapMap {
-            width: 100%;
-            height: calc(100% - 45px);
-            margin-top: 45px;
-          }
-          .right-flag {
-            position: absolute;
-            right: 30px;
-            bottom: 10px;
-            transition: right .3s ease-out;
-            animation: fadeInRight .4s ease-out .4s both;
-            .map-rrt {
-              margin-bottom: 20px;
-              box-shadow: 0 0 10px rgba(148,148,148,0.24);
-              >li {
-                padding: 12px 5px;
-                background-color: #ffffff;
-                cursor: pointer;
-                border-bottom: 1px solid #eee;
-                text-align: center;
-                >i {
-                  font-size: 20px;
-                  color: #0B6FF7;
-                }
-                >span {
-                  font-size: 12px;
-                }
-                &:last-child { border-bottom: 0; }
-              }
-            }
-            .map_rrt_u1 {
-              >li {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                i {
-                  text-align: center;
-                  display: block;
-                }
-                span {
-                  text-align: center;
-                  display: block;
-                }
-              }
-            }
-          }
-        }
-        .el-checkbox {
-          margin-right: 10px;
-        }
-        .close_arrow {
-          position: absolute;
-          i {
-            color: #F94439;
-            font-size: 20px;
-          }
-        }
-      }
-      .select_list_area {
-        width: 100%;
-        display: flex;
-        height: 490px;
-        border-top: 1px solid #f2f2f2;
-        .select_list_left {
-          width: 300px;
-          height: 100%;
-          border-right: 1px solid #F2F2F2;
-          .select_top {
-            display: flex;
-            justify-content: space-between;
-            height: 45px;
-            line-height: 45px;
-            padding: 0 10px;
-            border-bottom: 1px solid #F2F2F2;
-            >span {
-              color: #333333;
-            }
-            >p {
-              color: #B2B2B2;
-              cursor: pointer;
-            }
-          }
-          .dev_box{
-            height: 100%;
-            padding: 10px 20px;
-            li{
-              height: 36px;
-              line-height: 36px;
-              > span{
-                color: #666;
-              }
-            } 
-          }
-        }
-        .select_list_right {
-          width: 300px;
-          height: 100%;
-          border-right: 1px solid #F2F2F2;
-          .select_top {
-            display: flex;
-            justify-content: space-between;
-            height: 45px;
-            line-height: 45px;
-            padding: 0 10px;
-            border-bottom: 1px solid #F2F2F2;
-            >span {
-              color: #333333;
-            }
-            >p {
-              color: #B2B2B2;
-              cursor: pointer;
-            }
-          }
-          .dev_box{
-            height: 100%;
-            padding: 10px 20px;
-            li{
-              height: 36px;
-              line-height: 36px;
-              > span{
-                color: #666;
-              }
-            } 
-          }
-          .search_box {
-            margin: 4px 10px;
-            /deep/ .el-input--small .el-input__inner {
-              width: 220px;
-              border-radius: 40px;
-              background-color: #F2F2F2;
-              color: #999999;
-            }
-            .search_icon{
-              margin-top: 8px;
-              cursor: pointer; 
-              // margin-right: 35px;
-            }
-            /deep/ .el-input__suffix {
-              right: 48px;
-            }
-          }
-          .all_select_checkbox {
-            padding: 10px 20px 0;
-          }
-        }
-        .el-checkbox {
-          margin-right: 10px;
-        }
-      }
-    }
   }
   .operate_btn{
     width: 100%;
-    height: 50px;
-    line-height: 50px;
+    height: 65px;
+    line-height: 65px;
     padding: 0 10px;
     border-top: 1px solid #e6e6e6;
     background: #fff;
@@ -797,7 +592,7 @@ export default {
 </style>
 <style lang="scss">
 .bayonet_manage_add{
-  .add_form{
+  .basic_Info_Form{
     .longlat > .el-form-item__content{
       display: flex;
       flex-wrap: nowrap;

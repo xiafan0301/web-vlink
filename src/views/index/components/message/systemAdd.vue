@@ -25,8 +25,8 @@
         </el-form>
       </div>
       <div class="add_footer">
-        <el-button :loading="loadingBtn" class="select_btn btn_100" @click="addMsgNote('addForm')">发布</el-button>
-        <el-button @click.native="toGiveUpDialog = true" class="reset_btn btn_100">返回</el-button>
+        <el-button :loading="loadingBtn" class="btn_100" type="primary" @click="addMsgNote('addForm')">发布</el-button>
+        <el-button @click.native="toGiveUpDialog = true" class="btn_100">返回</el-button>
       </div>
     </div>
     <el-dialog
@@ -36,8 +36,8 @@
       top="40vh">
       <h4>是否放弃本次操作？</h4>
       <div slot="footer">
-        <el-button :loading="loadingBtn" @click="skip(1)" class="select_btn btn_140">放弃</el-button>
-        <el-button class="reset_btn btn_140" @click="toGiveUpDialog = false">取消</el-button>
+        <el-button :loading="loadingBtn" @click="skip(1)" class="btn_140" type="primary">放弃</el-button>
+        <el-button class="btn_140" @click="toGiveUpDialog = false">取消</el-button>
       </div>
     </el-dialog>
   </div>

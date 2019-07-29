@@ -126,6 +126,7 @@
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { mapXupuxian } from "@/config/config.js";
 import { random14 } from '@/utils/util.js';
+import { PortraitGetDispatch } from '@/views/index/api/api.portrait.js';
 export default {
   components: { vlBreadcrumb },
   data () {
@@ -137,13 +138,25 @@ export default {
       flvplayerId: 'flv_' + random14(),
       map: null,
       marker: {},
-      detailInfo: {}
+      detailInfo: {},
+      portraitStatus: null // 以图搜人状态
     }
   },
   mounted () {
+    this.getPortraitGetDispatch();
     this.getDetail();
   },
   methods: {
+    // 以图搜人实时/离线判断
+    getPortraitGetDispatch () {
+      PortraitGetDispatch()
+        .then(res => {
+          console.log('111', res)
+          if (res && res.data) {
+            this.portraitStatus = res.data;
+          }
+        })
+    },
     // 获取尾随车辆详情
     getDetail () {
       if (this.$route.query.obj) {
@@ -185,6 +198,15 @@ export default {
           
           let obj = data[i];
           if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
+            let iconType;
+            if (i === 0) {
+              iconType = 'vl_icon_04_019';
+            } else if (i === (data.length - 1)) {
+              iconType = 'vl_icon_05_019';
+            } else {
+              iconType = 'vl_icon_sxt';
+            }
+
             let offSet = [-20.5, -55];
             
             let _idBtn = 'vlJtcPlayBtn' + i;
@@ -197,7 +219,7 @@ export default {
               draggable: false, // 是否可拖动
               extData: '', // 用户自定义属性
               // 自定义点标记覆盖物内容
-              content: '<div id="vehicle' + i + '"  title="'+ obj.deviceName +'" class="vl_icon vl_icon_sxt"></div>'
+              content: '<div id="vehicle' + i + '"  title="'+ obj.deviceName +'" class="vl_icon '+ iconType +'"></div>'
             });
   
             path.push(new window.AMap.LngLat(obj.shotPlaceLongitude, obj.shotPlaceLatitude));
@@ -357,7 +379,7 @@ export default {
       });
       this.$router.push({name: 'control_create', query: { imgurl: this.detailInfo.subStoragePath, modelName: '人员追踪' }});
     },
-    // 跳至人像检索页面
+    // 跳至以图搜人页面
     skipYtsrPortraitPage () {
       this.$store.commit('setBreadcrumbData', {
         breadcrumbData: [
@@ -368,7 +390,11 @@ export default {
           { name: '以图搜人' }
         ]
       });
-      this.$router.push({name: 'portrait_ytsr_list', query: { imgurl: this.detailInfo.subStoragePath }});
+      // if (this.portraitStatus === 1) { // 离线
+      //   this.$router.push({name: 'portrait_ytsr_list', query: { imgurl: this.detailInfo.subStoragePath }});
+      // } else if (this.portraitStatus === 2) { // 实时
+        this.$router.push({name: 'portrait_ytsr_moment', query: { imgurl: this.detailInfo.subStoragePath }});
+      // }
     },
     // 跳至轨迹分析页面
     skipPjfxPortraitPage () {
