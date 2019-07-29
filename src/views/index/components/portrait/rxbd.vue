@@ -424,10 +424,11 @@
     height: 100%;
     border: .2rem solid #fafafa;
     background: #FFFFFF;
+    padding-bottom: .2rem;
     .vl_judge_tc_h {
       width: 100%;
       text-align: center;
-      padding-top: .77rem;
+      padding-top: .27rem;
       .judge_title {
         color: #333333;
         font-size: .5rem;
@@ -458,7 +459,7 @@
     .vl_judge_tc_c {
       height: 4.3rem;
       text-align: center;
-      margin-bottom: .9rem;
+      margin-bottom: .6rem;
       padding-top: .9rem;
       position: relative;
       .vl_judge_tc_c_item {

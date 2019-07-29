@@ -248,7 +248,7 @@ export default {
         endTime: "",
         similarityName: "相似度",
         similarity: "85", // 相似度
-        frequency: "", //频次
+        frequency: "3", //频次
         frequencyName: "频次不少于"
       },
       rules: {

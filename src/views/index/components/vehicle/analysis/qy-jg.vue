@@ -92,16 +92,16 @@
                       <span><font>号牌颜色</font>{{sturcDetail.plateColor}}</span>
                     </div>
                     <div class="struc_cdi_line">
-                      <span><font>车辆型号</font>{{sturcDetail.vehicleStyles}}</span>
+                      <span><font>车辆型号</font>{{sturcDetail.vehiclelModel ? sturcDetail.vehiclelModel : '未知'}}</span>
                     </div>
                     <div class="struc_cdi_line">
-                      <span><font>车辆颜色</font>{{sturcDetail.vehicleColor}}</span>
+                      <span><font>车辆颜色</font>{{sturcDetail.vehicleColor ? sturcDetail.vehicleColor : '未知'}}</span>
                     </div>
                     <div class="struc_cdi_line">
-                      <span><font>车辆类型</font>{{sturcDetail.vehicleColor}} {{sturcDetail.vehicleClass}} {{sturcDetail.vehicleBrand}} {{sturcDetail.vehicleStyles}}</span>
+                      <span><font>车辆类型</font>{{sturcDetail.vehicleClass ? sturcDetail.vehicleClass : '未知'}}</span>
                     </div>
                     <div class="struc_cdi_line">
-                      <span><font>号牌类型</font>{{sturcDetail.vehicleColor}} {{sturcDetail.vehicleClass}} {{sturcDetail.vehicleBrand}} {{sturcDetail.vehicleStyles}}</span>
+                      <span><font>号牌类型</font>{{sturcDetail.plateClass ? sturcDetail.plateClass : '未知'}}</span>
                     </div>
                   </div>
                 </vue-scroll>
@@ -242,6 +242,7 @@
         this.getTheList();
       },
       showStrucInfo (data, index) {
+        this.playing = false;
         this.curImgIndex = index;
         this.strucDetailDialog = true;
         this.sturcDetail = data;
@@ -289,6 +290,7 @@
         this.playing = !this.playing;
       },
       imgListTap (data, index) {
+        this.playing = false;
         this.curImgIndex = index;
         this.sturcDetail = data;
         this.drawPoint(data);

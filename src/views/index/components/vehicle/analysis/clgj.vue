@@ -310,23 +310,41 @@
         let date = new Date();
         let curDate = date.getTime();
         let curS = 1 * 24 * 3600 * 1000;
-        this.ruleForm.data1 = curDate - curS;
-        this.ruleForm.data2 = curDate;
+        let yDate = new Date(curDate - curS);
+        this.ruleForm.data1 = new Date(yDate.getFullYear() + '-' + (yDate.getMonth() + 1) + '-' + yDate.getDate() + ' 00:00:00').getTime();
+        this.ruleForm.data2 =  new Date(yDate.getFullYear() + '-' + (yDate.getMonth() + 1) + '-' + yDate.getDate() + ' 23:59:59').getTime();
       },
       hideLeft() {
         this.hideleft = !this.hideleft;
       },
       submitForm(v) {
-        if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data2 && this.ruleForm.input3.length){
-          let pg = {
+        if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data2){
+          if (this.ruleForm.input3.length || this.ruleForm.input5) {
+            let pg = {
+              vehicleNumber: ''
+            }
+            if (this.ruleForm.input3.includes(this.ruleForm.input5.replace(/\s+|\s+$/g, ''))) {
+              if (!document.querySelector('.el-message--info')) {
+                this.$message.info('输入框内的车牌已经添加了')
+              }
+              return false;
+            }
+            pg['startTime'] = formatDate(this.ruleForm.data1, 'yyyy-MM-dd HH:mm:ss');
+            pg['endTime'] = formatDate(this.ruleForm.data2, 'yyyy-MM-dd HH:mm:ss');
+//            if (this.ruleForm.input3.length) {
+//              pg['vehicleNumber'] += this.ruleForm.input3.join(',');
+//            }
+            pg['vehicleNumber'] = this.ruleForm.input3.concat(this.ruleForm.input5).join(',')
+
+            this.getVehicleShot(pg);
+          } else {
+            if (!document.querySelector('.el-message--info')) {
+              this.$message.info("请输入车牌号码。");
+            }
           }
-          pg['startTime'] = formatDate(this.ruleForm.data1, 'yyyy-MM-dd HH:mm:ss');
-          pg['endTime'] = formatDate(this.ruleForm.data2, 'yyyy-MM-dd HH:mm:ss');
-          pg['vehicleNumber'] = this.ruleForm.input3.join(',');
-          this.getVehicleShot(pg);
         }else{
           if (!document.querySelector('.el-message--info')) {
-            this.$message.info("请输入开始时间和车牌号码。");
+            this.$message.info("请输入开始和结束时间。");
           }
         }
       },
@@ -423,7 +441,7 @@
               b = false;
             }
           })
-          if (b) {
+          if (b && this.evData.length > 1) {
             if (x.bayonetName) {
               x['dataType'] = 12;
             } else {
@@ -452,14 +470,11 @@
         return str;
       },
       drawMapMarker (data) {
-        let path = [];
         for (let  i = 0; i < data.length; i++) {
           let obj = data[i];
-          let _path = [obj.shotPlaceLongitude, obj.shotPlaceLatitude];
           if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
-            path.push(_path);
             let $id = 'mapMark' + obj.dataType + obj.uid;
-            let _time = '';
+            let _time = '', isStartEnd = false;
             if (obj.showTime) {
               _time = '<p class="vl_map_mark_time">';
               obj.shotTime.split(',').forEach(j => {
@@ -468,6 +483,16 @@
               _time += '</p>';
             }
             let _content = `<div id="${$id}" class="vl_icon right_map_icon vl_icon_map_mark` + obj.dataType + `">` + _time + `</div>`
+            // 判断是不是起止点
+            let curList = this.evData[this.activeList].traceList;
+            if (obj.deviceID === curList[curList.length - 1].deviceID) {
+              _content = `<div id="${$id}" class="vl_icon vl_icon_map_mark_start">` + _time + `</div>`;
+              isStartEnd = true;
+            }
+            if (obj.deviceID === curList[0].deviceID) {
+              _content = `<div id="${$id}" class="vl_icon vl_icon_map_mark_end">` + _time + `</div>`;
+              isStartEnd = true;
+            }
             let point = new window.AMap.Marker({ // 添加自定义点标记
               map: this.amap,
               position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
@@ -484,12 +509,14 @@
               }
             })
             this.markerPoint[i] = point;
-            point.on('mouseover', function () {
-              $('#' + $id).addClass('vl_icon_map_hover_mark' + obj.dataType)
-            })
-            point.on('mouseout', function () {
-              $('#' + $id).removeClass('vl_icon_map_hover_mark' + obj.dataType)
-            })
+            if (!isStartEnd) {
+              point.on('mouseover', function () {
+                $('#' + $id).addClass('vl_icon_map_hover_mark' + obj.dataType)
+              })
+              point.on('mouseout', function () {
+                $('#' + $id).removeClass('vl_icon_map_hover_mark' + obj.dataType)
+              })
+            }
           }
         }
         this.amap.setFitView()
@@ -592,7 +619,7 @@
 </script>
 <style lang="scss">
   #rightMap {
-    .vl_icon.right_map_icon {
+    .vl_icon {
       width: 47px;
       position: relative;
       > .vl_map_mark_time {
@@ -607,6 +634,14 @@
           display: block;
         }
       }
+    }
+    .vl_icon.vl_icon_map_mark_start {
+      width: 80px;
+      height: 80px;
+    }
+    .vl_icon.vl_icon_map_mark_end {
+      width: 80px;
+      height: 80px;
     }
   }
 </style>
