@@ -67,7 +67,7 @@
               <div style="width: 70px; white-space:nowrap" class="smalltitle">
                 中文品牌：
               </div>
-              <div class="ttt-2">{{vehicleArch.vehicleBrand}}</div>
+              <div class="ttt-2">{{vehicleArch.brand}}</div>
             </div>
             <div>
               <div style="width: 70px; white-space:nowrap" class="smalltitle">
@@ -148,7 +148,7 @@
           <div class="th-ycxc-record">
             <div class="th-ycxc-record-list">
               <div class="list-box">
-                <div class="list-item" v-for="(item, index) in regulationsList" :key="item.vehicleDto.uid" @click="onOpenDetail(index)">
+                <div class="list-item" v-for="(item, index) in regulationsList" :key="item.vehicleDto.uid + index" @click="onOpenDetail(index)">
                   <img :src="item.vehicleDto.subStoragePath" alt="">
                   <p class="time"><i></i>{{item.vehicleDto.shotTime}}</p>
                   <p class="address"><i></i>{{item.vehicleDto.deviceName}}</p>

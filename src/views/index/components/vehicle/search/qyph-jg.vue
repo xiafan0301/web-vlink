@@ -197,7 +197,7 @@
         }
       },
       gotoControl (data){
-        this.$router.push({ name: 'control_create', query: {imgurl: data.subStoragePath, plateNo: data.plateNo} })
+        this.$router.push({ name: 'control_library', query: {imgurl: data.subStoragePath, plateNo: data.plateNo} })
       },
       getTheList () {
         let params = {where: this.$route.query};

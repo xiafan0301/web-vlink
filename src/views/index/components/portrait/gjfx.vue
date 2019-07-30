@@ -61,39 +61,6 @@
                     placeholder="选择日期时间">
             </el-date-picker>
           </el-form-item>
-          <!--<el-form-item label="抓拍区域：" class="quyu" label-width="90px"  prop="input5">-->
-            <!--<el-radio-group v-model="ruleForm.input5">-->
-              <!--<el-row :gutter="10">-->
-                <!--&lt;!&ndash;<el-col :span="12">&ndash;&gt;-->
-                  <!--&lt;!&ndash;<el-radio label="1">列表选择</el-radio>&ndash;&gt;-->
-                <!--&lt;!&ndash;</el-col>&ndash;&gt;-->
-                <!--<el-col :span="12">-->
-                  <!--<div @click="clickTabCh">-->
-                    <!--<el-radio label="2">地图选择</el-radio>-->
-                  <!--</div>-->
-                <!--</el-col>-->
-              <!--</el-row>-->
-            <!--</el-radio-group>-->
-          <!--</el-form-item>-->
-          <!--<el-form-item v-if="ruleForm.input5=='1'" prop="value1">-->
-            <!--<el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="全部区域" class="full">-->
-              <!--<el-option-group-->
-                <!--v-for="group in options"-->
-                <!--:key="group.areaName"-->
-                <!--:label="group.areaName">-->
-                <!--<el-option-->
-                  <!--v-for="item in group.areaTreeList"-->
-                  <!--:key="item.areaId"-->
-                  <!--:label="item.areaName"-->
-                  <!--:value="item.areaId">-->
-                <!--</el-option>-->
-              <!--</el-option-group>-->
-            <!--</el-select>-->
-          <!--</el-form-item>-->
-          <!--<el-form-item>-->
-            <!--<el-input  v-model="curChooseNum" :disabled="true">-->
-            <!--</el-input>-->
-          <!--</el-form-item>-->
           <el-form-item>
             <el-row :gutter="10">
               <el-col :span="12">
@@ -105,10 +72,10 @@
             </el-row>
           </el-form-item>
         </el-form>
-        <div class="insetLeft" @click="hideLeft"></div>
+        <div class="insetLeft vl_icon vl_icon_vehicle_02" :class="{'vl_icon_vehicle_03': hideleft}" @click="hideLeft"></div>
       </div>
     </div>
-    <div :class="['right',{hide:!hideleft}, {'clgj_map_show_pic': mapPicShow}]" id="rightMap"></div>
+    <div :class="['right',{hide:!hideleft}]" id="rightMap"></div>
     <div class="reselt" v-if="reselt && showLeft">
       <div class="plane insetPadding">
         <h3 class="title">分析结果<p>共经过{{totalAddressNum}}个地方，出现{{totalMapNum}}次</p></h3>
@@ -146,12 +113,11 @@
             </div>
           <!--</vue-scroll>-->
         </div>
-        <div class="insetLeft2" @click="hideResult"></div>
+        <div class="insetLeft2 vl_icon vl_icon_vehicle_02" :class="{'vl_icon_vehicle_03': hideleft}" @click="hideResult"></div>
       </div>
     </div>
     <!--地图操作按钮-->
     <ul class="map_rrt_u2">
-      <li @click="mapPicShow = !mapPicShow" style="font-size: 14px;" :style="{'color': mapPicShow ? '#0C70F8' : '#999'}">显示图片</li>
       <li @click="resetZoom"><i class="el-icon-aim"></i></li>
       <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
       <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
@@ -171,12 +137,12 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt="">
+            <img class="bigImg" :src="sturcDetail.subStoragePath" alt="">
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img">
-              <img :src="sturcDetail.storagePath" alt="">
+              <img class="bigImg" :src="sturcDetail.storagePath" alt="">
               <span>全景图</span>
             </div>
             <div class="struc_c_d_info">
@@ -206,7 +172,7 @@
         <div v-show="strucCurTab === 2" class="struc_c_address"></div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt="">
+            <img class="bigImg" :src="sturcDetail.subStoragePath" alt="">
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
@@ -233,8 +199,6 @@
         </swiper>
       </div>
     </el-dialog>
-    <!-- D设备 B卡口  这里是设备和卡口 -->
-    <!--<div is="mapSelector" :open="dialogVisible" :clear="selectMapClear" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div>-->
     <div id="capMap"></div>
     <!--人工筛选-->
     <el-dialog
@@ -291,7 +255,6 @@
     components: {vlBreadcrumb},
     data() {
       return {
-        mapPicShow: false, // 地图图片显示开关
         filterDialog: false,
         showLeft: false,
         selectMapClear: '',
@@ -378,7 +341,6 @@
       }
     },
     mounted() {
-      this.getMapGETmonitorList()//查询行政区域
       this.renderMap();
       this.setDTime();
       if (this.$route.query.imgurl) {
@@ -452,74 +414,6 @@
           this.reselt = true;
         }
       },
-      clickTabCh() {
-        this.dialogVisible = !this.dialogVisible;
-      },
-      clickTab(val){
-        this.hover = this.hover==val?'':val
-        if(!this.hover){
-          this.map.setDefaultCursor();
-          this.mouseTool.close(false);
-        }else{
-          this.selArea(val)
-        }
-
-      },
-      selArea (v) {
-        this.map.setDefaultCursor('crosshair');
-        switch (v){
-          case 'cut1' :
-            this.mouseTool.rectangle({
-              strokeColor:'#FA453A',
-              strokeWeight: 1,
-              fillColor:'#FA453A',
-              fillOpacity:0.2,
-              strokeStyle: 'solid',
-            })
-            break ;
-          case 'cut2' :
-            this.mouseTool.circle({
-              strokeColor: "#FA453A",
-              strokeWeight: 1,
-              strokeOpacity: 0.2,
-              fillColor: '#FA453A',
-              fillOpacity: 0.2,
-              strokeStyle: 'solid',
-              // 线样式还支持 'dashed'
-              // strokeDasharray: [30,10],
-            })
-            break ;
-          case 'cut3' :
-            this.mouseTool.polyline({
-              strokeColor: "#FA453A",
-              strokeOpacity: 1,
-              strokeWeight: 2,
-              // 线样式还支持 'dashed'
-              strokeStyle: "solid",
-              // strokeStyle是dashed时有效
-              // strokeDasharray: [10, 5],
-            })
-
-            break ;
-          case 'cut4' :
-            this.mouseTool.polygon({
-              zIndex: 13,
-              strokeColor: '#FA453A',
-              strokeOpacity: 1,
-              bubble: true,
-              strokeWeight: 1,
-              fillColor: '#FA453A',
-              fillOpacity: 0.2,
-              isRing: false
-            });
-            break ;
-          case 'cut5' :
-            break ;
-        }
-      },
-      hideMap(){
-        this.dialogVisible=false
-      },
       submitForm(v) {
         if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data2 && this.ruleForm.input3){
           let pg = {
@@ -557,17 +451,6 @@
         this.curChooseNum = '已选择0个设备';
         this.setDTime ();
       },
-      //查询行政区域
-      getMapGETmonitorList(){
-        let d={
-          areaUid:mapXupuxian.adcode
-        }
-        MapGETmonitorList(d).then(res=>{
-          if(res && res.data){
-            this.options.push(res.data)
-          }
-        })
-      },
       renderMap() {
         let map = new window.AMap.Map("rightMap", {
           zoom: 10,
@@ -582,12 +465,6 @@
         });
         supMap.setMapStyle('amap://styles/whitesmoke');
         this.map = supMap;
-      },
-      mapPoint (data) {
-        console.log(data);
-        let num = data.deviceList.length + data.bayonetList.length;
-        this.curChooseNum = '已选择' + num + '个设备';
-        this.pointData = data;
       },
       compare  (prop, bool) {
         return function (obj1, obj2) {
@@ -690,6 +567,7 @@
       },
       delSitem (item, sItem, index) {
         item.list.splice(index, 1);
+        item.times--;
         this.evData.splice(this.evData.findIndex(x => x === sItem), 1);
       },
       chooseOk () {
@@ -733,31 +611,19 @@
         }
         return str;
       },
-      drawMapMarker (data) {
+      drawMapMarker (oData) {
+        let data = this.fitlerSXT(oData);
         let path = [];
         for (let  i = 0; i < data.length; i++) {
           let obj = data[i];
-          let _path = [obj.shotPlaceLongitude, obj.shotPlaceLatitude];
           if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
-            let _sContent = `
-            <div class="vl_jtc_mk">
-              <img src="${obj.subStoragePath}"/>
-              <p>${obj.shotTime}</p>
-            </div>`;
-            // 窗体
-            let winInfo = new AMap.Marker({ // 添加自定义点标记
-              map: this.amap,
-              position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-              offset: new AMap.Pixel(20, -80), // 相对于基点的偏移位置
-              draggable: false, // 是否可拖动
-              extData: obj,
-              content: _sContent
-            });
-            winInfo.on('click', () => {
-              this.showStrucInfo(obj, i)
+            let _time = '';
+            _time = '<p class="vl_map_mark_time">';
+            obj.shotTime.split(',').forEach(j => {
+              _time += `<span>${j}</span>`
             })
-            path.push(_path);
-            let _content = `<div class="vl_icon vl_icon_sxt"><p>${obj.shotTime}</p></div>`
+            _time += '</p>';
+            let _content = `<div class="vl_icon vl_icon_sxt">` + _time + `</div>`
             let point = new AMap.Marker({ // 添加自定义点标记
               map: this.amap,
               position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
@@ -766,13 +632,35 @@
               // 自定义点标记覆盖物内容
               content: _content
             });
-            this.markerPoint[i] = [point,winInfo];
+            point.on('click', () => {
+              this.showStrucInfo(obj, i)
+            })
+            this.markerPoint[i] = [point];
           }
         }
         this.amap.setFitView()
-        this.drawLine(path);
+        this.drawLine(oData);
       }, // 覆盖物（窗体和checkbox
-      drawLine (path) {
+      fitlerSXT (oData) {
+        let data = objDeepCopy(oData), _arr = [];
+        data.forEach(x => {
+          let _i = _arr.findIndex(y => y.deviceID === x.deviceID);
+          if (_i === -1) {
+            _arr.push(x)
+          } else {
+            _arr[_i]['shotTime'] += ',' + x.shotTime;
+          }
+        })
+        return _arr;
+      },
+      drawLine (oData) {
+        let path = [];
+        oData.forEach(obj => {
+          let _path = [obj.shotPlaceLongitude, obj.shotPlaceLatitude];
+          if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
+            path.push(_path);
+          }
+        })
         var polyline = new AMap.Polyline({
           path: path,
           showDir: true,
@@ -1005,17 +893,9 @@
     top: 50%;
     margin-top: -89px;
     display: inline-block;
-    background-repeat: no-repeat;
-    transform: rotate(180deg);
-    background-image: url(../../../../assets/img/icons.png);
-    background-position: -380px -1269px;
     cursor: pointer;
   }
   .hide {
-    .insetLeft {
-      transform: rotate(180deg);
-      background-position: -504px -1269px;
-    }
   }
   .insetLeft2 {
     position: absolute;
@@ -1025,10 +905,6 @@
     top: 50%;
     margin-top: -89px;
     display: inline-block;
-    background-repeat: no-repeat;
-    transform: rotate(180deg);
-    background-image: url(../../../../assets/img/icons.png);
-    background-position: -318px -1269px;
     cursor: pointer;
   }
   .select_btn {
@@ -1274,16 +1150,20 @@
 </style>
 <style lang="scss">
   #rightMap {
-    .vl_icon.vl_icon_sxt {
+    .vl_icon {
+      width: 47px;
       position: relative;
-      > p {
+      > .vl_map_mark_time {
         position: absolute; top: 10px; left: 98%;
-        width: auto;
-        word-break:keep-all; white-space:nowrap;
+        width: 130px;
+        word-break:keep-all;
         font-size: 12px; color: #fff;
         background-color: rgba(0, 0, 0, 0.4);
         border-radius: 2px;
         padding: 2px 5px;
+        span{
+          display: block;
+        }
       }
     }
   }

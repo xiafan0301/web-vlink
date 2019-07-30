@@ -94,16 +94,16 @@
               <ul class="up_tz_list" v-if="uploadTZObj">
                 <li v-if="uploadTZObj.sex" @click="uploadTZObj.sex.active = !uploadTZObj.sex.active" :class="{'up_tz_list_sed': uploadTZObj.sex.active}">{{uploadTZObj.sex.value}}</li>
                 <li v-if="uploadTZObj.age" @click="uploadTZObj.age.active = !uploadTZObj.age.active" :class="{'up_tz_list_sed': uploadTZObj.age.active}">{{uploadTZObj.age.value}}</li>
+                <li v-if="uploadTZObj.hair" @click="uploadTZObj.hair.active = !uploadTZObj.hair.active" :class="{'up_tz_list_sed': uploadTZObj.hair.active}">{{uploadTZObj.hair.value}}</li>
                 <li v-if="uploadTZObj.glasses" @click="uploadTZObj.glasses.active = !uploadTZObj.glasses.active" :class="{'up_tz_list_sed': uploadTZObj.glasses.active}">{{uploadTZObj.glasses.value}}</li>
                 <li v-if="uploadTZObj.hat" @click="uploadTZObj.hat.active = !uploadTZObj.hat.active" :class="{'up_tz_list_sed': uploadTZObj.hat.active}">{{uploadTZObj.hat.value}}</li>
                 <li v-if="uploadTZObj.mask" @click="uploadTZObj.mask.active = !uploadTZObj.mask.active" :class="{'up_tz_list_sed': uploadTZObj.mask.active}">{{uploadTZObj.mask.value}}</li>
-                <li v-if="uploadTZObj.hair" @click="uploadTZObj.hair.active = !uploadTZObj.hair.active" :class="{'up_tz_list_sed': uploadTZObj.hair.active}">{{uploadTZObj.hair.value}}</li>
+                <li v-if="uploadTZObj.baby" @click="uploadTZObj.baby.active = !uploadTZObj.baby.active" :class="{'up_tz_list_sed': uploadTZObj.baby.active}">{{uploadTZObj.baby.value}}</li>
+                <li v-if="uploadTZObj.bag" @click="uploadTZObj.bag.active = !uploadTZObj.bag.active" :class="{'up_tz_list_sed': uploadTZObj.bag.active}">{{uploadTZObj.bag.value}}</li>
                 <li v-if="uploadTZObj.upperType" @click="uploadTZObj.upperType.active = !uploadTZObj.upperType.active" :class="{'up_tz_list_sed': uploadTZObj.upperType.active}">{{uploadTZObj.upperType.value}}</li>
                 <li v-if="uploadTZObj.upperColor" @click="uploadTZObj.upperColor.active = !uploadTZObj.upperColor.active" :class="{'up_tz_list_sed': uploadTZObj.upperColor.active}">{{'上身颜色：' + uploadTZObj.upperColor.value}}</li>
                 <li v-if="uploadTZObj.bottomType" @click="uploadTZObj.bottomType.active = !uploadTZObj.bottomType.active" :class="{'up_tz_list_sed': uploadTZObj.bottomType.active}">{{uploadTZObj.bottomType.value}}</li>
                 <li v-if="uploadTZObj.bottomColor" @click="uploadTZObj.bottomColor.active = !uploadTZObj.bottomColor.active" :class="{'up_tz_list_sed': uploadTZObj.bottomColor.active}">{{'下身颜色：' + uploadTZObj.bottomColor.value}}</li>
-                <li v-if="uploadTZObj.baby" @click="uploadTZObj.baby.active = !uploadTZObj.baby.active" :class="{'up_tz_list_sed': uploadTZObj.baby.active}">{{uploadTZObj.baby.value}}</li>
-                <li v-if="uploadTZObj.bag" @click="uploadTZObj.bag.active = !uploadTZObj.bag.active" :class="{'up_tz_list_sed': uploadTZObj.bag.active}">{{uploadTZObj.bag.value}}</li>
               </ul>
             </el-form-item>
 
@@ -255,7 +255,7 @@
             background
             layout="prev, pager, next"
             @current-change="handleCurrentChange"
-            :current-page="pagination.currentPage"
+            :current-page="pagination.pageNum"
             :page-size="pagination.pageSize"
             :total="pagination.total">
           </el-pagination>
@@ -357,11 +357,10 @@ export default {
       areaSData: [],
       searchLoading: false,
       dataList: [],
-      alldataList: [],
       orderType: 1, // 1时间排序 2监控排序
       order: 1, // 1desc 2asc
       pagination: {
-        currentPage: 1,
+        pageNum: 1,
         pageSize: 12,
         total: 0
       },
@@ -543,19 +542,6 @@ export default {
       let checkedCount = value.length;
       this.checkAll = checkedCount === this.areaSData.length;
       this.isIndeterminate = checkedCount > 0 && checkedCount < this.areaSData.length;
-    },
-
-    nextData(){
-      // console.log(3232131);
-      
-      let val= (this.pagination.pageNum?this.pagination.pageNum : 1) + 1
-      let lim = Math.ceil(this.pagination.total/this.pagination.pageSize)
-      if(val > lim){
-        return
-      }
-      this.pagination.currentPage=val
-      this.handleCurrentChange(val)
-
     },
     onCloseDetail () {
       this.showDetail=false
@@ -762,8 +748,6 @@ export default {
         this.isInitPage = false;
         if (res && res.data) {
           this.dataList = res.data.list;
-          this.alldataList.push(...res.data.list);
-          // this.alldataList=res.data.list;
           this.pagination.total = res.data.total;
         }
         this.searchLoading = false;

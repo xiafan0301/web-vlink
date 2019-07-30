@@ -807,7 +807,12 @@ export default {
           }
         }
         queryParams = {
-          ...this.qyryfxFrom,
+          sex: this.qyryfxFrom.sex,
+          age: this.qyryfxFrom.age !== "" ? this.qyryfxFrom.age.join() : "",
+          personGroupId:
+            this.qyryfxFrom.personGroupId !== ""
+              ? this.qyryfxFrom.personGroupId.join()
+              : "",
           deviceCode: device.viewClassCode,
           startTime: timeArr
             .map(item => {
