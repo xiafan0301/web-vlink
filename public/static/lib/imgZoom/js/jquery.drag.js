@@ -73,7 +73,7 @@ $.fn.extend({
 			console.log('mousedown mousedown');
 			// e.stopPropagation(); // 其它浏览器下阻止冒泡
 			// father.children().css({"zIndex":"0"});
-			$this.css({"zIndex": "16666"});
+			$this.css({"zIndex": "20002"});
 			mDown = true;
 			X = e.pageX;
 			Y = e.pageY;

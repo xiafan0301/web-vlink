@@ -271,13 +271,13 @@ export default {
     getDepartList () {
       const params = {
         'where.proKey': this.userInfo.proKey,
-        'where.organPid': this.$route.query.organObj.uid,
+        'where.organPid': JSON.parse(this.$route.query.organObj).uid,
         pageSize: 0
       };
       getDepartmentList(params)
         .then(res => {
           if (res) {
-            this.departmentList.push(this.$route.query.organObj);
+            this.departmentList.push(JSON.parse(this.$route.query.organObj));
             res.data.list.map(item => {
               this.departmentList.push(item);
             });

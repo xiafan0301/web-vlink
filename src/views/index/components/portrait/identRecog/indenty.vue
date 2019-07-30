@@ -200,6 +200,7 @@ export default {
     },
     // 选择历史图片
     chooseHisPic (item, index) {
+      this.choosedHisPicList = [];
       if (this.isImgChecked === index) {
         this.isImgChecked = -1;
       } else {

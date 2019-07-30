@@ -182,6 +182,18 @@ export function createUser (data) {
   });
 }
 /**
+ * 获取用户详细信息
+ * @param {*} data
+ */
+export function getAuthUserDetail (params) {
+  return request({
+    url: 'authServices/users/userDetailInfo',
+    params,
+    mode: 'auth',
+    method: 'get'
+  });
+}
+/**
  * 获取用户组
  * @param {*} data
  */

@@ -242,7 +242,7 @@
                           <div class="com_width_to_height" style="margin-bottom: 5px;">
                             <div>
                               <div>
-                                <img :src="item.vehicleDto.subStoragePath" :alt="item.vehicleDto.plateNo" :title="item.vehicleDto.plateNo">
+                                <img class="bigImg" :src="item.vehicleDto.subStoragePath" :alt="item.vehicleDto.plateNo" :title="item.vehicleDto.plateNo">
                               </div>
                             </div>
                           </div>

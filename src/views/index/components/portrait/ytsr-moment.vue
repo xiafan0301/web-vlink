@@ -101,7 +101,7 @@
             top="4vh"
             :show-close="false">
       <div class="struc_tab">
-        <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">抓拍详情</span>
+        <span >检索详情</span>
         <!-- <span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>
         <span :class="{'active': strucCurTab === 3}" @click="strucCurTab = 3">视频回放</span> -->
         <i style="font-size: 20px;" class="el-icon-close" @click="strucDetailDialog = false"></i>
@@ -996,7 +996,7 @@
         height: 1.16rem;
         padding: .3rem 0;
         position: relative;
-        color: #999999;
+        color: #333333;
         span {
           display: inline-block;
           margin-right: .55rem;

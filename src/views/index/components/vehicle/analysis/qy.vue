@@ -92,7 +92,7 @@
               </vue-scroll>
             </div>
           </div>
-          <div class="insetLeft" @click="hideLeft"></div>
+          <div class="insetLeft vl_icon vl_icon_vehicle_02" :class="{'vl_icon_vehicle_03': hideleft}" @click="hideLeft"></div>
         </div>
       </div>
       <!--地图操作按钮-->
@@ -644,10 +644,10 @@
               }
               return false;
             } else if (this.searchData[i].endTime > this.searchData[i].startTime + 3 * 3600 * 24 * 1000 || this.searchData[i].endTime < this.searchData[i].startTime ) {
-              if (!document.querySelector('.el-message--info')) {
-                this.$message.info('结束时间必须大于开始时间并且区间小于三天');
-              }
-              return false;
+              // if (!document.querySelector('.el-message--info')) {
+              //   this.$message.info('结束时间必须大于开始时间并且区间小于三天');
+              // }
+              // return false;
             }
           }
           supQuery.where['dtoList'] = this.searchData.map((x, index) => {
@@ -719,16 +719,10 @@
     top: 50%;
     margin-top: -89px;
     display: inline-block;
-    background-repeat: no-repeat;
-    transform: rotate(180deg);
-    background-image: url(../../../../../assets/img/icons.png);
-    background-position: -380px -1269px;
     cursor: pointer;
   }
   .hide {
     .insetLeft {
-      transform: rotate(180deg);
-      background-position: -504px -1269px;
     }
   }
   .map_rrt_u2 {

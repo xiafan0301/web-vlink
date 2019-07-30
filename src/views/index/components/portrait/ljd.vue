@@ -161,8 +161,13 @@
         <div class="limitBox">
           <vue-scroll>
           <el-collapse v-model="activeNames" @change="handleChange">
-            <el-collapse-item  v-for="(item,index) in evData" :key="index" :title="item.groupName+'（'+item.totalNum+'次）'" :name="index">
-              <div class="itembox" v-for="(v,d) in item.personDetailList">
+            <el-collapse-item  v-for="(item,index) in evData" :key="index" :name="index">
+              <template slot="title">
+                <span class="result_device_name" :title="item.groupName">{{item.groupName}}</span>
+                <span>({{item.totalNum}}次)</span>
+                <!-- <i class="header-icon el-icon-info"></i> -->
+              </template>
+              <div class="itembox" v-for="(v,d) in item.personDetailList" :key="d">
                 <div class="imgInfo"  @click.stop="onOpenDetail(v , item)">
                    <img :src="v.subStoragePath" class="img">
                    <div>
@@ -652,7 +657,7 @@ export default {
       getFoothold(d).then(res => {
         if (res) {
           this.isload=false
-          this.dialogChoose=true
+          // this.dialogChoose=true
           // console.log(res);
           
           if (!res.data || res.data.length === 0) {
@@ -663,6 +668,7 @@ export default {
             //this.searching = false;
             return false;
           }else{
+            this.dialogChoose=true
             for(let i=0; i<res.data.length;i++){
               this.activeChoose.push(i)
             }
@@ -1119,39 +1125,39 @@ export default {
   padding: 0px 15px;
   overflow: hidden;
   .limitBox{
+    
     .el-collapse-item{
-    border: none;
-    margin-top: 10px;
-    box-shadow: 5px 5px 5px -5px #dddddd;
-  }
+      border: none;
+      margin-top: 10px;
+      box-shadow: 5px 5px 5px -5px #dddddd;
+    }
     .itembox{
-      
-        width: 32.3%;
-        margin-right: 1%;
-        border: solid 1px rgba(211,211,211,1);
-        padding: 10px 5px; 
-        .imgInfo{
-          display: flex;
-          position: relative;
-          .subdata{
-            display: block;
-            line-height: 28px;
-          }
-         
-          .del{
-            position: absolute;
-            bottom: -10px;
-            right: -5px;
-            background: #999;
-            color: #ffffff;
-            padding: 4px;
-            cursor: pointer;
-          }
+      width: 32.3%;
+      margin-right: 1%;
+      border: solid 1px rgba(211,211,211,1);
+      padding: 10px 5px; 
+      .imgInfo{
+        display: flex;
+        position: relative;
+        .subdata{
+          display: block;
+          line-height: 28px;
+        }
+        
+        .del{
+          position: absolute;
+          bottom: -10px;
+          right: -5px;
+          background: #999;
+          color: #ffffff;
+          padding: 4px;
+          cursor: pointer;
         }
       }
-      .itembox:last-child{
-   border: solid 1px rgba(211,211,211,1);
-  }
+    }
+    .itembox:last-child{
+      border: solid 1px rgba(211,211,211,1);
+    }
   }
 }
 .del{
@@ -1242,6 +1248,12 @@ export default {
         color: #0C70F8;
       }
     }
+  }
+  .result_device_name {
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 </style>
 <style lang="scss">

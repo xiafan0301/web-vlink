@@ -7,15 +7,16 @@
       </el-breadcrumb>
     </div>
     <div class="content_box">
-      <ul class="tab_ul">
+      <p class="tab_p">{{isSelectTab === 1 ? '基本信息' : '联网信息'}}</p>
+      <!-- <ul class="tab_ul">
         <li :class="[isSelectTab === 1 ? 'is_active' : '']">基本信息</li>
         <li :class="[isSelectTab === 2 ? 'is_active' : '']">联网信息</li>
-      </ul>
+      </ul> -->
       <div class="basic_info" v-show="isSelectTab === 1">
         <vue-scroll>
           <el-form :model="cameraForm" :rules="rules" ref="cameraForm" label-width="100px" class="camera_form">
-            <el-form-item label="摄像头编码:" v-show="editId">
-              <p>{{editId}}</p>
+            <el-form-item label="摄像头编码:" v-show="deivceCodeId" style="margin-bottom:10px">
+              <span>{{deivceCodeId}}</span>
             </el-form-item>
             <el-form-item label="所属机构:" prop="dutyUnitId">
               <el-select
@@ -333,7 +334,7 @@ export default {
           value: '朝西南'
         }
       ],
-      editId: null, // 要编辑的id
+      deivceCodeId: null, // 摄像头编码
       map: null, // 地图对象
       organList: [], // 机构单位
       // organList: [],
@@ -380,7 +381,7 @@ export default {
               let obj = res.data;
               console.log('obj', obj)
 
-              this.editId = obj.uid;
+              this.deivceCodeId = obj.code;
 
               this.cameraForm.dutyUnitId = obj.dutyUnitId;
               this.cameraForm.dutyUserId = obj.dutyUserId;
@@ -920,22 +921,25 @@ export default {
     height: calc(100% - 80px - 65px);
     background-color: #ffffff;
     margin: 0 20px;
-    .tab_ul {
+    .tab_p {
       width: 100%;
       border-bottom: 1px solid #F2F2F2;
-      display: flex;
       height: 55px;
       line-height: 55px;
-      >li {
-        margin: 0 15px;
-        color: #333333;
-        font-size: 16px;
-        cursor: pointer;
-      }
-      .is_active {
-        color: #0C70F8;
-        border-bottom: 2px solid #0C70F8;
-      }
+      color: #333333;
+      font-size: 16px;
+      font-weight: bold;
+      padding: 0 15px;
+      // >li {
+      //   margin: 0 15px;
+      //   color: #333333;
+      //   font-size: 16px;
+      //   cursor: pointer;
+      // }
+      // .is_active {
+      //   color: #0C70F8;
+      //   border-bottom: 2px solid #0C70F8;
+      // }
     }
     .basic_info {
       height: calc(100% - 55px);
