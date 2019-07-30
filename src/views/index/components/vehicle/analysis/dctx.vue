@@ -361,6 +361,13 @@ export default {
             let idName = obj.uid + '_' + number;
             let content;
 
+            content = '<div id="'+ idName +'" class="icon_box vl_icon mark_span vl_icon_map_mark'+ deviceType +'">'+
+                '<div class="device_box"><p>设备名称：'+ detailDeviceName +'</p>'+
+                '<p>设备地址：'+ detailShotAddress +'</p></div>'+
+                '<p class="shot_time_p is_show_time shot_time_p_'+ number +'">'+
+                '<span>抓拍时间：'+ obj.shotTime +'</span></p></div>';
+
+            // if 
             if (_this.isCheckedVehicle === number) {
               content = '<div id="'+ idName +'" class="icon_box vl_icon mark_span vl_icon_map_mark'+ deviceType +'">'+
                 '<div class="device_box"><p>设备名称：'+ detailDeviceName +'</p>'+
@@ -368,13 +375,14 @@ export default {
                 '<p class="shot_time_p shot_time_p_'+ number +'">'+
                '<span>抓拍时间：'+ obj.shotTime +'</span></p></div>';
 
-            } else {
-              content = '<div id="'+ idName +'" class="icon_box vl_icon mark_span vl_icon_map_mark'+ deviceType +'">'+
-                '<div class="device_box"><p>设备名称：'+ detailDeviceName +'</p>'+
-                '<p>设备地址：'+ detailShotAddress +'</p></div>'+
-                '<p class="shot_time_p is_show_time shot_time_p_'+ number +'">'+
-                '<span>抓拍时间：'+ obj.shotTime +'</span></p></div>';
-            }
+            } 
+            // else {
+            //   content = '<div id="'+ idName +'" class="icon_box vl_icon mark_span vl_icon_map_mark'+ deviceType +'">'+
+            //     '<div class="device_box"><p>设备名称：'+ detailDeviceName +'</p>'+
+            //     '<p>设备地址：'+ detailShotAddress +'</p></div>'+
+            //     '<p class="shot_time_p is_show_time shot_time_p_'+ number +'">'+
+            //     '<span>抓拍时间：'+ obj.shotTime +'</span></p></div>';
+            // }
        
             let marker = new window.AMap.Marker({
               map: _this.map,
@@ -404,24 +412,24 @@ export default {
         let polyline = new window.AMap.Polyline({
           map: _this.map,
           path: path,
-          zIndex: 50,
+          zIndex: (_this.isCheckedVehicle && _this.isCheckedVehicle) === number ? 999 : 50,
           showDir: true,
-          strokeWeight: 4,
-          strokeColor: '#9CC5E7',
-          strokeStyle: 'dashed'
+          strokeWeight: (_this.isCheckedVehicle && _this.isCheckedVehicle) === number ? 10 : 4,
+          strokeColor: (_this.isCheckedVehicle && _this.isCheckedVehicle) === number ? '#41D459' : '#9CC5E7',
+          strokeStyle: (_this.isCheckedVehicle && _this.isCheckedVehicle) === number ? 'solid' : 'dashed'
         });
 
         _this.polylineObj[number] = polyline; // 将折线都存储起来
         
-        if (_this.polylineObj[_this.isCheckedVehicle]) {
-          _this.polylineObj[_this.isCheckedVehicle].setOptions({ //默认高亮显示同行车辆轨迹
-            zIndex: 999,
-            strokeWeight: 10,
-            showDir: true,
-            strokeColor: '#41D459',
-            strokeStyle: 'solid'
-          })
-        }
+        // if (_this.polylineObj[_this.isCheckedVehicle]) {
+        //   _this.polylineObj[_this.isCheckedVehicle].setOptions({ //默认高亮显示同行车辆轨迹
+        //     zIndex: 999,
+        //     strokeWeight: 10,
+        //     showDir: true,
+        //     strokeColor: '#41D459',
+        //     strokeStyle: 'solid'
+        //   })
+        // }
 
         _this.map.setFitView();
       }
