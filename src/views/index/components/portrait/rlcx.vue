@@ -255,7 +255,7 @@
             background
             layout="prev, pager, next"
             @current-change="handleCurrentChange"
-            :current-page="pagination.currentPage"
+            :current-page="pagination.pageNum"
             :page-size="pagination.pageSize"
             :total="pagination.total">
           </el-pagination>
@@ -357,11 +357,10 @@ export default {
       areaSData: [],
       searchLoading: false,
       dataList: [],
-      alldataList: [],
       orderType: 1, // 1时间排序 2监控排序
       order: 1, // 1desc 2asc
       pagination: {
-        currentPage: 1,
+        pageNum: 1,
         pageSize: 12,
         total: 0
       },
@@ -543,19 +542,6 @@ export default {
       let checkedCount = value.length;
       this.checkAll = checkedCount === this.areaSData.length;
       this.isIndeterminate = checkedCount > 0 && checkedCount < this.areaSData.length;
-    },
-
-    nextData(){
-      // console.log(3232131);
-      
-      let val= (this.pagination.pageNum?this.pagination.pageNum : 1) + 1
-      let lim = Math.ceil(this.pagination.total/this.pagination.pageSize)
-      if(val > lim){
-        return
-      }
-      this.pagination.currentPage=val
-      this.handleCurrentChange(val)
-
     },
     onCloseDetail () {
       this.showDetail=false
@@ -762,8 +748,6 @@ export default {
         this.isInitPage = false;
         if (res && res.data) {
           this.dataList = res.data.list;
-          this.alldataList.push(...res.data.list);
-          // this.alldataList=res.data.list;
           this.pagination.total = res.data.total;
         }
         this.searchLoading = false;
