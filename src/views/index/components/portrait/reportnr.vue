@@ -63,34 +63,35 @@
             <div class="message">
               <div class="text">1：基本信息</div>
               <div class="message_cont">
-                <img src="../../../../../public/static/img/vis-eg.png" height="200" width="200"/>
+                <img :src="portrailInfoDto.photoUrl" height="200" width="200"/>
                 <div style="padding-left: 20px; width: 320px">
                   <div class="subdata">
                     <i class="vl_icon vl_icon_retrieval_03" style="height: 24px"></i>
-                    <b>99.12</b>%
+                    <b>{{portrailInfoDto.semblance}}</b>%
                   </div>
                   <ul class="mes_cot">
-                    <li><span>姓名：</span><p>冉金敏</p></li>
-                    <li><span>证件类型：</span><p>冉金敏</p></li>
-                    <li><span>证件号码：</span><p>432501199111110011</p></li>
-                    <li><span>性别：</span><p>冉金敏</p></li>
-                    <li><span>民族：</span><p>冉金敏</p></li>
+                    <li class="clearfix"><span>姓名：</span><p>{{portrailInfoDto.name}}</p></li>
+                    <li class="clearfix"><span>证件类型：</span><p></p></li>
+                    <li class="clearfix"><span>证件号码：</span><p>{{portrailInfoDto.idNo}}</p></li>
+                    <li class="clearfix"><span>性别：</span><p>{{portrailInfoDto.sex}}</p></li>
+                    <li class="clearfix"><span>民族：</span><p>{{portrailInfoDto.nation}}</p></li>
                   </ul>
                 </div>
                 <div class="mes_cot_1">
                   <p>备注：</p>
                   <div>
-                    人物简介，简单介绍先进集体中的每个先进人物，或单个英雄、模范人物时，运用的一种应用文样式。目的在于激励先进，促使人们互相学习，互相鼓励，共同前进。正文内容，通常包括被介绍人的姓名、性别、年龄、职业、突出贡献、获得的荣誉称号等。在介绍完人物的上述情况之后，必要的可以写一句半句歌颂、赞扬的话。对其贡献作出评价，以表明作者态度。
+                    {{portrailInfoDto.remarks}}
                   </div>
                 </div>
               </div>
             </div>
             <div class="message_1 message">
-              <div class="text">1：基本信息</div>
-              <p>底库信息：底库1，底库2</p>
-              <p>分组信息：分组1，分组2</p>
+              <div class="text">1：分组信息</div>
+              <p>底库信息：{{repertoryGroupDto.repertories.join(',')}}</p>
+              <p>分组信息：{{repertoryGroupDto.groups.map((item)=>{
+                  return item.groupName
+                }).join(',')}}</p>
             </div>
-
           </div>
           <div class="cont1" id="report_showtype_2">
             <div style="background-color: white; color: #333333;
@@ -199,6 +200,7 @@
 import vehicleBreadcrumb from './breadcrumb.vue';
 import {PortraitPostPersonTrace} from "@/views/index/api/api.portrait.js";
 import { mapXupuxian,ajaxCtx } from "@/config/config.js";
+import { getdetailbg } from "../../api/api.analysis.js";
 export default {
   components: {vehicleBreadcrumb},
   data () {
@@ -244,6 +246,9 @@ export default {
       interruptDialog: false,    //中断任务
       isLoading: false,
       taskObj: '',     //单个列表任务
+      portrailInfoDto: {},
+      repertoryGroupDto: {repertories: [], groups:[{groupName: 'kkk'}]},
+      analysisTaskInfoWithBLOBsList: []
     }
   },
   created() {
@@ -252,10 +257,28 @@ export default {
   mounted () {
     this.initMap()
     this.renderMap()
+    this.getdetailbgg()
   },
   methods: {
-    hideResult () {
-      this.reselt = false;
+    getdetailbgg () {
+      let params = {
+        uid: '5CjLyShm83YNXMZ0Ry1KOU',
+        startTime: '2019-07-15 00:00:00',
+        endTime: '2019-07-18 23:59:59',
+        targetUrl: 'http://file.aorise.org/vlink/image/6e8322e9-6c29-4875-9036-35f8fc571775.jpg'
+      }
+      getdetailbg(params).then(res => {
+        if(res.data){
+          console.log(res.data)
+          this.portrailInfoDto = res.data.portrailInfoDto
+          this.repertoryGroupDto = res.data.repertoryGroupDto
+          this.analysisTaskInfoWithBLOBsList = res.data.analysisTaskInfoWithBLOBsList
+        }
+        this.$nextTick(() => {
+        })
+      }).catch(error => {
+        console.log(error)
+      })
     },
     //tab切换
     selectTab(val) {
@@ -514,7 +537,6 @@ export default {
                   }
                 }
                 .mes_cot{
-                  flex: 0;
                   p{
                     white-space: nowrap;
                   }

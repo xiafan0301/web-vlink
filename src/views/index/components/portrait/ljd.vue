@@ -652,7 +652,7 @@ export default {
       getFoothold(d).then(res => {
         if (res) {
           this.isload=false
-          this.dialogChoose=true
+          // this.dialogChoose=true
           // console.log(res);
           
           if (!res.data || res.data.length === 0) {
@@ -663,6 +663,7 @@ export default {
             //this.searching = false;
             return false;
           }else{
+            this.dialogChoose=true
             for(let i=0; i<res.data.length;i++){
               this.activeChoose.push(i)
             }

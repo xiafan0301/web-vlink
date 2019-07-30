@@ -277,11 +277,11 @@ export default {
       if (this.relayListIntval) {
         window.clearInterval(this.relayListIntval);
       }
-      if (!bClear) {
+      /* if (!bClear) {
         this.relayListIntval = window.setInterval(() => {
           this.getRelayList();
         }, 5 * 1000);
-      }
+      } */
     },
     searchSubmit () {
       this.getRelayList();

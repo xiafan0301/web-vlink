@@ -15,12 +15,12 @@
         <i class="el-icon-close" @click="strucDetailDialog = false"></i>
       </div>
       <div class="struc_main">
-        <div v-show="strucCurTab === 1" class="struc_c_detail">
-          <ul>
+        <ul v-show="strucCurTab === 1">
           <!-- <li><span>抓拍设备：{{sturcDetail.deviceName}}</span></li> -->
           <li><span style="line-height: 0.24rem;">抓拍地址：{{sturcDetail.address}}</span></li>
           <li style="color: #999;line-height: 0.24rem;">{{sturcDetail.shotTime}}</li>
         </ul>
+        <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
             <img :src="sturcDetail.subStoragePath" class="bigImg" />
             <span>抓拍图</span>
@@ -139,7 +139,7 @@
                 </vue-scroll>
               </div>
             </div>
-            <span>抓拍信息</span>
+            <!-- <span>抓拍信息</span> -->
           </div>
           <div class="operate_btn" @click="spinToRecog()">身份确认</div>
           <div class="operate_btn margin_btn" @click="spinToGJFX()">轨迹分析</div>
@@ -625,7 +625,9 @@ export default {
             float: left;
           }
           .struc_cdi_content {
-            height: 2.65rem;
+            height: 2.75rem;
+            display: flex;
+            flex-wrap: wrap;
           }
           .struc_c_d_info {
             width: calc(100% - 3.6rem);
@@ -677,6 +679,9 @@ export default {
               }
             }
             .struc_cdi_line {
+              flex: none;
+              width: 50%;
+              display: inline-block;
               p {
                 max-width: 100%;
                 overflow: hidden;
@@ -707,7 +712,7 @@ export default {
               }
             }
           }
-          &:before {
+         /*  &:before {
             display: block;
             content: "";
             position: absolute;
@@ -726,7 +731,7 @@ export default {
             transform: rotate(-45deg);
             border: 0.4rem solid #ffffff;
             border-color: transparent transparent transparent #ffffff;
-          }
+          } */
           > span {
             display: block;
             position: absolute;

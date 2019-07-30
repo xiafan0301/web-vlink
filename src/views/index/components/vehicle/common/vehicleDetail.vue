@@ -47,6 +47,7 @@
                 {{dicFormater(45, sturcDetail.plateClass)}}</span>
               </li>
               <!-- 套牌依据 -->
+              <li v-if="type === 5"><span><span>号牌颜色：</span>{{sturcDetail.plateColor}}</span></li>
               <li v-if="type === 5"><span><span>套牌依据：</span>{{sturcDetail.fakeReason}}</span></li>
             </ul>
              <!--  <span class='tz' v-if="sturcDetail.features"><b>特征码：</b>{{sturcDetail.features}}</span> -->
