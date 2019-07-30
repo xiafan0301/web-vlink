@@ -148,11 +148,12 @@
           <div class="th-ycxc-record">
             <div class="th-ycxc-record-list">
               <div class="list-box">
-                <div class="list-item" v-for="(item, index) in regulationsList" :key="item.vehicleDto.uid + index" @click="onOpenDetail(index)">
-                  <img :src="item.vehicleDto.subStoragePath" alt="">
-                  <p class="time"><i></i>{{item.vehicleDto.shotTime}}</p>
-                  <p class="address"><i></i>{{item.vehicleDto.deviceName}}</p>
-                  <p class="address1" style="color: red; padding-top: 5px"><i></i>{{item.fakeReason}}</p>
+                <div class="list-item" v-for="(item, index) in regulationsList" :key="item.uid + index" @click="onOpenDetail(index)">
+                  <img :src="item.subStoragePath" alt="">
+                  <p class="time"><i></i>{{item.shotTime}}</p>
+                  <p class="address"><i></i>{{item.deviceName}}</p>
+                  <p class="address1" style="color: red; padding-top: 5px"><i></i>
+                    {{item.fakePlateType == 4? '同号短时异地出没': item.fakePlateType == 1? '同号车身颜色不同' : item.fakePlateType == 2? '同号车辆类型不同': item.fakePlateType == 3? '同号车辆品牌不同': ''}}</p>
                 </div>
                 <el-pagination
                     class="cum_pagination th-center-pagination"
@@ -328,7 +329,6 @@ export default {
         if(res && res.data) {
           this.regulationsList = res.data.list
           this.pagination.total = res.data.total
-          console.log(this.regulationsList)
           if (this.regulationsList.length === 0) {
             this.nodata = "抱歉，没有相关结果"
             this.showimgnull = false
