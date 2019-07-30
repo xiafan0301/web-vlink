@@ -418,6 +418,7 @@ export default {
           deviceStatus: deviceStatus,
           importantLevel: importantLevel,
           type: type,
+          isBayonet: false,
           manufacturer: manufacturer,
           keyword: this.searchForm.keyword,
         }
@@ -596,6 +597,7 @@ export default {
         'where.type': type,
         'where.manufacturer': manufacturer,
         'where.keyword': this.searchForm.keyword,
+        'where.isBayonet': false, // 是否是卡口
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
         order: 'desc',
@@ -617,31 +619,6 @@ export default {
                   val.dutyUnitName = item.organName;
                 }
               });
-              // this.cameraTypeList.map(item => {
-              //   if (item.enumField == val.type) {
-              //     val.cameraTypeName = item.enumValue;
-              //   }
-              // });
-              // this.intelligentCharacList.map(item => {
-              //   if (item.enumField == val.intelligentCharac) {
-              //     val.intelligentCharacName = item.enumValue;
-              //   }
-              // });
-              // this.importLevelList.map(item => {
-              //   if (item.enumField == val.importantLevel) {
-              //     val.importantLevelName = item.enumValue;
-              //   }
-              // });
-              // this.manufacturerList.map(item => {
-              //   if (item.enumField == val.manufacturer) {
-              //     val.manufacturerName = item.enumValue;
-              //   }
-              // });
-              // this.deviceStatusList.map(item => {
-              //   if (item.enumField == val.deviceStatus) {
-              //     val.deviceStatusName = item.enumValue;
-              //   }
-              // });
             })
           } else {
             this.isSearchLoading = false;

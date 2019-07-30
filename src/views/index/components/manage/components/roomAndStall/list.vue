@@ -208,7 +208,7 @@ export default {
       } else {
         organObj = this.userInfo.organList[0];
       }
-      this.$router.push({name: 'room_detail', query: { id: obj.uid, organObj: organObj }});
+      this.$router.push({name: 'room_detail', query: { id: obj.uid, organObj: JSON.stringify(organObj) }});
     },
     // 跳至新增点室页面
     skipAddPage () {
@@ -218,7 +218,7 @@ export default {
       } else {
         organObj = this.userInfo.organList[0];
       }
-      this.$router.push({name: 'room_add', query: { organObj: organObj }});
+      this.$router.push({name: 'room_add', query: { organObj: JSON.stringify(organObj) }});
     },
     // 跳至编辑页面
     skipEditPage (obj) {
@@ -228,7 +228,7 @@ export default {
       } else {
         organObj = this.userInfo.organList[0];
       }
-      this.$router.push({name: 'room_edit', query: { id: obj.uid, organObj: organObj }});
+      this.$router.push({name: 'room_edit', query: { id: obj.uid, organObj: JSON.stringify(organObj) }});
     },
     // 显示删除弹出框
     showDeleteDialog (obj) {
