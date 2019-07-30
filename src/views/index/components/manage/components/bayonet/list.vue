@@ -2,19 +2,18 @@
   <div class="bayonet_manage_list">
     <el-form :inline="true" ref="queryForm" :model="queryForm" class="query_form">
       <el-form-item prop="organ">
-        <el-select v-model="queryForm.organ">
+        <el-select v-model="queryForm.organ" value-key="uid">
           <el-option label="全部机构" :value="null"></el-option>
           <el-option
             v-for="item in organList"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
+            :key="item.uid"
+            :label="item.organName"
+            :value="item">
           </el-option>
         </el-select>
       </el-form-item>
       <el-form-item prop="bayonetType">
-        <el-select v-model="queryForm.bayonetType">
-          <el-option label="出入城卡口" :value="null"></el-option>
+        <el-select v-model="queryForm.bayonetType" placeholder="请选择出入城卡口">
           <el-option
             v-for="item in bayonetTypeList"
             :key="item.value"
@@ -24,8 +23,7 @@
         </el-select>
       </el-form-item>
       <el-form-item prop="use">
-        <el-select v-model="queryForm.use">
-          <el-option label="卡口用途" :value="null"></el-option>
+        <el-select v-model="queryForm.use" placeholder="请选择卡口用途">
           <el-option
             v-for="item in useList"
             :key="item.value"
@@ -35,8 +33,7 @@
         </el-select>
       </el-form-item>
       <el-form-item prop="isStartUsing">
-        <el-select v-model="queryForm.isStartUsing">
-          <el-option label="是否启用" :value="null"></el-option>
+        <el-select v-model="queryForm.isStartUsing" placeholder="请选择是否启用">
           <el-option
             v-for="item in isStartUsingList"
             :key="item.value"
@@ -46,8 +43,7 @@
         </el-select>
       </el-form-item>
       <el-form-item prop="state">
-        <el-select v-model="queryForm.state">
-          <el-option label="在线状态" :value="null"></el-option>
+        <el-select v-model="queryForm.state" placeholder="请选择在线状态">
           <el-option
             v-for="item in stateList"
             :key="item.value"
@@ -181,9 +177,11 @@
   </div>
 </template>
 <script>
+import { getDepartmentList} from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {
+      userInfo: null,
       // 搜索参数
       queryForm: {
         organ: null,
@@ -195,10 +193,25 @@ export default {
       },
       // 搜索参数列表
       organList: [],
-      useList: [],
-      stateList: [],
-      bayonetTypeList: [],
-      isStartUsingList: [],
+      useList: [
+        {label: '人脸抓拍', value: 1},
+        {label: '车辆抓拍', value: 2},
+        {label: '全结构化', value: 3},
+        {label: '其他用途', value: 4}
+      ],
+      stateList: [
+        {label: '在线', value: 1},
+        {label: '离线', value: 2}
+      ],
+      bayonetTypeList: [
+        {value: 1, label: '出城卡口'},
+        {value: 2, label: '入城卡口'},
+        {value: 3, label: '其他'}
+      ],
+      isStartUsingList: [
+        {label: '启用', value: 1},
+        {label: '停用', value: 2}
+      ],
       loading: false,
       // 卡口列表参数
       bayonetManageList: [{value: true, state: 1}, {value: false, state: 2}],
@@ -211,7 +224,24 @@ export default {
       delBayonetDialog: false,
     }
   },
+  mounted () {
+    this.userInfo = this.$store.state.loginUser;
+    this.getDepartList();
+  },
   methods: {
+    // 获取所有的机构单位
+    getDepartList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0,
+      };
+      getDepartmentList(params)
+        .then(res => {
+          if (res && res.data.list) {
+            this.organList = res.data.list;
+          }
+        })
+    },
     getBayonetManageList () {
       console.log(this.bayonetManageList)
     },

@@ -97,7 +97,7 @@
           </div>
         </div>
         <div class="operate_btn">
-          <el-button class="btn_100" type="primary" @click="stepIndex = 2">下一步</el-button>
+          <el-button class="btn_100" type="primary" @click="sikpIsTwo">下一步</el-button>
           <el-button class="btn_100" @click="toGiveUpDialog = true">取消</el-button>
         </div>
       </div>
@@ -117,23 +117,27 @@
             </el-table-column>
             <el-table-column
               label="类型"
-              prop="cameraType"
               show-overflow-tooltip
               >
+              <template slot-scope="scope">
+                {{dicFormater(datalist.cameraType, String(scope.row.cameraType))}}
+              </template>
             </el-table-column>
             <el-table-column
               label="智能特性"
               :show-overflow-tooltip="true"
               >
               <template slot-scope="scope">
-                <span>{{scope.row.features.join(',')}}</span>
+                {{scope.row.features.map(m => dicFormater(datalist.intelCharac, String(m))).join(',')}}
               </template>
             </el-table-column>
             <el-table-column
               label="厂家"
-              prop="manufacturers"
               :show-overflow-tooltip="true"
               >
+              <template slot-scope="scope">
+                {{dicFormater(datalist.manufacturer, String(scope.row.manufacturers))}}
+              </template>
             </el-table-column>
             <el-table-column
               label="拍摄方向"
@@ -180,7 +184,7 @@
         </div>
         <div class="operate_btn">
           <el-button class="btn_100" type="primary" @click="stepIndex = 1">上一步</el-button>
-          <el-button class="btn_100" type="primary" @click="submitBayonet">确定</el-button>
+          <el-button class="btn_100" type="primary" :loading="loadingBtn" @click="submitBayonet">确定</el-button>
           <el-button class="btn_100" @click="toGiveUpDialog = true">取消</el-button>
         </div>
       </div>
@@ -354,18 +358,18 @@ export default {
       labelPosition: 'right',
       // 卡口基本信息表单参数
       basicInfoForm: {
-        bayonetName: null,
-        bayonetNum: null,
+        bayonetName: '卡口1',
+        bayonetNum: 123,
         organ: null,
         bayonetType: 3,
-        use: [],
-        bayonetIP: null,
+        use: [1, 2],
+        bayonetIP: '222.244.147.121',
         longitude: null,
         Latitude: null,
         bayonetAddress: null,
-        address: null,
-        laneNum: null,
-        describe: null,
+        address: '湖南省怀化市溆浦县政府',
+        laneNum: 1,
+        describe: '描述描述',
         usage: 1
       },
       options: mapData,
@@ -382,12 +386,12 @@ export default {
       // 卡口基本信息表单验证规则
       basicInfoFormRules: {
         bayonetName: [{required: true, message: '该项内容不可为空', trigger: 'blur'}],
-        organ: [{required: true, message: '该项内容不可为空', trigger: 'blur'}],
+        organ: [{required: true, message: '该项内容不可为空', trigger: 'change'}],
         bayonetIP: [{required: true, message: '该项内容不可为空', trigger: 'blur'}],
         longitude: [{required: true, message: '该项内容不可为空', trigger: 'blur'}],
         Latitude: [{required: true, message: '该项内容不可为空', trigger: 'blur'}],
         laneNum: [{required: true, message: '该项内容不可为空', trigger: 'blur'}],
-        bayonetAddress: [{required: true, message: '该项内容不可为空', trigger: 'blur'}],
+        bayonetAddress: [{required: true, message: '该项内容不可为空', trigger: 'change'}],
         address: [{required: true, message: '该项内容不可为空', trigger: 'blur'}]
       },
       // 地图参数
@@ -431,6 +435,7 @@ export default {
           }
         ]
       },
+      datalist: dataList,
       // 编辑卡口表单列表参数
       cameraTypeList: this.dicFormater(dataList.cameraType)[0].dictList,
       manufacturersList: this.dicFormater(dataList.manufacturer)[0].dictList,
@@ -507,16 +512,22 @@ export default {
   methods: {
     // 添加设备至列表中
     addDevByTable () {
-      // 新增
-      if (this.operateDevType === 1) {
-        this.bayonetDevList.push(objDeepCopy(this.bayonetDevForm));
-        this.editDevDialog = false;
-      // 编辑
-      } else {
-        this.bayonetDevList.splice(this.devIndex, 1, objDeepCopy(this.bayonetDevForm));
-        this.editDevDialog = false;
-      }
-      console.log(this.bayonetDevList, 'this.bayonetDevList')
+      this.$refs['bayonetDevForm'].validate((valid) => {
+        if (valid) {
+          // 新增
+          if (this.operateDevType === 1) {
+            this.bayonetDevList.push(objDeepCopy(this.bayonetDevForm));
+            this.editDevDialog = false;
+          // 编辑
+          } else {
+            this.bayonetDevList.splice(this.devIndex, 1, objDeepCopy(this.bayonetDevForm));
+            this.editDevDialog = false;
+          }
+          console.log(this.bayonetDevList, 'this.bayonetDevList')
+        } else {
+          return false;
+        }
+      });
     },
     // 弹出删除卡口设备弹窗
     popDeleteBayonetDevDialog (index) {
@@ -591,7 +602,7 @@ export default {
         bayonetName: this.basicInfoForm.bayonetName,   
         isEnterPoint: this.basicInfoForm.bayonetType,   
         desci: this.basicInfoForm.describe,          
-        use: this.basicInfoForm.use,   
+        use: this.basicInfoForm.use.join(','),   
         longitude: this.basicInfoForm.longitude,      
         latitude: this.basicInfoForm.Latitude,       
         bayonetAddress: this.locationName + this.basicInfoForm.address,
@@ -603,9 +614,23 @@ export default {
         dutyUnitName: this.basicInfoForm.organ && this.basicInfoForm.organ.organName,   
         bayonetDevInfoDtoList: bayonetDevInfoDtoList
       }
+      console.log(JSON.stringify(data))
+      this.loadingBtn = true;
       addBayonetInfo(data).then(res => {
 
+      }).finally(() => {
+        this.loadingBtn = false;
       })
+    },
+    // 跳转到下一步,必须验证通过
+    sikpIsTwo () {
+      this.$refs['basicInfoForm'].validate((valid) => {
+        if (valid) {
+          this.stepIndex = 2;
+        } else {
+          return false;
+        }
+      });
     },
     // 获取所有的机构单位
     getDepartList () {
@@ -686,6 +711,7 @@ export default {
             var lnglatXY = [e.lnglat.getLng(), e.lnglat.getLat()];//地图上所标点的坐标
             _this.basicInfoForm.longitude = lnglatXY[0];
             _this.basicInfoForm.Latitude = lnglatXY[1];
+            _this.$refs['basicInfoForm'].clearValidate(['longitude', 'Latitude']);
             geocoder.getAddress(lnglatXY, function(status, result) {
                 if (status === 'complete' && result.info === 'OK') {
                     //获得了有效的地址信息:
