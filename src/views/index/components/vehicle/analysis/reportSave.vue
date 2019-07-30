@@ -298,9 +298,9 @@ export default {
     });
     $('#app').css({ 'height': 'auto' });
     $('#app').css({ 'height': 'auto' });
-    $('title').text('车辆综合分析报告');
     this.pn = this.$route.query.pn;
     this.time = [this.$route.query.st, this.$route.query.et];
+    $('title').text('车辆综合分析报告 - ' + this.pn);
     this.initClgjMap();
     this.initYjcmMap();
     this.searchSubmit();
@@ -322,14 +322,14 @@ export default {
           this.rcList = data.inCityDtoList;
           this.ccList = data.outCityDtoList;
           this.yjcmList = data.analysisResultDto;
-          this.yjcmjlList = data.nightHauntConclusionList;
+          this.yjcmjlList = data.nightHauntConclusionDto;
           this.pfcmList = data.oftenCarAnalysisDtoList;
           this.tpcList = data.fakePlateResultDtoList;
           this.txclList =  data.tailBehindListForReportList; // 同行车
           this.clgjList = data.struVehicleDtoList;
           this.setMapMarkerForYjcm(); // 夜间出没
           this.setMapMarkerForClgj(); // 车辆轨迹
-          $('title').text('车辆侦察报告 - ' + this.clInfo.plateno);
+          // $('title').text('车辆侦察报告 - ' + this.clInfo.plateno);
           this.$nextTick(() => {
             this.$msgbox({
               title: '确认',
@@ -350,7 +350,7 @@ export default {
                     background: '#FFFFFF'   //如果导出的pdf为黑色背景，需要将导出的html模块内容背景 设置成白色。
                   };
                   pdf.addHTML($('#vehicle_report_save_c')[0], 0, 0, options, function () {
-                      pdf.save('车辆侦察报告_' + _this.clInfo.plateno + '_' +
+                      pdf.save('车辆侦察报告_' + _this.pn + '_' +
                         formatDate(params.startTime, 'yyyyMMdd') + '-'  + formatDate(params.endTime, 'yyyyMMdd') + '.pdf');
                   });
                   setTimeout(() => {

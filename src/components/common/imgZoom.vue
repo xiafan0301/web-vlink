@@ -1,6 +1,6 @@
 <template>
-  <div class="imgz_mask" id='imgZoomMask'>
-    <i class="imgz_mask_close el-icon-circle-close" id="imgZoomMask_icon"></i>
+  <div class="um_imgzoom_mask" :id="maskId">
+    <i class="um_imgzoom_close el-icon-circle-close" :id="imgCloseId"></i>
     <span><i class="el-icon-loading"></i>请稍后...</span>
   </div>
 </template>
@@ -8,109 +8,107 @@
 export default {
   data () {
     return {
+      imgClass: 'bigImg', // 图片加上这个CLASS即可点击触发图片放大效果
+
+      imgId: 'um_imgZoomImg',
+      maskId: 'um_imgZoomMask',
+      imgCloseId: 'um_imgZoomClose'
     }
   },
   mounted () {
     let _this = this;
-    $('#imgZoomMask').appendTo($('body'));
-    $('#imgZoomMask_icon').appendTo($('body'));
-    $('body').on('click', '.bigImg', function () {
+    let nMask = $('#' + _this.maskId), nClose = $('#' + _this.imgCloseId);
+    nMask.appendTo($('body'));
+    nClose.appendTo($('body'));
+    $('body').on('click', '.' + _this.imgClass, function () {
       let nImg = $(this);
       if (nImg && nImg.length > 0) {
-        let src = $(this).attr('src');
-        $('#imgZoomMask').show();
-        $('#imgZoomMask').children('span').show();
-        $('#imgZoomMask_icon').show();
+        let src = nImg.attr('src');
+        nMask.show();
+        nMask.children('span').show();
+        nClose.show();
         _this.imgHandler(src);
       }
     });
-    $('#imgZoomMask').on("click", function (event) {
-      let e = (event) ? event : window.event;
-      if (window.event && e.cancelBubble) {
-        e.cancelBubble = true; // ie下阻止冒泡
-      } else {
-        //e.preventDefault();
-        e.stopPropagation(); // 其它浏览器下阻止冒泡
-      }
-      $('#imgZoomMask').hide();
-      $('#imgZoomMask_icon').hide();
-      $('#imgZoomImg').fadeOut().remove();
-    });
-    $('#imgZoomMask_icon').on("click", function (event) {
+    // 遮盖层点击事件，关闭放大效果
+    nMask.on("click", function (event) {
       let e = (event) ? event : window.event;
       if (window.event && e.cancelBubble) {
         e.cancelBubble = true; // ie下阻止冒泡
       } else {
         e.stopPropagation(); // 其它浏览器下阻止冒泡
       }
-      $('#imgZoomMask').hide();
-      $('#imgZoomMask_icon').hide();
-      $('#imgZoomImg').fadeOut().remove();
+      nMask.hide();
+      nClose.hide();
+      $('#' + _this.imgId).fadeOut().remove();
     });
-    $(document).keyup(function (event) {
+    // 关闭按钮点击事件，关闭放大效果
+    nClose.on("click", function (event) {
+      let e = (event) ? event : window.event;
+      if (window.event && e.cancelBubble) {
+        e.cancelBubble = true; // ie下阻止冒泡
+      } else {
+        e.stopPropagation(); // 其它浏览器下阻止冒泡
+      }
+      nMask.hide();
+      nClose.hide();
+      $('#' + _this.imgId).fadeOut().remove();
+    });
+    /* $(document).keyup(function (event) {
       if (event && (event.keyCode === 27 || event.keyCode === 96)) {
-        $('#imgZoomMask').hide();
-        $('#imgZoomMask_icon').hide();
-        $('#imgZoomImg').fadeOut().remove();
+        $('#' + _this.maskId).hide();
+        $('#' + _this.imgId).fadeOut().remove();
       }
-    });
+    }); */
   },
   methods: {
     imgHandler (src) {
-      var windowWidth = $(window).width();
-      var windowHeight = $(window).height();
-      var img = new Image();
+      let _this = this;
+      let windowWidth = $(window).width(), windowHeight = $(window).height();
+      let img = new Image();
       img.src = src;
       img.onload = function() {
+        if ($('#' +  _this.imgId) && $('#' +  _this.imgId).length > 0) {
+          $('#' +  _this.imgId).remove();
+        }
         // 此时为关闭遮盖才能添加到 body
-        if (!$('#imgZoomMask').is(':hidden')) {
-          var dom = "";
-          var displayWidth = 0;
-          var displayHeight = 0;
-          var style = "";
+        let nMask = $('#' + _this.maskId);
+        if (!nMask.is(':hidden')) {
+          let dom = '', style = '';
+          let displayWidth = 0, displayHeight = 0, swh = '';
           if (img.width > img.height) {
-              displayWidth = windowWidth / 2;
-              displayHeight = img.height * displayWidth / img.width;
-              style = "z-index:16666;position:absolute;top:" +
-                  (windowHeight / 2 -  displayHeight / 2) +
-                  "px;left:" +
-                  (windowWidth / 2 - displayWidth / 2) +
-                  "px;cursor:pointer;";
-              dom = "<img draggable='true' src = '" +
-                  src +
-                  "' width = '50%' style='" +
-                  style +
-                  "' id='imgZoomImg'>";
+            displayWidth = windowWidth / 2;
+            displayHeight = img.height * displayWidth / img.width;
+            swh = ' width="50%"';
           } else {
-              displayHeight = windowHeight / 2;
-              displayWidth = displayHeight * img.width / img.height;
-              style = "z-index: 16666;position:absolute;top:" +
-                  (windowHeight / 2 - displayHeight / 2) +
-                  "px;left:" +
-                  (windowWidth / 2 - displayWidth / 2) +
-                  "px;cursor:pointer;";
-              dom = "<img draggable='true' src = '" +
-                  src +
-                  "' height = '50%' style=' " +
-                  style +
-                  "' id='imgZoomImg'>";
+            displayHeight = windowHeight / 2;
+            displayWidth = displayHeight * img.width / img.height;
+            swh = ' height="50%"';
           }
-          $("body").append(dom);
-          $('#imgZoomMask').children('span').hide();
-          $("#imgZoomImg").dragging({
-              move: "both", //拖动方向，x y both
+          style = 'z-index: 20002; position: absolute;' +
+            ' top:' + (windowHeight / 2 -  displayHeight / 2) + 'px;' +
+            ' left:' + (windowWidth / 2 - displayWidth / 2) + 'px;' +
+            ' cursor: pointer;';
+          dom = '<img draggable="true" src = "' + src + '"' +
+            swh + ' style="' + style + '" id="' + _this.imgId + '">';
+
+          $('body').append(dom);
+          nMask.children('span').hide();
+          let nImg = $('#' +  _this.imgId);
+          nImg.dragging({
+              move: 'both', //拖动方向，x y both
               direction:'all',
               randomPosition: false //初始位置是否随机
           });
-          $("#imgZoomImg").on("mousewheel", function(e, d) {
-            //d 1 前/大 -1 后/小
-            let iFex = 1.1, iFex2 = 1.05;
+          nImg.on('mousewheel', function(e, d) {
+            //d 1 上 -1 下
+            let iFex = 1.1;
             if (d === 1) {
-              let nI = $('#imgZoomImg');
-              let iT = Number(nI.css('top').replace(/px/g, '')), 
-                iL = Number(nI.css('left').replace(/px/g, '')), 
-                width = nI.width(), height = nI.height();
-              $("#imgZoomImg").css({
+              let iT = Number(nImg.css('top').replace(/px/g, '')), 
+                  iL = Number(nImg.css('left').replace(/px/g, '')), 
+                  width = nImg.width(),
+                  height = nImg.height();
+              nImg.css({
                 top: (iT - height * ((iFex - 1) / 2))  + 'px',
                 left: (iL - width * ((iFex - 1) / 2)) + 'px',
                 width: width * iFex,
@@ -118,11 +116,11 @@ export default {
               });
             }
             if (d === -1) {
-              let nI = $('#imgZoomImg');
-              let iT = Number(nI.css('top').replace(/px/g, '')), 
-                iL = Number(nI.css('left').replace(/px/g, '')), 
-                width = nI.width(), height = nI.height();
-              $("#imgZoomImg").css({
+              let iT = Number(nImg.css('top').replace(/px/g, '')), 
+                  iL = Number(nImg.css('left').replace(/px/g, '')), 
+                  width = nImg.width(),
+                  height = nImg.height();
+              nImg.css({
                 top: (iT + height * ((iFex - 1) / 2))  + 'px',
                 left: (iL + width * ((iFex - 1) / 2)) + 'px',
                 width: width - (iFex - 1) * width,
@@ -137,9 +135,9 @@ export default {
 }
 </script>
 <style lang="scss" paged>
-.imgz_mask {
+.um_imgzoom_mask {
   display: none;
-  position: fixed; top: 0;left: 0; z-index: 15555;
+  position: fixed; top: 0;left: 0; z-index: 20001;
   width: 100%;height: 100%;
   background: rgba(0, 0, 0, 0.5);
   > span {
@@ -155,9 +153,9 @@ export default {
     }
   }
 }
-.imgz_mask_close {
+.um_imgzoom_close {
   display: none;
-  position: fixed; top: 10px; right: 10px; z-index: 17000;
+  position: fixed; top: 10px; right: 10px; z-index: 20003;
   cursor: pointer;
   color: #fff; font-size: 26px;
 }
