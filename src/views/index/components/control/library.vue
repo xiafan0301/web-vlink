@@ -897,6 +897,7 @@ export default {
       }
       this.portraitForm.groupIds = [];
       this.carForm.groupIds = [];
+      this.carForm.vehicleNumber = null;
       this.portraitForm.sex = 0;
       this.isShowDpList = false;
       this.addPortraitDialog = !this.addPortraitDialog;

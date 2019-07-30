@@ -92,6 +92,7 @@
               :clearable="false"
               v-model="faceSnapForm.queryDate"
               type="daterange"
+              :picker-options="pickerOptions"
               range-separator="至"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
@@ -135,6 +136,7 @@
             <el-date-picker
               :clearable="false"
               class="vl_date"
+              :picker-options="pickerOptions"
               v-model="faceControlQueryDate"
               type="daterange"
               range-separator="至"
@@ -158,15 +160,19 @@
       <div>
         <div class="box chart_box">
           <h1>各时间段的抓拍人脸数</h1>
-          <p>人脸抓拍数(张)</p>
-          <div id="faceNumContainer"></div>
+          <p v-if="chartData1.length > 0">人脸抓拍数(张)</p>
+          <div id="faceNumContainer">
+            <span v-if="chartData1.length === 0">暂无数据</span>
+          </div>
         </div>
       </div>
       <div>
         <div class="box chart_box">
           <h1>各时间段人脸布控的告警次数</h1>
-          <p>告警次数(次)</p>
-          <div id="alarmNumContainer"> </div>
+          <p v-if="chartData2.length > 0">告警次数(次)</p>
+          <div id="alarmNumContainer">
+            <span v-if="chartData2.length === 0">暂无数据</span>
+          </div>
         </div>
       </div>
     </div>
@@ -229,11 +235,11 @@ export default {
         peakValues: '',
         timeDto: []
       },
-      // pickerOptions: {
-      //   disabledDate (time) {
-      //     return time.getTime() > Date.now();
-      //   }
-      // },
+      pickerOptions: {
+        disabledDate (time) {
+          return time.getTime() > Date.now();
+        }
+      },
       loadingBtn1: false,
       loadingBtn2: false,
       selectLength: null
@@ -316,14 +322,12 @@ export default {
     },
     // 获取人脸抓拍统计
     getFaceSnapSta () {
-      this.chartData1 = [];
       const params = {
         deviceIds: this.faceSnapForm.devIdData.selSelectedData1.map(m => m.id).join(','),
         bayonetIds: this.faceSnapForm.devIdData.selSelectedData2.map(m => m.id).join(','),
         startTime: this.faceSnapForm.queryDate[0],
         endTime: this.faceSnapForm.queryDate[1]
       }
-      console.log(params)
       this.loadingBtn1 = true;
       apiFaceSnap(params).then(res => {
         if (res) {
@@ -334,6 +338,12 @@ export default {
               return { time: m.name, count: m.total };
             })
             this.drawChart1();
+          } else {
+            this.chartData1 = [];
+            if (this.charts.chart1) {
+              this.charts.chart1.destroy();
+            }
+            this.charts.chart1 = null;
           }
         }
       }).finally(() => {
@@ -342,7 +352,6 @@ export default {
     },
     // 获取人脸布控告警数据分析
     getFaceControlSta () {
-      this.chartData2 = []
       const params = {
         startTime: this.faceControlQueryDate[0],
         endTime: this.faceControlQueryDate[1],
@@ -356,8 +365,13 @@ export default {
             this.chartData2 = timeDto.map(m => {
               return { time: m.name, count: m.total };
             })
-            console.log(this.chartData2, 'this.chartData2')
             this.drawChart2();
+          } else {
+            this.chartData2 = [];
+            if (this.charts.chart2) {
+              this.charts.chart2.destroy();
+            }
+            this.charts.chart2 = null;
           }
         }
       }).finally(() => {
@@ -365,13 +379,12 @@ export default {
       })
     },
     // 转换时间间隔
-    transformTime (title) {
-      if (title === '0点') return 0;
-      return title.length === 2 ? parseInt(title.slice(0, 1)) - 1 : parseInt(title.slice(0, 2)) - 1;
-    },
+    // transformTime (title) {
+    //   if (title === '0点') return 0;
+    //   return title.length === 2 ? parseInt(title.slice(0, 1)) - 1 : parseInt(title.slice(0, 2)) - 1;
+    // },
     // 画抓拍人脸数图表
     drawChart1 () {
-      // if (this.chartData1.length === 0) return;
       let chart = null,_this = this;
       if (this.charts.chart1) {
         this.charts.chart1.clear();
@@ -423,14 +436,7 @@ export default {
       chart.tooltip({
         useHtml: true,
         htmlContent: function (title, items) {
-          let str = `<div class="my_tooltip">`;
-          if (title === '0点') {
-            str += `<h1>${title}</h1>`;
-          } else {
-            str += `<h1>${_this.transformTime(title)}-${title}</h1>`;
-          }
-          str += `<span><span>${items[0].value}</span><span>张</span></span></div>`;
-          return str;
+          return`<div class="my_tooltip"><h1>${title}</h1><span><span>${items[0].value}</span><span>张</span></span></div>`;
         }
       });
       chart.legend(false);
@@ -491,14 +497,7 @@ export default {
       chart.tooltip({
         useHtml: true,
         htmlContent: function (title, items) {
-          let str = `<div class="my_tooltip">`;
-          if (title === '0点') {
-            str += `<h1>${title}</h1>`;
-          } else {
-            str += `<h1>${_this.transformTime(title)}-${title}</h1>`;
-          }
-          str += `<span><span>${items[0].value}</span><span>次</span></span></div>`;
-          return str;
+          return`<div class="my_tooltip"><h1>${title}</h1><span><span>${items[0].value}</span><span>张</span></span></div>`;
         }
       });
       chart.legend(false);
@@ -648,6 +647,12 @@ export default {
           width: 100%;
           height: 350px;
           min-height: 350px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          > span{
+            color: #999;
+          }
         }
       }
       .chart_box {
