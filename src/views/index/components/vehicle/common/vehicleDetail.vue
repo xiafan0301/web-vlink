@@ -33,22 +33,22 @@
           <div class="struc_c_d_info">
             <h2>分析结果</h2>
             <ul>
-              <li v-if="sturcDetail.plateNo"><span>车牌号码：</span><span :title="sturcDetail.plateNo">{{sturcDetail.plateNo}}</span></li>
-              <li v-if="type === 3 && sturcDetail.shotTime"><span>入城时间：</span><span :title="sturcDetail.shotTime">{{sturcDetail.shotTime}}</span></li>
-              <li v-if="type === 3 && sturcDetail.bayonetName"><span>入城卡口：</span><span :title="sturcDetail.bayonetName">{{sturcDetail.bayonetName}}</span></li>
-              <li v-if="type === 3 && sturcDetail.firstEnterFlag"><span>初次入城：</span><span :title="sturcDetail.firstEnterFlag">{{sturcDetail.firstEnterFlag}}</span></li>
-              <li v-if="sturcDetail.plateColor"><span>车牌颜色：</span><span :title="sturcDetail.plateColor">{{sturcDetail.plateColor}}</span></li>
-              <li v-if="sturcDetail.vehicleModel"><span>车辆型号：</span><span :title="sturcDetail.vehicleModel">{{sturcDetail.vehicleModel}}</span></li>
-              <li v-if="sturcDetail.vehicleColor"><span>车辆颜色：</span><span :title="sturcDetail.vehicleColor">{{sturcDetail.vehicleColor}}</span></li>
-              <li v-if="sturcDetail.vehicleClass"><span>车辆类型：</span><span :title="sturcDetail.vehicleClass">{{sturcDetail.vehicleClass}}</span></li>
-              <li v-if="type === 3 && sturcDetail.vehicleStyles"><span>车辆分组：</span><span :title="sturcDetail.vehicleStyles">{{sturcDetail.vehicleStyles}}</span></li>
+              <li v-if="sturcDetail.plateNo"><span>车牌号码</span><span :title="sturcDetail.plateNo">{{sturcDetail.plateNo}}</span></li>
+              <!-- <li v-if="type === 3 && sturcDetail.shotTime"><span>入城时间</span><span :title="sturcDetail.shotTime">{{sturcDetail.shotTime}}</span></li>
+              <li v-if="type === 3 && sturcDetail.bayonetName"><span>入城卡口</span><span :title="sturcDetail.bayonetName">{{sturcDetail.bayonetName}}</span></li> -->
+              <li v-if="type === 3 && sturcDetail.firstEnterFlag"><span>初次入城</span><span>是</span></li>
+              <li v-if="sturcDetail.plateColor"><span>车牌颜色</span><span :title="sturcDetail.plateColor">{{sturcDetail.plateColor}}</span></li>
+              <li v-if="sturcDetail.vehicleModel"><span>车辆型号</span><span :title="sturcDetail.vehicleModel">{{sturcDetail.vehicleModel}}</span></li>
+              <li v-if="sturcDetail.vehicleColor"><span>车辆颜色</span><span :title="sturcDetail.vehicleColor">{{sturcDetail.vehicleColor}}</span></li>
+              <li v-if="sturcDetail.vehicleClass"><span>车辆类型</span><span :title="sturcDetail.vehicleClass">{{sturcDetail.vehicleClass}}</span></li>
               <li v-if="sturcDetail.plateClass || sturcDetail.plateClass === 0">
-                <span>车牌类型：</span>
+                <span>车牌类型</span>
                 <span :title="sturcDetail.plateClass">{{dicFormater(45, sturcDetail.plateClass)}}</span>
               </li>
+              <li v-if="type === 3 && sturcDetail.vehicleStyles"><span>车辆分组</span><span :title="sturcDetail.vehicleStyles">{{sturcDetail.vehicleStyles}}</span></li>
               <!-- 套牌依据 -->
               <!-- li v-if="type === 5"><span>号牌颜色：</span><span>{{sturcDetail.plateColor}}</span></<!-->
-              <li v-if="type === 5"><span>套牌依据：</span><span :title="sturcDetail.fakeReason">{{sturcDetail.fakeReason}}</span></li>
+              <li v-if="type === 5"><span>套牌依据</span><span :title="sturcDetail.fakeReason">{{sturcDetail.fakeReason}}</span></li>
             </ul>
              <!--  <span class='tz' v-if="sturcDetail.features"><b>特征码：</b>{{sturcDetail.features}}</span> -->
           </div>
@@ -127,15 +127,7 @@ export default {
         this.strucIndex = val.index;
         this.strucInfoList = val.list;
         this.type = val.type;
-        if (this.type === 5) {
-          this.sturcDetail = Object.assign(
-            this.strucInfoList[this.strucIndex].vehicleDto, {
-              fakeReason: this.strucInfoList[this.strucIndex].fakeReason
-            }
-          );
-        } else {
-          this.sturcDetail = this.strucInfoList[this.strucIndex];
-        }
+        this.setDetailObj(this.strucInfoList[this.strucIndex]);
         this.pagination = {
           total: val.total,
           pageSize: val.pageSize,
@@ -167,6 +159,24 @@ export default {
     }
   },
   methods: {
+    setDetailObj (item) {
+      if (this.type === 5) {
+        // 套牌车
+        if (item && item.struVehicle) {
+          let _ots = {
+            '1': '同号车身颜色不同',
+            '2': '同号车辆类型不同',
+            '3': '同号车辆品牌不同',
+            '4': '同号短时异地出没'
+          };
+          this.sturcDetail = Object.assign(JSON.parse(item.struVehicle), {
+            fakeReason: _ots[item.fakePlateType + '']
+          });
+        }
+      } else {
+        this.sturcDetail = item;
+      }
+    },
     // 设置视频数据
     setPlayerData () {
       if (this.sturcDetail.videoPath) {
@@ -198,15 +208,7 @@ export default {
         if (this.strucIndex < (this.strucInfoList.length - 1)) {
           // 序号小于LIST长度-1
           this.strucIndex = this.strucIndex + 1;
-          if (this.type === 5) {
-            this.sturcDetail = Object.assign(
-              this.strucInfoList[this.strucIndex].vehicleDto, {
-                fakeReason: this.strucInfoList[this.strucIndex].fakeReason
-              }
-            );
-          } else {
-            this.sturcDetail = this.strucInfoList[this.strucIndex];
-          }
+          this.setDetailObj(this.strucInfoList[this.strucIndex]);
         } else {
           // 序号超出
           if (this.pagination.total > 
@@ -220,15 +222,7 @@ export default {
       } else {
         if (this.strucIndex > 0) {
           this.strucIndex = this.strucIndex - 1;
-          if (this.type === 5) {
-            this.sturcDetail = Object.assign(
-              this.strucInfoList[this.strucIndex].vehicleDto, {
-                fakeReason: this.strucInfoList[this.strucIndex].fakeReason
-              }
-            );
-          } else {
-            this.sturcDetail = this.strucInfoList[this.strucIndex];
-          }
+          this.setDetailObj(this.strucInfoList[this.strucIndex]);
         } else {
           if (this.pagination.pageNum > 1) {
             this.pagination.pageNum = this.pagination.pageNum - 1;
@@ -253,7 +247,7 @@ export default {
             this.pagination.total = res.data.total;
             this.strucInfoList = res.data.list;
             // this.sturcDetail = res.data.list[this.strucIndex];
-            this.sturcDetail = this.strucInfoList[this.strucIndex];
+            this.setDetailObj(this.strucInfoList[this.strucIndex]);
            
           }
         }).catch(() => {
@@ -267,8 +261,8 @@ export default {
         getFeatureSearch(params).then(res => {
           if (res && res.data) {
             this.pagination.total = res.data.total;
-            this.sturcDetail = res.data.list[this.strucIndex];
             this.strucInfoList = res.data.list;
+            this.setDetailObj(this.strucInfoList[this.strucIndex]);
           }
         }).catch(() => {
         });
@@ -282,11 +276,7 @@ export default {
           if (res && res.data) {
             this.pagination.total = res.data.total;
             this.strucInfoList = res.data.list;
-            this.sturcDetail = Object.assign(
-              this.strucInfoList[this.strucIndex].vehicleDto, {
-                fakeReason: this.strucInfoList[this.strucIndex].fakeReason
-              }
-            );
+            this.setDetailObj(this.strucInfoList[this.strucIndex]);
           }
         }).catch(() => {
         });
@@ -300,7 +290,7 @@ export default {
           if (res && res.data) {
             this.pagination.total = res.data.total;
             this.strucInfoList = res.data.list;
-            this.sturcDetail = res.data.list[this.strucIndex];
+            this.setDetailObj(this.strucInfoList[this.strucIndex]);
           }
         }).catch(() => {
         });
@@ -522,16 +512,15 @@ export default {
                 border-radius: 4px;
                 float: left;
                 &:first-child {
-                  width: 100px;
-                  padding-right: 5px;
+                  width: 85px;
                   background-color: #FAFAFA;
-                  text-align: right;
+                  text-align: center;
                   border: 1px solid #f2f2f2;
                   border-radius: 4px 0 0 4px;
                   color: #999;
                 }
                 &:last-child {
-                  max-width: 190px;
+                  max-width: 220px;
                   border: 1px solid #f2f2f2;
                   border-left: 0;
                   background-color: #fff;
