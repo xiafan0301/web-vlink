@@ -93,23 +93,28 @@
             </div>
           </div>
           <div>
-            <div class="chart_item">
+            <div class="chart_item car_brand">
               <h1>车辆的品牌排名（Top5）</h1>
               <div id="chartContainer2"></div>
+              <span v-if="chartData2.length === 0">暂无数据</span>
             </div>
           </div>
           <div>
             <div class="chart_item">
               <h1>各时间段的车数</h1>
-              <p>设备数量（辆）</p>
-              <div id="chartContainer3"></div>
+              <p v-if="chartData3.length > 0">设备数量（辆）</p>
+              <div id="chartContainer3">
+                <span v-if="chartData3.length === 0">暂无数据</span>
+              </div>
             </div>
           </div>
           <div>
             <div class="chart_item">
               <h1>各车辆类型过车情况</h1>
-              <p>数量（辆）</p>
-              <div id="chartContainer4"></div>
+              <p v-if="chartData4.length > 0">数量（辆）</p>
+              <div id="chartContainer4">
+                <span v-if="chartData4.length === 0">暂无数据</span>
+              </div>
             </div>
           </div>
         </div>
@@ -501,9 +506,31 @@ export default {
           this.chartData4 = res.data.carTypeDto.map(m => {
             return { carType: m.name, count: m.total, count1: 1 };
           })
-          this.drawChart2();
-          this.drawChart3();
-          this.drawChart4();
+          
+          if (this.chartData2.length === 0) {
+            if (this.charts.chart2) {
+              this.charts.chart2.destroy();
+            }
+            this.charts.chart2 = null;
+          } else {
+            this.drawChart2();
+          }
+          if (this.chartData3.length === 0) {
+            if (this.charts.chart3) {
+              this.charts.chart3.destroy();
+            }
+            this.charts.chart3 = null;
+          } else {
+            this.drawChart3();
+          }
+          if (this.chartData4.length === 0) {
+            if (this.charts.chart4) {
+              this.charts.chart4.destroy();
+            }
+            this.charts.chart4 = null;
+          } else {
+            this.drawChart4();
+          }
         }
       }).finally(() => {
         this.loadingBtn = false;
@@ -640,8 +667,26 @@ export default {
             #chartContainer2{
               width: 50%;
             }
+            #chartContainer3, #chartContainer4{
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              > span{
+                color: #999;
+              }
+            }
             .chart_table {
               padding: 8px 0 0;
+            }
+          }
+          .car_brand{
+            position: relative;
+            > span{
+              position: absolute;
+              left: 50%;
+              top: 50%;
+              transform: translate(-50%, -50%);
+              color: #999;
             }
           }
         }
