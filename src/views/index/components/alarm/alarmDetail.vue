@@ -183,8 +183,8 @@
               <div class="vl_jfo_sim"  v-show="showSim"><i class="vl_icon vl_icon_retrieval_05" :class="{'vl_icon_retrieval_06':  item.uid == curImgUid}"></i>{{item.semblance ? item.semblance : 92}}<span style="font-size: 12px;">%</span></div>
             </div>
           </swiper-slide>
-          <div class="swiper-button-prev" slot="button-prev"></div>
-          <div class="swiper-button-next" slot="button-next"></div>
+          <div class="swiper-button-prev" slot="button-prev" @click="getPreList"></div>
+          <div class="swiper-button-next" slot="button-next" @click="getNextList"></div>
         </swiper>
       </div>
     </div>
@@ -220,6 +220,7 @@ export default {
         navigation: {
           nextEl: '.swiper-button-next',
           prevEl: '.swiper-button-prev',
+          disabledClass: 'my-button-disabled'
         },
       },
       amap: null, // 地图实例
@@ -228,6 +229,9 @@ export default {
       startTime: null,
       endTime: null,
       isLoading: false,
+      pageNum: 1,
+      pageSize: 10,
+      total: 0,
     }
   },
   mounted() {
@@ -252,6 +256,18 @@ export default {
     }
   },
   methods: {
+    getPreList() {
+      if(this.pageNum > 1) {
+        this.pageNum = this.pageNum -1;
+        this.getAlarm()
+      }
+    },
+    getNextList() { 
+      if(this.pageNum < (this.total/this.pageSize)) {
+        this.pageNum = this.pageNum +1;
+        this.getAlarm()
+      }
+    },
     //告警
     getAlarm() {
       this.alarmList = [];
@@ -266,12 +282,15 @@ export default {
         "where.startTime": this.startTime,
         "where.endTime": this.endTime,
         "where.sortType": 2,
-        pageNum:-1,
-        pageSize: 0,
+        pageNum: this.pageNum,
+        pageSize: this.pageSize,
+        /* pageNum:-1,
+        pageSize: 0, */
       };
       getAlarmList(params).then( res => {
         if(res.data.list && res.data.list.length > 0) {
           this.strucInfoList = [...res.data.list]
+          this.total = res.data.total;
           for(let item of this.strucInfoList) {
             item['semblance'] = (item.semblance).toFixed(2)
             item['isSeen'] = false
