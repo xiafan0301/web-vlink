@@ -60,7 +60,7 @@
             </el-row>
           </el-form-item>
         </el-form>
-        <div class="insetLeft" @click="hideLeft"></div>
+        <div class="insetLeft vl_icon vl_icon_vehicle_02" :class="{'vl_icon_vehicle_03': hideleft}" @click="hideLeft"></div>
         <!--车辆切换列表-->
         <div class="clgj-s-list">
           <div v-for="(item, index) in evData" :key="item.id" :class="{'active': index === activeList}" @click="plateTap(index)">{{item.plateNo}}</div>
@@ -763,10 +763,6 @@
     top: 50%;
     margin-top: -89px;
     display: inline-block;
-    background-repeat: no-repeat;
-    transform: rotate(180deg);
-    background-image: url(../../../../../assets/img/icons.png);
-    background-position: -380px -1269px;
     cursor: pointer;
   }
   .clgj-s-list {
@@ -801,8 +797,6 @@
   }
   .hide {
     .insetLeft {
-      transform: rotate(180deg);
-      background-position: -504px -1269px;
     }
   }
   .insetLeft2 {

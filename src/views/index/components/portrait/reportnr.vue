@@ -102,17 +102,17 @@
             <div>
               <div class="list-box">
                 <ul class="rlcx_r_list clearfix">
-                  <li v-for="item in 12" :key="item">
+                  <li v-for="item in taskResult" :key="item.uid">
                     <div style="">
-                      <img src="../../../../assets/img/666.jpg" alt="">
+                      <img :src="item.subStoragePath" alt="">
                       <div>
                         <h4>检索资料</h4>
-                        <div><i class="vl_icon rlcx_sj"></i>18-12-24 14:12:17</div>
+                        <div><i class="vl_icon rlcx_sj"></i>{{item.shotTime}}</div>
                         <p>
-                          <span style="height: 30px;line-height: 30px;padding: 0 10px;display: inline-block;background: #fafafa;border: 1px solid #f2f2f2;border-radius: 3px;">男性</span>
-                          <span style="height: 30px;line-height: 30px;padding: 0 10px;display: inline-block;background: #fafafa;border: 1px solid #f2f2f2;border-radius: 3px;margin-left: 8px;">青年</span>
+                          <span style="height: 30px;line-height: 30px;padding: 0 10px;display: inline-block;background: #fafafa;border: 1px solid #f2f2f2;border-radius: 3px;">{{item.sex}}</span>
+                          <span style="height: 30px;line-height: 30px;padding: 0 10px;display: inline-block;background: #fafafa;border: 1px solid #f2f2f2;border-radius: 3px;margin-left: 8px;">{{item.age}}</span>
                         </p>
-                        <p><img src="../../../../assets/img/txfx_pao.png" alt=""><b style="color: #0C70F8;font-size: 34px;padding-left: 8px;">04</b><span style="color: #0C70F8;"> 同行次</span></p>
+                        <p><img src="../../../../assets/img/txfx_pao.png" alt=""><b style="color: #0C70F8;font-size: 34px;padding-left: 8px;">{{item.peerNumber}}</b><span style="color: #0C70F8;"> 同行次</span></p>
                         <div style="margin-top: 15px; cursor: pointer;border:1px solid #D3D3D3;border-radius:4px;background:rgba(246,248,249,1);color: #666;">查看同行记录</div>
                       </div>
                     </div>
@@ -129,24 +129,29 @@
               border-bottom: 1px solid #F2F2F2;
               font-size: 16px;">落脚点分析</div>
             <div class="cont2_map_box">
-              <div class="mes">
-                <el-collapse v-model="activeNames">
-                  <el-collapse-item title="创谷广告园(2次)" name="1">
-                    <div class="mes_cot">
-                      <div class="cot_1">
-                        <img src="../../../../../public/static/img/vis-eg.png">
-                        <div style="padding-left: 10px">
-                          <div style="background-color: #F6F6F6; padding: 0 8px"><i class="icon"></i>2018-12-27 15:46:07</div>
-                          <div class="subdata">
-                            <i class="vl_icon vl_icon_retrieval_03" style="height: 24px"></i>
-                            <b>99.12</b>%
+              <vue-scroll>
+                <div class="mes">
+                  <el-collapse v-model="activeNames">
+                    <el-collapse-item  v-for="(item, index) in struGroupResultDtoList" :key='index'  :title="item.groupName + '(' + item.totalNum + '次)'">
+                      <div class="mes_cot">
+                        <div v-for = "(ite, index) in item.personDetailList" :key='index'>
+                          <div class="cot_1">
+                            <img :src="ite.subStoragePath">
+                            <div style="padding-left: 10px">
+                              <div style="background-color: #F6F6F6; padding: 0 8px"><i class="icon"></i>{{ite.shotTime}}</div>
+                              <div class="subdata">
+                                <i class="vl_icon vl_icon_retrieval_03" style="height: 24px"></i>
+                                <b>{{ite.semblance}}</b>%
+                              </div>
+                            </div>
                           </div>
+                          <div style="margin: 15px 0; border-bottom: 1px solid #F2F2F2"></div>
                         </div>
                       </div>
-                    </div>
-                  </el-collapse-item>
-                </el-collapse>
-              </div>
+                    </el-collapse-item>
+                  </el-collapse>
+                </div>
+              </vue-scroll>
             </div>
             <div id="container"></div>
           </div>
@@ -248,16 +253,17 @@ export default {
       taskObj: '',     //单个列表任务
       portrailInfoDto: {},
       repertoryGroupDto: {repertories: [], groups:[{groupName: 'kkk'}]},
-      analysisTaskInfoWithBLOBsList: []
+      analysisTaskInfoWithBLOBsList: [],
+      taskResult: [],
+      struGroupResultDtoList: [{personDetailList: [{shotPlaceLongitude: 1,shotPlaceLatitude: 2 }]}]
     }
   },
   created() {
     this.userInfo = this.$store.state.loginUser;
   },
   mounted () {
-    this.initMap()
-    this.renderMap()
     this.getdetailbgg()
+    this.renderMap()
   },
   methods: {
     getdetailbgg () {
@@ -273,6 +279,9 @@ export default {
           this.portrailInfoDto = res.data.portrailInfoDto
           this.repertoryGroupDto = res.data.repertoryGroupDto
           this.analysisTaskInfoWithBLOBsList = res.data.analysisTaskInfoWithBLOBsList
+          this.taskResult = JSON.parse(res.data.analysisTaskInfoWithBLOBsList[0].taskResult)
+          this.struGroupResultDtoList = res.data.struGroupResultDtoList
+          this.initMap()
         }
         this.$nextTick(() => {
         })
@@ -298,11 +307,14 @@ export default {
       // this.map.setZoomAndCenter(iZoom, aCenter);
       let map = new window.AMap.Map('container', {
         zoom: 14, // 级别
-        center: [this.sturcDetail.longitude, this.sturcDetail.latitude,], // 中心点坐标
+        center: [110.597638, 27.910355,], // 中心点坐标
       });
       map.setMapStyle('amap://styles/whitesmoke');
       this.map = map;
-      this.drawPoint(this.sturcDetail)
+      // for (let i= 0; i< this.struGroupResultDtoList.length; i++){
+      //   this.drawPoint(this.struGroupResultDtoList[i])
+      // }
+      this.drawPoint(this.struGroupResultDtoList[0])
     },
     /**
      * 地图描点
@@ -315,19 +327,19 @@ export default {
       let _content = '<div class="vl_icon vl_icon_judge_02"></div>'
       this.markerPoint = new window.AMap.Marker({ // 添加自定义点标记
         map: this.map,
-        position: [data.longitude, data.latitude], // 基点位置 [116.397428, 39.90923]
+        position: [data.personDetailList[0].shotPlaceLongitude, data.personDetailList[0].shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
         offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
         draggable: false, // 是否可拖动
         // 自定义点标记覆盖物内容
         content: _content
       });
-      this.map.setZoomAndCenter(16, [data.longitude, data.latitude]); // 自适应点位置
-      let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`
+      this.map.setZoomAndCenter(16, [data.personDetailList[0].shotPlaceLongitude, data.personDetailList[0].shotPlaceLatitude]); // 自适应点位置
+      let sConent = `<div class="cap_info_win"><p>设备名称：${data.groupName}</p><p>抓拍地址</p></div>`
       this.infoWindow = new window.AMap.InfoWindow({
         map: this.map,
         isCustom: true,
         closeWhenClickMap: false,
-        position: [data.longitude, data.latitude],
+        position: [data.personDetailList[0].shotPlaceLongitude, data.personDetailList[0].shotPlaceLatitude],
         offset: new window.AMap.Pixel(0, -70),
         content: sConent
       })
@@ -583,7 +595,7 @@ export default {
                   float: left;
                   > div {
                     position: relative;
-                    width: 380px; height: 210px;
+                    width: 395px; height: 210px;
                     padding: 10px;
                     background-color: #fff;
                     box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);

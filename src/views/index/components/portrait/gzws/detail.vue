@@ -428,14 +428,14 @@ export default {
 <style lang="scss">
 .tip_box {
   width: 258px;
-  height: 361px;
-  padding: 20px;
+  // height: 361px;
+  padding: 20px 20px 14px 20px;
   background:rgba(255,255,255,1);
   box-shadow:0px 12px 14px 0px rgba(148,148,148,0.4);
   .select_target, .tail_vehicle {
     width:218px;
     height:122px;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     position: relative;
     >p {
       left: 0;
@@ -483,7 +483,7 @@ export default {
   }
   .divide {
     height:1px;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     border-bottom: 1px solid #F2F2F2;
     box-shadow:0px 12px 14px 0px rgba(148,148,148,0.4);
   }
@@ -559,7 +559,7 @@ export default {
           border:1px solid rgba(211,211,211,1);
           border-radius:4px;
           color: #666666;
-          font-size: 16px;
+          // font-size: 16px;
           text-align: center;
           &:hover {
             background:linear-gradient(90deg,rgba(8,106,234,1) 0%,rgba(4,102,222,1) 100%);

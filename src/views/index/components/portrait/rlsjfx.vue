@@ -86,12 +86,13 @@
           </div>
           <div class="face_snap_form">
             <div ref="devSelect" is="devSelect" @sendSelectData="getSelectData" @allSelectLength="allSelectLength"></div>
+            <!-- @change="validationDate(faceSnapForm)" -->
             <el-date-picker
               class="vl_date"
               :clearable="false"
               v-model="faceSnapForm.queryDate"
-              @change="validationDate(faceSnapForm)"
               type="daterange"
+              :picker-options="pickerOptions"
               range-separator="至"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
@@ -130,12 +131,13 @@
             <h1>人脸布控告警数据分析</h1>
             <span @click="skipHistoryAlarm">查看更多></span>
           </div>
+          <!-- @change="validationDate(faceControlQueryDate)" -->
           <div class="face_control_form">
             <el-date-picker
               :clearable="false"
               class="vl_date"
+              :picker-options="pickerOptions"
               v-model="faceControlQueryDate"
-              @change="validationDate(faceControlQueryDate)"
               type="daterange"
               range-separator="至"
               start-placeholder="开始日期"
@@ -158,23 +160,27 @@
       <div>
         <div class="box chart_box">
           <h1>各时间段的抓拍人脸数</h1>
-          <p>人脸抓拍数(张)</p>
-          <div id="faceNumContainer"></div>
+          <p v-if="chartData1.length > 0">人脸抓拍数(张)</p>
+          <div id="faceNumContainer">
+            <span v-if="chartData1.length === 0">暂无数据</span>
+          </div>
         </div>
       </div>
       <div>
         <div class="box chart_box">
           <h1>各时间段人脸布控的告警次数</h1>
-          <p>告警次数(次)</p>
-          <div id="alarmNumContainer"> </div>
+          <p v-if="chartData2.length > 0">告警次数(次)</p>
+          <div id="alarmNumContainer">
+            <span v-if="chartData2.length === 0">暂无数据</span>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
 <script>
-let startTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss'); //默认开始时间为当前时间前一天
-let endTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() + (24 * 60 * 60 * 1000 - 1) + 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss');//默认结束时间为开始时间后第三天
+let startTime = formatDate(new Date(new Date(new Date().toLocaleDateString())).getTime() - 24*60*60*1000, 'yyyy-MM-dd HH:mm:ss');
+let endTime = formatDate(new Date(new Date(new Date().toLocaleDateString())).getTime() - 1, 'yyyy-MM-dd HH:mm:ss');
 import vehicleBreadcrumb from './breadcrumb.vue';
 import devSelect from '@/components/common/devSelect.vue';
 import G2 from '@antv/g2';
@@ -228,6 +234,11 @@ export default {
         faceNums: '',
         peakValues: '',
         timeDto: []
+      },
+      pickerOptions: {
+        disabledDate (time) {
+          return time.getTime() > Date.now();
+        }
       },
       loadingBtn1: false,
       loadingBtn2: false,
@@ -311,14 +322,12 @@ export default {
     },
     // 获取人脸抓拍统计
     getFaceSnapSta () {
-      this.chartData1 = [];
       const params = {
         deviceIds: this.faceSnapForm.devIdData.selSelectedData1.map(m => m.id).join(','),
         bayonetIds: this.faceSnapForm.devIdData.selSelectedData2.map(m => m.id).join(','),
         startTime: this.faceSnapForm.queryDate[0],
         endTime: this.faceSnapForm.queryDate[1]
       }
-      console.log(params)
       this.loadingBtn1 = true;
       apiFaceSnap(params).then(res => {
         if (res) {
@@ -329,6 +338,12 @@ export default {
               return { time: m.name, count: m.total };
             })
             this.drawChart1();
+          } else {
+            this.chartData1 = [];
+            if (this.charts.chart1) {
+              this.charts.chart1.destroy();
+            }
+            this.charts.chart1 = null;
           }
         }
       }).finally(() => {
@@ -337,7 +352,6 @@ export default {
     },
     // 获取人脸布控告警数据分析
     getFaceControlSta () {
-      this.chartData2 = []
       const params = {
         startTime: this.faceControlQueryDate[0],
         endTime: this.faceControlQueryDate[1],
@@ -351,8 +365,13 @@ export default {
             this.chartData2 = timeDto.map(m => {
               return { time: m.name, count: m.total };
             })
-            console.log(this.chartData2, 'this.chartData2')
             this.drawChart2();
+          } else {
+            this.chartData2 = [];
+            if (this.charts.chart2) {
+              this.charts.chart2.destroy();
+            }
+            this.charts.chart2 = null;
           }
         }
       }).finally(() => {
@@ -360,13 +379,12 @@ export default {
       })
     },
     // 转换时间间隔
-    transformTime (title) {
-      if (title === '0点') return 0;
-      return title.length === 2 ? parseInt(title.slice(0, 1)) - 1 : parseInt(title.slice(0, 2)) - 1;
-    },
+    // transformTime (title) {
+    //   if (title === '0点') return 0;
+    //   return title.length === 2 ? parseInt(title.slice(0, 1)) - 1 : parseInt(title.slice(0, 2)) - 1;
+    // },
     // 画抓拍人脸数图表
     drawChart1 () {
-      // if (this.chartData1.length === 0) return;
       let chart = null,_this = this;
       if (this.charts.chart1) {
         this.charts.chart1.clear();
@@ -418,14 +436,7 @@ export default {
       chart.tooltip({
         useHtml: true,
         htmlContent: function (title, items) {
-          let str = `<div class="my_tooltip">`;
-          if (title === '0点') {
-            str += `<h1>${title}</h1>`;
-          } else {
-            str += `<h1>${_this.transformTime(title)}-${title}</h1>`;
-          }
-          str += `<span><span>${items[0].value}</span><span>张</span></span></div>`;
-          return str;
+          return`<div class="my_tooltip"><h1>${title}</h1><span><span>${items[0].value}</span><span>张</span></span></div>`;
         }
       });
       chart.legend(false);
@@ -486,14 +497,7 @@ export default {
       chart.tooltip({
         useHtml: true,
         htmlContent: function (title, items) {
-          let str = `<div class="my_tooltip">`;
-          if (title === '0点') {
-            str += `<h1>${title}</h1>`;
-          } else {
-            str += `<h1>${_this.transformTime(title)}-${title}</h1>`;
-          }
-          str += `<span><span>${items[0].value}</span><span>次</span></span></div>`;
-          return str;
+          return`<div class="my_tooltip"><h1>${title}</h1><span><span>${items[0].value}</span><span>张</span></span></div>`;
         }
       });
       chart.legend(false);
@@ -643,6 +647,12 @@ export default {
           width: 100%;
           height: 350px;
           min-height: 350px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          > span{
+            color: #999;
+          }
         }
       }
       .chart_box {

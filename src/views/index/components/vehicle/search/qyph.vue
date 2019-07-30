@@ -85,7 +85,7 @@
               </div>
             </div>
           </div>
-          <div class="insetLeft" @click="hideLeft"></div>
+          <div class="insetLeft vl_icon vl_icon_vehicle_02"  :class="{'vl_icon_vehicle_03': hideleft}" @click="hideLeft"></div>
         </div>
       </div>
       <!--地图操作按钮-->
@@ -641,16 +641,10 @@
     top: 50%;
     margin-top: -89px;
     display: inline-block;
-    background-repeat: no-repeat;
-    transform: rotate(180deg);
-    background-image: url(../../../../../assets/img/icons.png);
-    background-position: -380px -1269px;
     cursor: pointer;
   }
   .hide {
     .insetLeft {
-      transform: rotate(180deg);
-      background-position: -504px -1269px;
     }
   }
   .map_rrt_u2 {
