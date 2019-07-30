@@ -8,10 +8,6 @@
     </div>
     <div class="content_box">
       <p class="tab_p">{{isSelectTab === 1 ? '基本信息' : '联网信息'}}</p>
-      <!-- <ul class="tab_ul">
-        <li :class="[isSelectTab === 1 ? 'is_active' : '']">基本信息</li>
-        <li :class="[isSelectTab === 2 ? 'is_active' : '']">联网信息</li>
-      </ul> -->
       <div class="basic_info" v-show="isSelectTab === 1">
         <vue-scroll>
           <el-form :model="cameraForm" :rules="rules" ref="cameraForm" label-width="100px" class="camera_form">

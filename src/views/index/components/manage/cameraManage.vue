@@ -12,8 +12,9 @@
               unlink-panels
               range-separator="至"
               format="yyyy-MM-dd"
-              value-format="yyyy-MM-dd"
+              value-format="yyyy-MM-dd HH:mm:ss"
               v-model="searchForm.dateTime"
+              :default-time="['00:00:00', '23:59:59']"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
               :picker-options="pickerOptions"
@@ -587,6 +588,8 @@ export default {
       } else {
         manufacturer = this.searchForm.manufacturer;
       }
+      console.log(this.searchForm.dateTime)
+
       const params = {
         'where.onlineStartDate': this.searchForm.dateTime[0],
         'where.onlineEndDate': this.searchForm.dateTime[1],
