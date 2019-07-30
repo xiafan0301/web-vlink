@@ -1,6 +1,7 @@
 <template>
   <div class="imgz_mask" id='imgZoomMask'>
     <i class="imgz_mask_close el-icon-circle-close" id="imgZoomMask_icon"></i>
+    <span><i class="el-icon-loading"></i>请稍后...</span>
   </div>
 </template>
 <script>
@@ -18,6 +19,7 @@ export default {
       if (nImg && nImg.length > 0) {
         let src = $(this).attr('src');
         $('#imgZoomMask').show();
+        $('#imgZoomMask').children('span').show();
         $('#imgZoomMask_icon').show();
         _this.imgHandler(src);
       }
@@ -60,71 +62,75 @@ export default {
       var img = new Image();
       img.src = src;
       img.onload = function() {
-        var dom = "";
-        var displayWidth = 0;
-        var displayHeight = 0;
-        var style = "";
-        if (img.width > img.height) {
-            displayWidth = windowWidth / 2;
-            displayHeight = img.height * displayWidth / img.width;
-            style = "z-index:16666;position:absolute;top:" +
-                (windowHeight / 2 -  displayHeight / 2) +
-                "px;left:" +
-                (windowWidth / 2 - displayWidth / 2) +
-                "px;cursor:pointer;";
-            dom = "<img draggable='true' src = '" +
-                src +
-                "' width = '50%' style='" +
-                style +
-                "' id='imgZoomImg'>";
-        } else {
-            displayHeight = windowHeight / 2;
-            displayWidth = displayHeight * img.width / img.height;
-            style = "z-index: 16666;position:absolute;top:" +
-                (windowHeight / 2 - displayHeight / 2) +
-                "px;left:" +
-                (windowWidth / 2 - displayWidth / 2) +
-                "px;cursor:pointer;";
-            dom = "<img draggable='true' src = '" +
-                src +
-                "' height = '50%' style=' " +
-                style +
-                "' id='imgZoomImg'>";
+        // 此时为关闭遮盖才能添加到 body
+        if (!$('#imgZoomMask').is(':hidden')) {
+          var dom = "";
+          var displayWidth = 0;
+          var displayHeight = 0;
+          var style = "";
+          if (img.width > img.height) {
+              displayWidth = windowWidth / 2;
+              displayHeight = img.height * displayWidth / img.width;
+              style = "z-index:16666;position:absolute;top:" +
+                  (windowHeight / 2 -  displayHeight / 2) +
+                  "px;left:" +
+                  (windowWidth / 2 - displayWidth / 2) +
+                  "px;cursor:pointer;";
+              dom = "<img draggable='true' src = '" +
+                  src +
+                  "' width = '50%' style='" +
+                  style +
+                  "' id='imgZoomImg'>";
+          } else {
+              displayHeight = windowHeight / 2;
+              displayWidth = displayHeight * img.width / img.height;
+              style = "z-index: 16666;position:absolute;top:" +
+                  (windowHeight / 2 - displayHeight / 2) +
+                  "px;left:" +
+                  (windowWidth / 2 - displayWidth / 2) +
+                  "px;cursor:pointer;";
+              dom = "<img draggable='true' src = '" +
+                  src +
+                  "' height = '50%' style=' " +
+                  style +
+                  "' id='imgZoomImg'>";
+          }
+          $("body").append(dom);
+          $('#imgZoomMask').children('span').hide();
+          $("#imgZoomImg").dragging({
+              move: "both", //拖动方向，x y both
+              direction:'all',
+              randomPosition: false //初始位置是否随机
+          });
+          $("#imgZoomImg").on("mousewheel", function(e, d) {
+            //d 1 前/大 -1 后/小
+            let iFex = 1.1, iFex2 = 1.05;
+            if (d === 1) {
+              let nI = $('#imgZoomImg');
+              let iT = Number(nI.css('top').replace(/px/g, '')), 
+                iL = Number(nI.css('left').replace(/px/g, '')), 
+                width = nI.width(), height = nI.height();
+              $("#imgZoomImg").css({
+                top: (iT - height * ((iFex - 1) / 2))  + 'px',
+                left: (iL - width * ((iFex - 1) / 2)) + 'px',
+                width: width * iFex,
+                height: height * iFex
+              });
+            }
+            if (d === -1) {
+              let nI = $('#imgZoomImg');
+              let iT = Number(nI.css('top').replace(/px/g, '')), 
+                iL = Number(nI.css('left').replace(/px/g, '')), 
+                width = nI.width(), height = nI.height();
+              $("#imgZoomImg").css({
+                top: (iT + height * ((iFex - 1) / 2))  + 'px',
+                left: (iL + width * ((iFex - 1) / 2)) + 'px',
+                width: width - (iFex - 1) * width,
+                height: height - (iFex - 1) * height
+              });
+            }
+          });
         }
-        $("body").append(dom);
-        $("#imgZoomImg").dragging({
-            move: "both", //拖动方向，x y both
-            direction:'all',
-            randomPosition: false //初始位置是否随机
-        });
-        $("#imgZoomImg").on("mousewheel", function(e, d) {
-          //d 1 前/大 -1 后/小
-          let iFex = 1.1, iFex2 = 1.05;
-          if (d === 1) {
-            let nI = $('#imgZoomImg');
-            let iT = Number(nI.css('top').replace(/px/g, '')), 
-              iL = Number(nI.css('left').replace(/px/g, '')), 
-              width = nI.width(), height = nI.height();
-            $("#imgZoomImg").css({
-              top: (iT - height * ((iFex - 1) / 2))  + 'px',
-              left: (iL - width * ((iFex - 1) / 2)) + 'px',
-              width: width * iFex,
-              height: height * iFex
-            });
-          }
-          if (d === -1) {
-            let nI = $('#imgZoomImg');
-            let iT = Number(nI.css('top').replace(/px/g, '')), 
-              iL = Number(nI.css('left').replace(/px/g, '')), 
-              width = nI.width(), height = nI.height();
-            $("#imgZoomImg").css({
-              top: (iT + height * ((iFex - 1) / 2))  + 'px',
-              left: (iL + width * ((iFex - 1) / 2)) + 'px',
-              width: width - (iFex - 1) * width,
-              height: height - (iFex - 1) * height
-            });
-          }
-        });
       }
     }
   }
@@ -136,6 +142,18 @@ export default {
   position: fixed; top: 0;left: 0; z-index: 15555;
   width: 100%;height: 100%;
   background: rgba(0, 0, 0, 0.5);
+  > span {
+    display: inline-block;
+    position: absolute; top: 50%; left: 50%;
+    color: #fff;
+    margin-left: -50px; margin-top: -12px;
+    > i {
+      position: relative; top: 2px;
+      display: inline-block;
+      font-size: 20px;
+      margin-right: 10px;
+    }
+  }
 }
 .imgz_mask_close {
   display: none;
