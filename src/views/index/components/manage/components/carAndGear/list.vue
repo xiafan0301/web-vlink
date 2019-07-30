@@ -309,7 +309,7 @@ export default {
       } else {
         organObj = this.userInfo.organList[0];
       }
-      this.$router.push({name: 'car_detail', query: { id: obj.uid, organObj: organObj }});
+      this.$router.push({name: 'car_detail', query: { id: obj.uid, organObj: JSON.stringify(organObj) }});
     },
     // 跳至新增车辆页面
     skipAddPage () {
@@ -319,7 +319,8 @@ export default {
       } else {
         organObj = this.userInfo.organList[0];
       }
-      this.$router.push({name: 'car_add', query: { organObj: organObj }});
+      console.log('currentOrganObj', this.$store.state.currentOrganObj)
+      this.$router.push({name: 'car_add', query: { organObj: JSON.stringify(organObj)}});
     },
     // 跳至编辑页面
     skipEditPage (obj) {
@@ -329,7 +330,7 @@ export default {
       } else {
         organObj = this.userInfo.organList[0];
       }
-      this.$router.push({name: 'car_edit', query: { id: obj.uid, organObj: organObj }});
+      this.$router.push({name: 'car_edit', query: { id: obj.uid, organObj: JSON.stringify(organObj) }});
     },
     // 显示删除弹出框
     showDeleteDialog (obj) {

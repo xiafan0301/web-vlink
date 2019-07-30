@@ -296,15 +296,6 @@ export default {
       finalData: []
     }
   },
-  watch: {
-    // keyWord (val) {
-    //   if (val) {
-    //     this.closeShow = false;
-    //   } else {
-    //     this.getDepartList();
-    //   }
-    // }
-  },
   mounted () {
     this.userInfo = this.$store.state.loginUser;
 

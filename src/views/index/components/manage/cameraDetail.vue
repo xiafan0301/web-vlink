@@ -20,7 +20,7 @@
         <ul class="basic_info_ul">
           <li>
             <span>摄像头编码：</span>
-            <span>{{detailInfo.uid ? detailInfo.uid : '无'}}</span>
+            <span>{{detailInfo.code ? detailInfo.code : '无'}}</span>
           </li>
           <li>
             <span>所属机构：</span>
@@ -137,7 +137,7 @@
       </div>
     </el-dialog>
     <div class="video_box" v-if="isShowMonitor">
-      <div  is="flvplayer" class="vl_map_video_box"  @playerClose="playerClose" :oData="oData" :showFullScreen="true"></div>
+      <div is="flvplayer" class="vl_map_video_box" @playerClose="playerClose" :oData="oData" :showFullScreen="true"></div>
     </div>
   </div>
 </template>
@@ -362,10 +362,8 @@ export default {
   z-index: 99999;
 }
 .vl_map_video_box {
-  // position: fixed!important;
   width: 100%;
   height: 100%;
-  // top: 0!important;
 }
 </style>
 <style lang="scss">

@@ -29,8 +29,8 @@
             </el-form-item>
             <el-form-item>
               <el-select v-model="formInline.lb" placeholder="请选择车辆分组" style="width: 150px;">
-                <el-option :label="'布控车辆'" :value="1"></el-option>
-                <el-option :label="'无牌车'" :value="2"></el-option>
+                <el-option :label="'布控车辆'" :value="2"></el-option>
+                <el-option :label="'无牌车'" :value="1"></el-option>
                 <el-option v-for="(item, index) in lbList" :label="item.enumValue" :key="'dept-list-' + index" :value="item.uid"></el-option>
                 <el-option v-for="(item, index) in lbtsList" :label="item.name" :key="'dept-list-ts-' + index" :value="item.id"></el-option>
               </el-select>
