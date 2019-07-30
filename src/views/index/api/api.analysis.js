@@ -202,6 +202,14 @@ export function newTaskInfos(params) {
     params
   })
 }
+export function getdetailbg(params) {
+  return request({
+    url: '/personinvestigation/showinvestigationdetails',
+    method: 'get',
+    mode: 'judge',
+    params
+  })
+}
 
 /*-------------------------- 区域人员分析start -------------------------------*/
 /**

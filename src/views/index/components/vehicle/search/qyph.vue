@@ -486,8 +486,9 @@
         let date = new Date();
         let curDate = date.getTime();
         let curS = 1 * 24 * 3600 * 1000;
-        this.searchData.startTime = curDate - curS;
-        this.searchData.endTime = curDate;
+        let yDate = new Date(curDate - curS);
+        this.searchData.startTime = new Date(yDate.getFullYear() + '-' + (yDate.getMonth() + 1) + '-' + yDate.getDate() + ' 00:00:00').getTime();
+        this.searchData.endTime =  new Date(yDate.getFullYear() + '-' + (yDate.getMonth() + 1) + '-' + yDate.getDate() + ' 23:59:59').getTime();
       },
       // 选择区域
       selArea (v) {
