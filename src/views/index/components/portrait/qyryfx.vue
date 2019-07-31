@@ -90,7 +90,9 @@
               <div class="sd-opts">
                 <div class="sd-opts-title">
                   <h4>区域选择</h4>
-                  <i class="vl_icon vl_icon_portrait_02" title="定位当前选中区域" @click="setFitV(index)"></i>
+                  <i class="vl_icon vl_icon_portrait_02" v-if="item.canPosition"  title="定位当前选中区域" @click="setFitV(index)"></i>
+                  <i class="vl_icon vl_icon_portrait_02 cannot_click" v-else></i>
+
                 </div>
                 <ul>
                   <li title="选择矩形范围内的设备">
@@ -529,7 +531,8 @@ export default {
           endTime:
             formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
             " 23:59:59",
-          drawActiveType: 0 // 当前活跃的选中区域
+          drawActiveType: 0, // 当前活跃的选中区域
+          canPosition: false // 是否可以定位
         }
       ],
       zIndex: 50,
@@ -649,7 +652,8 @@ export default {
           endTime:
             formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
             " 23:59:59",
-          drawActiveType: 0 // 当前活跃的选中区域
+          drawActiveType: 0, // 当前活跃的选中区域
+          canPosition: false
         }
       ];
       this.startDateOptArr = [
@@ -908,7 +912,8 @@ export default {
           endTime:
             formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
             " 23:59:59",
-          drawActiveType: 0 // 当前活跃的选中区域
+          drawActiveType: 0, // 当前活跃的选中区域
+          canPosition: false
         }
       ];
     },
@@ -975,9 +980,9 @@ export default {
         // event.obj 为绘制出来的覆盖物对象
         let _sid = random14();
         this.drawClear(this.currenDrawobj);
-        // console.log('监听鼠标');
         //  return
         let drawActive = this.drawObj[this.currenDrawobj].drawActiveType; // 获取到当前要画的图形
+        this.drawObj[this.currenDrawobj].canPosition = true;
         if (drawActive === 1) {
           this.drawObj[this.currenDrawobj].rectangle[_sid] = {};
           this.drawObj[this.currenDrawobj].rectangle[_sid].obj = event.obj;
@@ -1317,7 +1322,6 @@ export default {
         this.drawObj[index].drawActiveType = drawType; // 当前要画的图形类别
         this.currenDrawobj = index; // 确定当前的时间区域
       }
-      // console.log("点击干掉", this.drawObj[this.currenDrawobj].drawActiveType);
       if (drawType === 1) {
         // 矩形
         this.drawRectangle();
@@ -2301,6 +2305,9 @@ export default {
               border-bottom: 1px solid #d3d3d3;
               > i {
                 cursor: pointer;
+              }
+              .cannot_click {
+                cursor: not-allowed;
               }
             }
             > ul {
