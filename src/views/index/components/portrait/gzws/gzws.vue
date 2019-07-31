@@ -394,7 +394,7 @@ export default {
               this.deviceList = res.data;
 
               // 初始化页面时默认选中第一个设备
-              this.addForm.deviceCode = this.deviceList[0].deviceID;
+              this.addForm.deviceCode = this.deviceList[0].deviceName;
               this.addForm.deviceName = this.deviceList[0].deviceName;
               
               this.isShowDeviceTip = false;
@@ -461,15 +461,20 @@ export default {
           this.isAddLoading = true;
           getPersonFollowing(params)
             .then(res => {
-              this.$message({
-                type: 'success',
-                message: '新建成功',
-                customClass: 'request_tip'
-              });
-              // this.dataList = res.data;
-              this.isAddLoading = false;
-              this.addTaskDialog = false;
-              this.getDataList();
+              if (res && res.code === '00000000') {
+                this.$message({
+                  type: 'success',
+                  message: '新建成功',
+                  customClass: 'request_tip'
+                });
+                // this.dataList = res.data;
+                this.isAddLoading = false;
+                this.addTaskDialog = false;
+
+                this.getDataList();
+              } else {
+                this.isAddLoading = false;
+              }
             })
             .catch(() => {this.isAddLoading = false;})
         }

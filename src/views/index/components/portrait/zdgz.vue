@@ -238,7 +238,7 @@
 
   <!-- 地图选择 -->
    <!-- D设备 B卡口  这里是设备和卡口 -->
-    <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" :clear="clearMapSelect" @mapSelectorEmit="mapPoint"></div>
   </div>
 </template>
 <script>
@@ -255,6 +255,7 @@ export default {
   },
   data() {
     return {
+      clearMapSelect: null, // 清除地图选择
       input5:"1",
       areaIds: [],
       eventAreas: [],
@@ -356,6 +357,11 @@ export default {
     getGroupListIsPortrait().then(res => {
       if (res) {
         this.portraitGroupList = res.data;
+        this.portraitGroupList.map(item => {
+          if (!item.uid) {
+            this.searchData.portraitGroupId = item.uid;
+          }
+        })
       }
     })
     getGroupListIsVehicle().then(res => {
@@ -414,6 +420,9 @@ export default {
           .then(res => {
             if (res) {
               this.eventAreas = res.data.areaTreeList;
+              this.eventAreas.map(item => {
+                this.areaIds.push(item.areaId);
+              })
             }
           })
     },
@@ -452,7 +461,13 @@ export default {
       this.searchData.ageGroup = null;
       this.searchData.vehicleGroupId = '';
       this.searchData.plateType = null;
+      this.selectDevice = [];
+      this.selectBayonet = [];
+      this.selectValue = "已选设备0个";
       this.areaIds = [];
+
+      this.clearMapSelect = !this.clearMapSelect; // 清除地图选择
+
     },
     beginSearch () {
       let _todo = false;
