@@ -11,11 +11,6 @@ export default {
       name: 'special_ehicle',
       component: () => import('@/views/index/components/manage/specialVehicle.vue')
     },
-    // {
-    //   path: 'departmentDetail',
-    //   name: 'department_detail',
-    //   component: () => import('@/views/index/components/manage/departmentDetail.vue')
-    // },
     {
       path: 'user',
       name: 'user',
