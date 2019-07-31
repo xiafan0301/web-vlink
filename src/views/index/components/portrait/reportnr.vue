@@ -165,28 +165,20 @@
               <vue-scroll>
                 <div class="mes">
                   <el-collapse v-model="activeNames">
-                    <el-collapse-item title="创谷广告园(2次)" name="1">
+                    <el-collapse-item  v-for="(item, index) in struGroupResultDtoList" :key='index'  :title="item.groupName + '(' + item.totalNum + '次)'">
                       <div class="mes_cot">
-                        <div class="cot_1">
-                          <img src="../../../../../public/static/img/vis-eg.png">
-                          <div style="padding-left: 10px">
-                            <div style="background-color: #F6F6F6; padding: 0 8px"><i class="icon"></i>2018-12-27 15:46:07</div>
-                            <div class="subdata">
-                              <i class="vl_icon vl_icon_retrieval_03" style="height: 24px"></i>
-                              <b>99.12</b>%
+                        <div v-for = "(ite, index) in item.personDetailList" :key='index'>
+                          <div class="cot_1">
+                            <img :src="ite.subStoragePath">
+                            <div style="padding-left: 10px">
+                              <div style="background-color: #F6F6F6; padding: 0 8px"><i class="icon"></i>{{ite.shotTime}}</div>
+                              <div class="subdata">
+                                <i class="vl_icon vl_icon_retrieval_03" style="height: 24px"></i>
+                                <b>{{ite.semblance}}</b>%
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <div style="margin: 15px 0; border-bottom: 1px solid #F2F2F2"></div>
-                        <div class="cot_1">
-                          <img src="../../../../../public/static/img/vis-eg.png">
-                          <div style="padding-left: 10px">
-                            <div style="background-color: #F6F6F6; padding: 0 8px"><i class="icon"></i>2018-12-27 15:46:07</div>
-                            <div class="subdata">
-                              <i class="vl_icon vl_icon_retrieval_03" style="height: 24px"></i>
-                              <b>99.12</b>%
-                            </div>
-                          </div>
+                          <div style="margin: 15px 0; border-bottom: 1px solid #F2F2F2"></div>
                         </div>
                       </div>
                     </el-collapse-item>
@@ -255,7 +247,8 @@ export default {
       repertoryGroupDto: {repertories: [], groups:[{groupName: 'kkk'}]},
       analysisTaskInfoWithBLOBsList: [],
       taskResult: [],
-      struGroupResultDtoList: [{personDetailList: [{shotPlaceLongitude: 1,shotPlaceLatitude: 2 }]}]
+      struGroupResultDtoList: [{personDetailList: [{shotPlaceLongitude: 1,shotPlaceLatitude: 2 }]}],
+      struPersonDtoList: []
     }
   },
   created() {
@@ -281,6 +274,30 @@ export default {
           this.analysisTaskInfoWithBLOBsList = res.data.analysisTaskInfoWithBLOBsList
           this.taskResult = JSON.parse(res.data.analysisTaskInfoWithBLOBsList[0].taskResult)
           this.struGroupResultDtoList = res.data.struGroupResultDtoList
+          // for (let i= 0; i<res.data.struPersonDtoList.length; i++) {
+          //   for (let k=0; i < res.data.struPersonDtoList.length, k++) {
+          //
+          //   }
+          // }
+          let list = []
+          res.data.struPersonDtoList.forEach((item)=>{
+            list.push(item.shotTime.substring(0,10))
+          })
+          list = Array.from(new Set(list))
+          for (let i =0; i<list.length; i++) {
+            let index = list[i]
+            this.struPersonDtoList[i] = {}
+            this.struPersonDtoList[i].shotTime= index
+            this.struPersonDtoList[i].list = []
+            for (let k =0; k<res.data.struPersonDtoList.length; k++) {
+              if (res.data.struPersonDtoList[k].shotTime.substring(0,10) === index) {
+                (this.struPersonDtoList[i].list).push(res.data.struPersonDtoList[k])
+              }
+            }
+            this.struPersonDtoList[i].num = this.struPersonDtoList[i].list.length
+          }
+          console.log(list)
+          console.log(this.struPersonDtoList)
           this.initMap()
         }
         this.$nextTick(() => {
@@ -311,20 +328,15 @@ export default {
       });
       map.setMapStyle('amap://styles/whitesmoke');
       this.map = map;
-      // for (let i= 0; i< this.struGroupResultDtoList.length; i++){
-      //   this.drawPoint(this.struGroupResultDtoList[i])
-      // }
-      this.drawPoint(this.struGroupResultDtoList[0])
+      for (let i= 0; i< this.struGroupResultDtoList.length; i++){
+        this.drawPoint(this.struGroupResultDtoList[i])
+      }
     },
     /**
      * 地图描点
      */
     drawPoint (data) {
-      console.log(data)
-      if (this.markerPoint) {
-        this.map.remove(this.markerPoint)
-      }
-      let _content = '<div class="vl_icon vl_icon_judge_02"></div>'
+      let _content = `<div class="vl_icon vl_icon_judge_02"></div><div class="cap_info_win"><p>${data.groupName}</p><p>${data.totalNum}次</p></div>`
       this.markerPoint = new window.AMap.Marker({ // 添加自定义点标记
         map: this.map,
         position: [data.personDetailList[0].shotPlaceLongitude, data.personDetailList[0].shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
@@ -334,15 +346,6 @@ export default {
         content: _content
       });
       this.map.setZoomAndCenter(16, [data.personDetailList[0].shotPlaceLongitude, data.personDetailList[0].shotPlaceLatitude]); // 自适应点位置
-      let sConent = `<div class="cap_info_win"><p>设备名称：${data.groupName}</p><p>抓拍地址</p></div>`
-      this.infoWindow = new window.AMap.InfoWindow({
-        map: this.map,
-        isCustom: true,
-        closeWhenClickMap: false,
-        position: [data.personDetailList[0].shotPlaceLongitude, data.personDetailList[0].shotPlaceLatitude],
-        offset: new window.AMap.Pixel(0, -70),
-        content: sConent
-      })
     },
     submitForm(v) {
       if(v == 1){
@@ -722,10 +725,23 @@ export default {
 <style lang="scss">
   .cap_info_win {
     background: #FFFFFF;
-    padding: .18rem;
-    font-size: .14rem;
+    padding: 18px;
+    font-size: 14px;
     color: #666666;
     position: relative;
+    white-space: nowrap;
+    left: -52px;
+    top: -173px;
+    min-width: 140px;
+    p{
+      text-align: center;
+    }
+    p:last-child{
+      text-align: center;
+      padding-top: 10px;
+      font-weight: bold;
+      font-size: 20px;
+    }
     &:after {
       display: block;
       content: '';
@@ -734,6 +750,10 @@ export default {
       position: absolute;
       bottom: -.2rem;
       left: calc(50% - .05rem);
+    }
+    &:hover{
+      background-color: #0C70F8;
+      color: white;
     }
   }
   .vl_jtc_mk {
