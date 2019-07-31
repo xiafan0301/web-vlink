@@ -53,6 +53,7 @@
             </el-date-picker>
           </div>
           <!-- 设备搜索 -->
+          <div class="device-comp">
           <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
           <div class="selected_device" @click="treeTabShow = true;">
             <i class="el-icon-arrow-down"></i>
@@ -127,6 +128,8 @@
               </div>-->
             </div>
           </div>
+          <p class="error-tip" :class="{'is-show': isDeviceTrue}">{{messageDevTip}}</p>
+          </div>
           <!-- 下划线 -->
          <!--  <div class="line"></div> -->
            <!-- 切换查询条件 -->
@@ -177,7 +180,8 @@
             </div> -->
             <!-- 车牌号搜索 -->
             <div class="license-plate-search">
-              <el-input v-model="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" clearable></el-input>
+              <el-input v-model="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" @blur="blurJudge" @clear="blurJudge" clearable></el-input>
+              <p class="error-tip" :class="{'is-show': isNumTrue}">{{messageTip}}</p>
             </div>
           </div>
           <!-- 切换查询条件 -->
@@ -450,7 +454,11 @@ export default {
       },
       exportLoading: false,
       messageInfo: null,
-      hoverActive: false
+      hoverActive: false,
+      isDeviceTrue: false,
+      isNumTrue: false,
+      messageTip: "",
+      messageDevTip: "",
     };
   },
   computed: {
@@ -631,6 +639,29 @@ export default {
       });
       this.setDTime();
     },
+    blurJudge() {
+      if (this.checkPlateNumber(this.searchData.licensePlateNum)) {
+        this.isNumTrue = false;
+      }else {
+        this.isNumTrue = true;
+      }
+    },
+    // 验证车牌号方法
+    checkPlateNumber(value) {
+      let reg = /^([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})$/;
+      if (value) {
+        if (!reg.test(value)) {
+          this.messageTip = "请正确输入车牌号码"
+          return false;
+        } else {
+          return true;
+        }
+        return true;
+      } else {
+        this.messageTip = "请输入车牌号码"
+        return false;
+      }
+    },
     //查询
     search() {
       console.log("==================", this.searchData);
@@ -642,25 +673,19 @@ export default {
 
       if (this.selectIndex === 1) {
         if (
-          this.searchData.licensePlateNum &&
+          this.checkPlateNumber(this.searchData.licensePlateNum) &&
           this.selectDeviceArr &&
           this.selectDeviceArr.length > 0
         ) {
           this.getSearchData();
-        } else if (!this.searchData.licensePlateNum) {
-          if (!document.querySelector(".el-message")) {
-            this.$message.info("请输入车牌号码");
-          }
+          this.isDeviceTrue = false;
+          this.isNumTrue = false;
+        } else if (!this.checkPlateNumber(this.searchData.licensePlateNum)) {
+          this.isNumTrue = true;
           return false;
-        } /* else if (!reg.test(this.searchData.licensePlateNum)) {
-          if (!document.querySelector(".el-message")) {
-            this.$message.info("请正确输入车牌号码");
-          }
-          return false;
-        } */ else {
-          if (!document.querySelector(".el-message")) {
-            this.$message.info("请选择设备");
-          }
+        } else {
+          this.isDeviceTrue = true;
+          this.messageDevTip = "请选择设备"
           return false;
         }
       } else if (this.selectIndex === 0) {
@@ -1188,6 +1213,14 @@ export default {
     chooseDevice() {
       // 选择了树的设备
       this.treeTabShow = false;
+      if(this.selectDeviceArr &&
+          this.selectDeviceArr.length > 0) {
+            this.isDeviceTrue = false;
+            this.messageDevTip = "";
+          }else {
+            this.isDeviceTrue = true;
+            this.messageDevTip = "请选择设备";
+          }
     },
     // 处理摄像头树全选时间
     handleCheckedAll(val) {
@@ -1305,6 +1338,14 @@ export default {
       background: #fff;
       box-shadow: 5px 0px 16px 0px rgba(169, 169, 169, 0.2);
       animation: fadeInLeft 0.4s ease-out 0.3s both;
+      .error-tip {
+        display: none;
+        color: #ef5555;
+        font-size: 12px;
+      }
+      .is-show {
+        display: block;
+      }
       .vl_judge_tc_c_item {
         width: 232px;
         height: 232px;
@@ -1403,6 +1444,12 @@ export default {
         margin: 0;
         opacity: 0;
         z-index: 10;
+      }
+      .device-comp {
+        .error-tip {
+          margin-top: -10px;
+          margin-bottom: 10px;
+        }
       }
       // 选择设备下拉
       .selected_device {
