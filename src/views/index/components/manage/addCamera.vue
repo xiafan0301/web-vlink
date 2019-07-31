@@ -48,10 +48,10 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="摄像头序列号" prop="deviceSn">
+            <el-form-item label="摄像头序列号:" prop="deviceSn">
               <el-input v-model="cameraForm.deviceSn" placeholder="请输入摄像头序列号"></el-input>
             </el-form-item>
-            <el-form-item label="摄像头类型::" prop="type">
+            <el-form-item label="摄像头类型:" prop="type">
               <el-select v-model="cameraForm.type" placeholder="请选择摄像头类型" style="width: 100%">
                 <el-option
                   v-for="item in cameraTypeList"
@@ -266,9 +266,9 @@ export default {
         maxPixel: [
           { required: true, message: '该项内容不可为空', trigger: 'blur' }
         ],
-        isActive: [
-          { required: true, message: '该项内容不可为空', trigger: 'blur' }
-        ]
+        // isActive: [
+        //   { required: true, message: '该项内容不可为空', trigger: 'blur' }
+        // ]
       },
       onlineRules: {
         deviceSip: [
@@ -754,6 +754,7 @@ export default {
 
       //为地图注册click事件获取鼠标点击出的经纬度坐标
       _this.map.on('click', function(e) {
+        console.log('asdasdasd', e)
           _this.onlineForm.longitude = e.lnglat.getLng();
           _this.onlineForm.latitude = e.lnglat.getLat();
 
@@ -811,6 +812,7 @@ export default {
         radius : 1000 //范围，默认：500
       });
       geocoder.getAddress(lnglatXY, function(status, result) {
+        console.log('sadasdasdresult', result)
         if (status === 'complete' && result.info === 'OK') {
            _this.geocoder_CallBack(result);
         }

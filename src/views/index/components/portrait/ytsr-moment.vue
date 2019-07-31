@@ -114,7 +114,7 @@
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img">
-              <img :src="sturcDetail.photoUrl" alt="">
+              <img class="bigImg" :src="sturcDetail.photoUrl" alt="">
               <span>布控库图</span>
             </div>
             <div class="struc_c_d_info">

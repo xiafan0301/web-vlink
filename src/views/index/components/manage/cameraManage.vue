@@ -5,16 +5,15 @@
         <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
           <el-form-item prop="dateTime">
             <el-date-picker
-              style="width: 380px"
+              style="width: 250px"
               class="vl_date"
               type="daterange"
               align="right"
               unlink-panels
               range-separator="至"
               format="yyyy-MM-dd"
-              value-format="yyyy-MM-dd HH:mm:ss"
+              value-format="yyyy-MM-dd"
               v-model="searchForm.dateTime"
-              :default-time="['00:00:00', '23:59:59']"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
               :picker-options="pickerOptions"
@@ -22,7 +21,7 @@
             </el-date-picker>
           </el-form-item>
           <el-form-item prop="dutyUnitId">
-            <el-select v-model="searchForm.dutyUnitId" placeholder="请选择">
+            <el-select v-model="searchForm.dutyUnitId" placeholder="请选择" style="width: 250px">
               <el-option value="全部机构"></el-option>
               <el-option
                 v-for="item in departmentList"
@@ -33,7 +32,7 @@
             </el-select>
           </el-form-item>
           <el-form-item prop="type">
-            <el-select v-model="searchForm.type" placeholder="请选择">
+            <el-select v-model="searchForm.type" placeholder="请选择" style="width: 250px">
               <el-option value="全部类型"></el-option>
               <el-option
                 v-for="item in cameraTypeList"
@@ -44,7 +43,7 @@
             </el-select>
           </el-form-item>
           <el-form-item prop="deviceStatus">
-            <el-select v-model="searchForm.deviceStatus" placeholder="请选择">
+            <el-select v-model="searchForm.deviceStatus" placeholder="请选择" style="width: 250px">
               <el-option value="全部状态"></el-option>
               <el-option
                 v-for="item in deviceStatusList"
@@ -55,7 +54,7 @@
             </el-select>
           </el-form-item>
           <el-form-item prop="intelligentCharac">
-            <el-select v-model="searchForm.intelligentCharac" placeholder="请选择">
+            <el-select v-model="searchForm.intelligentCharac" placeholder="请选择" style="width: 250px">
               <el-option value="全部特性"></el-option>
               <el-option
                 v-for="item in intelligentCharacList"
@@ -66,7 +65,7 @@
             </el-select>
           </el-form-item>
           <el-form-item prop="importantLevel">
-            <el-select v-model="searchForm.importantLevel" placeholder="请选择">
+            <el-select v-model="searchForm.importantLevel" placeholder="请选择" style="width: 250px">
               <el-option value="全部级别"></el-option>
               <el-option
                 v-for="item in importLevelList"
@@ -77,7 +76,7 @@
             </el-select>
           </el-form-item>
           <el-form-item prop="manufacturer">
-            <el-select v-model="searchForm.manufacturer" placeholder="请选择">
+            <el-select v-model="searchForm.manufacturer" placeholder="请选择" style="width: 250px">
               <el-option value="全部厂家"></el-option>
               <el-option
                 v-for="item in manufacturerList"
@@ -88,7 +87,7 @@
             </el-select>
           </el-form-item>
           <el-form-item prop="keyword">
-            <el-input placeholder="请输入摄像头名称/IP搜索" style="width: 240px" v-model="searchForm.keyword"></el-input>
+            <el-input placeholder="请输入摄像头名称/IP搜索" style="width: 250px" v-model="searchForm.keyword"></el-input>
           </el-form-item>
           <el-form-item>
             <el-button class="select_btn" type="primary" :loading="isSearchLoading" @click="selectDataList">查询</el-button>
@@ -118,13 +117,13 @@
           </el-table-column>
           <el-table-column
             label="摄像头编号"
-            prop="deviceCode"
+            prop="deviceSeq"
             width="150"
             sortable
             show-overflow-tooltip
             >
             <template slot-scope="scope">
-              <span>{{scope.row.deviceCode ? scope.row.deviceCode : '-'}}</span>
+              <span>{{scope.row.deviceSeq ? scope.row.deviceSeq : '-'}}</span>
             </template>
           </el-table-column>
           <el-table-column
@@ -299,7 +298,7 @@ export default {
     return {
       pickerOptions: {
         disabledDate(time) {
-          return time.getTime() > Date.now();
+          return time.getTime() > new Date().getTime();
         },
         shortcuts: [{
           text: '今天',
@@ -412,8 +411,8 @@ export default {
       const params = {
         viewType: 2, // 设备导出
         deviceBasicParamPageDto: {
-          onlineStartDate: this.searchForm.dateTime[0],
-          onlineEndDate: this.searchForm.dateTime[1],
+          onlineStartDate: this.searchForm.dateTime[0] && (this.searchForm.dateTime[0] + ' 00:00:00'),
+          onlineEndDate: this.searchForm.dateTime[1] && (this.searchForm.dateTime[1] + ' 23:59:59'),
           dutyUnitId: dutyUnitId,
           intelligentCharac: intelligentCharac,
           deviceStatus: deviceStatus,
@@ -591,8 +590,8 @@ export default {
       console.log(this.searchForm.dateTime)
 
       const params = {
-        'where.onlineStartDate': this.searchForm.dateTime[0],
-        'where.onlineEndDate': this.searchForm.dateTime[1],
+        'where.onlineStartDate': this.searchForm.dateTime[0] && (this.searchForm.dateTime[0] + ' 00:00:00'),
+        'where.onlineEndDate': this.searchForm.dateTime[1] && (this.searchForm.dateTime[1] + ' 23:59:59'),
         'where.dutyUnitId': dutyUnitId,
         'where.intelligentCharac': intelligentCharac,
         'where.deviceStatus': deviceStatus,

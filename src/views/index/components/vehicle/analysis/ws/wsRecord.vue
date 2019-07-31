@@ -7,6 +7,7 @@
           {name: '尾随分析', routerName: 'vehicle_search_ws', query: {
             plateNo: $route.query.plateNo,
             dateStart: $route.query.dateStart,
+            searchStartTime: $route.query.searchStartTime,
             dateEnd: $route.query.dateEnd,
             vehicleClass: $route.query.vehicleClass,
             interval: $route.query.interval,
@@ -185,7 +186,7 @@ export default {
           { name: '新建布控' }
         ]
       });
-      this.$router.push({name: 'control_create', query: { plateNo: this.$route.query.plateNo, modelName: '车辆追踪' }});
+      this.$router.push({name: 'control_create', query: { plateNo: this.resultList[0].struVehicleDto.plateNo, modelName: '车辆追踪' }});
     },
     // 跳至轨迹分析页面
     skipTrajectoryPage () {
@@ -197,7 +198,7 @@ export default {
           { name: '车辆轨迹' }
         ]
       });
-      this.$router.push({name: 'vehicle_analysis_clgj', query: { plateNo: this.$route.query.plateNo }});
+      this.$router.push({name: 'vehicle_analysis_clgj', query: { plateNo: this.resultList[0].struVehicleDto.plateNo }});
     },
     // 跳至落脚点分析页面
     skipFootholdPage () {
@@ -209,7 +210,7 @@ export default {
           { name: '落脚点分析' }
         ]
       });
-      this.$router.push({name: 'vehicle_search_ljd', query: { plateNo: this.$route.query.plateNo }});
+      this.$router.push({name: 'vehicle_search_ljd', query: { plateNo: this.resultList[0].struVehicleDto.plateNo }});
     },
     // 获取尾随车辆详情
     getDetail () {
