@@ -172,6 +172,7 @@ export function editDeviceInfo (data) {
     mode: baseModeName
   });
 }
+/**********************  卡口管理  ********************/
 /**
  * 新增卡口
  */
@@ -180,6 +181,61 @@ export function addBayonetInfo (data) {
     url: '/bayonet-service',
     data,
     method: 'post',
+    mode: baseModeName
+  });
+}
+/**
+ * 修改卡口
+ */
+export function putBayonetInfo (data) {
+  return request({
+    url: '/bayonet-service',
+    data,
+    method: 'put',
+    mode: baseModeName
+  });
+}
+/**
+ * 修改卡口基础信息
+ */
+export function putBayonetBasisInfo (data) {
+  return request({
+    url: '/bayonet-service/bayonet-info',
+    data,
+    method: 'put',
+    mode: baseModeName
+  });
+}
+/**
+ * 卡口列表查询
+ */
+export function getBayonetList (params) {
+  return request({
+    url: '/bayonet-service/bayonet-info-list',
+    params,
+    method: 'get',
+    mode: baseModeName
+  });
+}
+/**
+ * 删除卡口
+ */
+export function delBayonet (params) {
+  return request({
+    url: '/bayonet-service/bayonet',
+    params,
+    method: 'delete',
+    mode: baseModeName
+  });
+}
+/**
+ * 查看卡口详情
+ */
+export function getBayonetDetail (params) {
+  return request({
+    url: '/bayonet-service/bayonet-info',
+    params,
+    method: 'get',
     mode: baseModeName
   });
 }
