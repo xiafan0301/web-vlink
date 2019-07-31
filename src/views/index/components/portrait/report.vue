@@ -266,7 +266,7 @@ export default {
         pageSize: this.pagination.pageSize,
         orderBy: 'create_time',
         order: 'desc',
-        // 'where.taskType': 9,    //任务类型 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
+        'where.taskType': 9,    //任务类型 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
         'where.isFinish': this.selectIndex,   //是否完成 0:未完成(包含处理中、处理失败、处理中断) 1：已完成(处理成功)
       }
       this.taskForm.taskName && (params['where.taskName'] = this.taskForm.taskName);
@@ -307,7 +307,8 @@ export default {
     },
     // 跳至详情页面
     skipDetailPage(obj) {
-      this.$router.push({ name: "portrait_nr" , query: {uid: obj.uid}});
+      let data = JSON.parse(obj.taskWebParam)
+      this.$router.push({ name: "portrait_nr" , query: {uid: obj.uid, targetUrl: data.targetPicUrl, startTime: data.startTime, endTime: data.endTime}});
     },
     // 新见任务
     addnewtask () {
