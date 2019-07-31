@@ -869,7 +869,7 @@ export default {
 <style lang="scss">
 .pt_rlcx_fm {
   .el-form-item{
-    margin-bottom: 6px;
+    margin-bottom: 10px;
   }
   .el-form-item__label {
     padding-right: 5px;

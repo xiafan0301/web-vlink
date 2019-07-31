@@ -184,6 +184,9 @@ export default {
     },
     // flag false 上一个， true 下一个
     doSliderDetail (flag) {
+      console.log(this.strucIndex);
+      console.log(this.strucInfoList.length);
+      console.log(this.pagination);
       if (flag) {
         // 下一个
         if (this.strucIndex < (this.strucInfoList.length - 1)) {
@@ -193,7 +196,7 @@ export default {
         } else {
           // 序号超出
           if (this.pagination.total > 
-            (this.pagination.pageSize * (this.pagination.pageNum - 1) + this.strucIndex)) {
+            (this.pagination.pageSize * (this.pagination.pageNum - 1) + this.strucIndex + 1)) {
             // 需要分页
             this.pagination.pageNum = this.pagination.pageNum + 1;
             this.strucIndex = 0;
