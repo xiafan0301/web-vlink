@@ -103,21 +103,22 @@
       <div class="snap_box" v-if="!isShowFullScreen && isShowSnapList && snapTotal > 0">
         <div class="snap_box_one">
           <el-card shadow="hover" class="more">
-            <p>今日抓拍</p>
             <div>{{snapTotal}}</div>
+            <p>今日抓拍</p>
             <el-button size="small" @click="sikpISalarmToday">查看更多</el-button>
           </el-card>
         </div>
         <div class="snap_box_two" v-for="item in snapList" :key="item.deviceId">
-          <el-card class="pic" shadow="hover">
+          <el-card class="pic" shadow="hover" @click.native="skipIsalarmDel(item)">
+            <div class="obj_name">疑似目标：{{item.objName}}</div>
             <div class="img">
               <img :src="item.snapPhoto" alt="" width="130" height="130">
             </div>
             <ul>
-              <li>
+              <!-- <li>
                 <i class="vl_icon vl_icon_control_26"></i>
                 <span>{{item.objName}}</span>
-              </li>
+              </li> -->
               <li>
                 <i class="vl_icon vl_icon_control_27"></i>
                 <span>{{item.snapTime}}</span>
@@ -309,6 +310,10 @@ export default {
     this.map = map;
   },
   methods: {
+    // 跳转到告警详情页
+    skipIsalarmDel (item) {
+      this.$router.push({name: 'alarm_default', query: {uid: item.uid, objType: item.objType, type: 'today'}});
+    },
     hideLeft() {
       this.hideleft = !this.hideleft;
     },
@@ -924,19 +929,24 @@ export default {
             width: 100%;
             height: 100%;
             text-align: center;
-            padding: 78px 0 87px 0;
+            padding: 70px 0;
             box-shadow:0px -4px 10px 0px rgba(131,131,131,0.28);
+            background:linear-gradient(180deg,rgba(55,181,253,1),rgba(12,112,248,1));
             p{
+              margin-bottom: 10px;
               line-height: 24px;
+              color: #fff;
             }
             div{
-              font-size: 24px;
+              font-size: 38px;
               line-height: 24px;
-              margin-bottom: 5px;
-              color: #0769E7;
+              margin-bottom: 6px;
+              color: #fff;
+              font-family:Arial-BoldMT;
+              font-weight:bold;
             }
             .el-button{
-              width: 90px;
+              width: 120px;
               height: 30px;
             }
           }
@@ -948,16 +958,26 @@ export default {
           .pic.el-card{
             width: 100%;
             height: 100%;
-            padding: 15px 0;
+            padding-bottom: 15px;
             box-shadow:0px -4px 10px 0px rgba(131,131,131,0.28);
+            cursor: pointer;
+            .obj_name{
+              width: 100%;
+              height:32px;
+              line-height: 32px;
+              text-align: center;
+              background:rgba(12,112,248,1);
+              box-shadow:0px -4px 10px 0px rgba(131,131,131,0.28);
+              color: #fff;
+            }
             ul{
-              padding: 16px 0 0 16px;
+              padding: 6px 0 0 16px;
               li i{
                 vertical-align: middle;
-                margin-bottom: 2px;
               }
               li:nth-child(1) span{
                 color: #333333;
+                font-size: 12px;
               }
               li:not(:nth-child(1)) span{
                 color: #999999;
@@ -966,6 +986,7 @@ export default {
             } 
             .img{
               width: 100%;
+              margin-top: 15px;
               text-align: center;
             }          
           }          

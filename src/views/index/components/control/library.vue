@@ -715,11 +715,26 @@ export default {
     }
   },
   mounted () {
-    // 获取分组列表
-    this.getGroupList();
-    // 默认获取人像库列表
-    this.getPortraitList(this.groupId, 0);
     this.picHeight = window.screenHeight + 180;
+    /* 区域徘徊跳转过来 */
+    if (JSON.stringify(this.$route.query) !== '{}') {
+      const {imgurl, plateNo} = this.$route.query;
+      this.tabType = '2';
+      // 获取分组列表
+      this.getGroupList();
+      // 获取车像库列表
+      this.getVehicleList(this.groupId, 0);
+      this.addPortraitDialog = true;
+      this.operationType = '1';//新增
+      this.carForm.vehicleNumber = plateNo;//回填车牌号码
+      this.fileList = [{url: imgurl}];//回填图片
+      this.dialogImageUrl = imgurl;
+    } else {
+      // 获取分组列表
+      this.getGroupList();
+      // 获取人像库列表
+      this.getPortraitList(this.groupId, 0);
+    }
   },
   methods: {
     // 通过证件号模糊匹配人像列表
@@ -882,6 +897,7 @@ export default {
       }
       this.portraitForm.groupIds = [];
       this.carForm.groupIds = [];
+      this.carForm.vehicleNumber = null;
       this.portraitForm.sex = 0;
       this.isShowDpList = false;
       this.addPortraitDialog = !this.addPortraitDialog;

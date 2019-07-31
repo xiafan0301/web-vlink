@@ -653,7 +653,7 @@ export function addVhicleVideoContinue(params) {
  */
 export function selectVideoContinue(params) {
   return request({
-    url: '/select/video/continue',
+    url: '/begin/video/continue',
     method: 'get',
     params: params,
     mode: 'judge'

@@ -77,7 +77,7 @@
           <ul class="bottom">
             <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
             <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
-          </ul>
+          </ul> 
         </div>
       </div>
       <div class="add_footer">

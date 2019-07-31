@@ -33,18 +33,18 @@
           <div class="struc_c_d_info">
             <h2>分析结果：</h2>
             <ul>
-              <li v-if="sturcDetail.sex"><span>{{sturcDetail.sex}}</span></li>
-              <li v-if="sturcDetail.age"><span>{{sturcDetail.age}}</span></li>
-              <li v-if="sturcDetail.hair"><span>{{sturcDetail.hair}}</span></li>
-              <li v-if="sturcDetail.glasses"><span>{{sturcDetail.glasses}}</span></li>
-              <li v-if="sturcDetail.hat"><span>{{sturcDetail.hat}}</span></li>
-              <li v-if="sturcDetail.mask"><span>{{sturcDetail.mask}}</span></li>
-              <li v-if="sturcDetail.baby"><span>{{sturcDetail.baby}}</span></li>
-              <li v-if="sturcDetail.bag"><span>{{sturcDetail.bag}}</span></li>
-              <li v-if="sturcDetail.upperType"><span><span>上身款式：</span>{{sturcDetail.upperType}}</span></li>
-              <li v-if="sturcDetail.upperColor"><span><span>上身颜色：</span>{{sturcDetail.upperColor}}</span></li>
-              <li v-if="sturcDetail.bottomType"><span><span>下身款式：</span>{{sturcDetail.bottomType}}</span></li>
-              <li v-if="sturcDetail.bottomColor"><span><span>下身颜色：</span>{{sturcDetail.bottomColor}}</span></li>
+              <li v-if="sturcDetail.sex"><span>性别</span><span>{{sturcDetail.sex}}</span></li>
+              <li v-if="sturcDetail.age"><span>年龄段</span><span>{{sturcDetail.age}}</span></li>
+              <li v-if="sturcDetail.hair"><span>发型</span><span>{{sturcDetail.hair}}</span></li>
+              <li v-if="sturcDetail.glasses"><span>戴眼镜</span><span>{{sturcDetail.glasses}}</span></li>
+              <li v-if="sturcDetail.hat"><span>戴帽子</span><span>{{sturcDetail.hat}}</span></li>
+              <li v-if="sturcDetail.mask"><span>戴口罩</span><span>{{sturcDetail.mask}}</span></li>
+              <li v-if="sturcDetail.baby"><span>抱小孩</span><span>{{sturcDetail.baby}}</span></li>
+              <li v-if="sturcDetail.bag"><span>拎东西</span><span>{{sturcDetail.bag}}</span></li>
+              <li v-if="sturcDetail.upperType"><span>上身款式</span><span>{{sturcDetail.upperType}}</span></li>
+              <li v-if="sturcDetail.upperColor"><span>上身颜色</span><span>{{sturcDetail.upperColor}}</span></li>
+              <li v-if="sturcDetail.bottomType"><span>下身款式</span><span>{{sturcDetail.bottomType}}</span></li>
+              <li v-if="sturcDetail.bottomColor"><span>下身颜色</span><span>{{sturcDetail.bottomColor}}</span></li>
             </ul>
              <!--  <span class='tz' v-if="sturcDetail.features"><b>特征码：</b>{{sturcDetail.features}}</span> -->
           </div>
@@ -63,8 +63,11 @@
             :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
           </div>
         </div>
-        <div class="struc_c_d_box" style="padding: 10px 0 0 0; color: #666;" v-else>
-          暂无视频
+        <div class="struc_c_d_box struc_vid_empty" v-else>
+          <div class="struc_vid_empty_c com_trans50_lt">
+            <div></div>
+            <p>暂无视频</p>
+          </div>
         </div>
         <div class="download_btn" v-show="sturcDetail.videoPath">
           <a download="视频" :href="sturcDetail.videoPath">下载视频</a>
@@ -181,6 +184,9 @@ export default {
     },
     // flag false 上一个， true 下一个
     doSliderDetail (flag) {
+      console.log(this.strucIndex);
+      console.log(this.strucInfoList.length);
+      console.log(this.pagination);
       if (flag) {
         // 下一个
         if (this.strucIndex < (this.strucInfoList.length - 1)) {
@@ -190,7 +196,7 @@ export default {
         } else {
           // 序号超出
           if (this.pagination.total > 
-            (this.pagination.pageSize * (this.pagination.pageNum - 1) + this.strucIndex)) {
+            (this.pagination.pageSize * (this.pagination.pageNum - 1) + this.strucIndex + 1)) {
             // 需要分页
             this.pagination.pageNum = this.pagination.pageNum + 1;
             this.strucIndex = 0;
@@ -314,7 +320,7 @@ export default {
   .struc_main {
     position: relative;
     margin: 0 auto;
-    padding: 0 45px;
+    padding: 0 30px;
     border-bottom: 1px solid #f2f2f2;
     > i {
       position: absolute; top: 50%;
@@ -322,10 +328,10 @@ export default {
       margin-top: -40px;
       cursor: pointer;
       &.el-icon-arrow-left {
-        left: -20px;
+        left: -30px;
       }
       &.el-icon-arrow-right {
-        right: -20px;
+        right: -30px;
       }
       &.slider_sding { color: #999; cursor: default; }
       &.slider_dis { color: #999; cursor: not-allowed; }
@@ -424,7 +430,7 @@ export default {
           float: left;
         }
         .struc_c_d_info {
-          width: 318px; height: 400px;
+          width: 350px; height: 400px;
           padding: 0 10px 0 20px;
           color: #333333;
           overflow: auto;
@@ -436,30 +442,47 @@ export default {
             overflow: hidden;
             > li {
               float: left;
-              margin-bottom: 10px; margin-right: 10px;
+              width: 50%;
+              overflow: hidden;
+              margin-bottom: 15px;
               > span {
-                display: inline-block;
-                line-height: 26px;
+                line-height: 26px; height: 28px;
                 border: 1px solid #ddd;
-                padding: 0 20px 0 20px;
                 border-radius: 4px;
-                > span { color: #999; }
-                /* background-color: #0C70F8; 
-                color: #fff; */
-                /* &:first-child {
-                  width: 80px;
-                  background-color: #f2f2f2;
+                float: left;
+                font-size: 14px;
+                &:first-child {
+                  width: 70px;
+                  background-color: #FAFAFA;
                   text-align: center;
-                  border: 1px solid #eee;
+                  border: 1px solid #f2f2f2;
                   border-radius: 4px 0 0 4px;
+                  color: #999;
                 }
                 &:last-child {
-                  border: 1px solid #eee;
+                  max-width: 220px;
+                  border: 1px solid #f2f2f2;
                   border-left: 0;
-                  padding: 0 20px 0 16px;
+                  background-color: #fff;
+                  padding: 0 10px 0 10px;
                   border-radius: 0 4px 4px 0;
-                } */
+                  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; word-break: break-all;
+                }
               }
+            }
+          }
+        }
+        &.struc_vid_empty {
+          position: relative;
+          > .struc_vid_empty_c {
+            > div {
+              width: 134px; height: 89px;
+              background: url(../../../../../assets/img/video/video_empty.png) center center no-repeat;
+            }
+            > p {
+              padding-top: 10px;
+              text-align: center;
+              color: #666;
             }
           }
         }

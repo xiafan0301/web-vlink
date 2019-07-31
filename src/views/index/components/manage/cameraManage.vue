@@ -12,8 +12,9 @@
               unlink-panels
               range-separator="至"
               format="yyyy-MM-dd"
-              value-format="yyyy-MM-dd"
+              value-format="yyyy-MM-dd HH:mm:ss"
               v-model="searchForm.dateTime"
+              :default-time="['00:00:00', '23:59:59']"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
               :picker-options="pickerOptions"
@@ -418,6 +419,7 @@ export default {
           deviceStatus: deviceStatus,
           importantLevel: importantLevel,
           type: type,
+          isBayonet: false,
           manufacturer: manufacturer,
           keyword: this.searchForm.keyword,
         }
@@ -586,6 +588,8 @@ export default {
       } else {
         manufacturer = this.searchForm.manufacturer;
       }
+      console.log(this.searchForm.dateTime)
+
       const params = {
         'where.onlineStartDate': this.searchForm.dateTime[0],
         'where.onlineEndDate': this.searchForm.dateTime[1],
@@ -596,6 +600,7 @@ export default {
         'where.type': type,
         'where.manufacturer': manufacturer,
         'where.keyword': this.searchForm.keyword,
+        'where.isBayonet': false, // 是否是卡口
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
         order: 'desc',
@@ -617,31 +622,6 @@ export default {
                   val.dutyUnitName = item.organName;
                 }
               });
-              // this.cameraTypeList.map(item => {
-              //   if (item.enumField == val.type) {
-              //     val.cameraTypeName = item.enumValue;
-              //   }
-              // });
-              // this.intelligentCharacList.map(item => {
-              //   if (item.enumField == val.intelligentCharac) {
-              //     val.intelligentCharacName = item.enumValue;
-              //   }
-              // });
-              // this.importLevelList.map(item => {
-              //   if (item.enumField == val.importantLevel) {
-              //     val.importantLevelName = item.enumValue;
-              //   }
-              // });
-              // this.manufacturerList.map(item => {
-              //   if (item.enumField == val.manufacturer) {
-              //     val.manufacturerName = item.enumValue;
-              //   }
-              // });
-              // this.deviceStatusList.map(item => {
-              //   if (item.enumField == val.deviceStatus) {
-              //     val.deviceStatusName = item.enumValue;
-              //   }
-              // });
             })
           } else {
             this.isSearchLoading = false;
