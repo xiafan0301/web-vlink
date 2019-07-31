@@ -11,7 +11,7 @@
     <div class="vc_gcck">
       <div class="vc_gcck_con">
         <div class="gcck_s">
-          <el-form :inline="true" :model="formInline" ref="formInline" class="dl_hi_sf" size="small">
+          <el-form :inline="true" :model="formInline" ref="formInline" class="dl_hi_sf">
             <el-form-item>
               <el-date-picker style="width: 250px;"
                 class="vl_date"
@@ -43,9 +43,9 @@
             <el-form-item style="margin-right: 2px;">
               <el-checkbox class="gcck_ck_f" v-model="formInline.no">排除</el-checkbox>
             </el-form-item>
-            <el-form-item>
+            <el-form-item class="ntmd_fm">
               <el-input placeholder="请输入车牌号" style="width: 200px;" v-model="formInline.cp">
-                <el-select style="width: 80px;" v-model="formInline.cpp" slot="prepend" placeholder="归属">
+                <el-select style="width: 70px;" :clearable="true" v-model="formInline.cpp" slot="prepend" placeholder="">
                   <el-option v-for="(item, index) in cppList" :label="item.enumValue" :key="'afawe-list-' + index" :value="item.enumValue"></el-option>
                   <el-option :label="''" :value="''"></el-option>
                 </el-select>
@@ -495,5 +495,10 @@ export default {
   padding-left: 5px;
   color: #000;
   .el-checkbox__label { padding-left: 1px; }
+}
+.ntmd_fm {
+  .el-input-group__prepend {
+    background-color: #fff;
+  }
 }
 </style>

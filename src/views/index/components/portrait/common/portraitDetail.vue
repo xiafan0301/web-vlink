@@ -431,7 +431,7 @@ export default {
         }
         .struc_c_d_info {
           width: 350px; height: 400px;
-          padding: 0 10px 0 20px;
+          padding: 0 5px 0 20px;
           color: #333333;
           overflow: auto;
           > h2 {
@@ -450,9 +450,10 @@ export default {
                 border: 1px solid #ddd;
                 border-radius: 4px;
                 float: left;
+                overflow: hidden;
                 font-size: 14px;
                 &:first-child {
-                  width: 70px;
+                  width: 68px;
                   background-color: #FAFAFA;
                   text-align: center;
                   border: 1px solid #f2f2f2;
@@ -460,11 +461,11 @@ export default {
                   color: #999;
                 }
                 &:last-child {
-                  max-width: 220px;
+                  max-width: 94px;
                   border: 1px solid #f2f2f2;
                   border-left: 0;
                   background-color: #fff;
-                  padding: 0 10px 0 10px;
+                  padding: 0 9px 0 9px;
                   border-radius: 0 4px 4px 0;
                   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; word-break: break-all;
                 }
