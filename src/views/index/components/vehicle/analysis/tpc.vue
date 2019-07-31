@@ -387,7 +387,7 @@ export default {
         params: params, // 查询参数
         list: this.regulationsList, // 列表
         index: index, // 第几个
-        pageSize: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize,
         total: this.pagination.total,
         pageNum: this.pagination.pageNum
       }

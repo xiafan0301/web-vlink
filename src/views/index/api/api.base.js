@@ -172,3 +172,14 @@ export function editDeviceInfo (data) {
     mode: baseModeName
   });
 }
+/**
+ * 新增卡口
+ */
+export function addBayonetInfo (data) {
+  return request({
+    url: '/bayonet-service',
+    data,
+    method: 'post',
+    mode: baseModeName
+  });
+}

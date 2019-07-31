@@ -111,7 +111,37 @@
               <div class="struc_cdi_line" v-if="sturcDetail.alarmFeature">
                 <span class="feature_name">{{sturcDetail.alarmFeature.featureName}}</span>
               </div>
-              <div v-if="sturcDetail.snapTime">
+              <div class="struc_cdu_line" v-if="sturcDetail.snapTime">
+                <p>
+                  <b>抓拍时间</b>
+                  <span>{{sturcDetail.snapTime | fmTimestamp('yyyy-MM-dd HH:mm:ss')}}</span>
+                </p>
+              </div>
+              <div class="struc_cdu_line" v-if="sturcDetail.devInfo">
+                <p>
+                  <b>抓拍设备</b>
+                  <span>{{sturcDetail.devInfo.deviceName}}</span>
+                </p>
+              </div>
+              <div class="struc_cdu_line" v-if="sturcDetail.addressDesc">
+                <p>
+                  <b>抓拍地址</b>
+                  <span>{{sturcDetail.addressDesc}}</span>
+                </p>
+              </div>
+              <div class="struc_cdu_line" v-if="sturcDetail.areaInfo">
+                <p>
+                  <b>区域名称</b>
+                  <span>{{sturcDetail.areaInfo.cname}}</span>
+                </p>
+              </div>
+              <div class="struc_cdu_line" v-if="sturcDetail.eventInfo">
+                <p>
+                  <b>关联事件</b>
+                  <span>{{sturcDetail.eventInfo.eventCode}}</span>
+                </p>
+              </div>
+              <!-- <div v-if="sturcDetail.snapTime">
                 <div class="struc_cdu_line">
                   <span>{{sturcDetail.snapTime | fmTimestamp('yyyy-MM-dd HH:mm:ss')}}</span><span>抓拍时间</span>
                 </div>
@@ -135,7 +165,7 @@
                 <div class="struc_cdu_line">
                   <span>{{sturcDetail.eventInfo.eventCode}}</span><span>关联事件</span>
                 </div>
-              </div>
+              </div> -->
             </div>
             <span>相似度</span>
             <span>{{sturcDetail.semblance ? (sturcDetail.semblance).toFixed(2) : 0.00}}<span style="font-size: 12px;">%</span></span>
@@ -183,8 +213,8 @@
               <div class="vl_jfo_sim"  v-show="showSim"><i class="vl_icon vl_icon_retrieval_05" :class="{'vl_icon_retrieval_06':  item.uid == curImgUid}"></i>{{item.semblance ? item.semblance : 92}}<span style="font-size: 12px;">%</span></div>
             </div>
           </swiper-slide>
-          <div class="swiper-button-prev" slot="button-prev"></div>
-          <div class="swiper-button-next" slot="button-next"></div>
+          <div class="swiper-button-prev" slot="button-prev" @click="getPreList"></div>
+          <div class="swiper-button-next" slot="button-next" @click="getNextList"></div>
         </swiper>
       </div>
     </div>
@@ -220,6 +250,7 @@ export default {
         navigation: {
           nextEl: '.swiper-button-next',
           prevEl: '.swiper-button-prev',
+          disabledClass: 'my-button-disabled'
         },
       },
       amap: null, // 地图实例
@@ -228,6 +259,9 @@ export default {
       startTime: null,
       endTime: null,
       isLoading: false,
+      pageNum: 1,
+      pageSize: 10,
+      total: 0,
     }
   },
   mounted() {
@@ -252,6 +286,18 @@ export default {
     }
   },
   methods: {
+    getPreList() {
+      if(this.pageNum > 1) {
+        this.pageNum = this.pageNum -1;
+        this.getAlarm()
+      }
+    },
+    getNextList() { 
+      if(this.pageNum < (this.total/this.pageSize)) {
+        this.pageNum = this.pageNum +1;
+        this.getAlarm()
+      }
+    },
     //告警
     getAlarm() {
       this.alarmList = [];
@@ -266,12 +312,15 @@ export default {
         "where.startTime": this.startTime,
         "where.endTime": this.endTime,
         "where.sortType": 2,
-        pageNum:-1,
-        pageSize: 0,
+        pageNum: this.pageNum,
+        pageSize: this.pageSize,
+        /* pageNum:-1,
+        pageSize: 0, */
       };
       getAlarmList(params).then( res => {
         if(res.data.list && res.data.list.length > 0) {
           this.strucInfoList = [...res.data.list]
+          this.total = res.data.total;
           for(let item of this.strucInfoList) {
             item['semblance'] = (item.semblance).toFixed(2)
             item['isSeen'] = false
@@ -606,7 +655,7 @@ export default {
                   left: .8rem;
                 }
               }
-              .struc_cdu_line {
+              /* .struc_cdu_line {
                   border: 1px solid #F2F2F2;
                   border-radius: 3px;
                   background-color: #FAFAFA;
@@ -625,7 +674,7 @@ export default {
                     padding-left: .12rem;
                     color: #666;
                   }
-              }
+              } */
               .struc_cdi_line {
                 span {
                   position: relative;
@@ -647,6 +696,37 @@ export default {
                   }
                 }
               }
+              .struc_cdu_line {
+              flex: none;
+              p {
+                max-width: 100%;
+                overflow: hidden;
+                display: table;
+                min-height: .34rem;
+                margin-bottom: 0.08rem;
+                padding-right: 10px;
+                margin-right: 0.08rem;
+                border: 1px solid #f2f2f2;
+                border-radius: 3px;
+                font-size: 12px;
+                > b {
+                  width: 70px;
+                  background: #fafafa;
+                  color: #999;
+                  font-weight: normal;
+                  padding-right: 10px;
+                  padding-left: 10px;
+                  display: table-cell;
+                  vertical-align: middle;
+                  border-right: 1px solid #f2f2f2;
+                }
+                >span {
+                  display: table-cell;
+                  vertical-align: middle;
+                  padding-left: 5px;
+                }
+              }
+            }
               .feature_name {
                 max-width: 82%!important;
                 max-height: 1.02rem!important;
