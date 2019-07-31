@@ -1180,3 +1180,8 @@ html {
 .vl_date .el-range-separator {
   color: #999 !important;
 }
+
+.el-button.is-disabled, .el-button.is-disabled:focus, .el-button.is-disabled:hover {
+  background-color: #f2f2f2;
+  color: #b2b2b2; 
+}
