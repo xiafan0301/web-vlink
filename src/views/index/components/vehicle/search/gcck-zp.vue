@@ -72,7 +72,7 @@
                         </div>
                       </div>
                     </div>
-                    <div class="gcck_rbl_t com_ellipsis" :title="sitem.deviceName" style="color: #333;"><i class="vl_icon vl_icon_sm_cl"></i>{{sitem.plateNo}}</div>
+                    <div class="gcck_rbl_t com_ellipsis" :title="sitem.plateNo" style="color: #333;"><i class="vl_icon vl_icon_sm_cl"></i>{{sitem.plateNo ? sitem.plateNo : '未知车牌'}}</div>
                     <div class="gcck_rbl_t com_ellipsis" :title="sitem.shotTime"><i class="vl_icon vl_icon_sm_sj"></i>{{sitem.shotTime}}</div>
                   </div>
                 </li>
