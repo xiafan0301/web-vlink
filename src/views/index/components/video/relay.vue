@@ -196,6 +196,7 @@ import {ajaxCtx} from '@/config/config';
 import {mapXupuxian} from '@/config/config.js';
 import videoEmpty from './videoEmpty.vue';
 import relayNew from './relay-new.vue';
+import {formatDate} from '@/utils/util.js';
 import flvplayer from '@/components/common/flvplayer.vue';
 import { apiAreaServiceDeviceList, getAllMonitorList, getAllBayonetList } from "@/views/index/api/api.base.js";
   import {selectVideoContinue, JtcPOSTAppendixInfo, JtcGETAppendixInfoList} from '@/views/index/api/api.judge.js'
@@ -288,8 +289,18 @@ export default {
       this.intvalRelayList(false);
     },
     getRelayList (isFinished) {
+      let st = null, et = null;
+      if (isFinished) {
+        st = this.startTime2;
+        et = this.endTime2;
+      } else {
+        st = this.startTime;
+        et = this.endTime;
+      }
       let params = {
-        type: '0',
+        type: '1',
+        beginTime: formatDate(st, 'yyyy-MM-dd'),
+        endTime: formatDate(et, 'yyyy-MM-dd'),
         isFinished: isFinished ? '1' : '0'
       }
       // 0是人 1是车
