@@ -882,3 +882,4 @@ export function getVehicleModel (brands) {
     method: 'get'
   });
 }
+  

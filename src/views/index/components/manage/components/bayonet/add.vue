@@ -30,8 +30,8 @@
                 <el-input v-model="basicInfoForm.bayonetNum" placeholder="请输入卡口编号"></el-input>
               </el-form-item>
 
-              <el-form-item prop="bayonetType" label="出入城卡口:" required>
-                <el-radio-group v-model="basicInfoForm.bayonetType">
+              <el-form-item prop="isEnterPoint" label="出入城卡口:" required>
+                <el-radio-group v-model="basicInfoForm.isEnterPoint">
                   <el-radio :label="1">入城卡口</el-radio>
                   <el-radio :label="2">出城卡口</el-radio>
                   <el-radio :label="3">其他</el-radio>
@@ -50,7 +50,13 @@
               </el-form-item>
 
               <el-form-item prop="bayonetIP" label="卡口IP:">
-                <el-input v-model="basicInfoForm.bayonetIP"></el-input>
+                <!-- <el-input v-model="basicInfoForm.bayonetIP"></el-input> -->
+                <ul class="ip-adress">
+                  <li v-for="(item,index) in basicInfoForm.bayonetIP" :key="index">
+                    <el-input v-model="item.value" @change="checkIpVal(item,index)" @blur="setDefaultVal(item)" placeholder="255"></el-input>
+                    <div class="dot"></div>
+                  </li>
+                </ul>
               </el-form-item>
 
               <el-form-item label="经纬度:" required class="longlat">
@@ -72,15 +78,15 @@
                 <el-input v-model="basicInfoForm.address" placeholder="请输入详细地址" @blur="markAddress(basicInfoForm.address)"></el-input>
               </el-form-item>
               <el-form-item prop="laneNum" label="管理车道数:">
-                <el-input v-model="basicInfoForm.laneNum" placeholder="请输入车道数"></el-input>
+                <el-input v-model="basicInfoForm.laneNum" placeholder="请输入车道数" @blur="validationLaneNum"></el-input>
               </el-form-item>
               <el-form-item label="描述:">
                 <el-input show-word-limit maxlength="150" type="textarea" v-model="basicInfoForm.describe" placeholder="请描述下，文字限制150字"></el-input>
               </el-form-item>
               <el-form-item label="使用状况:">
                 <el-radio-group v-model="basicInfoForm.usage">
-                  <el-radio :label="1">启用</el-radio>
-                  <el-radio :label="2">停用</el-radio>
+                  <el-radio :label="true">启用</el-radio>
+                  <el-radio :label="false">停用</el-radio>
                 </el-radio-group>
               </el-form-item>
             </el-form>
@@ -184,7 +190,8 @@
         </div>
         <div class="operate_btn">
           <el-button class="btn_100" type="primary" @click="stepIndex = 1">上一步</el-button>
-          <el-button class="btn_100" type="primary" :loading="loadingBtn" @click="submitBayonet">确定</el-button>
+          <el-button class="btn_100" type="primary" v-if="pageType === 1" :loading="loadingBtn" @click="submitAddBayonet">确定</el-button>
+          <el-button class="btn_100" type="primary" v-else :loading="loadingBtn" @click="submitPutBayonet">确定</el-button>
           <el-button class="btn_100" @click="toGiveUpDialog = true">取消</el-button>
         </div>
       </div>
@@ -343,34 +350,34 @@
   </div>
 </template>
 <script>
-import { getDepartmentList} from '@/views/index/api/api.manage.js';
-import { addBayonetInfo} from '@/views/index/api/api.base.js';
+import {getDepartmentList} from '@/views/index/api/api.manage.js';
+import {addBayonetInfo, putBayonetInfo, getBayonetDetail} from '@/views/index/api/api.base.js';
 import {mapXupuxian} from '@/config/config.js';
 import mapData from '@/config/mapdata.json';
-import { dataList } from '@/utils/data.js';
-import { objDeepCopy } from '@/utils/util.js';
+import {dataList} from '@/utils/data.js';
+import {objDeepCopy} from '@/utils/util.js';
 export default {
   data () {
     return {
       userInfo: null,
       pageType: null,// 1为新增，2为编辑
-      stepIndex: 2,//步骤1为卡口基本信息，2位添加卡口设备
+      stepIndex: 1,//步骤1为卡口基本信息，2位添加卡口设备
       labelPosition: 'right',
       // 卡口基本信息表单参数
       basicInfoForm: {
         bayonetName: '卡口1',
         bayonetNum: 123,
         organ: null,
-        bayonetType: 3,
+        isEnterPoint: 3,
         use: [1, 2],
-        bayonetIP: '222.244.147.121',
+        bayonetIP: [{value: ''}, {value: ''}, {value: ''}, {value: ''}],
         longitude: null,
         Latitude: null,
         bayonetAddress: null,
         address: '湖南省怀化市溆浦县政府',
         laneNum: 1,
         describe: '描述描述',
-        usage: 1
+        usage: true
       },
       options: mapData,
       // 卡口基本信息表单列表参数
@@ -501,6 +508,9 @@ export default {
       devIndex: null,
       operateDevType: null,
       devInfo: {},//单个设备信息，用来编辑
+      bayonetId: null,
+      bayonetDetail: {},
+      oldBayonetUse: []
     }
   },
   mounted () {
@@ -508,8 +518,47 @@ export default {
     this.pageType = parseInt(this.$route.query.type);
     this.resetMap();
     this.getDepartList();
+    if (this.pageType === 2) {
+      this.bayonetId = this.$route.query.bayonetId;
+      this.getBayonetDetail();
+    }
   },
   methods: {
+    checkIpVal(item, index) {
+      console.log("===========",item,index)
+      // let self = this;
+      //确保每个值都处于0-255
+      let val = item.value;
+      //当输入的是空格时，值赋为空
+      val = val.trim();
+      val = parseInt(val, 10);
+      if(isNaN(val)) {
+        val = '';
+      } else {
+        val = val < 0 ? 0 : val;
+        val = val > 255 ? 255 : val;
+      }
+      item.value = val;
+    },
+    setDefaultVal(item) {
+      //当input失去焦点，而ip没有赋值时，会自动赋值为0
+      // let self = this;
+      let val = item.value;
+      if(val == '') {
+        item.value = '0';
+      }
+    },
+    validationLaneNum () {
+      const reg = /^[1-9]$/;
+      const isThrough = reg.test(this.basicInfoForm.laneNum);
+      if (this.basicInfoForm.laneNum && !isThrough) {
+        this.basicInfoForm.laneNum = null;
+        this.$nextTick(() => {
+          this.$refs['basicInfoForm'].clearValidate('laneNum');
+        })
+        this.$message.warning('只能输入1-9的整数');
+      }
+    },
     // 添加设备至列表中
     addDevByTable () {
       this.$refs['bayonetDevForm'].validate((valid) => {
@@ -543,6 +592,29 @@ export default {
     popAddDevDialog () {
       this.editDevDialog = true;
       this.operateDevType = 1;
+      this.bayonetDevForm = {
+        cameraName: '摄像头名称',
+        cameraType: '1',
+        manufacturers: '1',
+        pixel: '1',
+        direction: '朝东',
+        features: ['1','2'],
+        SIPNum: 123,
+        accessCode: 456,
+        devCode: 123,
+        servicePort: 80,
+        use: 1,
+        drivingInfo: [
+          {
+            laneNum: 1,
+            drivingDirection: 1,
+            cartMinSpeedLimit: 100,
+            cartMaxSpeedLimit: 100,
+            smallCarMinSpeedLimit: 100,
+            smallCarMaxSpeedLimit: 100
+          }
+        ]
+      };
     },
     // 弹出编辑卡口设备弹窗
     popEditDevDialog (data, index) {
@@ -567,8 +639,107 @@ export default {
        this.bayonetDevForm.drivingInfo.splice(index, 1);
     },
     // 新增卡口
-    submitBayonet () {
-      console.log(this.bayonetDevList, 'this.bayonetDevList')
+    submitAddBayonet () {
+      this.loadingBtn = true;
+      console.log(JSON.stringify(this.commonFunc(1)))
+      addBayonetInfo(this.commonFunc(1)).then(res => {
+        if (res) {
+          this.$message.success('新增成功');
+          this.$router.push({name: 'bayonet_manage_list'});
+        }
+      }).finally(() => {
+        this.loadingBtn = false;
+      })
+    },
+    // 获取卡口详情用于回填数据
+    getBayonetDetail () {
+      getBayonetDetail({id: this.bayonetId}).then(res => {
+        if (res) {
+          this.bayonetDetail = res.data;
+          this.oldBayonetUse = this.bayonetDetail.use;
+          const data = res.data;
+          // 回填卡口基本信息
+          this.basicInfoForm.bayonetName = data.bayonetName;
+          this.basicInfoForm.bayonetNum = data.bayonetNo;
+          this.basicInfoForm.organ = {organName: data.dutyUnitName, uid: data.dutyUnitId};
+          this.basicInfoForm.isEnterPoint = data.isEnterPoint;
+          this.basicInfoForm.use = data.use.split(',').map(m => parseInt(m));
+          this.basicInfoForm.longitude = data.longitude;
+          this.basicInfoForm.Latitude = data.latitude;
+          this.basicInfoForm.bayonetAddress = data.bayonetAddress;
+          this.basicInfoForm.address = data.bayonetAddress;
+          this.basicInfoForm.laneNum = data.laneNum;
+          this.basicInfoForm.describe = data.desci;
+          this.basicInfoForm.usage = data.isEnabled;
+          if (data.ipAddress) {
+            let ipAddress = data.ipAddress.split('.');
+            ipAddress.forEach((item, index) => {
+              this.basicInfoForm.bayonetIP[index].value = item;
+            })
+          }
+          console.log(this.basicInfoForm, 'this.basicInfoForm')
+          // 回填设备信息
+          this.bayonetDevList = data.bayonetDevInfoDtoList.map(m => {
+            return {
+              cameraName: m.deviceName,
+              cameraType: String(m.type),
+              manufacturers: String(m.manufacturer),
+              pixel: String(m.maxPixel),
+              direction: m.filmDirection,
+              features: m.intelligentCharacs.split(','),
+              SIPNum: m.deviceSip,
+              accessCode: m.deviceCode,
+              devCode: m.viewClassCode,
+              servicePort: m.servicePort,
+              use: m.deviceUse,
+              drivingInfo: m.cameraLaneRelList.map(c => {
+                return {
+                  laneNum: c.laneNo,
+                  drivingDirection: parseInt(c.direction),
+                  cartMaxSpeedLimit: c.bigMaxSpeed,
+                  cartMinSpeedLimit: c.bigMinSpeed,
+                  smallCarMaxSpeedLimit: c.smallMaxSpeed,
+                  smallCarMinSpeedLimit: c.smallMinSpeed
+                }
+              })
+            }
+          })
+        }
+      })
+    },
+    // 修改卡口
+    submitPutBayonet () {
+      this.bayonetDetail = Object.assign(this.bayonetDetail, this.commonFunc());
+      // 卡口用途无修改时
+      if (this.oldBayonetUse === this.basicInfoForm.use.join(',')) {
+        this.bayonetDetail.use = null;
+      // 修改为全不选时
+      } else if (this.basicInfoForm.use.join(',') === '') {
+        this.bayonetDetail.use = '';
+      } else {
+        this.bayonetDetail.use = this.basicInfoForm.use.join(',');
+      }
+      this.loadingBtn = true;
+      putBayonetInfo(this.bayonetDetail).then(res => {
+        if (res) {
+          this.$message.success('修改成功');
+          this.$router.push({name: 'bayonet_manage_list'});
+        }
+      }).finally(() => {
+        this.loadingBtn = false;
+      })
+    },
+    // 跳转到下一步,必须验证通过
+    sikpIsTwo () {
+      this.$refs['basicInfoForm'].validate((valid) => {
+        if (valid) {
+          this.stepIndex = 2;
+        } else {
+          return false;
+        }
+      });
+    },
+    commonFunc (type) {
       let bayonetDevInfoDtoList = objDeepCopy(this.bayonetDevList);
       bayonetDevInfoDtoList = bayonetDevInfoDtoList.map(m => {
         return {
@@ -597,40 +768,35 @@ export default {
           })
         }
       })
+      let ipAddress = [];
+      this.basicInfoForm.bayonetIP.forEach(item => {
+        if (!item.value) {
+          return;
+        } else {
+          ipAddress.push(item.value);
+        }
+      })
       let data = {
         bayonetNo: this.basicInfoForm.bayonetNum,
         bayonetName: this.basicInfoForm.bayonetName,   
-        isEnterPoint: this.basicInfoForm.bayonetType,   
+        isEnterPoint: this.basicInfoForm.isEnterPoint,   
         desci: this.basicInfoForm.describe,          
-        use: this.basicInfoForm.use.join(','),   
+        // use: this.basicInfoForm.use.join(','),   
         longitude: this.basicInfoForm.longitude,      
         latitude: this.basicInfoForm.Latitude,       
-        bayonetAddress: this.locationName + this.basicInfoForm.address,
+        bayonetAddress: this.basicInfoForm.address,
         laneNum: this.basicInfoForm.laneNum,        
-        isEnable: this.basicInfoForm.usage,       
+        isEnabled: this.basicInfoForm.usage,       
         // onlineState: this.basicInfoForm., 
-        ipAddress: this.basicInfoForm.bayonetIP,    
+        ipAddress: ipAddress.join('.'),    
         dutyUnitId: this.basicInfoForm.organ && this.basicInfoForm.organ.uid,     
         dutyUnitName: this.basicInfoForm.organ && this.basicInfoForm.organ.organName,   
         bayonetDevInfoDtoList: bayonetDevInfoDtoList
       }
-      console.log(JSON.stringify(data))
-      this.loadingBtn = true;
-      addBayonetInfo(data).then(res => {
-
-      }).finally(() => {
-        this.loadingBtn = false;
-      })
-    },
-    // 跳转到下一步,必须验证通过
-    sikpIsTwo () {
-      this.$refs['basicInfoForm'].validate((valid) => {
-        if (valid) {
-          this.stepIndex = 2;
-        } else {
-          return false;
-        }
-      });
+      if (type === 1) {
+        data.use = this.basicInfoForm.use.join(',');
+      }
+      return data;
     },
     // 获取所有的机构单位
     getDepartList () {
@@ -862,6 +1028,37 @@ export default {
           }
         }
       }
+      //IP地址样式
+      .ip-adress{
+        display: flex;
+        align-items: center;
+        border: 1px solid #D3D3D3;
+        width: 100%;
+        height: 40px;
+        border-radius: 4px;
+        margin-right: 10px;
+        &:hover, &:focus {
+          border-color: #0C70F8;
+        }
+        li {
+          position: relative;
+          &:last-child .dot {
+            display: none;
+          }
+          .el-input {
+            width: 55px;
+          }
+          .dot{
+            position: absolute;
+            bottom: 15px;
+            right: 0;
+            border-radius: 50%;
+            background: #D3D3D3;
+            width: 2px;
+            height: 2px;
+          }
+        }
+      }
     }
     .bayonet_dev_list{
       > .el-button{
@@ -911,6 +1108,13 @@ export default {
     }
     .__vuescroll{
       width: auto!important;
+    }
+    .ip-adress {
+      .el-input__inner {
+        border: none;
+        height: 38px;
+        text-align: center;
+      }
     }
   }
   .edit_dev_dialog{

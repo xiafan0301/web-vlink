@@ -21,7 +21,53 @@ export const conDetail = {
   type: null,
   updateTime: null
 }
-
+// 卡口详细数据模型
+export const bayonetDetail = {
+  "uid":null,
+  "bayonetNo":null,
+  "bayonetName":null,
+  "bayonetCode":null,
+  "bayonetType":null,
+  "isEnterPoint":null,
+  "desci":null,
+  "longitude":null,
+  "latitude":null,
+  "bayonetAddress":null,
+  "isEnabled":null,
+  "onlineState":null,
+  "ipAddress":null,
+  "dutyUnitId":null,
+  "dutyUnitName":null,
+  "laneNum":null,
+  "use":null,
+  "devNum":null,
+  "areaId":null,
+  "bayonetDevInfoDtoList":[
+    // {
+    // "uid":null,
+    // "deviceName":null,
+    // "type":null,
+    // "manufacturer":null,
+    // "maxPixel":null,
+    // "filmDirection":null,
+    // "deviceSip":null,
+    // "deviceCode":null,
+    // "viewClassCode":null,
+    // "servicePort":null,
+    // "deviceUse":null,
+    // "lanes":null,
+    // "intelligentCharacs":null,
+    // "deviceIntelRelList":null,
+    // "cameraLaneRelList":null,
+    // "opType":null
+    // }
+  ],
+  "delFlag":false,
+  "createTime":null,
+  "updateTime":null,
+  "updateUserId":null,
+  "opUserId":null
+}
 // 民族
 export const nationData = [
   {value: 1, label: "汉族"},
