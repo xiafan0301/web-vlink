@@ -37,7 +37,7 @@
         <div class="kaishi">
           <el-input v-model.trim="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" clearable></el-input>
         </div>
-        <div class="kaishi">
+        <div class="kaishi" style="padding-top: 20px">
           <el-button style="width: 110px" @click="rester">重置</el-button>
           <el-button type="primary" style="width: 110px" @click="search" :loading="searchLoading">查询</el-button>
         </div>

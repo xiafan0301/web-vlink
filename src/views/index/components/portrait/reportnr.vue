@@ -4,45 +4,12 @@
     <div style="height: 50px"></div>
     <div class="vehicle_content_nr_box">
       <div class="vehicle_content_nr_box_left">
-        <el-upload
-            class="vl_jtc_upload_gjfx gjfx_upload"
-            multiple
-            :show-file-list="false"
-            accept="image/*"
-            :action="uploadAcion"
-            list-type="picture-card">
-          <div>
-            <i
-                style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
-                class="vl_icon vl_icon_vehicle_01"
-            ></i>
-            <span style="position: absolute; top: 132px; left: 72px; color: #999999">点击上传图片</span>
-          </div>
-        </el-upload>
-        <div style="color: #999999; text-align: center; margin-top: 8px">请上传全身照搜索更精准</div>
-        <div style="margin-top: 10px">
-          <span style="display: inline-block; width: 14px; margin-right: 4px; color: #999999">开 始</span>
-          <el-date-picker
-              v-model="value1"
-              value-format="timestamp"
-              format="yyyy-MM-dd HH:mm:ss"
-              style="width: 212px; vertical-align: top"
-              type="datetime"
-              placeholder="选择日期时间">
-          </el-date-picker>
+        <div class="img">
+          <img :src="taskWebParam.targetPicUrl" height="232" width="232"/>
         </div>
-        <div style="margin-top: 10px">
-          <span style="display: inline-block; width: 14px; margin-right: 4px; color: #999999">结 束</span>
-          <el-date-picker
-              v-model="value2"
-              value-format="yyyy-MM-dd HH:mm:ss"
-              format="yyyy-MM-dd HH:mm:ss"
-              style="width: 212px; vertical-align: top"
-              type="datetime"
-              placeholder="选择日期时间">
-          </el-date-picker>
-        </div>
-        <el-button type="primary" style=" width: 100%; margin-top: 10px">档案分析</el-button>
+        <div style="color: #333333; font-size: 18px; font-weight: bold; padding: 16px 0">{{taskWebParam.taskName}}</div>
+        <div style="color: #333333; padding-bottom: 8px"><span style="color: #999999">从</span> {{taskWebParam.startTime}}</div>
+        <div style="color: #333333"><span style="color: #999999">至</span> {{taskWebParam.endTime}}</div>
       </div>
       <div class="vehicle_content_nr_box_right">
         <div class="vehicle_content_nr_box_right_top">
@@ -165,9 +132,9 @@
               <vue-scroll>
                 <div class="mes">
                   <el-collapse v-model="activeNames">
-                    <el-collapse-item  v-for="(item, index) in struGroupResultDtoList" :key='index'  :title="item.groupName + '(' + item.totalNum + '次)'">
+                    <el-collapse-item  v-for="(item, index) in struPersonDtoList" :key='index'  :title="item.shotTime + '(' + item.num + '次)'">
                       <div class="mes_cot">
-                        <div v-for = "(ite, index) in item.personDetailList" :key='index'>
+                        <div v-for = "(ite, index) in item.list" :key='index'>
                           <div class="cot_1">
                             <img :src="ite.subStoragePath">
                             <div style="padding-left: 10px">
@@ -195,7 +162,6 @@
 </template>
 <script>
 import vehicleBreadcrumb from './breadcrumb.vue';
-import {PortraitPostPersonTrace} from "@/views/index/api/api.portrait.js";
 import { mapXupuxian,ajaxCtx } from "@/config/config.js";
 import { getdetailbg } from "../../api/api.analysis.js";
 export default {
@@ -248,7 +214,10 @@ export default {
       analysisTaskInfoWithBLOBsList: [],
       taskResult: [],
       struGroupResultDtoList: [{personDetailList: [{shotPlaceLongitude: 1,shotPlaceLatitude: 2 }]}],
-      struPersonDtoList: []
+      struPersonDtoList: [],
+      data: [],
+      taskWebParam: {}
+
     }
   },
   created() {
@@ -256,15 +225,15 @@ export default {
   },
   mounted () {
     this.getdetailbgg()
-    this.renderMap()
+    console.log(this.$route.query.uid,this.$route.query.targetUrl, this.$route.query.startTime)
   },
   methods: {
     getdetailbgg () {
       let params = {
-        uid: '5CjLyShm83YNXMZ0Ry1KOU',
-        startTime: '2019-07-15 00:00:00',
-        endTime: '2019-07-18 23:59:59',
-        targetUrl: 'http://file.aorise.org/vlink/image/6e8322e9-6c29-4875-9036-35f8fc571775.jpg'
+        uid: this.$route.query.uid,
+        startTime: this.$route.query.startTime,
+        endTime: this.$route.query.endTime,
+        targetUrl: this.$route.query.targetUrl
       }
       getdetailbg(params).then(res => {
         if(res.data){
@@ -274,11 +243,7 @@ export default {
           this.analysisTaskInfoWithBLOBsList = res.data.analysisTaskInfoWithBLOBsList
           this.taskResult = JSON.parse(res.data.analysisTaskInfoWithBLOBsList[0].taskResult)
           this.struGroupResultDtoList = res.data.struGroupResultDtoList
-          // for (let i= 0; i<res.data.struPersonDtoList.length; i++) {
-          //   for (let k=0; i < res.data.struPersonDtoList.length, k++) {
-          //
-          //   }
-          // }
+          this.taskWebParam =JSON.parse(res.data.analysisTaskInfoWithBLOBsList[0].taskWebParam)
           let list = []
           res.data.struPersonDtoList.forEach((item)=>{
             list.push(item.shotTime.substring(0,10))
@@ -298,7 +263,13 @@ export default {
           }
           console.log(list)
           console.log(this.struPersonDtoList)
+          this.struPersonDtoList.forEach((item)=>{
+            item.list.forEach((ite)=>{
+              this.data.push(ite)
+            })
+          })
           this.initMap()
+          this.renderMap()
         }
         this.$nextTick(() => {
         })
@@ -345,34 +316,8 @@ export default {
         // 自定义点标记覆盖物内容
         content: _content
       });
-      this.map.setZoomAndCenter(16, [data.personDetailList[0].shotPlaceLongitude, data.personDetailList[0].shotPlaceLatitude]); // 自适应点位置
-    },
-    submitForm(v) {
-      if(v == 1){
-        let pg = {
-        }
-        pg['startTime'] = "2019-07-11 00:00:00";
-        pg['endTime'] = "2019-07-11 23:59:59";
-        pg['imageUrl'] = "http://file.aorise.org/vlink/image/cc78ae27-dca1-4291-85be-782941ae9ab2.jpg";
-        pg['areaUid']= "431224100,431224102,431224103,431224104,431224105,431224106,431224107,431224108"
-        this.getVehicleShot(pg);
-      }else{
-        this.$message.info("请上传图片");
-      }
-    },
-    getVehicleShot(d) {
-      this.searchLoading = true;
-      PortraitPostPersonTrace(d).then(res => {
-        if (res) {
-          if (!res.data || res.data.length === 0) {
-            this.$message.info("抱歉，没有找到匹配结果");
-            return false;
-          }
-          this.evData = res.data.list;
-          this.drawMapMarker(this.evData);
-        }
-      }).catch(() => {
-      });
+      // this.map.setZoomAndCenter(16, [data.personDetailList[0].shotPlaceLongitude, data.personDetailList[0].shotPlaceLatitude]); // 自适应点位置
+      this.map.setFitView();
     },
     drawMapMarker (data) {
       let path = [];
@@ -386,10 +331,10 @@ export default {
               <p>${obj.shotTime}</p>
             </div>`;
           // 窗体
-          let winInfo = new AMap.Marker({ // 添加自定义点标记
+          let winInfo = new window.AMap.Marker({ // 添加自定义点标记
             map: this.amap,
             position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-            offset: new AMap.Pixel(20, -80), // 相对于基点的偏移位置
+            offset: new window.AMap.Pixel(20, -80), // 相对于基点的偏移位置
             draggable: false, // 是否可拖动
             extData: obj,
             content: _sContent
@@ -399,10 +344,10 @@ export default {
           // })
           path.push(_path);
           let _content = `<div class="vl_icon vl_icon_sxt"></div>`
-          let point = new AMap.Marker({ // 添加自定义点标记
+          let point = new window.AMap.Marker({ // 添加自定义点标记
             map: this.amap,
             position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-            offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+            offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
             draggable: false, // 是否可拖动
             // 自定义点标记覆盖物内容
             content: _content
@@ -415,7 +360,7 @@ export default {
       this.drawLine(path);
     }, // 覆盖物（窗体和checkbox
     drawLine (path) {
-      var polyline = new AMap.Polyline({
+      var polyline = new window.AMap.Polyline({
         path: path,
         showDir: true,
         strokeColor: '#61C772',
@@ -432,6 +377,7 @@ export default {
       });
       map.setMapStyle("amap://styles/whitesmoke");
       this.amap = map;
+      this.drawMapMarker(this.data)
     },
   }
 }
@@ -450,37 +396,9 @@ export default {
         box-shadow:2px 3px 10px 0px rgba(131,131,131,0.28);
         padding: 20px;
         padding-top: 15px;
-        .vl_jtc_upload_gjfx {
-          text-align: center;
-          /deep/ .el-upload--picture-card {
-            width: 100%;
-            padding-top: 100%;
-            position: relative;
-            > i {
-              position: absolute;
-              top: 0;
-              bottom: 0;
-              left: 0;
-              right: 0;
-              margin: auto;
-            }
-            > img {
-              position: absolute;
-              top: 0;
-              left: 0;
-              width: 100%;
-              height: 100%;
-              -webkit-border-radius: 6px;
-              -moz-border-radius: 6px;
-              border-radius: 6px;
-            }
-          }
-        }
-        .gjfx_upload {
-          &:hover {
-            /deep/ .el-upload--picture-card {
-              background: #0C70F8;
-            }
+        .img{
+          img{
+            border-radius: 10px;
           }
         }
       }
