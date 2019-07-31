@@ -53,6 +53,7 @@ export const checkPlateNumber = (rule, value, callback) => {
   }
   callback();
 }
+
 /**
  * 判断邮箱格式
  */
