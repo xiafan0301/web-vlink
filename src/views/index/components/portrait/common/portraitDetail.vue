@@ -63,8 +63,11 @@
             :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
           </div>
         </div>
-        <div class="struc_c_d_box" style="padding: 10px 0 0 0; color: #666;" v-else>
-          暂无视频
+        <div class="struc_c_d_box struc_vid_empty" v-else>
+          <div class="struc_vid_empty_c com_trans50_lt">
+            <div></div>
+            <p>暂无视频</p>
+          </div>
         </div>
         <div class="download_btn" v-show="sturcDetail.videoPath">
           <a download="视频" :href="sturcDetail.videoPath">下载视频</a>
@@ -181,6 +184,9 @@ export default {
     },
     // flag false 上一个， true 下一个
     doSliderDetail (flag) {
+      console.log(this.strucIndex);
+      console.log(this.strucInfoList.length);
+      console.log(this.pagination);
       if (flag) {
         // 下一个
         if (this.strucIndex < (this.strucInfoList.length - 1)) {
@@ -190,7 +196,7 @@ export default {
         } else {
           // 序号超出
           if (this.pagination.total > 
-            (this.pagination.pageSize * (this.pagination.pageNum - 1) + this.strucIndex)) {
+            (this.pagination.pageSize * (this.pagination.pageNum - 1) + this.strucIndex + 1)) {
             // 需要分页
             this.pagination.pageNum = this.pagination.pageNum + 1;
             this.strucIndex = 0;
@@ -463,6 +469,20 @@ export default {
                   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; word-break: break-all;
                 }
               }
+            }
+          }
+        }
+        &.struc_vid_empty {
+          position: relative;
+          > .struc_vid_empty_c {
+            > div {
+              width: 134px; height: 89px;
+              background: url(../../../../../assets/img/video/video_empty.png) center center no-repeat;
+            }
+            > p {
+              padding-top: 10px;
+              text-align: center;
+              color: #666;
             }
           }
         }

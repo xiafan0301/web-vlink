@@ -666,7 +666,11 @@ export default {
               let vehicleModel;
               if (item.vehicleModel) {
                 vehicleModel = item.vehicleModel.split(';');
-                item.vehicleModel = vehicleModel.join(' ');
+                if(vehicleModel[1] !== 'null') {
+                  item.vehicleModel = vehicleModel.join(' ');
+                } else {
+                  item.vehicleModel = vehicleModel[0];
+                }
               }
 
               item.isDelete = false;

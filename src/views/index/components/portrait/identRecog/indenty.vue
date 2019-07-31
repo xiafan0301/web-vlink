@@ -173,7 +173,7 @@ export default {
     const imgPath = this.$route.query.path;
     if (imgPath) {
       this.queryImgPath = imgPath;
-      this.fileList.push({path: imgPath});
+      this.fileList.push({url: imgPath});
       this.curImageUrl = imgPath;
     }
   },
