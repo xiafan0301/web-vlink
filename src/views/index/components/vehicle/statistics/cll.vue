@@ -59,7 +59,7 @@
             class="vl_date">
           </el-date-picker>
         </div>
-        <div class="left_end" v-show="queryForm.statementType === 5">
+        <div class="left_end" v-show="queryForm.statementType === 5" style="padding-bottom: 0;">
           <el-date-picker
             :clearable="false"
             style="width: 100%;"
@@ -595,7 +595,7 @@ export default {
       .left_btn{
         display: flex;
         justify-content: space-between;
-        padding-top: 10px;
+        padding-top: 20px;
       }
       .el-select{
         width: 100%;
