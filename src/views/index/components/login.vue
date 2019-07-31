@@ -138,7 +138,7 @@ export default {
       let qrcode = new QRCode('download_qrcode', {  
         width: 200,  // 设置宽度 
         height: 200, // 设置高度
-        text: 'https://baidu.com',
+        text: 'http://file.aorise.org/app/umxwe-vlink-release.apk',
         colorDark: '#0C70F8', // 
         colorLight: '#ffffff' // 
         // correctLevel: '', // [L|M|Q|H]
