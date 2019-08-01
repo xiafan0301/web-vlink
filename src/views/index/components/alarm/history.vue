@@ -365,6 +365,10 @@ export default {
     },
     changeTab (type) {
       this.tabType = type;
+      this.selectDevice = []
+      this.selectControl = []
+      this.$refs.tree.setCheckedKeys([]);
+      this.$refs.gTree.setCheckedKeys([]);
     },
     //切换排序方式
     changeSort(type) {
@@ -644,6 +648,7 @@ export default {
         }
       }
       this.allAlarmList = this.getNAlarmList(this.mAlarmList)
+      this.$set(this.allAlarmList[0],"isExpand", true)
     },
     getNAlarmList(arr) {
       console.log("------------",arr)
@@ -1007,6 +1012,9 @@ export default {
         width: 62px;
       }
     }
+  }
+  .__rail-is-horizontal {
+    position: static!important;
   }
 }
 
