@@ -243,6 +243,7 @@ export default {
       background: rgba(0, 0, 0, 0.3);
       color: #fff;
       border-radius: 0 0 6px 6px;
+      text-align: center;
     }
     > span {
       display: none;
