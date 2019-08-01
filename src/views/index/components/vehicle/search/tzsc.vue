@@ -7,18 +7,12 @@
       :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
           {name: '特征搜车'}]"
     ></div>
-    <!-- <div class="link_bread">
-      <el-breadcrumb separator=">" class="bread_common">
-        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
-        <el-breadcrumb-item>特征搜车</el-breadcrumb-item>
-      </el-breadcrumb>
-    </div>-->
     <div class="sc_content">
       <!-- 通用的左边菜单 -->
       <div class="left_menu">
         <!-- 菜单表单 -->
         <vue-scroll>
-          <div style="padding: 12px 20px 20px 20px;">
+          <div style="padding: 20px;">
             <!-- 表单 -->
             <el-form :model="tzscMenuForm" ref="tzscMenuForm" :rules="rules">
               <div class="selectDate date-comp">
@@ -1369,7 +1363,7 @@ export default {
         width: 232px;
       }
       .el-form-item {
-        margin-bottom: 12px;
+        margin-bottom: 10px;
       }
       // 选择搜车类型
       .select_type {
@@ -1377,7 +1371,7 @@ export default {
       }
       // 特征
       .characteristic {
-        margin: 10px 0 38px 0;
+        margin: 10px 0 20px 0;
         .btn {
           line-height: 30px;
           height: 30px;
@@ -1418,7 +1412,7 @@ export default {
       }
       // 选择设备下拉
       .selected_device {
-        margin-bottom: 12px;
+        margin-bottom: 10px;
         position: relative;
         width: 232px;
         height: 40px;

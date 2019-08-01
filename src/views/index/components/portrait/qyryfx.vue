@@ -950,7 +950,7 @@ export default {
     // 地图定位
     resetZoom() {
       if (this.amap) {
-        this.amap.setZoomAndCenter(14, this.mapCenter);
+        this.amap.setFitView();
       }
     },
     // 地图缩放
@@ -2251,12 +2251,13 @@ export default {
         // 搜索条件
         .search_condition {
           .condition_title {
-            line-height: 50px;
+            // line-height: 50px;
             color: #666666;
             text-indent: 8px;
+            padding: 20px 0 10px 0;
           }
           .condition {
-            padding-bottom: 12px;
+            padding-bottom: 10px;
           }
         }
       }

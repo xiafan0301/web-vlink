@@ -7,18 +7,12 @@
         :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
           {name: '以图搜车'}]"
       ></div>
-    <!-- <div class="link_bread">
-      <el-breadcrumb separator=">" class="bread_common">
-        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
-        <el-breadcrumb-item>以图搜车</el-breadcrumb-item>
-      </el-breadcrumb>
-    </div> -->
     <div class="sc_content">
       <!-- 通用的左边菜单 -->
       <div class="left_menu">
         <!-- 菜单表单 -->
         <vue-scroll>
-          <div style="padding: 12px 20px 20px 20px;">
+          <div style="padding: 20px;">
             <!-- 表单 -->
             <div class="form_warp">
               <el-form :model="ytscMenuForm" ref="ytscMenuForm" :rules="rules">
@@ -899,7 +893,7 @@ export default {
       height: 100%;
       // 表单选项间隔
       .el-form-item {
-        margin-bottom: 12px;
+        margin-bottom: 10px;
       }
       // 菜单的表单
       .width232 {
@@ -910,7 +904,7 @@ export default {
       }
       // 选择设备下拉
       .selected_device {
-        margin-bottom: 12px;
+        margin-bottom: 10px;
         position: relative;
         width: 232px;
         height: 40px;
@@ -1008,7 +1002,7 @@ export default {
         -webkit-border-radius: 10px;
         -moz-border-radius: 10px;
         border-radius: 10px;
-        margin-top: 38px;
+        margin-top: 20px;
         &:hover {
           background: #2981f8;
           > p {
@@ -1077,8 +1071,7 @@ export default {
       }
       // 表单
       .form_warp {
-        padding-bottom: 38px;
-        // border-bottom: 1px solid #d3d3d3;
+        padding-bottom: 20px;
       }
     }
     // 没有数据的样式
