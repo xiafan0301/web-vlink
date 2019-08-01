@@ -928,7 +928,7 @@ export default {
                 display: table;
                 min-height: 0.34rem;
                 margin-bottom: 0.08rem;
-                padding-right: 10px;
+                padding-right: .08rem;
                 margin-right: 0.08rem;
                 border: 1px solid #f2f2f2;
                 border-radius: 3px;
@@ -938,16 +938,17 @@ export default {
                   background: #fafafa;
                   color: #999;
                   font-weight: normal;
-                  padding-right: 10px;
-                  padding-left: 10px;
+                  /* padding-right: 10px;
+                  padding-left: 10px; */
                   display: table-cell;
                   vertical-align: middle;
                   border-right: 1px solid #f2f2f2;
+                  text-align: center;
                 }
                 > span {
                   display: table-cell;
                   vertical-align: middle;
-                  padding-left: 5px;
+                  padding-left: .08rem;
                 }
               }
             }
