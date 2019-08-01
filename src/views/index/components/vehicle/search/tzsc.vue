@@ -55,15 +55,6 @@
                 <div class="no_device" v-else>选择设备</div>
                 <!-- 树tab页面 -->
                 <div class="device_tree_tab" v-show="treeTabShow">
-                  <!-- <div style="overflow: hidden;">
-                  <div
-                    class="tab_title"
-                    :class="{ 'current_title': index === selectedTreeTab }"
-                    @click="selectedTreeTab = index;"
-                    v-for="(item, index) in treeTabArr"
-                    :key="'tab_title' + index"
-                  >{{ item.name }}</div>
-                  </div>-->
                   <!-- 视频树 -->
                   <div class="tree_content">
                     <vue-scroll>
@@ -86,27 +77,6 @@
                       ></el-tree>
                     </vue-scroll>
                   </div>
-                  <!-- <div class="tree_content" v-show="selectedTreeTab === 1">
-                  <vue-scroll>
-                    <div class="checked_all">
-                      <el-checkbox
-                        :indeterminate="isIndeterminateBay"
-                        v-model="checkAllTreeBay"
-                        @change="handleCheckedAllBay"
-                      >全选</el-checkbox>
-                    </div>
-                    <el-tree
-                        @check="listenCheckedBay"
-                        :data="bayonetTree"
-                        show-checkbox
-                        default-expand-all
-                        node-key="id"
-                        ref="bayonetTree"
-                        highlight-current
-                        :props="defaultProps"
-                      ></el-tree>
-                  </vue-scroll>
-                  </div>-->
                 </div>
               </div>
               <!-- 选择搜车的类型 -->
@@ -118,37 +88,14 @@
               </div>
               <div v-show="selectType === 1">
                 <!-- 上传车像图片 -->
-                <div class="upload_warp" @drop="drop($event)" @dragover="allowDrop($event)">
-                  <el-upload
-                    @drop="drop($event)"
-                    :class="{'vl_jtc_upload': true}"
-                    :show-file-list="false"
-                    accept="image/*"
-                    :action="uploadAcion"
-                    list-type="picture-card"
-                    :before-upload="beforeAvatarUpload"
-                    :on-success="uploadSucess"
-                    :on-error="handleError"
-                  >
-                    <i v-if="uploading" class="el-icon-loading"></i>
-                    <img v-else-if="curImageUrl" :src="curImageUrl" />
-                    <div v-else>
-                      <i
-                        style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
-                        class="vl_icon vl_icon_vehicle_01"
-                      ></i>
-                      <span>点击上传图片</span>
-                    </div>
-                  </el-upload>
-                  <p @click="showHistoryPic">从上传记录中选择</p>
-                  <div v-show="curImageUrl" class="del_icon">
-                    <i class="el-icon-delete" @click="delPic"></i>
-                  </div>
+                <div style="padding: 0 15px; height: 210px;">
+                  <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit"></div>
                 </div>
                 <!-- 检索结果 -->
                 <div class="characteristic">
                   <el-button
                     class="get_character_btn"
+                    :class="{ have_character: this.curImageUrl !== '' }"
                     @click.stop="getCharacter"
                     :loading="getCharacterLoading"
                   >获取特征</el-button>
@@ -332,9 +279,11 @@
               >
                 <div class="img_wrap">
                   <img
-                    @dragstart="drag($event)"
-                    title="拖动图片上传"
+                    :alt="item.deviceName"
+                    @dragstart="dragStart($event, item)"
+                    @dragend="dragEnd"
                     draggable="true"
+                    style="cursor: move;"
                     :src="item.storagePath"
                   />
                 </div>
@@ -374,44 +323,15 @@
         </div>
       </div>
     </div>
-    <!--上传记录弹窗-->
-    <el-dialog
-      :visible.sync="historyPicDialog"
-      class="history-pic-dialog"
-      :close-on-click-modal="false"
-      top="4vh"
-      title="最近上传的图片"
-    >
-      <div style="text-align: center;font-size: 20px;" v-if="loadingHis">
-        <i class="el-icon-loading"></i>
-      </div>
-      <vue-scroll class="his-pic-box" v-else-if="historyPicList.length">
-        <div
-          class="his-pic-item"
-          :class="{'active': item.checked}"
-          v-for="item in historyPicList"
-          :key="item.uid"
-          @click="chooseHisPic(item)"
-        >
-          <img :src="item.path" alt />
-        </div>
-        <div style="clear: both;"></div>
-      </vue-scroll>
-      <p v-else>暂无历史记录</p>
-      <div slot="footer">
-        <el-button @click="historyPicDialog = false">取消</el-button>
-        <el-button type="primary" @click="addHisToImg" :disabled="choosedHisPic.length === 0">确认</el-button>
-      </div>
-    </el-dialog>
-
     <!--检索详情弹窗-->
     <div id="capMap"></div>
     <div is="vehicleDetail" :detailData="detailData"></div>
   </div>
 </template>
 <script>
+import vlUpload from "@/components/common/upload.vue";
 import vlBreadcrumb from "@/components/common/breadcrumb.vue";
-import vehicleDetail from '../common/vehicleDetail.vue';
+import vehicleDetail from "../common/vehicleDetail.vue";
 
 import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入溆浦县地图
 import { formatDate } from "@/utils/util.js";
@@ -433,11 +353,10 @@ import { objDeepCopy } from "../../../../../utils/util.js"; // 深拷贝方法
 import { constants } from "crypto";
 
 export default {
-  components: {vehicleDetail, vlBreadcrumb},
+  components: { vehicleDetail, vlBreadcrumb, vlUpload },
   data() {
     return {
       detailData: null,
-
       selectType: 1, // 图片提取或者自定义提取
       sortType: 1, // 1为时间排序， 2为监控排序
       timeSortType: true, // true为时间降序， false为时间升序
@@ -462,13 +381,7 @@ export default {
         inspectionCount: ""
       },
       rules: {
-        // selectDate: [
-        //   {
-        //     required: true,
-        //     message: "请选择日期",
-        //     trigger: "change"
-        //   }
-        // ]
+        
       },
       startDateOpt: {
         disabledDate: time => {
@@ -534,52 +447,6 @@ export default {
       //     enumValue: "收起"
       //   }
       // ],
-      // descOfRearItemOptions: [ // 年检标数量
-      //   {
-      //     enumField: "年检标数量0个",
-      //     enumValue: "年检标数量0个"
-      //   },
-      //   {
-      //     enumField: "年检标数量1个",
-      //     enumValue: "年检标数量1个"
-      //   },
-      //   {
-      //     enumField: "年检标数量2个",
-      //     enumValue: "年检标数量2个"
-      //   },
-      //   {
-      //     enumField: "年检标数量3个",
-      //     enumValue: "年检标数量3个"
-      //   },
-      //   {
-      //     enumField: "年检标数量4个",
-      //     enumValue: "年检标数量4个"
-      //   },
-      //   {
-      //     enumField: "年检标数量5个",
-      //     enumValue: "年检标数量5个"
-      //   },
-      //   {
-      //     enumField: "年检标数量6个",
-      //     enumValue: "年检标数量6个"
-      //   },
-      //   {
-      //     enumField: "年检标数量7个",
-      //     enumValue: "年检标数量7个"
-      //   },
-      //   {
-      //     enumField: "年检标数量8个",
-      //     enumValue: "年检标数量8个"
-      //   },
-      //   {
-      //     enumField: "年检标数量9个",
-      //     enumValue: "年检标数量9个"
-      //   },
-      //   {
-      //     enumField: "年检标数量10个",
-      //     enumValue: "年检标数量10个"
-      //   }
-      // ],
       characterTypes: [
         "plateNo", // 车牌号
         "plateColor", // 车牌颜色
@@ -602,11 +469,6 @@ export default {
       uploadAcion: ajaxCtx.base + "/new", //上传路径
       uploading: false, // 是否上传中
       curImageUrl: "", // 当前上传的图片
-      historyPicList: [], // 上传历史记录
-      selectedHistoryPic: null, // 当前选中的历史图片
-      historyPicDialog: false,
-      loadingHis: false, // 加载效果
-      imgData: null,
       /* 选择设备变量 */
       treeTabShow: false,
       selectDeviceArr: [], // 选中的设备数组
@@ -638,14 +500,11 @@ export default {
       noDataTips: "请在左侧输入查询条件",
       pageNum: 1,
       pageSize: 10,
-      total: 0,
+      total: 0
       /* 检索详情弹窗变量 */
     };
   },
   computed: {
-    choosedHisPic() {
-      return this.historyPicList.filter(x => x.checked);
-    },
     characteristicAble() {
       if (this.selectType === 1) {
         return (
@@ -690,13 +549,6 @@ export default {
   methods: {
     getSelectOption() {
       // 获取到自定义特征的下拉框列表数据
-      // this.dicFormater(); // 取字典数据
-      // plateClassOptions: [], // 号牌类型
-      // plateColorOptions: [], // 号牌颜色
-      // vehicleClassOptions: [], // 车辆类型
-      // vehicleColorOptions: [], // 车辆颜色
-      // carModelOptions: [], // 车辆型号
-      // sunvisorOptions: [], // 遮阳板
       this.plateClassOptions = this.dicFormater(45)[0].dictList;
       this.plateColorOptions = this.dicFormater(46)[0].dictList;
       this.vehicleClassOptions = this.dicFormater(44)[0].dictList;
@@ -718,7 +570,7 @@ export default {
         });
       });
     },
-    getStrucParams () {
+    getStrucParams() {
       // 处理设备UID
       let deviceUidArr = this.selectCameraArr.map(item => {
         return item.id;
@@ -734,11 +586,9 @@ export default {
               formatDate(this.tzscMenuForm.startTime, "yyyy-MM-dd") +
               " 00:00:00", // 开始时间
             endTime:
-              formatDate(this.tzscMenuForm.endTime, "yyyy-MM-dd") +
-              " 23:59:59", // 结束时间
+              formatDate(this.tzscMenuForm.endTime, "yyyy-MM-dd") + " 23:59:59", // 结束时间
             deviceUid: deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
-            bayonetUid:
-              bayonetUidArr.length > 0 ? bayonetUidArr.join() : null, // 卡口标识
+            bayonetUid: bayonetUidArr.length > 0 ? bayonetUidArr.join() : null, // 卡口标识
             plateClass: this.tzscMenuForm.licenseType || null, // 号牌类型
             plateColor: this.tzscMenuForm.licenseColor || null, // 号牌颜色
             vehicleClass: this.tzscMenuForm.carType || null, // 车辆类型
@@ -760,11 +610,9 @@ export default {
               formatDate(this.tzscMenuForm.startTime, "yyyy-MM-dd") +
               " 00:00:00", // 开始时间
             endTime:
-              formatDate(this.tzscMenuForm.endTime, "yyyy-MM-dd") +
-              " 23:59:59", // 结束时间
+              formatDate(this.tzscMenuForm.endTime, "yyyy-MM-dd") + " 23:59:59", // 结束时间
             deviceUid: deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
-            bayonetUid:
-              bayonetUidArr.length > 0 ? bayonetUidArr.join() : null // 卡口标识
+            bayonetUid: bayonetUidArr.length > 0 ? bayonetUidArr.join() : null // 卡口标识
           }
         };
         const selectedArr = this.characteristicList.filter(item => {
@@ -908,7 +756,6 @@ export default {
                   }
                 }
               }
-              // console.log("characteristicList", this.characteristicList);
             } else {
               this.characteristicList = [];
             }
@@ -1094,35 +941,8 @@ export default {
         this.isIndeterminate = false;
       }
     },
-    // 处理卡口树全选时间
-    /* handleCheckedAllBay(val) {
-      this.isIndeterminateBay = false;
-      if (val) {
-        this.$refs.bayonetTree.setCheckedNodes(this.bayonetTree);
-      } else {
-        this.$refs.bayonetTree.setCheckedNodes([]);
-      }
-      this.selectBayonetArr = this.$refs.bayonetTree.getCheckedNodes(true);
-      this.handleData();
-    },
-    //卡口
-    listenCheckedBay(val, val1) {
-      this.selectBayonetArr = this.$refs.bayonetTree.getCheckedNodes(true);
-      this.handleData();
-      if (val1.checkedNodes.length === this.videoTreeNodeCount) {
-        this.isIndeterminateBay = false;
-        this.checkAllTreeBay = true;
-      } else if (val1.checkedNodes.length < this.videoTreeNodeCount && val1.checkedNodes.length > 0) {
-        this.checkAllTreeBay = false;
-        this.isIndeterminateBay = true;
-      } else if (val1.checkedNodes.length === 0) {
-        this.checkAllTreeBay = false;
-        this.isIndeterminateBay = false;
-      }
-    }, */
     // 选中的设备数量处理
     handleData() {
-      /* this.selectDeviceArr = [...this.selectCameraArr, ...this.selectBayonetArr].filter(key => key.treeType); */
       this.selectDeviceArr = [...this.selectDeviceArr].filter(
         key => key.treeType
       );
@@ -1189,7 +1009,7 @@ export default {
         pageSize: this.pageSize,
         total: this.total,
         pageNum: this.pageNum
-      }
+      };
     },
     /* showStrucInfo(data, index) {
       // 打开抓拍详情
@@ -1208,120 +1028,33 @@ export default {
       this.sturcDetail = data;
       this.drawPoint(data); // 重新绘制地图
     },
-    /* 上传图片方法 */
-    beforeAvatarUpload(file) {
-      // 上传图片控制
-      const isJPG = file.type === "image/jpeg" || file.type === "image/png";
-      const isLt = file.size / 1024 / 1024 < 100;
-      if (!isJPG) {
-        this.$message.error("只能上传 JPG / PNG 格式图片!");
+    uploadEmit(data) {
+      if (data && data.path) {
+        this.curImageUrl = data.path;
+      } else {
+        this.curImageUrl = "";
       }
-      if (!isLt) {
-        this.$message.error("上传图片大小不能超过 100MB!");
-      }
-      this.uploading = true;
-      return isJPG && isLt;
     },
-    uploadSucess(response, file) {
-      //上传成功
-      this.uploading = false;
-      console.log(file);
-      if (response && response.data) {
-        let oRes = response.data;
-        if (oRes) {
-          let x = {
-            cname: oRes.fileName, // 附件名称 ,
-            contentUid: this.$store.state.loginUser.uid,
-            // desci: '', // 备注 ,
-            filePathName: oRes.fileName, // 附件保存名称 ,
-            fileType: 1, // 文件类型 ,
-            imgHeight: oRes.fileHeight, // 图片高存储的单位位px ,
-            imgSize: oRes.fileSize, // 图片大小存储的单位位byte ,
-            imgWidth: oRes.fileWidth, //  图片宽存储的单位位px ,
-            // otherFlag: '', // 其他标识 ,
-            path: oRes.fileFullPath, // 附件路径 ,
-            // path: oRes.path,
-            thumbnailName: oRes.thumbnailFileName, // 缩略图名称 ,
-            thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
-            // uid: '' //  附件标识
-          };
-          JtcPOSTAppendixInfo(x).then(jRes => {
-            if (jRes) {
-              x["uid"] = jRes.data;
-              console.log(x);
-            }
-          });
-          this.imgData = x;
-          this.curImageUrl = x.path;
+    // 拖拽开始
+    dragStart(ev, item) {
+      if (item && item.subStoragePath) {
+        if (!ev) {
+          ev = window.event;
         }
+        ev.dataTransfer.setData("upload_pic_url", item.subStoragePath); // 设置属性dataTransfer   两个参数   1：key   2：value
       }
     },
-    handleError() {
-      //上传失败
-      this.uploading = false;
-      this.$message.error("上传失败");
-    },
-    /**从历史记录中上传图片 */
-    showHistoryPic() {
-      //获取上传记录
-      this.loadingHis = true;
-      this.historyPicDialog = true; // 打开加载效果
-      let params = {
-        userId: this.$store.state.loginUser.uid,
-        fileType: 1
-      };
-      JtcGETAppendixInfoList(params)
-        .then(res => {
-          if (res) {
-            this.loadingHis = false; // 关闭加载效果
-            res.data.forEach(x => (x.checked = false));
-            this.historyPicList = res.data;
-          }
-        })
-        .catch(() => {
-          this.historyPicDialog = false; // 关闭加载效果
-        });
-    },
-    delPic() {
-      //删除图片
-      this.curImageUrl = "";
-    },
-    chooseHisPic(item) {
-      //选择最近上传的图片
-      item.checked = true;
-      this.selectedHistoryPic = item;
-    },
-    addHisToImg() {
-      this.curImageUrl = this.selectedHistoryPic.path;
-      this.historyPicDialog = false; // 关闭模态框
-    },
-    /* 拖拽图片上传的方法 */
-    drag(ev) {
-      ev.dataTransfer.setData("Text", ev.target.currentSrc);
-    },
-    drop(e) {
-      this.curImageUrl = e.dataTransfer.getData("Text");
-      let x = {
-        contentUid: this.$store.state.loginUser.uid,
-        cname: "拖拽图片" + Math.random(),
-        filePathName: "拖拽图片" + Math.random(),
-        path: e.dataTransfer.getData("Text")
-      };
-      JtcPOSTAppendixInfo(x).then(jRes => {
-        if (jRes) {
-          x["uid"] = jRes.data;
-          console.log(x);
-        }
-      });
-    },
-    allowDrop(e) {
-      e.preventDefault();
+    dragEnd() {
+      // console.log('drag end')
+      // this.dragActiveObj = null;
     }
   },
   watch: {
-    // stucOrder () {
-    //   this.tcDiscuss(true);
-    // },
+    curImageUrl(e) {
+      if (e === '') {
+        this.characteristicList = [];
+      }
+    },
     strucCurTab(e) {
       if (e === 2) {
         this.drawPoint(this.sturcDetail);
@@ -1371,7 +1104,7 @@ export default {
       }
       // 特征
       .characteristic {
-        margin: 10px 0 20px 0;
+        padding: 10px 15px 20px 15px;
         .btn {
           line-height: 30px;
           height: 30px;
@@ -1384,12 +1117,10 @@ export default {
         }
         .characteristic_list {
           min-height: 40px;
-          padding-bottom: 20px;
           overflow: hidden;
-          border-bottom: 1px solid #d3d3d3;
           .characteristic_item {
             float: left;
-            padding: 8px 16px;
+            padding: 7px 10px;
             font-size: 12px;
             background: #fafafa;
             border: 1px solid #f2f2f2;
@@ -1499,82 +1230,6 @@ export default {
           border: 1px solid #dddddd;
           color: #666666;
           width: 110px;
-        }
-      }
-      // 上传
-      .upload_warp {
-        position: relative;
-        height: 232px;
-        max-height: 232px;
-        overflow: hidden;
-        cursor: pointer;
-        -webkit-border-radius: 10px;
-        -moz-border-radius: 10px;
-        border-radius: 10px;
-        &:hover {
-          background: #2981f8;
-          > p {
-            display: block;
-          }
-          .del_icon {
-            display: block;
-          }
-        }
-        .vl_jtc_upload {
-          width: 100%;
-          height: 100%;
-          background: none;
-        }
-        > p {
-          display: none;
-          position: absolute;
-          bottom: 0;
-          text-align: center;
-          width: 100%;
-          color: #ffffff;
-          height: 36px;
-          line-height: 36px;
-          -webkit-border-radius: 0 0 10px 10px;
-          -moz-border-radius: 0 0 10px 10px;
-          border-radius: 0 0 10px 10px;
-          background: #0c70f8;
-        }
-        .vl_jtc_ic_input {
-          position: absolute;
-          top: 0.2rem;
-          width: 3rem;
-          height: 0.26rem;
-          left: 0.2rem;
-          border: 1px solid #d3d3d3;
-          -webkit-border-radius: 0.13rem;
-          -moz-border-radius: 0.13rem;
-          border-radius: 0.13rem;
-          padding: 0 0.02rem;
-          background: #ffffff;
-          .el-form-item__content {
-            height: 0.23rem;
-            line-height: 0.23rem;
-          }
-          input {
-            border: none !important;
-            height: 0.23rem;
-            line-height: 0.23rem;
-          }
-        }
-        .del_icon {
-          display: none;
-          position: absolute;
-          top: 10px;
-          right: 10px;
-          width: 24px;
-          height: 24px;
-          line-height: 24px;
-          text-align: center;
-          background: rgba(0, 0, 0, 0.4);
-          -webkit-border-radius: 4px;
-          -moz-border-radius: 4px;
-          border-radius: 4px;
-          color: #ffffff;
         }
       }
     }
@@ -1706,8 +1361,7 @@ export default {
 .tzsc_wrap {
   .characteristic {
     .get_character_btn {
-      width: 232px;
-      // line-height: 30px;
+      width: 202px;
       line-height: 1;
       height: 30px;
       background: #f2f2f2;
@@ -1718,37 +1372,9 @@ export default {
       cursor: pointer;
       padding: 0;
     }
-  }
-  // 上传
-  .upload_warp .vl_jtc_upload {
-    .el-upload {
-      width: 100%;
-      height: 100%;
-      background: #f2f2f2;
-      border: none;
-      span {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        margin-top: 126px;
-        color: #999;
-      }
-      &:hover {
-        background: #2981f8;
-        border: none;
-      }
-      &:hover span {
-        color: #fff;
-      }
-      img {
-        width: 100%;
-        height: 100%;
-        -webkit-border-radius: 10px;
-        -moz-border-radius: 10px;
-        border-radius: 10px;
-      }
+    .have_character {
+      background: #0C70F8;
+      color: #fff;
     }
   }
   // 历史图片弹窗
