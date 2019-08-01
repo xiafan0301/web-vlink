@@ -111,12 +111,12 @@
 
           <div class="chbox">
             <el-form :model="tzscMenuForm" ref="tzscMenuForm" :rules="rules">
-              <div style="padding-right: 20px;" v-if="input5 == 2">
-                <el-form-item label="号牌颜色" label-width="70px" prop>
+              <div v-if="input5 == 2">
+                <el-form-item prop>
                   <el-select
                     v-model="tzscMenuForm.licenseColor"
                     class="width132"
-                    placeholder="选择选项"
+                    placeholder="选择号牌颜色"
                   >
                     <el-option
                       v-for="item in plateColor"
@@ -126,8 +126,8 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label="车辆型号" label-width="70px" prop>
-                  <el-select v-model="tzscMenuForm.carModel" class="width132" placeholder="选择选项">
+                <el-form-item prop>
+                  <el-select v-model="tzscMenuForm.carModel" class="width132" placeholder="选择车辆型号">
                     <el-option
                       v-for="item in carModel"
                       :key="item.vehicleBrand"
@@ -136,8 +136,8 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label="车辆颜色" label-width="70px" prop>
-                  <el-select v-model="tzscMenuForm.carColor" class="width132" placeholder="选择选项">
+                <el-form-item prop>
+                  <el-select v-model="tzscMenuForm.carColor" class="width132" placeholder="选择车辆颜色">
                     <el-option
                       v-for="item in carColor"
                       :key="item.enumValue"
@@ -146,8 +146,8 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label="车辆类型" label-width="70px" prop>
-                  <el-select v-model="tzscMenuForm.carType" class="width132" placeholder="选择选项">
+                <el-form-item prop>
+                  <el-select v-model="tzscMenuForm.carType" class="width132" placeholder="选择车辆类型">
                     <el-option
                       v-for="item in vehicleType"
                       :key="item.enumValue"
@@ -156,8 +156,8 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label="号牌类型" label-width="70px" prop>
-                  <el-select v-model="tzscMenuForm.licenseType" class="width132" placeholder="选择选项">
+                <el-form-item prop>
+                  <el-select v-model="tzscMenuForm.licenseType" class="width132" placeholder="选择号牌类型">
                     <el-option
                       v-for="item in plateType"
                       :key="item.enumValue"
@@ -274,7 +274,7 @@
               <el-table :data="regulationsList">
                 <el-table-column label="序号" type="index" width="100"></el-table-column>
                 <el-table-column label="车牌号码" prop="plateNo" show-overflow-tooltip></el-table-column>
-                <el-table-column label="违法次数" sortable prop="counts" show-overflow-tooltip></el-table-column>
+                <el-table-column label="违章次数" sortable prop="counts" show-overflow-tooltip></el-table-column>
                 <el-table-column label="操作" show-overflow-tooltip>
                   <template slot-scope="scope">
                     <el-button @click="handleClick(scope.row)" type="text" size="small">查看详情</el-button>
@@ -1268,6 +1268,11 @@ html {
         padding: 0;
       }
     }
+  }
+}
+.chbox {
+  .el-select{
+    width: 100%;
   }
 }
 </style>
