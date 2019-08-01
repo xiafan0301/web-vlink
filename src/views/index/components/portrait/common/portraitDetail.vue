@@ -84,7 +84,7 @@ import {getFaceRetrievalPerson} from '../../../api/api.judge.js';
 export default {
   /* 
     oData
-      type: 1, // 1特征搜人 2以图搜人
+      type: 1, // 1特征搜人 2以图搜人 3落脚点分析
       params: {}, // 查询参数  列表查询的参数，结果需保持一致
       list: [], // 列表
       index: 0, // 当前页的第几个（点击的人像所在的页的序号）

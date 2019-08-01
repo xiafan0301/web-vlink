@@ -17,8 +17,11 @@
           label-width="0px"
           class="demo-ruleForm"
         >
-          <el-form-item>
-            <div class="upload_warp" @drop="drop($event)" @dragover="allowDrop($event)">
+          <el-form-item style="text-align: center;">
+            <div style="padding: 0 15px; height: 210px;">
+              <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit" :imgData="imgData"></div>
+            </div>
+            <!-- <div class="upload_warp" @drop="drop($event)" @dragover="allowDrop($event)">
               <el-upload
                 @drop="drop($event)"
                 :class="{'vl_jtc_upload': true}"
@@ -44,7 +47,7 @@
               <div v-show="curImageUrl" class="del_icon">
                 <i class="el-icon-delete" @click="delPic"></i>
               </div>
-            </div>
+            </div> -->
           </el-form-item>
           <el-form-item  prop="data1">
             <el-date-picker
@@ -68,19 +71,6 @@
               value-format="yyyy-MM-dd"
             ></el-date-picker>
           </el-form-item>
-          <!-- <el-form-item prop="data2">
-            <el-date-picker
-              v-model="ruleForm.data2"
-              type="daterange"
-              class="full vl_date"
-              value-format="yyyy-MM-dd"
-              :picker-options="pickerOptions"
-              range-separator="至"
-              :clearable="false"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-            ></el-date-picker>
-          </el-form-item> -->
           <el-form-item prop="minFootholdTimes" class="firstItem">
             <el-row :gutter="5">
               <el-col :span="22">
@@ -96,8 +86,7 @@
             </el-row>
           </el-form-item>
           <el-form-item class="firstItem" label="抓拍区域：" label-width="72px" prop="input5">
-            <!-- <el-radio-group v-model="input5" @change="changeTab"> -->
-            <el-radio-group v-model="ruleForm.input5" @change="changeTab">
+            <el-radio-group v-model="ruleForm.input5">
               <el-row :gutter="10">
                 <el-col :span="12">
                   <el-radio label="1">列表选择</el-radio>
@@ -158,9 +147,9 @@
     <div class="reselt" v-if="reselt">
       <div class="plane insetPadding">
         <h3 class="title">分析结果</h3>
-        <div class="limitBox">
+        <div class="limitBoxs">
           <vue-scroll>
-          <el-collapse v-model="activeNames" @change="handleChange">
+          <el-collapse v-model="activeNames">
             <el-collapse-item  v-for="(item,index) in evData" :key="index" :name="index">
               <template slot="title">
                 <span class="result_device_name" :title="item.groupName">{{item.groupName}}</span>
@@ -168,7 +157,7 @@
                 <!-- <i class="header-icon el-icon-info"></i> -->
               </template>
               <div class="itembox" v-for="(v,d) in item.personDetailList" :key="d">
-                <div class="imgInfo"  @click.stop="onOpenDetail(v , item)">
+                <div class="imgInfo"  @click.stop="onOpenDetail(v, d, item)">
                    <img :src="v.subStoragePath" class="img">
                    <div>
                      <p class="timedata"><i class="el-icon-time"></i>{{v.shotTime}}</p>
@@ -177,7 +166,7 @@
                       <b v-if="v.semblance">{{(v.semblance*1).toFixed(2)}}</b>%
                     </span>
                    </div>
-                  <i class="del el-icon-delete" @click.stop="delItems(d,index)"></i>
+                  <i class="del_list_icon el-icon-delete" @click.stop="delItems(d,index)"></i>
                 </div>
               </div>
               
@@ -193,14 +182,6 @@
     <!-- 地图选择 -->
     <!-- D设备 B卡口  这里是设备和卡口 -->
     <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" @mapSelectorEmit="mapPoint" ></div>
-    <!-- <el-dialog :visible.sync="dialogVisible" width="80%">
-      <mapselect
-        @selectMap="mapPoint"
-        @closeMap="hideMap"
-        :allPoints="allDevice"
-        :allBayonets="allBayonet"
-      ></mapselect>
-    </el-dialog> -->
     <!-- 人工筛选 -->
     <el-dialog
       title="人工筛选"
@@ -209,9 +190,9 @@
       <div class="choose">
         <div class="limitBox">
           <vue-scroll>
-          <el-collapse v-model="activeChoose" @change="handleChange">
+          <el-collapse v-model="activeChoose">
             <el-collapse-item  v-for="(item,index) in chooseData" :key="index" :title="item.groupName+'（'+item.totalNum+'次）'" :name="index">
-              <div class="itembox" v-for="(v,d) in item.personDetailList">
+              <div class="itembox" v-for="(v,d) in item.personDetailList" :key="d">
                 <div class="imgInfo">
                    <img :src="v.subStoragePath" class="img">
                    <div>
@@ -221,7 +202,7 @@
                       <b v-if="v.semblance">{{(v.semblance*1).toFixed(2)}}</b>%
                     </span>
                    </div>
-                  <i class="del el-icon-delete" @click="delItem(d,index)"></i>
+                  <i class="del del_list_icon el-icon-delete" @click="delItem(d,index)"></i>
                 </div>
               </div>
               
@@ -270,7 +251,7 @@
     </el-dialog>
 <!-- 抓拍信息 -->
      
-    <portraitDetail :open="showDetail" @closeDialog="onCloseDetail" :detailData="deData" :scrollData="seData" :showItem="true" ></portraitDetail>
+    <portraitDetail :detailData="detailData"></portraitDetail>
   </div>
 </template>
 <script>
@@ -287,12 +268,14 @@ import { getAllBayonetList } from "@/views/index/api/api.base.js";
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 // import mapselect from "@/views/index/components/common/mapSelect";
 import mapSelector from '@/components/common/mapSelector.vue';
-import portraitDetail from '@/components/common/portraitDetail.vue';
+import portraitDetail from './common/portraitDetail.vue';
 import { log } from 'util';
+import vlUpload from '@/components/common/upload.vue';
 export default {
   components: {
     mapSelector,
     flvplayer,
+    vlUpload,
     portraitDetail
   },
   data() {
@@ -307,7 +290,8 @@ export default {
           }
         ]
       },
-      deData:null,
+      uploadClear: {},
+      detailData:null,
       seData:null,
       isload:false,
       dialogChoose:false,
@@ -365,7 +349,10 @@ export default {
   mounted() {
     if( this.$route.query.imgurl || this.$route.query.path){
       let a =  this.$route.query.imgurl || this.$route.query.path ;
-      this.curImageUrl= a
+
+      this.imgData = Object.assign({}, {path: a});
+
+      this.curImageUrl= a;
     }
     
 
@@ -387,6 +374,12 @@ export default {
     }
   },
   methods: {
+    uploadEmit (data) {
+      console.log('uploadEmit data', data);
+      if (data && data.path) {
+        this.curImageUrl = data.path;
+      }
+    },
     mapZoomSet(val) {
       if (this.amap) {
         this.amap.setZoom(this.amap.getZoom() + val);
@@ -457,27 +450,18 @@ export default {
      /**
      * 打开抓拍弹框
      */
-    onOpenDetail (obj,list) {
-      this.showDetail=true;
-      this.deData = obj
-      this.seData = list.personDetailList
-      // console.log(obj)
+    onOpenDetail (obj, index, list) {
+
+      this.detailData = {
+        type: 3, // 3落脚点分析
+        // params: this.searchParams(), // 查询参数
+        list: list.personDetailList, // 列表
+        index: index, // 第几个
+        pageSize: list.totalNum,
+        total: list.totalNum,
+        pageNum: 1
+      }
     },
-    /**
-     * 关闭抓拍弹框
-     */
-    onCloseDetail () {
-      this.showDetail=false
-    },
-    /**
-     * 图片切换
-     */
-    imgListTap (obj, i) {
-      this.curImgIndex = i
-    },
-    handleChange(val) {
-        console.log(val);
-      },
     hideResult() {
       this.reselt = false;
       this.hideLeft();
@@ -530,15 +514,6 @@ export default {
 
       // console.log(this.selectDevice);
     },
-    changeTab(v) {
-      //console.log(v);
-      if (v == "2") {
-        //this.dialogVisibles = !this.dialogVisibles;
-        //this.dialogVisibles = true;
-      } else{
-        //this.dialogVisible=false
-      }
-    },
     submitForm(v) {
 
       if (
@@ -570,7 +545,8 @@ export default {
       this.setDTime()
       this.ruleForm.minFootholdTimes=3 
       this.ruleForm.input5='1'
-      this.ruleForm.value1=[]
+      this.ruleForm.value1=[];
+      this.uploadClear = {};
       this.options[0].areaTreeList.forEach(el=>{
             this.ruleForm.value1.push(el.areaId)
           })
@@ -1045,81 +1021,81 @@ export default {
    background-color: #0466de;
 }
 // 上传
-.upload_warp {
-  position: relative;
-  height: 232px;
-  max-height: 232px;
-  overflow: hidden;
-  cursor: pointer;
-  -webkit-border-radius: 10px;
-  -moz-border-radius: 10px;
-  border-radius: 10px;
-  &:hover {
-    background: #2981f8;
-    > p {
-      display: block;
-    }
-    .del_icon {
-      display: block;
-    }
-  }
-  .vl_jtc_upload {
-    width: 100%;
-    height: 100%;
-    background: none;
-  }
-  > p {
-    display: none;
-    position: absolute;
-    bottom: 0;
-    text-align: center;
-    width: 100%;
-    color: #ffffff;
-    height: 40px;
-    line-height: 40px;
-    -webkit-border-radius: 0 0 10px 10px;
-    -moz-border-radius: 0 0 10px 10px;
-    border-radius: 0 0 10px 10px;
-    background: #0c70f8;
-  }
-  .vl_jtc_ic_input {
-    position: absolute;
-    top: 0.2rem;
-    width: 3rem;
-    height: 0.26rem;
-    left: 0.2rem;
-    border: 1px solid #d3d3d3;
-    -webkit-border-radius: 0.13rem;
-    -moz-border-radius: 0.13rem;
-    border-radius: 0.13rem;
-    padding: 0 0.02rem;
-    background: #ffffff;
-    .el-form-item__content {
-      height: 0.23rem;
-      line-height: 0.23rem;
-    }
-    input {
-      border: none !important;
-      height: 0.23rem;
-      line-height: 0.23rem;
-    }
-  }
-  .del_icon {
-    display: none;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 24px;
-    height: 24px;
-    line-height: 24px;
-    text-align: center;
-    background: rgba(0, 0, 0, 0.4);
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
-    color: #ffffff;
-  }
-}
+// .upload_warp {
+//   position: relative;
+//   height: 232px;
+//   max-height: 232px;
+//   overflow: hidden;
+//   cursor: pointer;
+//   -webkit-border-radius: 10px;
+//   -moz-border-radius: 10px;
+//   border-radius: 10px;
+//   &:hover {
+//     background: #2981f8;
+//     > p {
+//       display: block;
+//     }
+//     .del_icon {
+//       display: block;
+//     }
+//   }
+//   .vl_jtc_upload {
+//     width: 100%;
+//     height: 100%;
+//     background: none;
+//   }
+//   > p {
+//     display: none;
+//     position: absolute;
+//     bottom: 0;
+//     text-align: center;
+//     width: 100%;
+//     color: #ffffff;
+//     height: 40px;
+//     line-height: 40px;
+//     -webkit-border-radius: 0 0 10px 10px;
+//     -moz-border-radius: 0 0 10px 10px;
+//     border-radius: 0 0 10px 10px;
+//     background: #0c70f8;
+//   }
+//   .vl_jtc_ic_input {
+//     position: absolute;
+//     top: 0.2rem;
+//     width: 3rem;
+//     height: 0.26rem;
+//     left: 0.2rem;
+//     border: 1px solid #d3d3d3;
+//     -webkit-border-radius: 0.13rem;
+//     -moz-border-radius: 0.13rem;
+//     border-radius: 0.13rem;
+//     padding: 0 0.02rem;
+//     background: #ffffff;
+//     .el-form-item__content {
+//       height: 0.23rem;
+//       line-height: 0.23rem;
+//     }
+//     input {
+//       border: none !important;
+//       height: 0.23rem;
+//       line-height: 0.23rem;
+//     }
+//   }
+//   .del_icon {
+//     display: none;
+//     position: absolute;
+//     top: 10px;
+//     right: 10px;
+//     width: 24px;
+//     height: 24px;
+//     line-height: 24px;
+//     text-align: center;
+//     background: rgba(0, 0, 0, 0.4);
+//     -webkit-border-radius: 4px;
+//     -moz-border-radius: 4px;
+//     border-radius: 4px;
+//     color: #ffffff;
+//   }
+// }
 .choose{
   height: 350px;
   padding: 0px 15px;
@@ -1146,8 +1122,10 @@ export default {
         
         .del{
           position: absolute;
-          bottom: -10px;
-          right: -5px;
+          right: 5px;
+          bottom: 0;
+          // bottom: -10px;
+          // right: -5px;
           background: #999;
           color: #ffffff;
           padding: 4px;
@@ -1223,8 +1201,21 @@ export default {
   .itembox{
     margin-bottom: 10px;
     padding-bottom: 10px;
-    margin-top: 10px;
+    padding-top: 10px;
     border-bottom: solid 1px #f2f2f2;
+    .del_list_icon {
+      display: none;
+    }
+    &:hover {
+      background-color: #E0F1FF;
+      .timedata {
+        border-color: transparent;
+        background-color: transparent;
+      }
+      .del_list_icon {
+        display: block;
+      }
+    }
   }
   .map_rrt_u2 {
     position: absolute; right: 30px;
@@ -1277,6 +1268,60 @@ export default {
   }
   .el-collapse-item__content{
     padding: 10px;
+  }
+}
+.limitBoxs{
+  height: 96%;
+
+  .el-collapse-item{
+    .el-collapse-item__header{
+      background: #F6F6F6;
+      padding-left: 10px;
+      height: 40px;
+      line-height: 40px;
+    }
+  }
+  .el-collapse-item__content{
+    // padding: 10px;
+  }
+  .itembox{
+    cursor: pointer;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-bottom: solid 1px #f2f2f2;
+    // .del{
+    //       position: absolute;
+    //       right: 5px;
+    //       bottom: 0;
+    //       // bottom: -10px;
+    //       // right: -5px;
+    //       background: #999;
+    //       color: #ffffff;
+    //       padding: 4px;
+    //       cursor: pointer;
+    //     }
+    .del_list_icon {
+      position: absolute;
+      right: 5px;
+      bottom: 0;
+      // bottom: -10px;
+      // right: -5px;
+      background: #999;
+      color: #ffffff;
+      padding: 4px;
+      cursor: pointer;
+      display: none;
+    }
+    &:hover {
+      background-color: #E0F1FF;
+      .timedata {
+        border-color: transparent;
+        background-color: transparent;
+      }
+      .del_list_icon {
+        display: block;
+      }
+    }
   }
 }
 .vl_jig_mk_p {

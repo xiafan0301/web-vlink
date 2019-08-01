@@ -229,13 +229,23 @@
         </div>
       </div>
     </div>
-    <div style="width: 0; height: 0;" v-show="showCut"  :class="{vl_j_cutscreen: showCut}">
+    <!-- <div style="width: 0; height: 0;" v-show="showCut"  :class="{vl_j_cutscreen: showCut}">
       <img :src="demoImg" alt="">
       <i @click="showCut = false" class="close_btn el-icon-error"></i>
       <a download="截图" :href="demoImg" id="vlJidDownloadImg" ></a>
-    </div>
+    </div> -->
   </div>
-
+  <!-- 截屏 dialog -->
+    <el-dialog title="截屏" :visible.sync="cutDialogVisible" :center="false" :append-to-body="true" width="1000px" style="z-index: 11111;">
+      <div style="text-align: center; padding-top: 30px;">
+        <canvas :id="flvplayerId + '_cut_canvas'"></canvas>
+      </div>
+      <div slot="footer" class="dialog-footer" style="padding: 0 0 20px 0;">
+        <el-button  @click="cutDialogVisible = false">取 消</el-button>&nbsp;&nbsp;&nbsp;&nbsp;
+        <el-button  type="priamry" @click="playerCutSave">保 存</el-button>
+        <a :id="flvplayerId + '_cut_a'" style="display: none;">保存</a>
+      </div>
+    </el-dialog>
   <!-- 地图选择 -->
    <!-- D设备 B卡口  这里是设备和卡口 -->
     <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" :clear="clearMapSelect" @mapSelectorEmit="mapPoint"></div>
@@ -248,6 +258,7 @@ import {getFocusList, newGETAlarmSnapList, JfoGETEventList,getAllDevice } from "
 import {MapGETmonitorList} from '../../api/api.map.js';
 import {getGroupListIsPortrait, getGroupListIsVehicle} from '../../api/api.control.js';
 import mapSelector from '@/components/common/mapSelector.vue';
+import { random14 } from '@/utils/util.js';
 export default {
    components: {
     mapSelector,
@@ -255,6 +266,8 @@ export default {
   },
   data() {
     return {
+      flvplayerId: 'flv_' + random14(),
+      cutDialogVisible: false, // 截图弹出框
       clearMapSelect: null, // 清除地图选择
       input5:"1",
       areaIds: [],
@@ -637,7 +650,7 @@ export default {
                 x.playing = false;
                 return x;
               });
-              console.log(this.curVideo);
+              console.log('curVideo', this.curVideo);
               
               this.$_hideLoading();
             }
@@ -666,10 +679,11 @@ export default {
       this.curVideo.videoList[_i].playing = !this.curVideo.videoList[_i].playing;
     },
     largeVideo (_i) {
+      this.curVideo.playing = false;
       let vDom = document.getElementById('vlJigVideo' + _i);
       vDom.pause();
       this.curVideo.id = 'vlJigVideo' + _i;
-      this.curVideo.playing = this.curVideo.videoList[_i].playing;
+      // this.curVideo.playing = this.curVideo.videoList[_i].playing;
       this.curVideo.playNum = _i;
       this.showLarge = true;
       if (this.curVideo.videoList[_i].playing) {
@@ -684,6 +698,8 @@ export default {
       })
       document.getElementById('vlJfoLargeV').currentTime = vDom.currentTime;
       this.curVideoUrl = vDom.src;
+
+      console.log('curVideoUrl', this.curVideoUrl)
     },
     closeVideo () {
       let vDom = document.getElementById(this.curVideo.id);
@@ -705,16 +721,61 @@ export default {
       document.getElementById('vlJfoLargeV').play();
     },
     cutScreen () {
-      this.showCut = true;
-      let _canvas = document.createElement('canvas');
-      _canvas.setAttribute('width', document.documentElement.clientWidth);
-      _canvas.setAttribute('height', document.documentElement.clientHeight);
-      let cxt = _canvas.getContext('2d');
-      cxt.drawImage(document.getElementById('vlJfoLargeV'), 0, 0, _canvas.width, _canvas.height);
-      this.demoImg = _canvas.toDataURL();
-      setTimeout(() => {
-        document.getElementById('vlJidDownloadImg').click();
-      }, 200)
+      console.log('mmmmmm')
+      this.cutDialogVisible = true;
+      console.log('vvvvv')
+      this.$nextTick(() => {
+        let $video = $('#vlJfoLargeV');
+        let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
+        // console.log($video.width(), $video.height());
+        if ($canvas && $canvas.length > 0) {
+          // let w = 920, h = 540;
+          let w = $video.width(), h = $video.height();
+          if (w > 920) {
+            h = Math.floor(920 / w * h);
+            w = 920;
+          }
+          $canvas.attr({
+            width: w,
+            height: h,
+          });
+          // $video[0].crossOrigin = 'anonymous';
+          // video canvas 必须为原生对象
+          let ctx = $canvas[0].getContext('2d');
+          this.cutTime = new Date().getTime();
+          ctx.drawImage($video[0], 0, 0, w, h);
+        }
+      });
+    },
+    // 截屏保存
+    playerCutSave () {
+      let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
+      if ($canvas && $canvas.length > 0) {
+        console.log('$canvas[0]', $canvas[0])
+        let img = $canvas[0].toDataURL('image/png');
+        // img.crossOrigin  = '';
+        let filename = 'image_' + this.cutTime + '.png';
+        if('msSaveOrOpenBlob' in navigator){
+          // 兼容EDGE
+          let arr = img.split(',');
+          let mime = arr[0].match(/:(.*?);/)[1];
+          let bstr = atob(arr[1]);
+          let n = bstr.length;
+          let u8arr = new Uint8Array(n);
+          while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+          }
+          let blob = new Blob([u8arr], {type:mime});
+          window.navigator.msSaveOrOpenBlob(blob, filename);
+          return;
+        }
+        img.replace('image/png', 'image/octet-stream');
+        let saveLink = $('#' + this.flvplayerId + '_cut_a')[0];
+        saveLink.href = img;
+        saveLink.download = filename;
+        saveLink.click();
+        // console.log(base64);
+      }
     },
     showEventList () {
       if (!this.$_loading) {
@@ -1131,7 +1192,7 @@ export default {
       left: 0;
       bottom: 0;
       background: #000000;
-      z-index: 9999;
+      z-index: 99;
       -webkit-transition: all .4s;
       -moz-transition: all .4s;
       -ms-transition: all .4s;

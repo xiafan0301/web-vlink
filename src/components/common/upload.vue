@@ -92,7 +92,7 @@ export default {
   },
   watch: {
     imgData (val) {
-      if (val && val.length > 0) {
+      if (val && val.path) {
         this.choosedHisPic = null;
         this.currentImg = Object.assign({}, val);
       }

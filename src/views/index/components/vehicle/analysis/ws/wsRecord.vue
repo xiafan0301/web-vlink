@@ -186,7 +186,7 @@ export default {
           { name: '新建布控' }
         ]
       });
-      this.$router.push({name: 'control_create', query: { plateNo: this.resultList[0].struVehicleDto.plateNo, modelName: '车辆追踪' }});
+      this.$router.push({name: 'control_create', query: { plateNo: this.resultList[0].struVehicleDto.plateNo, imgurl: this.resultList[0].struVehicleDto.storagePath, modelName: '车辆追踪' }});
     },
     // 跳至轨迹分析页面
     skipTrajectoryPage () {
