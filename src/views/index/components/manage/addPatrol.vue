@@ -11,8 +11,9 @@
     <div class="content_box">
       <div class="content_new_group">
         <el-form :inline="true" :model="addForm" :rules="rules" class="add_form" ref="addForm" label-width="110px">
-          <el-form-item label="轮巡名称:" style="width: 49%;" prop="roundName">
-            <el-input style="width: 100%;" v-model="addForm.roundName" placeholder="请输入轮巡名称" maxlength="10"></el-input>
+          <el-form-item label="轮巡名称:" style="width: 49%;" prop="roundName" :class="{'round_name': isShowRoundName }">
+            <el-input style="width: 100%;" v-model="addForm.roundName" placeholder="请输入轮巡名称" maxlength="10" @blur="blurRoundName"></el-input>
+            <p class="round_error_tip" v-show="isShowRoundName">轮巡名称不允许重复</p>
           </el-form-item>
            <el-form-item label="轮巡时间:" style="width: 49%;" prop="dateTime">
             <el-date-picker
@@ -162,11 +163,12 @@ import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import { validateDurationTime, validatePatrolTime } from '@/utils/validator.js';
 import { getAllDevices, getCusGroup, getDepartmentList } from '@/views/index/api/api.manage.js';
-import { addVideoRound, getVideoRoundDetail, updateVideoRoundState } from '@/views/index/api/api.video.js';
+import { addVideoRound, getVideoRoundDetail, updateVideoRoundState, judgeRoundName } from '@/views/index/api/api.video.js';
 export default {
   components: {listSelect, mapSelect},
   data () {
     return {
+      isShowRoundName: false, // 是否显示轮巡名称重复提示
       isSelected: 0, // 查询--重置
       backDialog: false, // 返回提示弹出框
       tabState: 1, // 地图选择
@@ -248,6 +250,23 @@ export default {
     this.getAllDepartList();
   },
   methods: {
+    // 判断轮巡名称是否重复
+    blurRoundName () {
+      if (this.addForm.roundName) {
+        if (!this.$route.query.id) { // 新增轮巡
+          judgeRoundName(this.addForm.roundName)
+            .then(res => {
+              if (res && res.data) {
+                this.isShowRoundName = true;
+              } else {
+                this.isShowRoundName = false;
+              }
+          })
+        }
+      } else {
+        this.isShowRoundName = false;
+      }
+    },
     // 根据设备名称搜索
     emitSearchData (val) {
       this.searchForm.devName = val;
@@ -660,6 +679,9 @@ export default {
     },
     // 新增轮巡
     addPatrolInfo () {
+      if (this.isShowRoundName) {
+        return;
+      }
       if (this.currentDeviceList.length === 0) {
         this.$message({
           type: 'warning',
@@ -906,6 +928,21 @@ export default {
           background-color: #ffffff;
           color: #666666;
           border-color: #DDDDDD;
+        }
+        .round_name {
+          position: relative;
+          /deep/ .el-input__inner {
+            border-color: #f56c6c;
+          }
+          .round_error_tip {
+            position: absolute;
+            height: 10px;
+            line-height: 10px;
+            color: #f56c6c;
+            font-size: 12px;
+            line-height: 1;
+            padding-top: 4px;
+          }
         }
       }
     }

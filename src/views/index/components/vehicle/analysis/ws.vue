@@ -151,7 +151,7 @@ export default {
       rules: {
         plateNo: [
           { required: true, message: '请输入正确的车牌号码', trigger: 'blur' },
-          // { validator: checkPlateNumber, trigger: 'blur' }
+          { validator: checkPlateNumber, trigger: 'blur' }
         ]
       },
       pickerStart: {
@@ -189,7 +189,7 @@ export default {
       this.searchForm.plateNo = plateNo;
       this.searchForm.shotTime = dateStart;
       this.searchForm.dateEnd = dateEnd;
-      this.searchForm.interval = this.$route.query.interval;
+      this.searchForm.interval = parseInt(this.$route.query.interval);
       this.searchForm.deviceCode = this.$route.query.deviceCode;
       if (this.$route.query.vehicleClass) {
         this.searchForm.vehicleClass = this.$route.query.vehicleClass.join(',');

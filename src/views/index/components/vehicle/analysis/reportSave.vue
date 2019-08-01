@@ -412,22 +412,36 @@ export default {
     },
     setMapMarkerForClgj () {
       let gjPath = [];
+      let ism = this.clgjList.length > 1;
       for (let i = 0; i < this.clgjList.length; i++) {
         // console.log('doMark', obj);
         let obj = this.clgjList[i];
+        let offset = [-20, -48];
+        let sClass = 'cl_report_gj';
         if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
+          // 起点
+          if (ism && i === 0) {
+            offset = [-40, -40];
+            sClass += ' cl_report_gj_qz cl_report_gj_q';
+          }
+          // 终点
+          if (ism && i === (this.clgjList.length - 1)) {
+            offset = [-40, -40];
+            sClass += ' cl_report_gj_qz cl_report_gj_z';
+          }
           let  sVideo = '';
           if (obj.storagePath) {
-            sVideo = '<div><img src="' + obj.storagePath + '" controls></img></div>';
+            sVideo = '<div><img class="bigImg" src="' + obj.storagePath + '" controls></img></div>' +
+              '<p>' + obj.shotTime + '</p>';
           }
-          let marker = new window.AMap.Marker({ // 添加自定义点标记
+          new window.AMap.Marker({ // 添加自定义点标记
             map: this.clgjMap,
             position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-            offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
+            offset: new window.AMap.Pixel(offset[0], offset[1]), // 相对于基点的偏移位置
             draggable: false, // 是否可拖动
             // extData: obj,
             // 自定义点标记覆盖物内容
-            content: '<div title="' + obj.deviceName + '" class="cl_report_gj">' +
+            content: '<div title="' + obj.deviceName + '" class="' + sClass + '">' +
               sVideo +
               '</div>'
           });
@@ -757,6 +771,21 @@ export default {
     > img {
       width: 100%; height: 100%;
     }
+  }
+  &.cl_report_gj_qz {
+    width: 80px; height: 80px;
+    > div {
+      bottom: -25px; left: 100%;
+    }
+    > p {
+      bottom: 27px; left: 100%;
+    }
+  }
+  &.cl_report_gj_q {
+    background: url(../../../../../assets/img/icons/icons_qd.png) center center no-repeat;
+  }
+  &.cl_report_gj_z {
+    background: url(../../../../../assets/img/icons/icons_zd.png) center center no-repeat;
   }
 }
 .cl_report_cm {

@@ -110,32 +110,9 @@
                     </div>-->
                   </div>
                 </div>
-                <div class="upload_warp" @drop="drop($event)" @dragover="allowDrop($event)">
-                  <el-upload
-                    @drop="drop($event)"
-                    :class="{'vl_jtc_upload': true}"
-                    :show-file-list="false"
-                    accept="image/*"
-                    :action="uploadAcion"
-                    list-type="picture-card"
-                    :before-upload="beforeAvatarUpload"
-                    :on-success="uploadSucess"
-                    :on-error="handleError"
-                  >
-                    <i v-if="uploading" class="el-icon-loading"></i>
-                    <img v-else-if="curImageUrl" :src="curImageUrl" />
-                    <div v-else>
-                      <i
-                        style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
-                        class="vl_icon vl_icon_vehicle_01"
-                      ></i>
-                      <span>点击上传图片</span>
-                    </div>
-                  </el-upload>
-                  <p @click="showHistoryPic">从上传记录中选择</p>
-                  <div v-show="curImageUrl" class="del_icon">
-                    <i class="el-icon-delete" @click="delPic"></i>
-                  </div>
+                <!-- 上传车像图片 -->
+                <div style="padding: 0 15px; height: 210px;">
+                  <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit"></div>
                 </div>
               </el-form>
             </div>
@@ -185,9 +162,11 @@
               >
                 <div class="img_wrap">
                   <img
-                    @dragstart="drag($event)"
-                    title="拖动图片上传"
+                   :alt="item.deviceName"
+                    @dragstart="dragStart($event, item)"
+                    @dragend="dragEnd"
                     draggable="true"
+                    style="cursor: move;"
                     :src="item.subStoragePath"
                   />
                 </div>
@@ -232,40 +211,14 @@
         </div>
       </div>
     </div>
-    <!--上传记录弹窗-->
-    <el-dialog
-      :visible.sync="historyPicDialog"
-      class="history-pic-dialog"
-      :close-on-click-modal="false"
-      top="4vh"
-      title="最近上传的图片"
-    >
-      <div style="text-align: center;font-size: 20px;" v-if="loadingHis">
-        <i class="el-icon-loading"></i>
-      </div>
-      <vue-scroll class="his-pic-box" v-else-if="historyPicList.length">
-        <div
-          class="his-pic-item"
-          :class="{'active': item.checked}"
-          v-for="item in historyPicList"
-          :key="item.uid"
-          @click="chooseHisPic(item)"
-        >
-          <img :src="item.path" alt />
-        </div>
-        <div style="clear: both;"></div>
-      </vue-scroll>
-      <p v-else>暂无历史记录</p>
-      <div slot="footer">
-        <el-button @click="historyPicDialog = false">取消</el-button>
-        <el-button type="primary" @click="addHisToImg" :disabled="choosedHisPic.length === 0">确认</el-button>
-      </div>
-    </el-dialog>
+  
     <!--检索详情弹窗-->
     <div is="vehicleDetail" :detailData="detailData"></div>
   </div>
 </template>
 <script>
+
+import vlUpload from "@/components/common/upload.vue";
 import vlBreadcrumb from "@/components/common/breadcrumb.vue";
 import vehicleDetail from '../common/vehicleDetail.vue';
 
@@ -280,12 +233,10 @@ import { MapGETmonitorList } from "../../../api/api.map.js"; // 获取到设备�
 import { objDeepCopy } from "../../../../../utils/util.js"; // 深拷贝方法
 
 export default {
-  components: { vlBreadcrumb, vehicleDetail },
+  components: { vlBreadcrumb, vehicleDetail, vlUpload },
   data() {
     return {
-
       detailData: null,
-
       selectType: 1,
       sortType: 1, // 1为时间排序， 2为监控排序
       timeSortType: true, // true为时间降序， false为时间升序
@@ -357,11 +308,6 @@ export default {
       uploadAcion: ajaxCtx.base + "/new", //上传路径
       uploading: false, // 是否上传中
       curImageUrl: "", // 当前上传的图片
-      historyPicList: [], // 上传历史记录
-      selectedHistoryPic: null,
-      historyPicDialog: false,
-      loadingHis: false,
-      imgData: null,
 
       /* 选择设备变量 */
       treeTabShow: false,
@@ -412,13 +358,7 @@ export default {
     }
   },
   methods: {
-    // bigImg(v) {
-    //   if (v == 1) {
-    //     this.isChoose = !this.isChoose;
-    //   } else {
-    //     this.isChoose2 = !this.isChoose2;
-    //   }
-    // },
+    
     /*重置菜单的数据 */
     resetMenu() {
       // 置空数据数量
@@ -694,32 +634,7 @@ export default {
         this.isIndeterminate = false;
       }
     },
-    // 处理卡口树全选时间
-    /* handleCheckedAllBay(val) {
-      this.isIndeterminateBay = false;
-      if (val) {
-        this.$refs.bayonetTree.setCheckedNodes(this.bayonetTree);
-      } else {
-        this.$refs.bayonetTree.setCheckedNodes([]);
-      }
-      this.selectBayonetArr = this.$refs.bayonetTree.getCheckedNodes(true);
-      this.handleData();
-    },
-    //卡口
-    listenCheckedBay(val, val1) {
-      this.selectBayonetArr = this.$refs.bayonetTree.getCheckedNodes(true);
-      this.handleData();
-      if (val1.checkedNodes.length === this.videoTreeNodeCount) {
-        this.isIndeterminateBay = false;
-        this.checkAllTreeBay = true;
-      } else if (val1.checkedNodes.length < this.videoTreeNodeCount && val1.checkedNodes.length > 0) {
-        this.checkAllTreeBay = false;
-        this.isIndeterminateBay = true;
-      } else if (val1.checkedNodes.length === 0) {
-        this.checkAllTreeBay = false;
-        this.isIndeterminateBay = false;
-      }
-    }, */
+    
     // 选中的设备数量处理
     handleData() {
       /* this.selectDeviceArr = [...this.selectCameraArr, ...this.selectBayonetArr].filter(key => key.treeType); */
@@ -740,115 +655,25 @@ export default {
         this.handleCheckedAll(true);
       });
     },
-    /* 上传图片方法 */
-    beforeAvatarUpload(file) {
-      // 上传图片控制
-      const isJPG = file.type === "image/jpeg" || file.type === "image/png";
-      const isLt = file.size / 1024 / 1024 < 100;
-      if (!isJPG) {
-        this.$message.error("只能上传 JPG / PNG 格式图片!");
+    uploadEmit(data) {
+      if (data && data.path) {
+        this.curImageUrl = data.path;
+      } else {
+        this.curImageUrl = "";
       }
-      if (!isLt) {
-        this.$message.error("上传图片大小不能超过 100MB!");
-      }
-      this.uploading = true;
-      return isJPG && isLt;
     },
-    uploadSucess(response) {
-      //上传成功
-      this.uploading = false;
-      /* this.compSim = '';
-      this.compSimWord = ''; */
-      if (response && response.data) {
-        let oRes = response.data;
-        if (oRes) {
-          let x = {
-            cname: oRes.fileName, // 附件名称 ,
-            contentUid: this.$store.state.loginUser.uid,
-            // desci: '', // 备注 ,
-            filePathName: oRes.fileName, // 附件保存名称 ,
-            fileType: 1, // 文件类型 ,
-            imgHeight: oRes.fileHeight, // 图片高存储的单位位px ,
-            imgSize: oRes.fileSize, // 图片大小存储的单位位byte ,
-            imgWidth: oRes.fileWidth, //  图片宽存储的单位位px ,
-            // otherFlag: '', // 其他标识 ,
-            path: oRes.fileFullPath, // 附件路径 ,
-            // path: oRes.path,
-            thumbnailName: oRes.thumbnailFileName, // 缩略图名称 ,
-            thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
-            // uid: '' //  附件标识
-          };
-          JtcPOSTAppendixInfo(x).then(jRes => {
-            if (jRes) {
-              x["uid"] = jRes.data;
-              // console.log(x);
-            }
-          });
-          this.imgData = x;
-          this.curImageUrl = x.path;
+    // 拖拽开始
+    dragStart(ev, item) {
+      if (item && item.subStoragePath) {
+        if (!ev) {
+          ev = window.event;
         }
+        ev.dataTransfer.setData("upload_pic_url", item.subStoragePath); // 设置属性dataTransfer   两个参数   1：key   2：value
       }
     },
-    handleError() {
-      //上传失败
-      this.uploading = false;
-      this.$message.error("上传失败");
-    },
-    /**从历史记录中上传图片 */
-    showHistoryPic() {
-      //获取上传记录
-      this.loadingHis = true;
-      this.historyPicDialog = true; // 打开加载效果
-      let params = {
-        userId: this.$store.state.loginUser.uid,
-        fileType: 1
-      };
-      JtcGETAppendixInfoList(params)
-        .then(res => {
-          if (res) {
-            this.loadingHis = false; // 关闭加载效果
-            res.data.forEach(x => (x.checked = false));
-            this.historyPicList = res.data;
-          }
-        })
-        .catch(() => {
-          this.historyPicDialog = false; // 关闭加载效果
-        });
-    },
-    delPic() {
-      //删除图片
-      this.curImageUrl = "";
-    },
-    chooseHisPic(item) {
-      //选择最近上传的图片
-      item.checked = true;
-      this.selectedHistoryPic = item;
-    },
-    addHisToImg() {
-      this.curImageUrl = this.selectedHistoryPic.path;
-      this.historyPicDialog = false; // 关闭模态框
-    },
-    /* 拖拽图片上传的方法 */
-    drag(ev) {
-      ev.dataTransfer.setData("Text", ev.target.currentSrc);
-    },
-    drop(e) {
-      this.curImageUrl = e.dataTransfer.getData("Text");
-      let x = {
-        contentUid: this.$store.state.loginUser.uid,
-        cname: "拖拽图片" + Math.random(),
-        filePathName: "拖拽图片" + Math.random(),
-        path: e.dataTransfer.getData("Text")
-      };
-      JtcPOSTAppendixInfo(x).then(jRes => {
-        if (jRes) {
-          x["uid"] = jRes.data;
-          console.log(x);
-        }
-      });
-    },
-    allowDrop(e) {
-      e.preventDefault();
+    dragEnd() {
+      // console.log('drag end')
+      // this.dragActiveObj = null;
     }
   },
   watch: {

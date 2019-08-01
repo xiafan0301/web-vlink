@@ -54,18 +54,26 @@
 import {ajaxCtx} from '@/config/config';
 import {JtcGETAppendixInfoList} from '@/views/index/api/api.judge.js';
 export default {
-  /** 
-   * @uploadEmit 上传成功/选择上传历史的时候的emit事件
+  /**
+   * emit事件说明
+   * uploadEmit(data) 上传成功/选择上传历史的时候的emit事件
    */
   /** 
+   * 拖拽说明
    * 拖拽dataTransfer key => upload_pic_url
    * dataTransfer.setData('upload_pic_url', IMG_URL);
    */
-   /** 
-   * clear: 改变clear即可清空上传信息
-   * width/height 宽高带单位，如 320px，默认都是100%
-   */
-  props: ['clear', 'width', 'height'],
+   /**
+    * props参数说明
+    * imgData 图片的默认或prop对象 {path: '', ...}，图片URL字段（path）为必须。
+    * clear: 改变clear即可清空上传信息
+    * width/height 宽高带单位，如 320px，默认都是100%
+    */
+   /**
+    * 删除/清空说明
+    * 删除/清空也会触发emit事件, 不过传递的参数为空，请注意！ uploadEmit(data) data为空
+    */
+  props: ['clear', 'width', 'height', 'imgData'],
   data () {
     return {
       uploadAcion: ajaxCtx.base + '/new',
@@ -77,7 +85,18 @@ export default {
       choosedHisPic: null
     }
   },
+  created () {
+    if (this.imgData) {
+      this.currentImg = Object.assign({}, this.imgData);
+    }
+  },
   watch: {
+    imgData (val) {
+      if (val && val.path) {
+        this.choosedHisPic = null;
+        this.currentImg = Object.assign({}, val);
+      }
+    },
     clear () {
       this.uploadClear();
     }
@@ -243,6 +262,7 @@ export default {
       background: rgba(0, 0, 0, 0.3);
       color: #fff;
       border-radius: 0 0 6px 6px;
+      text-align: center;
     }
     > span {
       display: none;
