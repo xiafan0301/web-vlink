@@ -505,7 +505,7 @@ export default {
       this.taskList.splice(index, 1);
     },
     skipMorePlan () { // 跳转至更多预案页面
-      this.$router.push({name: 'more_plan', query: {eventId: this.$route.query.id}});
+      this.$router.push({name: 'more_plan', query: {alarmId: this.$route.query.eventId, eventId: this.$route.query.id, type: 'alarm_ctc', objType: this.$route.query.objType}});
     },
     // 跳至查看预案页面
     skipSelectPlanPage (obj) {
