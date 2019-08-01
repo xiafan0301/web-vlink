@@ -219,7 +219,7 @@ export default {
       isShowMap: false, // 是否显示右侧地图
       backDialog: false, // 取消弹出框
       loading: false,
-      isSelectTab: 1, // 1---基础信息  2--联网信息
+      isSelectTab: 2, // 1---基础信息  2--联网信息
       isAddLoading: false, // 添加加载中
       isEditBaiscLoading: false, // 编辑基础信息加载中
       cameraForm: {

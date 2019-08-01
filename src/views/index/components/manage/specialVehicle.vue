@@ -107,15 +107,19 @@
                 </div>
                 <div class="info_list">
                   <span v-show="item.vehicleNumber">{{item.vehicleNumber && item.vehicleNumber}}</span>
-                  <span v-show="item.vehicleColor">{{item.vehicleColor && item.vehicleColor}}</span>
-                  <span v-show="item.vehicleType">{{item.vehicleType && item.vehicleType}}</span>
+                  <span v-show="item.vehicleColor">{{item.vehicleColor === '未知' ? '车身颜色' : '车身'}}{{item.vehicleColor && item.vehicleColor}}</span>
+                  <span v-show="item.vehicleType">{{item.vehicleType && item.vehicleType}}{{item.vehicleType === '其他' ? '车辆类型' : ''}}</span>
                   <span v-show="item.vehicleModel">{{item.vehicleModel && item.vehicleModel}}</span>
                 </div>
                 <div class="info_list">
-                  <span v-show="item.numberColor">{{item.numberColor}}</span>
+                  <span v-show="item.numberColor">
+                    {{item.numberColor === '其他' ? '其他车牌颜色' : '车牌' + item.numberColor +'色'}}
+                      <!-- 车牌{{item.numberColor}} -->
+                    <span v-show="item.numberType">({{item.numberType}})</span>
+                  </span>
                 </div>
                 <div class="info_list">
-                  <span v-show="item.ownerName">{{item.ownerName && item.ownerName}}<span v-show="item.ownerIdCard">({{item.ownerIdCard}})</span></span>
+                  <span v-show="item.ownerName">车主{{item.ownerName && item.ownerName}}<span v-show="item.ownerIdCard">({{item.ownerIdCard}})</span></span>
                   <!-- <span v-show="item.ownerIdCard">({{item.ownerIdCard}})</span> -->
                 </div>
                 <div class="info_list">
@@ -418,6 +422,21 @@
     <el-dialog :visible.sync="dialogVisible">
       <img width="100%" :src="dialogImageUrl" alt="">
     </el-dialog>
+    <!--返回提示弹出框-->
+    <el-dialog
+      title="提示"
+      :visible.sync="backDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <span style="color: #999999;">取消后内容不会保存，您确定要取消吗?</span>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="backDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" @click="sureBack">确认</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -447,6 +466,7 @@ export default {
           { required: true, message: '该项内容不可为空', trigger: 'blur' }
         ]
       },
+      backDialog: false, // 返回提示框
       isDeleteVehicleLoading: false, // 删除车辆加载中
       isVehicleLoading: false, // 新增--修改车辆加载中
       isSubmitData: true, // 是否能提交数据
@@ -540,6 +560,8 @@ export default {
     }
   },
   mounted () {
+    this.dataCarFormStr = JSON.stringify(this.carForm); // 将初始数据转成字符串
+
     this.getVehicleTypeList();
     this.getVehicleColor();
     this.getNumberTypeList();
@@ -658,8 +680,6 @@ export default {
       getSpecialVehicleList(params)
         .then(res => {
           if (res) {
-            
-
             this.vehicleList = res.data.list;
             this.pagination.total = res.data.total;
             this.vehicleList.map(item => {
@@ -1106,14 +1126,25 @@ export default {
               this.carForm.numberType = res.data.numberType;
               this.carForm.numberColor = numberColor && numberColor.toString();
 
+              this.dataCarFormStr = JSON.stringify(this.carForm); // 将初始数据转成字符串
             }
           })
       }
     },
+    // 确认取消
+    sureBack () {
+      this.backDialog = false;
+      this.dialogVisiable = false;
+    },
     // 取消新增--修改车辆
     cancelOperation (form) {
-      this.$refs[form].resetFields();
-      this.dialogVisiable = false;
+      const carFormData = JSON.stringify(this.carForm);
+      if (this.dataCarFormStr === carFormData) {
+        this.dialogVisiable = false;
+        this.$refs[form].resetFields();
+      } else {
+        this.backDialog = true;
+      }
     },
     // 根据搜索条件查询车辆
     searchData () {

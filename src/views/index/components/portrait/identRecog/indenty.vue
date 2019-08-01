@@ -9,7 +9,10 @@
     </div>
     <div class="content_box">
       <div class="left">
-        <div :class="['upload_box', {'hidden': curImageUrl}]">
+        <div style="padding: 0 15px; height: 210px; text-align:center">
+          <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit"></div>
+        </div>
+        <!-- <div :class="['upload_box', {'hidden': curImageUrl}]">
           <el-upload
             :disabled="isAddImgDisabled"
             ref="uploadPic"
@@ -28,7 +31,7 @@
             <p class="upload_text" v-show="!curImageUrl">点击上传图片</p>
             <p class="history" @click="showHistoryPic($event)" v-show="!curImageUrl">从上传记录中选择</p>
           </el-upload>
-        </div>
+        </div> -->
         <div class="divide"></div>
         <el-form class="left_form" :model="searchForm" ref="searchForm" :rules="searchRules">
           <el-form-item prop="idNo">
@@ -135,9 +138,10 @@ import { ajaxCtx } from '@/config/config.js';
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import noResult from '@/components/common/noResult.vue';
 import { checkIdCard } from '@/utils/validator.js';
+import vlUpload from '@/components/common/upload.vue';
 import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcPUTAppendixsOrder, getIdNoList} from '@/views/index/api/api.judge.js';
 export default {
-  components: { vlBreadcrumb, noResult },
+  components: { vlBreadcrumb, noResult, vlUpload },
   data () {
     return {
       isInitPage: true, // 是否是初始化页面
@@ -167,6 +171,7 @@ export default {
       queryImgPath: null, // 从其他模块传过来的图片
       isSearchLoading: false, // 搜索条件加载中
       isImgChecked: -1, // 是否选中历史图片
+      uploadClear: {},
     }
   },
   created () {
@@ -178,6 +183,13 @@ export default {
     }
   },
   methods: {
+    uploadEmit (data) {
+      console.log('uploadEmit data', data);
+      if (data && data.path) {
+        this.fileList = data;
+        this.curImageUrl = data.path;
+      }
+    },
     // 显示上传图片历史弹框
     showHistoryPic (e) {
       e.stopPropagation();
