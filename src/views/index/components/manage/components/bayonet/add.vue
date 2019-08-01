@@ -64,10 +64,14 @@
                   <el-input v-model="basicInfoForm.longitude" placeholder="请输入经度"></el-input>
                 </el-form-item>
                 <span>(经度)</span>
-                <el-form-item prop="Latitude" style="margin-left: 44px;">
+                <el-form-item prop="Latitude">
                   <el-input v-model="basicInfoForm.Latitude" placeholder="请输入纬度"></el-input>
                 </el-form-item>
                 <span>(纬度)</span>
+                <div class="map_select" @click="isShowMap = !isShowMap">
+                  <i class="vl_icon vl_icon_archives_4"></i>
+                  <span>地图选择</span>
+                </div>
               </el-form-item>
 
               <el-form-item label="卡口地址:" prop="bayonetAddress" placeholder="请选择省/市/县/乡">
@@ -91,7 +95,7 @@
               </el-form-item>
             </el-form>
           </vue-scroll>
-          <div class="add_map">
+          <div class="add_map" v-show="isShowMap">
             <div id="mapBox"></div>
             <div class="map_r">
               <div class="top"><i class="vl_icon vl_icon_control_23" @click="resetZoom"></i></div>
@@ -301,8 +305,8 @@
           </el-form-item>
 
           <el-form-item class="driving_info" v-for="(item, index) in bayonetDevForm.drivingInfo" :key="index">
-            <div class="vl_icon vl_icon_control_28" @click="delDrivingInfo(index)"></div>
-            <el-form-item style="margin-top: 30px;" label="车道号" :prop="'drivingInfo.' + index + '.laneNum'" :rules="{ required: true, message: '请选择车道号', trigger: 'change'}" >
+            <div v-if="bayonetDevForm.drivingInfo.length > 1" class="vl_icon vl_icon_control_28" @click="delDrivingInfo(index)"></div>
+            <el-form-item :style="{'margin-top': bayonetDevForm.drivingInfo.length > 1 ? '30px' : '0'}" label="车道号" :prop="'drivingInfo.' + index + '.laneNum'" :rules="{ required: true, message: '该项内容不可为空', trigger: 'change'}" >
               <el-select v-model="item.laneNum">
                 <el-option
                   v-for="item in laneNumList"
@@ -312,7 +316,7 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item style="margin-top: 30px;" label="行车方向" :prop="'drivingInfo.' + index + '.drivingDirection'" :rules="{ required: true, message: '请输入行车方向', trigger: 'change'}" >
+            <el-form-item :style="{'margin-top': bayonetDevForm.drivingInfo.length > 1 ? '30px' : '0'}" label="行车方向" :prop="'drivingInfo.' + index + '.drivingDirection'" :rules="{ required: true, message: '该项内容不可为空', trigger: 'change'}" >
               <el-select v-model="item.drivingDirection">
                 <el-option
                   v-for="item in drivingDirectionList"
@@ -322,7 +326,7 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="大车最低限速" :prop="'drivingInfo.' + index + '.cartMinSpeedLimit'" :rules="{ required: true, message: '请选择车道号', trigger: 'blur'}">
+            <el-form-item label="大车最低限速" :prop="'drivingInfo.' + index + '.cartMinSpeedLimit'">
               <el-input v-model="item.cartMinSpeedLimit"></el-input>
             </el-form-item>
             <el-form-item label="大车最高限速" :prop="'drivingInfo.' + index + '.cartMaxSpeedLimit'">
@@ -365,18 +369,18 @@ export default {
       labelPosition: 'right',
       // 卡口基本信息表单参数
       basicInfoForm: {
-        bayonetName: '卡口1',
-        bayonetNum: 123,
+        bayonetName: null,
+        bayonetNum: null,
         organ: null,
         isEnterPoint: 3,
-        use: [1, 2],
+        use: [],
         bayonetIP: [{value: ''}, {value: ''}, {value: ''}, {value: ''}],
         longitude: null,
         Latitude: null,
         bayonetAddress: null,
-        address: '湖南省怀化市溆浦县政府',
-        laneNum: 1,
-        describe: '描述描述',
+        address: null,
+        laneNum: null,
+        describe: null,
         usage: true
       },
       options: mapData,
@@ -407,6 +411,7 @@ export default {
       lngLat: null,//经纬度
       autoComplete: null,
       marker: null,
+      isShowMap: false,
       // 放弃本次操作弹窗参数
       toGiveUpDialog: false,
       loadingBtn: false,
@@ -420,25 +425,25 @@ export default {
       editDevDialog: false,
       // 编辑卡口表单参数
       bayonetDevForm: {
-        cameraName: '摄像头名称',
-        cameraType: '1',
-        manufacturers: '1',
-        pixel: '1',
-        direction: '朝东',
-        features: ['1','2'],
-        SIPNum: 123,
-        accessCode: 456,
-        devCode: 123,
-        servicePort: 80,
-        use: 1,
+        cameraName: null,
+        cameraType: null,
+        manufacturers: null,
+        pixel: null,
+        direction: null,
+        features: [],
+        SIPNum: null,
+        accessCode: null,
+        devCode: null,
+        servicePort: null,
+        use: null,
         drivingInfo: [
           {
-            laneNum: 1,
-            drivingDirection: 1,
-            cartMinSpeedLimit: 100,
-            cartMaxSpeedLimit: 100,
-            smallCarMinSpeedLimit: 100,
-            smallCarMaxSpeedLimit: 100
+            laneNum: null,
+            drivingDirection: null,
+            cartMinSpeedLimit: null,
+            cartMaxSpeedLimit: null,
+            smallCarMinSpeedLimit: null,
+            smallCarMaxSpeedLimit: null
           }
         ]
       },
@@ -593,28 +598,31 @@ export default {
       this.editDevDialog = true;
       this.operateDevType = 1;
       this.bayonetDevForm = {
-        cameraName: '摄像头名称',
-        cameraType: '1',
-        manufacturers: '1',
-        pixel: '1',
-        direction: '朝东',
-        features: ['1','2'],
-        SIPNum: 123,
-        accessCode: 456,
-        devCode: 123,
-        servicePort: 80,
-        use: 1,
+        cameraName: null,
+        cameraType: null,
+        manufacturers: null,
+        pixel: null,
+        direction: null,
+        features: [],
+        SIPNum: null,
+        accessCode: null,
+        devCode: null,
+        servicePort: null,
+        use: null,
         drivingInfo: [
           {
-            laneNum: 1,
-            drivingDirection: 1,
-            cartMinSpeedLimit: 100,
-            cartMaxSpeedLimit: 100,
-            smallCarMinSpeedLimit: 100,
-            smallCarMaxSpeedLimit: 100
+            laneNum: null,
+            drivingDirection: null,
+            cartMinSpeedLimit: null,
+            cartMaxSpeedLimit: null,
+            smallCarMinSpeedLimit: null,
+            smallCarMaxSpeedLimit: null
           }
         ]
       };
+      this.$nextTick(() => {
+        this.$refs['bayonetDevForm'].clearValidate();
+      })
     },
     // 弹出编辑卡口设备弹窗
     popEditDevDialog (data, index) {
@@ -637,6 +645,9 @@ export default {
     // 删除行车信息的动态表单
     delDrivingInfo (index) {
        this.bayonetDevForm.drivingInfo.splice(index, 1);
+       this.$nextTick(() => {
+        this.$refs['bayonetDevForm'].clearValidate(['drivingInfo.' + index + '.laneNum', 'drivingInfo.' + index + '.drivingDirection']);
+       })
     },
     // 新增卡口
     submitAddBayonet () {
@@ -882,6 +893,7 @@ export default {
                 if (status === 'complete' && result.info === 'OK') {
                     //获得了有效的地址信息:
                     //即，result.regeocode.formattedAddress
+                    _this.basicInfoForm.address = result.regeocode.formattedAddress;
                     _this.addMarker(e.lnglat.getLng(), e.lnglat.getLat());
 
                 }else{
@@ -978,13 +990,13 @@ export default {
         display: flex;
         flex-wrap: nowrap;
         .el-form{
-          width: 514px;
+          width: 542px;
           height: 100%;
           padding: 20px;
         }
         .add_map{
           height: 100%;
-          width: calc(100% - 514px);
+          width: calc(100% - 542px);
           position: relative;
           #mapBox{
             width: 100%;
@@ -1093,9 +1105,19 @@ export default {
         width: 120px;
       }
       > span{
-        margin-left: 10px;
+        margin: 0 4px;
         white-space: nowrap; 
         color: #D3D3D3;
+      }
+      .map_select{
+        cursor: pointer;
+        > i{
+          vertical-align: middle;
+        }
+        > span{
+          margin-left: 3px;
+          color: #0C70F8;
+        }
       }
     }
     .el-form{
@@ -1108,6 +1130,7 @@ export default {
     }
     .__vuescroll{
       width: auto!important;
+      padding-bottom: 10px!important;
     }
     .ip-adress {
       .el-input__inner {

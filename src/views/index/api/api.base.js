@@ -239,3 +239,14 @@ export function getBayonetDetail (params) {
     mode: baseModeName
   });
 }
+/**
+ * 导出
+ */
+export function exportService (data) {
+  return request({
+    url: '/excel-service/export',
+    data,
+    method: 'post',
+    mode: baseModeName
+  });
+}
