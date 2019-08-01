@@ -143,7 +143,8 @@ export default {
     },
     getAllUserList () {
       getUserList({
-        'where.proKey': this.$store.state.loginUser.proKey
+        'where.proKey': this.$store.state.loginUser.proKey,
+        pageSize: 0
       }).then(res => {
         if (res && res.data) {
           this.userList = res.data.list;
