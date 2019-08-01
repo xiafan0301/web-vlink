@@ -12,8 +12,8 @@
           </el-option>
         </el-select>
       </el-form-item>
-      <el-form-item prop="bayonetType">
-        <el-select v-model="queryForm.bayonetType" placeholder="请选择出入城卡口">
+      <el-form-item prop="isEnterPoint">
+        <el-select v-model="queryForm.isEnterPoint" placeholder="请选择出入城卡口">
           <el-option
             v-for="item in bayonetTypeList"
             :key="item.value"
@@ -62,7 +62,7 @@
     </div>
     <div class="operate_btn">
       <el-button class="select_btn" type="primary" icon="el-icon-plus" @click="skipIsAdd(1)">新增</el-button>
-      <el-button class="reset_btn">导出</el-button>
+      <el-button class="reset_btn" :loading="loadingExBtn" @click="exportBayonetList">导出</el-button>
     </div>
     <div class="table_box">
       <el-table
@@ -143,7 +143,7 @@
           show-overflow-tooltip
           >
           <template slot-scope="scope">
-            <span :class="['table_state', {'blue': scope.row.onlineState === 1, 'gray': scope.row.onlineState === 2}]">{{scope.row.onlineState === 1 ? '在线' : '离线'}}</span>
+            <span :class="['table_state', {'blue': scope.row.onlineState === true, 'gray': scope.row.onlineState === false}]">{{scope.row.onlineState === true ? '在线' : scope.row.onlineState === false ? '离线' : ''}}</span>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="140">
@@ -186,7 +186,8 @@
 </template>
 <script>
 import { getDepartmentList} from '@/views/index/api/api.manage.js';
-import { getBayonetList, delBayonet, putBayonetBasisInfo} from '@/views/index/api/api.base.js';
+import { getBayonetList, delBayonet, putBayonetBasisInfo, exportService} from '@/views/index/api/api.base.js';
+import { autoDownloadUrl } from '@/utils/util.js';
 export default {
   data () {
     return {
@@ -195,7 +196,7 @@ export default {
       queryForm: {
         organ: null,
         use: null,
-        bayonetType: null,
+        isEnterPoint: null,
         isStartUsing: null,
         state: null,
         bayonetName: null
@@ -209,8 +210,8 @@ export default {
         {label: '其他用途', value: 4}
       ],
       stateList: [
-        {label: '在线', value: 1},
-        {label: '离线', value: 2}
+        {label: '在线', value: true},
+        {label: '离线', value: false}
       ],
       bayonetTypeList: [
         {value: 1, label: '出城卡口'},
@@ -218,10 +219,9 @@ export default {
         {value: 3, label: '其他'}
       ],
       isStartUsingList: [
-        {label: '启用', value: 1},
-        {label: '停用', value: 2}
+        {label: '启用', value: true},
+        {label: '停用', value: false}
       ],
-      loading: false,
       // 卡口列表参数
       bayonetManageList: [],
       // 翻页数据
@@ -229,7 +229,9 @@ export default {
       pageSize: 10,
       pageNum: 1,
       // 删除弹出框参数
+      loading: false,
       loadingBtn: false,
+      loadingExBtn: false,
       delBayonetDialog: false,
       bayonetId: null,
     }
@@ -259,11 +261,33 @@ export default {
       this.queryForm = {
         organ: null,
         use: null,
-        bayonetType: null,
+        isEnterPoint: null,
         isStartUsing: null,
         state: null,
         bayonetName: null
       };
+    },
+    // 导出
+    exportBayonetList () {
+      let data = {
+        bayonetInfoListQueryDto: {
+          dutyUnitId: this.queryForm.organ && this.queryForm.organ.uid,
+          isEnabled: this.queryForm.isStartUsing,
+          isEnterPoint: this.queryForm.isEnterPoint,
+          keyword: this.queryForm.bayonetName,
+          onlineState: this.queryForm.state,
+          use: this.queryForm.use
+        },
+        viewType: 3
+      }
+      this.loadingExBtn = true;
+      exportService(data).then(res => {
+        if (res) {
+          autoDownloadUrl(res.data.fileUrl);
+        }
+      }).finally(() => {
+        this.loadingExBtn = false;
+      })
     },
     // 获取所有的机构单位
     getDepartList () {
@@ -290,19 +314,19 @@ export default {
     // 获取卡口列表
     getBayonetManageList () {
       let params = {
-        // 'where.bayonetType': this.queryForm.bayonetType,
-        'where.isEnterPoint': this.queryForm.bayonetType,
+        // 'where.isEnterPoint': this.queryForm.isEnterPoint,
+        'where.isEnterPoint': this.queryForm.isEnterPoint,
         // 'where.areaId': ,
         'where.dutyUnitId': this.queryForm.organ && this.queryForm.organ.uid,
         'where.use': this.queryForm.use,
         'where.isEnabled': this.queryForm.isStartUsing,
         'where.onlineState': this.queryForm.state,
-        'where.keyword': this.queryForm.bayonetName,
         pageNum: this.pageNum,
         pageSize: this.pageSize,
         orderBy: null,
         order: null
       }
+      this.queryForm.bayonetName && (params['where.keyword'] = this.queryForm.bayonetName);
       this.loading = true;
       getBayonetList(params).then(res => {
         if (res) {

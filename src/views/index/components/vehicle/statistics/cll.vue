@@ -84,7 +84,7 @@
               <i class="vl_icon vl_icon_vehicle_cll_02" @click="changeTab(2)" :class="{'active': tabIndex === 2}" ></i>
               <i class="vl_icon vl_icon_vehicle_cll_03" @click="tabIndex = 3" :class="{'active': tabIndex === 3}" v-show="queryForm.statementType !== 5"></i>
             </div>
-            <h1>({{dateTitle}})车流量统计</h1>
+            <h1>({{statementTitle}})车流量统计</h1>
             <el-button class="btn_100" type="primary" @click="exportExcel" :loading="loadingBtnExport">导出</el-button>
           </div>
           <div class="main_box" v-show="tabIndex === 1">
@@ -115,8 +115,8 @@
   </div>
 </template>
 <script>
-let startTime = formatDate(new Date(new Date(new Date().toLocaleDateString())).getTime() - 24*60*60*1000, 'yyyy-MM-dd HH:mm:ss');
-let endTime = formatDate(new Date(new Date(new Date().toLocaleDateString())).getTime() - 1, 'yyyy-MM-dd HH:mm:ss');
+let startTime = formatDate(new Date(new Date(new Date().toLocaleDateString('zh-Hans-CN').replace(/日/g, '').replace(/\/|年|月/g, '/').replace(/[^\d/]/g,''))).getTime() - 24*60*60*1000, 'yyyy-MM-dd HH:mm:ss');
+let endTime = formatDate(new Date(new Date(new Date().toLocaleDateString('zh-Hans-CN').replace(/日/g, '').replace(/\/|年|月/g, '/').replace(/[^\d/]/g,''))).getTime() - 1, 'yyyy-MM-dd HH:mm:ss');
 import G2 from '@antv/g2';
 import { View } from '@antv/data-set';
 import {apiCarFlow, exportExcel} from '@/views/index/api/api.vehicle.js';
@@ -177,6 +177,7 @@ export default {
           label: m.enumValue
         }
       }),
+      statementTitle: null,
       // laneList: [],
       statementTypeList: [
         {label: '日报表', value: 1},
@@ -206,26 +207,24 @@ export default {
       afterDate: null
     }
   },
-  computed: {
-    dateTitle () {
-      const type = this.queryForm.statementType;
-      if (type === 1) {
-        return '日报表';
-      } else if (type === 2) {
-        return '周报表';
-      } else if (type === 3) {
-        return '月报表';
-      } else if (type === 4) {
-        return '年报表';
-      } else if (type === 5) {
-        return '自定义时间段'
-      }
-    }
-  },
   mounted () {
     this.getListBayonet();
   },
   methods: {
+    getTitle () {
+      const type = this.queryForm.statementType;
+      if (type === 1) {
+        this.statementTitle = '日报表';
+      } else if (type === 2) {
+        this.statementTitle = '周报表';
+      } else if (type === 3) {
+        this.statementTitle = '月报表';
+      } else if (type === 4) {
+        this.statementTitle = '年报表';
+      } else if (type === 5) {
+        this.statementTitle = '自定义时间段';
+      }
+    },
     // 验证输入的警戒值
     validationWarningNum () {
       const reg = /^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$/;
@@ -492,6 +491,7 @@ export default {
     },
     // 获取车流量统计数据
     getCarTrafficSta () {
+      this.getTitle();
       this.chartData = [];
       this.headerList = [];
       this.bodyList = [];
