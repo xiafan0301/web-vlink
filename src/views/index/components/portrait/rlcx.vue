@@ -384,6 +384,10 @@ export default {
       console.log('uploadEmit data', data);
       if (data && data.path) {
         this.curImageUrl = data.path;
+      } else {
+        this.curImageUrl = null;
+        this.hqtzLoading = false;
+        this.uploadTZObj = {};
       }
     },
     // 获取特征
@@ -407,7 +411,7 @@ export default {
         bussType: 'person', // vehicle机动车、face人脸、person人体
         url: this.curImageUrl
       }).then(jRes => {
-        if (jRes && jRes.data) {
+        if (jRes && jRes.data && this.curImageUrl) {
           this.uploadTZObj = {
             sex: {active: true, value: jRes.data.sex},
             age: {active: true, value: jRes.data.age},
