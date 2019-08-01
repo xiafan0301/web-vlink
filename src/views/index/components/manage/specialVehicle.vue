@@ -178,7 +178,10 @@
       >
       <div class="content_body">
         <div class="left">
-          <div :class="['upload_pic', {'hidden': dialogImageUrl}]">
+          <div style="padding: 0 15px; height: 210px; text-align:center;">
+            <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit" :imgData="imgData"></div>
+          </div>
+          <!-- <div :class="['upload_pic', {'hidden': dialogImageUrl}]">
             <el-upload
               :disabled="isAddImgDisabled"
               ref="uploadPic"
@@ -197,7 +200,9 @@
           <template v-if="!isAddImgDisabled">
             <h1 class="vl_f_999">点击修改车像</h1>
             <p>请上传车辆图片</p>
-          </template>
+          </template> -->
+          <!-- <h1 class="vl_f_999">点击修改车像</h1> -->
+          <p>请上传车辆图片</p>
         </div>
         <div class="right">
           <vue-scroll>
@@ -440,6 +445,7 @@
   </div>
 </template>
 <script>
+import vlUpload from '@/components/common/upload.vue';
 import { ajaxCtx } from '@/config/config.js';
 import { checkPlateNumber, checkIdCard } from '@/utils/validator.js';
 import { dataList } from '@/utils/data.js';
@@ -449,6 +455,7 @@ import { getSpecialGroup, addSpecialVehicle, editSpecialVehicle, getSpecialVehic
   getSpecialVehicleList, addGroup, checkRename, editVeGroup, delGroup,
   getVehicleBrand, getVehicleModel, moveoutGroup, vehicleImport, vehicleExport, getReVehicleInfo } from '@/views/index/api/api.manage.js';
 export default {
+  components: { vlUpload },
   data () {
     return {
       importUrl: ajaxCtx.base + '/special-vehicle/import', // 导入请求地址
@@ -487,11 +494,11 @@ export default {
       failNumber: 0, // 导入失败多少条数据
       showFailFile: false, // 是否显示错误文件
       errorFile: null, // 错误文件地址
-      fileList: [],
+      // fileList: [],
       dialogImageUrl: null,
-      uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
+      // uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
       activeId: null, // 当前选中的分组id
-      isAddImgDisabled: false, // 是否能添加图片
+      // isAddImgDisabled: false, // 是否能添加图片
       picHeight: null,
       pagination: { total: 0, pageSize: 4, pageNum: 1 },
       groupList: [], // 车辆分组
@@ -540,6 +547,8 @@ export default {
       numberTypeList: [], // 号牌种类列表
       vehicleList: [], // 特殊车辆列表
       deleteIds: [], // 要删除的车辆
+      uploadClear: {},
+      imgData: {}
     }
   },
   watch: {
@@ -571,6 +580,17 @@ export default {
     
   },
   methods: {
+    uploadEmit (data) {
+      console.log('uploadEmit data', data);
+      if (data && data.path) {
+        this.dialogImageUrl = data.path;
+        this.$nextTick(() => {
+          this.getDeviceList();
+        })
+      } else {
+        this.dialogImageUrl = null;
+      }
+    },
     // 车辆品牌change
     handleChangeVehicleBrand (val) {
       this.carForm.vehicleModel = null;
@@ -1009,32 +1029,6 @@ export default {
         })
         .catch(() => {this.isDeleteVehicleLoading = false;})
     },
-    handleRemove () {
-      this.dialogImageUrl = null;
-    },
-    handlePictureCardPreview (file) {
-      this.dialogImageUrl = file.url;
-      this.dialogVisible = true;
-    },
-    uploadPicSuccess (file) {
-      this.dialogImageUrl = file.data.fileFullPath;
-    },
-    beforeAvatarUpload (file) {
-      const isJPG = file.type === 'image/jpeg' || file.type === 'image/jpg' || file.type === 'image/png';
-      const isLt4M = file.size / 1024 / 1024 < 4;
-
-      if (!isJPG) {
-        if (!document.querySelector('.el-message--info')) {
-          this.$message.info('上传图片只能是 jpeg、jpg、png 格式!');
-        }
-      }
-      if (!isLt4M) {
-        if (!document.querySelector('.el-message--info')) {
-          this.$message.info('上传图片大小不能超过 4MB!');
-        }
-      }
-      return isJPG && isLt4M;
-    },
     // 点击左边分组获取特殊车辆
     showGroupDeviceInfo (id) {
       this.activeId = id;
@@ -1063,10 +1057,9 @@ export default {
     // 显示新增--修改车辆弹出框
     showAddVehicleDialog (form, type, obj) {
       // 清除已上传的图片
-      if (this.$refs['uploadPic']) {
-        this.$refs['uploadPic'].clearFiles();
-        this.dialogImageUrl = null;
-      }
+      this.dialogImageUrl = null;
+      this.uploadClear = {};
+
       // 清空表单
       if (this.$refs[form]) {
         this.$refs[form].resetFields();
@@ -1101,9 +1094,9 @@ export default {
               let vehicleType = res.data.vehicleType;
               let numberType = res.data.numberType;
               let numberColor = res.data.numberColor;
-      
-              this.fileList = res.data.vehicleImagePath ? [{url: res.data.vehicleImagePath}] : [];//回填图片
-              this.dialogImageUrl = res.data.vehicleImagePath;
+
+              this.imgData = Object.assign({}, {path: res.data.vehicleImagePath})
+
               this.carForm.uid = res.data.uid;
               this.carForm.vehicleNumber = res.data.vehicleNumber;
               this.carForm.desci = res.data.desci;
@@ -1135,12 +1128,14 @@ export default {
     sureBack () {
       this.backDialog = false;
       this.dialogVisiable = false;
+      this.uploadClear = {};
     },
     // 取消新增--修改车辆
     cancelOperation (form) {
       const carFormData = JSON.stringify(this.carForm);
       if (this.dataCarFormStr === carFormData) {
         this.dialogVisiable = false;
+        this.uploadClear = {};
         this.$refs[form].resetFields();
       } else {
         this.backDialog = true;

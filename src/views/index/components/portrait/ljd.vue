@@ -19,7 +19,7 @@
         >
           <el-form-item style="text-align: center;">
             <div style="padding: 0 15px; height: 210px;">
-              <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit"></div>
+              <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit" :imgData="imgData"></div>
             </div>
             <!-- <div class="upload_warp" @drop="drop($event)" @dragover="allowDrop($event)">
               <el-upload
@@ -71,19 +71,6 @@
               value-format="yyyy-MM-dd"
             ></el-date-picker>
           </el-form-item>
-          <!-- <el-form-item prop="data2">
-            <el-date-picker
-              v-model="ruleForm.data2"
-              type="daterange"
-              class="full vl_date"
-              value-format="yyyy-MM-dd"
-              :picker-options="pickerOptions"
-              range-separator="至"
-              :clearable="false"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-            ></el-date-picker>
-          </el-form-item> -->
           <el-form-item prop="minFootholdTimes" class="firstItem">
             <el-row :gutter="5">
               <el-col :span="22">
@@ -99,8 +86,7 @@
             </el-row>
           </el-form-item>
           <el-form-item class="firstItem" label="抓拍区域：" label-width="72px" prop="input5">
-            <!-- <el-radio-group v-model="input5" @change="changeTab"> -->
-            <el-radio-group v-model="ruleForm.input5" @change="changeTab">
+            <el-radio-group v-model="ruleForm.input5">
               <el-row :gutter="10">
                 <el-col :span="12">
                   <el-radio label="1">列表选择</el-radio>
@@ -163,7 +149,7 @@
         <h3 class="title">分析结果</h3>
         <div class="limitBoxs">
           <vue-scroll>
-          <el-collapse v-model="activeNames" @change="handleChange">
+          <el-collapse v-model="activeNames">
             <el-collapse-item  v-for="(item,index) in evData" :key="index" :name="index">
               <template slot="title">
                 <span class="result_device_name" :title="item.groupName">{{item.groupName}}</span>
@@ -196,14 +182,6 @@
     <!-- 地图选择 -->
     <!-- D设备 B卡口  这里是设备和卡口 -->
     <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" @mapSelectorEmit="mapPoint" ></div>
-    <!-- <el-dialog :visible.sync="dialogVisible" width="80%">
-      <mapselect
-        @selectMap="mapPoint"
-        @closeMap="hideMap"
-        :allPoints="allDevice"
-        :allBayonets="allBayonet"
-      ></mapselect>
-    </el-dialog> -->
     <!-- 人工筛选 -->
     <el-dialog
       title="人工筛选"
@@ -212,7 +190,7 @@
       <div class="choose">
         <div class="limitBox">
           <vue-scroll>
-          <el-collapse v-model="activeChoose" @change="handleChange">
+          <el-collapse v-model="activeChoose">
             <el-collapse-item  v-for="(item,index) in chooseData" :key="index" :title="item.groupName+'（'+item.totalNum+'次）'" :name="index">
               <div class="itembox" v-for="(v,d) in item.personDetailList" :key="d">
                 <div class="imgInfo">
@@ -371,7 +349,10 @@ export default {
   mounted() {
     if( this.$route.query.imgurl || this.$route.query.path){
       let a =  this.$route.query.imgurl || this.$route.query.path ;
-      this.curImageUrl= a
+
+      this.imgData = Object.assign({}, {path: a});
+
+      this.curImageUrl= a;
     }
     
 
@@ -470,10 +451,7 @@ export default {
      * 打开抓拍弹框
      */
     onOpenDetail (obj, index, list) {
-      console.log('obj', obj)
-      console.log('list', list)
-      // this.showDetail=true;
-      // this.deData = obj
+
       this.detailData = {
         type: 3, // 3落脚点分析
         // params: this.searchParams(), // 查询参数
@@ -483,24 +461,7 @@ export default {
         total: list.totalNum,
         pageNum: 1
       }
-      // this.seData = list.personDetailList
-      // console.log(obj)
     },
-    /**
-     * 关闭抓拍弹框
-     */
-    onCloseDetail () {
-      this.showDetail=false
-    },
-    /**
-     * 图片切换
-     */
-    imgListTap (obj, i) {
-      this.curImgIndex = i
-    },
-    handleChange(val) {
-        console.log(val);
-      },
     hideResult() {
       this.reselt = false;
       this.hideLeft();
@@ -553,15 +514,6 @@ export default {
 
       // console.log(this.selectDevice);
     },
-    changeTab(v) {
-      //console.log(v);
-      if (v == "2") {
-        //this.dialogVisibles = !this.dialogVisibles;
-        //this.dialogVisibles = true;
-      } else{
-        //this.dialogVisible=false
-      }
-    },
     submitForm(v) {
 
       if (
@@ -593,7 +545,8 @@ export default {
       this.setDTime()
       this.ruleForm.minFootholdTimes=3 
       this.ruleForm.input5='1'
-      this.ruleForm.value1=[]
+      this.ruleForm.value1=[];
+      this.uploadClear = {};
       this.options[0].areaTreeList.forEach(el=>{
             this.ruleForm.value1.push(el.areaId)
           })
