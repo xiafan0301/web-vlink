@@ -260,7 +260,6 @@ export default {
         } else {
           return true;
         }
-        return true;
       } else {
         this.messageTip = "请输入车牌号码"
         /* if (!document.querySelector(".el-message")) {
