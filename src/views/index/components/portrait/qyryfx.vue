@@ -2257,7 +2257,7 @@ export default {
             padding: 20px 0 10px 0;
           }
           .condition {
-            padding-bottom: 12px;
+            padding-bottom: 10px;
           }
         }
       }
