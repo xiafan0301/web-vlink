@@ -32,7 +32,7 @@
             placeholder="请选择结束时间">
           </el-date-picker>
         </div>
-        <el-select v-model="queryForm.bayonet" filterable multiple collapse-tags placeholder="请选择卡口" style="width: 100%;">
+        <el-select class="bayonet_select" v-model="queryForm.bayonet" filterable multiple collapse-tags placeholder="请选择出城卡口" style="width: 100%;">
           <el-option
             v-for="item in listBayonet"
             :key="item.value"
@@ -65,7 +65,7 @@
               :value="item">
             </el-option>
           </el-select>
-          <el-input v-model="queryForm.provinceName" placeholder="请输入车牌号码"></el-input>
+          <el-input v-model="queryForm.provinceName" placeholder="请输入车牌号"></el-input>
         </div>
         <div class="left_btn">
           <el-button class="reset_btn" @click="resetQueryForm">重置</el-button>
@@ -97,16 +97,19 @@
               >
             </el-table-column>
             <el-table-column
-              label="抓拍时间"
+              label="出城时间"
               prop="shotTime"
               show-overflow-tooltip
               >
             </el-table-column>
             <el-table-column
-              label="车牌颜色"
-              prop="vehicleColor"
+              label="车辆分组"
+              prop="shotTime"
               show-overflow-tooltip
               >
+              <template slot-scope="scope">
+                {{scope.row.vehicleType && scope.row.vehicleType.join(',')}}
+              </template>
             </el-table-column>
             <el-table-column
               label="车辆类型"
@@ -143,8 +146,8 @@
 <script>
 // let startTime = formatDate(new Date().getTime() - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss');
 // let endTime = formatDate(new Date().getTime() + (24 * 60 * 60 * 1000 - 1) - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss');
-let startTime = formatDate(new Date(new Date(new Date().toLocaleDateString())).getTime() - 24*60*60*1000, 'yyyy-MM-dd HH:mm:ss');
-let endTime = formatDate(new Date(new Date(new Date().toLocaleDateString())).getTime() - 1, 'yyyy-MM-dd HH:mm:ss');
+let startTime = formatDate(new Date(new Date(new Date().toLocaleDateString('zh-Hans-CN').replace(/日/g, '').replace(/\/|年|月/g, '/').replace(/[^\d/]/g,''))).getTime() - 24*60*60*1000, 'yyyy-MM-dd HH:mm:ss');
+let endTime = formatDate(new Date(new Date(new Date().toLocaleDateString('zh-Hans-CN').replace(/日/g, '').replace(/\/|年|月/g, '/').replace(/[^\d/]/g,''))).getTime() - 1, 'yyyy-MM-dd HH:mm:ss');
 import {getOutCityBayonet, apiOutCityStatistics} from '@/views/index/api/api.vehicle.js';
 import {dataList} from '@/utils/data.js';
 import {formatDate} from '@/utils/util.js';
@@ -359,7 +362,7 @@ export default {
         }
       }
       .left_radio{
-        padding: 40px 0 10px 0;
+        padding: 20px 0 10px 0;
         > span{
           color: #999999;
         }
@@ -373,7 +376,7 @@ export default {
       .left_btn{
         display: flex;
         justify-content: space-between;
-        padding-top: 10px;
+        padding-top: 20px;
         .select_btn, .reset_btn {
           width: 110px;
         }
@@ -406,6 +409,18 @@ export default {
     .el-select .el-input--suffix .el-input__inner{
       border-radius: 4px 0 0 4px!important;
       border-right: none;
+    }
+  }
+  .bayonet_select{
+    .el-tag--info:nth-child(1){
+      .el-select__tags-text{
+        max-width: 96px;
+        display: inline-block;
+        overflow: hidden;
+      }
+      .el-tag__close{
+        top: -6px;
+      }
     }
   }
 }
