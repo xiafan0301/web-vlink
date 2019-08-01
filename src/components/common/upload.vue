@@ -17,6 +17,7 @@
         </div>
       </el-upload>
       <p @click="showHistoryPic">从上传记录中选择</p>
+      <span v-show="currentImg && currentImg.path" title="清空" @click="uploadClear(true)"><i class="el-icon-delete"></i></span>
     </div>
     <!--历史记录弹窗 :close-on-click-modal="false" -->
     <el-dialog
@@ -78,8 +79,7 @@ export default {
   },
   watch: {
     clear () {
-      this.currentImg = null;
-      this.choosedHisPic = null;
+      this.uploadClear();
     }
   },
   methods: {
@@ -90,12 +90,20 @@ export default {
     // 接收拖拽
     dragDrop (ev) {
       if (!ev) { ev = window.event; }
-      let url = ev.dataTransfer.getData("upload_pic_url");
+      let url = ev.dataTransfer.getData('upload_pic_url');
       if (url && url.length > 0) {
         this.choosedHisPic = null;
         this.currentImg = {
           path: url
         };
+        this.picSubmit();
+      }
+    },
+    // flag
+    uploadClear (flag) {
+      this.currentImg = null;
+      this.choosedHisPic = null;
+      if (flag) {
         this.picSubmit();
       }
     },
@@ -236,6 +244,20 @@ export default {
       color: #fff;
       border-radius: 0 0 6px 6px;
     }
+    > span {
+      display: none;
+      position: absolute; top: 5px; right: 5px;
+      line-height: normal;
+      background-color: #999;
+      background-color: rgba(0, 0, 0, 0.4);
+      padding: 2px 3px;
+      border-radius: 4px;
+      cursor: pointer;
+      > i {
+        font-size: 16px;
+        color: #fff;
+      }
+    }
     &:hover {
       .el-upload--picture-card {
         background-color: #2981F8;
@@ -244,6 +266,7 @@ export default {
         > p { display: none; }
       }
       > p { display: block; }
+      > span { display: block; }
     }
   }
 }
