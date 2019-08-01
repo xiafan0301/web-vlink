@@ -950,7 +950,7 @@ export default {
     // 地图定位
     resetZoom() {
       if (this.amap) {
-        this.amap.setZoomAndCenter(14, this.mapCenter);
+        this.amap.setFitView();
       }
     },
     // 地图缩放
