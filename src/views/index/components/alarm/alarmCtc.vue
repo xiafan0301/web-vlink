@@ -4,7 +4,7 @@
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/alarm/today' }" v-if="type === 'today'">今日告警</el-breadcrumb-item>
-        <el-breadcrumb-item :to="{ path: '/alarm/history' }" v-if="type === 'history'">历史告警</el-breadcrumb-item>
+        <el-breadcrumb-item :to="historyUrl" v-if="type === 'history'">历史告警</el-breadcrumb-item>
         <el-breadcrumb-item :to="detailUrl">告警详情</el-breadcrumb-item>
         <el-breadcrumb-item>调度指挥</el-breadcrumb-item>
       </el-breadcrumb>
@@ -467,6 +467,7 @@ export default {
         eventType: dataList.eventType,
         eventLevel: dataList.eventLevel,
         isShowBox: false,
+        historyUrl: '',
     }
   },
   created () {
@@ -478,7 +479,16 @@ export default {
     if(this.type === 'today') {
       this.detailUrl = this.detailUrl
     }else {
-      this.detailUrl = this.detailUrl + '&startTime=' + this.$route.query.startTime + '&endTime=' + this.$route.query.endTime
+      if(this.$route.query.startTime && this.$route.query.endTime) {
+        this.detailUrl = this.detailUrl + '&startTime=' + this.$route.query.startTime + '&endTime=' + this.$route.query.endTime
+      }else {
+        this.detailUrl = this.detailUrl
+      }
+    }
+    if(this.$route.query.startTime && this.$route.query.endTime) {
+      this.historyUrl = '/alarm/history?startTime='+ this.$route.query.startTime + '&endTime=' + this.$route.query.endTime
+    }else {
+      this.historyUrl = '/alarm/history';
     }
     this.getDepartList();
     this.toAlarmDetail();

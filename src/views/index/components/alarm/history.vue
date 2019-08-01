@@ -340,6 +340,10 @@ export default {
     },
   },
   mounted () {
+    if(this.$route.query.startTime && this.$route.query.endTime) {
+      this.startTime = this.$route.query.startTime;
+      this.endTime = this.$route.query.endTime;
+    }
     this.getDeviceList()
     this.getGroups()
     this.getAlarm();
