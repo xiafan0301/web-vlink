@@ -2251,9 +2251,10 @@ export default {
         // 搜索条件
         .search_condition {
           .condition_title {
-            line-height: 50px;
+            // line-height: 50px;
             color: #666666;
             text-indent: 8px;
+            padding: 20px 0 10px 0;
           }
           .condition {
             padding-bottom: 12px;
