@@ -18,7 +18,7 @@
               :value="item.uid">
             </el-option>
           </el-select>
-          <el-select class="full" v-model="searchData.sex" placeholder="选择性别">
+          <el-select class="full" v-model="searchData.sex" placeholder="请选择性别">
             <el-option
               v-for="item in sexList"
               :key="item.value"
@@ -26,7 +26,7 @@
               :value="item.value">
             </el-option>
           </el-select>
-          <el-select class="full" v-model="searchData.ageGroup" placeholder="选择年龄段">
+          <el-select class="full" v-model="searchData.ageGroup" placeholder="请选择年龄段">
             <el-option
               v-for="item in ageGroupList"
               :key="item.value"
@@ -114,6 +114,11 @@
     </div>
     <div :class="['vl_j_right',{hideleft:hideleft}]">
       <div id="tcMap"></div>
+      <ul class="map_rrt_u2">
+        <li  @click="resemt"><i class="el-icon-aim"></i></li>
+        <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
+        <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
+      </ul>
       <div class="vl_jfo_switch">
         <div><span :class="{'active': switchType === 0}" @click="switchType = 0">抓拍结果</span></div>
         <div><span :class="{'active': switchType === 1}" @click="switchType = 1;">关联事件</span></div>
@@ -259,6 +264,7 @@ import {MapGETmonitorList} from '../../api/api.map.js';
 import {getGroupListIsPortrait, getGroupListIsVehicle} from '../../api/api.control.js';
 import mapSelector from '@/components/common/mapSelector.vue';
 import { random14 } from '@/utils/util.js';
+import { mapXupuxian } from "@/config/config.js";
 export default {
    components: {
     mapSelector,
@@ -280,26 +286,26 @@ export default {
       evData: [],
       searchData: {
         type: 1, // 1：人， 2： 车,0 无限
-        portraitGroupId: '',  // 人员组
+        portraitGroupId: null,  // 人员组
         sex: null, // 1男，2女
         ageGroup: null, // 年龄段
         time1: null,
         time2: null
       },
       sexList: [
-        {value: null, label: '不限'},
+        // {value: null, label: '不限'},
         {value: '男', label: '男'},
         {value: '女', label: '女'}
       ],
       portraitGroupList: [],
       vehicleGroupList: [],
-      focusType: [
-        {value: null, label: '不限'},
-        {value: 1, label: '布控人员'},
-        {value: 2, label: '布控车辆'}
-      ],
+      // focusType: [
+      //   {value: null, label: '不限'},
+      //   {value: 1, label: '布控人员'},
+      //   {value: 2, label: '布控车辆'}
+      // ],
       ageGroupList: [
-        {value: null, label: '不限'},
+        // {value: null, label: '不限'},
         {value: '儿童', label: '儿童'},
         {value: '少年', label: '少年'},
         {value: '青年', label: '青年'},
@@ -384,6 +390,16 @@ export default {
     })
   },
   methods: {
+    mapZoomSet(val) {
+      if (this.amap) {
+        this.amap.setZoom(this.amap.getZoom() + val);
+      }
+    },
+    resemt(){
+      if (this.amap) {
+        this.amap.setZoomAndCenter(14, mapXupuxian.center);
+      }
+    },
     hideResult(){
       this.hideleft = !this.hideleft;
     },
@@ -468,7 +484,7 @@ export default {
     resetSearch () {
       this.setDTime()
       this.searchData.type = null;
-      this.searchData.portraitGroupId = '';
+      this.searchData.portraitGroupId = null;
       this.searchData.sex = null;
       this.searchData.vehicleColor = null;
       this.searchData.ageGroup = null;
@@ -477,7 +493,11 @@ export default {
       this.selectDevice = [];
       this.selectBayonet = [];
       this.selectValue = "已选设备0个";
+      
       this.areaIds = [];
+      this.eventAreas.map(item => {
+        this.areaIds.push(item.areaId);
+      });
 
       this.clearMapSelect = !this.clearMapSelect; // 清除地图选择
 
@@ -1416,6 +1436,29 @@ export default {
 }
 </style>
 <style lang="scss" scoped="scoped">
+.map_rrt_u2 {
+  position: absolute; right: 30px;
+  bottom: 30px;
+  margin-top: .2rem;
+  font-size: 26px;
+  background: #ffffff;
+  width: 78px;
+  padding: 0 10px;
+  > li {
+    line-height: 70px;
+    text-align: center;
+    cursor: pointer;
+    border-bottom: 1px solid #F2F2F2;
+    > i {
+      margin-top: 0;
+      display: inline-block;
+    }
+    color: #999999;
+    &:hover {
+      color: #0C70F8;
+    }
+  }
+}
  .vl_judge_tc{
     padding-top: 50px;
   }
