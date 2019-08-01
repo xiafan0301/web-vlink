@@ -4,18 +4,27 @@
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/alarm/today' }" v-if="type === 'today'">今日告警</el-breadcrumb-item>
-        <el-breadcrumb-item :to="{ path: '/alarm/history' }" v-if="type === 'history'">历史告警</el-breadcrumb-item>
+        <el-breadcrumb-item :to="historyUrl" v-if="type === 'history'">历史告警</el-breadcrumb-item>
         <el-breadcrumb-item :to="detailUrl">告警详情</el-breadcrumb-item>
         <el-breadcrumb-item>调度指挥</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="content-box" v-loading="isLoading">
       <div class="content-left-box">
+        <div class="snap_info" v-if="sturcDetail">
+          <div class="snap_i_f">
+            <p>
+              <span>抓拍位置：</span>
+              {{sturcDetail.addressDesc}}
+            </p>
+          </div>
+          <div class="snap_i_s">{{sturcDetail.snapTime | fmTimestamp('yyyy-MM-dd HH:mm:ss')}}</div>
+        </div>
         <div class="card-info">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.basePortraitInfo.photoUrl" alt="布控图" v-if="sturcDetail.objType == 1">
-            <img :src="sturcDetail.vehicleInfo.vehicleImagePath" alt="布控图" v-if="sturcDetail.objType == 2">
-            <img :src="sturcDetail.appendixInfo.path" alt="布控图" v-if="sturcDetail.objType == 3">
+            <img :src="sturcDetail.basePortraitInfo.photoUrl" alt="布控图" v-if="sturcDetail.objType == 1" class="bigImg">
+            <img :src="sturcDetail.vehicleInfo.vehicleImagePath" alt="布控图" v-if="sturcDetail.objType == 2" class="bigImg">
+            <img :src="sturcDetail.appendixInfo.path" alt="布控图" v-if="sturcDetail.objType == 3" class="bigImg">
             <span>布控图</span>
           </div>
           <div class="struc_c_d_info">
@@ -38,12 +47,12 @@
                   <span>{{sturcDetail.basePortraitInfo.idNo}}</span>
                 </p>
               </div>
-              <div class="struc_cdu_line" v-if="sturcDetail.basePortraitInfo.remarks">
+              <!-- <div class="struc_cdu_line" v-if="sturcDetail.basePortraitInfo.remarks">
                 <p class="next_height">
                   <b>备注信息</b>
                   <span>{{sturcDetail.basePortraitInfo.remarks}}</span>
                 </p>
-              </div>
+              </div> -->
               <!-- <div v-if="sturcDetail.basePortraitInfo.birthDate">
                 <div class="struc_cdu_line control_line">
                   <span>{{sturcDetail.basePortraitInfo.birthDate | fmTimestamp('yyyy-MM-dd')}}</span><span>出生日期</span>
@@ -78,12 +87,12 @@
                   <span>{{sturcDetail.vehicleInfo.ownerIdCard}}</span>
                 </p>
               </div>
-              <div class="struc_cdu_line" v-if="sturcDetail.vehicleInfo.desci">
+              <!-- <div class="struc_cdu_line" v-if="sturcDetail.vehicleInfo.desci">
                 <p class="next_height">
                   <b>备注信息</b>
                   <span>{{sturcDetail.vehicleInfo.desci}}</span>
                 </p>
-              </div>
+              </div> -->
               <!-- <div v-if="sturcDetail.vehicleInfo.ownerBirth">
                 <div class="struc_cdu_line control_line">
                   <span>{{sturcDetail.vehicleInfo.ownerBirth | fmTimestamp('yyyy-MM-dd')}}</span><span>出生日期</span>
@@ -127,11 +136,11 @@
         </div>
         <div class="card-info right-info">
           <div class="struc_c_d_qj struc_c_d_img struc_mr">
-            <img :src="sturcDetail.snapPhoto" alt="抓拍图">
+            <img :src="sturcDetail.snapPhoto" alt="抓拍图" class="bigImg">
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_info">
-              <h2>抓拍信息
+              <h2>分析结果
                 <div class="box_grade_info"> 
                     <i class="vl_icon vl_icon_alarm_2" v-if="sturcDetail.alarmLevel == 1"></i>
                     <i class="vl_icon vl_icon_alarm_3" v-if="sturcDetail.alarmLevel == 2"></i>
@@ -140,7 +149,126 @@
                     <i class="vl_icon vl_icon_alarm_6" v-if="sturcDetail.alarmLevel == 5"></i>
                 </div>
               </h2>
-              <div class="struc_cdi_line" v-if="sturcDetail.alarmFeature">
+              <template v-if="sturcDetail.alarmFeature">
+                <div v-if="sturcDetail.alarmFeature.featureName == '人脸特征值'" class="struc_box">
+                  <vue-scroll>
+                <div class="struc_cdu_line another_line" v-if="sturcDetail.alarmFeature.featureValue.sex">
+                  <p>
+                    <b>性别</b>
+                    <span>{{sturcDetail.alarmFeature.featureValue.sex}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdu_line another_line" v-if="sturcDetail.alarmFeature.featureValue.age">
+                  <p>
+                    <b>年龄段</b>
+                    <span>{{sturcDetail.alarmFeature.featureValue.age}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdu_line another_line" v-if="sturcDetail.alarmFeature.featureValue.glasses">
+                  <p>
+                    <b>眼镜</b>
+                    <span>{{sturcDetail.alarmFeature.featureValue.glasses}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdu_line another_line" v-if="sturcDetail.alarmFeature.featureValue.hat">
+                  <p>
+                    <b>帽子</b>
+                    <span>{{sturcDetail.alarmFeature.featureValue.hat}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdu_line another_line" v-if="sturcDetail.alarmFeature.featureValue.mask">
+                  <p>
+                    <b>口罩</b>
+                    <span>{{sturcDetail.alarmFeature.featureValue.mask}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdu_line another_line" v-if="sturcDetail.alarmFeature.featureValue.hair">
+                  <p>
+                    <b>发型</b>
+                    <span>{{sturcDetail.alarmFeature.featureValue.hair}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdu_line another_line" v-if="sturcDetail.alarmFeature.featureValue.upperType">
+                  <p>
+                    <b>上身款式</b>
+                    <span>{{sturcDetail.alarmFeature.featureValue.upperType}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdu_line another_line" v-if="sturcDetail.alarmFeature.featureValue.upperColor">
+                  <p>
+                    <b>上身颜色</b>
+                    <span>{{sturcDetail.alarmFeature.featureValue.upperColor}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdu_line another_line" v-if="sturcDetail.alarmFeature.featureValue.bottomType">
+                  <p>
+                    <b>下身款式</b>
+                    <span>{{sturcDetail.alarmFeature.featureValue.bottomType}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdu_line another_line" v-if="sturcDetail.alarmFeature.featureValue.bottomColor">
+                  <p>
+                    <b>下身颜色</b>
+                    <span>{{sturcDetail.alarmFeature.featureValue.bottomColor}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdu_line another_line" v-if="sturcDetail.alarmFeature.featureValue.baby">
+                  <p>
+                    <b>抱小孩</b>
+                    <span>{{sturcDetail.alarmFeature.featureValue.baby}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdu_line another_line" v-if="sturcDetail.alarmFeature.featureValue.bag">
+                  <p>
+                    <b>拎东西</b>
+                    <span>{{sturcDetail.alarmFeature.featureValue.bag}}</span>
+                  </p>
+                </div>
+                </vue-scroll>
+                </div>
+
+                <div v-if="sturcDetail.alarmFeature.featureName == '机动车特征值'">
+                  <vue-scroll>
+                <div class="struc_cdu_line" v-if="sturcDetail.alarmFeature.featureValue.plateNo">
+                  <p>
+                    <b>车牌号码</b>
+                    <span>{{sturcDetail.alarmFeature.featureValue.plateNo}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdu_line" v-if="sturcDetail.alarmFeature.featureValue.plateColor">
+                  <p>
+                    <b>车牌颜色</b>
+                    <span>{{sturcDetail.alarmFeature.featureValue.plateColor}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdu_line" v-if="sturcDetail.alarmFeature.featureValue.vehicleModel">
+                  <p>
+                    <b>车牌型号</b>
+                    <span>{{sturcDetail.alarmFeature.featureValue.vehicleModel}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdu_line" v-if="sturcDetail.alarmFeature.featureValue.vehicleColor">
+                  <p>
+                    <b>车辆颜色</b>
+                    <span>{{sturcDetail.alarmFeature.featureValue.vehicleColor}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdu_line" v-if="sturcDetail.alarmFeature.featureValue.vehicleClass">
+                  <p>
+                    <b>车辆类型</b>
+                    <span>{{sturcDetail.alarmFeature.featureValue.vehicleClass}}</span>
+                  </p>
+                </div>
+                <div class="struc_cdu_line" v-if="sturcDetail.alarmFeature.featureValue.plateClass || sturcDetail.alarmFeature.featureValue.plateClass === 0">
+                  <p>
+                    <b>车牌类型</b>
+                    <span>{{dicFormater(45, sturcDetail.alarmFeature.featureValue.plateClass)}}</span>
+                  </p>
+                </div>
+                </vue-scroll>
+                </div>
+                </template>
+              <!-- <div class="struc_cdi_line" v-if="sturcDetail.alarmFeature">
                 <span class="feature_name">{{sturcDetail.alarmFeature.featureName}}</span>
               </div>
               <div class="struc_cdu_line" v-if="sturcDetail.snapTime">
@@ -172,32 +300,8 @@
                   <b>关联事件</b>
                   <span>{{sturcDetail.eventInfo.eventCode}}</span>
                 </p>
-              </div>
-              <!-- <div v-if="sturcDetail.snapTime">
-                <div class="struc_cdu_line">
-                  <span>{{sturcDetail.snapTime | fmTimestamp('yyyy-MM-dd HH:mm:ss')}}</span><span>抓拍时间</span>
-                </div>
-              </div>
-              <div v-if="sturcDetail.devInfo">
-                <div class="struc_cdu_line">
-                  <span>{{sturcDetail.devInfo.deviceName}}</span><span>抓拍设备</span>
-                </div>
-              </div>
-              <div v-if="sturcDetail.addressDesc">
-                <div class="struc_cdu_line">
-                  <span>{{sturcDetail.addressDesc}}</span><span>抓拍地址</span>
-                </div>
-              </div>
-              <div v-if="sturcDetail.areaInfo">
-                <div class="struc_cdu_line">
-                  <span>{{sturcDetail.areaInfo.cname}}</span><span>区域名称</span>
-                </div>
-              </div>
-              <div v-if="sturcDetail.eventInfo">
-                <div class="struc_cdu_line">
-                  <span>{{sturcDetail.eventInfo.eventCode}}</span><span>关联事件</span>
-                </div>
               </div> -->
+              
           </div>
           <span>相似度</span>
           <span>{{sturcDetail.semblance ? (sturcDetail.semblance).toFixed(2) : 0.00}}<span style="font-size: 12px;">%</span></span>
@@ -363,6 +467,7 @@ export default {
         eventType: dataList.eventType,
         eventLevel: dataList.eventLevel,
         isShowBox: false,
+        historyUrl: '',
     }
   },
   created () {
@@ -374,7 +479,16 @@ export default {
     if(this.type === 'today') {
       this.detailUrl = this.detailUrl
     }else {
-      this.detailUrl = this.detailUrl + '&startTime=' + this.$route.query.startTime + '&endTime=' + this.$route.query.endTime
+      if(this.$route.query.startTime && this.$route.query.endTime) {
+        this.detailUrl = this.detailUrl + '&startTime=' + this.$route.query.startTime + '&endTime=' + this.$route.query.endTime
+      }else {
+        this.detailUrl = this.detailUrl
+      }
+    }
+    if(this.$route.query.startTime && this.$route.query.endTime) {
+      this.historyUrl = '/alarm/history?startTime='+ this.$route.query.startTime + '&endTime=' + this.$route.query.endTime
+    }else {
+      this.historyUrl = '/alarm/history';
     }
     this.getDepartList();
     this.toAlarmDetail();
@@ -424,6 +538,10 @@ export default {
       getAlarmDetail(eventId).then( res => {
         this.sturcDetail = res.data
         this.sturcDetail['objType'] = this.$route.query.objType
+        if(this.sturcDetail && this.sturcDetail.alarmFeature) {
+            let feature = JSON.parse(this.sturcDetail.alarmFeature.featureValue)
+            this.$set(this.sturcDetail.alarmFeature,"featureValue",feature)
+          }
         this.$nextTick(()=> {
           this.isLoading = false
         })
@@ -562,7 +680,7 @@ export default {
       width: 49.5%;
       .card-info {
         width: 98%;
-        height: 4.4rem;
+        height: 4rem;
         background: #fff;
         box-shadow:12px 0px 27px 0px rgba(141,142,142,0.19);
         border-radius:1px;
@@ -570,8 +688,8 @@ export default {
         display: flex;
         margin-bottom: .2rem;
         .struc_c_d_img {
-            width: 4rem;
-            height: 4rem;
+            width: 3.6rem;
+            height: 3.6rem;
             background: #EAEAEA;
             position: relative;
             img {
@@ -623,8 +741,8 @@ export default {
             }
           }
           .struc_c_d_info {
-              width: calc(100% - 4rem);
-              padding-left: .4rem;
+              width: calc(100% - 3.6rem);
+              padding-left: .3rem;
               color: #333333;
               h2 {
                 font-weight: bold;
@@ -674,6 +792,15 @@ export default {
                     color: #666;
                   }
               } */
+              .struc_box {
+                height: 3rem;
+                display: flex;
+                flex-wrap: wrap;
+              }
+              .another_line {
+                width: 50%;
+                display: inline-block;
+              }
               .struc_cdu_line {
               flex: none;
               p {
@@ -682,18 +809,17 @@ export default {
                 display: table;
                 min-height: .34rem;
                 margin-bottom: 0.1rem;
-                padding-right: 10px;
+                padding-right: .08rem;
                 margin-right: 0.08rem;
                 border: 1px solid #f2f2f2;
                 border-radius: 3px;
                 font-size: 12px;
                 > b {
-                  width: 70px;
+                  width: .7rem;
                   background: #fafafa;
                   color: #999;
                   font-weight: normal;
-                  padding-right: 10px;
-                  padding-left: 10px;
+                  text-align: center;
                   display: table-cell;
                   vertical-align: middle;
                   border-right: 1px solid #f2f2f2;
@@ -701,7 +827,7 @@ export default {
                 >span {
                   display: table-cell;
                   vertical-align: middle;
-                  padding-left: 5px;
+                  padding-left: .08rem;
                 }
                 &.next_height {
                   min-height: .26rem;
@@ -836,6 +962,25 @@ export default {
                 font-weight: bold;
               }
             }
+      }
+      .snap_info {
+        width: 98%;
+        background-color: #fff;
+        margin-bottom: 0.2rem;
+        padding: 0 .18rem;
+        box-shadow: 12px 0px 27px 0px rgba(141, 142, 142, 0.19);
+        border-radius: 1px;
+        .snap_i_f {
+          color: #333;
+          font-size: 16px;
+          padding-top: .1rem;
+          padding-bottom: .03rem;
+        }
+        .snap_i_s {
+          color: #999;
+          font-size: 14px;
+          padding-bottom: .09rem;
+        }
       }
     }
     .content-right-box {

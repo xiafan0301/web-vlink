@@ -5,7 +5,7 @@
       <div class="breadcrumb_heaer">
         <el-breadcrumb separator=">">
           <el-breadcrumb-item :to="{ path: '/alarm/today' }" v-if="type === 'today'">今日告警</el-breadcrumb-item>
-          <el-breadcrumb-item :to="{ path: '/alarm/history' }" v-if="type === 'history'">历史告警</el-breadcrumb-item>
+          <el-breadcrumb-item :to="historyUrl" v-if="type === 'history'">历史告警</el-breadcrumb-item>
           <el-breadcrumb-item>告警详情</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -390,10 +390,16 @@ export default {
       isLoading: false,
       pageNum: 1,
       pageSize: 10,
-      total: 0
+      total: 0,
+      historyUrl: '',
     };
   },
   mounted() {
+    if(this.$route.query.startTime && this.$route.query.endTime) {
+      this.historyUrl = '/alarm/history?startTime='+ this.$route.query.startTime + '&endTime=' + this.$route.query.endTime
+    }else {
+      this.historyUrl = '/alarm/history';
+    }
     let map = new AMap.Map("capMap", {
       center: [112.974691, 28.093846],
       zoom: 16
@@ -549,8 +555,8 @@ export default {
             eventType: eventType,
             type: this.type,
             objType: this.$route.query.objType,
-            startTime: this.startTime,
-            endTime: this.endTime,
+            startTime: this.$route.query.startTime,
+            endTime: this.$route.query.endTime,
             id: item.eventInfo ? item.eventInfo.uid : ""
           }
         });
@@ -576,7 +582,16 @@ export default {
           this.$message.success("撤销告警成功！");
           this.strucDetailDialog = false;
           if (this.type === "history") {
-            this.$router.push({ path: "/alarm/history" });
+            if(this.$route.query.startTime && this.$route.query.endTime) {
+              this.$router.push({ path: "/alarm/history",
+                                  query: {
+                                    startTime: this.$route.query.startTime,
+                                    endTime: this.$route.query.endTime,
+                                  }
+                                });
+            }else {
+              this.$router.push({ path: "/alarm/history" });
+            }
           } else {
             this.$router.push({ path: "/alarm/today" });
           }
@@ -587,7 +602,21 @@ export default {
     },
     // 返回
     back() {
-      this.$router.back(-1);
+      /* this.$router.back(-1); */
+      if (this.type === "history") {
+        if(this.$route.query.startTime && this.$route.query.endTime) {
+          this.$router.push({ path: "/alarm/history",
+                              query: {
+                                startTime: this.$route.query.startTime,
+                                endTime: this.$route.query.endTime,
+                              }
+                            });
+        }else {
+          this.$router.push({ path: "/alarm/history" });
+        }
+      } else {
+          this.$router.push({ path: "/alarm/today" });
+      }
     }
   }
 };
@@ -928,7 +957,7 @@ export default {
                 display: table;
                 min-height: 0.34rem;
                 margin-bottom: 0.08rem;
-                padding-right: 10px;
+                padding-right: .08rem;
                 margin-right: 0.08rem;
                 border: 1px solid #f2f2f2;
                 border-radius: 3px;
@@ -938,16 +967,17 @@ export default {
                   background: #fafafa;
                   color: #999;
                   font-weight: normal;
-                  padding-right: 10px;
-                  padding-left: 10px;
+                  /* padding-right: 10px;
+                  padding-left: 10px; */
                   display: table-cell;
                   vertical-align: middle;
                   border-right: 1px solid #f2f2f2;
+                  text-align: center;
                 }
                 > span {
                   display: table-cell;
                   vertical-align: middle;
-                  padding-left: 5px;
+                  padding-left: .08rem;
                 }
               }
             }
