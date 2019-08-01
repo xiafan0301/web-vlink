@@ -48,7 +48,7 @@
             </el-select>
           </el-form-item>
           <el-form-item prop="vehicleClass" class="firstItem">
-            <el-select v-model="ruleForm.vehicleClass"  class="full blankinput" placeholder="全部车辆类型">
+            <el-select v-model="ruleForm.vehicleClass" :class="{'blankinput': ruleForm.vehicleClass === ''}"   class="full" placeholder="全部车辆类型">
               <el-option label="全部车辆类型" value=""></el-option>
               <el-option
                 v-for="item in vehicleOptions"
@@ -1334,7 +1334,7 @@ export default {
 }
 .blankinput{
   .el-input__inner{
-    color: #909399;
+    color: #c6c6c6;
   }
 }
 .el-form-item__label{
