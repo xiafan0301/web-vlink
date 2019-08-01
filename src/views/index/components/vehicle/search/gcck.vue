@@ -32,7 +32,7 @@
               <el-date-picker style="width: 236px;"
                 class="vl_date"
                 v-model="searchTime2[0]"
-                type="date"
+                type="datetime"
                 align="left"
                 :editable="false"
                 :clearable="false"
@@ -41,7 +41,7 @@
               <el-date-picker style="width: 236px; margin-top: 10px"
                 class="vl_date vl_date_end"
                 v-model="searchTime2[1]"
-                type="date"
+                type="datetime"
                 align="left"
                 :editable="false"
                 :clearable="false"
@@ -192,7 +192,6 @@ import {formatDate} from '@/utils/util.js';
 export default {
   components: {vlBreadcrumb, flvplayer, dbTree, vehicleDetail},
   data () {
-    let nDate = new Date();
     return {
       detailData: null,
       showType: 1, // 1实时过车  2历史过车
@@ -202,7 +201,8 @@ export default {
       searchVal2: '',
       doSearch1: {},
       doSearch2: {},
-      searchTime2: [new Date(nDate.getTime() - 1 * 24 * 60 * 60 * 1000), new Date(nDate.getTime() - 1 * 24 * 60 * 60 * 1000)],
+      searchTime2: [new Date(new Date(new Date().toLocaleDateString()).getTime() - 1 * 24 * 60 * 60 * 1000), 
+        new Date(new Date(new Date().toLocaleDateString()).getTime() - 1)],
       treeList1: [],
       treeList2: [],
       bResize: {},
