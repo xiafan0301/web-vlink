@@ -1,6 +1,6 @@
 <template>
   <div class="um_vl_upload" :style="{width: width ? width : '100%', height: height ? height : '100%'}">
-    <div class="vl_upload_con">
+    <div class="vl_upload_con" @drop="dragDrop($event)" @dragover.prevent="dragOver">
       <el-upload class="vl_upload_upd"
         :show-file-list="false"
         accept="image/*"
@@ -41,7 +41,7 @@
         </div>
         <div style="clear: both;"></div>
       </vue-scroll>
-      <p v-else>暂无历史记录</p>
+      <p style="text-align: center; padding-top: 10px;" v-else>暂无历史记录</p>
       <div slot="footer">
         <el-button @click="historyPicDialog = false">取消</el-button>
         <el-button type="primary" @click="addHisToImg" :disabled="!choosedHisPic">确认</el-button>
@@ -55,6 +55,10 @@ import {JtcGETAppendixInfoList} from '@/views/index/api/api.judge.js';
 export default {
   /** 
    * @uploadEmit 上传成功/选择上传历史的时候的emit事件
+   */
+  /** 
+   * 拖拽dataTransfer key => upload_pic_url
+   * dataTransfer.setData('upload_pic_url', IMG_URL);
    */
    /** 
    * clear: 改变clear即可清空上传信息
@@ -78,9 +82,23 @@ export default {
       this.choosedHisPic = null;
     }
   },
-  mounted () {
-  },
   methods: {
+    // drag over
+    dragOver () {
+      // console.log('drag over')
+    },
+    // 接收拖拽
+    dragDrop (ev) {
+      if (!ev) { ev = window.event; }
+      let url = ev.dataTransfer.getData("upload_pic_url");
+      if (url && url.length > 0) {
+        this.choosedHisPic = null;
+        this.currentImg = {
+          path: url
+        };
+        this.picSubmit();
+      }
+    },
     // 上传图片
     beforeAvatarUpload (file) {
       const isJPG = (file.type === 'image/jpeg' || file.type === 'image/png');

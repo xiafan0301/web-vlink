@@ -299,8 +299,8 @@ export default {
       }
       let params = {
         type: '1',
-        beginTime: formatDate(st, 'yyyy-MM-dd'),
-        endTime: formatDate(et, 'yyyy-MM-dd'),
+        beginTime: formatDate(st, 'yyyy-MM-dd 00:00:00'),
+        endTime: formatDate(et, 'yyyy-MM-dd 23:59:59'),
         isFinished: isFinished ? '1' : '0'
       }
       // 0是人 1是车
