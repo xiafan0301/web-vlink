@@ -292,13 +292,13 @@ export default {
         width: G2.DomUtil.getWidth(temp),
         height: G2.DomUtil.getHeight(temp)
       });
-      let dv = new View().source(this.chartData);
-      dv.transform({
-        type: 'fold',
-        fields: ['车流量'], // 展开字段集
-        key: 'type', // key字段
-        value: 'value', // value字段
-      });
+      // let dv = new View().source(this.chartData);
+      // dv.transform({
+      //   type: 'fold',
+      //   fields: ['车流量'], // 展开字段集
+      //   key: 'type', // key字段
+      //   value: 'value', // value字段
+      // });
       // impute 补全列/补全字段
       // dv.transform({
       //   type: 'impute',
@@ -315,18 +315,13 @@ export default {
       // .position('date*车流量1') 
       // .color('#F2F2F2')
       // .size(30);
-      chart.source(dv, {
-        'value': {
+      chart.source(this.chartData, {
+        '车流量': {
           min: 0
         }
       });
-      chart.axis('value', {
-        title: null,
-        position: 'left'
-      });
       // 坐标轴刻度
-      chart.scale('value', {
-        alias: '车流量',
+      chart.scale('车流量', {
         title: {
           offset: 50
         }
@@ -339,13 +334,6 @@ export default {
             fill: '#999999',
             fontSize: 12
           }
-        },
-        tickLine: {
-          alignWithLabel: true,
-          length: 0
-        },
-        line: {
-          lineWidth: 0
         }
       });
       chart.tooltip({
@@ -358,15 +346,15 @@ export default {
       });
       chart.legend(false);
       chart.interval()
-      .position('date*value')
+      .position('date*车流量')
       .color('l(270) 0:#0C70F8 1:#0D9DF4')
       .size(30);
 
       if (this.queryForm.warningNum > 0) {
         chart.guide().line({
           top: true,
-          start: [dv.rows[0].date, this.queryForm.warningNum],
-          end: [dv.rows[dv.rows.length - 1].date, this.queryForm.warningNum],
+          start: [this.chartData[0].date, this.queryForm.warningNum],
+          end: [this.chartData[this.chartData.length - 1].date, this.queryForm.warningNum],
           lineStyle: {
             stroke: '#ef5555',
             lineWidth: 2,
@@ -387,21 +375,21 @@ export default {
         width: G2.DomUtil.getWidth(temp),
         height: G2.DomUtil.getHeight(temp)
       });
-      let dv = new View().source(this.chartData);
-      dv.transform({
-        type: 'fold',
-        fields: ['车流量'], // 展开字段集
-        key: 'type', // key字段
-        value: 'value', // value字段
-      });
-      chart.source(dv, {
-        'value': {
+      // let dv = new View().source(this.chartData);
+      // dv.transform({
+      //   type: 'fold',
+      //   fields: ['车流量'], // 展开字段集
+      //   key: 'type', // key字段
+      //   value: 'value', // value字段
+      // });
+      chart.source(this.chartData, {
+        '车流量': {
           min: 0
         }
       });
        
       // 坐标轴刻度
-      chart.scale('value', {
+      chart.scale('车流量', {
         title: {
           offset: 50
         }
@@ -415,13 +403,6 @@ export default {
               fill: '#999999',
               fontSize: 12
             }
-          },
-          tickLine: {
-            alignWithLabel: true,
-            length: 0
-          },
-          line: {
-            lineWidth: 0
           }
         });
       }
@@ -434,14 +415,14 @@ export default {
         }
       });
       chart.legend(false);
-      chart.area().position('date*value').color('type', ['#007EFF']).shape('smooth').opacity(0.6);
-      chart.line().position('date*value').color('type', ['#207BF1']).size(1).shape('smooth');
-      chart.point().position('date*value').color('type', ['#207BF1']).size(2).shape('smooth');
+      chart.area().position('date*车流量').color('#007EFF').shape('smooth').opacity(0.6);
+      chart.line().position('date*车流量').color('#207BF1').size(1).shape('smooth');
+      chart.point().position('date*车流量').color('#207BF1').size(2).shape('smooth');
       if (this.queryForm.warningNum > 0) {
         chart.guide().line({
           top: true,
-          start: [dv.rows[0].date, this.queryForm.warningNum],
-          end: [dv.rows[dv.rows.length -1].date, this.queryForm.warningNum],
+          start: [this.chartData[0].date, this.queryForm.warningNum],
+          end: [this.chartData[this.chartData.length -1].date, this.queryForm.warningNum],
           lineStyle: {
             stroke: '#ef5555',
             lineWidth: 2,

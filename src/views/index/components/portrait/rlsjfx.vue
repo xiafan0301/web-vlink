@@ -334,9 +334,7 @@ export default {
           this.faceSnapSta = res.data;
           let timeDto = this.faceSnapSta.timeDto
           if(timeDto && timeDto.length > 0) {
-            this.chartData1 = timeDto.map(m => {
-              return { time: m.name, count: m.total };
-            })
+            this.chartData1 = timeDto;
             this.drawChart1();
           } else {
             this.chartData1 = [];
@@ -362,9 +360,7 @@ export default {
           this.faceControlSta = res.data;
           let timeDto = this.faceControlSta.timeDto
           if(timeDto && timeDto.length > 0) {
-            this.chartData2 = timeDto.map(m => {
-              return { time: m.name, count: m.total };
-            })
+            this.chartData2 = timeDto;
             this.drawChart2();
           } else {
             this.chartData2 = [];
@@ -399,40 +395,19 @@ export default {
           height: G2.DomUtil.getHeight(temp)
         });
       }
-      let dv = new View().source(this.chartData1);
-      dv.transform({
-        type: 'fold',
-        fields: ['count'], // 展开字段集
-        key: 'type', // key字段
-        value: 'value', // value字段
-        retains: ['time']
-      });
-
-      chart.source(dv, {
-        'value': {
+      chart.source(this.chartData1, {
+        'total': {
           min: 0
         }
       });
-      // 坐标轴刻度
-      chart.axis('value', {
-        title: null
-      });
-      chart.axis('time', {
+      chart.axis('name', {
         label: {
           textStyle: {
             fill: '#999999',
             fontSize: 12
           }
-        },
-        tickLine: {
-          alignWithLabel: false,
-          length: 0
-        },
-        line: {
-          lineWidth: 0
         }
       });
-      chart.axis('count1', false)
       chart.tooltip({
         useHtml: true,
         htmlContent: function (title, items) {
@@ -448,14 +423,13 @@ export default {
         }
       });
       chart.legend(false);
-      chart.line().position('time*value').shape('hv').color('type', [ '#00C4FC']).size(2);
+      chart.line().position('name*total').shape('hv').color('#088BFD').size(2);
       // chart.area().position('time*value').color([ 'l(270) 0:#ffffff 1:#00C4FC' ]).shape('smooth');
       chart.render();
       this.charts.chart1 = chart;
     },
     // 画布控告警次数图表
     drawChart2 () {
-      // if (this.chartData2.length === 0) return;
       let chart = null,_this = this;
       if (this.charts.chart2) {
         this.charts.chart2.clear();
@@ -470,36 +444,17 @@ export default {
           height: G2.DomUtil.getHeight(temp)
         });
       }
-      let dv = new View().source(this.chartData2);
-      dv.transform({
-        type: 'fold',
-        fields: ['count'], // 展开字段集
-        key: 'type', // key字段
-        value: 'value', // value字段
-        retains: ['time']
-      });
-
-      chart.source(dv, {
-        'value': {
+      chart.source(this.chartData2, {
+        'total': {
           min: 0
         }
       });
-      chart.axis('value', {
-        title: null
-      });
-      chart.axis('time', {
+      chart.axis('name', {
         label: {
           textStyle: {
             fill: '#999999',
             fontSize: 12
           }
-        },
-        tickLine: {
-          alignWithLabel: false,
-          length: 0
-        },
-        line: {
-          lineWidth: 0
         }
       });
       chart.tooltip({
@@ -511,13 +466,13 @@ export default {
           } else {
             str += `<h1>${_this.transformTime(title)}-${title}</h1>`;
           }
-          str += `<span><span>${items[0].value}</span><span>张</span></span></div>`;
+          str += `<span><span>${items[0].value}</span><span>次</span></span></div>`;
           return str;
           // return`<div class="my_tooltip"><h1>${title}</h1><span><span>${items[0].value}</span><span>张</span></span></div>`;
         }
       });
       chart.legend(false);
-      chart.line().position('time*value').shape('hv').color('type', [ '#00C4FC']).size(2);
+      chart.line().position('name*total').shape('hv').color('#088BFD').size(2);
       // chart.area().position('time*value').color([ 'l(270) 0:#ffffff 1:#00C4FC' ]).shape('smooth');
       chart.render();
       this.charts.chart2 = chart;
@@ -645,13 +600,14 @@ export default {
             width: 33.33%;
             color: #333333;
             .five{
-              font-size: 12px;
-              color: #fff;
+              padding: 2px 5px;
               display: inline-block;
               line-height: 12px;
               text-align: center;
               margin-left: 10px;
               background: #FA453A;
+              font-size: 12px;
+              color: #fff;
             }
           }
         }
