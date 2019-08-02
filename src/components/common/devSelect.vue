@@ -1,6 +1,6 @@
 <!-- 设备下拉列表 通用组件 -->
 <template>
-  <div class="dev_select">
+  <div :class="['dev_select', {'rlsjfx': flag === 1, 'all': devIdData && devIdData[0] && devIdData[0].label === '全部设备'}]">
     <el-select
       style="width: 100%;"
       v-model="devIdData"
@@ -9,13 +9,14 @@
       @remove-tag="removeSeletedDev"
       @click.native="showChange"
       collapse-tags
-      placeholder="请选择设备">
+      placeholder="请选择卡口">
       <el-option :value="devIdData[0]" :label="devIdData[0] && devIdData[0].label"></el-option>
     </el-select>
     <div class="search_item" :style="{'height': isShowSelectList ? '160px' : '0px'}">
       <vue-scroll>
         <el-checkbox style="padding-left: 24px;padding-top: 10px;" v-model="checked" @change="isCheckedAll">全选</el-checkbox>
         <el-tree
+          default-expand-all
           :data="treeList"
           class="select_tree"
           ref="selectTree"
@@ -30,6 +31,7 @@
 <script>
 import {MapGETmonitorList} from '@/views/index/api/api.map.js';
 export default {
+  props: ['flag'],
   data () {
     return {
       likeKey: null,
@@ -136,18 +138,6 @@ export default {
       })
       return result;
     },
-    // 重置表单
-    // resetSelect () {
-    //   this.devIdData = [];
-    //   this.selObj = {
-    //     selSelectedData1: [],
-    //     selSelectedData2: [],
-    //   };
-    //   if (this.$refs.selectTree) {
-    //     this.$refs.selectTree.setCheckedKeys([]);
-    //   }
-    //   this.isShowSelectList = false;
-    // },
     // 是否显示下拉列表
     showChange () {
       this.isShowSelectList = !this.isShowSelectList;
@@ -168,17 +158,16 @@ export default {
       this.selObj.selSelectedData1 = data.filter(f => f.type === 1);
       this.selObj.selSelectedData2 = data.filter(f => f.type === 2);
       this.devIdData = data;
-      this.$emit('sendSelectData', this.selObj);
-      this.$emit('allSelectLength', this.selectNum);
-    }
-  },
-  watch: {
-    devIdData () {
       if (this.devIdData.length < this.selectNum) {
         this.checked = false;
       } else {
         this.checked = true;
       }
+      if (this.devIdData.length === this.selectNum) {
+        this.devIdData = [{label: '全部设备'}];
+      }
+      this.$emit('sendSelectData', this.selObj);
+      this.$emit('allSelectLength', this.selectNum);
     }
   }
 }
@@ -203,7 +192,39 @@ export default {
 }
 </style>
 <style lang="scss">
+.dev_select{
+  .el-tag--info{
+    background: #fff;
+    border-color: #fff;
+    > span{
+      font-size: 14px;
+    }
+    .el-tag__close{
+      display: none;
+    }
+  }
+  .el-tag--info:nth-child(1){
+    .el-select__tags-text{
+      max-width: 100px;
+      display: inline-block;
+      overflow-x: hidden;
+    }
+  }
+  .el-tag--info:nth-child(2){
+    .el-select__tags-text{
+      color: #0c70f8;
+    }
+  }
+}
+.dev_select.rlsjfx{
+  .el-tag--info:nth-child(1){
+    .el-select__tags-text{
+      max-width: 70px;
+    }
+  }
+}
 .statistics_select_list {
   display: none!important;
 }
 </style>
+  

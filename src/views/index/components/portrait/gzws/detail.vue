@@ -143,20 +143,20 @@ export default {
     }
   },
   mounted () {
-    this.getPortraitGetDispatch();
+    // this.getPortraitGetDispatch();
     this.getDetail();
   },
   methods: {
     // 以图搜人实时/离线判断
-    getPortraitGetDispatch () {
-      PortraitGetDispatch()
-        .then(res => {
-          console.log('111', res)
-          if (res && res.data) {
-            this.portraitStatus = res.data;
-          }
-        })
-    },
+    // getPortraitGetDispatch () {
+    //   PortraitGetDispatch()
+    //     .then(res => {
+    //       console.log('111', res)
+    //       if (res && res.data) {
+    //         this.portraitStatus = res.data;
+    //       }
+    //     })
+    // },
     // 获取尾随车辆详情
     getDetail () {
       if (this.$route.query.obj) {
@@ -225,7 +225,9 @@ export default {
             path.push(new window.AMap.LngLat(obj.shotPlaceLongitude, obj.shotPlaceLatitude));
 
             marker.on('mouseover', function () {
-              $('#vehicle' + i ).addClass('vl_icon_map_hover_mark0');
+              if(i !== 0 && i !== (data.length - 1)) {
+                $('#vehicle' + i ).addClass('vl_icon_map_hover_mark0');
+              }
 
               let sContent = "<div class='tip_box'><div class='select_target'><p class='select_p'>查询目标</p>"
                     +"<img src="+ obj.targetStoragePath +" /><div class='mongolia'>"
@@ -248,7 +250,10 @@ export default {
                 }, 500);
             });
             marker.on('mouseout', function () {
-              $('#vehicle' + i).removeClass('vl_icon_map_hover_mark0');
+              if(i !== 0 && i !== (data.length - 1)) {
+                $('#vehicle' + i ).removeClass('vl_icon_map_hover_mark0');
+              }
+              // $('#vehicle' + i).removeClass('vl_icon_map_hover_mark0');
             });
             // _this.map.setZoom(13)
             // marker.setPosition([obj.shotPlaceLongitude, obj.shotPlaceLatitude]);

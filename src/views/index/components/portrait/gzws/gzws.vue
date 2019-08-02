@@ -153,7 +153,10 @@
       >
       <div class="content_body">
         <div class="left">
-          <div :class="['upload_box', {'hidden': dialogImageUrl}]">
+          <div style="padding: 0 15px; height: 210px; text-align:center;margin-top: 50px;">
+            <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit"></div>
+          </div>
+          <!-- <div :class="['upload_box', {'hidden': dialogImageUrl}]">
             <el-upload
               ref="uploadPic"
               accept="image/*"
@@ -167,7 +170,7 @@
               <i class="vl_icon vl_icon_vehicle_01"></i>
               <p class="upload_text" v-show="!dialogImageUrl">点击上传图片</p>
             </el-upload>
-          </div>
+          </div> -->
         </div>
         <div class="right">
           <el-form class="left_form" :model="addForm" ref="addForm" :rules="rules">
@@ -230,8 +233,9 @@ import { getShotDevice, getTailBehindList } from '@/views/index/api/api.judge.js
 import { getPersonShotDev, getPersonFollowing } from '@/views/index/api/api.portrait.js';
 import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
 import { formatDate } from '@/utils/util.js';
+import vlUpload from '@/components/common/upload.vue';
 export default {
-  components: { vlBreadcrumb },
+  components: { vlBreadcrumb, vlUpload },
   data () {
     const startTime = new Date() - 24 * 60 * 60 *1000;
     return {
@@ -254,9 +258,9 @@ export default {
       isAddLoading: false, // 新建-恢复任务加载中
       isDeleteLoading: false, // 删除任务弹出框
       isInterruptLoading: false, // 中断任务弹出框
-      fileList: [], // 图片上传列表
+      // fileList: [], // 图片上传列表
       dialogImageUrl: null,
-      uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
+      // uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
       deviceStartTime: null, // 起点设备抓拍时间
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       searchForm: {
@@ -291,15 +295,27 @@ export default {
       deviceList: [], // 抓拍设备列表
       vehicleTypeList: [], // 车辆类型列表
       dataList: [], // 查询的抓拍结果列表
-      curImgNum: 0, // 图片数量
-      curImageUrl: null,
-      uploading: false
+      // curImgNum: 0, // 图片数量
+      // curImageUrl: null,
+      // uploading: false,
+      uploadClear: {}
     }
   },
   created () {
     this.getDataList();
   },
   methods: {
+    uploadEmit (data) {
+      console.log('uploadEmit data', data);
+      if (data && data.path) {
+        this.dialogImageUrl = data.path;
+        this.$nextTick(() => {
+          this.getDeviceList();
+        })
+      } else {
+        this.dialogImageUrl = null;
+      }
+    },
     // 时间选择change
     handleDateTime (val) {
       // if (val) {
@@ -345,35 +361,35 @@ export default {
       this.selectIndex = val;
       this.getDataList();
     },
-    // 删除图片
-    handleRemove (file, fileList) {
-      this.dialogImageUrl = null;
-    },
-    // 上传成功
-    uploadPicSuccess (res) {
-      if (res && res.data) {
-        this.dialogImageUrl = res.data.fileFullPath;
-        if (this.addForm.dateTime && this.addForm.dateTime.length !== 0) {
-          this.getDeviceList();
-        }
-      }
-    },
-    beforeAvatarUpload (file) {
-      const isJPG = file.type === 'image/jpeg' || file.type === 'image/jpg' || file.type === 'image/png';
-      const isLt4M = file.size / 1024 / 1024 < 4;
+    // // 删除图片
+    // handleRemove (file, fileList) {
+    //   this.dialogImageUrl = null;
+    // },
+    // // 上传成功
+    // uploadPicSuccess (res) {
+    //   if (res && res.data) {
+    //     this.dialogImageUrl = res.data.fileFullPath;
+    //     if (this.addForm.dateTime && this.addForm.dateTime.length !== 0) {
+    //       this.getDeviceList();
+    //     }
+    //   }
+    // },
+    // beforeAvatarUpload (file) {
+    //   const isJPG = file.type === 'image/jpeg' || file.type === 'image/jpg' || file.type === 'image/png';
+    //   const isLt4M = file.size / 1024 / 1024 < 4;
 
-      if (!isJPG) {
-        if (!document.querySelector('.el-message--info')) {
-          this.$message.info('上传图片只能是 jpeg、jpg、png 格式!');
-        }
-      }
-      if (!isLt4M) {
-        if (!document.querySelector('.el-message--info')) {
-          this.$message.info('上传图片大小不能超过 4MB!');
-        }
-      }
-      return isJPG && isLt4M;
-    },
+    //   if (!isJPG) {
+    //     if (!document.querySelector('.el-message--info')) {
+    //       this.$message.info('上传图片只能是 jpeg、jpg、png 格式!');
+    //     }
+    //   }
+    //   if (!isLt4M) {
+    //     if (!document.querySelector('.el-message--info')) {
+    //       this.$message.info('上传图片大小不能超过 4MB!');
+    //     }
+    //   }
+    //   return isJPG && isLt4M;
+    // },
     // 获取抓拍设备列表
     getDeviceList () {
       this.deviceList = [];
@@ -394,7 +410,7 @@ export default {
               this.deviceList = res.data;
 
               // 初始化页面时默认选中第一个设备
-              this.addForm.deviceCode = this.deviceList[0].deviceID;
+              this.addForm.deviceCode = this.deviceList[0].deviceName;
               this.addForm.deviceName = this.deviceList[0].deviceName;
               
               this.isShowDeviceTip = false;
@@ -423,6 +439,7 @@ export default {
       this.$refs[form].resetFields();
       this.addTaskDialog = false;
       this.dialogImageUrl = null;
+      this.uploadClear = {};
     },
     // 新建任务
     submitData (form) {
@@ -461,15 +478,20 @@ export default {
           this.isAddLoading = true;
           getPersonFollowing(params)
             .then(res => {
-              this.$message({
-                type: 'success',
-                message: '新建成功',
-                customClass: 'request_tip'
-              });
-              // this.dataList = res.data;
-              this.isAddLoading = false;
-              this.addTaskDialog = false;
-              this.getDataList();
+              if (res && res.code === '00000000') {
+                this.$message({
+                  type: 'success',
+                  message: '新建成功',
+                  customClass: 'request_tip'
+                });
+                // this.dataList = res.data;
+                this.isAddLoading = false;
+                this.addTaskDialog = false;
+
+                this.getDataList();
+              } else {
+                this.isAddLoading = false;
+              }
             })
             .catch(() => {this.isAddLoading = false;})
         }
@@ -491,7 +513,8 @@ export default {
         interval: 3 // 尾随间隔
       };
       this.dialogImageUrl = null;
-      this.fileList = [];
+      this.uploadClear = {};
+      // this.fileList = [];
       
     },
     // 显示中断任务弹出框

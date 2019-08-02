@@ -154,7 +154,7 @@ import { formatDate, objDeepCopy } from "@/utils/util.js";
 import { checkPlateNumber } from '@/utils/validator.js';
 import { getMultiVehicleList, getBaseVehicleList } from '@/views/index/api/api.judge.js';
 const overStartTime = new Date() - 24 * 60 * 60 * 1000;
-// const reg = /^(([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z](([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z][A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳使领]))$/;
+let reg = /^([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})$/;
 export default {
   components: { vlBreadcrumb, noResult },
   data () {
@@ -250,11 +250,11 @@ export default {
     // 添加同行车辆
     onAddVehicleNumber () {
       const vehicleNumber = this.searchForm.peerVehicleNumber;
-      // if (!reg.test(vehicleNumber)) {
-      //   if (!document.querySelector('.el-message--info')) {
-      //     this.$message.info('请输入正确的车牌号码');
-      //   }
-      // } else {
+      if (!reg.test(vehicleNumber)) {
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('请输入正确的车牌号码');
+        }
+      } else {
         if (vehicleNumber) {
           this.searchForm.peerVehicleNumber = null;
           this.vehicleNumberList.push(vehicleNumber);
@@ -265,7 +265,7 @@ export default {
             this.isDisabled = false;
           }
         }
-      // }
+      }
     },
     // 删除添加的同行车辆
     removeVehicle (index) {
@@ -338,7 +338,7 @@ export default {
                 a['showTime'] = false;
               }
   
-              if (a.isAllPassed) { // 全部车辆经过该设备
+              if (a.isPeer) { // 全部车辆经过该设备
                 a['deviceType'] = 17;
               } else {
                 if (a.bayonetId) { // 设备为卡口

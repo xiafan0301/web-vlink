@@ -11,7 +11,6 @@
       <div class="plane">
         <el-form
           :model="ruleForm"
-          status-icon
           ref="ruleForm"
           :rules="rules"
           label-width="0px"
@@ -39,75 +38,13 @@
               value-format="yyyy-MM-dd"
             ></el-date-picker>
           </el-form-item>
-          <!-- <el-form-item class="firstItem" prop="data1">
-            <el-date-picker
-          v-model="ruleForm.data1"
-          type="daterange"
-          :clearable="false"
-          class="full vl_date"
-          value-format="yyyy-MM-dd"
-          :picker-options="pickerOptions"
-          range-separator="至"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期">
-        </el-date-picker>
-          </el-form-item> -->
-
           <el-form-item prop="input3">
-            <p class="carCold">车牌：</p>
             <el-input placeholder="请输入车牌号" v-model="ruleForm.input3" class="input-with-select">
-              <el-select>
+              <!-- <el-select>
                 <el-option v-for="(item, index) in pricecode" :label="item" :value="item" :key="'cph_' + index"></el-option>
-              </el-select>
+              </el-select> -->
             </el-input>
           </el-form-item>
-          <!-- <el-form-item prop="input4" >
-            <el-row :gutter="5">
-              <el-col :span="22">
-                <div>
-                  <el-input placeholder="不小于" v-model="ruleForm.input4" class="insetIput">
-                    <i slot="prefix" class="inset">落脚点次数</i>
-                  </el-input>
-                </div>
-              </el-col>
-              <el-col :span="2">
-                <div class="line40">次</div>
-              </el-col>
-            </el-row>
-          </el-form-item>
-          <el-form-item label="抓拍区域：" label-width="72px" prop="input5">
-            <el-radio-group v-model="ruleForm.input5" @change="changeTab">
-               <el-row :gutter="10">
-                <el-col :span="12">
-                  <el-radio label="1">列表选择</el-radio>
-                </el-col>
-                <el-col :span="12">
-                  <div @click="clickTab">
-                    <el-radio label="2">地图选择</el-radio>
-                  </div>
-                </el-col>
-              </el-row>
-            </el-radio-group>
-          </el-form-item>
-          <el-form-item v-if="ruleForm.input5=='1'" prop="value1">
-            <el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="请选择" class="full">
-            <el-option-group
-              v-for="group in options"
-              :key="group.areaName"
-              :label="group.areaName">
-              <el-option
-                v-for="item in group.areaTreeList"
-                :key="item.areaId"
-                :label="item.areaName"
-                :value="item.areaId">
-              </el-option>
-            </el-option-group>
-          </el-select>
-          </el-form-item>
-          <el-form-item v-if="ruleForm.input5=='2'" >
-            <el-input  v-model="selectValue" :disabled="true">
-            </el-input>
-          </el-form-item> -->
           <el-form-item>
             <el-row :gutter="10">
               <el-col :span="12">
@@ -158,8 +95,9 @@
 <script>
 import flvplayer from '@/components/common/flvplayer.vue';
 import { mapXupuxian } from "@/config/config.js";
-import { cityCode } from "@/utils/data.js";
+// import { cityCode } from "@/utils/data.js";
 import { transMinute } from '@/utils/util.js';
+import { checkPlateNumber } from '@/utils/validator.js';
 import { getVehicleShot,getAllDevice } from "@/views/index/api/api.judge.js";
 import { getAllBayonetList } from "@/views/index/api/api.base.js";
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
@@ -199,32 +137,32 @@ export default {
 						}
           ],
           input3:[{
-             required: true, message: '请输入正确车牌', trigger: 'blur'
+             required: true, message: '请输入正确的车牌号码', trigger: 'blur'
           },{
-            pattern:/([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})/,
-            message: '常规格式：湘A12345',
+            validator: checkPlateNumber,
             trigger: 'blur'
             }]
        },
-      pricecode:cityCode,
+      // pricecode:cityCode,
      
       options: [],
       evData: [],
       pickerOptions: {
           disabledDate (time) {
-            let date = new Date();
-            let y = date.getFullYear();
-            let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
-            let d = date.getDate();
-            let threeMonths = '';
-            let start = '';
-            if (parseFloat(m) >= 2) {
-              start = y + '-' + (m - 1) + '-' + d;
-            } else {
-              start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
-            }
-            threeMonths = new Date(start).getTime();
-            return time.getTime() > Date.now() || time.getTime() < threeMonths;
+            // let date = new Date();
+            // let y = date.getFullYear();
+            // let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
+            // let d = date.getDate();
+            // let threeMonths = '';
+            // let start = '';
+            // if (parseFloat(m) >= 2) {
+            //   start = y + '-' + (m - 1) + '-' + d;
+            // } else {
+            //   start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
+            // }
+            // threeMonths = new Date(start).getTime();
+             return time.getTime() > Date.now();
+            // return time.getTime() > Date.now() || time.getTime() < threeMonths;
           }
         },
     };
@@ -331,42 +269,47 @@ export default {
       // }
     },
     submitForm(v) {
-      let isP=/([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})/
-      let  result = isP.test(this.ruleForm.input3);
-      if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data2 && this.ruleForm.input3){
-      let pg={
-        //shotTime:+"_"+this.ruleForm.data1[1]+" 23:59:59",
-        startTime:this.ruleForm.data1+" 00:00:00",
-        endTime:this.ruleForm.data2+" 23:59:59",
-        //shotTime:this.ruleForm.data1[0]+"_"+this.ruleForm.data1[1],
-        // minSnapNum: this.ruleForm.input4 || 0,
-        plateNo: this.ruleForm.input3 ,
-      }
-      // if(this.ruleForm.input5==1 && this.ruleForm.value1.length!=0){
-      //   pg.areaIds=this.ruleForm.value1.join(",")
-      // }
-      // if(this.ruleForm.input5==2){
-      //    pg.deviceIds=this.selectDevice.join(",")
-      //    pg.bayonetIds=this.selectBayonet.join(",")
-      // }
-      
-      if(!result){
-        if(!document.querySelector('.el-message--info')){
-           this.$message.info("请输入正确的车牌号码。");
-        }
-        
-         return;
-      }
+      this.$refs[v].validate(valid => {
+        if (valid) {
+          // let isP=/([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})/
+          // let  result = isP.test(this.ruleForm.input3);
+          // if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data2 && this.ruleForm.input3){
+          let pg={
+            //shotTime:+"_"+this.ruleForm.data1[1]+" 23:59:59",
+            startTime:this.ruleForm.data1 + " 00:00:00",
+            endTime:this.ruleForm.data2 + " 23:59:59",
+            //shotTime:this.ruleForm.data1[0]+"_"+this.ruleForm.data1[1],
+            // minSnapNum: this.ruleForm.input4 || 0,
+            plateNo: this.ruleForm.input3
+          }
+          // if(this.ruleForm.input5==1 && this.ruleForm.value1.length!=0){
+          //   pg.areaIds=this.ruleForm.value1.join(",")
+          // }
+          // if(this.ruleForm.input5==2){
+          //    pg.deviceIds=this.selectDevice.join(",")
+          //    pg.bayonetIds=this.selectBayonet.join(",")
+          // }
+          
+          // if(!result){
+          //   if(!document.querySelector('.el-message--info')){
+          //      this.$message.info("请输入正确的车牌号码。");
+          //   }
+            
+          //    return;
+          // }
+    
+          this.getVehicleShot(pg);
+          // }else{
+          //   if(!document.querySelector('.el-message--info')){
+          //    this.$message.info("请输入开始时间和车牌号码。");
+          //   }
+          // }
 
-      this.getVehicleShot(pg);
-      }else{
-        if(!document.querySelector('.el-message--info')){
-         this.$message.info("请输入开始时间和车牌号码。");
         }
-      }
+      })
     },
     resetForm(v){
-     
+      this.$refs[v].resetFields();
       this.setDTime() 
       this.ruleForm.input3=null
       // this.ruleForm.input4=3
