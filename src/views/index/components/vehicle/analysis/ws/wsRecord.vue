@@ -186,7 +186,7 @@ export default {
           { name: '新建布控' }
         ]
       });
-      this.$router.push({name: 'control_create', query: { plateNo: this.resultList[0].struVehicleDto.plateNo, modelName: '车辆追踪' }});
+      this.$router.push({name: 'control_create', query: { plateNo: this.resultList[0].struVehicleDto.plateNo, imgurl: this.resultList[0].struVehicleDto.storagePath, modelName: '车辆追踪' }});
     },
     // 跳至轨迹分析页面
     skipTrajectoryPage () {
@@ -291,7 +291,9 @@ export default {
             path.push(new window.AMap.LngLat(obj.shotPlaceLongitude, obj.shotPlaceLatitude));
 
             marker.on('mouseover', function () {
-              $('#vehicle' + obj.deviceID).addClass('vl_icon_map_hover_mark0');
+              if(i !== 0 && i !== (data.length - 1)) {
+                $('#vehicle' + obj.deviceID).addClass('vl_icon_map_hover_mark0');
+              }
 
               let sContent = "<div class='tip_box'><div class='select_target'><p class='select_p'>查询目标</p>"
                     +"<img src="+ obj.storagePath +" /><div class='mongolia'>"
@@ -314,7 +316,9 @@ export default {
                 }, 500);
             });
             marker.on('mouseout', function () {
-              $('#vehicle' + obj.deviceID).removeClass('vl_icon_map_hover_mark0');
+              if(i !== 0 && i !== (data.length - 1)) {
+                $('#vehicle' + obj.deviceID).removeClass('vl_icon_map_hover_mark0');
+              }
             });
             // _this.map.setZoom(13)
             // marker.setPosition([obj.shotPlaceLongitude, obj.shotPlaceLatitude]);

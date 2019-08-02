@@ -52,6 +52,7 @@
                     </div>
                   </template>
                   <el-upload
+                    v-show="isShowUpload"
                     :action="uploadUrl"
                     list-type="picture-card"
                     accept=".png,.jpg,.jpeg,.mp4,.bmp"
@@ -66,8 +67,8 @@
                   </el-upload>
                 </div>
                 <el-form-item label-width="85px" class="upload_tip">
-                  <div style="color: #999999;">（只能上传视频或图片，视频最多1个，图片最多9张）</div>
-                  <p class="error_tip" v-show="isShowErrorTip">{{errorText}}</p>
+                  <div style="color: #999999;">（请添加mp4格式的视频或者JPEG/PNG/BMP格式的图片）</div>
+                  <!-- <p class="error_tip" v-show="isShowErrorTip">{{errorText}}</p> -->
                 </el-form-item>
                 <el-form-item  label="处理单位:" prop="dealOrgId" label-width="85px">
                   <el-select v-model="addEventForm.dealOrgId" style='width: 95%'>
@@ -234,37 +235,42 @@ export default {
       uploadImgList: [], // 要上传的图片列表
       uplaodVideoList: [], // 要上传的视频列表
       imgList1: [], // 要放大的图片
-      isShowErrorTip: false, // 是否显示图片上传错误提示
+      isShowUpload: true, // 是否显示上传组件
+      isShowErrorTip: false,
       errorText: null, // 图片上传错误提示
       autoInput: null, // 自动输入对象
     }
   },
   watch: {
     uplaodVideoList (val) {
-      if (this.uploadImgList.length > 0 && val.length > 0) {
-        this.isShowErrorTip = true;
-        this.errorText = '图片和视频只能上传一种';
-      } else if (this.uploadImgList.length > 9 || val.length > 1) {
-        this.isShowErrorTip = true;
-        this.errorText = '最多上传1个视频或9张图片';
-      } 
-      else {
-        this.isShowErrorTip = false;
-        this.errorText = null;
+      console.log('val', val)
+      if (val && val.length > 0) {
+        this.isShowUpload = false;
+      } else {
+        this.isShowUpload = true;
       }
+
+      if (val.length > 0 && this.uploadImgList.length > 0) {
+        this.$message({
+          type: 'info',
+          message: '图片和视频只能上传一种'
+        });
+        return;
+      } 
     },
     uploadImgList (val) {
-      if (this.uplaodVideoList.length > 0 && val.length > 0) {
-        this.isShowErrorTip = true;
-        this.errorText = '图片和视频只能上传一种';
-      } else if (this.uplaodVideoList.length > 1 || val.length > 9) {
-        this.isShowErrorTip = true;
-        this.errorText = '最多上传1个视频或9张图片';
-      } 
-      else {
-        this.isShowErrorTip = false;
-        this.errorText = null;
+      if ((val && val.length === 9)) {
+        this.isShowUpload = false;
+      } else {
+        this.isShowUpload = true;
       }
+      if (this.uplaodVideoList.length > 0 && val.length > 0) {
+        this.$message({
+          type: 'info',
+          message: '图片和视频只能上传一种'
+        });
+        return;
+      } 
     }
   },
   created () {
@@ -453,9 +459,17 @@ export default {
           customClass: 'upload_file_tip'
         });
       }
-      if (this.isShowErrorTip) {
-        return;
-      }
+      //  if (this.uplaodVideoList.length > 0 && this.uploadImgList.length > 0) {
+      //   this.$message({
+      //     type: 'warning',
+      //     message: '图片和视频只能上传一种',
+      //     customClass: 'upload_file_tip'
+      //   });
+      //   return;
+      // } 
+      // if (this.isShowErrorTip) {
+      //   return;
+      // }
       return isPng && isLtTenM;
     },
     // 移除图片
@@ -737,16 +751,16 @@ export default {
               }
             }
             .upload_tip {
-            margin-left: 85px;
-            // /deep/ .el-form-item__content {
-              // line-height: 20px;
-              .error_tip {
-                padding-left: 5px;
-                color: #F56C6C;
-                font-size: 12px;
+              margin-left: 85px;
+              /deep/ .el-form-item__content {
+                /deep/ .error_tip {
+                  padding-left: 5px;
+                  color: #F56C6C;
+                  font-size: 12px;
+                  line-height: 0;
+                }
               }
-            // }
-          }
+            }
           }
           .limit_parent {
             position: relative;

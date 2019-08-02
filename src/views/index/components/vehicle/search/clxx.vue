@@ -22,7 +22,7 @@
                 v-model="searchData.startTime"
                 type="date"
                 :picker-options="startDateOpt"
-                placeholder="开始时间"
+                placeholder="请选择开始时间"
                 :clearable="false"
                 format="yyyy-MM-dd HH:mm:ss">
             </el-date-picker>
@@ -45,7 +45,7 @@
                 v-model="searchData.endTime"
                 type="date"
                 :picker-options="endDateOpt"
-                placeholder="结束时间"
+                placeholder="请选择结束时间"
                 :clearable="false"
                 format="yyyy-MM-dd HH:mm:ss"
                 @change="dateChange">
@@ -53,7 +53,7 @@
           </div>
           <!-- 车牌号搜索 -->
           <div class="license-plate-search">
-            <el-input v-model="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" @blur="blurJudge" @clear="blurJudge" clearable></el-input>
+            <el-input v-model="searchData.licensePlateNum" placeholder="请输入车牌号" @blur="blurJudge" @clear="blurJudge" clearable></el-input>
             <p class="error-tip" :class="{'is-show': isTrue}">{{messageTip}}</p>
           </div>
           <div class="search-btn">
@@ -260,7 +260,6 @@ export default {
         } else {
           return true;
         }
-        return true;
       } else {
         this.messageTip = "请输入车牌号码"
         /* if (!document.querySelector(".el-message")) {
@@ -363,13 +362,12 @@ export default {
   .vehicle-info-content {
     height: 100%;
     display: flex;
-    border-top: 1px solid #d3d3d3;
     .info-left {
       width: 272px;
       padding: 20px 0 20px 20px;
       color: #999;
       background: #fff;
-      box-shadow: 5px 0px 16px 0px rgba(169, 169, 169, 0.2);
+      box-shadow: 2px 3px 10px 0px rgba(131, 131, 131, 0.28);
       animation: fadeInLeft 0.4s ease-out 0.3s both;
       .error-tip {
         display: none;
@@ -386,6 +384,10 @@ export default {
       .license-plate-search {
         width: 232px;
         margin-bottom: 10px;
+        .error-tip {
+          line-height: 20px;
+          margin-bottom: -10px;
+        }
       }
     }
     .info-right {
@@ -497,11 +499,14 @@ export default {
     text-align: center;
     padding-top: 10px;
     .el-button {
-      width: 45%;
+      width: 110px;
     }
     .el-button--primary {
       background-color: #0c70f8;
       border-color: #0c70f8;
+    }
+    .el-button+.el-button {
+      margin-left: 12px;
     }
   }
   //弹窗

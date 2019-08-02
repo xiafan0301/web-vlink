@@ -218,7 +218,9 @@
         <ul class="rlcx_r_list clearfix" v-if="dataList && dataList.length > 0">
           <li v-for="(item, index) in dataList" :key="'tzsr_list_' + index" @click="goToDetail(item, index)">
             <div>
-              <img :src="item.subStoragePath" :alt="item.deviceName">
+              <img :src="item.subStoragePath" :alt="item.deviceName" 
+                @dragstart="dragStart($event, item)" @dragend="dragEnd"
+                draggable="true" style="cursor: move;">
               <div>
                 <h4>检索资料</h4>
                 <div><i class="vl_icon rlcx_sj"></i>{{item.shotTime}}</div>
@@ -366,10 +368,26 @@ export default {
     this.getMapGETmonitorList();
   },
   methods: {
+    // 拖拽开始
+    dragStart (ev, item) {
+      if (item && item.subStoragePath) {
+         if (!ev) { ev = window.event; }
+        ev.dataTransfer.setData('upload_pic_url', item.subStoragePath); // 设置属性dataTransfer   两个参数   1：key   2：value
+      }
+    },
+    dragEnd () {
+      // console.log('drag end')
+      // this.dragActiveObj = null;
+    },
+
     uploadEmit (data) {
       console.log('uploadEmit data', data);
       if (data && data.path) {
         this.curImageUrl = data.path;
+      } else {
+        this.curImageUrl = null;
+        this.hqtzLoading = false;
+        this.uploadTZObj = {};
       }
     },
     // 获取特征
@@ -393,7 +411,7 @@ export default {
         bussType: 'person', // vehicle机动车、face人脸、person人体
         url: this.curImageUrl
       }).then(jRes => {
-        if (jRes && jRes.data) {
+        if (jRes && jRes.data && this.curImageUrl) {
           this.uploadTZObj = {
             sex: {active: true, value: jRes.data.sex},
             age: {active: true, value: jRes.data.age},
