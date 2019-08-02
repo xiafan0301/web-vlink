@@ -32,7 +32,7 @@
               <el-date-picker style="width: 236px;"
                 class="vl_date"
                 v-model="searchTime2[0]"
-                type="datetime"
+                type="datetime" time-arrow-control
                 align="left"
                 :editable="false"
                 :clearable="false"
@@ -41,7 +41,7 @@
               <el-date-picker style="width: 236px; margin-top: 10px"
                 class="vl_date vl_date_end"
                 v-model="searchTime2[1]"
-                type="datetime"
+                type="datetime" time-arrow-control
                 align="left"
                 :editable="false"
                 :clearable="false"
