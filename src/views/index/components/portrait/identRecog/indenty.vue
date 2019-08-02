@@ -8,7 +8,7 @@
       </div>
     </div>
     <div class="content_box">
-      <div class="left">
+      <div class="left_search">
         <div style="padding: 0 15px; height: 210px; text-align:center">
           <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit" :imgData="imgData"></div>
         </div>
@@ -120,19 +120,15 @@ export default {
       queryImgPath: null, // 从其他模块传过来的图片
       isSearchLoading: false, // 搜索条件加载中
       uploadClear: {},
-      imgData: {},
+      imgData: null,
     }
   },
   created () {
     const imgPath = this.$route.query.path;
     if (imgPath) {
       this.imgData = Object.assign({}, {path: imgPath});
-      // this.imgData = {
-      //   path: imgPath
-      // };
+
       this.queryImgPath = imgPath;
-      // this.fileList.push({url: imgPath});
-      // this.curImageUrl = imgPath;
     }
   },
   methods: {
@@ -143,8 +139,8 @@ export default {
         this.uploadImgId = data.uid;
       } else {
         this.uploadImgId = null;
-        this.fileList = [];
-        this.curImageUrl = null;
+        // this.fileList = [];
+        // this.curImageUrl = null;
       }
     },
    
@@ -217,7 +213,7 @@ export default {
     display: flex;
     height: 100%;
     padding-top: 50px;
-    .left {
+    .left_search {
       width: 265px;
       height: 100%;
       box-shadow: 2px 0px 5px 0px rgba(131,131,131,0.28);
@@ -227,58 +223,6 @@ export default {
         height: 1px;
         border-bottom: 1px solid #D3D3D3;
         margin: 20px 0;
-      }
-      .upload_box {
-        text-align: center;
-        width: 225px;
-        height: 225px;
-        overflow: hidden;
-        &.hidden /deep/ .el-upload--picture-card {
-          display: none!important;
-        }
-        /deep/ .el-upload-list__item {
-          width: 225px;
-          height: 225px;
-        }
-        /deep/ .el-upload {
-          width: 225px;
-          height: 225px;
-          position: relative;
-          .upload_text {
-            line-height: 0;
-            color: #999999;
-            margin-top: -60px;
-          }
-          
-          .history {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 30px;
-            line-height: 30px;
-            width: 100%;
-            color: #FFFFFF;
-            font-size: 12px;
-            background:rgba(12,112,248,1);
-            border-radius:0px 0px 5px 5px;
-            display: none;
-          }
-          i {
-            margin-top: 40px;
-            margin-left: 15px;
-            width: 120px;
-            height: 120px;
-          }
-          &:hover {
-            background: #2981F8;
-            .upload_text {
-              color: #ffffff;
-            }
-            .history {
-              display: block;
-            }
-          }
-        }
       }
       .left_form {
         width: 100%;
@@ -406,28 +350,6 @@ export default {
   }
   .reset_btn, .select_btn {
     width: 100px;
-  }
-}
-.history-pic-dialog {
-  .his-pic-box {
-    width: 100%;
-    height: 500px !important;
-    .his-pic-item {
-      float: left;
-      width: 142px;
-      height: 142px;
-      border: 2px solid #FFFFFF;
-      margin-right: 10px;
-      margin-bottom: 10px;
-      cursor: pointer;
-      img {
-        width: 100%;
-        height: 100%;
-      }
-    }
-    .active {
-      border-color: #0C70F8;
-    }
   }
 }
 

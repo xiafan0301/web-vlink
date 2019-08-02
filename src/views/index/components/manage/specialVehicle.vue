@@ -122,9 +122,7 @@
                   <span v-show="item.ownerName">车主{{item.ownerName && item.ownerName}}<span v-show="item.ownerIdCard">({{item.ownerIdCard}})</span></span>
                   <!-- <span v-show="item.ownerIdCard">({{item.ownerIdCard}})</span> -->
                 </div>
-                <div class="info_list">
-                  <span v-show="item.desci" :title="item.desci">{{item.desci && item.desci}}</span>
-                </div>
+                
                 <div class="info_list group_list" v-show="item.groupList && item.groupList.length > 0">
                   <span v-show="index < 2" v-for="(item, index) in item.groupList" :key="index" :title="item.groupName">{{item.groupName}}</span>
                   <template v-if="item.groupList.length > 2">
@@ -145,6 +143,9 @@
                       </el-popover>
                     </div>
                   </template>
+                </div>
+                <div class="info_list">
+                  <span v-show="item.desci" :title="item.desci">{{item.desci && item.desci}}</span>
                 </div>
               </div>
             </li>
