@@ -27,7 +27,7 @@
           </div>
         </div>
         <div class="list-box">
-          <div class="list-item" v-for="item in dataList" :key="item.uid" @click="onOpenDetail(item)">
+          <div class="list-item" v-for="(item, index) in dataList" :key="item.uid" @click="onOpenDetail(item, index)">
             <img :src="item.subStoragePath" alt="">
             <p class="time"><i></i>{{item.shotTime}}</p>
             <p class="address"><i></i>抓拍设备:{{item.deviceName}}</p>
@@ -46,7 +46,7 @@
         <div is="noResult" :isInitPage="isInitPage"></div>
       </template>
     </div>
-    <el-dialog
+    <!-- <el-dialog
       :visible.sync="strucDetailDialog"
       class="struc_detail_ycxc_dialog"
       :close-on-click-modal="false"
@@ -135,7 +135,6 @@
       </div>
       <div class="struc-list">
         <swiper :options="swiperOption" ref="mySwiper">
-          <!-- slides -->
           <swiper-slide v-for="(item, index) in allDataList" :key="index + 'isgm'">
             <div class="swiper_img_item" :class="{'active': item.uid === curImgIndex}" @click="imgListTap(item)">
               <img style="display: block; width: 100%; height: .88rem;" :src="item.subStoragePath" alt="">
@@ -145,10 +144,12 @@
           <div class="swiper-button-next" slot="button-next"></div>
         </swiper>
       </div>
-    </el-dialog>
+    </el-dialog> -->
+    <div is="vehicleDetail" :detailData="detailData"></div>
   </div>
 </template>
 <script>
+import vehicleDetail from '../common/vehicleDetail.vue';
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import noResult from '@/components/common/noResult.vue';
@@ -157,10 +158,12 @@ import { getNightVehicleRecordList, getSnapDetail  }from "@/views/index/api/api.
 export default {
   components: {
     noResult,
+    vehicleDetail,
     vlBreadcrumb
   },
   data () {
     return {
+      detailData: null,
       isInitPage: false,
       sortType: 1, // 1为时间排序， 2为监控排序
       timeSortType: false, // true为时间降序， false为时间升序
@@ -381,36 +384,54 @@ export default {
       this.pagination.pageNum = page;
       this.getList();
     },
+    getStrucParams () {
+
+    },
     /**
      * 打开抓拍弹框
      */
-    onOpenDetail (obj) {
-      console.log('obj', obj)
-      this.numberTypeList.map(item => {
-        if (item.enumField === obj.plateClass) {
-          obj.plateClass = item.enumValue;
-        }
-      });
-      this.sturcDetail = obj;
-      this.curImgIndex = obj.uid;
+    onOpenDetail (obj, index) {
+      // console.log('obj', obj)
+      // this.numberTypeList.map(item => {
+      //   if (item.enumField === obj.plateClass) {
+      //     obj.plateClass = item.enumValue;
+      //   }
+      // });
+      this.queryObj['vehicleNumber'] = this.$route.query.vehicleNumber;
+      this.queryObj['order'] = this.pagination.order;
+      this.queryObj['orderBy'] = this.pagination.orderBy;
 
-      let currentIndex;
-      this.allDataList.map((item, index) => {
-        if (item.uid === obj.uid) {
-          currentIndex = index;
-        }
-      })
 
-      this.strucDetailDialog = true;
+      this.detailData = {
+        type: 8, // 8夜间行车
+        params: this.queryObj, // 查询参数
+        list: this.dataList, // 列表
+        index: index, // 第几个
+        pageSize: this.pagination.pageSize,
+        total: this.pagination.total,
+        pageNum: this.pagination.pageNum
+      }
 
-      let _this = this;
+      // this.sturcDetail = obj;
+      // this.curImgIndex = obj.uid;
 
-      _this.$nextTick(() => {
-        _this.getAllList();
-        _this.initMap(obj);
+      // let currentIndex;
+      // this.allDataList.map((item, index) => {
+      //   if (item.uid === obj.uid) {
+      //     currentIndex = index;
+      //   }
+      // })
 
-        _this.$refs.mySwiper.slideTo(currentIndex);
-      })
+      // this.strucDetailDialog = true;
+
+      // let _this = this;
+
+      // _this.$nextTick(() => {
+      //   _this.getAllList();
+      //   _this.initMap(obj);
+
+      //   _this.$refs.mySwiper.slideTo(currentIndex);
+      // })
     },
     /**
      * 关闭抓拍弹框

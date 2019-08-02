@@ -159,3 +159,14 @@ export function delUser(data) {
     method: 'delete'
   });
 }
+/**
+ * 获取所有省市区县信息
+ * @param {*} data 
+ */
+export function getAreaList(pid) {
+  return request({
+    url: '/area-service/area-list/'+ pid,
+    mode: 'user',
+    method: 'get'
+  });
+}
