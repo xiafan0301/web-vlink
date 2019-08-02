@@ -32,8 +32,7 @@
           </li>
           <li>
             <div><span>出入城卡口</span><span>{{bayonetDetail.isEnterPoint === 1 ? '入城卡口' : bayonetDetail.isEnterPoint === 2 ? '出城卡口' : bayonetDetail.isEnterPoint === 3 ? '其他' : ''}}</span></div>
-            <div><span>卡口地址</span><span>{{bayonetDetail.bayonetAddress || '无'}}</span></div>
-            
+            <div><span>卡口地址</span><span :title="bayonetDetail.bayonetAddress">{{bayonetDetail.bayonetAddress | strCutWithLen(32)}}</span></div>
           </li> 
         </ul>
       </div>

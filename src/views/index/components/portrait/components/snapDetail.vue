@@ -141,7 +141,7 @@
             <!-- <span>抓拍信息</span> -->
           </div>
           <!-- <div class="operate_btn" @click="spinToRecog()">身份确认</div> -->
-          <div class="operate_btn margin_btn" @click="spinToGJFX()">轨迹分析</div>
+          <div class="operate_btn" @click="spinToGJFX()">轨迹分析</div>
           <div class="operate_btn margin_btn" @click="spinToLJD()">落脚点分析</div>
           <div class="operate_btn margin_btn" @click="spinToControl()">新建布控</div>
         </div>
@@ -389,6 +389,12 @@ export default {
 };
 </script>
 <style lang="scss">
+html {font-size: 100px;}
+  @media screen and (min-width: 960px) and (max-width: 1119px) {html {font-size: 60px !important;}}
+  @media screen and (min-width: 1200px) and (max-width: 1439px) {html {font-size: 70px !important;}}
+  @media screen and (min-width: 1440px) and (max-width: 1679px) {html {font-size: 80px !important;}}
+  @media screen and (min-width: 1680px) and (max-width: 1919px) {html {font-size: 90px !important;}}
+  @media screen and (min-width: 1920px) {html {font-size: 100px !important;} }
 .snap_dialog {
   height: 100%;
   .struc_detail_dialog_comp {

@@ -223,7 +223,7 @@
                 </vue-scroll>
                 </div>
 
-                <div v-if="sturcDetail.alarmFeature.featureName == '机动车特征值'">
+                <div v-if="sturcDetail.alarmFeature.featureName == '车辆特征值'">
                   <vue-scroll>
                 <div class="struc_cdu_line" v-if="sturcDetail.alarmFeature.featureValue.plateNo">
                   <p>

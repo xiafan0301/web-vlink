@@ -139,7 +139,7 @@ export default {
           input3:[{
              required: true, message: '请输入正确的车牌号码', trigger: 'blur'
           },{
-            validator: 'checkPlateNumber',
+            validator: checkPlateNumber,
             trigger: 'blur'
             }]
        },
@@ -149,19 +149,20 @@ export default {
       evData: [],
       pickerOptions: {
           disabledDate (time) {
-            let date = new Date();
-            let y = date.getFullYear();
-            let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
-            let d = date.getDate();
-            let threeMonths = '';
-            let start = '';
-            if (parseFloat(m) >= 2) {
-              start = y + '-' + (m - 1) + '-' + d;
-            } else {
-              start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
-            }
-            threeMonths = new Date(start).getTime();
-            return time.getTime() > Date.now() || time.getTime() < threeMonths;
+            // let date = new Date();
+            // let y = date.getFullYear();
+            // let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
+            // let d = date.getDate();
+            // let threeMonths = '';
+            // let start = '';
+            // if (parseFloat(m) >= 2) {
+            //   start = y + '-' + (m - 1) + '-' + d;
+            // } else {
+            //   start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
+            // }
+            // threeMonths = new Date(start).getTime();
+             return time.getTime() > Date.now();
+            // return time.getTime() > Date.now() || time.getTime() < threeMonths;
           }
         },
     };

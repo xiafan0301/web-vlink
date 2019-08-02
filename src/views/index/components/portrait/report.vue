@@ -156,6 +156,7 @@
                 :before-upload="befupload"
                 :on-success="uploadPicSuccess"
                 :limit="1"
+                :on-remove="handleRemove"
                 :data="{projectType: 2}"
                 list-type="picture-card">
               <i class="vl_icon vl_icon_control_14"></i>
@@ -238,6 +239,9 @@ export default {
     this.selectDataList();
   },
   methods: {
+    handleRemove () {
+      this.$refs['uploadPic'].clearFiles()
+    },
     uploadPicSuccess (file) {
       this.dialogImageUrl = file.data.sysCommonImageInfo.fileFullPath;
       this.$message.success('上传成功！');

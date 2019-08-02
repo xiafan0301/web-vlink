@@ -18,7 +18,7 @@
               :value="item.uid">
             </el-option>
           </el-select>
-          <el-select class="full" v-model="searchData.sex" placeholder="请选择性别">
+          <el-select class="full" v-model="searchData.sex" placeholder="请选择性别" clearable>
             <el-option
               v-for="item in sexList"
               :key="item.value"
@@ -26,7 +26,7 @@
               :value="item.value">
             </el-option>
           </el-select>
-          <el-select class="full" v-model="searchData.ageGroup" placeholder="请选择年龄段">
+          <el-select class="full" v-model="searchData.ageGroup" placeholder="请选择年龄段" clearable>
             <el-option
               v-for="item in ageGroupList"
               :key="item.value"
