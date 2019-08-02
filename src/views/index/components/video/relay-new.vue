@@ -32,7 +32,8 @@
                 <el-input v-model="xjPlateNo" placeholder="请输入车牌号码"></el-input>
               </div>
               <div class="task_mtl_u" v-else>
-                <el-upload
+                <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit"></div>
+                <!-- <el-upload
                   class="vid_relay_upload"
                   :show-file-list="false"
                   accept="image/*"
@@ -52,25 +53,42 @@
                 <p @click="showHistoryPic(1)">从上传记录中选择</p>
                 <div v-show="curImageUrl" class="del_icon">
                   <i class="el-icon-delete" @click="delPic(1)"></i>
-                </div>
+                </div> -->
               </div>
             </div>
             <div class="relay_task_mtr">
               <div v-if="xjType === 1 && uploadPersonObj">
                 <h3>图片信息：</h3>
                 <ul>
-                  <li><span>性别：</span>{{uploadPersonObj.sex}}</li>
-                  <li><span>年龄段：</span>{{uploadPersonObj.age}}</li>
-                  <li><span>是否戴眼镜：</span>{{uploadPersonObj.glasses}}</li>
-                  <li><span>是否戴帽子：</span>{{uploadPersonObj.hat}}</li>
-                  <li><span>是否戴口罩：</span>{{uploadPersonObj.mask}}</li>
-                  <li><span>发型：</span>{{uploadPersonObj.hair}}</li>
-                  <li><span>上身款式：</span>{{uploadPersonObj.upperType}}</li>
-                  <li><span>上身颜色：</span>{{uploadPersonObj.upperColor}}</li>
-                  <li><span>下身款式：</span>{{uploadPersonObj.bottomType}}</li>
-                  <li><span>下身颜色：</span>{{uploadPersonObj.bottomColor}}</li>
-                  <li><span>是否抱小孩：</span>{{uploadPersonObj.baby}}</li>
-                  <li><span>是否拎东西：</span>{{uploadPersonObj.bag}}</li>
+                  <li><span>性别：</span>{{uploadPersonObj.sex ? uploadPersonObj.sex : '-'}}</li>
+                  <li><span>年龄段：</span>{{uploadPersonObj.age ? uploadPersonObj.age : '-'}}</li>
+                  <li><span>发型：</span>{{uploadPersonObj.hair ? uploadPersonObj.hair : '-'}}</li>
+                  <li><span>戴眼镜：</span>{{uploadPersonObj.glasses ? uploadPersonObj.glasses : '-'}}</li>
+                  <li><span>戴帽子：</span>{{uploadPersonObj.hat ? uploadPersonObj.hat : '-'}}</li>
+                  <li><span>戴口罩：</span>{{uploadPersonObj.mask ? uploadPersonObj.mask : '-'}}</li>
+                  <li><span>抱小孩：</span>{{uploadPersonObj.baby ? uploadPersonObj.baby : '-'}}</li>
+                  <li><span>拎东西：</span>{{uploadPersonObj.bag ? uploadPersonObj.bag : '-'}}</li>
+                  <li><span>上身款式：</span>{{uploadPersonObj.upperType ? uploadPersonObj.upperType : '-'}}</li>
+                  <li><span>上身颜色：</span>{{uploadPersonObj.upperColor ? uploadPersonObj.upperColor : '-'}}</li>
+                  <li><span>下身款式：</span>{{uploadPersonObj.bottomType ? uploadPersonObj.bottomType : '-'}}</li>
+                  <li><span>下身颜色：</span>{{uploadPersonObj.bottomColor ? uploadPersonObj.bottomColor : '-'}}</li>
+                </ul>
+              </div>
+              <div v-if="xjType === 2 && uploadPersonObj">
+                <h3>图片信息：</h3>
+                <ul>
+                  <li><span>性别：</span>{{uploadPersonObj.sex ? uploadPersonObj.sex : '-'}}</li>
+                  <li><span>年龄段：</span>{{uploadPersonObj.age ? uploadPersonObj.age : '-'}}</li>
+                  <li><span>发型：</span>{{uploadPersonObj.hair ? uploadPersonObj.hair : '-'}}</li>
+                  <li><span>戴眼镜：</span>{{uploadPersonObj.glasses ? uploadPersonObj.glasses : '-'}}</li>
+                  <li><span>戴帽子：</span>{{uploadPersonObj.hat ? uploadPersonObj.hat : '-'}}</li>
+                  <li><span>戴口罩：</span>{{uploadPersonObj.mask ? uploadPersonObj.mask : '-'}}</li>
+                  <li><span>抱小孩：</span>{{uploadPersonObj.baby ? uploadPersonObj.baby : '-'}}</li>
+                  <li><span>拎东西：</span>{{uploadPersonObj.bag ? uploadPersonObj.bag : '-'}}</li>
+                  <li><span>上身款式：</span>{{uploadPersonObj.upperType ? uploadPersonObj.upperType : '-'}}</li>
+                  <li><span>上身颜色：</span>{{uploadPersonObj.upperColor ? uploadPersonObj.upperColor : '-'}}</li>
+                  <li><span>下身款式：</span>{{uploadPersonObj.bottomType ? uploadPersonObj.bottomType : '-'}}</li>
+                  <li><span>下身颜色：</span>{{uploadPersonObj.bottomColor ? uploadPersonObj.bottomColor : '-'}}</li>
                 </ul>
               </div>
             </div>
@@ -141,37 +159,18 @@
         <el-button size="small" @click="xjClose">&nbsp;&nbsp;&nbsp;&nbsp;取&nbsp;&nbsp;消&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
       </div>
     </div>
-    <!--历史记录弹窗-->
-    <el-dialog
-        :visible.sync="historyPicDialog"
-        class="history-pic-dialog"
-        :close-on-click-modal="false"
-        top="4vh"
-        title="最近上传的图片">
-      <div style="text-align: center;font-size: 20px;" v-if="loadingHis"><i class="el-icon-loading"></i></div>
-      <vue-scroll style="height: 4.6rem !important;" v-else-if="historyPicList.length">
-        <div style="float: left;width: 1.38rem;height: 1.38rem;border: 3px solid #FFFFFF;
-          margin-right: .2rem; margin-bottom: .2rem; cursor: pointer;" 
-          class="his-pic-item" :style="{'border-color': item.checked ? '#0C70F8' : '#FFFFFF'}" v-for="item in historyPicList" :key="item.id" @click="chooseHisPic(item)">
-          <img style="width: 100%; height: 100%;" :src="item.path" alt="">
-        </div>
-        <div style="clear: both;"></div>
-      </vue-scroll>
-      <p v-else>暂无历史记录</p>
-      <div slot="footer">
-        <el-button @click="historyPicDialog = false">取消</el-button>
-        <el-button type="primary" @click="addHisToImg()" :disabled="choosedHisPic.length === 0">确认</el-button>
-      </div>
-    </el-dialog>
   </div>
 </template>
 <script>
 import {ajaxCtx} from '@/config/config';
 import {mapXupuxian} from '@/config/config.js';
-import { apiAreaServiceDeviceList, getAllMonitorList, getAllBayonetList } from "@/views/index/api/api.base.js";
-import {JtcGETAppendixInfoList, addPersonVideoContinue, addVhicleVideoContinue} from '@/views/index/api/api.judge.js'
+import vlUpload from '@/components/common/upload.vue';
+import {apiAreaServiceDeviceList, getAllMonitorList, getAllBayonetList} from "@/views/index/api/api.base.js";
+import {JtcGETAppendixInfoList, addPersonVideoContinue, addVhicleVideoContinue} from '@/views/index/api/api.judge.js';
+import {getPhotoAnalysis} from "@/views/index/api/api.analysis.js"; // 车辆特征检索接口
 import {getPicRecognize} from '../../api/api.structuring.js';
 export default {
+  components: {vlUpload},
   data () {
     return {
       /* 新建任务 begin */
@@ -195,20 +194,11 @@ export default {
 
       xjDesVal: '',
 
-      uploadAcion: ajaxCtx.base + '/new',
+      uploadPersonObj: null,
+      uploadVehicleObj: null,
       curImageUrl: '', // 当前上传的图片 人员
       curImageUrl2: '', // 当前上传的图片 车辆
-      uploading: false, // 是否上传中
-      uploadFileList: [],
-      uploadPersonObj: null,
-      uploadVhicleObj: null,
-      imgData: {
-        imgOne: null,
-        imgTwo: null
-      },
-      historyPicList: [], // 上传历史记录
-      historyPicDialog: false,
-      loadingHis: false,
+      uploadClear: {}
       /* 新建任务 end */
     }
   },
@@ -419,48 +409,16 @@ export default {
     /* 新建任务 */
     xjTypeChanged (type) {
     },
-    // 上传图片
-    beforeAvatarUpload (file) {
-      const isJPG = (file.type === 'image/jpeg' || file.type === 'image/png');
-      const isLt = file.size / 1024 / 1024 < 100;
-      if (!isJPG) {
-        this.$message.error('只能上传 JPG / PNG 格式图片!');
-      }
-      if (!isLt) {
-        this.$message.error('上传图片大小不能超过 100MB!');
-      }
-      this.uploading = true;
-      return isJPG && isLt;
-    },
-    uploadSucess (response, file, fileList) {
-      this.uploading = false;
-      this.compSim = '';
-      this.compSimWord = '';
-      if (response && response.data) {
-        let oRes = response.data;
-        if (oRes) {
-          let x = {
-            cname: oRes.fileName, // 附件名称 ,
-            contentUid: this.$store.state.loginUser.uid,
-            // desci: '', // 备注 ,
-            filePathName: oRes.fileName, // 附件保存名称 ,
-            fileType: 1, // 文件类型 ,
-            imgHeight: oRes.fileHeight, // 图片高存储的单位位px ,
-            imgSize: oRes.fileSize, // 图片大小存储的单位位byte ,
-            imgWidth: oRes.fileWidth, //  图片宽存储的单位位px ,
-            // otherFlag: '', // 其他标识 ,
-            path: oRes.fileFullPath, // 附件路径 ,
-            // path: oRes.path,
-            thumbnailName: oRes.thumbnailFileName, // 缩略图名称 ,
-            thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
-            // uid: '' //  附件标识
-          };
-          this.getPicInfo(x);
-          this.imgData.imgOne = x;
-          this.curImageUrl = x.path;
+    uploadEmit (data) {
+      if (data) {
+        this.getPicInfo(data);
+      } else {
+        if (this.xjType === 1) {
+          this.uploadPersonObj = null;
+        } else if (this.xjType === 2) {
+          this.uploadVehicleObj = null;
         }
       }
-      this.uploadFileList = fileList;
     },
     getPicInfo (data) {
       if (this.xjType === 1) {
@@ -477,10 +435,18 @@ export default {
         }).catch(() => {
         })
       }
-    },
-    handleError () {
-      this.uploading = false;
-      this.$message.error('上传失败')
+      if (this.xjType === 2) {
+        getPhotoAnalysis(data.path).then(jRes => {
+          console.log('getPhotoAnalysis', jRes);
+          if (jRes && jRes.data && jRes.data.length > 0) {
+            this.uploadVehicleObj = Object.assign(jRes.data[0], {
+              img_path: data.path,
+              img_thumbnailPath: data.thumbnailPath
+            });
+          }
+        }).catch(() => {
+        })
+      }
     },
     delPic (index) {
       this.compSim = '';
@@ -492,48 +458,6 @@ export default {
         this.uploadFileList2.splice(0, 1);
         this.curImageUrl2 = '';
       }
-    },
-    showHistoryPic (index) {
-      this.curIndex = index;
-      this.loadingHis = true;
-      this.historyPicDialog = true;
-      let params = {
-        userId: this.$store.state.loginUser.uid,
-        fileType: 1
-      }
-      JtcGETAppendixInfoList(params).then(res => {
-        if (res) {
-          this.loadingHis = false;
-          res.data.forEach(x => x.checked = false);
-          this.historyPicList = res.data;
-        }
-      }).catch(() => {
-        this.historyPicDialog = false;
-      })
-    },
-    chooseHisPic (item) {
-      this.historyPicList.forEach(x => {
-        x.checked = false;
-      })
-      item.checked = true;
-    },
-    addHisToImg () {
-      this.historyPicDialog = false;
-      let _ids = [];
-      this.choosedHisPic.forEach(x => {
-        _ids.push(x.uid)
-        if (this.xjType === 1) {
-          this.curImageUrl = x.path;
-          this.imgData.imgOne = x;
-        } else {
-          this.imgData.imgTwo = x;
-          this.curImageUrl2 = x.path;
-        }
-      })
-      let _obj = {
-        appendixInfoIds: _ids.join(',')
-      }
-      // JtcPUTAppendixsOrder(_obj);
     },
     xjSubmit () {
       if (this.xjType === 1) {
@@ -868,14 +792,5 @@ export default {
   width: 100%; height: 50px; line-height: 48px;
   text-align: center;
   background-color: #fff;
-}
-</style>
-<style lang="scss">
-.vid_relay_upload {
-  width: 200px; height: 200px;
-  > .el-upload--picture-card {
-    width: 200px; height: 200px; line-height: 200px;
-    > img { height: 100%; width: 100%; }
-  }
 }
 </style>
