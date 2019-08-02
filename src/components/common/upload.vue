@@ -52,7 +52,7 @@
 </template>
 <script>
 import {ajaxCtx} from '@/config/config';
-import {JtcGETAppendixInfoList} from '@/views/index/api/api.judge.js';
+import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList} from '@/views/index/api/api.judge.js';
 export default {
   /**
    * emit事件说明
@@ -166,6 +166,14 @@ export default {
           };
           this.picSubmit();
           // this.curImageUrl = x.path;
+          if (this.$store.state.loginUser && this.$store.state.loginUser.uid) {
+            this.currentImg.contentUid = this.$store.state.loginUser.uid;
+            JtcPOSTAppendixInfo(this.currentImg).then(jRes => {
+              if (jRes) {
+                this.currentImg['uid'] = jRes.data;
+              }
+            })
+          }
         }
       }
     },
