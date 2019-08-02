@@ -236,6 +236,7 @@ export default {
   components: { vlBreadcrumb, vehicleDetail, vlUpload },
   data() {
     return {
+      uploadClear: {},
       detailData: null,
       selectType: 1,
       sortType: 1, // 1为时间排序， 2为监控排序
@@ -361,6 +362,7 @@ export default {
     
     /*重置菜单的数据 */
     resetMenu() {
+      this.uploadClear = {};
       // 置空数据数量
       this.total = 0;
       this.pageNum = 1;
