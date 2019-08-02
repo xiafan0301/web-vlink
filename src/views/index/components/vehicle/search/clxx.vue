@@ -22,7 +22,7 @@
                 v-model="searchData.startTime"
                 type="date"
                 :picker-options="startDateOpt"
-                placeholder="开始时间"
+                placeholder="请选择开始时间"
                 :clearable="false"
                 format="yyyy-MM-dd HH:mm:ss">
             </el-date-picker>
@@ -45,7 +45,7 @@
                 v-model="searchData.endTime"
                 type="date"
                 :picker-options="endDateOpt"
-                placeholder="结束时间"
+                placeholder="请选择结束时间"
                 :clearable="false"
                 format="yyyy-MM-dd HH:mm:ss"
                 @change="dateChange">

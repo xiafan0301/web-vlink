@@ -431,8 +431,9 @@ export default {
           }
           let  sVideo = '';
           if (obj.storagePath) {
-            sVideo = '<div><img class="bigImg" src="' + obj.storagePath + '" controls></img></div>' +
-              '<p>' + obj.shotTime + '</p>';
+            /* sVideo = '<div><img class="bigImg" src="' + obj.storagePath + '" controls></img></div>' +
+              '<p>' + obj.shotTime + '</p>'; */
+            sVideo = '<p>' + obj.shotTime + '</p>';
           }
           new window.AMap.Marker({ // 添加自定义点标记
             map: this.clgjMap,
@@ -771,6 +772,15 @@ export default {
     > img {
       width: 100%; height: 100%;
     }
+  }
+  > p {
+    position: absolute; bottom: 17px; left: 95%; z-index: 1;
+    width: 150px; height: 20px; line-height: 20px;
+    background-color: #0C70F8;
+    border-radius: 10px;
+    color: #fff; font-size: 12px;
+    text-align: center;
+    &:hover { z-index: 2; }
   }
   &.cl_report_gj_qz {
     width: 80px; height: 80px;
