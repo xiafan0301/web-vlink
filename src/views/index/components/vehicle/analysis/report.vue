@@ -312,7 +312,7 @@ export default {
       mapPicShow: false,
       mapPicShow2: false,
       searchForm: {
-        plateNo: '湘A757BW', // 湘A757BW
+        plateNo: '', // 湘A757BW
         time: [new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000), new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000)]
         // time: [new Date(new Date().getTime() - 5 * 24 * 60 * 60 * 1000), new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000)]
       },
