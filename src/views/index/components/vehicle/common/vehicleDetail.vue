@@ -45,7 +45,7 @@
                 <span>车牌类型</span>
                 <span :title="sturcDetail.plateClass">{{dicFormater(45, sturcDetail.plateClass)}}</span>
               </li>
-              <li v-if="type === 3 && sturcDetail.vehicleStyles"><span>车辆分组</span><span :title="sturcDetail.vehicleStyles">{{sturcDetail.vehicleStyles}}</span></li>
+              <li v-if="type === 3 && sturcDetail.vehicleType"><span>车辆分组</span><span :title="sturcDetail.vehicleType">{{sturcDetail.vehicleType.join(',')}}</span></li>
               <!-- 套牌依据 -->
               <!-- li v-if="type === 5"><span>号牌颜色：</span><span>{{sturcDetail.plateColor}}</span></<!-->
               <li v-if="type === 5"><span>套牌依据</span><span :title="sturcDetail.fakeReason">{{sturcDetail.fakeReason}}</span></li>
@@ -165,17 +165,20 @@ export default {
     setDetailObj (item) {
       if (this.type === 5) {
         // 套牌车
-        if (item && item.struVehicle) {
-          let _ots = {
-            '1': '同号车身颜色不同',
-            '2': '同号车辆类型不同',
-            '3': '同号车辆品牌不同',
-            '4': '同号短时异地出没'
-          };
-          this.sturcDetail = Object.assign(JSON.parse(item.struVehicle), {
-            fakeReason: _ots[item.fakePlateType + '']
-          });
-        }
+        this.sturcDetail = Object.assign(item.vehicleDto, {
+          fakeReason: item.fakeReason
+        });
+        // if (item && item.struVehicle) {
+        //   let _ots = {
+        //     '1': '同号车身颜色不同',
+        //     '2': '同号车辆类型不同',
+        //     '3': '同号车辆品牌不同',
+        //     '4': '同号短时异地出没'
+        //   };
+        //   this.sturcDetail = Object.assign(JSON.parse(item.struVehicle), {
+        //     fakeReason: _ots[item.fakePlateType + '']
+        //   });
+        // }
       } else {
         this.sturcDetail = item;
       }
