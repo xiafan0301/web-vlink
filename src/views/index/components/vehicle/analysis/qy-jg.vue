@@ -120,14 +120,18 @@
             <img class="bigImg"  :src="sturcDetail.subStoragePath" alt="">
             <span>抓拍图</span>
           </div>
-          <div class="struc_c_d_box">
-            <video id="capVideo" :src="sturcDetail.videoPath"></video>
-            <div class="play_btn" @click="videoTap" v-show="!playing">
-              <i class="vl_icon vl_icon_judge_01" v-if="playing"></i>
-              <i class="vl_icon vl_icon_control_09" v-else></i>
+          <div class="struc_c_d_box" style="float: left;" v-if="playerData">
+            <div is="flvplayer" :oData="playerData"
+                 :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
             </div>
           </div>
-          <div class="download_btn"><a download="视频" :href="videoUrl"></a>下载视频</div>
+          <div class="struc_c_d_box struc_vid_empty" style="float: left;" v-else>
+            <div class="struc_vid_empty_c com_trans50_lt">
+              <div></div>
+              <p>暂无视频</p>
+            </div>
+          </div>
+          <p class="download_tips" v-show="sturcDetail.videoPath">下载提示：右键点击视频选择“另存视频为”即可下载视频。</p>
         </div>
       </div>
       <div class="struc-list">
@@ -155,6 +159,7 @@
     components: {vehicleBreadcrumb, flvplayer},
     data () {
       return {
+        playerData: null,
         firstIn: true,
         stucOrder: 2, // 1升序，2降序，3监控，4相似度
         swiperOption: {
@@ -198,6 +203,21 @@
       this.getTheList();
     },
     methods: {
+      // 设置视频数据
+      setPlayerData () {
+        if (this.sturcDetail.videoPath) {
+          this.playerData = {
+            type: 3,
+            title: this.sturcDetail.deviceName,
+            video: {
+              uid: new Date().getTime() + '',
+              downUrl: this.sturcDetail.videoPath
+            }
+          }
+        } else {
+          this.playerData = null;
+        }
+      },
       getTheList () {
         let params = this.$route.query;
         params.pageNum = this.pagination.pageNum;
@@ -253,6 +273,7 @@
         this.sturcDetail = data;
         this.strucCurTab = 1;
         this.drawPoint(data);
+        this.setPlayerData();
       },
       drawPoint (data) {
         this.$nextTick(() => {
@@ -281,24 +302,12 @@
           content: sConent
         })
       },
-      videoTap () {
-        let vDom = document.getElementById('capVideo')
-        if (this.playing) {
-          vDom.pause();
-        } else {
-          vDom.play();
-        }
-        vDom.addEventListener('ended', (e) => {
-          e.target.currentTime = 0;
-          this.playing = false;
-        })
-        this.playing = !this.playing;
-      },
       imgListTap (data, index) {
         this.playing = false;
         this.curImgIndex = index;
         this.sturcDetail = data;
         this.drawPoint(data);
+        this.setPlayerData();
       },
       closeDialog () {
         this.strucDetailDialog = false;
@@ -312,7 +321,7 @@
         if (e === 2) {
           this.drawPoint(this.sturcDetail)
         } else if (e === 3) {
-          this.videoUrl = document.getElementById('capVideo').src;
+          this.setPlayerData();
         }
       },
       leftActive () {
@@ -819,6 +828,12 @@
             width: 100%;
             height: 100%;
           }
+        }
+        .download_tips {
+          float: left;
+          width: 100%;
+          text-align: right;
+          padding-right: 40px; padding-top: 10px;
         }
       }
     }

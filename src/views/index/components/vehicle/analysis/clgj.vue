@@ -145,14 +145,18 @@
             <img class="bigImg"  :src="sturcDetail.subStoragePath" alt="">
             <span>抓拍图</span>
           </div>
-          <div class="struc_c_d_box">
-            <video id="capVideo" :src="sturcDetail.videoPath"></video>
-            <div class="play_btn" @click="videoTap" v-show="!playing">
-              <i class="vl_icon vl_icon_judge_01" v-if="playing"></i>
-              <i class="vl_icon vl_icon_control_09" v-else></i>
+          <div class="struc_c_d_box" style="float: left;" v-if="playerData">
+            <div is="flvplayer" :oData="playerData"
+                 :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
             </div>
           </div>
-          <div class="download_btn"><a download="视频" :href="videoUrl"></a>下载视频</div>
+          <div class="struc_c_d_box struc_vid_empty" style="float: left;" v-else>
+            <div class="struc_vid_empty_c com_trans50_lt">
+              <div></div>
+              <p>暂无视频</p>
+            </div>
+          </div>
+          <p class="download_tips" v-show="sturcDetail.videoPath">下载提示：右键点击视频选择“另存视频为”即可下载视频。</p>
         </div>
       </div>
       <div class="struc-list">
@@ -180,10 +184,12 @@
   import { cityCode, dataList } from "@/utils/data.js";
   import { InvestigateGetTrace } from "@/views/index/api/api.judge.js";
   import { getDiciData } from '@/views/index/api/api.js';
+  import flvplayer from '@/components/common/flvplayer.vue';
   export default {
-    components: {vlBreadcrumb},
+    components: {vlBreadcrumb, flvplayer},
     data() {
       return {
+        playerData: null,
         activeList: 0,
         serarchLoading: false,
         selectMapClear: '',
@@ -262,6 +268,21 @@
       this.getNumberTypeList();
     },
     methods: {
+      // 设置视频数据
+      setPlayerData () {
+        if (this.sturcDetail.videoPath) {
+          this.playerData = {
+            type: 3,
+            title: this.sturcDetail.deviceName,
+            video: {
+              uid: new Date().getTime() + '',
+              downUrl: this.sturcDetail.videoPath
+            }
+          }
+        } else {
+          this.playerData = null;
+        }
+      },
       // 获取号牌种类列表
       getNumberTypeList () {
         const type = dataList.numberType;
@@ -552,19 +573,6 @@
           this.amap.add([polyline]);
         })
       }, // 画线
-      videoTap () {
-        let vDom = document.getElementById('capVideo')
-        if (this.playing) {
-          vDom.pause();
-        } else {
-          vDom.play();
-        }
-        vDom.addEventListener('ended', (e) => {
-          e.target.currentTime = 0;
-          this.playing = false;
-        })
-        this.playing = !this.playing;
-      },
       showStrucInfo (data) {
         this.amap.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude])
         this.curImgIndex = this.curEvData.findIndex(x => x.deviceID === data.deviceID);
@@ -579,6 +587,7 @@
         this.sturcDetail = data;
         this.strucCurTab = 1;
         this.drawPoint(data);
+        this.setPlayerData();
       },
       drawPoint (data) {
         this.$nextTick(() => {
@@ -618,6 +627,7 @@
         this.sturcDetail = data;
         this.playing = false;
         this.drawPoint(data);
+        this.setPlayerData();
       }
     }
   };
@@ -1237,6 +1247,12 @@
         }
       }
       .struc_c_video {
+        .download_tips {
+          float: left;
+          width: 100%;
+          text-align: right;
+          padding-right: 40px; padding-top: 10px;
+        }
         .struc_c_d_box {
           background: #E9E7E8;
           height: 100%;

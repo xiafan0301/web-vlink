@@ -102,14 +102,18 @@
             <img :src="sturcDetail.subStoragePath" class="bigImg"  alt="">
             <span>抓拍图</span>
           </div>
-          <div class="struc_c_d_box">
-            <video id="capVideo" :src="sturcDetail.videoPath"></video>
-            <div class="play_btn" @click="videoTap" v-show="!playing">
-              <i class="vl_icon vl_icon_judge_01" v-if="playing"></i>
-              <i class="vl_icon vl_icon_control_09" v-else></i>
+          <div class="struc_c_d_box" style="float: left;" v-if="playerData">
+            <div is="flvplayer" :oData="playerData"
+                 :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
             </div>
           </div>
-          <div class="download_btn"><a class="is_active" @click="downloadVideo(sturcDetail.videoPath)">下载视频</a></div>
+          <div class="struc_c_d_box struc_vid_empty" style="float: left;" v-else>
+            <div class="struc_vid_empty_c com_trans50_lt">
+              <div></div>
+              <p>暂无视频</p>
+            </div>
+          </div>
+          <p class="download_tips" v-show="sturcDetail.videoPath">下载提示：右键点击视频选择“另存视频为”即可下载视频。</p>
         </div>
       </div>
       <div class="struc-list">
@@ -139,6 +143,7 @@
     components: {vehicleBreadcrumb, flvplayer},
     data () {
       return {
+        playerData: null,
         curInSur: null,
         swiperOption: {
           slidesPerView: 10,
@@ -190,16 +195,6 @@
               this.numberTypeList = res.data;
             }
           })
-      },
-      downloadVideo (path) {
-        console.log(path)
-        var wind = window.open(path, 'newwindow', 'height=800, width=1100, top=100, left=100, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=n o, status=no');
-        let domA = document.createElement('a');
-        domA.setAttribute('download', '下载视频');
-        domA.setAttribute('href', path);
-        wind.onload = () => {
-          console.log('fsfds')
-        }
       },
       gotoControl (data){
         this.$router.push({ name: 'control_library', query: {imgurl: data.subStoragePath, plateNo: data.plateNo} })
@@ -256,6 +251,22 @@
         });
         this.sturcDetail = this.curStrucList[0];
         this.drawPoint(this.sturcDetail);
+        this.setPlayerData();
+      },
+      // 设置视频数据
+      setPlayerData () {
+        if (this.sturcDetail.videoPath) {
+          this.playerData = {
+            type: 3,
+            title: this.sturcDetail.deviceName,
+            video: {
+              uid: new Date().getTime() + '',
+              downUrl: this.sturcDetail.videoPath
+            }
+          }
+        } else {
+          this.playerData = null;
+        }
       },
       drawPoint (data) {
         console.log(data)
@@ -285,19 +296,6 @@
           content: sConent
         })
       },
-      videoTap () {
-        let vDom = document.getElementById('capVideo')
-        if (this.playing) {
-          vDom.pause();
-        } else {
-          vDom.play();
-        }
-        vDom.addEventListener('ended', (e) => {
-          e.target.currentTime = 0;
-          this.playing = false;
-        })
-        this.playing = !this.playing;
-      },
       imgListTap (data, index) {
         this.numberTypeList.map(item => {
           if (item.enumField === data.plateClass) {
@@ -309,6 +307,7 @@
         this.sturcDetail = data;
         this.playing = false;
         this.drawPoint(data);
+        this.setPlayerData();
       }
     },
     watch: {
@@ -316,7 +315,7 @@
         if (e === 2) {
           this.drawPoint(this.sturcDetail)
         } else if (e === 3) {
-          this.videoUrl = document.getElementById('capVideo').src;
+          this.setPlayerData();
         }
       }
     }
@@ -679,6 +678,12 @@
           -webkit-box-shadow: 0 0 0!important;
           -moz-box-shadow: 0 0 0!important;
           box-shadow: 0 0 0!important;
+        }
+        .download_tips {
+          float: left;
+          width: 100%;
+          text-align: right;
+          padding-right: 40px; padding-top: 10px;
         }
       }
     }

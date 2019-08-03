@@ -260,14 +260,18 @@
             <img class="bigImg" :src="sturcDetail.subStoragePath" alt="">
             <span>抓拍图</span>
           </div>
-          <div class="struc_c_d_box">
-            <video id="capVideo" :src="sturcDetail.videoPath"></video>
-            <div class="play_btn" @click="videoTap" v-show="!playing">
-              <i class="vl_icon vl_icon_judge_01" v-if="playing"></i>
-              <i class="vl_icon vl_icon_control_09" v-else></i>
+          <div class="struc_c_d_box" style="float: left;" v-if="playerData">
+            <div is="flvplayer" :oData="playerData"
+                 :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
             </div>
           </div>
-          <div class="download_btn"><a download="视频" :href="videoUrl"></a>下载视频</div>
+          <div class="struc_c_d_box struc_vid_empty" style="float: left;" v-else>
+            <div class="struc_vid_empty_c com_trans50_lt">
+              <div></div>
+              <p>暂无视频</p>
+            </div>
+          </div>
+          <p class="download_tips" v-show="sturcDetail.videoPath">下载提示：右键点击视频选择“另存视频为”即可下载视频。</p>
         </div>
       </div>
       <div class="struc-list">
@@ -329,7 +333,7 @@
 </template>
 <script>
   import vlBreadcrumb from '@/components/common/breadcrumb.vue';
-//  import mapSelector from '@/components/common/mapSelector.vue';
+  import flvplayer from '@/components/common/flvplayer.vue';
   import { mapXupuxian,ajaxCtx } from "@/config/config.js";
   import { objDeepCopy, random14, formatDate } from "@/utils/util.js";
   import { cityCode } from "@/utils/data.js";
@@ -337,9 +341,10 @@
   import { MapGETmonitorList } from "@/views/index/api/api.map.js";
   import { getAllBayonetList } from "@/views/index/api/api.base.js";
   export default {
-    components: {vlBreadcrumb},
+    components: {vlBreadcrumb, flvplayer},
     data() {
       return {
+        playerData: null,
         filterDialog: false,
         showLeft: false,
         selectMapClear: '',
@@ -433,6 +438,21 @@
       }
     },
     methods: {
+      // 设置视频数据
+      setPlayerData () {
+        if (this.sturcDetail.videoPath) {
+          this.playerData = {
+            type: 3,
+            title: this.sturcDetail.deviceName,
+            video: {
+              uid: new Date().getTime() + '',
+              downUrl: this.sturcDetail.videoPath
+            }
+          }
+        } else {
+          this.playerData = null;
+        }
+      },
       delPic () {
         this.ruleForm.input3 = '';
       },
@@ -769,19 +789,6 @@
         this.operData();
         this.drawMapMarker(this.evData)
       }, // 更新画线
-      videoTap () {
-        let vDom = document.getElementById('capVideo')
-        if (this.playing) {
-          vDom.pause();
-        } else {
-          vDom.play();
-        }
-        vDom.addEventListener('ended', (e) => {
-          e.target.currentTime = 0;
-          this.playing = false;
-        })
-        this.playing = !this.playing;
-      },
       showStrucInfo (data, index) {
         this.amap.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude])
         this.curImgIndex = index;
@@ -789,6 +796,7 @@
         this.sturcDetail = data;
         this.strucCurTab = 1;
         this.drawPoint(data);
+        this.setPlayerData();
       },
       drawPoint (data) {
         this.$nextTick(() => {
@@ -821,6 +829,7 @@
         this.curImgIndex = index;
         this.sturcDetail = data;
         this.drawPoint(data);
+        this.setPlayerData();
       },
       mapZoomSet (val) {
         if (this.amap) {
@@ -1335,8 +1344,10 @@
       margin-top: 126px;
       color: #999;
     }
-    &:hover span {
-      color: #fff;
+    &:hover {
+      span {
+        color: #FFFFFF;
+      }
     }
   }
   .gjfx_upload {
@@ -1598,6 +1609,12 @@
         }
       }
       .struc_c_video {
+        .download_tips {
+          float: left;
+          width: 100%;
+          text-align: right;
+          padding-right: 40px; padding-top: 10px;
+        }
         .struc_c_d_box {
           background: #E9E7E8;
           height: 100%;
