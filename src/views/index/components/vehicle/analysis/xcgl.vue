@@ -18,14 +18,14 @@
           <!-- 时间 -->
           <div class="time-search date-comp">
             <el-date-picker
-                class="vl_date"
-                v-model="searchData.startTime"
-                type="date"
-                :picker-options="startDateOpt"
-                placeholder="开始时间"
-                :clearable="false"
-                format="yyyy-MM-dd HH:mm:ss">
-            </el-date-picker>
+              class="vl_date"
+              v-model="searchData.startTime"
+              type="date"
+              :picker-options="startDateOpt"
+              placeholder="开始时间"
+              :clearable="false"
+              format="yyyy-MM-dd HH:mm:ss"
+            ></el-date-picker>
             <!-- <el-date-picker
               class="vl_date"
               v-model="searchData.time"
@@ -38,74 +38,74 @@
               end-placeholder="结束日期"
               @change="dateChange"
               :clearable="false"
-            ></el-date-picker> -->
+            ></el-date-picker>-->
           </div>
           <div class="time-search date-comp">
             <el-date-picker
-                class="vl_date vl_date_end"
-                v-model="searchData.endTime"
-                type="date"
-                :picker-options="endDateOpt"
-                placeholder="结束时间"
-                :clearable="false"
-                format="yyyy-MM-dd HH:mm:ss"
-                @change="dateChange">
-            </el-date-picker>
+              class="vl_date vl_date_end"
+              v-model="searchData.endTime"
+              type="date"
+              :picker-options="endDateOpt"
+              placeholder="结束时间"
+              :clearable="false"
+              format="yyyy-MM-dd HH:mm:ss"
+              @change="dateChange"
+            ></el-date-picker>
           </div>
           <!-- 设备搜索 -->
           <div class="device-comp">
-          <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
-          <div class="selected_device" @click="treeTabShow = true;">
-            <i class="el-icon-arrow-down"></i>
-            <!-- <i class="el-icon-arrow-up"></i> -->
-            <div class="device_list" v-if="selectDeviceArr.length > 0">
-              <template v-if="checkAllTree">
-                <span>全部设备</span>
-              </template>
-              <template v-else>
-                <span>{{ selectDeviceArr[0].label }}</span>
-                <span
-                  v-show="selectDeviceArr.length > 1"
-                  title="展开选中的设备"
-                  class="device_count"
-                >+{{ selectDeviceArr.length - 1 }}</span>
-              </template>
-            </div>
-            <div class="no_device" v-else>选择设备</div>
-            <!-- 树tab页面 -->
-            <div class="device_tree_tab" v-show="treeTabShow">
-              <div style="overflow: hidden;">
-                <!-- <div
+            <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
+            <div class="selected_device" @click="treeTabShow = true;">
+              <i class="el-icon-arrow-down"></i>
+              <!-- <i class="el-icon-arrow-up"></i> -->
+              <div class="device_list" v-if="selectDeviceArr.length > 0">
+                <template v-if="checkAllTree">
+                  <span>全部设备</span>
+                </template>
+                <template v-else>
+                  <span>{{ selectDeviceArr[0].label }}</span>
+                  <span
+                    v-show="selectDeviceArr.length > 1"
+                    title="展开选中的设备"
+                    class="device_count"
+                  >+{{ selectDeviceArr.length - 1 }}</span>
+                </template>
+              </div>
+              <div class="no_device" v-else>选择设备</div>
+              <!-- 树tab页面 -->
+              <div class="device_tree_tab" v-show="treeTabShow">
+                <div style="overflow: hidden;">
+                  <!-- <div
                   class="tab_title"
                   :class="{ 'current_title': index === selectedTreeTab }"
                   @click="selectedTreeTab = index;"
                   v-for="(item, index) in treeTabArr"
                   :key="'tab_title' + index"
-                >{{ item.name }}</div>-->
-              </div>
-              <!-- 摄像头树 -->
-              <div class="tree_content">
-                <vue-scroll>
-                  <div class="checked_all">
-                    <el-checkbox
-                      :indeterminate="isIndeterminate"
-                      v-model="checkAllTree"
-                      @change="handleCheckedAll"
-                    >全选</el-checkbox>
-                  </div>
-                  <el-tree
-                    @check="listenChecked"
-                    :data="cameraTree"
-                    show-checkbox
-                    default-expand-all
-                    node-key="label"
-                    ref="cameraTree"
-                    highlight-current
-                    :props="defaultProps"
-                  ></el-tree>
-                </vue-scroll>
-              </div>
-              <!-- <div class="tree_content" v-show="selectedTreeTab === 1">
+                  >{{ item.name }}</div>-->
+                </div>
+                <!-- 摄像头树 -->
+                <div class="tree_content">
+                  <vue-scroll>
+                    <div class="checked_all">
+                      <el-checkbox
+                        :indeterminate="isIndeterminate"
+                        v-model="checkAllTree"
+                        @change="handleCheckedAll"
+                      >全选</el-checkbox>
+                    </div>
+                    <el-tree
+                      @check="listenChecked"
+                      :data="cameraTree"
+                      show-checkbox
+                      default-expand-all
+                      node-key="label"
+                      ref="cameraTree"
+                      highlight-current
+                      :props="defaultProps"
+                    ></el-tree>
+                  </vue-scroll>
+                </div>
+                <!-- <div class="tree_content" v-show="selectedTreeTab === 1">
                     <vue-scroll>
                       <div class="checked_all">
                         <el-checkbox
@@ -125,20 +125,20 @@
                         :props="defaultProps"
                       ></el-tree>
                     </vue-scroll>
-              </div>-->
+                </div>-->
+              </div>
             </div>
-          </div>
-          <p class="error-tip" :class="{'is-show': isDeviceTrue}">{{messageDevTip}}</p>
+            <p class="error-tip" :class="{'is-show': isDeviceTrue}">{{messageDevTip}}</p>
           </div>
           <!-- 下划线 -->
-         <!--  <div class="line"></div> -->
-           <!-- 切换查询条件 -->
-           <!-- <div class="switching-select">
+          <!--  <div class="line"></div> -->
+          <!-- 切换查询条件 -->
+          <!-- <div class="switching-select">
            <el-radio-group v-model="selectIndex">
               <el-radio :label="0">使用图片</el-radio>
               <el-radio :label="1">使用车牌</el-radio>
             </el-radio-group>
-           </div> -->
+          </div>-->
           <!-- 上传 -->
           <div class="vl_judge_tc_c_item" v-show="selectIndex === 0">
             <el-upload
@@ -177,16 +177,22 @@
                   :value="item.enumValue"
                 ></el-option>
               </el-select>
-            </div> -->
+            </div>-->
             <!-- 车牌号搜索 -->
             <div class="license-plate-search">
-              <el-input v-model="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" @blur="blurJudge" @clear="blurJudge" clearable></el-input>
+              <el-input
+                v-model="searchData.licensePlateNum"
+                placeholder="请输入车牌号"
+                @blur="blurJudge"
+                @clear="blurJudge"
+                clearable
+              ></el-input>
               <p class="error-tip" :class="{'is-show': isNumTrue}">{{messageTip}}</p>
             </div>
           </div>
           <!-- 切换查询条件 -->
-         <!--  <div class="tab-switching" v-show="selectIndex === 0" @click="selectTab(1)">使用车牌号</div>
-          <div class="tab-switching" v-show="selectIndex === 1" @click="selectTab(0)">使用图片</div> -->
+          <!--  <div class="tab-switching" v-show="selectIndex === 0" @click="selectTab(1)">使用车牌号</div>
+          <div class="tab-switching" v-show="selectIndex === 1" @click="selectTab(0)">使用图片</div>-->
 
           <div class="search-btn">
             <el-button @click="resetSearch">重置</el-button>
@@ -331,13 +337,9 @@ export default {
       startDateOpt: {
         disabledDate: time => {
           if (this.searchData.endTime) {
-            return (
-              time.getTime() > new Date(this.searchData.endTime).getTime()
-            );
+            return time.getTime() > new Date(this.searchData.endTime).getTime();
           } else {
-            return (
-              time.getTime() > new Date().getTime()
-            );
+            return time.getTime() > new Date().getTime();
           }
         }
       },
@@ -349,9 +351,7 @@ export default {
               time.getTime() > new Date().getTime()
             );
           } else {
-            return (
-              time.getTime() > new Date().getTime()
-            );
+            return time.getTime() > new Date().getTime();
           }
         }
       },
@@ -458,7 +458,7 @@ export default {
       isDeviceTrue: false,
       isNumTrue: false,
       messageTip: "",
-      messageDevTip: "",
+      messageDevTip: ""
     };
   },
   computed: {
@@ -588,15 +588,16 @@ export default {
     },
     //设置默认时间
     setDTime() {
-      let curDate = new Date(new Date().toLocaleDateString()).getTime()
+      let curDate = new Date(new Date().toLocaleDateString()).getTime();
       let curS = 1 * 24 * 3600 * 1000;
       let _s = curDate - curS;
-      let _e = curDate - 1
+      let _e = curDate - 1;
       this.searchData.startTime = formatDate(_s);
       this.searchData.endTime = formatDate(_e);
     },
     dateChange() {
-      this.searchData.endTime = new Date(this.searchData.endTime).getTime() + 1 * 24 * 3600 * 1000 - 1;
+      this.searchData.endTime =
+        new Date(this.searchData.endTime).getTime() + 1 * 24 * 3600 * 1000 - 1;
     },
     // 日期控制
     timeChange(type = "start") {
@@ -642,7 +643,7 @@ export default {
     blurJudge() {
       if (this.checkPlateNumber(this.searchData.licensePlateNum)) {
         this.isNumTrue = false;
-      }else {
+      } else {
         this.isNumTrue = true;
       }
     },
@@ -651,14 +652,13 @@ export default {
       let reg = /^([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})$/;
       if (value) {
         if (!reg.test(value)) {
-          this.messageTip = "请正确输入车牌号码"
+          this.messageTip = "请正确输入车牌号码";
           return false;
         } else {
           return true;
         }
-        return true;
       } else {
-        this.messageTip = "请输入车牌号码"
+        this.messageTip = "请输入车牌号码";
         return false;
       }
     },
@@ -685,7 +685,7 @@ export default {
           return false;
         } else {
           this.isDeviceTrue = true;
-          this.messageDevTip = "请选择设备"
+          this.messageDevTip = "请选择设备";
           return false;
         }
       } else if (this.selectIndex === 0) {
@@ -737,7 +737,7 @@ export default {
     getSearchData() {
       let params = {
         startDate: formatDate(this.searchData.startTime, "yyyy-MM-dd HH:mm:ss"),
-        endDate: formatDate(this.searchData.endTime, "yyyy-MM-dd HH:mm:ss"),
+        endDate: formatDate(this.searchData.endTime, "yyyy-MM-dd HH:mm:ss")
       };
       if (!this.checkAllTree) {
         if (this.selectCameraArr && this.selectCameraArr.length > 0) {
@@ -792,7 +792,7 @@ export default {
         drivingDiscipline = {};
       drivingDiscipline = {
         startDate: formatDate(this.searchData.startTime, "yyyy-MM-dd HH:mm:ss"),
-        endDate: formatDate(this.searchData.endTime, "yyyy-MM-dd HH:mm:ss"),
+        endDate: formatDate(this.searchData.endTime, "yyyy-MM-dd HH:mm:ss")
       };
       if (!this.checkAllTree) {
         if (this.selectCameraArr && this.selectCameraArr.length > 0) {
@@ -1213,14 +1213,13 @@ export default {
     chooseDevice() {
       // 选择了树的设备
       this.treeTabShow = false;
-      if(this.selectDeviceArr &&
-          this.selectDeviceArr.length > 0) {
-            this.isDeviceTrue = false;
-            this.messageDevTip = "";
-          }else {
-            this.isDeviceTrue = true;
-            this.messageDevTip = "请选择设备";
-          }
+      if (this.selectDeviceArr && this.selectDeviceArr.length > 0) {
+        this.isDeviceTrue = false;
+        this.messageDevTip = "";
+      } else {
+        this.isDeviceTrue = true;
+        this.messageDevTip = "请选择设备";
+      }
     },
     // 处理摄像头树全选时间
     handleCheckedAll(val) {
@@ -1245,7 +1244,7 @@ export default {
           continue;
         }
       }
-      console.log('videoTreeNodeCount', this.videoTreeNodeCount)
+      console.log("videoTreeNodeCount", this.videoTreeNodeCount);
     },
     //摄像头
     listenChecked(val, val1) {
@@ -1322,7 +1321,6 @@ export default {
   .driving-rules-content {
     height: 100%;
     display: flex;
-    border-top: 1px solid #d3d3d3;
     // 关闭展开菜单按钮
     @mixin close_menu {
       position: absolute;
@@ -1336,7 +1334,7 @@ export default {
       padding: 20px 0 20px 20px;
       color: #999;
       background: #fff;
-      box-shadow: 5px 0px 16px 0px rgba(169, 169, 169, 0.2);
+      box-shadow: 2px 3px 10px 0px rgba(131, 131, 131, 0.28);
       animation: fadeInLeft 0.4s ease-out 0.3s both;
       .error-tip {
         display: none;
@@ -1432,6 +1430,10 @@ export default {
       //车牌号搜索
       .license-plate-search {
         width: 232px;
+        .error-tip {
+          line-height: 20px;
+          margin-bottom: -10px;
+        }
       }
       // 关闭设备tab
       .selected_device_comp {
@@ -1448,7 +1450,7 @@ export default {
       .device-comp {
         .error-tip {
           margin-top: -10px;
-          margin-bottom: 10px;
+          line-height: 20px;
         }
       }
       // 选择设备下拉
@@ -1696,7 +1698,7 @@ export default {
     .el-radio__label {
       padding-left: 5px;
     }
-    .el-radio__input.is-checked+.el-radio__label {
+    .el-radio__input.is-checked + .el-radio__label {
       color: #0c70f8;
     }
   }
@@ -1706,11 +1708,14 @@ export default {
     text-align: center;
     padding-top: 20px;
     .el-button {
-      width: 45%;
+      width: 110px;
     }
     .el-button--primary {
       background-color: #0c70f8;
       border-color: #0c70f8;
+    }
+    .el-button + .el-button {
+      margin-left: 12px;
     }
   }
   //导出

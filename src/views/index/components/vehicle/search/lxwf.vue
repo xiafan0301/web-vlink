@@ -23,9 +23,9 @@
             </el-radio-group>
           </div>
           <!-- 上传 -->
-          <div v-if="input5==1">
+          <div v-show="input5==1">
             <div class="vl_judge_tc_c_item">
-              <el-upload
+              <!-- <el-upload
                 :class="{'vl_jtc_upload': true}"
                 :show-file-list="false"
                 accept="image/*"
@@ -48,15 +48,17 @@
               <p @click="showHistoryPic">从上传记录中选择</p>
               <div v-show="curImageUrl" class="del_icon">
                 <i class="el-icon-delete" @click="delPic"></i>
-              </div>
+              </div> -->
+              <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit"></div>
             </div>
+
             <div class="license-plate-search">
               <el-button
-                type="primary"
-                :disabled="curImageUrl=='' || disab"
+                :type="curImageUrl ? 'primary' : ''"
+                :disabled="!curImageUrl"
                 @click="getItem"
+                style="width: 100%;"
                 :loading="searchings"
-                class="select_btn full"
               >获取特征</el-button>
               <div class="chara" v-if="photoAnalysis">
                 <span
@@ -111,12 +113,12 @@
 
           <div class="chbox">
             <el-form :model="tzscMenuForm" ref="tzscMenuForm" :rules="rules">
-              <div style="padding-right: 20px;" v-if="input5 == 2">
-                <el-form-item label="号牌颜色" label-width="70px" prop>
+              <div v-show="input5 == 2">
+                <el-form-item prop>
                   <el-select
                     v-model="tzscMenuForm.licenseColor"
                     class="width132"
-                    placeholder="选择选项"
+                    placeholder="选择号牌颜色"
                   >
                     <el-option
                       v-for="item in plateColor"
@@ -126,8 +128,8 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label="车辆型号" label-width="70px" prop>
-                  <el-select v-model="tzscMenuForm.carModel" class="width132" placeholder="选择选项">
+                <el-form-item prop>
+                  <el-select v-model="tzscMenuForm.carModel" class="width132" placeholder="选择车辆型号">
                     <el-option
                       v-for="item in carModel"
                       :key="item.vehicleBrand"
@@ -136,8 +138,8 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label="车辆颜色" label-width="70px" prop>
-                  <el-select v-model="tzscMenuForm.carColor" class="width132" placeholder="选择选项">
+                <el-form-item prop>
+                  <el-select v-model="tzscMenuForm.carColor" class="width132" placeholder="选择车辆颜色">
                     <el-option
                       v-for="item in carColor"
                       :key="item.enumValue"
@@ -146,8 +148,8 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label="车辆类型" label-width="70px" prop>
-                  <el-select v-model="tzscMenuForm.carType" class="width132" placeholder="选择选项">
+                <el-form-item prop>
+                  <el-select v-model="tzscMenuForm.carType" class="width132" placeholder="选择车辆类型">
                     <el-option
                       v-for="item in vehicleType"
                       :key="item.enumValue"
@@ -156,8 +158,8 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label="号牌类型" label-width="70px" prop>
-                  <el-select v-model="tzscMenuForm.licenseType" class="width132" placeholder="选择选项">
+                <el-form-item prop>
+                  <el-select v-model="tzscMenuForm.licenseType" class="width132" placeholder="选择号牌类型">
                     <el-option
                       v-for="item in plateType"
                       :key="item.enumValue"
@@ -274,7 +276,7 @@
               <el-table :data="regulationsList">
                 <el-table-column label="序号" type="index" width="100"></el-table-column>
                 <el-table-column label="车牌号码" prop="plateNo" show-overflow-tooltip></el-table-column>
-                <el-table-column label="违法次数" sortable prop="counts" show-overflow-tooltip></el-table-column>
+                <el-table-column label="违章次数" sortable prop="counts" show-overflow-tooltip></el-table-column>
                 <el-table-column label="操作" show-overflow-tooltip>
                   <template slot-scope="scope">
                     <el-button @click="handleClick(scope.row)" type="text" size="small">查看详情</el-button>
@@ -305,7 +307,7 @@
     </div>
 
     <!--上传记录弹窗-->
-    <el-dialog
+    <!-- <el-dialog
       :visible.sync="historyPicDialog"
       class="history-pic-dialog"
       :close-on-click-modal="false"
@@ -332,19 +334,20 @@
         <el-button @click="historyPicDialog = false">取消</el-button>
         <el-button type="primary" @click="addHisToImg" :disabled="choosedHisPic.length === 0">确认</el-button>
       </div>
-    </el-dialog>
+    </el-dialog> -->
 
-    <BigImg
+    <!-- <BigImg
       :imgList="imgList"
       :imgIndex="imgIndex"
       :isShow="isShowImg"
       @emitCloseImgDialog="emitCloseImgDialog"
-    ></BigImg>
+    ></BigImg> -->
   </div>
 </template>
 <script>
 import { ajaxCtx } from "@/config/config";
 import BigImg from "@/components/common/bigImg.vue";
+import vlUpload from '@/components/common/upload.vue';
 import {
   JtcPOSTAppendixInfo,
   JtcGETAppendixInfoList,
@@ -358,28 +361,30 @@ import { getCarmodelList } from "../../../api/api.base.js";
 import { dataList } from "@/utils/data.js";
 // import { callbackify, error } from 'util';
 export default {
-  components: { BigImg },
+  components: { BigImg, vlUpload },
   data() {
     return {
-      disab: false,
+      // disab: false,
       isNull: true,
       photoAnalysis: null, //图片分析特征
       plateType: [], // 号牌类型
       plateColor: [], // 号牌颜色
       vehicleType: [], // 车辆类型
       carColor: [], // 车辆颜色
-      uploadAcion: ajaxCtx.base + "/new", //上传路径
-      uploading: false, // 是否上传中
-      uploadFileList: [],
+      // uploadAcion: ajaxCtx.base + "/new", //上传路径
+      // uploading: false, // 是否上传中
+      // uploadFileList: [],
       curImageUrl: "", // 当前上传的图片
-      historyPicList: [], // 上传历史记录
-      historyPicDialog: false,
-      loadingHis: false,
+      // historyPicList: [], // 上传历史记录
+      // historyPicDialog: false,
+      // loadingHis: false,
       isDao: false,
-      imgData: null,
+      // imgData: null,
       input5: "1",
       data1: "",
       data2: "",
+
+      uploadClear: {},
 
       // 菜单表单变量
       tzscMenuForm: {
@@ -422,8 +427,8 @@ export default {
       searching: false,
       searchings: false,
       imgIndex: 0, // 点击的图片索引
-      isShowImg: false, // 是否放大图片
-      imgList: [],
+      // isShowImg: false, // 是否放大图片
+      // imgList: [],
       rules: {
         input4: [
           {
@@ -471,11 +476,11 @@ export default {
       }
     };
   },
-  computed: {
-    choosedHisPic() {
-      return this.historyPicList.filter(x => x.checked);
-    }
-  },
+  // computed: {
+  //   choosedHisPic() {
+  //     return this.historyPicList.filter(x => x.checked);
+  //   }
+  // },
  beforeRouteEnter(to, from, next) {
      next(vm => {
          // 通过 `vm` 访问组件实例
@@ -499,6 +504,12 @@ export default {
     this.setDTime();
   },
   methods: {
+    uploadEmit (data) {
+      console.log('uploadEmit data', data);
+      if (data && data.path) {
+        this.curImageUrl = data.path;
+      }
+    },
     //导出
     exportList(){
       this.isDao=true
@@ -612,93 +623,93 @@ export default {
       this.$router.push({ name: "vehicle_search_lxwfdetail", query: v });
     },
     // 上传图片
-    beforeAvatarUpload(file) {
-      const isJPG = file.type === "image/jpeg" || file.type === "image/png";
-      const isLt = file.size / 1024 / 1024 < 100;
-      if (!isJPG) {
-        this.$message.error("只能上传 JPG / PNG 格式图片!");
-      }
-      if (!isLt) {
-        this.$message.error("上传图片大小不能超过 100MB!");
-      }
-      this.uploading = true;
-      return isJPG && isLt;
-    },
+    // beforeAvatarUpload(file) {
+    //   const isJPG = file.type === "image/jpeg" || file.type === "image/png";
+    //   const isLt = file.size / 1024 / 1024 < 100;
+    //   if (!isJPG) {
+    //     this.$message.error("只能上传 JPG / PNG 格式图片!");
+    //   }
+    //   if (!isLt) {
+    //     this.$message.error("上传图片大小不能超过 100MB!");
+    //   }
+    //   this.uploading = true;
+    //   return isJPG && isLt;
+    // },
     //上传成功
-    uploadSucess(response, file, fileList) {
-      this.uploading = false;
-      /* this.compSim = '';
-      this.compSimWord = ''; */
-      if (response && response.data) {
-        let oRes = response.data;
-        if (oRes) {
-          let x = {
-            cname: oRes.fileName, // 附件名称 ,
-            contentUid: this.$store.state.loginUser.uid,
-            // desci: '', // 备注 ,
-            filePathName: oRes.fileName, // 附件保存名称 ,
-            fileType: 1, // 文件类型 ,
-            imgHeight: oRes.fileHeight, // 图片高存储的单位位px ,
-            imgSize: oRes.fileSize, // 图片大小存储的单位位byte ,
-            imgWidth: oRes.fileWidth, //  图片宽存储的单位位px ,
-            // otherFlag: '', // 其他标识 ,
-            path: oRes.fileFullPath, // 附件路径 ,
-            // path: oRes.path,
-            thumbnailName: oRes.thumbnailFileName, // 缩略图名称 ,
-            thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
-            // uid: '' //  附件标识
-          };
-          JtcPOSTAppendixInfo(x).then(jRes => {
-            if (jRes) {
-              x["uid"] = jRes.data;
-              console.log(x);
-            }
-          });
-          this.imgData = x;
-          this.curImageUrl = x.path;
-          this.disab = false;
-        }
-      }
-      this.uploadFileList = fileList;
-    },
+    // uploadSucess(response, file, fileList) {
+    //   this.uploading = false;
+    //   /* this.compSim = '';
+    //   this.compSimWord = ''; */
+    //   if (response && response.data) {
+    //     let oRes = response.data;
+    //     if (oRes) {
+    //       let x = {
+    //         cname: oRes.fileName, // 附件名称 ,
+    //         contentUid: this.$store.state.loginUser.uid,
+    //         // desci: '', // 备注 ,
+    //         filePathName: oRes.fileName, // 附件保存名称 ,
+    //         fileType: 1, // 文件类型 ,
+    //         imgHeight: oRes.fileHeight, // 图片高存储的单位位px ,
+    //         imgSize: oRes.fileSize, // 图片大小存储的单位位byte ,
+    //         imgWidth: oRes.fileWidth, //  图片宽存储的单位位px ,
+    //         // otherFlag: '', // 其他标识 ,
+    //         path: oRes.fileFullPath, // 附件路径 ,
+    //         // path: oRes.path,
+    //         thumbnailName: oRes.thumbnailFileName, // 缩略图名称 ,
+    //         thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
+    //         // uid: '' //  附件标识
+    //       };
+    //       JtcPOSTAppendixInfo(x).then(jRes => {
+    //         if (jRes) {
+    //           x["uid"] = jRes.data;
+    //           console.log(x);
+    //         }
+    //       });
+    //       this.imgData = x;
+    //       this.curImageUrl = x.path;
+    //       this.disab = false;
+    //     }
+    //   }
+    //   this.uploadFileList = fileList;
+    // },
     //上传失败
-    handleError() {
-      this.uploading = false;
-      this.$message.error("上传失败");
-    },
+    // handleError() {
+    //   this.uploading = false;
+    //   this.$message.error("上传失败");
+    // },
     //获取上传记录
-    showHistoryPic() {
-      this.loadingHis = true;
-      this.historyPicDialog = true;
-      let params = {
-        userId: this.$store.state.loginUser.uid,
-        fileType: 1
-      };
-      JtcGETAppendixInfoList(params)
-        .then(res => {
-          if (res) {
-            this.loadingHis = false;
-            res.data.forEach(x => (x.checked = false));
-            this.historyPicList = res.data;
-          }
-        })
-        .catch(() => {
-          this.historyPicDialog = false;
-        });
-    },
+    // showHistoryPic() {
+    //   this.loadingHis = true;
+    //   this.historyPicDialog = true;
+    //   let params = {
+    //     userId: this.$store.state.loginUser.uid,
+    //     fileType: 1
+    //   };
+    //   JtcGETAppendixInfoList(params)
+    //     .then(res => {
+    //       if (res) {
+    //         this.loadingHis = false;
+    //         res.data.forEach(x => (x.checked = false));
+    //         this.historyPicList = res.data;
+    //       }
+    //     })
+    //     .catch(() => {
+    //       this.historyPicDialog = false;
+    //     });
+    // },
     //删除图片
-    delPic() {
-      this.uploadFileList.splice(0, 1);
-      this.curImageUrl = "";
-      this.photoAnalysis = null;
-    },
+    // delPic() {
+    //   this.uploadFileList.splice(0, 1);
+    //   this.curImageUrl = "";
+    //   this.photoAnalysis = null;
+    // },
     //选择最近上传的图片
-    chooseHisPic(item) {
-      this.historyPicList.forEach(x => {
-        x.checked = false;
-      });
-      item.checked = true;
-    },
+    // chooseHisPic(item) {
+    //   this.historyPicList.forEach(x => {
+    //     x.checked = false;
+    //   });
+    //   item.checked = true;
+    // },
     //获取特征
     getItem() {
       this.searchings = true;
@@ -728,27 +739,27 @@ export default {
             plateColor: true,
             _plateClass: true
           }
-          this.disab = true;
+          // this.disab = true;
         } else {
           this.searchings = false;
         }
       });
     },
     //从历史上传图片中上传
-    addHisToImg() {
-      this.historyPicDialog = false;
-      let _ids = [];
-      this.choosedHisPic.forEach(x => {
-        _ids.push(x.uid);
-        this.curImageUrl = x.path;
-        this.disab = false;
-        this.imgData = x;
-      });
-      let _obj = {
-        appendixInfoIds: _ids.join(",")
-      };
-      JtcPUTAppendixsOrder(_obj);
-    },
+    // addHisToImg() {
+    //   this.historyPicDialog = false;
+    //   let _ids = [];
+    //   this.choosedHisPic.forEach(x => {
+    //     _ids.push(x.uid);
+    //     this.curImageUrl = x.path;
+    //     this.disab = false;
+    //     this.imgData = x;
+    //   });
+    //   let _obj = {
+    //     appendixInfoIds: _ids.join(",")
+    //   };
+    //   JtcPUTAppendixsOrder(_obj);
+    // },
     //设置默认时间
     setDTime() {
       let date = new Date();
@@ -770,9 +781,10 @@ export default {
     //重置
     resetSearch() {
       //this.searchData.licensePlateNum = null;
-      this.uploadFileList.splice(0, this.uploadFileList.length);
-      this.imgData = null;
+      // this.uploadFileList.splice(0, this.uploadFileList.length);
+      // this.imgData = null;
       this.curImageUrl = "";
+      this.uploadClear = {};
       //this.tzscMenuForm.input4 = 3,
       (this.tzscMenuForm = {
         input4: 3,
@@ -872,17 +884,17 @@ export default {
       });
     },
     // 图片放大
-    openBigImg(index, data) {
-      console.log("--------------", index, data);
-      this.imgList = data;
-      this.isShowImg = true;
-      this.imgIndex = index;
-    },
+    // openBigImg(index, data) {
+    //   console.log("--------------", index, data);
+    //   this.imgList = data;
+    //   this.isShowImg = true;
+    //   this.imgIndex = index;
+    // },
     // 关闭图片放大
-    emitCloseImgDialog(data) {
-      this.imgList = [];
-      this.isShowImg = data;
-    },
+    // emitCloseImgDialog(data) {
+    //   this.imgList = [];
+    //   this.isShowImg = data;
+    // },
     //分页
     handleSizeChange(val) {
       this.pagination.pageNum = 1;
@@ -943,14 +955,10 @@ export default {
       .vl_judge_tc_c_item {
         width: 232px;
         height: 232px;
-        display: inline-block;
-        position: relative;
         margin-top: 16px;
         margin-bottom: 20px;
-        -webkit-border-radius: 10px;
-        -moz-border-radius: 10px;
         border-radius: 10px;
-        cursor: pointer;
+        text-align: center;
         &:hover {
           background: #2981f8;
           > p {
@@ -1268,6 +1276,11 @@ html {
         padding: 0;
       }
     }
+  }
+}
+.chbox {
+  .el-select{
+    width: 100%;
   }
 }
 </style>

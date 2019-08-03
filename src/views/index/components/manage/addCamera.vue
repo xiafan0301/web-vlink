@@ -48,10 +48,10 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="摄像头序列号" prop="deviceSn">
+            <el-form-item label="摄像头序列号:" prop="deviceSn">
               <el-input v-model="cameraForm.deviceSn" placeholder="请输入摄像头序列号"></el-input>
             </el-form-item>
-            <el-form-item label="摄像头类型::" prop="type">
+            <el-form-item label="摄像头类型:" prop="type">
               <el-select v-model="cameraForm.type" placeholder="请选择摄像头类型" style="width: 100%">
                 <el-option
                   v-for="item in cameraTypeList"
@@ -148,7 +148,7 @@
                 </ul>
               </el-form-item>
               <el-form-item label="所在位置:" prop="address">
-                <el-cascader v-model="onlineForm.locationName" :options="options" ref="cascaderAddr" style="width:100%" @change="handleChangeAddress" clearable placeholder="请选择省/市/县/乡"></el-cascader>
+                <el-cascader v-model="onlineForm.locationName" :options="areaDataList" :props="areaProps" ref="cascaderAddr" style="width:100%" @change="handleChangeAddress" clearable placeholder="请选择省/市/县/乡"></el-cascader>
               </el-form-item>
               <el-form-item label="" prop="address">
                 <el-input v-model="onlineForm.address" placeholder="请输入详细地址" @blur="markAddress(onlineForm.address)"></el-input>
@@ -212,6 +212,7 @@ import { getDiciData } from '@/views/index/api/api.js';
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { mapXupuxian } from "@/config/config.js";
 import mapData from '@/config/mapdata.json';
+import { getAreaList } from '@/views/index/api/api.user.js';
 export default {
   components: { vlBreadcrumb },
   data () {
@@ -219,7 +220,7 @@ export default {
       isShowMap: false, // 是否显示右侧地图
       backDialog: false, // 取消弹出框
       loading: false,
-      isSelectTab: 1, // 1---基础信息  2--联网信息
+      isSelectTab: 2, // 1---基础信息  2--联网信息
       isAddLoading: false, // 添加加载中
       isEditBaiscLoading: false, // 编辑基础信息加载中
       cameraForm: {
@@ -266,9 +267,9 @@ export default {
         maxPixel: [
           { required: true, message: '该项内容不可为空', trigger: 'blur' }
         ],
-        isActive: [
-          { required: true, message: '该项内容不可为空', trigger: 'blur' }
-        ]
+        // isActive: [
+        //   { required: true, message: '该项内容不可为空', trigger: 'blur' }
+        // ]
       },
       onlineRules: {
         deviceSip: [
@@ -334,7 +335,12 @@ export default {
       map: null, // 地图对象
       organList: [], // 机构单位
       // organList: [],
-      options: mapData,
+      // options: mapData,
+      areaProps: {
+        value: 'uid',
+        label: 'cname',
+        children: 'childList'
+      },
       geolocation: null, // 地图定位对象
       t: 1,
       locationName: null, //省市区
@@ -343,6 +349,7 @@ export default {
       importLevelList: [], // 级别
       manufacturerList: [], // 厂家
       maxPixelList: [], // 最大像素
+      areaDataList: [] // 省市区县数据列表
     }
   },
   created () {
@@ -353,6 +360,7 @@ export default {
     this.getImportLevelList();
     this.getManufacturerList();
     this.getMaxPixelList();
+    this.getAreaDataList();
   },
   mounted () {
     this.initMap();
@@ -361,12 +369,33 @@ export default {
 
     if (this.$route.query.id) {
       this.cameraForm.uid = this.$route.query.id;
-
-      // this.onlineForm.locationName = [320000, 320200, 320206];
       this.getDetail();
     }
   },
   methods: {
+    // 获取省市区县信息
+    getAreaDataList () {
+      const pid = 1;
+      getAreaList(pid)
+        .then(res => {
+          if (res && res.data) {
+            const data = this.handleAreaData(res.data.childList);
+            this.areaDataList = data;
+          }
+        })
+    },
+    // 处理省市区县数据
+    handleAreaData (data) {
+      let _this =this;
+      data.forEach((val, index) => {
+        if (val.childList.length === 0) { // 当childList为[]时,删除childList
+          _this.$delete(val, 'childList');
+        } else {
+          _this.handleAreaData(val.childList);
+        }
+      })
+      return data;
+    },
     // 获取摄像头详情
     getDetail () {
       const id = this.$route.query.id;
@@ -601,7 +630,7 @@ export default {
     //详细地址查询
     markAddress(val) {
       if(val) {
-        this.markLocation(this.locationName + val)
+        this.markLocation(this.locationName + val);
       }
     },
     //根据地址搜索
@@ -726,7 +755,7 @@ export default {
             zoomToAccuracy: true //定位成功后调整地图视野范围使定位位置及精度范围视野内可见，默认：false
         });
         map.addControl(geolocation);
-        geolocation.getCurrentPosition();
+        // geolocation.getCurrentPosition();
         _this.geolocation = geolocation;
         window.AMap.event.addListener(geolocation, "error", onError); //返回定位出错信息
         function onError(data) {
@@ -735,14 +764,14 @@ export default {
       });
 
       let geocoder;
-      window.AMap.service('AMap.Geocoder',function(){//回调函数
-        //实例化Geocoder
-        geocoder = new window.AMap.Geocoder({
-          city: "全国", //城市，默认：“全国”
-          radius: 500 //范围，默认：500
-        })
-        //TODO: 使用geocoder 对象完成相关功能
-      })
+      // window.AMap.service('AMap.Geocoder',function(){//回调函数
+      //   //实例化Geocoder
+      //   geocoder = new window.AMap.Geocoder({
+      //     city: "全国", //城市，默认：“全国”
+      //     radius: 500 //范围，默认：500
+      //   })
+      //   //TODO: 使用geocoder 对象完成相关功能
+      // })
 
       map.setMapStyle("amap://styles/whitesmoke");
       _this.map = map;
@@ -754,6 +783,7 @@ export default {
 
       //为地图注册click事件获取鼠标点击出的经纬度坐标
       _this.map.on('click', function(e) {
+        console.log('asdasdasd', e)
           _this.onlineForm.longitude = e.lnglat.getLng();
           _this.onlineForm.latitude = e.lnglat.getLat();
 
@@ -807,10 +837,11 @@ export default {
     writeAddress(lnglatXY){
       let _this = this;
       let geocoder = new window.AMap.Geocoder({
-        city : "全国", //城市，默认：“全国”
-        radius : 1000 //范围，默认：500
+//         city : "全国", //城市，默认：“全国”
+//         radius : 1000 //范围，默认：500
       });
       geocoder.getAddress(lnglatXY, function(status, result) {
+        console.log('sadasdasdresult', result)
         if (status === 'complete' && result.info === 'OK') {
            _this.geocoder_CallBack(result);
         }

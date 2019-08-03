@@ -54,24 +54,25 @@
         <div id="portraitDetail_capMap"></div>
       </div>
       <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video clearfix">
-        <div class="struc_c_d_qj struc_c_d_img">
+        <div class="struc_c_d_qj struc_c_d_img" style="float: left;">
           <img class="bigImg" title="点击放大图片" :src="sturcDetail.subStoragePath" alt />
           <span>抓拍图</span>
         </div>
-        <div class="struc_c_d_box" v-if="playerData">
+        <div class="struc_c_d_box" style="float: left;" v-if="playerData">
           <div is="flvplayer" :oData="playerData"
             :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
           </div>
         </div>
-        <div class="struc_c_d_box struc_vid_empty" v-else>
+        <div class="struc_c_d_box struc_vid_empty" style="float: left;" v-else>
           <div class="struc_vid_empty_c com_trans50_lt">
             <div></div>
             <p>暂无视频</p>
           </div>
         </div>
-        <div class="download_btn" v-show="sturcDetail.videoPath">
+        <p class="download_tips" v-show="sturcDetail.videoPath">下载提示：右键点击视频选择“另存视频为”即可下载视频。</p>
+        <!-- <div class="download_btn" v-show="sturcDetail.videoPath">
           <a download="视频" :href="sturcDetail.videoPath">下载视频</a>
-        </div>
+        </div> -->
       </div>
     </div>
   </el-dialog>
@@ -83,7 +84,7 @@ import {getFaceRetrievalPerson} from '../../../api/api.judge.js';
 export default {
   /* 
     oData
-      type: 1, // 1特征搜人 2以图搜人
+      type: 1, // 1特征搜人 2以图搜人 3落脚点分析
       params: {}, // 查询参数  列表查询的参数，结果需保持一致
       list: [], // 列表
       index: 0, // 当前页的第几个（点击的人像所在的页的序号）
@@ -431,7 +432,7 @@ export default {
         }
         .struc_c_d_info {
           width: 350px; height: 400px;
-          padding: 0 10px 0 20px;
+          padding: 0 5px 0 20px;
           color: #333333;
           overflow: auto;
           > h2 {
@@ -450,9 +451,10 @@ export default {
                 border: 1px solid #ddd;
                 border-radius: 4px;
                 float: left;
+                overflow: hidden;
                 font-size: 14px;
                 &:first-child {
-                  width: 70px;
+                  width: 68px;
                   background-color: #FAFAFA;
                   text-align: center;
                   border: 1px solid #f2f2f2;
@@ -460,11 +462,11 @@ export default {
                   color: #999;
                 }
                 &:last-child {
-                  max-width: 220px;
+                  max-width: 94px;
                   border: 1px solid #f2f2f2;
                   border-left: 0;
                   background-color: #fff;
-                  padding: 0 10px 0 10px;
+                  padding: 0 9px 0 9px;
                   border-radius: 0 4px 4px 0;
                   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; word-break: break-all;
                 }
@@ -506,6 +508,12 @@ export default {
         -webkit-box-shadow: 0 0 0 !important;
         -moz-box-shadow: 0 0 0 !important;
         box-shadow: 0 0 0 !important;
+      }
+      .download_tips {
+        float: left;
+        width: 100%;
+        text-align: right;
+        padding-right: 40px; padding-top: 10px;
       }
       .download_btn {
         position: absolute; top: 415px; right: 30px;

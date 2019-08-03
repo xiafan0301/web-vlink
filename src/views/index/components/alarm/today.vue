@@ -304,6 +304,10 @@ export default {
     },
     changeTab (type) {
       this.tabType = type;
+      this.selectDevice = []
+      this.selectControl = []
+      this.$refs.tree.setCheckedKeys([]);
+      this.$refs.gTree.setCheckedKeys([]);
     },
     getCheckedKeys() {
       this.selectDevice = this.$refs.tree.getCheckedKeys(true);
@@ -712,6 +716,9 @@ export default {
         width: 62px;
       }
     }
+  }
+  .__rail-is-horizontal {
+    position: static!important;
   }
 }
 

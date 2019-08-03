@@ -37,7 +37,7 @@
         <div class="kaishi">
           <el-input v-model.trim="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" clearable></el-input>
         </div>
-        <div class="kaishi">
+        <div class="kaishi" style="padding-top: 20px">
           <el-button style="width: 110px" @click="rester">重置</el-button>
           <el-button type="primary" style="width: 110px" @click="search" :loading="searchLoading">查询</el-button>
         </div>
@@ -149,11 +149,11 @@
             <div class="th-ycxc-record-list">
               <div class="list-box">
                 <div class="list-item" v-for="(item, index) in regulationsList" :key="item.uid + index" @click="onOpenDetail(index)">
-                  <img :src="item.subStoragePath" alt="">
-                  <p class="time"><i></i>{{item.shotTime}}</p>
-                  <p class="address"><i></i>{{item.deviceName}}</p>
+                  <img :src="item.vehicleDto.subStoragePath" alt="">
+                  <p class="time"><i></i>{{item.vehicleDto.shotTime}}</p>
+                  <p class="address"><i></i>{{item.vehicleDto.deviceName}}</p>
                   <p class="address1" style="color: red; padding-top: 5px"><i></i>
-                    {{item.fakePlateType == 4? '同号短时异地出没': item.fakePlateType == 1? '同号车身颜色不同' : item.fakePlateType == 2? '同号车辆类型不同': item.fakePlateType == 3? '同号车辆品牌不同': ''}}</p>
+                    {{item.fakeReason}}</p>
                 </div>
                 <el-pagination
                     class="cum_pagination th-center-pagination"
@@ -377,6 +377,7 @@ export default {
         pageSize: 10,
         total: 0
       }, */
+      console.log(index)
       let params = {
         startDate: formatDate(this.value1),
         endDate: this.value2,

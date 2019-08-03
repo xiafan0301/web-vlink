@@ -151,7 +151,7 @@ export default {
       rules: {
         plateNo: [
           { required: true, message: '请输入正确的车牌号码', trigger: 'blur' },
-          // { validator: checkPlateNumber, trigger: 'blur' }
+          { validator: checkPlateNumber, trigger: 'blur' }
         ]
       },
       pickerStart: {
@@ -180,7 +180,7 @@ export default {
   mounted () {
     this.getVehicleTypeList();
     const plateNo = this.$route.query.plateNo;
-    const dateStart = this.$route.query.dateStart;
+    const dateStart = this.$route.query.searchStartTime;
     const dateEnd = this.$route.query.dateEnd;
     if (plateNo) { // 从其他模块跳转过来的
       this.searchForm.plateNo = plateNo;
@@ -189,7 +189,7 @@ export default {
       this.searchForm.plateNo = plateNo;
       this.searchForm.shotTime = dateStart;
       this.searchForm.dateEnd = dateEnd;
-      this.searchForm.interval = this.$route.query.interval;
+      this.searchForm.interval = parseInt(this.$route.query.interval);
       this.searchForm.deviceCode = this.$route.query.deviceCode;
       if (this.$route.query.vehicleClass) {
         this.searchForm.vehicleClass = this.$route.query.vehicleClass.join(',');
@@ -253,6 +253,8 @@ export default {
     // 获取抓拍设备列表
     getDeviceList () {
       this.deviceList = [];
+      this.searchForm.deviceCode = null;
+      this.deviceStartTime = null;
       const params = {
         plateNo: this.searchForm.plateNo,
         startTime: formatDate(this.searchForm.shotTime),
@@ -300,6 +302,7 @@ export default {
         plateNo: this.searchForm.plateNo,
         dateStart: formatDate(this.deviceStartTime),
         dateEnd: formatDate(this.searchForm.dateEnd),
+        searchStartTime: formatDate(this.searchForm.shotTime),
         plateNoTb: obj.plateNo,
         vehicleClass: this.searchForm.vehicleClass.join(',') || null,
         interval: this.searchForm.interval,
@@ -333,8 +336,6 @@ export default {
           };
           let deviceCode, vehicleType;
           this.deviceList.map(item => {
-            console.log('asdasdd')
-            console.log(this.searchForm.deviceCode)
             if (item.deviceName === this.searchForm.deviceCode) {
               deviceCode = item.deviceID;
             }

@@ -484,6 +484,7 @@ export default {
       markTask(params).then(res => {
         console.log(res)
         this.$message.success('全部标记为已读成功')
+        this.getTaskCount();
         this.getTaskData();
       }).catch(()=>{})
     }

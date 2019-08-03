@@ -19,7 +19,7 @@
             :picker-options="pickerOptions2">
           </el-date-picker>
         </el-form-item>
-        <el-form-item>
+        <!-- <el-form-item>
           <el-cascader
             expand-trigger="hover"
             :options="options"
@@ -27,7 +27,7 @@
             @change="handleChange"
             placeholder="请选择省 / 市 / 县 / 乡">
           </el-cascader>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item>
           <el-button class="operation_btn blue_btn" :loading="searchLoading" @click="searchData">筛选</el-button>
         </el-form-item>

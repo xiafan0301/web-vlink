@@ -16,12 +16,14 @@
               style="width: 230px; vertical-align: top"
               class="full vl_date"
               type="datetime"
+              :clearable = 'false'
               placeholder="选择日期时间">
           </el-date-picker>
         </div>
         <div class="jiesu">
           <el-date-picker
               v-model="value2"
+              :clearable = 'false'
               format="yyyy-MM-dd HH:mm:ss"
               :picker-options="pickerOptions1"
               value-format="yyyy-MM-dd HH:mm:ss"
@@ -79,7 +81,7 @@
         <div style="padding-top: 10px">
           <el-checkbox v-model="onlySurveillance"><span style="color: #999999">只查看初次入城记录</span></el-checkbox>
         </div>
-        <div class="kakou">
+        <div class="kakou" style="padding-top: 20px">
           <el-button style="width: 110px" @click="reset">重置</el-button>
           <el-button type="primary" style="width: 110px" @click="tongji" :loading="searchLoading">查询</el-button>
         </div>
@@ -99,6 +101,10 @@
               <el-table-column
                   prop="plateNo"
                   label="车牌号码">
+                <template slot-scope="scope">
+                  <span>{{scope.row.plateNo}}</span>
+                  <i class="icon" v-if="scope.row.firstEnterFlag"></i>
+                </template>
               </el-table-column>
               <el-table-column
                   prop="bayonetName"
@@ -108,20 +114,14 @@
               <el-table-column
                   prop="shotTime"
                   width="240"
-                  label="抓拍时间">
+                  label="入城时间">
               </el-table-column>
               <el-table-column
                   prop="vehicleColor"
-                  label="车牌颜色"
-                  show-overflow-tooltip>
-              </el-table-column>
-              <el-table-column
-                  prop="isSurveillance"
-                  label="布控库"
+                  label="车牌分组"
                   show-overflow-tooltip>
                 <template slot-scope="scope">
-                  <span v-if="scope.row.isSurveillance">是</span>
-                  <span v-else>否</span>
+                  <span>{{scope.row.vehicleType.join(',')}}</span>
                 </template>
               </el-table-column>
               <el-table-column
@@ -362,11 +362,12 @@ export default {
   mounted() {
     getbayonet().then(res=>{
       if (res.data) {
-        this.kakou = res.data.map((item)=>{
-          return item.bayonetList
+        res.data.forEach((item)=>{
+          item.bayonetList.forEach((ite)=>{
+            this.kakou.push(ite)
+          })
         })
       }
-      this.kakou = this.kakou.flat(6)
       this.lll = this.kakou.map((item)=> {
         return item.uid
       })
@@ -578,6 +579,15 @@ export default {
 </script>
 <style lang="scss" scoped>
   .ccrc{
+    .icon{
+      width: 16px;
+      height: 16px;
+      display: inline-block;
+      background: url("../../../../../assets/img/vehicle/new (2).png") no-repeat;
+      vertical-align: middle;
+      padding-bottom: 19px;
+      margin-left: 8px;
+    }
     height: 100%;
     .ccrc_breadcrumb{
       background-color: white;

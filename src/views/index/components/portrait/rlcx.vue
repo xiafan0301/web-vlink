@@ -30,10 +30,10 @@
               placeholder="结束日期">
             </el-date-picker>
           </el-form-item>
-          <el-form-item label="抓拍区域:" label-width="72px">
-            <el-radio-group v-model="searchForm.type" @change="areaTypeChanged">
-              <el-radio :label="1">列表选择</el-radio>
-              <el-radio :label="2">地图选择</el-radio>
+          <el-form-item label="抓拍区域:" label-width="70px" label-position="left">
+            <el-radio-group v-model="searchForm.type" @change="areaTypeChanged" style="display: inline-block; width: 100%;">
+              <el-radio style="width: 50%; margin: 0;" :label="1">列表选择</el-radio>
+              <el-radio style="width: 50%; margin: 0;" :label="2">地图选择</el-radio>
             </el-radio-group>
           </el-form-item>
             <el-form-item v-show="searchForm.type === 1">
@@ -74,7 +74,7 @@
               </div>
             </el-form-item>
             <el-form-item v-show="searchForm.type2 === 1" style="text-align: center; padding: 10px 15px 0 15px;">
-              <el-button style="width: 100%;" size="small" type="primary" :disabled="!curImageUrl" @click="fnHqtz" :loading="hqtzLoading">&nbsp;&nbsp;获取特征&nbsp;&nbsp;</el-button>
+              <el-button style="width: 100%;" :type="curImageUrl ? 'primary' : ''" :disabled="!curImageUrl" @click="fnHqtz" :loading="hqtzLoading">&nbsp;&nbsp;获取特征&nbsp;&nbsp;</el-button>
               <ul class="up_tz_list" v-if="uploadTZObj">
                 <li v-if="uploadTZObj.sex" @click="uploadTZObj.sex.active = !uploadTZObj.sex.active" :class="{'up_tz_list_sed': uploadTZObj.sex.active}">{{uploadTZObj.sex.value}}</li>
                 <li v-if="uploadTZObj.age" @click="uploadTZObj.age.active = !uploadTZObj.age.active" :class="{'up_tz_list_sed': uploadTZObj.age.active}">{{uploadTZObj.age.value}}</li>
@@ -218,7 +218,9 @@
         <ul class="rlcx_r_list clearfix" v-if="dataList && dataList.length > 0">
           <li v-for="(item, index) in dataList" :key="'tzsr_list_' + index" @click="goToDetail(item, index)">
             <div>
-              <img :src="item.subStoragePath" :alt="item.deviceName">
+              <img :src="item.subStoragePath" :alt="item.deviceName" 
+                @dragstart="dragStart($event, item)" @dragend="dragEnd"
+                draggable="true" style="cursor: move;">
               <div>
                 <h4>检索资料</h4>
                 <div><i class="vl_icon rlcx_sj"></i>{{item.shotTime}}</div>
@@ -366,10 +368,26 @@ export default {
     this.getMapGETmonitorList();
   },
   methods: {
+    // 拖拽开始
+    dragStart (ev, item) {
+      if (item && item.subStoragePath) {
+         if (!ev) { ev = window.event; }
+        ev.dataTransfer.setData('upload_pic_url', item.subStoragePath); // 设置属性dataTransfer   两个参数   1：key   2：value
+      }
+    },
+    dragEnd () {
+      // console.log('drag end')
+      // this.dragActiveObj = null;
+    },
+
     uploadEmit (data) {
       console.log('uploadEmit data', data);
       if (data && data.path) {
         this.curImageUrl = data.path;
+      } else {
+        this.curImageUrl = null;
+        this.hqtzLoading = false;
+        this.uploadTZObj = {};
       }
     },
     // 获取特征
@@ -393,7 +411,7 @@ export default {
         bussType: 'person', // vehicle机动车、face人脸、person人体
         url: this.curImageUrl
       }).then(jRes => {
-        if (jRes && jRes.data) {
+        if (jRes && jRes.data && this.curImageUrl) {
           this.uploadTZObj = {
             sex: {active: true, value: jRes.data.sex},
             age: {active: true, value: jRes.data.age},
@@ -872,7 +890,8 @@ export default {
     margin-bottom: 10px;
   }
   .el-form-item__label {
-    padding-right: 5px;
+    text-align: left;
+    padding-right: 0;
   }
   .el-radio {
     margin-right: 5px;

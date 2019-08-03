@@ -258,7 +258,7 @@
                   <span :title="item.vehicleNumber">{{item.vehicleNumber}}</span><span :title="item.numberType">{{item.numberType}}</span>
                 </div>
                 <div class="data_list">
-                  <span :title="item.vehicleType">{{item.vehicleType}}</span><span :title="item.vehicleColor">{{item.vehicleColor}}</span>
+                  <span :title="item.vehicleType" v-if="item.vehicleType">{{item.vehicleType}}</span><span :title="item.vehicleColor" v-if="item.vehicleColor">{{item.vehicleColor}}</span>
                 </div>
                 <div class="data_list">
                   <span :title="item.numberColor">{{item.numberColor}}</span>

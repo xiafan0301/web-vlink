@@ -59,7 +59,7 @@
             class="vl_date">
           </el-date-picker>
         </div>
-        <div class="left_end" v-show="queryForm.statementType === 5">
+        <div class="left_end" v-show="queryForm.statementType === 5" style="padding-bottom: 0;">
           <el-date-picker
             :clearable="false"
             style="width: 100%;"
@@ -84,7 +84,7 @@
               <i class="vl_icon vl_icon_vehicle_cll_02" @click="changeTab(2)" :class="{'active': tabIndex === 2}" ></i>
               <i class="vl_icon vl_icon_vehicle_cll_03" @click="tabIndex = 3" :class="{'active': tabIndex === 3}" v-show="queryForm.statementType !== 5"></i>
             </div>
-            <h1>({{dateTitle}})车流量统计</h1>
+            <h1>({{statementTitle}})车流量统计</h1>
             <el-button class="btn_100" type="primary" @click="exportExcel" :loading="loadingBtnExport">导出</el-button>
           </div>
           <div class="main_box" v-show="tabIndex === 1">
@@ -115,8 +115,8 @@
   </div>
 </template>
 <script>
-let startTime = formatDate(new Date(new Date(new Date().toLocaleDateString())).getTime() - 24*60*60*1000, 'yyyy-MM-dd HH:mm:ss');
-let endTime = formatDate(new Date(new Date(new Date().toLocaleDateString())).getTime() - 1, 'yyyy-MM-dd HH:mm:ss');
+let startTime = formatDate(new Date(new Date(new Date().toLocaleDateString('zh-Hans-CN').replace(/日/g, '').replace(/\/|年|月/g, '/').replace(/[^\d/]/g,''))).getTime() - 24*60*60*1000, 'yyyy-MM-dd HH:mm:ss');
+let endTime = formatDate(new Date(new Date(new Date().toLocaleDateString('zh-Hans-CN').replace(/日/g, '').replace(/\/|年|月/g, '/').replace(/[^\d/]/g,''))).getTime() - 1, 'yyyy-MM-dd HH:mm:ss');
 import G2 from '@antv/g2';
 import { View } from '@antv/data-set';
 import {apiCarFlow, exportExcel} from '@/views/index/api/api.vehicle.js';
@@ -177,6 +177,7 @@ export default {
           label: m.enumValue
         }
       }),
+      statementTitle: null,
       // laneList: [],
       statementTypeList: [
         {label: '日报表', value: 1},
@@ -206,26 +207,24 @@ export default {
       afterDate: null
     }
   },
-  computed: {
-    dateTitle () {
-      const type = this.queryForm.statementType;
-      if (type === 1) {
-        return '日报表';
-      } else if (type === 2) {
-        return '周报表';
-      } else if (type === 3) {
-        return '月报表';
-      } else if (type === 4) {
-        return '年报表';
-      } else if (type === 5) {
-        return '自定义时间段'
-      }
-    }
-  },
   mounted () {
     this.getListBayonet();
   },
   methods: {
+    getTitle () {
+      const type = this.queryForm.statementType;
+      if (type === 1) {
+        this.statementTitle = '日报表';
+      } else if (type === 2) {
+        this.statementTitle = '周报表';
+      } else if (type === 3) {
+        this.statementTitle = '月报表';
+      } else if (type === 4) {
+        this.statementTitle = '年报表';
+      } else if (type === 5) {
+        this.statementTitle = '自定义时间段';
+      }
+    },
     // 验证输入的警戒值
     validationWarningNum () {
       const reg = /^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$/;
@@ -293,13 +292,13 @@ export default {
         width: G2.DomUtil.getWidth(temp),
         height: G2.DomUtil.getHeight(temp)
       });
-      let dv = new View().source(this.chartData);
-      dv.transform({
-        type: 'fold',
-        fields: ['车流量'], // 展开字段集
-        key: 'type', // key字段
-        value: 'value', // value字段
-      });
+      // let dv = new View().source(this.chartData);
+      // dv.transform({
+      //   type: 'fold',
+      //   fields: ['车流量'], // 展开字段集
+      //   key: 'type', // key字段
+      //   value: 'value', // value字段
+      // });
       // impute 补全列/补全字段
       // dv.transform({
       //   type: 'impute',
@@ -316,18 +315,13 @@ export default {
       // .position('date*车流量1') 
       // .color('#F2F2F2')
       // .size(30);
-      chart.source(dv, {
-        'value': {
+      chart.source(this.chartData, {
+        '车流量': {
           min: 0
         }
       });
-      chart.axis('value', {
-        title: null,
-        position: 'left'
-      });
       // 坐标轴刻度
-      chart.scale('value', {
-        alias: '车流量',
+      chart.scale('车流量', {
         title: {
           offset: 50
         }
@@ -340,13 +334,6 @@ export default {
             fill: '#999999',
             fontSize: 12
           }
-        },
-        tickLine: {
-          alignWithLabel: true,
-          length: 0
-        },
-        line: {
-          lineWidth: 0
         }
       });
       chart.tooltip({
@@ -359,15 +346,15 @@ export default {
       });
       chart.legend(false);
       chart.interval()
-      .position('date*value')
+      .position('date*车流量')
       .color('l(270) 0:#0C70F8 1:#0D9DF4')
       .size(30);
 
       if (this.queryForm.warningNum > 0) {
         chart.guide().line({
           top: true,
-          start: [dv.rows[0].date, this.queryForm.warningNum],
-          end: [dv.rows[dv.rows.length - 1].date, this.queryForm.warningNum],
+          start: [this.chartData[0].date, this.queryForm.warningNum],
+          end: [this.chartData[this.chartData.length - 1].date, this.queryForm.warningNum],
           lineStyle: {
             stroke: '#ef5555',
             lineWidth: 2,
@@ -388,21 +375,21 @@ export default {
         width: G2.DomUtil.getWidth(temp),
         height: G2.DomUtil.getHeight(temp)
       });
-      let dv = new View().source(this.chartData);
-      dv.transform({
-        type: 'fold',
-        fields: ['车流量'], // 展开字段集
-        key: 'type', // key字段
-        value: 'value', // value字段
-      });
-      chart.source(dv, {
-        'value': {
+      // let dv = new View().source(this.chartData);
+      // dv.transform({
+      //   type: 'fold',
+      //   fields: ['车流量'], // 展开字段集
+      //   key: 'type', // key字段
+      //   value: 'value', // value字段
+      // });
+      chart.source(this.chartData, {
+        '车流量': {
           min: 0
         }
       });
        
       // 坐标轴刻度
-      chart.scale('value', {
+      chart.scale('车流量', {
         title: {
           offset: 50
         }
@@ -416,13 +403,6 @@ export default {
               fill: '#999999',
               fontSize: 12
             }
-          },
-          tickLine: {
-            alignWithLabel: true,
-            length: 0
-          },
-          line: {
-            lineWidth: 0
           }
         });
       }
@@ -435,14 +415,14 @@ export default {
         }
       });
       chart.legend(false);
-      chart.area().position('date*value').color('type', ['#007EFF']).shape('smooth').opacity(0.6);
-      chart.line().position('date*value').color('type', ['#207BF1']).size(1).shape('smooth');
-      chart.point().position('date*value').color('type', ['#207BF1']).size(2).shape('smooth');
+      chart.area().position('date*车流量').color('#007EFF').shape('smooth').opacity(0.6);
+      chart.line().position('date*车流量').color('#207BF1').size(1).shape('smooth');
+      chart.point().position('date*车流量').color('#207BF1').size(2).shape('smooth');
       if (this.queryForm.warningNum > 0) {
         chart.guide().line({
           top: true,
-          start: [dv.rows[0].date, this.queryForm.warningNum],
-          end: [dv.rows[dv.rows.length -1].date, this.queryForm.warningNum],
+          start: [this.chartData[0].date, this.queryForm.warningNum],
+          end: [this.chartData[this.chartData.length -1].date, this.queryForm.warningNum],
           lineStyle: {
             stroke: '#ef5555',
             lineWidth: 2,
@@ -492,6 +472,7 @@ export default {
     },
     // 获取车流量统计数据
     getCarTrafficSta () {
+      this.getTitle();
       this.chartData = [];
       this.headerList = [];
       this.bodyList = [];
@@ -595,7 +576,7 @@ export default {
       .left_btn{
         display: flex;
         justify-content: space-between;
-        padding-top: 10px;
+        padding-top: 20px;
       }
       .el-select{
         width: 100%;

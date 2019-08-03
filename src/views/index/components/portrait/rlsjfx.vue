@@ -27,7 +27,7 @@
               <i class="vl_icon vl_icon_portrait_rlsjfx_03"></i>
               <div>
                 <p>男性:女性</p>
-                <h1>{{rlsjfxDetail.malePerInSur}}:{{rlsjfxDetail.femalePerInSur}}</h1>
+                <h1>{{rlsjfxDetail.malePerInSur}}&nbsp;:&nbsp;{{rlsjfxDetail.femalePerInSur}}</h1>
               </div>
             </div>
             <div class="item">
@@ -65,7 +65,7 @@
               <i class="vl_icon vl_icon_portrait_rlsjfx_03"></i>
               <div>
                 <p>男性:女性</p>
-                <h1>{{rlsjfxDetail.malePerInBase}}:{{rlsjfxDetail.femalePerInBase}}</h1>
+                <h1>{{rlsjfxDetail.malePerInBase}}&nbsp;:&nbsp;{{rlsjfxDetail.femalePerInBase}}</h1>
               </div>
             </div>
             <div class="item">
@@ -85,7 +85,7 @@
             <span @click="skipPortraitSearch">查看更多></span>
           </div>
           <div class="face_snap_form">
-            <div ref="devSelect" is="devSelect" @sendSelectData="getSelectData" @allSelectLength="allSelectLength"></div>
+            <div ref="devSelect" is="devSelect" :flag="1" @sendSelectData="getSelectData" @allSelectLength="allSelectLength"></div>
             <!-- @change="validationDate(faceSnapForm)" -->
             <el-date-picker
               class="vl_date"
@@ -112,9 +112,9 @@
                 popper-class="five_info"
                 trigger="hover">
                 <div>
-                  <h1>抓拍人脸数TOP5</h1>
+                  <h1>抓拍人脸数<span>TOP5</span></h1>
                   <ul>
-                    <li v-for="(item,index) in faceSnapSta.device" :key="index"><span>{{item.name}}</span><span>{{item.total}}张</span></li>
+                    <li v-for="(item,index) in faceSnapSta.device" :key="index"><span :title="item.name">{{item.name | strCutWithLen(15)}}</span><span>{{item.total}}张</span></li>
                   </ul>
                 </div>
                 <span slot="reference" class="five">TOP5</span>
@@ -334,9 +334,7 @@ export default {
           this.faceSnapSta = res.data;
           let timeDto = this.faceSnapSta.timeDto
           if(timeDto && timeDto.length > 0) {
-            this.chartData1 = timeDto.map(m => {
-              return { time: m.name, count: m.total };
-            })
+            this.chartData1 = timeDto;
             this.drawChart1();
           } else {
             this.chartData1 = [];
@@ -362,9 +360,7 @@ export default {
           this.faceControlSta = res.data;
           let timeDto = this.faceControlSta.timeDto
           if(timeDto && timeDto.length > 0) {
-            this.chartData2 = timeDto.map(m => {
-              return { time: m.name, count: m.total };
-            })
+            this.chartData2 = timeDto;
             this.drawChart2();
           } else {
             this.chartData2 = [];
@@ -379,10 +375,10 @@ export default {
       })
     },
     // 转换时间间隔
-    // transformTime (title) {
-    //   if (title === '0点') return 0;
-    //   return title.length === 2 ? parseInt(title.slice(0, 1)) - 1 : parseInt(title.slice(0, 2)) - 1;
-    // },
+    transformTime (title) {
+      if (title === '0点') return 0;
+      return title.length === 2 ? parseInt(title.slice(0, 1)) - 1 : parseInt(title.slice(0, 2)) - 1;
+    },
     // 画抓拍人脸数图表
     drawChart1 () {
       let chart = null,_this = this;
@@ -399,55 +395,41 @@ export default {
           height: G2.DomUtil.getHeight(temp)
         });
       }
-      let dv = new View().source(this.chartData1);
-      dv.transform({
-        type: 'fold',
-        fields: ['count'], // 展开字段集
-        key: 'type', // key字段
-        value: 'value', // value字段
-        retains: ['time']
-      });
-
-      chart.source(dv, {
-        'value': {
+      chart.source(this.chartData1, {
+        'total': {
           min: 0
         }
       });
-      // 坐标轴刻度
-      chart.axis('value', {
-        title: null
-      });
-      chart.axis('time', {
+      chart.axis('name', {
         label: {
           textStyle: {
             fill: '#999999',
             fontSize: 12
           }
-        },
-        tickLine: {
-          alignWithLabel: false,
-          length: 0
-        },
-        line: {
-          lineWidth: 0
         }
       });
-      chart.axis('count1', false)
       chart.tooltip({
         useHtml: true,
         htmlContent: function (title, items) {
-          return`<div class="my_tooltip"><h1>${title}</h1><span><span>${items[0].value}</span><span>张</span></span></div>`;
+          let str = `<div class="my_tooltip">`;
+          if (title === '0点') {
+            str += `<h1>${title}</h1>`;
+          } else {
+            str += `<h1>${_this.transformTime(title)}-${title}</h1>`;
+          }
+          str += `<span><span>${items[0].value}</span><span>张</span></span></div>`;
+          return str;
+          // return`<div class="my_tooltip"><h1>${title}</h1><span><span>${items[0].value}</span><span>张</span></span></div>`;
         }
       });
       chart.legend(false);
-      chart.line().position('time*value').color('type', [ '#00C4FC']).size(2).shape('smooth');
-      chart.area().position('time*value').color([ 'l(270) 0:#ffffff 1:#00C4FC' ]).shape('smooth');
+      chart.line().position('name*total').shape('hv').color('#088BFD').size(2);
+      // chart.area().position('time*value').color([ 'l(270) 0:#ffffff 1:#00C4FC' ]).shape('smooth');
       chart.render();
       this.charts.chart1 = chart;
     },
     // 画布控告警次数图表
     drawChart2 () {
-      // if (this.chartData2.length === 0) return;
       let chart = null,_this = this;
       if (this.charts.chart2) {
         this.charts.chart2.clear();
@@ -462,47 +444,36 @@ export default {
           height: G2.DomUtil.getHeight(temp)
         });
       }
-      let dv = new View().source(this.chartData2);
-      dv.transform({
-        type: 'fold',
-        fields: ['count'], // 展开字段集
-        key: 'type', // key字段
-        value: 'value', // value字段
-        retains: ['time']
-      });
-
-      chart.source(dv, {
-        'value': {
+      chart.source(this.chartData2, {
+        'total': {
           min: 0
         }
       });
-      chart.axis('value', {
-        title: null
-      });
-      chart.axis('time', {
+      chart.axis('name', {
         label: {
           textStyle: {
             fill: '#999999',
             fontSize: 12
           }
-        },
-        tickLine: {
-          alignWithLabel: false,
-          length: 0
-        },
-        line: {
-          lineWidth: 0
         }
       });
       chart.tooltip({
         useHtml: true,
         htmlContent: function (title, items) {
-          return`<div class="my_tooltip"><h1>${title}</h1><span><span>${items[0].value}</span><span>张</span></span></div>`;
+          let str = `<div class="my_tooltip">`;
+          if (title === '0点') {
+            str += `<h1>${title}</h1>`;
+          } else {
+            str += `<h1>${_this.transformTime(title)}-${title}</h1>`;
+          }
+          str += `<span><span>${items[0].value}</span><span>次</span></span></div>`;
+          return str;
+          // return`<div class="my_tooltip"><h1>${title}</h1><span><span>${items[0].value}</span><span>张</span></span></div>`;
         }
       });
       chart.legend(false);
-      chart.line().position('time*value').color('type', [ '#00C4FC']).size(2).shape('smooth');
-      chart.area().position('time*value').color([ 'l(270) 0:#ffffff 1:#00C4FC' ]).shape('smooth');
+      chart.line().position('name*total').shape('hv').color('#088BFD').size(2);
+      // chart.area().position('time*value').color([ 'l(270) 0:#ffffff 1:#00C4FC' ]).shape('smooth');
       chart.render();
       this.charts.chart2 = chart;
     }
@@ -556,12 +527,12 @@ export default {
             background: #0C70F8;
             display: flex;
             flex-wrap: nowrap;
-            justify-content: space-between;
+            justify-content: space-around;
             padding: 10px;
             > div{
               text-align: center;
-              line-height: 30px;
               > p{
+                margin-top: 16px;
                 color: #FFFFFF;
                 font-size: 12px;
               }
@@ -629,13 +600,14 @@ export default {
             width: 33.33%;
             color: #333333;
             .five{
-              font-size: 12px;
-              color: #fff;
+              padding: 2px 5px;
               display: inline-block;
               line-height: 12px;
               text-align: center;
               margin-left: 10px;
               background: #FA453A;
+              font-size: 12px;
+              color: #fff;
             }
           }
         }
@@ -698,6 +670,9 @@ export default {
   > div{
     > h1{
       color: #FA453A;
+      >span{
+        font-weight: bold;
+      }
     }
     > ul > li{
       line-height: 25px;
