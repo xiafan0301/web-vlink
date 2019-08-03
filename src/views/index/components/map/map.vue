@@ -817,7 +817,7 @@
         return list;
       },
       // 地图标记
-      mapMark (data) {
+      mapMark (data, bool) {
         if (data && data.length > 0) {
           let _this = this;
           for (let i = 0; i < data.length; i++) {
@@ -1021,7 +1021,9 @@
               }
             })
           }
-          this.map.setFitView();
+          if (!bool) {
+            this.map.setFitView();
+          }
         }
       },
       // 清除车辆路线和图标

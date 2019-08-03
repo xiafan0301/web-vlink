@@ -17,26 +17,31 @@
           class="demo-ruleForm"
         >
           <el-form-item>
-            <el-upload
-                class="vl_jtc_upload_gjfx gjfx_upload"
-                multiple
-                :show-file-list="false"
-                accept="image/*"
-                :action="uploadAcion"
-                list-type="picture-card"
-                :before-upload="beforeAvatarUpload"
-                :on-success="uploadSucess"
-                :on-error="handleError">
-              <i v-if="uploading" class="el-icon-loading"></i>
-              <img v-else-if="ruleForm.input3" :src="ruleForm.input3">
-              <div v-else>
-                <i
-                        style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
-                        class="vl_icon vl_icon_vehicle_01"
-                ></i>
-                <span>点击上传图片</span>
+            <div class="upload_warp">
+              <el-upload
+                      class="vl_jtc_upload_gjfx gjfx_upload"
+                      multiple
+                      :show-file-list="false"
+                      accept="image/*"
+                      :action="uploadAcion"
+                      list-type="picture-card"
+                      :before-upload="beforeAvatarUpload"
+                      :on-success="uploadSucess"
+                      :on-error="handleError">
+                <i v-if="uploading" class="el-icon-loading"></i>
+                <img v-else-if="ruleForm.input3" :src="ruleForm.input3">
+                <div v-else>
+                  <i
+                          style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
+                          class="vl_icon vl_icon_vehicle_01"
+                  ></i>
+                  <span>点击上传图片</span>
+                </div>
+              </el-upload>
+              <div v-show="ruleForm.input3" class="del_icon">
+                <i class="el-icon-delete" @click="delPic()"></i>
               </div>
-            </el-upload>
+            </div>
           </el-form-item>
           <el-form-item class="" prop="data1">
             <el-date-picker
@@ -135,6 +140,11 @@
         <i class="el-icon-close" @click="strucDetailDialog = false"></i>
       </div>
       <div class="struc_main">
+        <ul v-show="strucCurTab === 1">
+          <!-- <li><span>抓拍设备：{{sturcDetail.deviceName}}</span></li> -->
+          <li><span style="line-height: 0.24rem;">抓拍地址：{{sturcDetail.address}}</span></li>
+          <li style="color: #999;line-height: 0.24rem;">{{sturcDetail.shotTime}}</li>
+        </ul>
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
             <img class="bigImg" :src="sturcDetail.subStoragePath" alt="">
@@ -146,27 +156,102 @@
               <span>全景图</span>
             </div>
             <div class="struc_c_d_info">
-              <h2>对比信息</h2>
-              <div class="struc_cdi_line">
-                <span><font>抓拍时间</font>{{sturcDetail.shotTime}}</span>
+              <h2>分析结果</h2>
+              <!--<div class="struc_cdi_line">-->
+                <!--<span><font>抓拍时间</font>{{sturcDetail.shotTime}}</span>-->
+              <!--</div>-->
+              <!--<div class="struc_cdi_line">-->
+                <!--<span><font>抓拍设备</font>{{sturcDetail.deviceName}}</span>-->
+              <!--</div>-->
+              <!--<div class="struc_cdi_line">-->
+                <!--<span><font>抓拍地址</font>{{sturcDetail.address}}</span>-->
+              <!--</div>-->
+              <!--<div class="struc_cdi_line">-->
+                <!--<span class="tz"><font>特征</font><p>{{sturcDetail.sex+" "+(sturcDetail.age || "")+ " "+ (sturcDetail.baby || "")+ " " + (sturcDetail.bag || "")+ " " + (sturcDetail.bottomColor || "") +(sturcDetail.bottomType || "")+ " " + (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+ " "+(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")}}</p></span>-->
+              <!--</div>-->
+              <div class="struc_cd_info_main">
+                <vue-scroll>
+                  <div class="struc_cdi_line" v-if="sturcDetail.sex">
+                    <p>
+                      <b>性别</b>
+                      <span>{{sturcDetail.sex}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.age">
+                    <p>
+                      <b>年龄段</b>
+                      <span>{{sturcDetail.age}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.glasses">
+                    <p>
+                      <b>眼镜</b>
+                      <span>{{sturcDetail.glasses}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.hat">
+                    <p>
+                      <b>帽子</b>
+                      <span>{{sturcDetail.hat}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.mask">
+                    <p>
+                      <b>口罩</b>
+                      <span>{{sturcDetail.mask}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.hair">
+                    <p>
+                      <b>发型</b>
+                      <span>{{sturcDetail.hair}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.upperType">
+                    <p>
+                      <b>上身款式</b>
+                      <span>{{sturcDetail.upperType}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.upperColor">
+                    <p>
+                      <b>上身颜色</b>
+                      <span>{{sturcDetail.upperColor}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.bottomType">
+                    <p>
+                      <b>下身款式</b>
+                      <span>{{sturcDetail.bottomType}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.bottomColor">
+                    <p>
+                      <b>下身颜色</b>
+                      <span>{{sturcDetail.bottomColor}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.baby">
+                    <p>
+                      <b>抱小孩</b>
+                      <span>{{sturcDetail.baby}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.bag">
+                    <p>
+                      <b>拎东西</b>
+                      <span>{{sturcDetail.bag}}</span>
+                    </p>
+                  </div>
+                </vue-scroll>
               </div>
-              <div class="struc_cdi_line">
-                <span><font>抓拍设备</font>{{sturcDetail.deviceName}}</span>
-              </div>
-              <div class="struc_cdi_line">
-                <span><font>抓拍地址</font>{{sturcDetail.address}}</span>
-              </div>
-              <div class="struc_cdi_line">
-                <span class="tz"><font>特征</font><p>{{sturcDetail.sex+" "+(sturcDetail.age || "")+ " "+ (sturcDetail.baby || "")+ " " + (sturcDetail.bag || "")+ " " + (sturcDetail.bottomColor || "") +(sturcDetail.bottomType || "")+ " " + (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+ " "+(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")}}</p></span>
-              </div>
-              <div class="struc_cdi_line"></div>
             </div>
-            <span>抓拍信息</span>
+            <!--<span>抓拍信息</span>-->
           </div>
           <!--跳转按钮-->
           <div class="struc_t_btn">
             <a @click="gotoControl(sturcDetail.subStoragePath)">新建布控</a>
-            <a @click="gotoLjd(sturcDetail.subStoragePath)">落脚地分析</a>
+            <a @click="gotoLjd(sturcDetail.subStoragePath)">落脚点分析</a>
           </div>
         </div>
         <div v-show="strucCurTab === 2" class="struc_c_address"></div>
@@ -348,6 +433,9 @@
       }
     },
     methods: {
+      delPic () {
+        this.ruleForm.input3 = '';
+      },
       chooseEndTime (e) {
         if (e < this.ruleForm.data1) {
           this.$message.info('结束时间必须大于开始时间才会有结果')
@@ -633,7 +721,9 @@
               content: _content
             });
             point.on('click', () => {
-              this.showStrucInfo(obj, i)
+              let newObj = objDeepCopy(obj);
+              newObj.shotTime = newObj.shotTime.split(',')[0];
+              this.showStrucInfo(newObj, i)
             })
             this.markerPoint[i] = [point];
           }
@@ -746,6 +836,29 @@
   };
 </script>
 <style lang="scss" scoped>
+  .upload_warp {
+    position: relative;
+    .del_icon {
+      display: none;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 24px;
+      height: 24px;
+      line-height: 24px;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.4);
+      -webkit-border-radius: 4px;
+      -moz-border-radius: 4px;
+      border-radius: 4px;
+      color: #ffffff;
+    }
+    &:hover {
+      .del_icon {
+        display: block;
+      }
+    }
+  }
   .map_rrt_u2 {
     position: absolute; right: 30px;
     bottom: 30px;
@@ -1213,6 +1326,18 @@
         border-radius: 6px;
       }
     }
+    span {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      margin-top: 126px;
+      color: #999;
+    }
+    &:hover span {
+      color: #fff;
+    }
   }
   .gjfx_upload {
     &:hover {
@@ -1259,7 +1384,7 @@
     }
     .struc_main {
       width: 11.46rem;
-      height: 4.4rem;
+      height: 5rem;
       margin: 0 auto;
       border-bottom: 1px solid #F2F2F2;
       .struc_c_detail {
@@ -1366,70 +1491,46 @@
                 }
               }
             }
+            .struc_cd_info_main {
+              height: 2.75rem;
+            }
             .struc_cdi_line {
-              >span {
-                /*position: relative;*/
-                max-width: 100%;
-                display: inline-block;
-                height: .3rem;
-                line-height: .3rem;
-                margin-bottom: .08rem;
-                border: 1px solid #F2F2F2;
-                color: #333333;
-                white-space: nowrap;
-                text-overflow: ellipsis;
-                border-radius:3px;
-                font-size: 12px;
-                overflow: hidden;
-                padding-right: .1rem;
-                margin-right: .08rem;
-                > i {
-                  vertical-align: middle;
-                  margin-left: .1rem;
-                }
-                > font {
-                  width: 75px;
-                  text-align: center;
-                  border-right: 1px solid #F2F2F2;
-                  color: #999999;
-                  background: #FAFAFA;
-                  display: inline-block;
-                  margin-right: .1rem;
-                }
-              }
-              .tz {
-                display: flex;
-                white-space: normal;
-                overflow: visible;
-                height: auto;
-                border: none;
-                font {
-                  flex-shrink: 0;
-                  width: 75px;
-                  border: 1px solid #F2F2F2;
-                  -webkit-border-radius: 3px 0 0 3px;
-                  -moz-border-radius: 3px 0 0 3px;
-                  border-radius: 3px 0 0 3px;
-                  margin-right: 0px;
-                  border-right: none;
-                }
-                >p{
-                  color: #333333;
-                  border: 1px solid #F2F2F2;
-                  -webkit-border-radius: 0 3px 3px 0;
-                  -moz-border-radius: 0 3px 3px 0;
-                  border-radius: 0 3px 3px 0;
-                  padding-left: .1rem;
-                }
-              }
+              flex: none;
+              width: 50%;
+              display: inline-block;
               p {
-                color: #999999;
+                max-width: 100%;
+                overflow: hidden;
+                display: table;
+                min-height: 30px;
+                margin-bottom: 0.08rem;
+                padding-right: 10px;
+                margin-right: 0.08rem;
+                border: 1px solid #f2f2f2;
+                border-radius: 3px;
+                font-size: 12px;
+                > b {
+                  width: 70px;
+                  background: #fafafa;
+                  color: #999;
+                  font-weight: normal;
+                  padding-right: 10px;
+                  padding-left: 10px;
+                  display: table-cell;
+                  vertical-align: middle;
+                  border-right: 1px solid #f2f2f2;
+                }
+                >span {
+                  display: table-cell;
+                  vertical-align: middle;
+                  padding-left: 5px;
+                }
               }
             }
           }
           &:before {
             display: block;
-            content: '';
+            content: none;
             position: absolute;
             top: -.7rem;
             right: -.7rem;
@@ -1439,7 +1540,7 @@
           }
           &:after {
             display: block;
-            content: '';
+            content: none;
             position: absolute;
             top: -.4rem;
             right: -.4rem;

@@ -3,7 +3,7 @@
     <div class="">
       <div is="vlBreadcrumb"
            :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
-            {name: '以图搜人', routerName: 'portrait_ytsr_list'},
+            {name: '以图搜人', routerName: 'portrait_ytsr_moment'},
             {name: '搜索结果'}]">
       </div>
     </div>

@@ -86,10 +86,11 @@ export function PortraitPostPersonTrace(data) {
  * 以图搜人实时/离线判断
  * @data {object} data
  */
-export function PortraitGetDispatch() {
+export function PortraitGetDispatch(data) {
   return request({
     url: '/portrait/by-photo/dispatch',
-    method: 'get',
+    method: 'post',
+    data,
     mode: 'judge'
   })
 }

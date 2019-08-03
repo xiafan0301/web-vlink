@@ -36,6 +36,11 @@
         <i class="el-icon-close" @click="strucDetailDialog = false"></i>
       </div>
       <div class="struc_main">
+        <ul v-show="strucCurTab === 1">
+          <!-- <li><span>抓拍设备：{{sturcDetail.deviceName}}</span></li> -->
+          <li><span>抓拍地址：{{sturcDetail.address}}</span></li>
+          <li style="color: #999;">{{sturcDetail.shotTime}}</li>
+        </ul>
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
             <img :src="sturcDetail.subStoragePath"  class="bigImg" alt="">
@@ -51,20 +56,20 @@
               <div class="struc_cd_info_main">
                 <vue-scroll>
                   <div class="scroll_box">
-                    <div class="struc_cdi_line">
-                      <span :title="sturcDetail.shotTime"><font>抓拍时间</font>{{sturcDetail.shotTime}}</span>
-                    </div>
-                    <div class="struc_cdi_line">
-                      <span :title="sturcDetail.deviceName"><font>抓拍设备</font>{{sturcDetail.deviceName}}</span>
-                    </div>
-                    <div class="struc_cdi_line">
-                      <span :title="sturcDetail.address"><font>抓拍地址</font>{{sturcDetail.address}}</span>
-                    </div>
+                    <!--<div class="struc_cdi_line">-->
+                      <!--<span :title="sturcDetail.shotTime"><font>抓拍时间</font>{{sturcDetail.shotTime}}</span>-->
+                    <!--</div>-->
+                    <!--<div class="struc_cdi_line">-->
+                      <!--<span :title="sturcDetail.deviceName"><font>抓拍设备</font>{{sturcDetail.deviceName}}</span>-->
+                    <!--</div>-->
+                    <!--<div class="struc_cdi_line">-->
+                      <!--<span :title="sturcDetail.address"><font>抓拍地址</font>{{sturcDetail.address}}</span>-->
+                    <!--</div>-->
                     <div class="struc_cdi_line">
                       <span :title="sturcDetail.plateNo"><font>车牌号码</font>{{sturcDetail.plateNo}}</span>
                     </div>
                     <div class="struc_cdi_line">
-                      <span :title="sturcDetail.plateColor"><font>号牌颜色</font>{{sturcDetail.plateColor}}</span>
+                      <span :title="sturcDetail.plateColor"><font>车牌颜色</font>{{sturcDetail.plateColor}}</span>
                     </div>
                     <div class="struc_cdi_line">
                       <span :title="sturcDetail.vehicleModel"><font>车辆型号</font>{{sturcDetail.vehicleModel}}</span>
@@ -423,7 +428,7 @@
     }
     .struc_main {
       width: 11.46rem;
-      height: 4.4rem;
+      height: 5rem;
       margin: 0 auto;
       border-bottom: 1px solid #F2F2F2;
       .struc_c_detail {
