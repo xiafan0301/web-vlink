@@ -604,13 +604,12 @@ export default {
       console.log('obj', obj)
       e.stopPropagation();
 
-      this.editDepartmentDialog = true;
 
       this.getDetail(obj.uid);
 
       const params = {
         'where.proKey': this.userInfo.proKey,
-        'where.organPid': obj.uid,
+        'where.organPid': this.userInfo.organList[0].uid,
         pageSize: 0
       };
       getDepartmentList(params)
@@ -622,6 +621,17 @@ export default {
             });
           }
         })
+      console.log('this.departmentFormList', this.departmentFormList)
+      this.editDepartmentDialog = true;
+
+    },
+    // 确认编辑部门
+    editUnitInfo (form) {
+      this.$refs[form].validate(valid => {
+        if (valid) {
+          
+        }
+      })
     },
     // 显示删除部门弹出框
     onDeleteDepart (obj, e) {
@@ -642,14 +652,14 @@ export default {
       };
       getDepartDetail(params)
         .then(res => {
-          if (res) {
+          if (res && res.data) {
             console.log('res', res)
-            // this.editUnit.organName = obj.organName;
-            // this.editUnit.organPid = obj.organPid;
-            // this.editUnit.province = obj.province;
-            // this.editUnit.city = obj.city;
-            // this.editUnit.region = obj.region;
-            // this.editUnit.street = obj.street;
+            this.editUnit.organName = res.data.organName;
+            this.editUnit.organPid = res.data.organPid;
+            this.editUnit.province = res.data.province;
+            this.editUnit.city = res.data.city;
+            this.editUnit.region = res.data.region;
+            this.editUnit.street = res.data.street;
           }
         })
     }

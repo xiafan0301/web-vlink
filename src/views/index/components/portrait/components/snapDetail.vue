@@ -135,14 +135,13 @@
                   <span>{{sturcDetail.sex+" "+(sturcDetail.age || "")+ " " + (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+" "+ (sturcDetail.baby || "")+ " " + (sturcDetail.bag || "") + " "+(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")+ " " + (sturcDetail.bottomColor || "") +(sturcDetail.bottomType || "")}}</span>
                 </p>
               </div> -->
-              <div class="struc_cdi_line"></div>
                 </vue-scroll>
               </div>
             </div>
             <!-- <span>抓拍信息</span> -->
           </div>
-          <div class="operate_btn" @click="spinToRecog()">身份确认</div>
-          <div class="operate_btn margin_btn" @click="spinToGJFX()">轨迹分析</div>
+          <!-- <div class="operate_btn" @click="spinToRecog()">身份确认</div> -->
+          <div class="operate_btn" @click="spinToGJFX()">轨迹分析</div>
           <div class="operate_btn margin_btn" @click="spinToLJD()">落脚点分析</div>
           <div class="operate_btn margin_btn" @click="spinToControl()">新建布控</div>
         </div>
@@ -390,6 +389,12 @@ export default {
 };
 </script>
 <style lang="scss">
+html {font-size: 100px;}
+  @media screen and (min-width: 960px) and (max-width: 1119px) {html {font-size: 60px !important;}}
+  @media screen and (min-width: 1200px) and (max-width: 1439px) {html {font-size: 70px !important;}}
+  @media screen and (min-width: 1440px) and (max-width: 1679px) {html {font-size: 80px !important;}}
+  @media screen and (min-width: 1680px) and (max-width: 1919px) {html {font-size: 90px !important;}}
+  @media screen and (min-width: 1920px) {html {font-size: 100px !important;} }
 .snap_dialog {
   height: 100%;
   .struc_detail_dialog_comp {
@@ -424,7 +429,7 @@ export default {
       }
     }
     .struc_main {
-      width: 11.46rem;
+      width: 12rem;
       height: 4.88rem;
       margin: 0 auto;
       border-bottom: 1px solid #f2f2f2;
@@ -631,7 +636,7 @@ export default {
           }
           .struc_c_d_info {
             width: calc(100% - 3.6rem);
-            padding-left: 0.24rem;
+            padding-left: 0.2rem;
             color: #333333;
             h2 {
               font-weight: bold;
@@ -686,9 +691,9 @@ export default {
                 max-width: 100%;
                 overflow: hidden;
                 display: table;
-                min-height: 30px;
+                min-height: .3rem;
                 margin-bottom: 0.08rem;
-                padding-right: 10px;
+                padding-right: .08rem;
                 margin-right: 0.08rem;
                 border: 1px solid #f2f2f2;
                 border-radius: 3px;
@@ -698,8 +703,7 @@ export default {
                   background: #fafafa;
                   color: #999;
                   font-weight: normal;
-                  padding-right: 10px;
-                  padding-left: 10px;
+                  text-align: center;
                   display: table-cell;
                   vertical-align: middle;
                   border-right: 1px solid #f2f2f2;
@@ -707,7 +711,7 @@ export default {
                 >span {
                   display: table-cell;
                   vertical-align: middle;
-                  padding-left: 5px;
+                  padding-left: .08rem;
                 }
               }
             }

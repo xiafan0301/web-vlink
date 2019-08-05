@@ -186,7 +186,7 @@
             show-overflow-tooltip
             >
             <template slot-scope="scope">
-              <span>{{scope.row.deviceStatusStr ? scope.row.deviceStatusStr : '-'}}</span>
+              <span>{{scope.row.deviceStatusStr ? scope.row.deviceStatusStr : '--'}}</span>
             </template>
           </el-table-column>
           <el-table-column label="操作" fixed="right" width="160">

@@ -20,10 +20,10 @@
             <div class="img-box" @click="toSnapDetail(item)">
               <img alt="头像" :src="item.personDetailList[0].subStoragePath">
               <i class="vl_icon vl_icon_portrait_01"></i>
-              <span class="num">
-                {{item.appearTotal}}
+              <p class="num">
+                <span>{{item.appearTotal}}</span>
                 <span class="text">次</span>
-              </span>
+              </p>
             </div>
           </div>
         </div>
@@ -176,39 +176,39 @@ export default {
   .analysis-rc-info {
     height: 100%;
     .analysis-r-content {
-      padding: 30px 0 0 0;
+      padding: .3rem 0 0 0;
       display: flex;
       flex-wrap: wrap;
       .img-item {
-        width: 217px;
-        height: 217px;
-        margin: 0 0 20px 20px;
+        width: 2.17rem;
+        height: 2.17rem;
+        margin: 0 0 .2rem .2rem;
         background-color: #fff;
         box-shadow: 0px 2px 10px 0px rgba(131, 131, 131, 0.12);
         .img-box {
           position: relative;
-          width: 185px;
-          height: 185px;
+          width: 1.85rem;
+          height: 1.85rem;
           background-color: #999;
-          margin: 16px;
+          margin: .16rem;
           >img {
-            width: 185px;
-            height: 185px;
+            width: 1.85rem;
+            height: 1.85rem;
           }
           i {
             position: absolute;
-            top: -1px;
-            right: -1px;
+            top: -0.01rem;
+            right: -0.01rem;
           }
           .num {
             display: block;
             position: absolute;
-            top: -7px;
-            right: -6px;
+            top: -3px;
+            right: -5px;
             width: 100px;
             height: 100px;
             text-align: center;
-            font-size: 20px;
+            font-size: .2rem;
             font-weight: 600;
             color: #fff;
             -webkit-transform: rotate(45deg);
@@ -217,25 +217,22 @@ export default {
             -o-transform: rotate(45deg);
             transform: rotate(45deg);
             z-index: 99;
-            .text {
-              position: absolute;
-              top: 8px;
-              right: 24px;
-              font-weight: 500;
-              font-size: 12px;
-            }
+          }
+          .text {
+            font-weight: 500;
+            font-size: 12px;  
           }
         }
       }
     }
     .cum_pagination {
-      padding: 30px 0 40px 0;
+      padding: .3rem 0 .4rem 0;
       text-align: center;
     }
   }
   .no-data {
     position: fixed;
-    top: 150px;
+    top: 1.5rem;
     right: 0;
     bottom: 0;
     left: 0;
@@ -248,7 +245,7 @@ export default {
       display: inline-block;
       height: 100%;
       vertical-align: middle;
-      margin-top: -30px;
+      margin-top: -.3rem;
     }
     .content {
       display: inline-block;
@@ -256,12 +253,18 @@ export default {
       text-align: center;
       font-size: 14px;
       white-space: normal;
-      margin-top: -30px;
+      margin-top: -.3rem;
     }
   }
 }
 </style>
 <style lang="scss">
+html {font-size: 100px;}
+  @media screen and (min-width: 960px) and (max-width: 1119px) {html {font-size: 60px !important;}}
+  @media screen and (min-width: 1200px) and (max-width: 1439px) {html {font-size: 70px !important;}}
+  @media screen and (min-width: 1440px) and (max-width: 1679px) {html {font-size: 80px !important;}}
+  @media screen and (min-width: 1680px) and (max-width: 1919px) {html {font-size: 90px !important;}}
+  @media screen and (min-width: 1920px) {html {font-size: 100px !important;} }
 .analysis-results {
   .__view {
     width: 100% !important; // vue-scroll样式重置

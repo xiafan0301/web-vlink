@@ -580,13 +580,12 @@ export default {
 <style lang="scss" scoped>
   .ccrc{
     .icon{
-      width: 14px;
-      height: 14px;
+      width: 16px;
+      height: 16px;
       display: inline-block;
-      background: url("../../../../../assets/img/vehicle/new.png") no-repeat;
+      background: url("../../../../../assets/img/vehicle/new (2).png") no-repeat;
       vertical-align: middle;
-      background-size: 14px 14px;
-      padding-bottom: 17px;
+      padding-bottom: 19px;
       margin-left: 8px;
     }
     height: 100%;

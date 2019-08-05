@@ -18,7 +18,7 @@
               :value="item.uid">
             </el-option>
           </el-select>
-          <el-select class="full" v-model="searchData.sex" placeholder="选择性别">
+          <el-select class="full" v-model="searchData.sex" placeholder="请选择性别" clearable>
             <el-option
               v-for="item in sexList"
               :key="item.value"
@@ -26,7 +26,7 @@
               :value="item.value">
             </el-option>
           </el-select>
-          <el-select class="full" v-model="searchData.ageGroup" placeholder="选择年龄段">
+          <el-select class="full" v-model="searchData.ageGroup" placeholder="请选择年龄段" clearable>
             <el-option
               v-for="item in ageGroupList"
               :key="item.value"
@@ -114,6 +114,11 @@
     </div>
     <div :class="['vl_j_right',{hideleft:hideleft}]">
       <div id="tcMap"></div>
+      <ul class="map_rrt_u2">
+        <li  @click="resemt"><i class="el-icon-aim"></i></li>
+        <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
+        <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
+      </ul>
       <div class="vl_jfo_switch">
         <div><span :class="{'active': switchType === 0}" @click="switchType = 0">抓拍结果</span></div>
         <div><span :class="{'active': switchType === 1}" @click="switchType = 1;">关联事件</span></div>
@@ -229,13 +234,23 @@
         </div>
       </div>
     </div>
-    <div style="width: 0; height: 0;" v-show="showCut"  :class="{vl_j_cutscreen: showCut}">
+    <!-- <div style="width: 0; height: 0;" v-show="showCut"  :class="{vl_j_cutscreen: showCut}">
       <img :src="demoImg" alt="">
       <i @click="showCut = false" class="close_btn el-icon-error"></i>
       <a download="截图" :href="demoImg" id="vlJidDownloadImg" ></a>
-    </div>
+    </div> -->
   </div>
-
+  <!-- 截屏 dialog -->
+    <el-dialog title="截屏" :visible.sync="cutDialogVisible" :center="false" :append-to-body="true" width="1000px" style="z-index: 11111;">
+      <div style="text-align: center; padding-top: 30px;">
+        <canvas :id="flvplayerId + '_cut_canvas'"></canvas>
+      </div>
+      <div slot="footer" class="dialog-footer" style="padding: 0 0 20px 0;">
+        <el-button  @click="cutDialogVisible = false">取 消</el-button>&nbsp;&nbsp;&nbsp;&nbsp;
+        <el-button  type="priamry" @click="playerCutSave">保 存</el-button>
+        <a :id="flvplayerId + '_cut_a'" style="display: none;">保存</a>
+      </div>
+    </el-dialog>
   <!-- 地图选择 -->
    <!-- D设备 B卡口  这里是设备和卡口 -->
     <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" :clear="clearMapSelect" @mapSelectorEmit="mapPoint"></div>
@@ -248,6 +263,8 @@ import {getFocusList, newGETAlarmSnapList, JfoGETEventList,getAllDevice } from "
 import {MapGETmonitorList} from '../../api/api.map.js';
 import {getGroupListIsPortrait, getGroupListIsVehicle} from '../../api/api.control.js';
 import mapSelector from '@/components/common/mapSelector.vue';
+import { random14 } from '@/utils/util.js';
+import { mapXupuxian } from "@/config/config.js";
 export default {
    components: {
     mapSelector,
@@ -255,6 +272,8 @@ export default {
   },
   data() {
     return {
+      flvplayerId: 'flv_' + random14(),
+      cutDialogVisible: false, // 截图弹出框
       clearMapSelect: null, // 清除地图选择
       input5:"1",
       areaIds: [],
@@ -267,26 +286,26 @@ export default {
       evData: [],
       searchData: {
         type: 1, // 1：人， 2： 车,0 无限
-        portraitGroupId: '',  // 人员组
+        portraitGroupId: null,  // 人员组
         sex: null, // 1男，2女
         ageGroup: null, // 年龄段
         time1: null,
         time2: null
       },
       sexList: [
-        {value: null, label: '不限'},
+        // {value: null, label: '不限'},
         {value: '男', label: '男'},
         {value: '女', label: '女'}
       ],
       portraitGroupList: [],
       vehicleGroupList: [],
-      focusType: [
-        {value: null, label: '不限'},
-        {value: 1, label: '布控人员'},
-        {value: 2, label: '布控车辆'}
-      ],
+      // focusType: [
+      //   {value: null, label: '不限'},
+      //   {value: 1, label: '布控人员'},
+      //   {value: 2, label: '布控车辆'}
+      // ],
       ageGroupList: [
-        {value: null, label: '不限'},
+        // {value: null, label: '不限'},
         {value: '儿童', label: '儿童'},
         {value: '少年', label: '少年'},
         {value: '青年', label: '青年'},
@@ -371,6 +390,16 @@ export default {
     })
   },
   methods: {
+    mapZoomSet(val) {
+      if (this.amap) {
+        this.amap.setZoom(this.amap.getZoom() + val);
+      }
+    },
+    resemt(){
+      if (this.amap) {
+        this.amap.setZoomAndCenter(14, mapXupuxian.center);
+      }
+    },
     hideResult(){
       this.hideleft = !this.hideleft;
     },
@@ -455,7 +484,7 @@ export default {
     resetSearch () {
       this.setDTime()
       this.searchData.type = null;
-      this.searchData.portraitGroupId = '';
+      this.searchData.portraitGroupId = null;
       this.searchData.sex = null;
       this.searchData.vehicleColor = null;
       this.searchData.ageGroup = null;
@@ -464,7 +493,11 @@ export default {
       this.selectDevice = [];
       this.selectBayonet = [];
       this.selectValue = "已选设备0个";
+      
       this.areaIds = [];
+      this.eventAreas.map(item => {
+        this.areaIds.push(item.areaId);
+      });
 
       this.clearMapSelect = !this.clearMapSelect; // 清除地图选择
 
@@ -637,7 +670,7 @@ export default {
                 x.playing = false;
                 return x;
               });
-              console.log(this.curVideo);
+              console.log('curVideo', this.curVideo);
               
               this.$_hideLoading();
             }
@@ -666,10 +699,11 @@ export default {
       this.curVideo.videoList[_i].playing = !this.curVideo.videoList[_i].playing;
     },
     largeVideo (_i) {
+      this.curVideo.playing = false;
       let vDom = document.getElementById('vlJigVideo' + _i);
       vDom.pause();
       this.curVideo.id = 'vlJigVideo' + _i;
-      this.curVideo.playing = this.curVideo.videoList[_i].playing;
+      // this.curVideo.playing = this.curVideo.videoList[_i].playing;
       this.curVideo.playNum = _i;
       this.showLarge = true;
       if (this.curVideo.videoList[_i].playing) {
@@ -684,6 +718,8 @@ export default {
       })
       document.getElementById('vlJfoLargeV').currentTime = vDom.currentTime;
       this.curVideoUrl = vDom.src;
+
+      console.log('curVideoUrl', this.curVideoUrl)
     },
     closeVideo () {
       let vDom = document.getElementById(this.curVideo.id);
@@ -705,16 +741,61 @@ export default {
       document.getElementById('vlJfoLargeV').play();
     },
     cutScreen () {
-      this.showCut = true;
-      let _canvas = document.createElement('canvas');
-      _canvas.setAttribute('width', document.documentElement.clientWidth);
-      _canvas.setAttribute('height', document.documentElement.clientHeight);
-      let cxt = _canvas.getContext('2d');
-      cxt.drawImage(document.getElementById('vlJfoLargeV'), 0, 0, _canvas.width, _canvas.height);
-      this.demoImg = _canvas.toDataURL();
-      setTimeout(() => {
-        document.getElementById('vlJidDownloadImg').click();
-      }, 200)
+      console.log('mmmmmm')
+      this.cutDialogVisible = true;
+      console.log('vvvvv')
+      this.$nextTick(() => {
+        let $video = $('#vlJfoLargeV');
+        let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
+        // console.log($video.width(), $video.height());
+        if ($canvas && $canvas.length > 0) {
+          // let w = 920, h = 540;
+          let w = $video.width(), h = $video.height();
+          if (w > 920) {
+            h = Math.floor(920 / w * h);
+            w = 920;
+          }
+          $canvas.attr({
+            width: w,
+            height: h,
+          });
+          // $video[0].crossOrigin = 'anonymous';
+          // video canvas 必须为原生对象
+          let ctx = $canvas[0].getContext('2d');
+          this.cutTime = new Date().getTime();
+          ctx.drawImage($video[0], 0, 0, w, h);
+        }
+      });
+    },
+    // 截屏保存
+    playerCutSave () {
+      let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
+      if ($canvas && $canvas.length > 0) {
+        console.log('$canvas[0]', $canvas[0])
+        let img = $canvas[0].toDataURL('image/png');
+        // img.crossOrigin  = '';
+        let filename = 'image_' + this.cutTime + '.png';
+        if('msSaveOrOpenBlob' in navigator){
+          // 兼容EDGE
+          let arr = img.split(',');
+          let mime = arr[0].match(/:(.*?);/)[1];
+          let bstr = atob(arr[1]);
+          let n = bstr.length;
+          let u8arr = new Uint8Array(n);
+          while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+          }
+          let blob = new Blob([u8arr], {type:mime});
+          window.navigator.msSaveOrOpenBlob(blob, filename);
+          return;
+        }
+        img.replace('image/png', 'image/octet-stream');
+        let saveLink = $('#' + this.flvplayerId + '_cut_a')[0];
+        saveLink.href = img;
+        saveLink.download = filename;
+        saveLink.click();
+        // console.log(base64);
+      }
     },
     showEventList () {
       if (!this.$_loading) {
@@ -1131,7 +1212,7 @@ export default {
       left: 0;
       bottom: 0;
       background: #000000;
-      z-index: 9999;
+      z-index: 99;
       -webkit-transition: all .4s;
       -moz-transition: all .4s;
       -ms-transition: all .4s;
@@ -1355,6 +1436,29 @@ export default {
 }
 </style>
 <style lang="scss" scoped="scoped">
+.map_rrt_u2 {
+  position: absolute; right: 30px;
+  bottom: 30px;
+  margin-top: .2rem;
+  font-size: 26px;
+  background: #ffffff;
+  width: 78px;
+  padding: 0 10px;
+  > li {
+    line-height: 70px;
+    text-align: center;
+    cursor: pointer;
+    border-bottom: 1px solid #F2F2F2;
+    > i {
+      margin-top: 0;
+      display: inline-block;
+    }
+    color: #999999;
+    &:hover {
+      color: #0C70F8;
+    }
+  }
+}
  .vl_judge_tc{
     padding-top: 50px;
   }

@@ -45,7 +45,7 @@
                 <span>车牌类型</span>
                 <span :title="sturcDetail.plateClass">{{dicFormater(45, sturcDetail.plateClass)}}</span>
               </li>
-              <li v-if="type === 3 && sturcDetail.vehicleStyles"><span>车辆分组</span><span :title="sturcDetail.vehicleStyles">{{sturcDetail.vehicleStyles}}</span></li>
+              <li v-if="type === 3 && sturcDetail.vehicleType"><span>车辆分组</span><span :title="sturcDetail.vehicleType">{{sturcDetail.vehicleType.join(',')}}</span></li>
               <!-- 套牌依据 -->
               <!-- li v-if="type === 5"><span>号牌颜色：</span><span>{{sturcDetail.plateColor}}</span></<!-->
               <li v-if="type === 5"><span>套牌依据</span><span :title="sturcDetail.fakeReason">{{sturcDetail.fakeReason}}</span></li>
@@ -58,24 +58,25 @@
         <div id="vehicleDetail_capMap"></div>
       </div>
       <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video clearfix">
-        <div class="struc_c_d_qj struc_c_d_img">
+        <div class="struc_c_d_qj struc_c_d_img" style="float: left;">
           <img class="bigImg" title="点击放大图片" :src="sturcDetail.subStoragePath" alt />
           <span>抓拍图</span>
         </div>
-        <div class="struc_c_d_box" v-if="playerData">
+        <div class="struc_c_d_box" v-if="playerData" style="float: left;">
           <div is="flvplayer" :oData="playerData"
             :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
           </div>
         </div>
-        <div class="struc_c_d_box struc_vid_empty" v-else>
+        <div class="struc_c_d_box struc_vid_empty" style="float: left;" v-else>
           <div class="struc_vid_empty_c com_trans50_lt">
             <div></div>
             <p>暂无视频</p>
           </div>
         </div>
-        <div class="download_btn" v-show="sturcDetail.videoPath">
+        <p class="download_tips" v-show="sturcDetail.videoPath">下载提示：右键点击视频选择“另存视频为”即可下载视频。</p>
+        <!-- <div class="download_btn" v-show="sturcDetail.videoPath">
           <a download="视频" :href="sturcDetail.videoPath">下载视频</a>
-        </div>
+        </div> -->
       </div>
     </div>
   </el-dialog>
@@ -83,12 +84,12 @@
 <script>
 import { mapXupuxian } from "@/config/config.js";
 import flvplayer from '@/components/common/flvplayer.vue';
-import {getDeviceSnapImagesPage, JtcPOSTAppendtpInfo} from '../../../api/api.judge.js';
+import {getDeviceSnapImagesPage, JtcPOSTAppendtpInfo, getNightVehicleRecordList} from '../../../api/api.judge.js';
 import {getFeatureSearch, getPhotoSearch} from "../../../api/api.analysis.js"; // 车辆特征检索接口
 export default {
   /* 
     oData
-      type: 1, // 1过车查看 2特征搜车 3入城统计 4出城统计 5套牌车 7以图搜车
+      type: 1, // 1过车查看 2特征搜车 3入城统计 4出城统计 5套牌车 7以图搜车 8 夜间行车
       params: {}, // 查询参数  列表查询的参数，结果需保持一致
       list: [], // 列表
       index: 0, // 当前页的第几个（点击的人像所在的页的序号）
@@ -165,17 +166,20 @@ export default {
     setDetailObj (item) {
       if (this.type === 5) {
         // 套牌车
-        if (item && item.struVehicle) {
-          let _ots = {
-            '1': '同号车身颜色不同',
-            '2': '同号车辆类型不同',
-            '3': '同号车辆品牌不同',
-            '4': '同号短时异地出没'
-          };
-          this.sturcDetail = Object.assign(JSON.parse(item.struVehicle), {
-            fakeReason: _ots[item.fakePlateType + '']
-          });
-        }
+        this.sturcDetail = Object.assign(item.vehicleDto, {
+          fakeReason: item.fakeReason
+        });
+        // if (item && item.struVehicle) {
+        //   let _ots = {
+        //     '1': '同号车身颜色不同',
+        //     '2': '同号车辆类型不同',
+        //     '3': '同号车辆品牌不同',
+        //     '4': '同号短时异地出没'
+        //   };
+        //   this.sturcDetail = Object.assign(JSON.parse(item.struVehicle), {
+        //     fakeReason: _ots[item.fakePlateType + '']
+        //   });
+        // }
       } else {
         this.sturcDetail = item;
       }
@@ -290,6 +294,20 @@ export default {
           pageNum: this.pagination.pageNum
         });
         getPhotoSearch(params).then(res => {
+          if (res && res.data) {
+            this.pagination.total = res.data.total;
+            this.strucInfoList = res.data.list;
+            this.setDetailObj(this.strucInfoList[this.strucIndex]);
+          }
+        }).catch(() => {
+        });
+      } else if (this.type === 8) {
+        // getFeatureSearch
+        let params = Object.assign(this.params, {
+          pageSize: this.pagination.pageSize,
+          pageNum: this.pagination.pageNum
+        });
+        getNightVehicleRecordList(params).then(res => {
           if (res && res.data) {
             this.pagination.total = res.data.total;
             this.strucInfoList = res.data.list;
@@ -569,6 +587,12 @@ export default {
         -webkit-box-shadow: 0 0 0 !important;
         -moz-box-shadow: 0 0 0 !important;
         box-shadow: 0 0 0 !important;
+      }
+      .download_tips {
+        float: left;
+        width: 100%;
+        text-align: right;
+        padding-right: 40px; padding-top: 10px;
       }
       .download_btn {
         position: absolute; top: 415px; right: 30px;

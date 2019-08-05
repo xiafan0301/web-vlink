@@ -7,18 +7,12 @@
         :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
           {name: '模糊搜车'}]"
       ></div>
-    <!-- <div class="link_bread">
-      <el-breadcrumb separator=">" class="bread_common">
-        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
-        <el-breadcrumb-item>模糊搜车</el-breadcrumb-item>
-      </el-breadcrumb>
-    </div> -->
     <div class="sc_content">
       <!-- 通用的左边菜单 -->
       <div class="left_menu">
         <!-- 菜单表单 -->
         <vue-scroll>
-          <div style="padding: 12px 20px 20px 20px;">
+          <div style="padding: 20px;">
             <!-- 表单 -->
             <div class="form_warp">
               <el-form :model="mhscMenuForm" ref="mhscMenuForm" :rules="rules">
@@ -28,7 +22,6 @@
                       v-model="mhscMenuForm.startTime"
                       type="date"
                       :clearable="false"
-                      
                       :picker-options="startDateOpt"
                       placeholder="开始时间"
                       class="width232 vl_date"
@@ -249,35 +242,6 @@
         </div>
       </div>
     </div>
-    <!--上传记录弹窗-->
-    <!-- <el-dialog
-      :visible.sync="historyPicDialog"
-      class="history-pic-dialog"
-      :close-on-click-modal="false"
-      top="4vh"
-      title="最近上传的图片"
-    >
-      <div style="text-align: center;font-size: 20px;" v-if="loadingHis">
-        <i class="el-icon-loading"></i>
-      </div>
-      <vue-scroll class="his-pic-box" v-else-if="historyPicList.length">
-        <div
-          class="his-pic-item"
-          :class="{'active': item.checked}"
-          v-for="item in historyPicList"
-          :key="item.uid"
-          @click="chooseHisPic(item)"
-        >
-          <img :src="item.path" alt />
-        </div>
-        <div style="clear: both;"></div>
-      </vue-scroll>
-      <p v-else>暂无历史记录</p>
-      <div slot="footer">
-        <el-button @click="historyPicDialog = false">取消</el-button>
-        <el-button type="primary" :disabled="choosedHisPic.length === 0">确认</el-button>
-      </div>
-    </el-dialog>-->
     <!--检索详情弹窗-->
     <div is="vehicleDetail" :detailData="detailData"></div>
   </div>
@@ -792,7 +756,7 @@ export default {
       height: 100%;
       // 表单选项间隔
       .el-form-item {
-        margin-bottom: 12px;
+        margin-bottom: 10px;
       }
       // 菜单的表单
       .width232 {
@@ -803,7 +767,7 @@ export default {
       }
       // 选择设备下拉
       .selected_device {
-        margin-bottom: 12px;
+        margin-bottom: 10px;
         position: relative;
         width: 232px;
         height: 40px;
@@ -880,6 +844,7 @@ export default {
       }
       // 按钮
       .btn_warp {
+        padding-top: 10px;
         .select_btn {
           background: #0c70f8;
           color: #ffffff;

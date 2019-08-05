@@ -59,6 +59,10 @@
         <i class="el-icon-close" @click="onCloseDetail"></i>
       </div>
       <div class="struc_main">
+        <div class="struc_main_top">
+          <p class="struc_main_top_address">抓拍位置:{{sturcDetail.address ? sturcDetail.address : '无'}}</p>
+          <p class="struc_main_top_time">{{sturcDetail.shotTime ? sturcDetail.shotTime : '无'}}</p>
+        </div>
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
             <img :src="sturcDetail.storagePath" alt="" class="bigImg">
@@ -70,21 +74,21 @@
               <span>抓拍图</span>
             </div>
             <div class="struc_c_d_info">
-              <h2>抓拍信息</h2>
+              <h2>分析结果</h2>
                 <ul class="stru_ul">
                   <vue-scroll>
-                    <li>
+                    <!-- <li>
                       <span>抓拍时间</span>
                       <span>{{sturcDetail.shotTime ? sturcDetail.shotTime : '无'}}</span>
-                    </li>
-                    <li>
+                    </li> -->
+                    <!-- <li>
                       <span>抓拍摄像头</span>
                       <span :title="sturcDetail.deviceName" class="info_span">{{sturcDetail.deviceName ? sturcDetail.deviceName : '无'}}</span>
-                    </li>
-                    <li>
+                    </li> -->
+                    <!-- <li>
                       <span>抓拍地点</span>
                       <span :title="sturcDetail.address" class="info_span">{{sturcDetail.address ? sturcDetail.address : '无'}}</span>
-                    </li>
+                    </li> -->
                     <li>
                       <span>车牌号码</span>
                       <span>{{sturcDetail.plateNo ? sturcDetail.plateNo : '无'}}</span>
@@ -590,6 +594,18 @@ export default {
     height: 5rem;
     margin: 0 auto;
     border-bottom: 1px solid #F2F2F2;
+    .struc_main_top {
+      .struc_main_top_address {
+        color: #333333;
+        padding-bottom: 6px;
+        // font-size: 16px;
+      }
+      .struc_main_top_time {
+        color: #999999;
+        // font-size: 12px;
+        padding-bottom: 6px;
+      }
+    }
     .download_btn {
       display: inline-block;
       width:160px;height:40px;

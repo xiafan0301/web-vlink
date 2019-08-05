@@ -1,6 +1,6 @@
 <template>
   <div class="um_vl_upload" :style="{width: width ? width : '100%', height: height ? height : '100%'}">
-    <div class="vl_upload_con">
+    <div class="vl_upload_con" @drop="dragDrop($event)" @dragover.prevent="dragOver">
       <el-upload class="vl_upload_upd"
         :show-file-list="false"
         accept="image/*"
@@ -17,6 +17,7 @@
         </div>
       </el-upload>
       <p @click="showHistoryPic">从上传记录中选择</p>
+      <span v-show="currentImg && currentImg.path" title="清空" @click="uploadClear(true)"><i class="el-icon-delete"></i></span>
     </div>
     <!--历史记录弹窗 :close-on-click-modal="false" -->
     <el-dialog
@@ -41,7 +42,7 @@
         </div>
         <div style="clear: both;"></div>
       </vue-scroll>
-      <p v-else>暂无历史记录</p>
+      <p style="text-align: center; padding-top: 10px;" v-else>暂无历史记录</p>
       <div slot="footer">
         <el-button @click="historyPicDialog = false">取消</el-button>
         <el-button type="primary" @click="addHisToImg" :disabled="!choosedHisPic">确认</el-button>
@@ -51,16 +52,28 @@
 </template>
 <script>
 import {ajaxCtx} from '@/config/config';
-import {JtcGETAppendixInfoList} from '@/views/index/api/api.judge.js';
+import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList} from '@/views/index/api/api.judge.js';
 export default {
+  /**
+   * emit事件说明
+   * uploadEmit(data) 上传成功/选择上传历史的时候的emit事件
+   */
   /** 
-   * @uploadEmit 上传成功/选择上传历史的时候的emit事件
+   * 拖拽说明
+   * 拖拽dataTransfer key => upload_pic_url
+   * dataTransfer.setData('upload_pic_url', IMG_URL);
    */
-   /** 
-   * clear: 改变clear即可清空上传信息
-   * width/height 宽高带单位，如 320px，默认都是100%
-   */
-  props: ['clear', 'width', 'height'],
+   /**
+    * props参数说明
+    * imgData 图片的默认或prop对象 {path: '', ...}，图片URL字段（path）为必须。
+    * clear: 改变clear即可清空上传信息
+    * width/height 宽高带单位，如 320px，默认都是100%
+    */
+   /**
+    * 删除/清空说明
+    * 删除/清空也会触发emit事件, 不过传递的参数为空，请注意！ uploadEmit(data) data为空
+    */
+  props: ['clear', 'width', 'height', 'imgData'],
   data () {
     return {
       uploadAcion: ajaxCtx.base + '/new',
@@ -72,15 +85,47 @@ export default {
       choosedHisPic: null
     }
   },
-  watch: {
-    clear () {
-      this.currentImg = null;
-      this.choosedHisPic = null;
+  created () {
+    if (this.imgData && this.imgData.path) {
+      this.currentImg = Object.assign({}, this.imgData);
     }
   },
-  mounted () {
+  watch: {
+    imgData (val) {
+      if (val && val.path) {
+        this.choosedHisPic = null;
+        this.currentImg = Object.assign({}, val);
+      }
+    },
+    clear () {
+      this.uploadClear();
+    }
   },
   methods: {
+    // drag over
+    dragOver () {
+      // console.log('drag over')
+    },
+    // 接收拖拽
+    dragDrop (ev) {
+      if (!ev) { ev = window.event; }
+      let url = ev.dataTransfer.getData('upload_pic_url');
+      if (url && url.length > 0) {
+        this.choosedHisPic = null;
+        this.currentImg = {
+          path: url
+        };
+        this.picSubmit();
+      }
+    },
+    // flag
+    uploadClear (flag) {
+      this.currentImg = null;
+      this.choosedHisPic = null;
+      if (flag) {
+        this.picSubmit();
+      }
+    },
     // 上传图片
     beforeAvatarUpload (file) {
       const isJPG = (file.type === 'image/jpeg' || file.type === 'image/png');
@@ -121,6 +166,14 @@ export default {
           };
           this.picSubmit();
           // this.curImageUrl = x.path;
+          if (this.$store.state.loginUser && this.$store.state.loginUser.uid) {
+            this.currentImg.contentUid = this.$store.state.loginUser.uid;
+            JtcPOSTAppendixInfo(this.currentImg).then(jRes => {
+              if (jRes) {
+                this.currentImg['uid'] = jRes.data;
+              }
+            })
+          }
         }
       }
     },
@@ -217,6 +270,21 @@ export default {
       background: rgba(0, 0, 0, 0.3);
       color: #fff;
       border-radius: 0 0 6px 6px;
+      text-align: center;
+    }
+    > span {
+      display: none;
+      position: absolute; top: 5px; right: 5px;
+      line-height: normal;
+      background-color: #999;
+      background-color: rgba(0, 0, 0, 0.4);
+      padding: 2px 3px;
+      border-radius: 4px;
+      cursor: pointer;
+      > i {
+        font-size: 16px;
+        color: #fff;
+      }
     }
     &:hover {
       .el-upload--picture-card {
@@ -226,6 +294,7 @@ export default {
         > p { display: none; }
       }
       > p { display: block; }
+      > span { display: block; }
     }
   }
 }
