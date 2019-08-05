@@ -311,6 +311,7 @@
             }
           } else {
             this.ruleForm.input3.push(this.ruleForm.input5.replace(/\s+|\s+$/g, ''))
+            this.ruleForm.input5 = '';
           }
         }
       },
