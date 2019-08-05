@@ -34,6 +34,7 @@
             <h2>分析结果</h2>
             <ul>
               <li v-if="sturcDetail.plateNo"><span>车牌号码</span><span :title="sturcDetail.plateNo">{{sturcDetail.plateNo}}</span></li>
+              <li v-if="type === 3 && sturcDetail.vehicleType"><span>车辆分组</span><span :title="sturcDetail.vehicleType">{{(sturcDetail.vehicleType && sturcDetail.vehicleType.length > 0) ? sturcDetail.vehicleType.join(',') : '--'}}</span></li>
               <!-- <li v-if="type === 3 && sturcDetail.shotTime"><span>入城时间</span><span :title="sturcDetail.shotTime">{{sturcDetail.shotTime}}</span></li>
               <li v-if="type === 3 && sturcDetail.bayonetName"><span>入城卡口</span><span :title="sturcDetail.bayonetName">{{sturcDetail.bayonetName}}</span></li> -->
               <li v-if="type === 3 && sturcDetail.firstEnterFlag"><span>初次入城</span><span>是</span></li>
