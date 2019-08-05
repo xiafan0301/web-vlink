@@ -220,7 +220,7 @@ export default {
       isShowMap: false, // 是否显示右侧地图
       backDialog: false, // 取消弹出框
       loading: false,
-      isSelectTab: 2, // 1---基础信息  2--联网信息
+      isSelectTab: 1, // 1---基础信息  2--联网信息
       isAddLoading: false, // 添加加载中
       isEditBaiscLoading: false, // 编辑基础信息加载中
       cameraForm: {
@@ -764,14 +764,14 @@ export default {
       });
 
       let geocoder;
-      // window.AMap.service('AMap.Geocoder',function(){//回调函数
-      //   //实例化Geocoder
-      //   geocoder = new window.AMap.Geocoder({
-      //     city: "全国", //城市，默认：“全国”
-      //     radius: 500 //范围，默认：500
-      //   })
-      //   //TODO: 使用geocoder 对象完成相关功能
-      // })
+      window.AMap.service('AMap.Geocoder',function(){//回调函数
+        //实例化Geocoder
+        geocoder = new window.AMap.Geocoder({
+          city: "全国", //城市，默认：“全国”
+          radius: 500 //范围，默认：500
+        })
+        //TODO: 使用geocoder 对象完成相关功能
+      })
 
       map.setMapStyle("amap://styles/whitesmoke");
       _this.map = map;

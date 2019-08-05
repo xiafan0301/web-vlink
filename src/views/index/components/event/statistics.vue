@@ -37,57 +37,57 @@
     <div class="e_stat_content" v-loading="searchLoading">
       <!-- 综合统计 -->
       <ul class="stat-zt">
-          <li>
-            <div class="stat-zt-box" style="background: #0C70F8">
-              <div class="left-icon-number">
-                <i class="vl_icon vl_icon_statistics_8"></i>
-              </div>
-              <!-- <div class="stat-zt-value"> -->
-              <p class="event_num_title">事件数量(件)</p>
-              <h3 class="event_number">{{generalData.totalCount}}</h3>
-              <!-- </div> -->
-              <!-- <div class="right-icon">
-                <i class="vl_icon vl_icon_statistics_4"></i>
-              </div> -->
+        <li>
+          <div class="stat-zt-box" style="background: #0C70F8">
+            <div class="left-icon-number">
+              <i class="vl_icon vl_icon_statistics_8"></i>
             </div>
-          </li>
-          <li>
-            <div class="stat-zt-box" style="background: #0D9DF4">
-              <div class="left-icon-finish">
-                <i class="vl_icon vl_icon_statistics_7"></i>
-              </div>
-              <!-- <div class="stat-zt-value"> -->
-              <p class="event_num_title">处理完成(件)</p>
-              <h3 class="event_number">{{generalData.finishCount}}</h3>
-              <!-- </div> -->
-              <!-- <div class="right-icon"><i class="vl_icon vl_icon_statistics_3"></i></div> -->
+            <!-- <div class="stat-zt-value"> -->
+            <p class="event_num_title">事件数量(件)</p>
+            <h3 class="event_number">{{generalData.totalCount}}</h3>
+            <!-- </div> -->
+            <!-- <div class="right-icon">
+              <i class="vl_icon vl_icon_statistics_4"></i>
+            </div> -->
+          </div>
+        </li>
+        <li>
+          <div class="stat-zt-box" style="background: #0D9DF4">
+            <div class="left-icon-finish">
+              <i class="vl_icon vl_icon_statistics_7"></i>
             </div>
-          </li>
-          <li>
-            <div class="stat-zt-box" style="background: #6262FF">
-              <div class="left-icon-ing">
-                <i class="vl_icon vl_icon_statistics_6"></i>
-              </div>
-              <!-- <div class="stat-zt-value"> -->
-              <p class="event_num_title">处理中(件)</p>
-              <h3 class="event_number">{{generalData.processingCount}}</h3>
-              <!-- </div> -->
-              <!-- <div class="right-icon"><i class="vl_icon vl_icon_statistics_2"></i></div> -->
+            <!-- <div class="stat-zt-value"> -->
+            <p class="event_num_title">处理完成(件)</p>
+            <h3 class="event_number">{{generalData.finishCount}}</h3>
+            <!-- </div> -->
+            <!-- <div class="right-icon"><i class="vl_icon vl_icon_statistics_3"></i></div> -->
+          </div>
+        </li>
+        <li>
+          <div class="stat-zt-box" style="background: #6262FF">
+            <div class="left-icon-ing">
+              <i class="vl_icon vl_icon_statistics_6"></i>
             </div>
-          </li>
-          <li>
-            <div class="stat-zt-box" style="background: #8949F3">
-              <div class="left-icon-unhandle">
-                <i class="vl_icon vl_icon_statistics_5"></i>
-              </div>
-              <!-- <div class="stat-zt-value"> -->
-              <p class="event_num_title">待处理(件)</p>
-              <h3 class="event_number">{{generalData.pendingCount}}</h3>
-              <!-- </div> -->
-              <!-- <div class="right-icon"><i class="vl_icon vl_icon_statistics_1"></i></div> -->
+            <!-- <div class="stat-zt-value"> -->
+            <p class="event_num_title">处理中(件)</p>
+            <h3 class="event_number">{{generalData.processingCount}}</h3>
+            <!-- </div> -->
+            <!-- <div class="right-icon"><i class="vl_icon vl_icon_statistics_2"></i></div> -->
+          </div>
+        </li>
+        <li>
+          <div class="stat-zt-box" style="background: #8949F3">
+            <div class="left-icon-unhandle">
+              <i class="vl_icon vl_icon_statistics_5"></i>
             </div>
-          </li>
-        </ul>
+            <!-- <div class="stat-zt-value"> -->
+            <p class="event_num_title">待处理(件)</p>
+            <h3 class="event_number">{{generalData.pendingCount}}</h3>
+            <!-- </div> -->
+            <!-- <div class="right-icon"><i class="vl_icon vl_icon_statistics_1"></i></div> -->
+          </div>
+        </li>
+      </ul>
       <!-- 统计图表 -->
       <ul class="e_stat_tt">
         <li>
@@ -155,7 +155,13 @@
             </ul>
           </div>
           <div class="stat_map_cr" id="drawEdge"></div>
-          <div class="de-close-btn">
+          <!--地图操作按钮-->
+          <ul class="map_rrt_u2">
+            <li @click="resetZoom"><i class="el-icon-aim"></i></li>
+            <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
+            <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
+          </ul>
+          <!-- <div class="de-close-btn">
             <ul class="first_ul">
               <li>
                 <i class="vl_icon vl_icon_control_23" @click="setMapStatus('1')"></i>
@@ -170,7 +176,7 @@
                 <i class="el-icon-minus" @click="setMapStatus('3')" :class="{'de-btn-dis': mapScale.sx}"></i>
               </li>
             </ul>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
@@ -306,6 +312,18 @@ export default {
     }
   },
   methods: {
+
+    mapZoomSet (val) {
+      if (this.amap) {
+        this.amap.setZoom(this.amap.getZoom() + val);
+      }
+    },
+    resetZoom () {
+      if (this.amap) {
+        this.amap.setZoomAndCenter(this.zoom, mapXupuxian.center);
+        this.amap.setFitView();
+      }
+    },
     // 地图
     initMap () {
       // let _this = this;
@@ -1058,6 +1076,29 @@ export default {
       position: relative;
       width: 100%; height: 1000px;
       background-color: #fff;
+      .map_rrt_u2 {
+        position: absolute; right: 30px;
+        bottom: 20px;
+        margin-top: .2rem;
+        font-size: 26px;
+        background: #ffffff;
+        width: 78px;
+        padding: 0 10px;
+        > li {
+          line-height: 70px;
+          text-align: center;
+          cursor: pointer;
+          border-bottom: 1px solid #F2F2F2;
+          > i {
+            margin-top: 0;
+            display: inline-block;
+          }
+          color: #999999;
+          &:hover {
+            color: #0C70F8;
+          }
+        }
+      }
       > .stat_map_cl {
         width: 300px; height: 100%;
         background-color: #fff;
@@ -1080,6 +1121,7 @@ export default {
   }
   .stat_map_cl_ul {
     padding-top: 20px;
+    
     > li {
       position: relative;
       border-top: 1px solid #E9F7FF;
