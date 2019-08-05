@@ -234,7 +234,7 @@ import {
 } from "@/views/index/api/api.base.js";
 import { validateSimilarity, validateFrequency } from "@/utils/validator.js";
 import { postTaskAnalysis } from "../../api/api.analysis.js";
-import { formatDate, random14 } from "@/utils/util.js";
+import { formatDate, random14, dateOrigin } from "@/utils/util.js";
 import vlBreadcrumb from "@/components/common/breadcrumb.vue";
 export default {
   components: { vlBreadcrumb },
@@ -347,14 +347,16 @@ export default {
   methods: {
     //设置时间
     setDate() {
-      let curDate = new Date(new Date().toLocaleDateString()).getTime()
+      /* let curDate = new Date(new Date().toLocaleDateString()).getTime()
       let curS = 1 * 24 * 3600 * 1000;
       let startTime = curDate - curS;
       let endTime = curDate - 1
-      /* let startTime = new Date() - 3600 * 1000 * 24 * 1;
-      let endTime = new Date(); */
       this.searchData.startTime = formatDate(startTime);
-      this.searchData.endTime = formatDate(endTime);
+      this.searchData.endTime = formatDate(endTime); */
+      let _s = new Date(dateOrigin().getTime() - 3600 * 1000 * 24 * 1);
+      let _e = new Date(dateOrigin(true).getTime() - 3600 * 1000 * 24 * 1);
+      this.searchData.startTime = _s;
+      this.searchData.endTime = _e;
     },
     //重置
     resetSearch(formName) {
