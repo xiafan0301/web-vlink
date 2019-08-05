@@ -67,6 +67,7 @@
     <div class="table_box">
       <el-table
         v-loading="loading"
+        @sort-change="bayonetNoSort"
         :data="bayonetManageList.list"
         >
         <el-table-column
@@ -78,6 +79,8 @@
         <el-table-column
           label="卡口编号"
           prop="bayonetNo"
+          sortable="custom"
+          width="100"
           show-overflow-tooltip
           >
         </el-table-column>
@@ -95,6 +98,7 @@
         </el-table-column>
         <el-table-column
           label="出入城卡口"
+          width="100"
           :show-overflow-tooltip="true"
           >
           <template slot-scope="scope">
@@ -214,8 +218,8 @@ export default {
         {label: '离线', value: false}
       ],
       bayonetTypeList: [
-        {value: 1, label: '出城卡口'},
-        {value: 2, label: '入城卡口'},
+        {value: 1, label: '入城卡口'},
+        {value: 2, label: '出城卡口'},
         {value: 3, label: '其他'}
       ],
       isStartUsingList: [
@@ -311,10 +315,29 @@ export default {
       }
       putBayonetBasisInfo(data);
     },
+    // 卡口编号排序
+    bayonetNoSort (data) {
+      console.log(data)
+      if (data.order) {
+        this.orderObj = data;
+      } else {
+        this.orderObj = null
+      }
+      let order = null;
+      if (this.orderObj) {
+        if (this.orderObj.order === 'ascending') {
+          order = 'asc';
+        } else {
+          order = 'desc';
+        }
+        this.getBayonetManageList({orderBy: data.prop, order});
+      } else {
+        this.getBayonetManageList();
+      }
+    },
     // 获取卡口列表
-    getBayonetManageList () {
+    getBayonetManageList (data = {}) {
       let params = {
-        // 'where.isEnterPoint': this.queryForm.isEnterPoint,
         'where.isEnterPoint': this.queryForm.isEnterPoint,
         // 'where.areaId': ,
         'where.dutyUnitId': this.queryForm.organ && this.queryForm.organ.uid,
@@ -323,10 +346,11 @@ export default {
         'where.onlineState': this.queryForm.state,
         pageNum: this.pageNum,
         pageSize: this.pageSize,
-        orderBy: null,
-        order: null
+        orderBy: 'createTime',
+        order: 'desc'
       }
       this.queryForm.bayonetName && (params['where.keyword'] = this.queryForm.bayonetName);
+      params = Object.assign(params, data);
       this.loading = true;
       getBayonetList(params).then(res => {
         if (res) {
@@ -354,7 +378,17 @@ export default {
     handleCurrentChange (page) {
       this.pageNum = page;
       this.currentPage = page;
-      this.getBayonetManageList();
+      let order = null;
+      if (this.orderObj) {
+        if (this.orderObj.order === 'ascending') {
+          order = 'asc';
+        } else {
+          order = 'desc';
+        }
+        this.getBayonetManageList({orderBy: this.orderObj.prop, order});
+      } else {
+        this.getBayonetManageList();
+      }
     },
     // 跳转至详情页
     skipIsDetail (bayonetId) {
