@@ -13,8 +13,7 @@
           status-icon
           ref="ruleForm"
           label-width="0px"
-          class="demo-ruleForm"
-        >
+          class="demo-ruleForm">
           <el-form-item  prop="dateStart">
             <el-date-picker
               v-model="ruleForm.dateStart"
@@ -75,7 +74,7 @@
                
             </el-radio-group>
           </el-form-item>
-<el-form-item v-if="input5=='2'" >
+          <el-form-item v-if="input5=='2'" >
             <el-input  v-model="selectValue" :disabled="true">
             </el-input>
           </el-form-item>
@@ -181,139 +180,11 @@
     <!-- D设备 B卡口  这里是设备和卡口 -->
     <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div>
     
-    
-    <!--检索详情弹窗-->
-    <el-dialog
-      :visible.sync="strucDetailDialog"
-      class="struc_detail_dialog"
-      :close-on-click-modal="false"
-      top="4vh"
-      :show-close="false"
-      >
-      <div class="struc_tab">
-        <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">抓拍详情</span>
-        <span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>
-        <span :class="{'active': strucCurTab === 3}" @click="strucCurTab = 3">视频回放</span>
-        <i style="font-size: 20px;" class="el-icon-close" @click="strucDetailDialog = false"></i>
-      </div>
-      <div class="struc_main" >
-        <div v-show="strucCurTab === 1" class="struc_c_detail">
-          <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.storagePath" class="bigImg" title="点击放大图片" alt />
-            <span>全景图</span>
-          </div>
-          <div class="struc_c_d_box">
-            <div class="struc_c_d_img struc_c_d_img_green">
-              <img :src="sturcDetail.subStoragePath" class="bigImg" title="点击放大图片" alt />
-              <span>抓拍图</span>
-            </div>
-            <div class="struc_c_d_info">
-              <vue-scroll>
-                <h2>抓拍信息</h2>
-                <!-- 特征展示框 -->
-                
-                <!-- 车辆的信息栏 -->
-                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.shotTime">
-                  <p class="line_content">
-                    <span class="key">抓拍时间</span>
-                    <span class="val">{{sturcDetail.shotTime}}</span>
-                  </p>
-                </div>
-                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.deviceName">
-                  <p class="line_content">
-                    <span class="key">抓拍设备</span>
-                    <span class="val">{{sturcDetail.deviceName}}</span>
-                  </p>
-                </div>
-                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.address">
-                  <p class="line_content">
-                    <span class="key" title="抓拍地点">抓拍地点</span>
-                    <span class="val">{{sturcDetail.address}}</span>
-                  </p>
-                </div>
-                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.plateNo">
-                  <p class="line_content">
-                    <span class="key">车牌号码</span>
-                    <span class="val">{{sturcDetail.plateNo}}</span>
-                  </p>
-                </div>
-                <!-- 5个特征 -->
-                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.plateColor">
-                  <p class="line_content">
-                    <span class="key">车牌颜色</span>
-                    <span class="val">{{sturcDetail.plateColor}}</span>
-                  </p>
-                </div>
-                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.vehicleModel">
-                  <p class="line_content">
-                    <span class="key">车辆型号</span>
-                    <span class="val">{{sturcDetail.vehicleModel}}</span>
-                  </p>
-                </div>
-                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.vehicleColor">
-                  <p class="line_content">
-                    <span class="key">车辆颜色</span>
-                    <span class="val">{{sturcDetail.vehicleColor}}</span>
-                  </p>
-                </div>
-                <div class="struc_cdi_line_tzsc" v-if="sturcDetail.vehicleClass">
-                  <p class="line_content">
-                    <span class="key">车辆类型</span>
-                    <span class="val">{{sturcDetail.vehicleClass}}</span>
-                  </p>
-                </div>
-                <div
-                  class="struc_cdi_line_tzsc"
-                  v-if="sturcDetail.plateClass || sturcDetail.plateClass === 0"
-                >
-                  <p class="line_content">
-                    <span class="key">号牌类型</span>
-                    <span class="val">{{dicFormater(45, sturcDetail.plateClass)}}</span>
-                  </p>
-                </div>
-              </vue-scroll>
-            </div>
-          </div>
-        </div>
-        <div v-show="strucCurTab === 2" class="struc_c_address"></div>
-        <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
-          <div class="struc_c_d_qj struc_c_d_img">
-            <img class="bigImg" title="点击放大图片" :src="sturcDetail.subStoragePath" alt />
-            <span>抓拍图</span>
-          </div>
-          <div class="struc_c_d_box">
-            <video id="capVideo" :src="sturcDetail.videoPath"></video>
-            <div class="play_btn" @click="videoTap" v-show="!playing">
-              <i class="vl_icon vl_icon_judge_01" v-if="playing"></i>
-              <i class="vl_icon vl_icon_control_09" v-else></i>
-            </div>
-          </div>
-          <div class="download_btn">
-            <a download="视频" :href="videoUrl"></a>下载视频
-          </div>
-        </div>
-      </div>
-      <div class="struc-list" v-show="strucInfoList.length > 1">
-        <swiper :options="swiperOption" ref="mySwiper">
-          <!-- slides -->
-          <swiper-slide v-for="(item, index) in strucInfoList" :key="'my_swiper' + index">
-            <div
-              class="swiper_img_item"
-              :class="{'active': index === curImgIndex}"
-              @click="imgListTap(item, index)"
-            >
-              <img style="width: 100%; height: .88rem;" :src="item.subStoragePath" alt />
-            </div>
-          </swiper-slide>
-          <div class="swiper-button-prev" slot="button-prev"></div>
-          <div class="swiper-button-next" slot="button-next"></div>
-        </swiper>
-      </div>
-    </el-dialog>
-    <div id="capMap"></div>
+    <div is="vehicleDetail" :detailData="detailData"></div>
   </div>
 </template>
 <script>
+import vehicleDetail from '../common/vehicleDetail.vue';
 import { mapXupuxian } from "@/config/config.js";
 import { cityCode } from "@/utils/data.js";
 import { getVehicleShot,getAllDevice,getGroups,getSnapList,exportNightVehicle,getSnapDetail} from "@/views/index/api/api.judge.js";
@@ -322,11 +193,10 @@ import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import mapSelector from '@/components/common/mapSelector.vue';
 import { dataList } from '@/utils/data.js';
 export default {
-  components: {
-    mapSelector
-  },
+  components: { mapSelector, vehicleDetail },
   data () {
     return {
+      detailData: null,
       amap:null,
       markerPoint: null, // 地图点集合
       pickerOptions: {
@@ -513,11 +383,23 @@ export default {
     getSnapDetail(data){
       
       getSnapDetail(data).then(res=>{
-        if(res && res.data){
-          this.strucDetailDialog = true 
+        if(res && res.data && res.data.snapDtoList && res.data.snapDtoList.length > 0){
+         /*  this.strucDetailDialog = true 
           this.sturcDetail=res.data.snapDtoList[0]
           if(res.data.snapDtoList && res.data.snapDtoList.length>0){
             this.strucInfoList = res.data.snapDtoList;
+          } */
+          let _d = res.data.snapDtoList;
+          this.detailData = {
+            type: 11, // 11车辆查询
+            params: {
+              where: {}
+            }, // 查询参数
+            list: _d, // 列表
+            index: 0, // 第几个
+            pageSize: _d.length,
+            total: _d.length,
+            pageNum: 1
           }
           
           //this.snapObj=res.data.snapDtoList[0]
