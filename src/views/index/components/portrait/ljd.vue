@@ -17,38 +17,6 @@
           label-width="0px"
           class="demo-ruleForm"
         >
-          <el-form-item style="text-align: center;">
-            <div style="padding: 0 15px; height: 210px;">
-              <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit" :imgData="imgData"></div>
-            </div>
-            <!-- <div class="upload_warp" @drop="drop($event)" @dragover="allowDrop($event)">
-              <el-upload
-                @drop="drop($event)"
-                :class="{'vl_jtc_upload': true}"
-                :show-file-list="false"
-                accept="image/*"
-                :action="uploadAcion"
-                list-type="picture-card"
-                :before-upload="beforeAvatarUpload"
-                :on-success="uploadSucess"
-                :on-error="handleError"
-              >
-                <i v-if="uploading" class="el-icon-loading"></i>
-                <img v-else-if="curImageUrl" :src="curImageUrl">
-                <div v-else>
-                  <i
-                    style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
-                    class="vl_icon vl_icon_vehicle_01"
-                  ></i>
-                  <span>点击上传图片</span>
-                </div>
-              </el-upload>
-              <p @click="showHistoryPic">从上传记录中选择</p>
-              <div v-show="curImageUrl" class="del_icon">
-                <i class="el-icon-delete" @click="delPic"></i>
-              </div>
-            </div> -->
-          </el-form-item>
           <el-form-item  prop="data1">
             <el-date-picker
               v-model="ruleForm.data1"
@@ -71,6 +39,7 @@
               value-format="yyyy-MM-dd"
             ></el-date-picker>
           </el-form-item>
+         
           <el-form-item prop="minFootholdTimes" class="firstItem">
             <el-row :gutter="5">
               <el-col :span="22">
@@ -123,6 +92,11 @@
           </el-form-item>
           <el-form-item v-if="ruleForm.input5=='2'">
             <el-input v-model="selectValue" :disabled="true"></el-input>
+          </el-form-item>
+           <el-form-item style="text-align: center;">
+            <div style="padding: 0 15px; height: 210px;">
+              <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit" :imgData="imgData"></div>
+            </div>
           </el-form-item>
           <el-form-item>
             <el-row :gutter="10">

@@ -10,6 +10,24 @@
     
     <div :class="['vl_j_left',{hideleft:hideleft}]">
       <div class="vl_jtc_search" style="padding-top: 0;">
+        <el-date-picker
+          v-model="searchData.time1"
+          type="date"
+          placeholder="开始时间"
+          :picker-options="pickerOptions"
+          class="full vl_date"
+          :clearable="false"
+          value-format="yyyy-MM-dd"
+        ></el-date-picker>
+        <el-date-picker
+            v-model="searchData.time2"
+            type="date"
+            :clearable="false"
+            :picker-options="pickerOptions"
+            placeholder="结束时间"
+            class="full vl_date vl_date_end"
+            value-format="yyyy-MM-dd"
+          ></el-date-picker>
           <el-select class="full" v-model="searchData.portraitGroupId" placeholder="关注人群">
             <el-option
               v-for="item in portraitGroupList"
@@ -34,80 +52,46 @@
               :value="item.value">
             </el-option>
           </el-select>
-       
-
-       <!-- <el-date-picker
-         v-model="searchData.time"
-          type="daterange"
-          :clearable="false"
-          class="full vl_date"
-          value-format="yyyy-MM-dd"
-          :picker-options="pickerOptions"
-          range-separator="至"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期">
-        </el-date-picker> -->
-            <el-date-picker
-              v-model="searchData.time1"
-              type="date"
-              placeholder="开始时间"
-              :picker-options="pickerOptions"
-              class="full vl_date"
-              :clearable="false"
-              value-format="yyyy-MM-dd"
-            ></el-date-picker>
-            <el-date-picker
-              v-model="searchData.time2"
-              type="date"
-              :clearable="false"
-              :picker-options="pickerOptions"
-              placeholder="结束时间"
-              class="full vl_date vl_date_end"
-              value-format="yyyy-MM-dd"
-            ></el-date-picker>
-        <!-- <el-form-item label="区域：" label-width="60px" prop="input5"> -->
-            <!-- <el-radio-group v-model="input5" @change="changeTab"> -->
-            <el-radio-group v-model="input5" @change="changeTab">
-               <el-row :gutter="10">
-                <el-col :span="12">
-                  <el-radio label="1">列表选择</el-radio>
-                </el-col>
-                <el-col :span="12">
-                  <div @click="clickTab">
-                    <el-radio label="2">地图选择</el-radio>
-                  </div>
-                </el-col>
-              </el-row>
-            </el-radio-group>
-          <!-- </el-form-item> -->
+          <el-radio-group v-model="input5" @change="changeTab">
+              <el-row :gutter="10">
+              <el-col :span="12">
+                <el-radio label="1">列表选择</el-radio>
+              </el-col>
+              <el-col :span="12">
+                <div @click="clickTab">
+                  <el-radio label="2">地图选择</el-radio>
+                </div>
+              </el-col>
+            </el-row>
+          </el-radio-group>
           <div v-if="input5==2" >
             <el-input  v-model="selectValue" :disabled="true">
             </el-input>
           </div>
-        <el-select 
-          v-model="areaIds"
-          class="camera-select full"
-          multiple
-          collapse-tags
-          placeholder="关注范围" v-if="input5==1">
-          <el-option
-            v-for="item in eventAreas"
-            :key="item.id"
-            :label="item.areaName"
-            :value="item.areaId">
-          </el-option>
-        </el-select>
-        <div>
+          <el-select 
+            v-model="areaIds"
+            class="camera-select full"
+            multiple
+            collapse-tags
+            placeholder="关注范围" v-if="input5==1">
+            <el-option
+              v-for="item in eventAreas"
+              :key="item.id"
+              :label="item.areaName"
+              :value="item.areaId">
+            </el-option>
+          </el-select>
+          <div>
           <el-row :gutter="10">
-              <el-col :span="12">
-                <el-button  @click="resetSearch" class="full">重置</el-button>
-              </el-col>
-              <el-col :span="12">
-                <el-button  :loading="searching" type="primary" @click="beginSearch"
-                  class="select_btn full"
-                >搜索</el-button>
-              </el-col>
-            </el-row>
+            <el-col :span="12">
+              <el-button  @click="resetSearch" class="full">重置</el-button>
+            </el-col>
+            <el-col :span="12">
+              <el-button  :loading="searching" type="primary" @click="beginSearch"
+                class="select_btn full"
+              >搜索</el-button>
+            </el-col>
+          </el-row>
         </div>
       </div>
       <span class="insetLeft2" @click="hideResult"></span>
