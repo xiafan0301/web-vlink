@@ -659,5 +659,17 @@ export function selectVideoContinue(params) {
     mode: 'judge'
   })
 }
+/**
+ * 终止或重新开始视频接力
+ * @param {object} params
+ */
+export function updVideoContinue(params) {
+  return request({
+    url: '/end/video/continue',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
 
 

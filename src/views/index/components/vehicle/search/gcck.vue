@@ -188,7 +188,7 @@ import dbTree from '@/components/common/dbTree.vue';
 import {getDeviceByBayonetUid, getDeviceDetailById} from '../../../api/api.base.js';
 import {MapGETmonitorList} from '../../../api/api.map.js';
 import {getDeviceSnapImagesSum, getDeviceSnapImagesPage} from '../../../api/api.judge.js';
-import {formatDate} from '@/utils/util.js';
+import {formatDate, dateOrigin} from '@/utils/util.js';
 export default {
   components: {vlBreadcrumb, flvplayer, dbTree, vehicleDetail},
   data () {
@@ -201,8 +201,7 @@ export default {
       searchVal2: '',
       doSearch1: {},
       doSearch2: {},
-      searchTime2: [new Date(new Date(new Date().toLocaleDateString()).getTime() - 1 * 24 * 60 * 60 * 1000), 
-        new Date(new Date(new Date().toLocaleDateString()).getTime() - 1)],
+      searchTime2: [dateOrigin(), dateOrigin(true)],
       treeList1: [],
       treeList2: [],
       bResize: {},

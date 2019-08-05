@@ -28,9 +28,9 @@
       }
     },
     mounted () {
-      this.userInfo.userName = '里斯'
+      // this.userInfo.userName = '里斯'
       // this.set(this.userInfo, 'userName', '李四');
-      // this.userInfo.address = '长沙市'
+      // this.userInfo.address = '长沙市' 
     },
     methods: {
       add () {
@@ -38,8 +38,8 @@
         // this.$set(this.userInfo, 'userName', '李四');
 
         // this.userInfo.nation = '中国'
-        // this.userInfo.address = '湘潭县'
-        this.$set(this.userInfo, 'address', '湖南省长沙市')
+        this.userInfo.address = '湘潭县'
+        // this.$set(this.userInfo, 'address', '湖南省长沙市')
 
         console.log(this.userInfo)
       }

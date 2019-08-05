@@ -135,12 +135,11 @@ export default {
     uploadEmit (data) {
       console.log('uploadEmit data', data);
       if (data && data.path) {
-        // this.fileList = data;
-        this.uploadImgId = data.uid;
+        setTimeout(() => {
+          this.uploadImgId = data.uid;
+        }, 500)
       } else {
         this.uploadImgId = null;
-        // this.fileList = [];
-        // this.curImageUrl = null;
       }
     },
    
@@ -148,12 +147,10 @@ export default {
     resetData (form) {
       this.isInitPage = false;
 
-      // this.curImageUrl = null;
-      // this.fileList = [];
       this.uploadImgId = null;
       this.dataDetail = null;
       this.uploadClear = {};
-      // this.$refs.uploadPic.clearFiles();
+
       this.$refs[form].resetFields();
     },
     // 根据搜索条件进行查询
@@ -162,8 +159,6 @@ export default {
         if (valid) {
           this.dataDetail = null;
 
-          console.log(this.curImageUrl)
-          console.log(this.fileList)
           if (!this.uploadImgId || !this.searchForm.idNo) {
             if (!document.querySelector('.el-message--info')) {
               this.$message.info('请输入图片和证件号');
@@ -175,16 +170,9 @@ export default {
             uploadImgUrls: this.queryImgPath
           };
 
-          // let _ids = [];
-          // this.fileList.forEach(x => {
-          //   if (x) {
-          //     _ids.push(x.uid);
-          //   }
-          // })
           if (this.uploadImgId) {
             params['appendixIds'] = this.uploadImgId;
           }
-          // params['appendixIds'] = '01tBEd6hSUblR8X9C5KElA'
           this.isSearchLoading = true;
           getIdNoList(params).then(res => {
             if (res && res.data) {

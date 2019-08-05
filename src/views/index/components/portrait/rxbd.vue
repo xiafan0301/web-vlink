@@ -29,11 +29,13 @@
                   :on-error="handleError">
             <i v-if="uploading" class="el-icon-loading"></i>
             <img v-else-if="curImageUrl" :src="curImageUrl">
-            <i
-              style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
-              class="vl_icon vl_icon_vehicle_01"
-              v-else
-            ></i>
+            <div  v-else>
+              <i
+                      style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
+                      class="vl_icon vl_icon_vehicle_01"
+              ></i>
+              <span>点击上传图片</span>
+            </div>
           </el-upload>
           <p @click="showHistoryPic(1)">从上传记录中选择</p>
           <div v-show="curImageUrl" class="del_icon">
@@ -52,11 +54,13 @@
                   :on-error="handleError2">
             <i v-if="uploading2" class="el-icon-loading"></i>
             <img v-else-if="curImageUrl2" :src="curImageUrl2">
-            <i
-                    style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
-                    class="vl_icon vl_icon_vehicle_01"
-                    v-else
-            ></i>
+            <div  v-else>
+              <i
+                      style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
+                      class="vl_icon vl_icon_vehicle_01"
+              ></i>
+              <span>点击上传图片</span>
+            </div>
           </el-upload>
           <!--<div class="vl_jtc_ic_input" v-show="!curImageUrl2">-->
             <!--<el-form :model="numberValidateForm" ref="vlJtcIdCard"  class="demo-ruleForm">-->
@@ -478,8 +482,21 @@
         &:last-child {
           margin-left: .15rem;
         }
+        span {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          margin-top: 1.7rem;
+          line-height: 1.7rem;
+          color: #999;
+        }
         &:hover {
           background: #2981F8;
+          span {
+            color: #fff;
+          }
           >p {
             display: block;
           }

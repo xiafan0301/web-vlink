@@ -165,9 +165,9 @@
             <el-input v-model="editUnit.organName" style="width: 95%;" placeholder="请输入单位名称" maxlength="10"></el-input>
           </el-form-item>
           <el-form-item label=" " prop="organPid">
-            <el-select style="width: 95%;" v-model="editUnit.organPid" placeholder="请选择上级单位">
+            <el-select style="width: 95%;" v-model="editUnit.organPid" placeholder="请选择上级单位" disabled>
               <el-option
-                v-for="(item, index) in departmentFormList"
+                v-for="(item, index) in editDepartmentFormList"
                 :key="'item' + index"
                 :label="item.organName"
                 :value="item.uid"
@@ -281,6 +281,7 @@ export default {
           { required: true, message: '该项内容不可为空', trigger: 'blur' }
         ]
       },
+      editDepartmentFormList: [],
       departmentFormList: [], // 新增和修改的单位
       allDepartmentList: [],  // 当前用户所属单位及下级单位
       departmentList: [], // 下级单位
@@ -601,35 +602,66 @@ export default {
     },
     // 显示编辑部门弹出框
     onEditDepart (obj, e) {
-      console.log('obj', obj)
       e.stopPropagation();
-
-
-      this.getDetail(obj.uid);
 
       const params = {
         'where.proKey': this.userInfo.proKey,
-        'where.organPid': this.userInfo.organList[0].uid,
         pageSize: 0
       };
       getDepartmentList(params)
         .then(res => {
           if (res) {
-            this.departmentFormList.push(obj);
             res.data.list.map(item => {
-              this.departmentFormList.push(item);
+              this.editDepartmentFormList.push(item);
             });
           }
         })
-      console.log('this.departmentFormList', this.departmentFormList)
-      this.editDepartmentDialog = true;
 
+      this.getDetail(obj.uid);
+
+      this.editDepartmentDialog = true;
     },
     // 确认编辑部门
     editUnitInfo (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-          
+          this.provinceList.map(item => {
+            if (item.uid === this.editUnit.province) {
+              this.editUnit.province = item.cname;
+            }
+          })
+          this.cityList.map(item => {
+            if (item.uid === this.editUnit.city) {
+              this.editUnit.city = item.cname;
+            }
+          })
+          this.countyList.map(item => {
+            if (item.uid === this.editUnit.region) {
+              this.editUnit.region = item.cname;
+            }
+          })
+          this.streetList.map(item => {
+            if (item.uid === this.editUnit.street) {
+              this.editUnit.street = item.cname;
+            }
+          })
+          this.isEditLoading = true;
+          updateDepart(this.editUnit)
+            .then(res => {
+              if (res && res.data) {
+                 this.$message({
+                  type: 'success',
+                  message: '修改成功',
+                  customClass: 'request_tip'
+                });
+                this.editDepartmentDialog = false;
+                this.getDepartList();
+                this.isEditLoading = false;
+              } else {
+                this.isEditLoading = false;
+              }
+            })
+            .catch(() => {this.isEditLoading = false;})
         }
       })
     },
@@ -646,6 +678,7 @@ export default {
     },
     // 获取机构详情
     getDetail (id) {
+      this.editUnit.uid = id;
       const params = {
         uid: id,
         proKey: this.userInfo.proKey
@@ -653,13 +686,12 @@ export default {
       getDepartDetail(params)
         .then(res => {
           if (res && res.data) {
-            console.log('res', res)
             this.editUnit.organName = res.data.organName;
-            this.editUnit.organPid = res.data.organPid;
             this.editUnit.province = res.data.province;
             this.editUnit.city = res.data.city;
             this.editUnit.region = res.data.region;
             this.editUnit.street = res.data.street;
+            this.editUnit.organPid = res.data.organPid;
           }
         })
     }

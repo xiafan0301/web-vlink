@@ -59,7 +59,7 @@
         <i class="el-icon-close" @click="onCloseDetail"></i>
       </div>
       <div class="struc_main">
-        <div class="struc_main_top">
+        <div class="struc_main_top" v-show="strucCurTab === 1">
           <p class="struc_main_top_address">抓拍位置:{{sturcDetail.address ? sturcDetail.address : '无'}}</p>
           <p class="struc_main_top_time">{{sturcDetail.shotTime ? sturcDetail.shotTime : '无'}}</p>
         </div>
@@ -389,7 +389,7 @@ export default {
      * 打开抓拍弹框
      */
     onOpenDetail (obj) {
-      console.log('obj', obj)
+      this.playing = false;
       this.numberTypeList.map(item => {
         if (item.enumField === obj.plateClass) {
           obj.plateClass = item.enumValue;

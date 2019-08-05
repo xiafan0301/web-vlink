@@ -34,6 +34,7 @@
             <h2>分析结果</h2>
             <ul>
               <li v-if="sturcDetail.plateNo"><span>车牌号码</span><span :title="sturcDetail.plateNo">{{sturcDetail.plateNo}}</span></li>
+              <li v-if="type === 3 && sturcDetail.vehicleType"><span>车辆分组</span><span :title="sturcDetail.vehicleType">{{(sturcDetail.vehicleType && sturcDetail.vehicleType.length > 0) ? sturcDetail.vehicleType.join(',') : '--'}}</span></li>
               <!-- <li v-if="type === 3 && sturcDetail.shotTime"><span>入城时间</span><span :title="sturcDetail.shotTime">{{sturcDetail.shotTime}}</span></li>
               <li v-if="type === 3 && sturcDetail.bayonetName"><span>入城卡口</span><span :title="sturcDetail.bayonetName">{{sturcDetail.bayonetName}}</span></li> -->
               <li v-if="type === 3 && sturcDetail.firstEnterFlag"><span>初次入城</span><span>是</span></li>
@@ -45,7 +46,7 @@
                 <span>车牌类型</span>
                 <span :title="sturcDetail.plateClass">{{dicFormater(45, sturcDetail.plateClass)}}</span>
               </li>
-              <li v-if="type === 3 && sturcDetail.vehicleType"><span>车辆分组</span><span :title="sturcDetail.vehicleType">{{sturcDetail.vehicleType.join(',')}}</span></li>
+              <li v-if="type === 3 && sturcDetail.vehicleType"><span>车辆分组</span><span :title="sturcDetail.vehicleType">{{(sturcDetail.vehicleType && sturcDetail.vehicleType.length > 0) ? sturcDetail.vehicleType.join(',') : '--'}}</span></li>
               <!-- 套牌依据 -->
               <!-- li v-if="type === 5"><span>号牌颜色：</span><span>{{sturcDetail.plateColor}}</span></<!-->
               <li v-if="type === 5"><span>套牌依据</span><span :title="sturcDetail.fakeReason">{{sturcDetail.fakeReason}}</span></li>
@@ -89,7 +90,7 @@ import {getFeatureSearch, getPhotoSearch} from "../../../api/api.analysis.js"; /
 export default {
   /* 
     oData
-      type: 1, // 1过车查看 2特征搜车 3入城统计 4出城统计 5套牌车 7以图搜车 8 夜间行车
+      type: 1, // 1过车查看 2特征搜车 3入城统计 4出城统计 5套牌车 7以图搜车 8 夜间行车 11车辆查询
       params: {}, // 查询参数  列表查询的参数，结果需保持一致
       list: [], // 列表
       index: 0, // 当前页的第几个（点击的人像所在的页的序号）
@@ -138,7 +139,6 @@ export default {
           pageNum: val.pageNum
         }
         this.params = val.params;
-        console.log('this.sturcDetail', this.sturcDetail);
       }
     },
     // 监听人像详细信息

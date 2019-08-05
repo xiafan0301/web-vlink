@@ -536,7 +536,7 @@ export default {
           this.alarmList = [...res.data.list]
           for(let i=0; i< this.alarmList.length; i++) {
             let item = this.alarmList[i]
-            item['semblance'] = (item.semblance).toFixed(2)
+            item['semblance'] = +(item.semblance).toFixed(2)
             let alarmTimeD = formatDate(item.alarmTime, 'yyyy-MM-dd')
             item['alarmTimeD'] = new Date(alarmTimeD).getTime()
             let alarmTime = formatDate(item.alarmTime, 'yyyy-MM-dd HH:mm:ss')
@@ -580,9 +580,21 @@ export default {
         }else {
           this.alarmList.sort(this.compareUp("semblance"))
         }
-        for(let i = 0 ; i < 10; i++) {
-          params = { lSemblance: (10-i-1)*10, rSemblance: 10*(10-i) }
-          this.filterList(params)  
+        let newArr = [
+          {lSemblance: 90, rSemblance: 100},
+          {lSemblance: 80, rSemblance: 90},
+          {lSemblance: 70, rSemblance: 80},
+          {lSemblance: 60, rSemblance: 70},
+          {lSemblance: 50, rSemblance: 60},
+          {lSemblance: 40, rSemblance: 50},
+          {lSemblance: 30, rSemblance: 40},
+          {lSemblance: 20, rSemblance: 30},
+          {lSemblance: 10, rSemblance: 20},
+          {lSemblance: 0, rSemblance: 10}]
+        for(let key of newArr) {
+          /* params = { lSemblance: (10-i-1)*10, rSemblance: 10*(10-i) } */
+          console.log(key)
+          this.filterList(key)  
         }
       }else if(this.sortType === 2 ) {
         let arr = [{ upTime: 0,time: 7, label: '' }, 
@@ -652,7 +664,9 @@ export default {
         }
       }
       this.allAlarmList = this.getNAlarmList(this.mAlarmList)
-      this.$set(this.allAlarmList[0],"isExpand", true)
+      if(this.allAlarmList && this.allAlarmList.length > 0) {
+        this.$set(this.allAlarmList[0],"isExpand", true)
+      }
     },
     getNAlarmList(arr) {
       console.log("------------",arr)

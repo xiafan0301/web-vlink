@@ -53,7 +53,7 @@
             </el-select>
           </el-form-item>
           <el-form-item prop="vehicleType">
-            <el-select v-model="searchForm.vehicleType" style="width: 250px;" placeholder="车辆类型" clearable> <!--底库列表-->
+            <el-select v-model="searchForm.vehicleType" style="width: 250px;" placeholder="车辆类型"> <!--底库列表-->
               <el-option value='不限'></el-option>
               <el-option
                 v-for="(item, index) in vehicleTypeList"
@@ -64,7 +64,7 @@
             </el-select>
           </el-form-item>
           <el-form-item prop="numType">
-            <el-select v-model="searchForm.numType" style="width: 250px;" placeholder="号牌类型" clearable> <!--分组-->
+            <el-select v-model="searchForm.numType" style="width: 250px;" placeholder="号牌类型"> <!--分组-->
               <el-option value='不限'></el-option>
               <el-option
                 v-for="(item, index) in numberTypeList"
@@ -109,18 +109,16 @@
                   <span v-show="item.vehicleNumber">{{item.vehicleNumber && item.vehicleNumber}}</span>
                   <span v-show="item.vehicleColor">{{item.vehicleColor === '未知' ? '车身颜色' : '车身'}}{{item.vehicleColor && item.vehicleColor}}</span>
                   <span v-show="item.vehicleType">{{item.vehicleType && item.vehicleType}}{{item.vehicleType === '其他' ? '车辆类型' : ''}}</span>
-                  <span v-show="item.vehicleModel">{{item.vehicleModel && item.vehicleModel}}</span>
+                  <span v-show="item.vehicleModel" :title="item.vehicleModel">{{item.vehicleModel && item.vehicleModel}}</span>
                 </div>
                 <div class="info_list">
                   <span v-show="item.numberColor">
                     {{item.numberColor === '其他' ? '其他车牌颜色' : '车牌' + item.numberColor +'色'}}
-                      <!-- 车牌{{item.numberColor}} -->
                     <span v-show="item.numberType">({{item.numberType}})</span>
                   </span>
                 </div>
                 <div class="info_list">
-                  <span v-show="item.ownerName">车主{{item.ownerName && item.ownerName}}<span v-show="item.ownerIdCard">({{item.ownerIdCard}})</span></span>
-                  <!-- <span v-show="item.ownerIdCard">({{item.ownerIdCard}})</span> -->
+                  <span v-show="item.ownerName">车主{{item.ownerName && item.ownerName}}<span v-show="item.ownerIdCard" :title="item.ownerIdCard">({{item.ownerIdCard}})</span></span>
                 </div>
                 
                 <div class="info_list group_list" v-show="item.groupList && item.groupList.length > 0">
