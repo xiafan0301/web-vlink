@@ -125,8 +125,9 @@
       </div>
       <div class="vl_jfo_right" v-show="showVideoList">
         <div class="vl_jig_right_title">
-          <span>{{curSXT.deviceName}}</span>
-          <span>抓拍{{curSXT.shotNum}}次</span>
+          <p><i class="vl_icon vl_icon_v11"></i><span :title="curSXT.deviceName">{{curSXT.deviceName}}</span></p>
+          <p><i class="vl_icon vl_icon_position_1"></i><span :title="curSXT.address">{{curSXT.address}}</span></p>
+          <!-- < span>抓拍{{curSXT.shotNum}}次</span> -->
         </div>
         <vue-scroll>
           <div class="vl_jtc_mk" v-for="(item, index) in curVideo.videoList" :key="item.id">
@@ -222,7 +223,7 @@
       </div>
     </div>
     <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
-      <video id="vlJfoLargeV" :src="curVideoUrl"></video>
+      <video id="vlJfoLargeV" :src="curVideoUrl" crossOrigin="anonymous"></video>
       <div @click="closeVideo" class="close_btn el-icon-error"></div>
       <div class="control_bottom">
         <div>{{curSXT.deviceName}}</div>
@@ -907,11 +908,11 @@ export default {
   }
   .vl_jfo_right {
     position: absolute;
-    right: .2rem;
+    right: 0;
     top: 0;
     width: 2.6rem;
     height: 100%;
-    padding: .3rem .2rem .2rem .2rem;
+    padding: 0.08rem .2rem .2rem .2rem;
     box-shadow: 0px 10px 12px 0px rgba(4,24,54,0.2);
     background: #ffffff;
     &:hover {
@@ -920,24 +921,42 @@ export default {
       }
     }
     .vl_jig_right_title {
-      position: absolute;
-      top: 0;
+      // position: absolute;
+      // top: 0;
       width: 2.2rem;
-      height: .3rem;
-      padding-top: .1rem;
-      text-align: left;
-      span {
-        display: inline-block;
-        width: 50%;
-        font-size: .14rem;
-        color: #333333;
-        white-space: nowrap;
-        overflow: hidden;
-        &:last-child {
-          text-align: right;
-          color: #999999;
+      // vertical-align: middle;
+      // height: .3rem;
+      // padding-top: .1rem;
+      // margin-bottom: 10px;
+      // text-align: left;
+      color: #333333;
+      >p {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        i {
+          margin-right: 5px;
+        }
+        span {
+          width: calc(100% - 17px);
+          display: inline-block;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
       }
+      // span {
+      //   display: inline-block;
+      //   width: 50%;
+      //   font-size: .14rem;
+      //   color: #333333;
+      //   white-space: nowrap;
+      //   overflow: hidden;
+      //   &:last-child {
+      //     text-align: right;
+      //     color: #999999;
+      //   }
+      // }
     }
     .vl_jtc_mk {
       margin-top: .2rem;
