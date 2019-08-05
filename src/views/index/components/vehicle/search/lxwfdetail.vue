@@ -30,7 +30,7 @@
               </div> -->
               <div class="card-item">
                 <label class="title">所有人：</label>
-                <span>{{carInfo.owner	}}</span>
+                <span>{{carInfo.owner	|| '-'}}</span>
               </div>
               
               <div class="card-item">
@@ -129,6 +129,9 @@
                   prop="city"
                   show-overflow-tooltip
                   >
+                  <template slot-scope="scope">
+                    {{scope.row.city || '-'}}
+                  </template>
                 </el-table-column>
                 <el-table-column
                   label="罚款金额"
@@ -153,6 +156,9 @@
                   prop="vioCategory"
                   show-overflow-tooltip
                   >
+                  <template slot-scope="scope">
+                    {{scope.row.vioCategory || '-'}}
+                  </template>
                 </el-table-column>
                 <el-table-column
                   label="采集机关"

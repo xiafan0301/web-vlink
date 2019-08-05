@@ -643,12 +643,18 @@
                 this.$message.info('第' + (i + 1) + '个区域没有框选中设备，请重新选择第' + (i + 1) + '个区域');
               }
               return false;
-            } else if (this.searchData[i].endTime > this.searchData[i].startTime + 3 * 3600 * 24 * 1000 || this.searchData[i].endTime < this.searchData[i].startTime ) {
-              // if (!document.querySelector('.el-message--info')) {
-              //   this.$message.info('结束时间必须大于开始时间并且区间小于三天');
-              // }
-              // return false;
+            } else if (this.searchData[i].endTime < this.searchData[i].startTime) {
+              if (!document.querySelector('.el-message--info')) {
+                 this.$message.info('结束时间必须大于开始时间');
+               }
+               return false;
             }
+//            else if (this.searchData[i].endTime > this.searchData[i].startTime + 3 * 3600 * 24 * 1000 || this.searchData[i].endTime < this.searchData[i].startTime ) {
+//               if (!document.querySelector('.el-message--info')) {
+//                 this.$message.info('结束时间必须大于开始时间并且区间小于三天');
+//               }
+//               return false;
+//            }
           }
           supQuery.where['dtoList'] = this.searchData.map((x, index) => {
             let obj = {}
