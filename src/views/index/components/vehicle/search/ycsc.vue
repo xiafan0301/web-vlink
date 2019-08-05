@@ -634,7 +634,6 @@ export default {
         this.isIndeterminate = false;
       }
     },
-    
     // 选中的设备数量处理
     handleData() {
       /* this.selectDeviceArr = [...this.selectCameraArr, ...this.selectBayonetArr].filter(key => key.treeType); */
