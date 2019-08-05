@@ -90,9 +90,13 @@
               <div class="sd-opts">
                 <div class="sd-opts-title">
                   <h4>区域选择</h4>
-                  <i class="vl_icon vl_icon_portrait_02" v-if="item.canPosition"  title="定位当前选中区域" @click="setFitV(index)"></i>
+                  <i
+                    class="vl_icon vl_icon_portrait_02"
+                    v-if="item.canPosition"
+                    title="定位当前选中区域"
+                    @click="setFitV(index)"
+                  ></i>
                   <i class="vl_icon vl_icon_portrait_02 cannot_click" v-else></i>
-
                 </div>
                 <ul>
                   <li title="选择矩形范围内的设备">
@@ -830,6 +834,13 @@ export default {
             .join()
         };
       }
+
+      const loading = this.$loading({
+        lock: true,
+        text: "获取摄像头信息中。。。",
+        spinner: "el-icon-loading",
+        background: "rgba(0, 0, 0, 0.7)"
+      });
       getShotNumAreaDetail(queryParams)
         .then(res => {
           if (res && res.data) {
@@ -847,12 +858,15 @@ export default {
                 item.currentIndex = 0;
               }
             }
+            loading.close();
           } else {
             this.cameraPhotoList = [];
+            loading.close();
           }
         })
         .catch(() => {
           this.cameraPhotoList = [];
+          loading.close();
         });
     },
     /*处理删除或者添加一个时间区域*/

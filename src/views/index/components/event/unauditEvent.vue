@@ -145,7 +145,13 @@
       <div class="content_right" v-show="isShowMap">
         <!--地图-->
         <div id="mapBox"></div>
-        <div class="right-flag">
+        <!--地图操作按钮-->
+        <ul class="map_rrt_u2">
+          <li @click="resetMap"><i class="el-icon-aim"></i></li>
+          <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
+          <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
+        </ul>
+        <!-- <div class="right-flag">
           <ul class="map-rrt">
             <li><i class="vl_icon vl_icon_control_23" @click="resetMap"></i></li>
           </ul>
@@ -153,7 +159,7 @@
             <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
             <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
           </ul>
-        </div>
+        </div> -->
         <i class="vl_icon vl_icon_event_23 close_btn" @click="closeMap"></i>
       </div>
     </div>
@@ -470,7 +476,7 @@ export default {
       let _this = this;
       _this.isShowMap = true;
 
-      _this.resetMap();
+      // _this.resetMap();
       let map = new window.AMap.Map('mapBox', {
         zoom: 16, // 级别
         center: [110.596015, 27.907662], // 中心点坐标[110.596015, 27.907662]
@@ -507,14 +513,10 @@ export default {
       this.mapMark(this.addEventForm);
     },
     resetMap () {
-      let _this = this;
-      let map = new window.AMap.Map('mapBox', {
-        zoom: 16, // 级别
-        center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
-        // viewMode: '3D' // 使用3D视图
-      });
-      map.setMapStyle('amap://styles/whitesmoke');
-      _this.map = map;
+      if (this.map) {
+        this.map.setZoomAndCenter(16, [110.596015, 27.907662]);
+        this.map.setFitView();
+      }
     },
     mapZoomSet (val) {
       if (this.map) {
@@ -1013,31 +1015,54 @@ export default {
         right: 20px;
         top: 20px;
       }
-      .right-flag {
-        position: absolute; right: 20px; bottom: 0;
-        height: 220px;
-        transition: right .3s ease-out;
-        animation: fadeInRight .4s ease-out .4s both;
-        .map-rrt {
-          padding: 0 5px;
-          background-color: #fff;
-          box-shadow: 0 0 10px rgba(148,148,148,0.24);
-          >li {
-            padding: 15px 10px;
-            cursor: pointer;
-            border-bottom: 1px solid #eee;
-            text-align: center;
-            >i {
-              font-size: 20px;
-              color: #0B6FF7;
-            }
-            &:last-child { border-bottom: 0; }
+      .map_rrt_u2 {
+        position: absolute; right: 30px;
+        bottom: 20px;
+        margin-top: .2rem;
+        font-size: 26px;
+        background: #ffffff;
+        width: 78px;
+        padding: 0 10px;
+        > li {
+          line-height: 70px;
+          text-align: center;
+          cursor: pointer;
+          border-bottom: 1px solid #F2F2F2;
+          > i {
+            margin-top: 0;
+            display: inline-block;
+          }
+          color: #999999;
+          &:hover {
+            color: #0C70F8;
           }
         }
-        .map_rrt_u2 {
-          margin-top: 20px;
-        }
       }
+      // .right-flag {
+      //   position: absolute; right: 20px; bottom: 0;
+      //   height: 220px;
+      //   transition: right .3s ease-out;
+      //   animation: fadeInRight .4s ease-out .4s both;
+      //   .map-rrt {
+      //     padding: 0 5px;
+      //     background-color: #fff;
+      //     box-shadow: 0 0 10px rgba(148,148,148,0.24);
+      //     >li {
+      //       padding: 15px 10px;
+      //       cursor: pointer;
+      //       border-bottom: 1px solid #eee;
+      //       text-align: center;
+      //       >i {
+      //         font-size: 20px;
+      //         color: #0B6FF7;
+      //       }
+      //       &:last-child { border-bottom: 0; }
+      //     }
+      //   }
+      //   .map_rrt_u2 {
+      //     margin-top: 20px;
+      //   }
+      // }
     }
   }
   .operation-footer {

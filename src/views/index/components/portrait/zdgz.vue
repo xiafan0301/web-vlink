@@ -10,6 +10,24 @@
     
     <div :class="['vl_j_left',{hideleft:hideleft}]">
       <div class="vl_jtc_search" style="padding-top: 0;">
+        <el-date-picker
+          v-model="searchData.time1"
+          type="date"
+          placeholder="开始时间"
+          :picker-options="pickerOptions"
+          class="full vl_date"
+          :clearable="false"
+          value-format="yyyy-MM-dd"
+        ></el-date-picker>
+        <el-date-picker
+            v-model="searchData.time2"
+            type="date"
+            :clearable="false"
+            :picker-options="pickerOptions"
+            placeholder="结束时间"
+            class="full vl_date vl_date_end"
+            value-format="yyyy-MM-dd"
+          ></el-date-picker>
           <el-select class="full" v-model="searchData.portraitGroupId" placeholder="关注人群">
             <el-option
               v-for="item in portraitGroupList"
@@ -34,80 +52,46 @@
               :value="item.value">
             </el-option>
           </el-select>
-       
-
-       <!-- <el-date-picker
-         v-model="searchData.time"
-          type="daterange"
-          :clearable="false"
-          class="full vl_date"
-          value-format="yyyy-MM-dd"
-          :picker-options="pickerOptions"
-          range-separator="至"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期">
-        </el-date-picker> -->
-            <el-date-picker
-              v-model="searchData.time1"
-              type="date"
-              placeholder="开始时间"
-              :picker-options="pickerOptions"
-              class="full vl_date"
-              :clearable="false"
-              value-format="yyyy-MM-dd"
-            ></el-date-picker>
-            <el-date-picker
-              v-model="searchData.time2"
-              type="date"
-              :clearable="false"
-              :picker-options="pickerOptions"
-              placeholder="结束时间"
-              class="full vl_date vl_date_end"
-              value-format="yyyy-MM-dd"
-            ></el-date-picker>
-        <!-- <el-form-item label="区域：" label-width="60px" prop="input5"> -->
-            <!-- <el-radio-group v-model="input5" @change="changeTab"> -->
-            <el-radio-group v-model="input5" @change="changeTab">
-               <el-row :gutter="10">
-                <el-col :span="12">
-                  <el-radio label="1">列表选择</el-radio>
-                </el-col>
-                <el-col :span="12">
-                  <div @click="clickTab">
-                    <el-radio label="2">地图选择</el-radio>
-                  </div>
-                </el-col>
-              </el-row>
-            </el-radio-group>
-          <!-- </el-form-item> -->
+          <el-radio-group v-model="input5" @change="changeTab">
+              <el-row :gutter="10">
+              <el-col :span="12">
+                <el-radio label="1">列表选择</el-radio>
+              </el-col>
+              <el-col :span="12">
+                <div @click="clickTab">
+                  <el-radio label="2">地图选择</el-radio>
+                </div>
+              </el-col>
+            </el-row>
+          </el-radio-group>
           <div v-if="input5==2" >
             <el-input  v-model="selectValue" :disabled="true">
             </el-input>
           </div>
-        <el-select 
-          v-model="areaIds"
-          class="camera-select full"
-          multiple
-          collapse-tags
-          placeholder="关注范围" v-if="input5==1">
-          <el-option
-            v-for="item in eventAreas"
-            :key="item.id"
-            :label="item.areaName"
-            :value="item.areaId">
-          </el-option>
-        </el-select>
-        <div>
+          <el-select 
+            v-model="areaIds"
+            class="camera-select full"
+            multiple
+            collapse-tags
+            placeholder="关注范围" v-if="input5==1">
+            <el-option
+              v-for="item in eventAreas"
+              :key="item.id"
+              :label="item.areaName"
+              :value="item.areaId">
+            </el-option>
+          </el-select>
+          <div>
           <el-row :gutter="10">
-              <el-col :span="12">
-                <el-button  @click="resetSearch" class="full">重置</el-button>
-              </el-col>
-              <el-col :span="12">
-                <el-button  :loading="searching" type="primary" @click="beginSearch"
-                  class="select_btn full"
-                >搜索</el-button>
-              </el-col>
-            </el-row>
+            <el-col :span="12">
+              <el-button  @click="resetSearch" class="full">重置</el-button>
+            </el-col>
+            <el-col :span="12">
+              <el-button  :loading="searching" type="primary" @click="beginSearch"
+                class="select_btn full"
+              >搜索</el-button>
+            </el-col>
+          </el-row>
         </div>
       </div>
       <span class="insetLeft2" @click="hideResult"></span>
@@ -125,8 +109,9 @@
       </div>
       <div class="vl_jfo_right" v-show="showVideoList">
         <div class="vl_jig_right_title">
-          <span>{{curSXT.deviceName}}</span>
-          <span>抓拍{{curSXT.shotNum}}次</span>
+          <p><i class="vl_icon vl_icon_v11"></i><span :title="curSXT.deviceName">{{curSXT.deviceName}}</span></p>
+          <p><i class="vl_icon vl_icon_position_1"></i><span :title="curSXT.address">{{curSXT.address}}</span></p>
+          <!-- < span>抓拍{{curSXT.shotNum}}次</span> -->
         </div>
         <vue-scroll>
           <div class="vl_jtc_mk" v-for="(item, index) in curVideo.videoList" :key="item.id">
@@ -222,7 +207,7 @@
       </div>
     </div>
     <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
-      <video id="vlJfoLargeV" :src="curVideoUrl"></video>
+      <video id="vlJfoLargeV" :src="curVideoUrl" crossOrigin="anonymous"></video>
       <div @click="closeVideo" class="close_btn el-icon-error"></div>
       <div class="control_bottom">
         <div>{{curSXT.deviceName}}</div>
@@ -907,11 +892,11 @@ export default {
   }
   .vl_jfo_right {
     position: absolute;
-    right: .2rem;
+    right: 0;
     top: 0;
     width: 2.6rem;
     height: 100%;
-    padding: .3rem .2rem .2rem .2rem;
+    padding: 0.08rem .2rem .2rem .2rem;
     box-shadow: 0px 10px 12px 0px rgba(4,24,54,0.2);
     background: #ffffff;
     &:hover {
@@ -920,24 +905,42 @@ export default {
       }
     }
     .vl_jig_right_title {
-      position: absolute;
-      top: 0;
+      // position: absolute;
+      // top: 0;
       width: 2.2rem;
-      height: .3rem;
-      padding-top: .1rem;
-      text-align: left;
-      span {
-        display: inline-block;
-        width: 50%;
-        font-size: .14rem;
-        color: #333333;
-        white-space: nowrap;
-        overflow: hidden;
-        &:last-child {
-          text-align: right;
-          color: #999999;
+      // vertical-align: middle;
+      // height: .3rem;
+      // padding-top: .1rem;
+      // margin-bottom: 10px;
+      // text-align: left;
+      color: #333333;
+      >p {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        i {
+          margin-right: 5px;
+        }
+        span {
+          width: calc(100% - 17px);
+          display: inline-block;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
       }
+      // span {
+      //   display: inline-block;
+      //   width: 50%;
+      //   font-size: .14rem;
+      //   color: #333333;
+      //   white-space: nowrap;
+      //   overflow: hidden;
+      //   &:last-child {
+      //     text-align: right;
+      //     color: #999999;
+      //   }
+      // }
     }
     .vl_jtc_mk {
       margin-top: .2rem;

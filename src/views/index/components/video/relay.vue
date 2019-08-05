@@ -21,7 +21,7 @@
                     type="date"
                     time-arrow-control
                     :editable="false" :clearable="false"
-                    @change="searchSubmit"
+                    @change="searchSubmit(false)"
                     placeholder="选择开始时间">
                   </el-date-picker>
                 </div>
@@ -35,12 +35,12 @@
                     type="date"
                     time-arrow-control
                     :editable="false" :clearable="false"
-                    @change="searchSubmit"
+                    @change="searchSubmit(false)"
                     placeholder="选择结束时间">
                   </el-date-picker>
                 </div>
                 <div>
-                  <el-select @change="searchSubmit" size="small" style="width: 100%;" v-model="targetType" placeholder="选择目标类型">
+                  <el-select @change="searchSubmit(false)" size="small" style="width: 100%;" v-model="targetType" placeholder="选择目标类型">
                     <el-option :label="'全部'" :value="''"></el-option>
                     <el-option :label="'人员'" :value="'0'"></el-option>
                     <el-option :label="'车辆'" :value="'1'"></el-option>
@@ -50,41 +50,45 @@
               <div class="show_list" style="padding-top: 142px; position: relative;">
                 <!-- 直播列表 -->
                 <div class="relay_ul_list">
-                  <ul>
-                    <li>
-                      <div v-if="!deviceIsPlaying({uid: 3}, 1)"
-                        @dragstart="dragStart($event, {uid: 3}, 1)" @dragend="dragEnd"
+                  <ul v-if="relayList && relayList.length > 0">
+                    <!-- relayList -->
+                    <li v-for="(item, index) in relayList" :key="'relay_list_' + index">
+                      <div v-if="!deviceIsPlaying(item, 1)"
+                        @dragstart="dragStart($event, item, 1)" @dragend="dragEnd"
                         draggable="true" style="cursor: move;">
-                        <div class="relay_ul_lit">2018-11-25 09:12<span class="relay_ul_lit_t2">告警</span></div>
-                        <div class="relay_ul_lim">
+                        <div class="relay_ul_lit">{{item.createTime}}<span class="relay_ul_lit_t2" v-if="item.videoPath">告警</span></div>
+                        <div class="relay_ul_lim" v-if="(item.type === 1 || item.type === '1') && item.plateNo && !item.subStoragePath">
                           <ul>
                             <li>车牌号码</li>
-                            <li>湘A234A1</li>
+                            <li>{{item.plateNo}}</li>
                           </ul>
                         </div>
-                        <div class="relay_ul_lid com_ellipsis">备注只显示一行，为空时不显示...</div>
-                      </div>
-                      <div  class="relay_ul_list_active" draggable="false" v-else>
-                        <div class="relay_ul_lit">2018-11-25 09:12<span class="relay_ul_lit_t1">播放中</span></div>
-                        <div class="relay_ul_lim">
-                          <ul>
-                            <li>车牌号码</li>
-                            <li>湘A234A1</li>
-                          </ul>
-                        </div>
-                        <div class="relay_ul_lid com_ellipsis">备注只显示一行，为空时不显示...</div>
-                      </div>
-                    </li>
-                    <li v-for="(item, index) in 10" :key="index">
-                      <div>
-                        <div class="relay_ul_lit">2018-11-25 09:12<span class="relay_ul_lit_t2">告警</span></div>
-                        <div class="relay_ul_lii">
+                        <div class="relay_ul_lii" v-else>
                           <img src="../../../../assets/img/666.jpg" alt="">
                         </div>
-                        <div class="relay_ul_lid com_ellipsis">备注只显示一行，为空时不显示...</div>
+                        <div class="relay_ul_lid com_ellipsis">{{item.remarks}}</div>
+                      </div>
+                      <div class="relay_ul_list_active" draggable="false" v-else>
+                        <div class="relay_ul_lit">{{item.createTime}}<span class="relay_ul_lit_t2" v-if="item.videoPath">告警</span></div>
+                        <div class="relay_ul_lim" v-if="(item.type === 1 || item.type === '1') && item.plateNo && !item.storagePath">
+                          <ul>
+                            <li>车牌号码</li>
+                            <li>{{item.plateNo}}</li>
+                          </ul>
+                        </div>
+                        <div class="relay_ul_lii" v-else>
+                          <img src="../../../../assets/img/666.jpg" alt="">
+                        </div>
+                        <div class="relay_ul_lid com_ellipsis">{{item.remarks}}</div>
                       </div>
                     </li>
                   </ul>
+                  <div class="relay_ul_et" v-else>
+                    暂无数据
+                  </div>
+                  <div class="relay_ul_ld" v-if="searchLoading">
+                    <i class="el-icon-loading"></i>加载中，请稍后...
+                  </div>
                 </div>
                 <div class="relay_ul_btn">
                   <el-button @click="changePage(2)" size="small" type="primary" style="width:60%;">新建任务</el-button>
@@ -103,7 +107,7 @@
                     type="date"
                     time-arrow-control
                     :editable="false" :clearable="false"
-                    @change="searchSubmit"
+                    @change="searchSubmit(true)"
                     placeholder="选择开始时间">
                   </el-date-picker>
                 </div>
@@ -117,12 +121,12 @@
                     type="date"
                     time-arrow-control
                     :editable="false" :clearable="false"
-                    @change="searchSubmit"
+                    @change="searchSubmit(true)"
                     placeholder="选择结束时间">
                   </el-date-picker>
                 </div>
                 <div>
-                  <el-select @change="searchSubmit" size="small" style="width: 100%;" v-model="targetType2" placeholder="选择目标类型">
+                  <el-select @change="searchSubmit(true)" size="small" style="width: 100%;" v-model="targetType2" placeholder="选择目标类型">
                     <el-option :label="'全部'" :value="''"></el-option>
                     <el-option :label="'人员'" :value="'0'"></el-option>
                     <el-option :label="'车辆'" :value="'1'"></el-option>
@@ -132,29 +136,29 @@
               <div class="show_list" style="padding-top: 142px; position: relative;">
                 <!-- 直播列表 -->
                 <div class="relay_ul_list">
-                  <ul>
-                    <li>
-                      <div>
-                        <div class="relay_ul_lit">2018-11-25 09:12<span class="relay_ul_lit_t3">重启任务</span></div>
-                        <div class="relay_ul_lim">
+                  <ul v-if="relayList2 && relayList2.length > 0">
+                    <li v-for="(item, index) in relayList2" :key="'relay_list2_' + index">
+                      <div class="relay_ul_list_active">
+                        <div class="relay_ul_lit">{{item.createTime}}<span class="relay_ul_lit_t3" @click="relayModify(item.uid, item.type, 0)">重启任务</span></div>
+                        <div class="relay_ul_lim" v-if="(item.type === 1 || item.type === '1') && item.plateNo && !item.storagePath">
                           <ul>
                             <li>车牌号码</li>
-                            <li>湘A234A1</li>
+                            <li>{{item.plateNo}}</li>
                           </ul>
                         </div>
-                        <div class="relay_ul_lid com_ellipsis">备注只显示一行，为空时不显示...</div>
-                      </div>
-                    </li>
-                    <li v-for="(item, index) in 10" :key="index">
-                      <div>
-                        <div class="relay_ul_lit">2018-11-25 09:12<span class="relay_ul_lit_t3">重启任务</span></div>
-                        <div class="relay_ul_lii">
+                        <div class="relay_ul_lii" v-else>
                           <img src="../../../../assets/img/666.jpg" alt="">
                         </div>
-                        <div class="relay_ul_lid com_ellipsis">备注只显示一行，为空时不显示...</div>
+                        <div class="relay_ul_lid com_ellipsis">{{item.remarks}}</div>
                       </div>
                     </li>
                   </ul>
+                  <div class="relay_ul_et" v-else>
+                    暂无数据
+                  </div>
+                  <div class="relay_ul_ld" v-if="searchLoading2">
+                    <i class="el-icon-loading"></i>加载中，请稍后...
+                  </div>
                 </div>
                 <div class="relay_ul_btn">
                   <el-button size="small" type="primary" style="width:60%;" @click="changePage(2)">新建任务</el-button>
@@ -199,14 +203,17 @@ import relayNew from './relay-new.vue';
 import {formatDate} from '@/utils/util.js';
 import flvplayer from '@/components/common/flvplayer.vue';
 import { apiAreaServiceDeviceList, getAllMonitorList, getAllBayonetList } from "@/views/index/api/api.base.js";
-  import {selectVideoContinue, JtcPOSTAppendixInfo, JtcGETAppendixInfoList} from '@/views/index/api/api.judge.js'
+  import {selectVideoContinue, updVideoContinue, JtcPOSTAppendixInfo, JtcGETAppendixInfoList} from '@/views/index/api/api.judge.js'
+import { error } from 'util';
 export default {
   components: {videoEmpty, flvplayer, relayNew},
   data () {
     let _ndate = new Date();
     return {
+      searchLoading: false,
       relayList: [],
       relayListIntval: null,
+      searchLoading2: false,
       relayList2: [],
 
       pageType: 1, // 1展示 2新建
@@ -265,10 +272,7 @@ export default {
     this.startTime2 = this.initTime[0];
     this.endTime2 = this.initTime[1];
 
-    this.getRelayList();
-    this.intvalRelayList(false);
-
-    this.getRelayList(true); // 已结束
+    this.reSearch();
   },
   mounted () {
   },
@@ -284,29 +288,37 @@ export default {
         }, 5 * 1000);
       } */
     },
-    searchSubmit () {
-      this.getRelayList();
-      this.intvalRelayList(false);
+    searchSubmit (isFinished) {
+      if (isFinished) {
+        this.getRelayList(true); // 已结束
+      } else {
+        this.getRelayList(); // 进行中
+        this.intvalRelayList(false);
+      }
+    },
+    reSearch () {
+      this.getRelayList(); // 进行中
+      this.getRelayList(true); // 已结束
+      this.intvalRelayList(false); // 开启定时器
     },
     getRelayList (isFinished) {
-      let st = null, et = null;
+      let st = null, et = null, stype = '';
       if (isFinished) {
         st = this.startTime2;
         et = this.endTime2;
+        stype = this.targetType2;
       } else {
         st = this.startTime;
         et = this.endTime;
+        stype = this.targetType;
       }
       let params = {
-        type: '1',
+        type: stype,
         beginTime: formatDate(st, 'yyyy-MM-dd 00:00:00'),
         endTime: formatDate(et, 'yyyy-MM-dd 23:59:59'),
         isFinished: isFinished ? '1' : '0'
       }
-      // 0是人 1是车
-      if (this.targetType === '1' || this.targetType === '0') {
-        params.type = this.targetType;
-      }
+      if (isFinished) { this.searchLoading2 = true; } else { this.searchLoading = true; }
       selectVideoContinue(params).then((res) => {
         if (res && res.data) {
           if (isFinished) {
@@ -315,7 +327,9 @@ export default {
             this.relayList = res.data;
           }
         }
+        if (isFinished) { this.searchLoading2 = false; } else { this.searchLoading = false; }
       }).catch((error => {
+        if (isFinished) { this.searchLoading2 = false; } else { this.searchLoading = false; }
       }));
     },
     closeNew () {
@@ -396,13 +410,13 @@ export default {
     dragDrop (item, index) {
       if (this.dragActiveObj) {
         // let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
-        let type = this.dragActiveObj.ui_type;
+        let type = this.dragActiveObj.ui_type; // 1进行中 2已结束
         let obj = {
           type: 5,
           title: '视频接力测试视频',
-          record: true,
-          video: Object.assign({}, {
-            uid: this.dragActiveObj.uid
+          record: false,
+          video: Object.assign({}, this.dragActiveObj, {
+            videoPath: 'http://10.116.126.10/root/image/2019/08/02/34020000001320000003598820190802115400000001.mp4'
           })
         }
         this.videoList.splice(index, 1, obj);
@@ -417,10 +431,23 @@ export default {
      * 关闭播放器
      * @param {string} sid 视频ID
      */
-    playerClose (iIndex) {
+    playerClose (iIndex, oData) {
+      console.log(oData);
       this.videoList.splice(iIndex, 1, {});
+      this.relayModify(oData.video.uid, oData.video.type, 1);
     },
     /* 播放器事件 end */
+    relayModify (uid, type, isFinished) {
+      updVideoContinue({
+        uid: uid,
+        type: type,
+        isFinished: isFinished
+      }).then(res => {
+        if (res) {
+          this.reSearch();
+        }
+      }).catch(error => {});
+    },
 
     showListEvent (type) {
       this.showMenuActive = true;
@@ -635,9 +662,23 @@ export default {
 }
 .relay_main { width: 100%; height: 100%; }
 .relay_ul_list {
+  position: relative;
   height: 100%;
   padding-bottom: 50px;
   border-top: 1px solid #eee;
+  > .relay_ul_ld {
+    position: absolute; top: 20px; left: 10%;
+    width: 80%;
+    padding: 20px 0;
+    text-align: center;
+    background-color: #fff;
+    > i { font-size: 20px; position: relative; top: 2px; margin-right: 5px; }
+  }
+  > .relay_ul_et {
+    padding-top: 20px;
+    text-align: center;
+    color: #999;
+  }
   > ul {
     height: 100%;
     overflow: auto;

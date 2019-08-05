@@ -81,9 +81,7 @@
       </div>
     </div>
 <!-- 视频播放 -->
-  <div class="video_box" v-if="dialogVisible">
-    <div is="flvplayer" class="vl_map_video_box" :oData="playUrl" @playerClose="playerClose" :showFullScreen="true" :oConfig="{fit: false, sign: false, pause: true,fullscreen:false}"></div>
-  </div>
+  <div is="mapVideoPlay" :oData="mapVideoData"></div>
     <!-- 地图选择 -->
     <!-- <el-dialog :visible.sync="dialogVisible" width="80%">
         <mapselect @selectMap="mapPoint" @closeMap="hideMap" :allPoints="allDevice" :allBayonets="allBayonet"></mapselect>
@@ -93,7 +91,6 @@
   </div>
 </template>
 <script>
-import flvplayer from '@/components/common/flvplayer.vue';
 import { mapXupuxian } from "@/config/config.js";
 // import { cityCode } from "@/utils/data.js";
 import { transMinute } from '@/utils/util.js';
@@ -103,13 +100,15 @@ import { getAllBayonetList } from "@/views/index/api/api.base.js";
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 // import mapselect from "@/views/index/components/common/mapSelect";
 import mapSelector from '@/components/common/mapSelector.vue';
+import mapVideoPlay from '@/components/common/mapVideoPlay.vue';
 export default {
   components: {
     mapSelector,
-    flvplayer
+    mapVideoPlay
   },
   data() {
     return {
+      mapVideoData: null,
       dialogVisible: false,
       isload: false,
       amap: null,
@@ -496,18 +495,10 @@ export default {
     },
     
     showVideo(v){
-
-     // console.log(v);
-      this.dialogVisible=true
-      this.playUrl = {
-            type: 3,
-            title: '',
-            video: {
-              uid: 1,
-              downUrl: v.videoPath
-            }
-          }
-      
+      this.mapVideoData = {
+        name: '',
+        url: v.videoPath
+      }
     }
   }
 };
