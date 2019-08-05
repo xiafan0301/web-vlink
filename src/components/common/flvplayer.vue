@@ -16,21 +16,26 @@
       <div v-else>视频加载中，请稍后...</div>
     </div>
     <!-- oData.type === 5 视频接力 -->
-    <div class="player_relay_i" v-if="oData.type === 5">
+    <div class="player_relay_i" v-if="oData.type === 5 && oData">
       <div class="player_relay_icp">
-        <ul>
+        <ul v-if="(oData.video.type === 1 || oData.video.type === '1') && oData.video.plateNo && !oData.video.subStoragePath">
           <li>车牌号码</li>
-          <li>湘A234A1</li>
+          <li>{{oData.video.plateNo}}</li>
         </ul>
+        <div v-else>
+          <img :src="oData.video.subStoragePath" alt="">
+        </div>
       </div>
       <div class="player_relay_imp">
         <router-link title="接力地图" target="_blank" class="vl_icon vl_icon_rpm" :to="{name: 'video_relay_map', query: {
-            tid: '001'
-            }}">
+            uid: oData.video.uid,
+            type: oData.video.type
+          }}">
         </router-link>
       </div>
     </div>
     <span v-show="fullScreen" class="vl_icon player_out_fullscreen vl_icon_v30" @click="playerFullScreen(false)" title="退出全屏"></span>
+    <!-- 关闭按钮 -->
     <span v-if="config.close && !fullScreen && !optionsDis" class="vl_icon vl_icon_close" @click="playerClose" title="关闭"></span>
     <!-- <span v-else class="vl_icon vl_icon_close" @click="playerClose" title="关闭"></span> -->
     <!-- 暂停按钮（遮盖） -->
@@ -451,7 +456,7 @@ export default {
     initPlayer () {
       this.videoLoadingFailed = false;
       let obj = {deviceId: this.oData.video.uid};
-      if (this.oData.type === 1 || this.oData.type === 5) {
+      if (this.oData.type === 1) {
         // 直播
         apiVideoPlay(obj).then(res => {
           if (res && res.data) {
@@ -493,6 +498,10 @@ export default {
       } else if (this.oData.type === 3) {
         // 录像
         this.initPlayerDoForNormal(this.oData.video.downUrl);
+      } else if (this.oData.type === 5) {
+        // 视频接力
+        // console.log('视频接力');
+        this.initPlayerDoForNormal(this.oData.video.videoPath);
       }
       
     },
@@ -592,10 +601,10 @@ export default {
       }
     },
     // 普通播放（录像）
-    initPlayerDoForNormal () {
+    initPlayerDoForNormal (url) {
       this.videoLoading = true;
       var videoElement = document.getElementById(this.flvplayerId);
-      videoElement.src = this.oData.video.downUrl;
+      videoElement.src = url;
       // 真正处于播放的状态，这个时候我们才是真正的在观看视频。
       // 暂停后再播放也会触发 this.config.pause影响
       videoElement.onplaying = () => {
@@ -609,7 +618,7 @@ export default {
       videoElement.onended = () => {
         console.log('播放结束');
         this.playActive = false;
-        videoElement.pause();
+        // videoElement.pause();
       };
       videoElement.onerror = () => {
         this.videoLoadingFailed = true;
@@ -965,7 +974,7 @@ export default {
     // 播放/暂停
     playerPlay (flag) {
       this.playActive = flag;
-      console.log('playerPlay', flag)
+      // console.log('playerPlay', flag)
       if (this.oData.type === 1) {
         if (flag) {
           // 直播 播放的时候需要重新加载
@@ -976,7 +985,7 @@ export default {
         } else {
           this.player.pause();
         }
-      } else if (this.oData.type === 2 || this.oData.type === 3) {
+      } else if (this.oData.type === 2 || this.oData.type === 3 || this.oData.type === 5) {
         // 回放/录像
         if (flag) {
           this.config.pause = false;
@@ -1155,7 +1164,7 @@ export default {
     },
     // 视频关闭事件
     playerClose () {
-      this.$emit('playerClose', this.index, 123123);
+      this.$emit('playerClose', this.index, this.oData);
     },
     /* 标记 */
     addSign () {
@@ -1296,8 +1305,7 @@ export default {
   position: absolute; top: 10px; left: 10px; z-index: 100;
   > .player_relay_icp {
     > ul {
-      width: 76px;
-      margin: 0 auto; padding: 8px 0;
+      margin: 0 auto; padding: 8px 10px;
       background-color: #f2f2f2;
       border:1px solid rgba(211, 211, 211, 0.97);
       border-radius:3px;
@@ -1305,6 +1313,11 @@ export default {
         text-align: center;
         font-size: 12px;
       }
+    }
+    > div {
+      width: 120px; height: 60px;
+      text-align: left;
+      > img { max-width: 100%; max-height: 100%; }
     }
   }
   > .player_relay_imp {

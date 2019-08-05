@@ -86,7 +86,7 @@
           <p @click="skipPjfxPortraitPage">轨迹分析</p>
           <p @click="skipLjdPortraitPage">落脚点分析</p>
         </div>
-        <div id="rightMap"></div>
+        <div id="rightContainerMap"></div>
         <!--地图操作按钮-->
         <ul class="map_rrt_u2">
           <li @click="resetZoom"><i class="el-icon-aim"></i></li>
@@ -97,7 +97,7 @@
     </div>
     <!-- 视频全屏放大 -->
     <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
-      <video id="controlVideo" :src="videoDetail.videoPath"></video>
+      <video id="controlVideo" :src="videoDetail.videoPath" crossOrigin="anonymous"></video>
       <div @click="closeVideo" class="vl_icon vl_icon_event_23 close_icon"></div>
       <div class="control_bottom">
         <div>{{videoDetail.deviceName}}</div>
@@ -181,7 +181,7 @@ export default {
     // 初始化地图
     initMap (obj) {
       let _this = this;
-      let map = new window.AMap.Map('rightMap', {
+      let map = new window.AMap.Map('rightContainerMap', {
         zoom: 15, // 级别
         center: mapXupuxian.center, // 中心点坐标[110.596015, 27.907662]
       });
@@ -292,6 +292,7 @@ export default {
     // 关闭视频
     closeVideo () {
       this.showLarge = false;
+      this.isPlaying = false;
       document.getElementById('controlVideo').pause();
     },
     // 播放视频
@@ -572,7 +573,7 @@ export default {
           }
         }
       }
-      #rightMap {
+      #rightContainerMap {
         // z-index: 1000;
         width: 100%;
         height: 100%;
@@ -612,7 +613,7 @@ export default {
   left: 0;
   bottom: 0;
   background: #000000;
-  z-index: 9999;
+  z-index: 1111;
   -webkit-transition: all .4s;
   -moz-transition: all .4s;
   -ms-transition: all .4s;
