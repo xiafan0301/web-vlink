@@ -89,7 +89,7 @@ import {getFeatureSearch, getPhotoSearch} from "../../../api/api.analysis.js"; /
 export default {
   /* 
     oData
-      type: 1, // 1过车查看 2特征搜车 3入城统计 4出城统计 5套牌车 7以图搜车 8 夜间行车
+      type: 1, // 1过车查看 2特征搜车 3入城统计 4出城统计 5套牌车 7以图搜车 8 夜间行车 11车辆查询
       params: {}, // 查询参数  列表查询的参数，结果需保持一致
       list: [], // 列表
       index: 0, // 当前页的第几个（点击的人像所在的页的序号）
