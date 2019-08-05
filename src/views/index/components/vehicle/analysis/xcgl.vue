@@ -312,7 +312,8 @@ import {
   random14,
   objDeepCopy,
   formatDate,
-  autoDownloadUrl
+  autoDownloadUrl,
+  dateOrigin
 } from "../../../../../utils/util.js";
 import vlBreadcrumb from "@/components/common/breadcrumb.vue";
 export default {
@@ -588,12 +589,16 @@ export default {
     },
     //设置默认时间
     setDTime() {
-      let curDate = new Date(new Date().toLocaleDateString()).getTime();
+      /* let curDate = new Date(new Date().toLocaleDateString()).getTime();
       let curS = 1 * 24 * 3600 * 1000;
       let _s = curDate - curS;
       let _e = curDate - 1;
       this.searchData.startTime = formatDate(_s);
-      this.searchData.endTime = formatDate(_e);
+      this.searchData.endTime = formatDate(_e); */
+      let _s = new Date(dateOrigin().getTime() - 3600 * 1000 * 24 * 1);
+      let _e = new Date(dateOrigin(true).getTime() - 3600 * 1000 * 24 * 1);
+      this.searchData.startTime = _s;
+      this.searchData.endTime = _e;
     },
     dateChange() {
       this.searchData.endTime =
