@@ -39,8 +39,10 @@
       <!--查询范围-->
       <div class="ytsr_left_radio">
         <span>查询范围：</span>
-        <el-radio v-model="radio" label="1">基础信息库</el-radio>
-        <el-radio v-model="radio" label="2">抓拍视图库</el-radio>
+        <span>
+          <el-radio v-model="radio" label="1">基础信息库</el-radio>
+          <el-radio v-model="radio" label="2">抓拍视图库</el-radio>
+        </span>
       </div>
       <div class="ytsr_left_search" v-show="radio === '1'">
         <el-select
@@ -278,6 +280,22 @@
         <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="sureDeleteTask">确认</el-button>
       </div>
     </el-dialog>
+    <!--新建任务弹出框-->
+    <el-dialog
+            title="新建离线任务"
+            :visible.sync="addTaskDialog"
+            width="482px"
+            :close-on-click-modal="false"
+            :close-on-press-escape="false"
+            class="dialog_comp"
+    >
+      <span style="color: #999999;">因数据量较大，为减少等待时间，这次分析将建立离线任务，需要在下方输入 任务名称。离线任务可以在右侧离线任务列表查看任务状态。</span>
+      <el-input v-model="taskName" placeholder="请输入任务名称"></el-input>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="addTaskDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="onConfirmAddTask">确认</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -334,6 +352,8 @@
         interruptDialog: false, //中断任务
         addTaskDialog: false,
         isAddLoading: false,
+        taskName: '', // 新建弹窗里的任务名称
+        addParams: {},
         uploading: false,
         uploadAcion: ajaxCtx.base + '/new',
         searching: false,
@@ -622,7 +642,11 @@
         this.getDataList();
       },
       skipResultPage (obj) {
-        this.$router.push({name: 'portrait_ytsr', query: {uid: obj.uid}})
+        if (obj.taskWebParam.origin === 1) {
+          this.$router.push({name: 'portrait_ytsr', query: {uid: obj.uid}})
+        } else {
+          this.$router.push({name: 'portrait_ytsr_shot', query: {uid: obj.uid}})
+        }
       },
       // 显示中断任务弹出框
       showInterruptDialog (obj) {
@@ -758,6 +782,7 @@
           origin: this.radio,
         };
         let params = {
+          origin: this.radio,
         }
         if (!this.imgList) {
           if (!document.querySelector('.el-message--info')) {
@@ -778,38 +803,83 @@
         }
         if (this.radio === '1') {
           p1['portraitGroupId'] = this.searchData.portraitGroupId.join(',');
+          params['portraitGroupId'] = this.searchData.portraitGroupId.join(',');
+          let pNameList = []
+          this.searchData.portraitGroupId.forEach(x => {
+            pNameList.push(this.portraitGroupList.find(y => y.uid === x).groupName)
+          })
+          params['portraitGroupName'] = pNameList;
         } else {
+          let dNameList = [];
+          let dList = this.selectCameraArr.map(res =>  res.deviceName);
+          let bList = this.selectBayonetArr.map(res => res.bayonetName);
+          dNameList = dList.concat(bList);
+          if (dNameList.length > 3) {
+            params['deviceNames'] = dNameList.splice(0, 3);
+            params['deviceNames'].push('等' + dNameList.length + '个设备');
+            params['deviceNames'] =  params['deviceNames'].join(',')
+          } else {
+            params['deviceNames'] = dNameList.join(',')
+          }
           p1['deviceIds'] = this.selectCameraArr.map(res => res.id).join(',');
+          params['deviceIds'] = this.selectCameraArr.map(res => res.id).join(',');
           p1['bayonetIds'] = this.selectBayonetArr.map(res => res.id).join(',');
+          params['bayonetIds'] = this.selectBayonetArr.map(res => res.id).join(',');
           p1['startTime'] = this.searchData.shotTime[0];
+          params['startTime'] = this.searchData.shotTime[0];
           p1['endTime'] = this.searchData.shotTime[1];
+          params['endTime'] = this.searchData.shotTime[1];
         }
         PortraitGetDispatch(p1)
             .then(res => {
               if (res) {
+                this.searching = false;
                 if (res.data === 1) {
-                  PortraitPostByphotoTask(params)
-                      .then(sRes => {
-                        if (sRes) {
-                          this.$set(sRes.data, 'taskResult', JSON.parse(sRes.data.taskResult));
-                          this.$set(sRes.data, 'taskWebParam', JSON.parse(sRes.data.taskWebParam));
-                          console.log(sRes.data)
-                          this.searching = false;
-                        }
-                      })
+                  this.addParams = params;
+                  this.addTaskDialog = true;
                 } else {
-                  PortraitPostByphotoRealtime(params)
-                      .then(sRes => {
-                        if (sRes) {
-                          this.$set(sRes.data, 'taskResult', JSON.parse(sRes.data.taskResult));
-                          this.$set(sRes.data, 'taskWebParam', JSON.parse(sRes.data.taskWebParam));
-                          console.log(sRes.data)
-                          this.searching = false;
-                        }
-                      })
+                  if (this.radio === "1") {
+                    this.$router.push({name: 'portrait_ytsr', query: params})
+                  } else {
+                    this.$router.push({name: 'portrait_ytsr_shot', query: params})
+                  }
+//                  PortraitPostByphotoRealtime(params)
+//                      .then(sRes => {
+//                        if (sRes) {
+//                          this.$set(sRes.data, 'taskResult', JSON.parse(sRes.data.taskResult));
+//                          this.$set(sRes.data, 'taskWebParam', JSON.parse(sRes.data.taskWebParam));
+//                          console.log(sRes.data)
+//                          this.searching = false;
+//                        }
+//                      })
                 }
               }
             })
+      },
+      onConfirmAddTask () {
+        if (!this.taskName.replace(/\s+|\s+$/g, '')) {
+          if (!document.querySelector('.el-message--info')) {
+            this.$message.info('任务名称不能为空');
+            return false;
+          }
+        }
+        this.addParams.taskName = this.taskName;
+        this.isAddLoading = true;
+        PortraitPostByphotoTask(this.addParams).then(res => {
+          if (res && res.data) {
+            this.$message({
+              type: 'success',
+              message: '新建成功',
+              customClass: 'request_tip'
+            })
+            this.isAddLoading = false
+            this.addTaskDialog = false
+            this.getDataList()
+            console.log(res.data)
+          } else {
+            this.isAddLoading = false;
+          }
+        }).catch(() => {this.isAddLoading = false})
       },
       handleCurrentChange (e) {
         this.pagination.pageNum = e;
@@ -1196,10 +1266,11 @@
       .ytsr_left_radio {
         padding-left: 20px;
         margin: 20px 0;
-        .el-radio {
-          margin-right: 0px;
-          .el-radio__label {
-            padding-left: 0px;
+        display: flex;
+        >span {
+          display: block;
+          &:first-child {
+            width: 90px;
           }
         }
       }
