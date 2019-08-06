@@ -166,7 +166,7 @@
               </div>
             </div>
             <div class="list_con_info">
-              <div>{{item.surveillanceName}}</div>
+              <div>布控名：{{item.surveillanceName}}</div>
               <div>
                 <span>{{item.devName}}</span>&nbsp;
                 <span>{{item.snapTime}}</span>
