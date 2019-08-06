@@ -28,6 +28,7 @@
             </el-form-item>
             <el-form-item label="创建时间：" prop="reportTime">
               <el-date-picker
+                class="vl_date"
                 v-model="taskForm.reportTime"
                 type="datetimerange"
                 value-format="yyyy-MM-dd HH:mm:ss"
@@ -150,7 +151,7 @@
         >
         <div class="content_body">
           <div class="left">
-            <div :class="['upload_box', {'hidden': dialogImageUrl}]">
+            <!-- <div :class="['upload_box', {'hidden': dialogImageUrl}]">
               <el-upload
                 ref="uploadPic"
                 accept="image/*"
@@ -162,11 +163,14 @@
                 :before-upload="beforeAvatarUpload"
                 :file-list="fileList">
                 <i class="vl_icon vl_icon_th_01"></i>
-                <!-- <p class="upload_text" v-show="!dialogImageUrl">点击上传图片</p> -->
               </el-upload>
+            </div> -->
+            <!-- 上传车像图片 -->
+            <div style="margin-top: 20px; height: 210px;">
+              <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit"></div>
             </div>
-            <p style="color: #999999;margin-top: 8px;padding-left: 40px;">请上传目标对象</p>
-            <p style="color: #999999;padding-left: 34px;">全身照搜索更精确</p>
+            <!-- <p style="color: #999999;margin-top: 8px;padding-left: 40px;">请上传目标对象</p>
+            <p style="color: #999999;padding-left: 34px;">全身照搜索更精确</p> -->
           </div>
           <div class="right">
             <div class="line-box"><el-input v-model="addData.taskName" placeholder="请设置任务名称，最多20字" maxlength="20"></el-input></div>
@@ -177,8 +181,15 @@
               <i v-if="treeTabShow" class="el-icon-arrow-up"></i>
               <i v-else class="el-icon-arrow-down"></i>
               <div class="device_list" v-if="selectDeviceArr.length > 0">
-                <span>{{ selectDeviceArr[0].label }}</span>
-                <span v-show="selectDeviceArr.length > 1" title="展开选中的设备" class="device_count">+{{ selectDeviceArr.length - 1 }}</span>
+                <template v-if="checkAllTree">
+                  <span>全部设备</span>
+                </template>
+                <template v-else>
+                  <span>{{ selectDeviceArr[0].label }}</span>
+                  <span v-show="selectDeviceArr.length > 1" title="展开选中的设备" class="device_count">+{{ selectDeviceArr.length - 1 }}</span>
+                </template>
+                <!-- <span>{{ selectDeviceArr[0].label }}</span>
+                <span v-show="selectDeviceArr.length > 1" title="展开选中的设备" class="device_count">+{{ selectDeviceArr.length - 1 }}</span> -->
               </div>
               <!-- placeholder -->
               <div class="no_device" v-else>请选择设备</div>
@@ -241,15 +252,16 @@
 
             <div class="line-box">
               <el-date-picker
+                class="vl_date"
                 v-model="taskTime"
                 style="width:100%;"
-                @change="handleDateTime"
                 :picker-options="pickerDateTime"
                 type="datetimerange"
                 range-separator="至"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期">
               </el-date-picker>
+              <!-- @change="handleDateTime" -->
             </div>
             <div class="line-box left_num">
               <el-input class="left-none-border" v-model="addData.number">
@@ -274,9 +286,12 @@ import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume, postPeopleTask }
 import { ajaxCtx, mapXupuxian } from '@/config/config.js';
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import { objDeepCopy, formatDate } from "@/utils/util.js";
+import vlUpload from "@/components/common/upload.vue";
 export default {
+  components: { vlUpload },
   data() {
     return {
+      uploadClear: {},
       pickerDateTime: {
         disabledDate (time) {
           return time.getTime() > (new Date().getTime());
@@ -307,13 +322,14 @@ export default {
       isAddLoading: false,
       fileList: [], // 图片上传列表
       dialogImageUrl: null,
+      curImageUrl: null,
       uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
       addData: {
         taskName: null,
         deviceId: null,
         startTime: null,
         endTime: null,
-        number: 2,
+        number: 5,
         targetPicUrl: null
       },
       taskTime: [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()],
@@ -348,7 +364,7 @@ export default {
   },
   mounted() {
     //获取摄像头卡口数据
-    this.getMonitorList()
+   
     this.getDataList();
   },
   methods: {
@@ -401,16 +417,29 @@ export default {
         deviceId: null,
         startTime: null,
         endTime: null,
-        number: 2,
+        number: 5,
         targetPicUrl: null
       })
+      this.uploadClear = {}
+      this.curImageUrl = ""
       this.taskTime = [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()]
-      this.addTaskDialog = true
+      this.addTaskDialog = true;
+      
+      this.$nextTick(() => {
+         this.getMonitorList()
+      })
     },
     // 删除图片
     // eslint-disable-next-line no-unused-vars
     handleRemove (file, fileList) {
       this.dialogImageUrl = null
+    },
+    uploadEmit(data) {
+      if (data && data.path) {
+        this.curImageUrl = data.path;
+      } else {
+        this.curImageUrl = "";
+      }
     },
     // 上传成功
     uploadPicSuccess (res) {
@@ -459,6 +488,7 @@ export default {
       //   this.isAddLoading = false
       //   return false
       // }
+      this.addData.targetPicUrl = this.curImageUrl
       let arr = []
       this.selectDeviceArr.forEach(item => {arr.push(item.uid)})
       this.addData.deviceId = arr.join(',')
@@ -590,6 +620,10 @@ export default {
           // this.bayonetTree = this.getBayTreeList(bayonet);
           this.getLeafCountTree(this.videoTree, 'camera');
           // this.getLeafCountTree(this.bayonetTree, 'bayonet');
+          this.$nextTick(() => {
+            this.checkAllTree = true
+            this.handleCheckedAllVideo(true)
+          })
         }
       });
     },
@@ -623,6 +657,7 @@ export default {
         this.$refs.videotree.setCheckedNodes([]);
       }
       this.selectVedioArr = this.$refs.videotree.getCheckedNodes(true);
+      console.log('this.selectVedioArr', this.selectVedioArr)
       this.handleData();
     },
     /**
@@ -857,8 +892,8 @@ export default {
         /deep/ .el-input__inner::placeholder {
           color: #999;
         }
-        /deep/ .el-range-editor {
-          .el-input__icon {
+        /deep/ .el-date-editor {
+          .el-range__close-icon {
             position: absolute;
             right: 8px;
             top: 2px;
