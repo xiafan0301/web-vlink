@@ -17,9 +17,16 @@
         <span>相似度：</span>≥{{taskDetail ? taskDetail.minSemblance : 0}}%
       </div>
       <div class="vl_ytsr_left_line">
-        <span>基础信息库：</span>
+        <span>抓拍时间：</span>
         <span>
-          <p v-for="item in taskDetail.portraitGroupName" :key="item.id">{{item}}</p>
+          <p>{{taskDetail.startTime}}</p>
+          <p>{{taskDetail.endTime}}</p>
+        </span>
+      </div>
+      <div class="vl_ytsr_left_line">
+        <span>抓拍设备：</span>
+        <span>
+           <p v-for="item in taskDetail.deviceNames" :key="item.id">{{item}}</p>
         </span>
       </div>
     </div>
@@ -29,18 +36,23 @@
           <div class="vl_jig_right_title">
             <div class="vl_jr_t_item">
               <span><span style="color: #333333">检索结果 </span> ({{strucInfoList.length}})</span>
+              <div :class="{'active-item': stucOrder < 3}" @click="timeOrderS">时间排序 <span><i :class="{'active': stucOrder === 2}" class="el-icon-caret-top"></i><i :class="{'active': stucOrder === 1}" class="el-icon-caret-bottom"></i></span></div>
+            </div>
+            <div class="vl_jr_t_item">
+              <div :class="{'active-item': stucOrder === 3}" @click="stucOrder = 3">监控排序</div>
+              <div :class="{'active-item': stucOrder === 4}" @click="stucOrder = 4" style="margin-left: .1rem;">相似度排序</div>
             </div>
           </div>
           <div class="vl_jfo_event">
             <vue-scroll>
               <div class="vl_jfo_event_box clearfix">
                 <div class="vl_jfo_box_item" v-for="(item, index) in strucInfoList" :key="item.id" @click="showStrucInfo(item, index)">
-                  <div class="vl_jfo_i_left"><img :src="item.photoUrl" alt=""></div>
+                  <div class="vl_jfo_i_left"><img :src="item.subStoragePath" alt=""></div>
                   <div class="vl_jfo_i_right">
                     <p>检索资料</p>
-                    <div class="vl_jfo_line"><span>{{item.name}}</span></div>
+                    <div class="vl_jfo_line"><span>{{item.shotTime}}</span></div>
                     <br>
-                    <div class="vl_jfo_line"><span>{{item.originBank}}</span></div>
+                    <div class="vl_jfo_line"><span>{{item.deviceName}}</span></div>
                     <div class="vl_jfo_sim"><i class="vl_icon vl_icon_retrieval_03"></i>{{(item.semblance*1).toFixed(2)}}<span style="font-size: 12px;">%</span></div>
                   </div>
                 </div>
@@ -51,7 +63,7 @@
         <template v-else>
           <div is="noResult"></div>
         </template>
-        </div>
+      </div>
     </div>
     <!--检索详情弹窗-->
     <el-dialog
@@ -69,48 +81,109 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.upPhotoUrl" alt="">
+            <img :src="sturcDetail.personStoragePath" alt="">
             <span>上传图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img">
-              <img class="bigImg" :src="sturcDetail.photoUrl" alt="">
-              <span>底库图</span>
+              <img class="bigImg" :src="sturcDetail.subStoragePath" alt="">
+              <span>抓拍图</span>
             </div>
             <div class="struc_c_d_info">
-              <h2>{{sturcDetail.name}}<div class="vl_jfo_sim" ><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? (sturcDetail.semblance*1).toFixed(2) : '0.00'}}<span style="font-size: 12px;">%</span></div></h2>
-              <div class="struc_cdi_line">
-                <span v-show="sturcDetail.sex">{{sturcDetail.sex}}</span>
-                <span v-show="sturcDetail.nation">{{sturcDetail.nation}}</span>
+              <h2>分析结果<div class="vl_jfo_sim" ><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? (sturcDetail.semblance*1).toFixed(2) : '0.00'}}<span style="font-size: 12px;">%</span></div></h2>
+              <div class="struc_cd_info_main">
+                <vue-scroll>
+                  <div class="struc_cdi_line" v-if="sturcDetail.sex">
+                    <p>
+                      <b>性别</b>
+                      <span>{{sturcDetail.sex}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.age">
+                    <p>
+                      <b>年龄段</b>
+                      <span>{{sturcDetail.age}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.glasses">
+                    <p>
+                      <b>眼镜</b>
+                      <span>{{sturcDetail.glasses}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.hat">
+                    <p>
+                      <b>帽子</b>
+                      <span>{{sturcDetail.hat}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.mask">
+                    <p>
+                      <b>口罩</b>
+                      <span>{{sturcDetail.mask}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.hair">
+                    <p>
+                      <b>发型</b>
+                      <span>{{sturcDetail.hair}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.upperType">
+                    <p>
+                      <b>上身款式</b>
+                      <span>{{sturcDetail.upperType}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.upperColor">
+                    <p>
+                      <b>上身颜色</b>
+                      <span>{{sturcDetail.upperColor}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.bottomType">
+                    <p>
+                      <b>下身款式</b>
+                      <span>{{sturcDetail.bottomType}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.bottomColor">
+                    <p>
+                      <b>下身颜色</b>
+                      <span>{{sturcDetail.bottomColor}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.baby">
+                    <p>
+                      <b>抱小孩</b>
+                      <span>{{sturcDetail.baby}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.bag">
+                    <p>
+                      <b>拎东西</b>
+                      <span>{{sturcDetail.bag}}</span>
+                    </p>
+                  </div>
+                </vue-scroll>
               </div>
-              <div class="struc_cdi_line">
-                <span>{{sturcDetail.birthDate}}</span>
-              </div>
-              <div class="struc_cdi_line">
-                <span>{{sturcDetail.idNo}}<i class="el-icon-postcard"></i></span>
-              </div>
-              <div class="struc_cdi_line">
-                <span>{{sturcDetail.group}}</span>
-              </div>
-              <div class="struc_cdi_line"></div>
             </div>
-            <span>布控库信息</span>
           </div>
         </div>
         <!--<div v-show="strucCurTab === 2" class="struc_c_address"></div>-->
         <!--<div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">-->
-          <!--<div class="struc_c_d_qj struc_c_d_img">-->
-            <!--<img :src="sturcDetail.subStoragePath" alt="">-->
-            <!--<span>抓拍图</span>-->
-          <!--</div>-->
-          <!--<div class="struc_c_d_box">-->
-            <!--<video id="capVideo" :src="sturcDetail.videoPath"></video>-->
-            <!--<div class="play_btn" @click="videoTap" v-show="!playing">-->
-              <!--<i class="vl_icon vl_icon_judge_01" v-if="playing"></i>-->
-              <!--<i class="vl_icon vl_icon_control_09" v-else></i>-->
-            <!--</div>-->
-          <!--</div>-->
-          <!--<div class="download_btn"><a download="视频" :href="videoUrl"></a>下载视频</div>-->
+        <!--<div class="struc_c_d_qj struc_c_d_img">-->
+        <!--<img :src="sturcDetail.subStoragePath" alt="">-->
+        <!--<span>抓拍图</span>-->
+        <!--</div>-->
+        <!--<div class="struc_c_d_box">-->
+        <!--<video id="capVideo" :src="sturcDetail.videoPath"></video>-->
+        <!--<div class="play_btn" @click="videoTap" v-show="!playing">-->
+        <!--<i class="vl_icon vl_icon_judge_01" v-if="playing"></i>-->
+        <!--<i class="vl_icon vl_icon_control_09" v-else></i>-->
+        <!--</div>-->
+        <!--</div>-->
+        <!--<div class="download_btn"><a download="视频" :href="videoUrl"></a>下载视频</div>-->
         <!--</div>-->
       </div>
       <div class="struc-list">
@@ -118,8 +191,8 @@
           <!-- slides -->
           <swiper-slide v-for="(item, index) in strucInfoList" :key="item.id">
             <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
-              <img style="height: .88rem;width: 50%;padding-right: .02rem;" :src="item.upPhotoUrl" alt="">
-              <img style="height: .88rem;width: 50%;padding-left: .02rem;" :src="item.photoUrl" alt="">
+              <img style="height: .88rem;width: 50%;padding-right: .02rem;" :src="item.personStoragePath" alt="">
+              <img style="height: .88rem;width: 50%;padding-left: .02rem;" :src="item.subStoragePath" alt="">
               <div class="vl_jfo_sim"><i class="vl_icon vl_icon_retrieval_05" :class="{'vl_icon_retrieval_06':  index === curImgIndex}"></i>{{item.semblance ? (item.semblance*1).toFixed(2) : '0.00'}}<span style="font-size: 12px;">%</span></div>
             </div>
           </swiper-slide>
@@ -169,6 +242,7 @@
         curImgIndex: 0,
         sturcDetail: {},
         strucDetailDialog: false,
+        devicePinYin: 'abcdefghijklmnopqrstuvwxyz',
         videoUrl: '' // 弹窗视频回放里的视频
       }
     },
@@ -180,16 +254,25 @@
       }
     },
     methods: {
+      timeOrderS () {
+        if (this.stucOrder > 2) {
+          this.stucOrder = 2;
+        } else {
+          this.stucOrder === 1 ? this.stucOrder = 2 : this.stucOrder = 1;
+        }
+      },
       // 获取实时
       getTheList () {
-          PortraitPostByphotoRealtime(this.$route.query)
+        PortraitPostByphotoRealtime(this.$route.query)
             .then(sRes => {
               if (sRes) {
                 this.$set(sRes.data, 'taskResult', JSON.parse(sRes.data.taskResult));
                 this.$set(sRes.data, 'taskWebParam', JSON.parse(sRes.data.taskWebParam));
-                console.log(sRes.data);
+                sRes.data.taskWebParam.deviceNames = sRes.data.taskWebParam.deviceNames.split(',')
                 this.strucInfoList = sRes.data.taskResult;
+                this.changeOrder();
                 this.taskDetail = sRes.data.taskWebParam;
+                console.log(sRes.data)
               }
             })
       },
@@ -202,12 +285,38 @@
                 if (res) {
                   this.$set(res.data, 'taskResult', JSON.parse(res.data.taskResult));
                   this.$set(res.data, 'taskWebParam', JSON.parse(res.data.taskWebParam));
-                  // res.data.taskResult.push(...res.data.taskResult)
+                  res.data.taskWebParam.deviceNames = res.data.taskWebParam.deviceNames.split(',')
                   this.strucInfoList = res.data.taskResult;
+                  this.changeOrder();
                   this.taskDetail = res.data.taskWebParam;
                   console.log(res.data)
                 }
               })
+        }
+      },
+      changeOrder () {
+        console.log(this.stucOrder);
+        switch (this.stucOrder) {
+          case 1:
+            this.strucInfoList.sort((a, b) => {
+              return new Date(b.shotTime).getTime() - new Date(a.shotTime).getTime();
+            })
+            break;
+          case 2:
+            this.strucInfoList.sort((a, b) => {
+              return new Date(a.shotTime).getTime() - new Date(b.shotTime).getTime();
+            })
+            break;
+          case 3:
+            this.strucInfoList.sort((a, b) => {
+              return this.devicePinYin.indexOf(b.deviceNamePinyin.toLowerCase()[0]) - this.devicePinYin.indexOf(a.deviceNamePinyin.toLowerCase()[0]);
+            })
+            break;
+          case 4:
+            this.strucInfoList.sort((a, b) => {
+              return b.semblance - a.semblance;
+            })
+            break;
         }
       },
       showStrucInfo (data, index) {
@@ -220,6 +329,7 @@
         this.curImgIndex = index;
         this.sturcDetail = data;
       },
+      tcDiscuss () {},
       videoTap () {
         let vDom = document.getElementById('capVideo')
         if (this.playing) {
@@ -232,6 +342,11 @@
           this.playing = false;
         })
         this.playing = !this.playing;
+      }
+    },
+    watch: {
+      stucOrder () {
+        this.changeOrder();
       }
     }
   }
@@ -732,41 +847,46 @@
                   }
                 }
               }
+              .struc_cd_info_main {
+                height: 2.75rem;
+              }
               .struc_cdi_line {
-                >span {
-                  /*position: relative;*/
-                  max-width: 100%;
-                  display: inline-block;
-                  height: .3rem;
-                  line-height: .3rem;
-                  margin-bottom: .08rem;
-                  border: 1px solid #F2F2F2;
-                  background: #FAFAFA;
-                  color: #333333;
-                  white-space: nowrap;
-                  text-overflow: ellipsis;
-                  border-radius:3px;
-                  font-size: 12px;
-                  overflow: hidden;
-                  padding: 0 .1rem;
-                  margin-right: .08rem;
-                  > i {
-                    vertical-align: middle;
-                    margin-left: .1rem;
-                  }
-                  font {
-                    color: #999999;
-                    margin-left: 20px;
-                  }
-                }
+                flex: none;
+                width: 50%;
+                display: inline-block;
                 p {
-                  color: #999999;
+                  max-width: 100%;
+                  overflow: hidden;
+                  display: table;
+                  min-height: 30px;
+                  margin-bottom: 0.08rem;
+                  padding-right: 10px;
+                  margin-right: 0.08rem;
+                  border: 1px solid #f2f2f2;
+                  border-radius: 3px;
+                  font-size: 12px;
+                  > b {
+                    width: 70px;
+                    background: #fafafa;
+                    color: #999;
+                    font-weight: normal;
+                    padding-right: 10px;
+                    padding-left: 10px;
+                    display: table-cell;
+                    vertical-align: middle;
+                    border-right: 1px solid #f2f2f2;
+                  }
+                  >span {
+                    display: table-cell;
+                    vertical-align: middle;
+                    padding-left: 5px;
+                  }
                 }
               }
             }
             &:before {
               display: block;
-              content: '';
+              content: none;
               position: absolute;
               top: -.7rem;
               right: -.7rem;
@@ -776,7 +896,7 @@
             }
             &:after {
               display: block;
-              content: '';
+              content: none;
               position: absolute;
               top: -.4rem;
               right: -.4rem;
