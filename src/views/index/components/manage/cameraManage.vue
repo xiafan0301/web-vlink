@@ -105,6 +105,7 @@
         <el-table
           class="data_table"
           :data="dataList"
+          @sort-change="sortDeviceSeq"
           >
           <el-table-column
             label="摄像头名称"
@@ -119,7 +120,7 @@
             label="摄像头编号"
             prop="deviceSeq"
             width="150"
-            sortable
+            sortable="custom"
             show-overflow-tooltip
             >
             <template slot-scope="scope">
@@ -326,7 +327,7 @@ export default {
           }
         }]
       },
-      pagination: { total: 0, pageSize: 10, pageNum: 1 },
+      pagination: { total: 0, pageSize: 10, pageNum: 1, order: 'desc', orderBy: 'create_time' },
       searchForm: {
         dateTime: [], // 日期
         dutyUnitId: '全部机构', // 机构单位
@@ -375,6 +376,23 @@ export default {
     }, 1000)
   },
   methods: {
+    // 监听摄像头编号的排序
+    sortDeviceSeq (column) {
+      if (column.order) {
+        if (column.order === 'ascending') {
+          this.pagination.order = 'asc';
+        }
+        if (column.order === 'descending') {
+          this.pagination.order = 'desc';
+        }
+        this.pagination.orderBy = column.prop;
+      } else {
+        this.pagination.order = 'desc';
+        this.pagination.orderBy = 'create_time';
+      }
+
+      this.selectDataList();
+    },
     // 导出文件
     exportFile () {
       let dutyUnitId, deviceStatus, intelligentCharac, importantLevel, manufacturer, type;
@@ -421,6 +439,8 @@ export default {
           isBayonet: false,
           manufacturer: manufacturer,
           keyword: this.searchForm.keyword,
+          order: this.pagination.order,
+          orderBy: this.pagination.orderBy
         }
       };
       vehicleExport(params)
@@ -602,8 +622,8 @@ export default {
         'where.isBayonet': false, // 是否是卡口
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
-        order: 'desc',
-        orderBy: 'create_time'
+        order: this.pagination.order,
+        orderBy: this.pagination.orderBy
       };
       console.log('params', params)
       this.isSearchLoading = true;
