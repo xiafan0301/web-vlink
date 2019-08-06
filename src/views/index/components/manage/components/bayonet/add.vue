@@ -138,7 +138,7 @@
               :show-overflow-tooltip="true"
               >
               <template slot-scope="scope">
-                {{scope.row.features.map(m => dicFormater(datalist.intelCharac, String(m))).join(',')}}
+                {{scope.row.features && scope.row.features.map(m => dicFormater(datalist.intelCharac, String(m))).join(',')}}
               </template>
             </el-table-column>
             <el-table-column
@@ -166,7 +166,8 @@
               show-overflow-tooltip
               >
               <template slot-scope="scope">
-                <span>{{scope.row.drivingInfo.map(m => m.laneNum).join(',')}}</span>
+                <span v-if="scope.row.use === 1">{{scope.row.drivingInfo && scope.row.drivingInfo.map(m => '车道' + m.laneNum).join(',')}}</span>
+                <span v-else>-</span>
               </template>
             </el-table-column>
             <el-table-column label="操作">
@@ -229,11 +230,11 @@
       width="800px"
       height="600px"
       top="40vh"
-      title="添加卡口设备">
+      :title="this.operateDevType === 1 ? '添加卡口设备' : '编辑卡口设备'">
       <vue-scroll style="height: 500px">
         <el-form ref="bayonetDevForm" :model="bayonetDevForm" :rules="bayonetDevFormRules" label-width="120px" :label-position="labelPosition">
           <el-form-item prop="cameraName" label="摄像头名称:">
-            <el-input v-model="bayonetDevForm.cameraName" placeholder="请输入摄像头名称，不超过20字"></el-input>
+            <el-input @blur="validationBayonetName" v-model="bayonetDevForm.cameraName" placeholder="请输入摄像头名称，不超过20字"></el-input>
           </el-form-item>
           <el-form-item label="摄像头类型:">
             <el-select v-model="bayonetDevForm.cameraType">
@@ -303,47 +304,49 @@
               <el-radio :label="2">全景摄像头</el-radio>
             </el-radio-group>
           </el-form-item>
-
-          <el-form-item class="driving_info" v-for="(item, index) in bayonetDevForm.drivingInfo" :key="index">
-            <div v-if="bayonetDevForm.drivingInfo.length > 1" class="vl_icon vl_icon_control_28" @click="delDrivingInfo(index)"></div>
-            <el-form-item :style="{'margin-top': bayonetDevForm.drivingInfo.length > 1 ? '30px' : '0'}" label="车道号" :prop="'drivingInfo.' + index + '.laneNum'" :rules="{ required: true, message: '该项内容不可为空', trigger: 'change'}" >
-              <el-select v-model="item.laneNum">
-                <el-option
-                  v-for="item in laneNumList"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value">
-                </el-option>
-              </el-select>
+          <!-- 抓拍摄像头时才存在车道 -->
+          <template v-if="bayonetDevForm.use === 1">
+            <el-form-item class="driving_info" v-for="(item, index) in bayonetDevForm.drivingInfo" :key="index">
+              <div v-if="bayonetDevForm.drivingInfo.length > 1" class="vl_icon vl_icon_control_28" @click="delDrivingInfo(index)"></div>
+              <el-form-item :style="{'margin-top': bayonetDevForm.drivingInfo.length > 1 ? '30px' : '0'}" label="车道号" :prop="'drivingInfo.' + index + '.laneNum'" :rules="{ required: true, message: '该项内容不可为空', trigger: 'change'}" >
+                <el-select v-model="item.laneNum" @change="laneNumTheOnly(index, 'drivingInfo.' + index + '.laneNum')">
+                  <el-option
+                    v-for="item in laneNumList"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                  </el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item :style="{'margin-top': bayonetDevForm.drivingInfo.length > 1 ? '30px' : '0'}" label="行车方向" :prop="'drivingInfo.' + index + '.drivingDirection'" :rules="{ required: true, message: '该项内容不可为空', trigger: 'change'}" >
+                <el-select v-model="item.drivingDirection">
+                  <el-option
+                    v-for="item in drivingDirectionList"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                  </el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="大车最低限速" :prop="'drivingInfo.' + index + '.cartMinSpeedLimit'">
+                <el-input v-model="item.cartMinSpeedLimit" @blur="validationSpeed('cartMinSpeedLimit', index)"></el-input>
+              </el-form-item>
+              <el-form-item label="大车最高限速" :prop="'drivingInfo.' + index + '.cartMaxSpeedLimit'">
+                <el-input v-model="item.cartMaxSpeedLimit" @blur="validationSpeed('cartMaxSpeedLimit', index)"></el-input>
+              </el-form-item>
+              <el-form-item label="小车最低限速" :prop="'drivingInfo.' + index + '.smallCarMinSpeedLimit'">
+                <el-input v-model="item.smallCarMinSpeedLimit" @blur="validationSpeed('smallCarMinSpeedLimit', index)"></el-input>
+              </el-form-item>
+              <el-form-item label="小车最高限速" :prop="'drivingInfo.' + index + '.smallCarMaxSpeedLimit'">
+                <el-input v-model="item.smallCarMaxSpeedLimit" @blur="validationSpeed('smallCarMaxSpeedLimit', index)"></el-input>
+              </el-form-item>
             </el-form-item>
-            <el-form-item :style="{'margin-top': bayonetDevForm.drivingInfo.length > 1 ? '30px' : '0'}" label="行车方向" :prop="'drivingInfo.' + index + '.drivingDirection'" :rules="{ required: true, message: '该项内容不可为空', trigger: 'change'}" >
-              <el-select v-model="item.drivingDirection">
-                <el-option
-                  v-for="item in drivingDirectionList"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value">
-                </el-option>
-              </el-select>
+            <el-form-item class="add_btn_form">
+              <div class="add_btn" @click="addDrivingInfo">
+                <i class="vl_icon vl_icon_control_22"></i><span>添加</span>
+              </div>
             </el-form-item>
-            <el-form-item label="大车最低限速" :prop="'drivingInfo.' + index + '.cartMinSpeedLimit'">
-              <el-input v-model="item.cartMinSpeedLimit"></el-input>
-            </el-form-item>
-            <el-form-item label="大车最高限速" :prop="'drivingInfo.' + index + '.cartMaxSpeedLimit'">
-              <el-input v-model="item.cartMaxSpeedLimit"></el-input>
-            </el-form-item>
-            <el-form-item label="小车最低限速" :prop="'drivingInfo.' + index + '.smallCarMinSpeedLimit'">
-              <el-input v-model="item.smallCarMinSpeedLimit"></el-input>
-            </el-form-item>
-            <el-form-item label="小车最高限速" :prop="'drivingInfo.' + index + '.smallCarMaxSpeedLimit'">
-              <el-input v-model="item.smallCarMaxSpeedLimit"></el-input>
-            </el-form-item>
-          </el-form-item>
-          <el-form-item class="add_btn_form">
-            <div class="add_btn" @click="addDrivingInfo">
-              <i class="vl_icon vl_icon_control_22"></i><span>添加</span>
-            </div>
-          </el-form-item>
+          </template>
         </el-form>
       </vue-scroll>
       <div slot="footer">
@@ -373,7 +376,7 @@ export default {
         bayonetNum: null,
         organ: null,
         isEnterPoint: 3,
-        use: [],
+        use: null,
         bayonetIP: [{value: ''}, {value: ''}, {value: ''}, {value: ''}],
         longitude: null,
         Latitude: null,
@@ -423,7 +426,7 @@ export default {
 
       // 编辑卡口设备弹窗参数
       editDevDialog: false,
-      // 编辑卡口表单参数
+      // 编辑卡口设备表单参数
       bayonetDevForm: {
         cameraName: null,
         cameraType: null,
@@ -435,7 +438,7 @@ export default {
         accessCode: null,
         devCode: null,
         servicePort: null,
-        use: null,
+        use: 1,
         drivingInfo: [
           {
             laneNum: null,
@@ -491,7 +494,12 @@ export default {
         {value: 1, label: '1'},
         {value: 2, label: '2'},
         {value: 3, label: '3'},
-        {value: 4, label: '4'}
+        {value: 4, label: '4'},
+        {value: 5, label: '5'},
+        {value: 6, label: '6'},
+        {value: 7, label: '7'},
+        {value: 8, label: '8'},
+        {value: 9, label: '9'}
       ],
       drivingDirectionList: [
         {value: 1, label: '直行'},
@@ -553,6 +561,17 @@ export default {
         item.value = '0';
       }
     },
+    // 验证卡口下设备不能重名
+    validationBayonetName () {
+      if (this.bayonetDevList.some(s => s.cameraName === this.bayonetDevForm.cameraName)) {
+        this.$message.warning('同一卡口下设备不能重名');
+        this.bayonetDevForm.cameraName = null;
+        this.$nextTick(() => {
+          this.$refs['bayonetDevForm'].clearValidate('cameraName');
+        })
+      }
+    },
+    // 验证车道
     validationLaneNum () {
       const reg = /^[1-9]$/;
       const isThrough = reg.test(this.basicInfoForm.laneNum);
@@ -564,10 +583,35 @@ export default {
         this.$message.warning('只能输入1-9的整数');
       }
     },
+    // 验证车速
+    validationSpeed (str, index) {
+      const reg = /^[1-9]\d*$/;
+      const data = this.bayonetDevForm.drivingInfo[index][str];
+      const isThrough = reg.test(data);
+      if (data && !isThrough) {
+        this.bayonetDevForm.drivingInfo[index][str] = null;
+        this.$message.warning('只能输入正整数');
+      }
+    },
+    // 每个设备下车道号不能重复
+    laneNumTheOnly (index, prop) {
+      const laneNum = this.bayonetDevForm.drivingInfo[index].laneNum;
+      let data = objDeepCopy(this.bayonetDevForm);
+      data.drivingInfo = data.drivingInfo.filter((f, i) => i !== index);
+      if (data.drivingInfo.some(s => s.laneNum === laneNum)) {
+        this.$message.warning('同一设备下车道号不能重复');
+        this.bayonetDevForm.drivingInfo[index].laneNum = null;
+        this.$nextTick(() => {
+          this.$refs['bayonetDevForm'].clearValidate(prop);
+        })
+      }
+    },
     // 添加设备至列表中
     addDevByTable () {
       this.$refs['bayonetDevForm'].validate((valid) => {
         if (valid) {
+          // 对车道排序
+          this.bayonetDevForm.drivingInfo.sort((a, b) => a.laneNum - b.laneNum);
           // 新增
           if (this.operateDevType === 1) {
             this.bayonetDevList.push(objDeepCopy(this.bayonetDevForm));
@@ -608,7 +652,7 @@ export default {
         accessCode: null,
         devCode: null,
         servicePort: null,
-        use: null,
+        use: 1,
         drivingInfo: [
           {
             laneNum: null,
@@ -626,7 +670,7 @@ export default {
     },
     // 弹出编辑卡口设备弹窗
     popEditDevDialog (data, index) {
-      this.bayonetDevForm = data;
+      this.bayonetDevForm = objDeepCopy(data);
       this.devIndex = index;
       this.operateDevType = 2;
       this.editDevDialog = true;
@@ -674,7 +718,7 @@ export default {
           this.basicInfoForm.bayonetNum = data.bayonetNo;
           this.basicInfoForm.organ = {organName: data.dutyUnitName, uid: data.dutyUnitId};
           this.basicInfoForm.isEnterPoint = data.isEnterPoint;
-          this.basicInfoForm.use = data.use.split(',').map(m => parseInt(m));
+          this.basicInfoForm.use = data.use && data.use.split(',').map(m => parseInt(m));
           this.basicInfoForm.longitude = data.longitude;
           this.basicInfoForm.Latitude = data.latitude;
           this.basicInfoForm.bayonetAddress = data.bayonetAddress;
@@ -683,27 +727,28 @@ export default {
           this.basicInfoForm.describe = data.desci;
           this.basicInfoForm.usage = data.isEnabled;
           if (data.ipAddress) {
-            let ipAddress = data.ipAddress.split('.');
+            let ipAddress = data.ipAddress && data.ipAddress.split('.');
             ipAddress.forEach((item, index) => {
               this.basicInfoForm.bayonetIP[index].value = item;
             })
           }
+          this.markLocation(data.bayonetAddress);
           console.log(this.basicInfoForm, 'this.basicInfoForm')
           // 回填设备信息
-          this.bayonetDevList = data.bayonetDevInfoDtoList.map(m => {
+          this.bayonetDevList = data.bayonetDevInfoDtoList && data.bayonetDevInfoDtoList.map(m => {
             return {
               cameraName: m.deviceName,
-              cameraType: String(m.type),
-              manufacturers: String(m.manufacturer),
-              pixel: String(m.maxPixel),
+              cameraType: m.type && String(m.type),
+              manufacturers: m.manufacturer && String(m.manufacturer),
+              pixel: m.maxPixel && String(m.maxPixel),
               direction: m.filmDirection,
-              features: m.intelligentCharacs.split(','),
+              features: m.intelligentCharacs && m.intelligentCharacs.split(','),
               SIPNum: m.deviceSip,
               accessCode: m.deviceCode,
               devCode: m.viewClassCode,
               servicePort: m.servicePort,
               use: m.deviceUse,
-              drivingInfo: m.cameraLaneRelList.map(c => {
+              drivingInfo: m.cameraLaneRelList && m.cameraLaneRelList.map(c => {
                 return {
                   laneNum: c.laneNo,
                   drivingDirection: parseInt(c.direction),
@@ -721,12 +766,12 @@ export default {
     // 修改卡口
     submitPutBayonet () {
       this.bayonetDetail = Object.assign(this.bayonetDetail, this.commonFunc());
-      // 卡口用途无修改时
-      if (this.oldBayonetUse === this.basicInfoForm.use.join(',')) {
-        this.bayonetDetail.use = null;
       // 修改为全不选时
-      } else if (this.basicInfoForm.use.join(',') === '') {
+      if (!this.basicInfoForm.use) {
         this.bayonetDetail.use = '';
+      // 卡口用途无修改时
+      } else if (this.oldBayonetUse === this.basicInfoForm.use.join(',')) {
+        this.bayonetDetail.use = null;
       } else {
         this.bayonetDetail.use = this.basicInfoForm.use.join(',');
       }
@@ -753,7 +798,7 @@ export default {
     commonFunc (type) {
       let bayonetDevInfoDtoList = objDeepCopy(this.bayonetDevList);
       bayonetDevInfoDtoList = bayonetDevInfoDtoList.map(m => {
-        return {
+        let obj = {
           deviceName: m.cameraName,
           type: m.cameraType,
           manufacturer: m.manufacturers,
@@ -764,10 +809,10 @@ export default {
           viewClassCode: m.devCode,
           servicePort: m.servicePort,
           deviceUse: m.use,
-          deviceIntelRelList: m.features.map(m => {
+          deviceIntelRelList: m.features && m.features.map(m => {
             return {intelligentCharac: m}
           }),
-          cameraLaneRelList: m.drivingInfo.map(m => {
+          cameraLaneRelList: m.drivingInfo && m.drivingInfo.map(m => {
             return {
               laneNo: m.laneNum,
               direction: m.drivingDirection,
@@ -778,6 +823,10 @@ export default {
             }
           })
         }
+        if (m.use === 2) {
+          obj.cameraLaneRelList = null;
+        }
+        return obj;
       })
       let ipAddress = [];
       this.basicInfoForm.bayonetIP.forEach(item => {
@@ -805,7 +854,7 @@ export default {
         bayonetDevInfoDtoList: bayonetDevInfoDtoList
       }
       if (type === 1) {
-        data.use = this.basicInfoForm.use.join(',');
+        data.use = this.basicInfoForm.use && this.basicInfoForm.use.join(',');
       }
       return data;
     },
@@ -826,6 +875,7 @@ export default {
     handleChangeAddress (value) {
       // this.$set(this.onlineForm,'address','');
       let labels = this.$refs['cascaderAddr'].currentLabels;
+      console.log(value, 'value')
       if(labels && labels.length > 0) {
         this.locationName = labels.join('');
         this.markLocation(this.locationName);
@@ -861,7 +911,12 @@ export default {
     },
     // 跳转到卡口列表
     skipIsList () {
-      this.$router.push({name: 'bayonet_manage_list'});
+      if (this.editDevDialog) {
+        this.editDevDialog = false;
+        this.toGiveUpDialog = false;
+      } else {
+        this.$router.push({name: 'bayonet_manage_list'});
+      }
     },
     /* 地图选择经纬度方法start */
     resetMap () {
@@ -1073,6 +1128,7 @@ export default {
       }
     }
     .bayonet_dev_list{
+      overflow-y: auto;
       > .el-button{
         margin: 10px 20px;
       }
