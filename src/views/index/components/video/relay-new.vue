@@ -204,7 +204,6 @@ export default {
   },
   watch: {
     xjMoreInfo (val) {
-      console.log(val);
       if (val) {
         if (this.xjSelType === 1) {
           if (!this.xjMap) {
@@ -238,6 +237,8 @@ export default {
     }
   },
   created () {
+    this.getListDevice();
+    this.getListBayonet();
   },
   mounted () {
   },
@@ -267,8 +268,8 @@ export default {
         this.xjDrawPolygon.push(event.obj);
         this.xjDrawSelComp();
       });
-      this.getListDevice();
-      this.getListBayonet();
+      this.markListDevice();
+      this.markListBayonet();
     },
     xjMapTreeDel () {
       let aL = this.$refs.xjMapTree.getCheckedNodes();
@@ -365,32 +366,36 @@ export default {
       getAllMonitorList({ccode: mapXupuxian.adcode}).then(res => {
         if (res) {
           this.listDevice = res.data;
-          for (let i = 0; i < this.listDevice.length; i++) {
-            let _d = this.listDevice[i];
-            let sC = 'vl_icon_sxt';
-            if (_d.deviceStatus !== 1) { sC = 'vl_icon_sxt_dis'; }
-            this.doMark([_d.longitude, _d.latitude],
-              _d.deviceName, 'vl_icon ' + sC);
-          }
-          this.xjMap.setFitView();
         }
       });
+    },
+    markListDevice () {
+      for (let i = 0; i < this.listDevice.length; i++) {
+        let _d = this.listDevice[i];
+        let sC = 'vl_icon_sxt';
+        if (_d.deviceStatus !== 1) { sC = 'vl_icon_sxt_dis'; }
+        this.doMark([_d.longitude, _d.latitude],
+          _d.deviceName, 'vl_icon ' + sC);
+      }
+      this.xjMap.setFitView();
     },
     // 卡口
     getListBayonet () {
       getAllBayonetList({areaId: mapXupuxian.adcode}).then(res => {
         if (res) {
           this.listBayonet = res.data;
-          for (let i = 0; i < this.listBayonet.length; i++) {
-            let _d = this.listBayonet[i];
-            let sC = 'vl_icon_kk';
-            if (!_d.isEnabled) { sC = 'vl_icon_kk_dis'; }
-            this.doMark([_d.longitude, _d.latitude],
-              _d.bayonetName, 'vl_icon ' + sC);
-          }
-          this.xjMap.setFitView();
         }
       });
+    },
+    markListBayonet () {
+      for (let i = 0; i < this.listBayonet.length; i++) {
+        let _d = this.listBayonet[i];
+        let sC = 'vl_icon_kk';
+        if (!_d.isEnabled) { sC = 'vl_icon_kk_dis'; }
+        this.doMark([_d.longitude, _d.latitude],
+          _d.bayonetName, 'vl_icon ' + sC);
+      }
+      this.xjMap.setFitView();
     },
     // 
     doMark (lnglat, title, sClass) {
@@ -460,9 +465,17 @@ export default {
       }
     },
     xjSubmit () {
+      // 获取设备 xjMoreInfo  true/false
+      let dids = '';
+      if (!this.xjMoreInfo) {
+        for (let i = 0; i < this.listDevice.length; i++) {
+          dids += (i > 0 ? ';' : '') + this.listDevice[i].uid;
+        }
+      }
+
       if (this.xjType === 1) {
         let params = {
-          // spotLists: '', // 监控点(集合形式‘；’号分隔)
+          spotLists: dids, // 监控点(集合形式‘;’号分隔)
           imgUrl: this.uploadPersonObj.img_path,
           subStoragePath: this.uploadPersonObj.img_thumbnailPath,
           // personStoragePath: this.curImageUrl,
