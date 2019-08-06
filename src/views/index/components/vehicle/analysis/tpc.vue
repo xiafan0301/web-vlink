@@ -148,7 +148,7 @@
           <div class="th-ycxc-record">
             <div class="th-ycxc-record-list">
               <div class="list-box">
-                <div class="list-item" v-for="(item, index) in regulationsList" :key="item.uid + index" @click="onOpenDetail(index)">
+                <div class="list-item" v-for="(item, index) in regulationsList" :key="item.uid" @click="onOpenDetail(index)">
                   <img :src="item.vehicleDto.subStoragePath" alt="">
                   <p class="time"><i></i>{{item.vehicleDto.shotTime}}</p>
                   <p class="address"><i></i>{{item.vehicleDto.deviceName}}</p>

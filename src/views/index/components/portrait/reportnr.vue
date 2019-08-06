@@ -1,11 +1,11 @@
 <template>
   <div class="vehicle_content_nr">
-    <div class="vc_rep_bd" is="vehicleBreadcrumb" :oData="[{name: '人员侦察报告内容'}]"></div>
+    <div class="vc_rep_bd" is="vehicleBreadcrumb" :oData="[{name:'人员侦察报告', routerName: 'portrait_report'}, {name: '人员侦察报告内容'}]"></div>
     <div style="height: 50px"></div>
     <div class="vehicle_content_nr_box">
       <div class="vehicle_content_nr_box_left">
         <div class="img">
-          <img :src="taskWebParam.targetPicUrl" height="232" width="232"/>
+          <img :src="taskWebParam.targetPicUrl" height="232" width="232" class="bigImg" title="点击放大图片" />
         </div>
         <div style="color: #333333; font-size: 18px; font-weight: bold; padding: 16px 0">{{taskWebParam.taskName}}</div>
         <div style="color: #333333; padding-bottom: 8px"><span style="color: #999999">从</span> {{taskWebParam.startTime}}</div>
@@ -30,7 +30,7 @@
             <div class="message">
               <div class="text">1：基本信息</div>
               <div class="message_cont">
-                <img :src="portrailInfoDto.photoUrl" height="200" width="200"/>
+                <img :src="portrailInfoDto.photoUrl" height="200" width="200" class="bigImg" title="点击放大图片"/>
                 <div style="padding-left: 20px; width: 320px">
                   <div class="subdata">
                     <i class="vl_icon vl_icon_retrieval_03" style="height: 24px"></i>
@@ -71,7 +71,7 @@
                 <ul class="rlcx_r_list clearfix">
                   <li v-for="item in taskResult" :key="item.uid">
                     <div style="">
-                      <img :src="item.subStoragePath" alt="">
+                      <img :src="item.subStoragePath" alt="" class="bigImg" title="点击放大图片">
                       <div>
                         <h4>检索资料</h4>
                         <div><i class="vl_icon rlcx_sj"></i>{{item.shotTime}}</div>
@@ -103,7 +103,7 @@
                       <div class="mes_cot">
                         <div v-for = "(ite, index) in item.personDetailList" :key='index'>
                           <div class="cot_1">
-                            <img :src="ite.subStoragePath">
+                            <img :src="ite.subStoragePath" class="bigImg" title="点击放大图片">
                             <div style="padding-left: 10px">
                               <div style="background-color: #F6F6F6; padding: 0 8px"><i class="icon"></i>{{ite.shotTime}}</div>
                               <div class="subdata">
@@ -136,7 +136,7 @@
                       <div class="mes_cot">
                         <div v-for = "(ite, index) in item.list" :key='index'>
                           <div class="cot_1">
-                            <img :src="ite.subStoragePath">
+                            <img :src="ite.subStoragePath" class="bigImg" title="点击放大图片">
                             <div style="padding-left: 10px">
                               <div style="background-color: #F6F6F6; padding: 0 8px"><i class="icon"></i>{{ite.shotTime}}</div>
                               <div class="subdata">
