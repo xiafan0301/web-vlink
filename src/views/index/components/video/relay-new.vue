@@ -86,7 +86,7 @@
                 <div class="mb_map_map_l">
                   <div class="mb_map_map_lt">
                     已选设备（{{xjMapListSum}}）
-                    <span v-if="xjMapTree && xjMapTree.length > 0" @click="xjMapTreeDel">移除设备</span>
+                    <span :class="{'map_lt_sed': xjMapTreeChecked}" :title="xjMapTreeChecked ? '移除选择设备' : ''" v-if="xjMapTree && xjMapTree.length > 0" @click="xjMapTreeDel">移除设备</span>
                   </div>
                   <div class="mb_map_map_lb">
                     <el-tree
@@ -95,6 +95,7 @@
                       :data="xjMapTree"
                       show-checkbox
                       node-key="id"
+                      @check="xjMapTreeCheck"
                       :default-expand-all="true"
                       :props="xjMapTreeDefaultProps">
                     </el-tree>
@@ -165,6 +166,7 @@ export default {
       mouseTool: null,
       xjDrawPolygon: [],
       xjMapTree: [],
+      xjMapTreeChecked: false,
       xjMapTreeDefaultProps: {
         children: 'children',
         label: 'name'
@@ -262,9 +264,11 @@ export default {
     xjMapTreeDel () {
       let aL = this.$refs.xjMapTree.getCheckedNodes();
       for (let i = 0; i < aL.length; i++) {
+        this.$refs.xjMapTree.setChecked(aL[i], false);
         this.$refs.xjMapTree.remove(aL[i]);
       }
-      console.log('xjMapTree', this.xjMapTree);
+      this.xjMapTreeChecked = false;
+      // console.log('xjMapTree', this.xjMapTree);
     },
     // 画完后处理数据
     xjDrawSelComp () {
@@ -400,6 +404,14 @@ export default {
         // 自定义点标记覆盖物内容
         content: '<div title="' + title + '" class="map_icons ' + sClass + '"></div>'
       });
+    },
+
+    xjMapTreeCheck (cData, sedData) {
+      if (cData && sedData && sedData.checkedNodes && sedData.checkedNodes.length > 0) {
+        this.xjMapTreeChecked = true;
+      } else {
+        this.xjMapTreeChecked = false;
+      }
     },
 
     /* 新建任务 */
@@ -611,8 +623,10 @@ export default {
       border-bottom: 1px solid #f2f2f2;
       overflow: hidden;
       > span {
+        cursor: default;
         float: right;
         color: #999;
+        &.map_lt_sed { color: #186DFB; cursor: pointer; }
       }
     }
     > .mb_map_map_lb {
