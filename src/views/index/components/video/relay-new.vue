@@ -3,7 +3,7 @@
     <div class="">
       <div class="relay_task_t">
         <el-breadcrumb separator-class="el-icon-arrow-right">
-          <el-breadcrumb-item><span style="cursor: pointer;" @click="xjClose">视频接力</span></el-breadcrumb-item>
+          <el-breadcrumb-item><span style="cursor: pointer;" @click="xjClose(false)">视频接力</span></el-breadcrumb-item>
           <el-breadcrumb-item>新建任务</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -36,7 +36,10 @@
               </div>
             </div>
             <div class="relay_task_mtr">
-              <div v-if="xjType === 1 && uploadPersonObj">
+              <div class="task_mtr_ld" v-if="(xjType === 1 || (xjType === 2 && xjVechicleType === 1)) && picSearchLoading">
+                <i class="el-icon-loading"></i>正在分析图片，请稍后...
+              </div>
+              <div v-else-if="xjType === 1 && uploadPersonObj">
                 <h3>图片信息：</h3>
                 <ul>
                   <li><span>性别：</span>{{uploadPersonObj.sex ? uploadPersonObj.sex : '--'}}</li>
@@ -53,7 +56,7 @@
                   <li><span>下身颜色：</span>{{uploadPersonObj.bottomColor ? uploadPersonObj.bottomColor : '--'}}</li>
                 </ul>
               </div>
-              <div v-if="xjType === 2 && xjVechicleType === 1 && uploadVehicleObj">
+              <div v-else-if="xjType === 2 && xjVechicleType === 1 && uploadVehicleObj">
                 <h3>图片信息：</h3>
                 <ul>
                   <li style="width: 50%;"><span>车牌号码：</span>{{uploadVehicleObj.plateNo ? uploadVehicleObj.plateNo : '--'}}</li>
@@ -77,13 +80,13 @@
             <div class="task_mb_map">
               <ul class="task_mb_mt">
                 <li @click="xjSelType = 1" :class="{'task_mb_mt_sed': xjSelType === 1}">地图选择</li>
-                <li @click="xjSelType = 2" :class="{'task_mb_mt_sed': xjSelType === 2}">列表选择</li>
+                <li @click="xjSelType = 1" :class="{'task_mb_mt_sed': xjSelType === 2}">列表选择</li>
               </ul>
               <div class="mb_map_map" v-show="xjSelType === 1">
                 <div class="mb_map_map_l">
                   <div class="mb_map_map_lt">
                     已选设备（{{xjMapListSum}}）
-                    <span v-if="xjMapTree && xjMapTree.length > 0" @click="xjMapTreeDel">移除设备</span>
+                    <span :class="{'map_lt_sed': xjMapTreeChecked}" :title="xjMapTreeChecked ? '移除选择设备' : ''" v-if="xjMapTree && xjMapTree.length > 0" @click="xjMapTreeDel">移除设备</span>
                   </div>
                   <div class="mb_map_map_lb">
                     <el-tree
@@ -92,6 +95,7 @@
                       :data="xjMapTree"
                       show-checkbox
                       node-key="id"
+                      @check="xjMapTreeCheck"
                       :default-expand-all="true"
                       :props="xjMapTreeDefaultProps">
                     </el-tree>
@@ -130,7 +134,7 @@
       </div>
       <div class="relay_task_b">
         <el-button size="small" @click="xjSubmit" :loading="submitLoading" type="primary">&nbsp;&nbsp;&nbsp;&nbsp;确&nbsp;&nbsp;定&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
-        <el-button size="small" @click="xjClose">&nbsp;&nbsp;&nbsp;&nbsp;取&nbsp;&nbsp;消&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
+        <el-button size="small" @click="xjClose(false)">&nbsp;&nbsp;&nbsp;&nbsp;取&nbsp;&nbsp;消&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
       </div>
     </div>
   </div>
@@ -139,7 +143,7 @@
 import {ajaxCtx} from '@/config/config';
 import {mapXupuxian} from '@/config/config.js';
 import vlUpload from '@/components/common/upload.vue';
-import {apiAreaServiceDeviceList, getAllMonitorList, getAllBayonetList} from "@/views/index/api/api.base.js";
+import {apiAreaServiceDeviceList, getAllMonitorList, getAllBayonetList, getDeviceByBayonetUids} from "@/views/index/api/api.base.js";
 import {JtcGETAppendixInfoList, addPersonVideoContinue, addVhicleVideoContinue} from '@/views/index/api/api.judge.js';
 import {getPhotoAnalysis} from "@/views/index/api/api.analysis.js"; // 车辆特征检索接口
 import {getPicRecognize} from '../../api/api.structuring.js';
@@ -149,6 +153,7 @@ export default {
     return {
       /* 新建任务 begin */
       xjType: 1, // 1人员 2车辆
+      picSearchLoading: false,
       xjVechicleType: 1, // 1上传图片  2输入车牌号
       xjPlateNo: '',
       xjMoreInfo: false,
@@ -161,6 +166,7 @@ export default {
       mouseTool: null,
       xjDrawPolygon: [],
       xjMapTree: [],
+      xjMapTreeChecked: false,
       xjMapTreeDefaultProps: {
         children: 'children',
         label: 'name'
@@ -220,8 +226,8 @@ export default {
   mounted () {
   },
   methods: {
-    xjClose () {
-      this.$emit('closeNew');
+    xjClose (flag) {
+      this.$emit('closeNew', flag);
     },
     xjInitMap () {
       let _this = this;
@@ -242,7 +248,14 @@ export default {
       this.mouseTool.on('draw', (event) => {
         // event.obj 为绘制出来的覆盖物对象
         console.log('draw event', event);
+        if (this.xjDrawPolygon && this.xjDrawPolygon[0]) {
+          _this.xjMap.remove(this.xjDrawPolygon[0]);
+        }
+        this.xjDrawPolygon = [];
         this.xjDrawPolygon.push(event.obj);
+        this.xjMapSelActive = false;
+        this.mouseTool.close(false);
+        this.xjMap.setDefaultCursor();
         this.xjDrawSelComp();
       });
       this.markListDevice();
@@ -251,10 +264,13 @@ export default {
     xjMapTreeDel () {
       let aL = this.$refs.xjMapTree.getCheckedNodes();
       for (let i = 0; i < aL.length; i++) {
+        this.$refs.xjMapTree.setChecked(aL[i], false);
         this.$refs.xjMapTree.remove(aL[i]);
       }
-      console.log('xjMapTree', this.xjMapTree);
+      this.xjMapTreeChecked = false;
+      // console.log('xjMapTree', this.xjMapTree);
     },
+    // 画完后处理数据
     xjDrawSelComp () {
       let oList = {};
       if (this.listDevice && this.listDevice.length > 0) {
@@ -304,13 +320,18 @@ export default {
           }
         }
       }
+      let aRst = [];
       for (let k in oList) {
-        this.xjMapTree.push(oList[k]);
+        aRst.push(oList[k]);
       }
+      this.xjMapTree = aRst;
     },
     xjMapSelChange () {
-      this.xjMapSelActive = !this.xjMapSelActive;
-      if (this.xjMapSelActive) {
+      if (this.xjDrawPolygon && this.xjDrawPolygon[0]) {
+        this.xjMap.remove(this.xjDrawPolygon[0]);
+      }
+      if (!this.xjMapSelActive) {
+        this.xjMapSelActive = true;
         this.xjMap.setDefaultCursor("crosshair");
         this.mouseTool.polygon({
           strokeColor: "#FA453A",
@@ -322,9 +343,6 @@ export default {
           isRing: false,
           zIndex: 10
         });
-      } else {
-        this.mouseTool.close(false);
-        this.xjMap.setDefaultCursor();
       }
     },
     setMapStatus (status) {
@@ -388,6 +406,14 @@ export default {
       });
     },
 
+    xjMapTreeCheck (cData, sedData) {
+      if (cData && sedData && sedData.checkedNodes && sedData.checkedNodes.length > 0) {
+        this.xjMapTreeChecked = true;
+      } else {
+        this.xjMapTreeChecked = false;
+      }
+    },
+
     /* 新建任务 */
     xjTypeChanged (type) {
       if (type === 1) {
@@ -409,8 +435,10 @@ export default {
         this.getPicInfo(data);
       } else {
         if (this.xjType === 1) {
+          this.curImageUrl = '';
           this.uploadPersonObj = null;
         } else if (this.xjType === 2) {
+          this.curImageUrl2 = '';
           this.uploadVehicleObj = null;
         }
       }
@@ -418,6 +446,7 @@ export default {
     getPicInfo (data) {
       if (this.xjType === 1) {
         this.curImageUrl = data.path;
+        this.picSearchLoading = true;
         getPicRecognize({
           bussType: 'person', // vehicle机动车、face人脸、person人体
           url: data.path
@@ -428,81 +457,130 @@ export default {
               img_thumbnailPath: data.thumbnailPath
             });
           }
+          this.picSearchLoading = false;
         }).catch(() => {
+          this.picSearchLoading = false;
         })
       }
       if (this.xjType === 2) {
         this.curImageUrl2 = data.path;
+        this.picSearchLoading = true;
         getPhotoAnalysis(data.path).then(jRes => {
-          console.log('getPhotoAnalysis', jRes);
           if (jRes && jRes.data && jRes.data.length > 0) {
             this.uploadVehicleObj = Object.assign(jRes.data[0], {
               img_path: data.path,
               img_thumbnailPath: data.thumbnailPath
             });
           }
+          this.picSearchLoading = false;
         }).catch(() => {
+          this.picSearchLoading = false;
         })
       }
     },
-    delPic (index) {
-      this.compSim = '';
-      this.compSimWord = '';
-      if (index === 1) {
-        this.uploadFileList.splice(0, 1);
-        this.curImageUrl = '';
+    xjSubmit () {
+      if (this.xjType === 1 && !this.uploadPersonObj) {
+        this.msgTips('请上传图片！'); // 人员  无图片
+        return false;
+      }
+      if (this.xjType === 2 && this.xjVechicleType === 1 && !this.uploadVehicleObj) {
+        this.msgTips('请上传图片！'); // 车辆  无图片
+        return false;
+      }
+      if (this.xjType === 2 && this.xjVechicleType === 2 && !this.xjPlateNo) {
+        this.msgTips('请输入车牌号码！'); // 车辆-车牌号码  无车牌号码
+        return false;
+      }
+      this.submitLoading = true;
+      // 获取设备 xjMoreInfo  true/false
+      let params = {};
+      // 更多设置
+      let dids = [], bids = [];
+      if (this.xjMoreInfo) {
+        params.remarks = this.xjDesVal;
+        // id: "3" name: "长沙创谷广告园44" type: 1摄像头/卡口
+        // console.log('this.xjMapTree', this.xjMapTree);
+        for (let i = 0; i < this.xjMapTree.length; i++) {
+          if (this.xjMapTree[i] && this.xjMapTree[i].children && this.xjMapTree[i].children.length > 0) {
+            for (let j = 0; j < this.xjMapTree[i].children.length; j++) {
+              let oj = this.xjMapTree[i].children[j];
+              if (oj.type === 1) {
+                dids.push(oj.id);
+              } else if (oj.type === 2) {
+                bids.push(oj.id);
+              }
+            }
+          }
+        }
       } else {
-        this.uploadFileList2.splice(0, 1);
-        this.curImageUrl2 = '';
+        for (let i = 0; i < this.listDevice.length; i++) {
+          dids.push(this.listDevice[i].uid);
+        }
+        for (let i = 0; i < this.listBayonet.length; i++) {
+          bids.push(this.listBayonet[i].uid);
+        }
+      }
+      // console.log('dids', dids);
+      // console.log('bids', bids);
+      if (bids && bids.length > 0) {
+        getDeviceByBayonetUids(bids).then(res => {
+          if (res && res.data) {
+            for (let i = 0; i < res.data.length; i++) {
+              dids.push(res.data[i].uid);
+            }
+          }
+          this.xjSubmitTh(params, dids);
+        }).catch(() => {
+          this.submitLoading = false;
+        });
+      } else {
+        this.xjSubmitTh(params, dids);
       }
     },
-    xjSubmit () {
-      // 获取设备 xjMoreInfo  true/false
-      let dids = '';
-      if (!this.xjMoreInfo) {
-        for (let i = 0; i < this.listDevice.length; i++) {
-          dids += (i > 0 ? ';' : '') + this.listDevice[i].uid;
-        }
+    xjSubmitTh (params, dids) {
+      if (dids && dids.length > 0) {
+        dids = [...new Set(dids)];
+        params.spotLists = dids.join(';'); // 监控点(集合形式‘;’号分隔)
       }
-      let params = {
-        spotLists: dids // 监控点(集合形式‘;’号分隔)
+      if (!params.spotLists || params.spotLists.length <= 0) {
+        this.msgTips('请选择设备！');
+        this.submitLoading = false;
+        return false;
       }
+      // 验证通过，可以提交
+      this.xjSubmitDo(params);
+    },
+    xjSubmitDo (params) {
       if (this.xjType === 1) {
-        if (!this.uploadPersonObj) {
-          this.msgTips('请上传图片！');
-          return false;
-        }
         params = Object.assign(params, this.uploadPersonObj, {
           imgUrl: this.uploadPersonObj.img_path,
           subStoragePath: this.uploadPersonObj.img_thumbnailPath,
         });
-        this.submitLoading = true;
+        // console.log('addPersonVideoContinue', params);
         addPersonVideoContinue(params).then((res) => {
+          if (res) {
+            this.xjClose(true);
+          }
           this.submitLoading = false;
         }).catch((error => {
           this.submitLoading = false;
         }));
       } else if (this.xjType === 2) {
         if (this.xjVechicleType === 1) {
-          if (!this.uploadVehicleObj) {
-            this.msgTips('请上传图片！');
-            return false;
-          }
           params = Object.assign(params, this.uploadVehicleObj, {
             imgUrl: this.uploadVehicleObj.img_path,
             subStoragePath: this.uploadVehicleObj.img_thumbnailPath,
           });
         } else if (this.xjVechicleType === 2) {
-          if (!this.xjPlateNo) {
-            this.msgTips('请输入车牌号码！');
-            return false;
-          }
           params = Object.assign(params, {
             plateNo: this.xjPlateNo
           });
         }
-        this.submitLoading = true;
+        // console.log('addVhicleVideoContinue', params);
         addVhicleVideoContinue(params).then((res) => {
+          if (res) {
+            this.xjClose(true);
+          }
           this.submitLoading = false;
         }).catch((error => {
           this.submitLoading = false;
@@ -510,7 +588,7 @@ export default {
       }
     },
     // 信息提示
-    msgTips (msg) {
+    msgTips (smsg) {
       let nMsg = $('.el-message--info');
       if (nMsg && nMsg.length > 0) {
         nMsg.find('.el-message__content').text(smsg);
@@ -523,6 +601,9 @@ export default {
     }
   },
   destroyed () {
+    if (this.xjMap) {
+      this.xjMap.destroy();
+    }
   }
 }
 </script>
@@ -542,8 +623,10 @@ export default {
       border-bottom: 1px solid #f2f2f2;
       overflow: hidden;
       > span {
+        cursor: default;
         float: right;
         color: #999;
+        &.map_lt_sed { color: #186DFB; cursor: pointer; }
       }
     }
     > .mb_map_map_lb {
@@ -708,6 +791,15 @@ export default {
           color: #666;
         }
       }
+    }
+  }
+  > .task_mtr_ld {
+    border: 0;
+    color: #999;
+    > i {
+      position: relative; top: 2px;
+      font-size: 20px;
+      margin-right: 5px;
     }
   }
 }
