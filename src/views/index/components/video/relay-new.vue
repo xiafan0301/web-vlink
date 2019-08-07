@@ -3,7 +3,7 @@
     <div class="">
       <div class="relay_task_t">
         <el-breadcrumb separator-class="el-icon-arrow-right">
-          <el-breadcrumb-item><span style="cursor: pointer;" @click="xjClose">视频接力</span></el-breadcrumb-item>
+          <el-breadcrumb-item><span style="cursor: pointer;" @click="xjClose(false)">视频接力</span></el-breadcrumb-item>
           <el-breadcrumb-item>新建任务</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -133,7 +133,7 @@
       </div>
       <div class="relay_task_b">
         <el-button size="small" @click="xjSubmit" :loading="submitLoading" type="primary">&nbsp;&nbsp;&nbsp;&nbsp;确&nbsp;&nbsp;定&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
-        <el-button size="small" @click="xjClose">&nbsp;&nbsp;&nbsp;&nbsp;取&nbsp;&nbsp;消&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
+        <el-button size="small" @click="xjClose(false)">&nbsp;&nbsp;&nbsp;&nbsp;取&nbsp;&nbsp;消&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
       </div>
     </div>
   </div>
@@ -224,8 +224,8 @@ export default {
   mounted () {
   },
   methods: {
-    xjClose () {
-      this.$emit('closeNew');
+    xjClose (flag) {
+      this.$emit('closeNew', flag);
     },
     xjInitMap () {
       let _this = this;
@@ -527,9 +527,7 @@ export default {
     },
     xjSubmitTh (params, dids) {
       if (dids && dids.length > 0) {
-        console.log(dids);
         dids = [...new Set(dids)];
-        console.log(dids);
         params.spotLists = dids.join(';'); // 监控点(集合形式‘;’号分隔)
       }
       if (!params.spotLists || params.spotLists.length <= 0) {
@@ -546,8 +544,11 @@ export default {
           imgUrl: this.uploadPersonObj.img_path,
           subStoragePath: this.uploadPersonObj.img_thumbnailPath,
         });
-        console.log('addPersonVideoContinue', params);
+        // console.log('addPersonVideoContinue', params);
         addPersonVideoContinue(params).then((res) => {
+          if (res) {
+            this.xjClose(true);
+          }
           this.submitLoading = false;
         }).catch((error => {
           this.submitLoading = false;
@@ -563,8 +564,11 @@ export default {
             plateNo: this.xjPlateNo
           });
         }
-        console.log('addVhicleVideoContinue', params);
+        // console.log('addVhicleVideoContinue', params);
         addVhicleVideoContinue(params).then((res) => {
+          if (res) {
+            this.xjClose(true);
+          }
           this.submitLoading = false;
         }).catch((error => {
           this.submitLoading = false;
@@ -585,6 +589,9 @@ export default {
     }
   },
   destroyed () {
+    if (this.xjMap) {
+      this.xjMap.destroy();
+    }
   }
 }
 </script>

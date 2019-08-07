@@ -243,7 +243,7 @@
         </ul>
       </div>
     </div>
-    <div class="vl_vid relay_task" v-show="pageType === 2">
+    <div class="vl_vid relay_task" v-if="pageType === 2">
       <div is="relayNew" @closeNew="closeNew"></div>
     </div>
   </div>
@@ -385,8 +385,12 @@ export default {
         if (isFinished) { this.searchLoading2 = false; } else { this.searchLoading = false; }
       }));
     },
-    closeNew () {
+    closeNew (flag) {
+      // console.log('closeNew', flag);
       this.changePage(1);
+      if (flag) {
+        this.reSearch();
+      }
     },
     changePage (type) {
       this.pageType = type;
