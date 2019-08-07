@@ -113,18 +113,20 @@
           <p><i class="vl_icon vl_icon_position_1"></i><span :title="curSXT.address">{{curSXT.address}}</span></p>
           <!-- < span>抓拍{{curSXT.shotNum}}次</span> -->
         </div>
-        <vue-scroll>
-          <div class="vl_jtc_mk" v-for="(item, index) in curVideo.videoList" :key="item.id">
-            <p>{{item.shotTime}}</p>
-            <video :id="'vlJigVideo' + index" :src="item.videoPath"></video>
-            <p>{{item.shotTime}}</p>
-            <div class="vl_jig_right_btn">
-              <span class="vl_icon vl_icon_judge_01" @click="playVideo(index)" v-if="item.playing"></span>
-              <span class="vl_icon vl_icon_control_09" @click="playVideo(index)" v-else></span>
-              <span class="vl_icon vl_icon_control_08" @click="largeVideo(index)"></span>
+        <div class="video_container">
+          <vue-scroll>
+            <div class="vl_jtc_mk" v-for="(item, index) in curVideo.videoList" :key="item.id">
+              <p>{{item.shotTime}}</p>
+              <video :id="'vlJigVideo' + index" :src="item.videoPath"></video>
+              <p>{{item.shotTime}}</p>
+              <div class="vl_jig_right_btn">
+                <span class="vl_icon vl_icon_judge_01" @click="playVideo(index)" v-if="item.playing"></span>
+                <span class="vl_icon vl_icon_control_09" @click="playVideo(index)" v-else></span>
+                <span class="vl_icon vl_icon_control_08" @click="largeVideo(index)"></span>
+              </div>
             </div>
-          </div>
-        </vue-scroll>
+          </vue-scroll>
+        </div>
         <div class="vl_jig_right_close"><i class="el-icon-error" @click="hideVideoList"></i></div>
       </div>
       <div class="vl_jig_event" v-show="switchType === 1">
@@ -904,15 +906,24 @@ export default {
         display: block;
       }
     }
+    .video_container {
+      height: calc(100% - 30px);
+      .vl_jtc_mk {
+        margin-top: .2rem;
+        .vl_jig_right_btn {
+          position: absolute;
+          bottom: 0;
+          right: 0;
+          height: 28px;
+          padding-top: 2px;
+          span {
+            cursor: pointer;
+          }
+        }
+      }
+    }
     .vl_jig_right_title {
-      // position: absolute;
-      // top: 0;
       width: 2.2rem;
-      // vertical-align: middle;
-      // height: .3rem;
-      // padding-top: .1rem;
-      // margin-bottom: 10px;
-      // text-align: left;
       color: #333333;
       >p {
         width: 100%;
@@ -929,32 +940,8 @@ export default {
           white-space: nowrap;
         }
       }
-      // span {
-      //   display: inline-block;
-      //   width: 50%;
-      //   font-size: .14rem;
-      //   color: #333333;
-      //   white-space: nowrap;
-      //   overflow: hidden;
-      //   &:last-child {
-      //     text-align: right;
-      //     color: #999999;
-      //   }
-      // }
     }
-    .vl_jtc_mk {
-      margin-top: .2rem;
-      .vl_jig_right_btn {
-        position: absolute;
-        bottom: 0;
-        right: 0;
-        height: 28px;
-        padding-top: 2px;
-        span {
-          cursor: pointer;
-        }
-      }
-    }
+    
     .vl_jig_right_close {
       display: none;
       position: absolute;

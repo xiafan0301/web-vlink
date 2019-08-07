@@ -64,12 +64,15 @@
                           </ul>
                         </div>
                         <div class="relay_ul_lii" v-else>
-                          <img src="../../../../assets/img/666.jpg" alt="">
+                          <img :src="item.subStoragePath" alt="">
                         </div>
-                        <div class="relay_ul_lid com_ellipsis">{{item.remarks}}</div>
+                        <div class="relay_ul_lid com_ellipsis">
+                          <span v-if="item.remarks">{{item.remarks}}</span>
+                          <span style="color: #999;" v-else>暂无备注</span>
+                        </div>
                       </div>
                       <div class="relay_ul_list_active" draggable="false" v-else>
-                        <div class="relay_ul_lit">{{item.createTime}}<span class="relay_ul_lit_t2" v-if="item.videoPath">告警</span></div>
+                        <div class="relay_ul_lit">{{item.createTime}}<span class="relay_ul_lit_t1">播放中</span></div>
                         <div class="relay_ul_lim" v-if="(item.type === 1 || item.type === '1') && item.plateNo && !item.storagePath">
                           <ul>
                             <li>车牌号码</li>
@@ -77,9 +80,12 @@
                           </ul>
                         </div>
                         <div class="relay_ul_lii" v-else>
-                          <img src="../../../../assets/img/666.jpg" alt="">
+                          <img :src="item.subStoragePath" alt="">
                         </div>
-                        <div class="relay_ul_lid com_ellipsis">{{item.remarks}}</div>
+                        <div class="relay_ul_lid com_ellipsis">
+                          <span v-if="item.remarks">{{item.remarks}}</span>
+                          <span style="color: #999;" v-else>暂无备注</span>
+                        </div>
                       </div>
                     </li>
                   </ul>
@@ -87,7 +93,9 @@
                     暂无数据
                   </div>
                   <div class="relay_ul_ld" v-if="searchLoading">
-                    <i class="el-icon-loading"></i>加载中，请稍后...
+                    <div>
+                      <i class="el-icon-loading"></i>加载中，请稍后...
+                    </div>
                   </div>
                 </div>
                 <div class="relay_ul_btn">
@@ -149,7 +157,10 @@
                         <div class="relay_ul_lii" v-else>
                           <img src="../../../../assets/img/666.jpg" alt="">
                         </div>
-                        <div class="relay_ul_lid com_ellipsis">{{item.remarks}}</div>
+                        <div class="relay_ul_lid com_ellipsis">
+                          <span v-if="item.remarks">{{item.remarks}}</span>
+                          <span style="color: #999;" v-else>暂无备注</span>
+                        </div>
                       </div>
                     </li>
                   </ul>
@@ -316,7 +327,7 @@ export default {
         type: stype,
         beginTime: formatDate(st, 'yyyy-MM-dd 00:00:00'),
         endTime: formatDate(et, 'yyyy-MM-dd 23:59:59'),
-        isFinished: isFinished ? '1' : '0'
+        isFinished: isFinished ? 1 : 0
       }
       if (isFinished) { this.searchLoading2 = true; } else { this.searchLoading = true; }
       selectVideoContinue(params).then((res) => {
@@ -603,12 +614,8 @@ export default {
     }
     > .del_icon {
       display: none;
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      width: 24px;
-      height: 24px;
-      line-height: 24px;
+      position: absolute; top: 10px; right: 10px;
+      width: 24px; height: 24px; line-height: 24px;
       text-align: center;
       background: rgba(0, 0, 0, 0.4);
       border-radius: 4px;
@@ -667,12 +674,16 @@ export default {
   padding-bottom: 50px;
   border-top: 1px solid #eee;
   > .relay_ul_ld {
-    position: absolute; top: 20px; left: 10%;
-    width: 80%;
-    padding: 20px 0;
-    text-align: center;
-    background-color: #fff;
-    > i { font-size: 20px; position: relative; top: 2px; margin-right: 5px; }
+    position: absolute; top: 0px; left: 0;
+    width: 100%;
+    > div {
+      margin-right: 20px;
+      padding: 30px 0;
+      background-color: #fff;
+      text-align: center;
+      > i { font-size: 20px; position: relative; top: 2px; margin-right: 5px; }
+    }
+    
   }
   > .relay_ul_et {
     padding-top: 20px;
