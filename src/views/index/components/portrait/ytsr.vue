@@ -69,7 +69,7 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.upPhotoUrl" alt="">
+            <img  class="bigImg" :src="sturcDetail.upPhotoUrl" alt="">
             <span>上传图</span>
           </div>
           <div class="struc_c_d_box">
@@ -89,7 +89,7 @@
               <div class="struc_cdi_line">
                 <span>{{sturcDetail.idNo}}<i class="el-icon-postcard"></i></span>
               </div>
-              <div class="struc_cdi_line">
+              <div class="struc_cdi_line" v-show="sturcDetail.group">
                 <span>{{sturcDetail.group}}</span>
               </div>
               <div class="struc_cdi_line"></div>
