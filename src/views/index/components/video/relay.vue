@@ -489,6 +489,7 @@ export default {
      * @param {string} sid 视频ID
      */
     playerClose (iIndex, oData) {
+      console.log(iIndex);
       console.log(oData);
       this.videoList.splice(iIndex, 1, {});
       this.relayModify(oData.video.uid, oData.video.type, 1, 1);
@@ -505,7 +506,7 @@ export default {
           }
         }
         if (iInd >= 0) {
-          this.relayList.splice(iIndex, 1);
+          this.relayList.splice(iInd, 1);
         }
       } else if (cbType === 2) {
         let iInd = -1;
@@ -516,7 +517,7 @@ export default {
           }
         }
         if (iInd >= 0) {
-          this.relayList2.splice(iIndex, 1);
+          this.relayList2.splice(iInd, 1);
         }
       }
       updVideoContinue({

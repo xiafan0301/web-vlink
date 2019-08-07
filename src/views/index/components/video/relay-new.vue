@@ -270,6 +270,13 @@ export default {
       this.xjMapTreeChecked = false;
       // console.log('xjMapTree', this.xjMapTree);
     },
+    xjMapTreeCheck (cData, sedData) {
+      if (cData && sedData && sedData.checkedNodes && sedData.checkedNodes.length > 0) {
+        this.xjMapTreeChecked = true;
+      } else {
+        this.xjMapTreeChecked = false;
+      }
+    },
     // 画完后处理数据
     xjDrawSelComp () {
       let oList = {};
@@ -404,14 +411,6 @@ export default {
         // 自定义点标记覆盖物内容
         content: '<div title="' + title + '" class="map_icons ' + sClass + '"></div>'
       });
-    },
-
-    xjMapTreeCheck (cData, sedData) {
-      if (cData && sedData && sedData.checkedNodes && sedData.checkedNodes.length > 0) {
-        this.xjMapTreeChecked = true;
-      } else {
-        this.xjMapTreeChecked = false;
-      }
     },
 
     /* 新建任务 */
