@@ -36,7 +36,7 @@
                   <ul class="child_temp_detail" v-show="!item.isSXT">
                     <li v-for="(itm, idx) in item.bayonetList" :key="'itm' + idx">
                       <el-checkbox v-model="itm.isChildChecked" @change="handleLeftChildChecked(index, idx, itm.isChildChecked, item.isSXT)"></el-checkbox>
-                      <span>{{itm.deviceName}}</span>
+                      <span>{{itm.bayonetName}}</span>
                     </li>
                   </ul>
                 </div>
@@ -96,7 +96,7 @@
                     <ul class="child_temp_detail" v-show="!item.isSXT">
                       <li v-for="(itm, idx) in item.bayonetList" :key="'itm' + idx">
                         <el-checkbox v-model="itm.isChildChecked" @change="handleChildChecked(index, idx, itm.isChildChecked, item.isSXT)"></el-checkbox>
-                        <span>{{itm.deviceName}}</span>
+                        <span>{{itm.bayonetName}}</span>
                       </li>
                     </ul>
                   </div>

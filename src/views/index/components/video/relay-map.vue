@@ -385,7 +385,7 @@ export default {
     }
   }
   &.cl_relay_qz {
-    img {
+    .vid_relay_marker_img {
       top: -10px; left: 62px;
     }
   }
