@@ -77,12 +77,12 @@
               <div class="hd_alarm_t">
                 <div class="uesr_info">
                   <h1>布控名：{{item.surveillanceName}}</h1>
-                  <p>{{item.devName}}</p>
+                  <p>设备名：{{item.devName}}</p>
                   <p>{{item.snapTime}}</p>
                 </div>
                 <div class="img_info"><img :src="item.snapPhoto" alt="抓拍照片"></div>
                 <div>
-                  <span>{{item.semblance}}</span>
+                  <span v-if="item.semblance">{{item.semblance}}</span><span class="percent">%</span>
                   <p>相似度</p>
                   <el-progress :percentage="item.semblance" color="#0C70F8"></el-progress>
                 </div>
@@ -91,8 +91,8 @@
               <div class="hd_alarm_b" v-if="item.objType == 1 || item.objType == 2">
                 <template v-if="item.objType == 1">
                   <div class="alarm_b_list">{{item.name}}</div>
-                  <div class="alarm_b_list">{{item.sex}}</div>
-                  <div class="alarm_b_list">{{item.nation}}</div>
+                  <div class="alarm_b_list" v-if="item.sex && item.sex != '未知'">{{item.sex}}</div>
+                  <div class="alarm_b_list" v-if="item.nation && item.nation != '未知'">{{item.nation}}</div>
                 </template>
                 <template v-if="item.objType == 2">
                   <div class="alarm_b_list">{{item.vehicleNumber}}</div>
@@ -651,8 +651,13 @@ export default {
         padding-top: 15px;
         > span{
           color: #0C70F8;
-          font-size: 24px;
+          font-size: 20px;
           font-weight:bold;
+        }
+        .percent {
+          color: #0C70F8;
+          font-size: 14px;
+          font-weight: 500;
         }
         > p{
           color: #333333;
