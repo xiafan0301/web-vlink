@@ -52,42 +52,82 @@
                 <div class="relay_ul_list">
                   <ul v-if="relayList && relayList.length > 0">
                     <!-- relayList -->
-                    <li v-for="(item, index) in relayList" :key="'relay_list_' + index">
-                      <div v-if="!deviceIsPlaying(item, 1)"
-                        @dragstart="dragStart($event, item, 1)" @dragend="dragEnd"
-                        draggable="true" style="cursor: move;">
-                        <div class="relay_ul_lit">{{item.createTime}}<span class="relay_ul_lit_t2" v-if="item.videoPath">告警</span></div>
-                        <div class="relay_ul_lim" v-if="(item.type === 1 || item.type === '1') && item.plateNo && !item.subStoragePath">
-                          <ul>
-                            <li>车牌号码</li>
-                            <li>{{item.plateNo}}</li>
-                          </ul>
+                    <template v-for="(item, index) in relayList">
+                      <li v-if="item.videoPath || item.uid === '1kQHCCsC7QxL37s1Bk5tr0'" :key="'relay_li_' + index">
+                        <div v-if="!deviceIsPlaying(item, 1)"
+                          @dragstart="dragStart($event, item, 1)" @dragend="dragEnd"
+                          draggable="true" style="cursor: move;">
+                          <div class="relay_ul_lit">{{item.createTime}}<span class="relay_ul_lit_t2">告警</span></div>
+                          <div class="relay_ul_lim" v-if="(item.type === 1 || item.type === '1') && item.plateNo && !item.subStoragePath">
+                            <ul>
+                              <li>车牌号码</li>
+                              <li>{{item.plateNo}}</li>
+                            </ul>
+                          </div>
+                          <div class="relay_ul_lii" v-else>
+                            <img :src="item.subStoragePath" alt="">
+                          </div>
+                          <div class="relay_ul_lid com_ellipsis">
+                            <span v-if="item.remarks">{{item.remarks}}</span>
+                            <span style="color: #999;" v-else>暂无备注</span>
+                          </div>
                         </div>
-                        <div class="relay_ul_lii" v-else>
-                          <img :src="item.subStoragePath" alt="">
+                        <div class="relay_ul_list_active" draggable="false" v-else>
+                          <div class="relay_ul_lit">{{item.createTime}}<span class="relay_ul_lit_t1">播放中</span></div>
+                          <div class="relay_ul_lim" v-if="(item.type === 1 || item.type === '1') && item.plateNo && !item.storagePath">
+                            <ul>
+                              <li>车牌号码</li>
+                              <li>{{item.plateNo}}</li>
+                            </ul>
+                          </div>
+                          <div class="relay_ul_lii" v-else>
+                            <img :src="item.subStoragePath" alt="">
+                          </div>
+                          <div class="relay_ul_lid com_ellipsis">
+                            <span v-if="item.remarks">{{item.remarks}}</span>
+                            <span style="color: #999;" v-else>暂无备注</span>
+                          </div>
                         </div>
-                        <div class="relay_ul_lid com_ellipsis">
-                          <span v-if="item.remarks">{{item.remarks}}</span>
-                          <span style="color: #999;" v-else>暂无备注</span>
+                      </li>
+                    </template>
+                    <template v-for="(item, index) in relayList">
+                      <li v-if="!item.videoPath" :key="'relay_li2_' + index">
+                        <div v-if="!deviceIsPlaying(item, 1)"
+                          @dragstart="dragStart($event, item, 1)" @dragend="dragEnd"
+                          draggable="true" style="cursor: move;">
+                          <div class="relay_ul_lit">{{item.createTime}}</div>
+                          <div class="relay_ul_lim" v-if="(item.type === 1 || item.type === '1') && item.plateNo && !item.subStoragePath">
+                            <ul>
+                              <li>车牌号码</li>
+                              <li>{{item.plateNo}}</li>
+                            </ul>
+                          </div>
+                          <div class="relay_ul_lii" v-else>
+                            <img :src="item.subStoragePath" alt="">
+                          </div>
+                          <div class="relay_ul_lid com_ellipsis">
+                            <span v-if="item.remarks">{{item.remarks}}</span>
+                            <span style="color: #999;" v-else>暂无备注</span>
+                          </div>
                         </div>
-                      </div>
-                      <div class="relay_ul_list_active" draggable="false" v-else>
-                        <div class="relay_ul_lit">{{item.createTime}}<span class="relay_ul_lit_t1">播放中</span></div>
-                        <div class="relay_ul_lim" v-if="(item.type === 1 || item.type === '1') && item.plateNo && !item.storagePath">
-                          <ul>
-                            <li>车牌号码</li>
-                            <li>{{item.plateNo}}</li>
-                          </ul>
+                        <div class="relay_ul_list_active" draggable="false" v-else>
+                          <div class="relay_ul_lit">{{item.createTime}}<span class="relay_ul_lit_t1">播放中</span></div>
+                          <div class="relay_ul_lim" v-if="(item.type === 1 || item.type === '1') && item.plateNo && !item.storagePath">
+                            <ul>
+                              <li>车牌号码</li>
+                              <li>{{item.plateNo}}</li>
+                            </ul>
+                          </div>
+                          <div class="relay_ul_lii" v-else>
+                            <img :src="item.subStoragePath" alt="">
+                          </div>
+                          <div class="relay_ul_lid com_ellipsis">
+                            <span v-if="item.remarks">{{item.remarks}}</span>
+                            <span style="color: #999;" v-else>暂无备注</span>
+                          </div>
                         </div>
-                        <div class="relay_ul_lii" v-else>
-                          <img :src="item.subStoragePath" alt="">
-                        </div>
-                        <div class="relay_ul_lid com_ellipsis">
-                          <span v-if="item.remarks">{{item.remarks}}</span>
-                          <span style="color: #999;" v-else>暂无备注</span>
-                        </div>
-                      </div>
-                    </li>
+                      </li>
+                    </template>
                   </ul>
                   <div class="relay_ul_et" v-else>
                     暂无数据
@@ -147,7 +187,7 @@
                   <ul v-if="relayList2 && relayList2.length > 0">
                     <li v-for="(item, index) in relayList2" :key="'relay_list2_' + index">
                       <div class="relay_ul_list_active">
-                        <div class="relay_ul_lit">{{item.createTime}}<span class="relay_ul_lit_t3" @click="relayModify(item.uid, item.type, 0)">重启任务</span></div>
+                        <div class="relay_ul_lit">{{item.createTime}}<span class="relay_ul_lit_t3" @click="relayModify(item.uid, item.type, 0, 2)">重启任务</span></div>
                         <div class="relay_ul_lim" v-if="(item.type === 1 || item.type === '1') && item.plateNo && !item.storagePath">
                           <ul>
                             <li>车牌号码</li>
@@ -155,7 +195,7 @@
                           </ul>
                         </div>
                         <div class="relay_ul_lii" v-else>
-                          <img src="../../../../assets/img/666.jpg" alt="">
+                          <img :src="item.subStoragePath" alt="">
                         </div>
                         <div class="relay_ul_lid com_ellipsis">
                           <span v-if="item.remarks">{{item.remarks}}</span>
@@ -168,7 +208,9 @@
                     暂无数据
                   </div>
                   <div class="relay_ul_ld" v-if="searchLoading2">
-                    <i class="el-icon-loading"></i>加载中，请稍后...
+                    <div>
+                      <i class="el-icon-loading"></i>加载中，请稍后...
+                    </div>
                   </div>
                 </div>
                 <div class="relay_ul_btn">
@@ -445,18 +487,48 @@ export default {
     playerClose (iIndex, oData) {
       console.log(oData);
       this.videoList.splice(iIndex, 1, {});
-      this.relayModify(oData.video.uid, oData.video.type, 1);
+      this.relayModify(oData.video.uid, oData.video.type, 1, 1);
     },
     /* 播放器事件 end */
-    relayModify (uid, type, isFinished) {
+    // cbType  1结束任务 2重启任务
+    relayModify (uid, type, isFinished, cbType) {
+      if (cbType === 1) {
+        let iInd = -1;
+        for (let i = 0; i < this.relayList.length; i++) {
+          if (this.relayList[i].uid === uid) {
+            iInd = i;
+            break;
+          }
+        }
+        if (iInd >= 0) {
+          this.relayList.splice(iIndex, 1);
+        }
+      } else if (cbType === 2) {
+        let iInd = -1;
+        for (let i = 0; i < this.relayList2.length; i++) {
+          if (this.relayList2[i].uid === uid) {
+            iInd = i;
+            break;
+          }
+        }
+        if (iInd >= 0) {
+          this.relayList2.splice(iIndex, 1);
+        }
+      }
       updVideoContinue({
         uid: uid,
         type: type,
         isFinished: isFinished
       }).then(res => {
         if (res) {
-          this.reSearch();
+          // this.reSearch();
         }
+        if (cbType === 1) {
+          this.getRelayList(true); // 已结束 
+        } else if (cbType === 2) {
+          this.getRelayList(); // 进行中
+        }
+          
       }).catch(error => {});
     },
 

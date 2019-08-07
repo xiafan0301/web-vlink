@@ -32,63 +32,37 @@
                 <el-input v-model="xjPlateNo" placeholder="请输入车牌号码"></el-input>
               </div>
               <div class="task_mtl_u" v-else>
-                <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit"></div>
-                <!-- <el-upload
-                  class="vid_relay_upload"
-                  :show-file-list="false"
-                  accept="image/*"
-                  :action="uploadAcion"
-                  list-type="picture-card"
-                  :before-upload="beforeAvatarUpload"
-                  :on-success="uploadSucess"
-                  :on-error="handleError">
-                  <i v-if="uploading" class="el-icon-loading"></i>
-                  <img v-else-if="xjType === 1 && curImageUrl" :src="curImageUrl">
-                  <img v-else-if="xjType === 2 && curImageUrl2" :src="curImageUrl2">
-                  <div style="line-height: normal; padding-top: 35px;" v-else>
-                    <span style="font-size: 60px; color: #999;" class="el-icon-plus"></span>
-                    <p style="color: #999; padding-top: 15px;">请上传清晰图片</p>
-                  </div>
-                </el-upload>
-                <p @click="showHistoryPic(1)">从上传记录中选择</p>
-                <div v-show="curImageUrl" class="del_icon">
-                  <i class="el-icon-delete" @click="delPic(1)"></i>
-                </div> -->
+                <div is="vlUpload" :imgData="imgData" :clear="uploadClear" @uploadEmit="uploadEmit"></div>
               </div>
             </div>
             <div class="relay_task_mtr">
               <div v-if="xjType === 1 && uploadPersonObj">
                 <h3>图片信息：</h3>
                 <ul>
-                  <li><span>性别：</span>{{uploadPersonObj.sex ? uploadPersonObj.sex : '-'}}</li>
-                  <li><span>年龄段：</span>{{uploadPersonObj.age ? uploadPersonObj.age : '-'}}</li>
-                  <li><span>发型：</span>{{uploadPersonObj.hair ? uploadPersonObj.hair : '-'}}</li>
-                  <li><span>戴眼镜：</span>{{uploadPersonObj.glasses ? uploadPersonObj.glasses : '-'}}</li>
-                  <li><span>戴帽子：</span>{{uploadPersonObj.hat ? uploadPersonObj.hat : '-'}}</li>
-                  <li><span>戴口罩：</span>{{uploadPersonObj.mask ? uploadPersonObj.mask : '-'}}</li>
-                  <li><span>抱小孩：</span>{{uploadPersonObj.baby ? uploadPersonObj.baby : '-'}}</li>
-                  <li><span>拎东西：</span>{{uploadPersonObj.bag ? uploadPersonObj.bag : '-'}}</li>
-                  <li><span>上身款式：</span>{{uploadPersonObj.upperType ? uploadPersonObj.upperType : '-'}}</li>
-                  <li><span>上身颜色：</span>{{uploadPersonObj.upperColor ? uploadPersonObj.upperColor : '-'}}</li>
-                  <li><span>下身款式：</span>{{uploadPersonObj.bottomType ? uploadPersonObj.bottomType : '-'}}</li>
-                  <li><span>下身颜色：</span>{{uploadPersonObj.bottomColor ? uploadPersonObj.bottomColor : '-'}}</li>
+                  <li><span>性别：</span>{{uploadPersonObj.sex ? uploadPersonObj.sex : '--'}}</li>
+                  <li><span>年龄段：</span>{{uploadPersonObj.age ? uploadPersonObj.age : '--'}}</li>
+                  <li><span>发型：</span>{{uploadPersonObj.hair ? uploadPersonObj.hair : '--'}}</li>
+                  <li><span>戴眼镜：</span>{{uploadPersonObj.glasses ? uploadPersonObj.glasses : '--'}}</li>
+                  <li><span>戴帽子：</span>{{uploadPersonObj.hat ? uploadPersonObj.hat : '--'}}</li>
+                  <li><span>戴口罩：</span>{{uploadPersonObj.mask ? uploadPersonObj.mask : '--'}}</li>
+                  <li><span>抱小孩：</span>{{uploadPersonObj.baby ? uploadPersonObj.baby : '--'}}</li>
+                  <li><span>拎东西：</span>{{uploadPersonObj.bag ? uploadPersonObj.bag : '--'}}</li>
+                  <li><span>上身款式：</span>{{uploadPersonObj.upperType ? uploadPersonObj.upperType : '--'}}</li>
+                  <li><span>上身颜色：</span>{{uploadPersonObj.upperColor ? uploadPersonObj.upperColor : '--'}}</li>
+                  <li><span>下身款式：</span>{{uploadPersonObj.bottomType ? uploadPersonObj.bottomType : '--'}}</li>
+                  <li><span>下身颜色：</span>{{uploadPersonObj.bottomColor ? uploadPersonObj.bottomColor : '--'}}</li>
                 </ul>
               </div>
-              <div v-if="xjType === 2 && uploadPersonObj">
+              <div v-if="xjType === 2 && xjVechicleType === 1 && uploadVehicleObj">
                 <h3>图片信息：</h3>
                 <ul>
-                  <li><span>性别：</span>{{uploadPersonObj.sex ? uploadPersonObj.sex : '-'}}</li>
-                  <li><span>年龄段：</span>{{uploadPersonObj.age ? uploadPersonObj.age : '-'}}</li>
-                  <li><span>发型：</span>{{uploadPersonObj.hair ? uploadPersonObj.hair : '-'}}</li>
-                  <li><span>戴眼镜：</span>{{uploadPersonObj.glasses ? uploadPersonObj.glasses : '-'}}</li>
-                  <li><span>戴帽子：</span>{{uploadPersonObj.hat ? uploadPersonObj.hat : '-'}}</li>
-                  <li><span>戴口罩：</span>{{uploadPersonObj.mask ? uploadPersonObj.mask : '-'}}</li>
-                  <li><span>抱小孩：</span>{{uploadPersonObj.baby ? uploadPersonObj.baby : '-'}}</li>
-                  <li><span>拎东西：</span>{{uploadPersonObj.bag ? uploadPersonObj.bag : '-'}}</li>
-                  <li><span>上身款式：</span>{{uploadPersonObj.upperType ? uploadPersonObj.upperType : '-'}}</li>
-                  <li><span>上身颜色：</span>{{uploadPersonObj.upperColor ? uploadPersonObj.upperColor : '-'}}</li>
-                  <li><span>下身款式：</span>{{uploadPersonObj.bottomType ? uploadPersonObj.bottomType : '-'}}</li>
-                  <li><span>下身颜色：</span>{{uploadPersonObj.bottomColor ? uploadPersonObj.bottomColor : '-'}}</li>
+                  <li style="width: 50%;"><span>车牌号码：</span>{{uploadVehicleObj.plateNo ? uploadVehicleObj.plateNo : '--'}}</li>
+                  <li style="width: 50%;"><span>车辆分组：</span>{{(uploadVehicleObj.vehicleType && uploadVehicleObj.vehicleType.length > 0) ? uploadVehicleObj.vehicleType.join(',') : '--'}}</li>
+                  <li style="width: 50%;"><span>车牌颜色：</span>{{uploadVehicleObj.plateColor ? uploadVehicleObj.plateColor : '--'}}</li>
+                  <li style="width: 50%;"><span>车辆型号：</span>{{uploadVehicleObj.vehicleModel ? uploadVehicleObj.vehicleModel : '--'}}</li>
+                  <li style="width: 50%;"><span>车辆颜色：</span>{{uploadVehicleObj.vehicleColor ? uploadVehicleObj.vehicleColor : '--'}}</li>
+                  <li style="width: 50%;"><span>车辆类型：</span>{{uploadVehicleObj.vehicleClass ? uploadVehicleObj.vehicleClass : '--'}}</li>
+                  <li style="width: 50%;"><span>车牌类型：</span>{{uploadVehicleObj.baby ? dicFormater(45, uploadVehicleObj.plateClass) : '--'}}</li>
                 </ul>
               </div>
             </div>
@@ -155,7 +129,7 @@
         </div>
       </div>
       <div class="relay_task_b">
-        <el-button size="small" @click="xjSubmit" type="primary">&nbsp;&nbsp;&nbsp;&nbsp;确&nbsp;&nbsp;定&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
+        <el-button size="small" @click="xjSubmit" :loading="submitLoading" type="primary">&nbsp;&nbsp;&nbsp;&nbsp;确&nbsp;&nbsp;定&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
         <el-button size="small" @click="xjClose">&nbsp;&nbsp;&nbsp;&nbsp;取&nbsp;&nbsp;消&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
       </div>
     </div>
@@ -194,8 +168,11 @@ export default {
 
       xjDesVal: '',
 
+      submitLoading: false,
+
       uploadPersonObj: null,
       uploadVehicleObj: null,
+      imgData: null,
       curImageUrl: '', // 当前上传的图片 人员
       curImageUrl2: '', // 当前上传的图片 车辆
       uploadClear: {}
@@ -413,6 +390,19 @@ export default {
 
     /* 新建任务 */
     xjTypeChanged (type) {
+      if (type === 1) {
+        if (this.curImageUrl) {
+          this.imgData = { path: this.curImageUrl };
+        } else {
+          this.imgData = {};
+        }
+      } else if (type === 2) {
+        if (this.curImageUrl2) {
+          this.imgData = { path: this.curImageUrl2 };
+        } else {
+          this.imgData = {};
+        }
+      }
     },
     uploadEmit (data) {
       if (data) {
@@ -427,6 +417,7 @@ export default {
     },
     getPicInfo (data) {
       if (this.xjType === 1) {
+        this.curImageUrl = data.path;
         getPicRecognize({
           bussType: 'person', // vehicle机动车、face人脸、person人体
           url: data.path
@@ -441,6 +432,7 @@ export default {
         })
       }
       if (this.xjType === 2) {
+        this.curImageUrl2 = data.path;
         getPhotoAnalysis(data.path).then(jRes => {
           console.log('getPhotoAnalysis', jRes);
           if (jRes && jRes.data && jRes.data.length > 0) {
@@ -472,42 +464,61 @@ export default {
           dids += (i > 0 ? ';' : '') + this.listDevice[i].uid;
         }
       }
-
+      let params = {
+        spotLists: dids // 监控点(集合形式‘;’号分隔)
+      }
       if (this.xjType === 1) {
-        let params = {
-          spotLists: dids, // 监控点(集合形式‘;’号分隔)
+        if (!this.uploadPersonObj) {
+          this.msgTips('请上传图片！');
+          return false;
+        }
+        params = Object.assign(params, this.uploadPersonObj, {
           imgUrl: this.uploadPersonObj.img_path,
           subStoragePath: this.uploadPersonObj.img_thumbnailPath,
-          // personStoragePath: this.curImageUrl,
-          // type: '0', // 0是人 1是车
-          sex: this.uploadPersonObj.sex,
-          sexCode: this.uploadPersonObj.sexCode,
-          hair: this.uploadPersonObj.hair,
-          hairCode: this.uploadPersonObj.hairCode,
-          age: this.uploadPersonObj.age,
-          ageCode: this.uploadPersonObj.ageCode,
-          upperType: this.uploadPersonObj.upperType,
-          upperTypeCode: this.uploadPersonObj.upperTypeCode,
-          upperColor: this.uploadPersonObj.upperColor,
-          upperColorCode: this.uploadPersonObj.upperColorCode,
-          bottomType: this.uploadPersonObj.bottomType,
-          bottomTypeCode: this.uploadPersonObj.bottomTypeCode,
-          bottomColor: this.uploadPersonObj.bottomColor,
-          bottomColorCode: this.uploadPersonObj.bottomColorCode,
-          hat: this.uploadPersonObj.hat,
-          hatCode: this.uploadPersonObj.hatCode,
-          bag: this.uploadPersonObj.bag,
-          bagCode: this.uploadPersonObj.bagCode,
-          baby: this.uploadPersonObj.baby,
-          babyCode: this.uploadPersonObj.babyCode,
-          glasses: this.uploadPersonObj.glasses,
-          glassesCode: this.uploadPersonObj.glassesCode,
-          mask: this.uploadPersonObj.mask,
-          maskCode: this.uploadPersonObj.maskCode
-        }
+        });
+        this.submitLoading = true;
         addPersonVideoContinue(params).then((res) => {
+          this.submitLoading = false;
         }).catch((error => {
+          this.submitLoading = false;
         }));
+      } else if (this.xjType === 2) {
+        if (this.xjVechicleType === 1) {
+          if (!this.uploadVehicleObj) {
+            this.msgTips('请上传图片！');
+            return false;
+          }
+          params = Object.assign(params, this.uploadVehicleObj, {
+            imgUrl: this.uploadVehicleObj.img_path,
+            subStoragePath: this.uploadVehicleObj.img_thumbnailPath,
+          });
+        } else if (this.xjVechicleType === 2) {
+          if (!this.xjPlateNo) {
+            this.msgTips('请输入车牌号码！');
+            return false;
+          }
+          params = Object.assign(params, {
+            plateNo: this.xjPlateNo
+          });
+        }
+        this.submitLoading = true;
+        addVhicleVideoContinue(params).then((res) => {
+          this.submitLoading = false;
+        }).catch((error => {
+          this.submitLoading = false;
+        }));
+      }
+    },
+    // 信息提示
+    msgTips (msg) {
+      let nMsg = $('.el-message--info');
+      if (nMsg && nMsg.length > 0) {
+        nMsg.find('.el-message__content').text(smsg);
+      } else {
+        this.$message({
+          message: smsg,
+          type: 'info'
+        });
       }
     }
   },
