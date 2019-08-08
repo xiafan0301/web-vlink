@@ -249,6 +249,7 @@ export default {
         password: null, // 密码
         rtspPort: null, // RTSP端口
         locationName: [],
+        areaId: null, // 区域id
         address: null, // 所在位置
       },
       rules: {
@@ -430,6 +431,7 @@ export default {
               this.onlineForm.rtspPort = obj.rtspPort;
               this.onlineForm.address = obj.address;
               this.onlineForm.deviceSip = obj.deviceSip;
+              this.onlineForm.areaId = obj.areaId;
 
               if (obj.location) {
                 let arr = [];
@@ -457,11 +459,9 @@ export default {
                 })
               }
               
-              
               if (this.$route.query.id) {
                 this.addMarker([this.onlineForm.longitude, this.onlineForm.latitude]);
               }
-              console.log(this.onlineForm.locationName)
             }
           })
       }
@@ -621,8 +621,7 @@ export default {
     handleChangeAddress (value) {
       this.$set(this.onlineForm,'address','');
       let labels = this.$refs['cascaderAddr'].currentLabels;
-      console.log(labels,value)
-      if(labels && labels.length > 0) {
+       if(labels && labels.length > 0) {
         this.locationName = labels.join('');
         this.markLocation(this.locationName);
       } 
@@ -878,6 +877,7 @@ export default {
           if (!this.$route.query.id) {
             this.$delete(this.cameraForm, 'uid');
           }
+          this.onlineForm.areaId = this.onlineForm.locationName[this.onlineForm.locationName.length - 1];
           const params = {
             ...this.cameraForm,
             ...this.onlineForm,
@@ -927,8 +927,6 @@ export default {
       this.$refs[form].validate(valid => {
         if (valid) {
           this.isSelectTab = 2;
-          console.log('cameraForm', this.cameraForm)
-          console.log('onlineForm', this.onlineForm)
         }
       })
     },

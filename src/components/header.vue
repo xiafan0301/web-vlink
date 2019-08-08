@@ -66,7 +66,7 @@
           <el-popover
             ref="popover"
             placement="bottom"
-            width="428"
+            width="488"
             trigger="click"
             :popper-class="alarmPopoverClass"
             v-model="alarmVisible">
@@ -76,14 +76,14 @@
             <div class="vl_hd_alarm" v-for="(item,index) in alarmList" :key="index" @click="goSkipDetail(item)">
               <div class="hd_alarm_t">
                 <div class="uesr_info">
-                  <h1>{{item.surveillanceName}}</h1>
-                  <p>{{item.devName}}</p>
+                  <h1>布控名：{{item.surveillanceName}}</h1>
+                  <p>设备名：{{item.devName}}</p>
                   <p>{{item.snapTime}}</p>
                 </div>
                 <div class="img_info"><img :src="item.snapPhoto" alt="抓拍照片"></div>
                 <div>
-                  <span>{{item.semblance}}</span>
-                  <p>匹配度</p>
+                  <span v-if="item.semblance">{{item.semblance}}</span><span class="percent">%</span>
+                  <p>相似度</p>
                   <el-progress :percentage="item.semblance" color="#0C70F8"></el-progress>
                 </div>
                 <div class="img_info"><img :src="item.surveillancePhoto" alt="布防照片"></div>
@@ -91,8 +91,8 @@
               <div class="hd_alarm_b" v-if="item.objType == 1 || item.objType == 2">
                 <template v-if="item.objType == 1">
                   <div class="alarm_b_list">{{item.name}}</div>
-                  <div class="alarm_b_list">{{item.sex}}</div>
-                  <div class="alarm_b_list">{{item.nation}}</div>
+                  <div class="alarm_b_list" v-if="item.sex && item.sex != '未知'">{{item.sex}}</div>
+                  <div class="alarm_b_list" v-if="item.nation && item.nation != '未知'">{{item.nation}}</div>
                 </template>
                 <template v-if="item.objType == 2">
                   <div class="alarm_b_list">{{item.vehicleNumber}}</div>
@@ -621,7 +621,7 @@ export default {
         flex: 0 0 25%;
       } */
       .uesr_info {
-        flex: 0 0 30%;
+        flex: 0 0 36%;
         > div{
           margin-bottom: 10px;
           color: #333333;
@@ -639,6 +639,7 @@ export default {
           }
         h1 {
           -webkit-line-clamp: 1; //行数
+          margin-bottom: 5px;
         }
         p {
           -webkit-line-clamp: 2; //行数
@@ -650,8 +651,13 @@ export default {
         padding-top: 15px;
         > span{
           color: #0C70F8;
-          font-size: 24px;
+          font-size: 20px;
           font-weight:bold;
+        }
+        .percent {
+          color: #0C70F8;
+          font-size: 14px;
+          font-weight: 500;
         }
         > p{
           color: #333333;
@@ -669,7 +675,7 @@ export default {
         }
       }
       .img_info {
-        flex: 0 0 27%;
+        flex: 0 0 24%;
         text-align: center;
         > img{
           width: 90px;

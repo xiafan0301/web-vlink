@@ -61,8 +61,8 @@
                   <div v-if="sturcDetail.basePortraitInfo">
                     <p class="name_info">
                       <span>{{sturcDetail.basePortraitInfo.name}}</span>
-                      <span>{{sturcDetail.basePortraitInfo.sexStr}}</span>
-                      <span>{{sturcDetail.basePortraitInfo.nationStr}}</span>
+                      <span v-if="sturcDetail.basePortraitInfo.sexStr && sturcDetail.basePortraitInfo.sexStr != '未知'">{{sturcDetail.basePortraitInfo.sexStr}}</span>
+                      <span v-if="sturcDetail.basePortraitInfo.nationStr && sturcDetail.basePortraitInfo.nationStr != '未知'">{{sturcDetail.basePortraitInfo.nationStr}}</span>
                     </p>
                   </div>
                   <div v-if="sturcDetail.basePortraitInfo.idNo">

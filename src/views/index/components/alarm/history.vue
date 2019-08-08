@@ -166,9 +166,9 @@
               </div>
             </div>
             <div class="list_con_info">
-              <div>{{item.surveillanceName}}</div>
+              <div>布控名：{{item.surveillanceName}}</div>
               <div>
-                <span>{{item.devName}}</span>&nbsp;
+                <span>设备名：{{item.devName}}</span>&nbsp;
                 <span>{{item.snapTime}}</span>
               </div>
             </div>
@@ -176,8 +176,8 @@
               <div class="hover_info">
                 <p class="name_info" v-if="item.objType == 1">
                   <span>{{item.name}}</span>
-                  <span>{{item.sex}}</span>
-                  <span>{{item.nation}}</span>
+                  <span v-if="item.sex && item.sex != '未知'">{{item.sex}}</span>
+                  <span v-if="item.nation && item.nation != '未知'">{{item.nation}}</span>
                 </p>
                 <p class="name_info" v-if="item.objType == 2">
                   <span>{{item.vehicleNumber}}</span>

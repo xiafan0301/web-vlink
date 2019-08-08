@@ -39,8 +39,10 @@
       <!--查询范围-->
       <div class="ytsr_left_radio">
         <span>查询范围：</span>
-        <el-radio v-model="radio" label="1">基础信息库</el-radio>
-        <el-radio v-model="radio" label="2">抓拍视图库</el-radio>
+        <span>
+          <el-radio v-model="radio" label="1">基础信息库</el-radio>
+          <el-radio v-model="radio" label="2">抓拍视图库</el-radio>
+        </span>
       </div>
       <div class="ytsr_left_search" v-show="radio === '1'">
         <el-select
@@ -60,12 +62,22 @@
       <div class="ytsr_left_search"  v-show="radio === '2'">
         <div class="left_time">
           <el-date-picker
-                  v-model="searchData.shotTime"
-                  type="daterange"
-                  value-format="yyyy-MM-dd"
-                  range-separator="至"
-                  start-placeholder="开始日期"
-                  end-placeholder="结束日期">
+                  v-model="searchData.startTime"
+                  style="width: 100%;margin-bottom: 20px;"
+                  class="vl_date"
+                  type="date"
+                  @change="chooseStartTime"
+                  value-format="timestamp"
+                  placeholder="选择日期时间">
+          </el-date-picker>
+          <el-date-picker
+                  style="width: 100%;"
+                  class="vl_date vl_date_end"
+                  v-model="searchData.endTime"
+                  @change="chooseEndTime"
+                  value-format="timestamp"
+                  type="date"
+                  placeholder="选择日期时间">
           </el-date-picker>
         </div>
         <!-- 设备搜索 -->
@@ -278,6 +290,22 @@
         <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="sureDeleteTask">确认</el-button>
       </div>
     </el-dialog>
+    <!--新建任务弹出框-->
+    <el-dialog
+            title="新建离线任务"
+            :visible.sync="addTaskDialog"
+            width="482px"
+            :close-on-click-modal="false"
+            :close-on-press-escape="false"
+            class="dialog_comp"
+    >
+      <span style="color: #999999;">因数据量较大，为减少等待时间，这次分析将建立离线任务，需要在下方输入 任务名称。离线任务可以在右侧离线任务列表查看任务状态。</span>
+      <el-input v-model="taskName" placeholder="请输入任务名称"></el-input>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="addTaskDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="onConfirmAddTask">确认</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -286,7 +314,7 @@
   import { ScpGETdeviceListById, ScpGETretrievalHisById} from '../../api/api.search.js';
   import {JtcPUTAppendixsOrder, JtcPOSTAppendixInfo, JtcGETAppendixInfoList,  getShotDevice, getTailBehindList } from '../../api/api.judge'
   import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
-  import {getGroupListIsPortrait} from '../../api/api.control.js';
+  import {getGroups} from '../../api/api.judge.js';
   import { ajaxCtx, mapXupuxian } from '@/config/config.js';
   import { MapGETmonitorList } from "@/views/index/api/api.map.js";
   import { objDeepCopy, formatDate } from "@/utils/util.js";
@@ -324,7 +352,8 @@
         selectIndex: 1, // 默认已完成的任务
         pagination: { total: 0, pageSize: 10, pageNum: 1 },
         taskForm: {
-          reportTime: [], // 日期
+          startTime: '',
+          endTime: '',
           taskName: null // 任务名称
         },
         list: [], //已完成列表
@@ -334,6 +363,8 @@
         interruptDialog: false, //中断任务
         addTaskDialog: false,
         isAddLoading: false,
+        taskName: '', // 新建弹窗里的任务名称
+        addParams: {},
         uploading: false,
         uploadAcion: ajaxCtx.base + '/new',
         searching: false,
@@ -345,7 +376,8 @@
         searchData: {
           minSemblance: 85, // 最小相似度
           portraitGroupId: [],
-          shotTime: ''
+          startTime: '',
+          endTime: ''
         }
       }
     },
@@ -372,7 +404,7 @@
         this.curImageUrl = x.path;
       }
       // 获取人员组，跟车辆组列表
-      getGroupListIsPortrait().then(res => {
+      getGroups({groupType: 4}).then(res => {
         if (res) {
           this.portraitGroupList = res.data;
           this.searchData.portraitGroupId = this.portraitGroupList.map(x => {
@@ -385,12 +417,28 @@
       this.setDTime();
     },
     methods: {
+      // 重置查询条件
+      resetForm (form) {
+        this.$refs[form].resetFields();
+        this.getDataList();
+      },
+      chooseEndTime (e) {
+        if (e < this.searchData.startTime) {
+          this.$message.info('结束时间必须大于开始时间才会有结果')
+        }
+      },
+      chooseStartTime (e) {
+        if (e > this.searchData.endTime) {
+          this.$message.info('结束时间必须大于开始时间才会有结果')
+        }
+      },
       setDTime() {
         let curDate = new Date(new Date().toLocaleDateString()).getTime()
         let curS = 1 * 24 * 3600 * 1000;
         let _s = curDate - curS;
 //        let _e = curDate - 1
-        this.searchData.shotTime = [formatDate(_s, "yyyy-MM-dd"), formatDate(_s, "yyyy-MM-dd")];
+        this.searchData.startTime = _s;
+        this.searchData.endTime = _s;
       },
       // 获取离线任务
       getDataList () {
@@ -622,7 +670,11 @@
         this.getDataList();
       },
       skipResultPage (obj) {
-        this.$router.push({name: 'portrait_ytsr', query: {uid: obj.uid}})
+        if (obj.taskWebParam.origin === 1) {
+          this.$router.push({name: 'portrait_ytsr', query: {uid: obj.uid}})
+        } else {
+          this.$router.push({name: 'portrait_ytsr_shot', query: {uid: obj.uid}})
+        }
       },
       // 显示中断任务弹出框
       showInterruptDialog (obj) {
@@ -758,6 +810,7 @@
           origin: this.radio,
         };
         let params = {
+          origin: this.radio,
         }
         if (!this.imgList) {
           if (!document.querySelector('.el-message--info')) {
@@ -778,38 +831,83 @@
         }
         if (this.radio === '1') {
           p1['portraitGroupId'] = this.searchData.portraitGroupId.join(',');
+          params['portraitGroupId'] = this.searchData.portraitGroupId.join(',');
+          let pNameList = []
+          this.searchData.portraitGroupId.forEach(x => {
+            pNameList.push(this.portraitGroupList.find(y => y.uid === x).groupName)
+          })
+          params['portraitGroupName'] = pNameList;
         } else {
+          let dNameList = [];
+          let dList = this.selectCameraArr.map(res =>  res.deviceName);
+          let bList = this.selectBayonetArr.map(res => res.bayonetName);
+          dNameList = dList.concat(bList);
+          if (dNameList.length > 3) {
+            params['deviceNames'] = dNameList.splice(0, 3);
+            params['deviceNames'].push('等' + dNameList.length + '个设备');
+            params['deviceNames'] =  params['deviceNames'].join(',')
+          } else {
+            params['deviceNames'] = dNameList.join(',')
+          }
           p1['deviceIds'] = this.selectCameraArr.map(res => res.id).join(',');
+          params['deviceIds'] = this.selectCameraArr.map(res => res.id).join(',');
           p1['bayonetIds'] = this.selectBayonetArr.map(res => res.id).join(',');
-          p1['startTime'] = this.searchData.shotTime[0];
-          p1['endTime'] = this.searchData.shotTime[1];
+          params['bayonetIds'] = this.selectBayonetArr.map(res => res.id).join(',');
+          p1['startTime'] = formatDate(this.searchData.startTime, 'yyyy-MM-dd');
+          params['startTime'] = formatDate(this.searchData.startTime, 'yyyy-MM-dd');
+          p1['endTime'] = formatDate(this.searchData.endTime, 'yyyy-MM-dd');
+          params['endTime'] = formatDate(this.searchData.endTime, 'yyyy-MM-dd');
         }
         PortraitGetDispatch(p1)
             .then(res => {
+              this.searching = false;
               if (res) {
                 if (res.data === 1) {
-                  PortraitPostByphotoTask(params)
-                      .then(sRes => {
-                        if (sRes) {
-                          this.$set(sRes.data, 'taskResult', JSON.parse(sRes.data.taskResult));
-                          this.$set(sRes.data, 'taskWebParam', JSON.parse(sRes.data.taskWebParam));
-                          console.log(sRes.data)
-                          this.searching = false;
-                        }
-                      })
+                  this.addParams = params;
+                  this.addTaskDialog = true;
                 } else {
-                  PortraitPostByphotoRealtime(params)
-                      .then(sRes => {
-                        if (sRes) {
-                          this.$set(sRes.data, 'taskResult', JSON.parse(sRes.data.taskResult));
-                          this.$set(sRes.data, 'taskWebParam', JSON.parse(sRes.data.taskWebParam));
-                          console.log(sRes.data)
-                          this.searching = false;
-                        }
-                      })
+                  if (this.radio === "1") {
+                    this.$router.push({name: 'portrait_ytsr', query: params})
+                  } else {
+                    this.$router.push({name: 'portrait_ytsr_shot', query: params})
+                  }
+//                  PortraitPostByphotoRealtime(params)
+//                      .then(sRes => {
+//                        if (sRes) {
+//                          this.$set(sRes.data, 'taskResult', JSON.parse(sRes.data.taskResult));
+//                          this.$set(sRes.data, 'taskWebParam', JSON.parse(sRes.data.taskWebParam));
+//                          console.log(sRes.data)
+//                          this.searching = false;
+//                        }
+//                      })
                 }
               }
             })
+      },
+      onConfirmAddTask () {
+        if (!this.taskName.replace(/\s+|\s+$/g, '')) {
+          if (!document.querySelector('.el-message--info')) {
+            this.$message.info('任务名称不能为空');
+            return false;
+          }
+        }
+        this.addParams.taskName = this.taskName;
+        this.isAddLoading = true;
+        PortraitPostByphotoTask(this.addParams).then(res => {
+          if (res && res.data) {
+            this.$message({
+              type: 'success',
+              message: '新建成功',
+              customClass: 'request_tip'
+            })
+            this.isAddLoading = false
+            this.addTaskDialog = false
+            this.getDataList()
+            console.log(res.data)
+          } else {
+            this.isAddLoading = false;
+          }
+        }).catch(() => {this.isAddLoading = false})
       },
       handleCurrentChange (e) {
         this.pagination.pageNum = e;
@@ -1196,10 +1294,11 @@
       .ytsr_left_radio {
         padding-left: 20px;
         margin: 20px 0;
-        .el-radio {
-          margin-right: 0px;
-          .el-radio__label {
-            padding-left: 0px;
+        display: flex;
+        >span {
+          display: block;
+          &:first-child {
+            width: 90px;
           }
         }
       }

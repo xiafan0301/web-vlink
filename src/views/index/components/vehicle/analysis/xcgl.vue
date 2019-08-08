@@ -750,8 +750,8 @@ export default {
           params["cameraIds"] = cameraIds.join("-");
         }
         if (this.selectBayonetArr && this.selectBayonetArr.length > 0) {
-          let bayonentIds = this.selectBayonetArr.map(res => res.id);
-          params["bayonentIds"] = bayonentIds.join("-");
+          let bayonetIds = this.selectBayonetArr.map(res => res.id);
+          params["bayonetIds"] = bayonetIds.join("-");
         }
       }
       if (this.selectIndex === 0) {
@@ -805,8 +805,8 @@ export default {
           drivingDiscipline["cameraIds"] = cameraIds.join("-");
         }
         if (this.selectBayonetArr && this.selectBayonetArr.length > 0) {
-          let bayonentIds = this.selectBayonetArr.map(res => res.id);
-          drivingDiscipline["bayonentIds"] = bayonentIds.join("-");
+          let bayonetIds = this.selectBayonetArr.map(res => res.id);
+          drivingDiscipline["bayonetIds"] = bayonetIds.join("-");
         }
       }
       if (this.selectTimeList && this.selectTimeList.length > 0) {
