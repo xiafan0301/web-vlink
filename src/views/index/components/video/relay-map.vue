@@ -13,8 +13,8 @@
               </div>
             </div>
             <ul>
-              <li>{{item.name}}</li>
-              <li>18-11-25 09:12</li>
+              <li>{{item.spotName}}</li>
+              <li>{{item.showTime}}</li>
             </ul>
           </li>
         </ul>
@@ -34,16 +34,16 @@
           <div class="relay_list_fst_i">
             <img v-if="detailData.subStoragePath" :src="detailData.subStoragePath" class="bigImg" alt="">
           </div>
-          <div class="relay_list_fst_b">抓拍图片<span>{{123123 | fmTenThousand}}</span></div>
+          <div class="relay_list_fst_b">抓拍图片&nbsp;<span>{{listData.length | fmTenThousand}}</span></div>
         </div>
       </li>
-      <li v-for="item in 10" :key="item">
+      <li v-for="(item, index) in listData" :key="'zp_li_' + index">
         <div class="relay_list_li">
           <div class="relay_list_li_i">
-            <img src="../../../../assets/img/666.jpg" class="bigImg" alt="">
+            <img :src="item.subStoragePath" class="bigImg" alt="">
           </div>
-          <div class="relay_list_li_d"><i class="vl_icon vl_icon_sm_sj"></i>18-12-24 14:12:17</div>
-          <div class="relay_list_li_d"><i class="vl_icon vl_icon_sm_sxt"></i>环保路摄像头002</div>
+          <div class="relay_list_li_d"><i class="vl_icon vl_icon_sm_sj"></i>{{item.showTime}}</div>
+          <div class="relay_list_li_d"><i class="vl_icon vl_icon_sm_sxt"></i>{{item.spotName}}</div>
         </div>
       </li>
     </ul>
@@ -72,7 +72,7 @@ export default {
     }
   },
   created () {
-    for (let i = 0; i < 20; i++) {
+    /* for (let i = 0; i < 20; i++) {
       this.listData.push({
         uid: i + 1,
         name: '测试接力地图数据-' + (i + 1),
@@ -80,7 +80,7 @@ export default {
         latitude: 27.708490 + (0.02 * i),
         subStoragePath: 'http://filevlink.aorise.org/root/image/2019/08/02/800390420190801165300000001_1.JPG'
       });
-    }
+    } */
     let uid = this.$route.query.uid;
     let type = this.$route.query.type;
     this.getDData(uid, type);
@@ -101,15 +101,6 @@ export default {
     });
   },
   methods: {
-    getDGJ (uid, type) {
-      getVideoContinueAllpointss({
-        id: uid,
-        type: type
-      }).then((res) => {
-        if (res && res.data) {
-        }
-      }).catch();
-    },
     getDData (uid, type) {
       getVideoContinue({
         id: uid,
@@ -117,6 +108,8 @@ export default {
       }).then((res) => {
         if (res && res.data) {
           this.detailData = res.data;
+          this.listData = this.detailData.videos;
+          this.setMarks();
         }
       }).catch();
     },
@@ -134,7 +127,6 @@ export default {
       // map.setMapStyle('amap://styles/a00b8c5653a6454dd8a6ec3b604ec50c');
       // console.log('_config', _config)
       _this.amap = map;
-      this.setMarks();
     },
     selData (data, bCenter) {
       this.sedData = data;
@@ -151,7 +143,7 @@ export default {
       let ism = this.listData.length > 1;
       for (let i = 0; i < this.listData.length; i++) {
         let _d = this.listData[i];
-        if (_d.longitude > 0 && _d.latitude > 0) {
+        if (_d.shotPlaceLongitude > 0 && _d.shotPlaceLatitude > 0) {
           let sClass = '', sContent = '';
           if (ism && i === 0) {
             // 起点
@@ -174,7 +166,7 @@ export default {
           '</div>';
           new window.AMap.Marker({ // 添加自定义点标记
             map: this.amap,
-            position: [_d.longitude, _d.latitude], // 基点位置 [116.397428, 39.90923]
+            position: [_d.shotPlaceLongitude, _d.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
             offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
             draggable: false, // 是否可拖动
             extData: _d,
@@ -182,7 +174,7 @@ export default {
             content: sContent,
             zIndex: 100
           });
-          gjPath.push([_d.longitude, _d.latitude]);
+          gjPath.push([_d.shotPlaceLongitude, _d.shotPlaceLatitude]);
         }
       }
       if (gjPath && gjPath.length > 0) {
