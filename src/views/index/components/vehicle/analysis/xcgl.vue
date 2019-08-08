@@ -22,7 +22,7 @@
               v-model="searchData.startTime"
               type="date"
               :picker-options="startDateOpt"
-              placeholder="开始时间"
+              placeholder="请选择开始时间"
               :clearable="false"
               format="yyyy-MM-dd HH:mm:ss"
             ></el-date-picker>
@@ -46,7 +46,7 @@
               v-model="searchData.endTime"
               type="date"
               :picker-options="endDateOpt"
-              placeholder="结束时间"
+              placeholder="请选择结束时间"
               :clearable="false"
               format="yyyy-MM-dd HH:mm:ss"
               @change="dateChange"
@@ -750,8 +750,8 @@ export default {
           params["cameraIds"] = cameraIds.join("-");
         }
         if (this.selectBayonetArr && this.selectBayonetArr.length > 0) {
-          let bayonentIds = this.selectBayonetArr.map(res => res.id);
-          params["bayonentIds"] = bayonentIds.join("-");
+          let bayonetIds = this.selectBayonetArr.map(res => res.id);
+          params["bayonetIds"] = bayonetIds.join("-");
         }
       }
       if (this.selectIndex === 0) {
@@ -805,8 +805,8 @@ export default {
           drivingDiscipline["cameraIds"] = cameraIds.join("-");
         }
         if (this.selectBayonetArr && this.selectBayonetArr.length > 0) {
-          let bayonentIds = this.selectBayonetArr.map(res => res.id);
-          drivingDiscipline["bayonentIds"] = bayonentIds.join("-");
+          let bayonetIds = this.selectBayonetArr.map(res => res.id);
+          drivingDiscipline["bayonetIds"] = bayonetIds.join("-");
         }
       }
       if (this.selectTimeList && this.selectTimeList.length > 0) {

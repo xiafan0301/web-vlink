@@ -4,7 +4,7 @@
       <h2>行动轨迹</h2>
       <div>
         <ul>
-          <li v-for="(item, index) in listData" :key="'vrm_' + index" @click="selData(item)"
+          <li v-for="(item, index) in listData" :key="'vrm_' + index" @click="selData(item, true)"
             :class="{'relay_mli_sed': item.uid === sedData.uid}">
             <div>
               <div :class="{'relay_mli_last': index >= (listData.length - 1)}">
@@ -32,7 +32,7 @@
         <div class="relay_list_fst">
           <p class="relay_list_fst_t">目标对象</p>
           <div class="relay_list_fst_i">
-            <img src="../../../../assets/img/666.jpg" alt="">
+            <img v-if="detailData.subStoragePath" :src="detailData.subStoragePath" class="bigImg" alt="">
           </div>
           <div class="relay_list_fst_b">抓拍图片<span>{{123123 | fmTenThousand}}</span></div>
         </div>
@@ -40,7 +40,7 @@
       <li v-for="item in 10" :key="item">
         <div class="relay_list_li">
           <div class="relay_list_li_i">
-            <img src="../../../../assets/img/666.jpg" alt="">
+            <img src="../../../../assets/img/666.jpg" class="bigImg" alt="">
           </div>
           <div class="relay_list_li_d"><i class="vl_icon vl_icon_sm_sj"></i>18-12-24 14:12:17</div>
           <div class="relay_list_li_d"><i class="vl_icon vl_icon_sm_sxt"></i>环保路摄像头002</div>
@@ -48,6 +48,7 @@
       </li>
     </ul>
     <div is="mapVideoPlay" :oData="mapVideoData"></div>
+    <div is="imgZoom"></div>
   </div>
 </template>
 <script>
@@ -55,10 +56,14 @@
 import {formatDate} from '@/utils/util.js';
 import {mapXupuxian} from '@/config/config.js';
 import mapVideoPlay from '@/components/common/mapVideoPlay.vue';
+import imgZoom from '@/components/common/imgZoom.vue';
+import {getVideoContinue,getVideoContinueAllpointss} from '@/views/index/api/api.judge.js'
+
 export default {
-  components: {mapVideoPlay},
+  components: {mapVideoPlay, imgZoom},
   data () {
     return {
+      detailData: {},
       mapVideoData: null,
       zIndex: 100,
       showMenuActive: true,
@@ -76,6 +81,10 @@ export default {
         subStoragePath: 'http://filevlink.aorise.org/root/image/2019/08/02/800390420190801165300000001_1.JPG'
       });
     }
+    let uid = this.$route.query.uid;
+    let type = this.$route.query.type;
+    this.getDData(uid, type);
+    // this.getDGJ(uid, type);
   },
   mounted () {
     let _this = this;
@@ -92,6 +101,25 @@ export default {
     });
   },
   methods: {
+    getDGJ (uid, type) {
+      getVideoContinueAllpointss({
+        id: uid,
+        type: type
+      }).then((res) => {
+        if (res && res.data) {
+        }
+      }).catch();
+    },
+    getDData (uid, type) {
+      getVideoContinue({
+        id: uid,
+        type: type
+      }).then((res) => {
+        if (res && res.data) {
+          this.detailData = res.data;
+        }
+      }).catch();
+    },
     initMap () {
       let _this = this;
       let _config = Object.assign({}, {
@@ -108,13 +136,13 @@ export default {
       _this.amap = map;
       this.setMarks();
     },
-    selData (data) {
+    selData (data, bCenter) {
       this.sedData = data;
       $('.amap-marker').css('z-index', 100);
       $('.vid_relay_marker_mk').removeClass('relay_marker_mk_sed');
       $('#relay_marker_' + data.uid).addClass('relay_marker_mk_sed');
       $('#relay_marker_' + data.uid).closest('.amap-marker').css('z-index', 101);
-      if (data.longitude > 0 && data.latitude > 0) {
+      if (bCenter && data.longitude > 0 && data.latitude > 0) {
         this.amap.setCenter([data.longitude, data.latitude]);
       }
     },
@@ -129,10 +157,10 @@ export default {
             // 起点
             sContent += '<span class="cl_relay_gj_qz cl_relay_gj_q"></span>';
             sClass += 'cl_relay_qz';
-          } else if (ism && i === (this.listData.length - 1)) {
+          /* } else if (ism && i === (this.listData.length - 1)) {
             // 终点
             sClass += 'cl_relay_qz';
-            sContent += '<span class="cl_relay_gj_qz cl_relay_gj_z"></span>';
+            sContent += '<span class="cl_relay_gj_qz cl_relay_gj_z"></span>'; */
           } else {
             sContent += '<span class="vl_icon vl_icon_sxt_dis"></span>' +
               '<span class="vl_icon vl_icon_map_hover_mark0"></span>';
@@ -168,8 +196,15 @@ export default {
           strokeWeight: 10,      // 线宽
           strokeStyle: "solid"  // 线样式 dashed solid
         });
+        this.amap.setFitView();
+        // this.amap.setCenter(gjPath[gjPath.length - 1]);
       }
-      this.amap.setFitView();
+      if (this.listData && this.listData.length > 0) {
+        window.setTimeout(() => {
+          this.selData(this.listData[this.listData.length - 1], true);
+        }, 1000);
+      }
+      
     },
     mapState (type) {
       if (type === 1) {
