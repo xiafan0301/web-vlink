@@ -638,6 +638,14 @@
         MapGETmonitorList(params)
             .then(res => {
               if (res) {
+                // 把卡口isEnabled为false的清除
+                res.data.areaTreeList.forEach(x => {
+                  x.bayonetList.forEach((y, index) => {
+                    if (!y.isEnabled) {
+                      x.bayonetList.splice(index, 1)
+                    }
+                  })
+                })
                 // 根据当前登录部门，做车辆组对象
                 let __obj = {
                   areaName: '车辆',
