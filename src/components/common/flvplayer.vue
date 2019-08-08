@@ -8,12 +8,15 @@
       </div>
     </div>
     <!-- loading -->
-    <div class="player_loading com_trans50_lt" v-show="videoLoading">
-      <div v-if="videoLoadingFailed">
+    <div class="player_loading" v-if="oData.type === 5 && videoRelayEmpty">
+      <div class="com_trans50_lt">目标抓拍中，请稍候...</div>
+    </div>
+    <div class="player_loading" v-show="videoLoading">
+      <div class="com_trans50_lt" v-if="videoLoadingFailed">
         <p>视频加载失败</p>
         <el-button round size="small" @click="relaodPlayer">重新获取</el-button>
       </div>
-      <div v-else>视频加载中，请稍后...</div>
+      <div class="com_trans50_lt" v-else>视频加载中，请稍后...</div>
     </div>
     <!-- oData.type === 5 视频接力 -->
     <div class="player_relay_i" v-if="oData.type === 5 && oData">
@@ -369,7 +372,8 @@ export default {
         minCtrTime: 2000, // 最小控制时间
         para: 100,
         position: null // { cmd: , action: 1 } 正在调节的方向
-      }
+      },
+      videoRelayEmpty: false
     }
   },
   filters: {
@@ -377,7 +381,9 @@ export default {
   watch: {
     oData (newData, oldData) {
       console.log('watch oData', newData);
-      if (oldData && oldData.video.uid === newData.video.uid) {
+      if (newData.type === 5 && oldData && oldData.video.videoPath === newData.video.videoPath) {
+        return false;
+      } else if (newData.type != 5 && oldData && oldData.video.uid === newData.video.uid) {
         return false;
       }
       // 去掉暂停按钮
@@ -501,7 +507,13 @@ export default {
       } else if (this.oData.type === 5) {
         // 视频接力
         // console.log('视频接力');
-        this.initPlayerDoForNormal(this.oData.video.videoPath);
+        if (this.oData.video.videoPath) {
+          this.initPlayerDoForNormal(this.oData.video.videoPath);
+          this.videoRelayEmpty = false;
+        } else {
+          this.videoLoading = false;
+          this.videoRelayEmpty = true;
+        }
       }
       
     },
@@ -619,6 +631,11 @@ export default {
         console.log('播放结束');
         this.playActive = false;
         // videoElement.pause();
+        if (this.oData.type === 5) {
+          this.videoRelayEmpty = true;
+          if (this.video) {
+          }
+        }
       };
       videoElement.onerror = () => {
         this.videoLoadingFailed = true;
@@ -1302,7 +1319,7 @@ export default {
 /* 视频接力 begin */
 .player_fit { object-fit: fill; }
 .player_relay_i {
-  position: absolute; top: 10px; left: 10px; z-index: 100;
+  position: absolute; top: 10px; left: 10px; z-index: 1001;
   > .player_relay_icp {
     > ul {
       margin: 0 auto; padding: 8px 10px;
@@ -1388,15 +1405,17 @@ export default {
     cursor: pointer;
   }
   > .player_loading {
-    position: absolute; top: 50%; left: 50%; z-index: 10;
-    color: #fff;
+    position: absolute; top: 0; left: 0; z-index: 1000;
+    height: 100%; width: 100%;
+    background-color: #000;
     text-align: center;
     > div {
+      color: #fff;
       > p { padding-bottom: 10px; }
     }
   }
   > .vl_icon_close {
-    position: absolute; top: 10px; right: 10px; z-index: 10;
+    position: absolute; top: 10px; right: 10px; z-index: 1001;
     cursor: pointer;
   }
   > .vl_icon_v51 {

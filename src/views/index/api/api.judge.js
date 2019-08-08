@@ -672,4 +672,29 @@ export function updVideoContinue(params) {
   })
 }
 
+/**
+ * 搜索视频接力详情
+ * @param {object} params
+ */
+export function getVideoContinue(params) {
+  return request({
+    url: '/query/video/continue',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
+
+/**
+ * 搜索视频接力详情
+ * @param {object} params
+ */
+export function getVideoContinueAllpointss(params) {
+  return request({
+    url: '/allpointss/video/continues',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
 
