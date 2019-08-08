@@ -91,11 +91,12 @@ export default {
     $('title').text('接力地图');
     this.initMap();
     $('.vid_relay').on('click', '.vid_relay_marker_img', function () {
-      _this.videoPlayDialog = true;
+      let st = $(this).attr('title');
+      let surl = $(this).attr('_url');
       _this.$nextTick(() => {
         _this.mapVideoData = {
-          name: '视频接力测试视频',
-          url: 'http://10.116.126.10/root/image/2019/08/02/34020000001320000003598820190802115400000001.mp4'
+          name: st,
+          url: surl
         }
       });
     });
@@ -109,7 +110,9 @@ export default {
         if (res && res.data) {
           this.detailData = res.data;
           this.listData = this.detailData.videos;
-          this.setMarks();
+          this.$nextTick(() => {
+            this.setMarks();
+          });
         }
       }).catch();
     },
@@ -160,7 +163,7 @@ export default {
           sContent = '<div id="relay_marker_' + _d.uid + '" title="' + _d.name + '"' +
             ' class="vid_relay_marker_mk ' + sClass + '">' +
             sContent +
-            '<div class="vid_relay_marker_img">' +
+            '<div class="vid_relay_marker_img" title="' + _d.spotName + '" _url="' + _d.videoPath + '">' +
               '<img src="' + _d.subStoragePath + '" controls></img><span class="vl_icon"></span>' +
             '</div>' +
           '</div>';
