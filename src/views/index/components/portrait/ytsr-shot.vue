@@ -251,9 +251,6 @@
         amap: null, // 地图实例
         markerPoint: null, // 地图点集合
         InfoWindow: null,
-        curVideoUrl: '',
-        playing: false, // 视频播放是否
-        historyPicDialog: false,
         stucOrder: 4, // 1升序，2降序，3监控，4相似度
         taskDetail: {},
         strucInfoList: [], // 检索抓拍信息
@@ -413,20 +410,7 @@
         this.drawPoint(data);
         this.setPlayerData();
       },
-      tcDiscuss () {},
-      videoTap () {
-        let vDom = document.getElementById('capVideo')
-        if (this.playing) {
-          vDom.pause();
-        } else {
-          vDom.play();
-        }
-        vDom.addEventListener('ended', (e) => {
-          e.target.currentTime = 0;
-          this.playing = false;
-        })
-        this.playing = !this.playing;
-      }
+      tcDiscuss () {}
     },
     watch: {
       stucOrder () {
