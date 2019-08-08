@@ -750,9 +750,9 @@ export default {
           // 回填卡口基本信息
           this.basicInfoForm.areaId = data.areaId;
           const addr = this.getCascaderObj3(this.basicInfoForm.areaId, this.areaDataList);
-          this.resAddress = addr.map(m => m.cname).join('');
-          this.basicInfoForm.bayonetAddress = addr.map(m => m.uid);
-          this.basicInfoForm.address = data.bayonetAddress.replace(addr.map(m => m.cname).join(''), '');
+          this.resAddress = addr && addr.map(m => m.cname).join('');
+          this.basicInfoForm.bayonetAddress = addr && addr.map(m => m.uid);
+          this.basicInfoForm.address = addr && data.bayonetAddress.replace(addr.map(m => m.cname).join(''), '');
           this.basicInfoForm.bayonetName = data.bayonetName;
           this.basicInfoForm.bayonetNum = data.bayonetNo;
           this.basicInfoForm.organ = {organName: data.dutyUnitName, uid: data.dutyUnitId};
@@ -919,17 +919,17 @@ export default {
         return null;
       });
     },
-    // 根据key找到符合条件的对象
-    getCascaderObj2(_val, _opt, key) {
+    // 根据cname找到符合条件的对象
+    getCascaderObj2(_val, _opt) {
       let res = null;
       let func = (val, opt) => {
         try{ 
           opt.forEach(f => {
-            if (f[key] == val) { 
+            if (f.uid == val) { 
               res = f;
               foreach.break = new Error("找到了就跳出循环");  
             } else {
-              if (f.childList) {
+              if (f.hasOwnProperty('childList')) {
                 func(val, f.childList);
               }
             }
@@ -941,10 +941,15 @@ export default {
       func(_val, _opt);
       return res;
     },
-    // 回填级联时，根据详情返回的areaId，找到其所有的上级
-    getCascaderObj3(_val, _opt) {
-      const obj = this.getCascaderObj2(_val, this.areaDataList, 'uid');
+    // 回填级联时，根据详情返回的areaId，找到其所有的上级和下级
+    getCascaderObj3(_val, _opt, township) {
+      const obj = this.getCascaderObj2(_val, this.areaDataList);
+      if (!obj) return null;
       let res = [obj];
+      if (obj.hasOwnProperty('childList') && township) {
+        const _obj = obj.childList.find(c => c.cname === township);
+        res.unshift(_obj);
+      }
       let func = (val, opt) => {
         opt.forEach(f => {
           if (f.uid == val) { 
@@ -953,7 +958,7 @@ export default {
               func(f.parentUid, this.areaDataList);
             }
           } else {
-            if (f.childList) {
+            if (f.hasOwnProperty('childList')) {
               func(val, f.childList);
             }
           }
@@ -965,6 +970,7 @@ export default {
     
     // 所在位置change
     handleChangeAddress () {
+      console.log(this.basicInfoForm.bayonetAddress)
       const arr = this.getCascaderObj(this.basicInfoForm.bayonetAddress, this.areaDataList);
       let str = arr.map(m => m.cname).join('');
       this.resAddress = str;
@@ -1031,23 +1037,21 @@ export default {
             _this.$refs['basicInfoForm'].clearValidate(['longitude', 'Latitude']);
             geocoder.getAddress(lnglatXY, function(status, result) {
                 if (status === 'complete' && result.info === 'OK') {
-                    //获得了有效的地址信息:
-                    //即，result.regeocode.formattedAddress
                     console.log(result)
                     const {province, city, district, township} = result.regeocode.addressComponent;
-                    let arr = [province, city, district, township];
+                    const adcode = result.regeocode.addressComponent.adcode;
+                    let arr = [province, city, district];
+
+                    const obj = _this.getCascaderObj2(adcode, _this.areaDataList);
+                    if (!obj) return _this.$message.warning('所选地址在卡口地址下拉列表中无可匹配项'); 
+                    if (obj.hasOwnProperty('childList')) arr.push(township);
+
                     _this.resAddress = arr.join('');
-                    let res = [];
-                    for (let item of arr) {
-                      const code = _this.getCascaderObj2(item, _this.areaDataList, 'cname');
-                      if (code) res.push(code.uid);
-                    }
-                    console.log(res)
-                    console.log( _this.areaDataList)
-                    _this.basicInfoForm.bayonetAddress = res;
+                    const codeList = _this.getCascaderObj3(adcode, _this.areaDataList, township);
+                    console.log(codeList, 'codeList')
+                    _this.basicInfoForm.bayonetAddress = codeList && codeList.map(m => m.uid);
                     _this.basicInfoForm.address = result.regeocode.formattedAddress.replace(arr.join(''), '');
                     _this.addMarker(e.lnglat.getLng(), e.lnglat.getLat());
-
                 }else{
                     //获取地址失败
                     _this.$message.error('没有获取到地址');
