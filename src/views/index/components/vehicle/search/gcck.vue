@@ -36,6 +36,7 @@
                 align="left"
                 :editable="false"
                 :clearable="false"
+                placeholder="请选择开始时间"
                 :picker-options="pickerOptions">
               </el-date-picker>
               <el-date-picker style="width: 236px; margin-top: 10px"
@@ -45,6 +46,7 @@
                 align="left"
                 :editable="false"
                 :clearable="false"
+                placeholder="请选择结束时间"
                 :picker-options="pickerOptions">
               </el-date-picker>
               <el-input
