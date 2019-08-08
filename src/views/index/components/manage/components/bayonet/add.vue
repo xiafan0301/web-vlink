@@ -75,11 +75,11 @@
               </el-form-item>
 
               <el-form-item label="卡口地址:" prop="bayonetAddress" placeholder="请选择省/市/县/乡">
-                <el-cascader v-model="basicInfoForm.bayonetAddress" :options="options" ref="cascaderAddr" style="width:100%" @change="handleChangeAddress" clearable placeholder="请选择省/市/县/乡"></el-cascader>
+                <el-cascader v-model="basicInfoForm.bayonetAddress" :options="areaDataList" :props="areaProps" ref="cascaderAddr" style="width:100%" @change="handleChangeAddress" clearable placeholder="请选择省/市/县/乡"></el-cascader>
               </el-form-item>
               
               <el-form-item prop="address">
-                <el-input v-model="basicInfoForm.address" placeholder="请输入详细地址" @blur="markAddress(basicInfoForm.address)"></el-input>
+                <el-input v-model="basicInfoForm.address" placeholder="请输入详细地址" @blur="handleChangeAddress"></el-input>
               </el-form-item>
               <el-form-item prop="laneNum" label="管理车道数:">
                 <el-input v-model="basicInfoForm.laneNum" placeholder="请输入车道数" @blur="validationLaneNum"></el-input>
@@ -341,7 +341,7 @@
                 <el-input v-model="item.smallCarMaxSpeedLimit" @blur="validationSpeed('smallCarMaxSpeedLimit', index)"></el-input>
               </el-form-item>
             </el-form-item>
-            <el-form-item class="add_btn_form">
+            <el-form-item class="add_btn_form" v-if="parseInt(basicInfoForm.laneNum) > bayonetDevForm.drivingInfo.length">
               <div class="add_btn" @click="addDrivingInfo">
                 <i class="vl_icon vl_icon_control_22"></i><span>添加</span>
               </div>
@@ -359,10 +359,11 @@
 <script>
 import {getDepartmentList} from '@/views/index/api/api.manage.js';
 import {addBayonetInfo, putBayonetInfo, getBayonetDetail} from '@/views/index/api/api.base.js';
+import { getAreaList } from '@/views/index/api/api.user.js';
 import {mapXupuxian} from '@/config/config.js';
-import mapData from '@/config/mapdata.json';
 import {dataList} from '@/utils/data.js';
 import {objDeepCopy} from '@/utils/util.js';
+import { setTimeout } from 'timers';
 export default {
   data () {
     return {
@@ -386,7 +387,12 @@ export default {
         describe: null,
         usage: true
       },
-      options: mapData,
+      areaDataList: [],
+      areaProps: {
+        value: 'uid',
+        label: 'cname',
+        children: 'childList'
+      },
       // 卡口基本信息表单列表参数
       organList: [],// 机构列表
       useList: [
@@ -450,6 +456,7 @@ export default {
           }
         ]
       },
+      resAddress: null,
       datalist: dataList,
       // 编辑卡口表单列表参数
       cameraTypeList: this.dicFormater(dataList.cameraType)[0].dictList,
@@ -490,17 +497,6 @@ export default {
           value: '朝西南'
         }
       ],
-      laneNumList: [
-        {value: 1, label: '1'},
-        {value: 2, label: '2'},
-        {value: 3, label: '3'},
-        {value: 4, label: '4'},
-        {value: 5, label: '5'},
-        {value: 6, label: '6'},
-        {value: 7, label: '7'},
-        {value: 8, label: '8'},
-        {value: 9, label: '9'}
-      ],
       drivingDirectionList: [
         {value: 1, label: '直行'},
         {value: 2, label: '左转'},
@@ -526,17 +522,55 @@ export default {
       oldBayonetUse: []
     }
   },
-  mounted () {
-    this.userInfo = this.$store.state.loginUser;
-    this.pageType = parseInt(this.$route.query.type);
-    this.resetMap();
-    this.getDepartList();
-    if (this.pageType === 2) {
-      this.bayonetId = this.$route.query.bayonetId;
-      this.getBayonetDetail();
+  computed: {
+    laneNumList () {
+      let arr = [];
+      for(let i = 1; i < parseInt(this.basicInfoForm.laneNum) + 1; i++) {
+        arr.push({value: i, label: `${i}`});
+      }
+      return arr;
     }
   },
+  created () {
+    this.getAreaDataList();
+  },
+  mounted () {
+    this.userInfo = this.$store.state.loginUser;
+    
+    this.resetMap();
+    this.getDepartList();
+    
+  },
   methods: {
+    // 获取省市区县信息
+    getAreaDataList () {
+      const pid = 1;
+      getAreaList(pid)
+        .then(res => {
+          if (res && res.data) {
+            const data = this.handleAreaData(res.data.childList);
+            this.areaDataList = data;
+
+            this.pageType = parseInt(this.$route.query.type);
+            if (this.pageType === 2) {
+              this.bayonetId = this.$route.query.bayonetId;
+              this.getBayonetDetail();
+            }
+          }
+        })
+    },
+    // 处理省市区县数据
+    handleAreaData (data) {
+      let _this = this;
+      data.forEach((val, index) => {
+        if (val.childList.length === 0) { // 当childList为[]时,删除childList
+          _this.$delete(val, 'childList');
+        } else {
+          _this.handleAreaData(val.childList);
+        }
+      })
+      return data;
+    },
     checkIpVal(item, index) {
       console.log("===========",item,index)
       // let self = this;
@@ -714,6 +748,11 @@ export default {
           this.oldBayonetUse = this.bayonetDetail.use;
           const data = res.data;
           // 回填卡口基本信息
+          this.basicInfoForm.areaId = data.areaId;
+          const addr = this.getCascaderObj3(this.basicInfoForm.areaId, this.areaDataList);
+          this.resAddress = addr.map(m => m.cname).join('');
+          this.basicInfoForm.bayonetAddress = addr.map(m => m.uid);
+          this.basicInfoForm.address = data.bayonetAddress.replace(addr.map(m => m.cname).join(''), '');
           this.basicInfoForm.bayonetName = data.bayonetName;
           this.basicInfoForm.bayonetNum = data.bayonetNo;
           this.basicInfoForm.organ = {organName: data.dutyUnitName, uid: data.dutyUnitId};
@@ -721,8 +760,6 @@ export default {
           this.basicInfoForm.use = data.use && data.use.split(',').map(m => parseInt(m));
           this.basicInfoForm.longitude = data.longitude;
           this.basicInfoForm.Latitude = data.latitude;
-          this.basicInfoForm.bayonetAddress = data.bayonetAddress;
-          this.basicInfoForm.address = data.bayonetAddress;
           this.basicInfoForm.laneNum = data.laneNum;
           this.basicInfoForm.describe = data.desci;
           this.basicInfoForm.usage = data.isEnabled;
@@ -837,6 +874,7 @@ export default {
         }
       })
       let data = {
+        areaId: this.basicInfoForm.bayonetAddress[this.basicInfoForm.bayonetAddress.length - 1],
         bayonetNo: this.basicInfoForm.bayonetNum,
         bayonetName: this.basicInfoForm.bayonetName,   
         isEnterPoint: this.basicInfoForm.isEnterPoint,   
@@ -844,7 +882,7 @@ export default {
         // use: this.basicInfoForm.use.join(','),   
         longitude: this.basicInfoForm.longitude,      
         latitude: this.basicInfoForm.Latitude,       
-        bayonetAddress: this.basicInfoForm.address,
+        bayonetAddress: this.resAddress + this.basicInfoForm.address,
         laneNum: this.basicInfoForm.laneNum,        
         isEnabled: this.basicInfoForm.usage,       
         // onlineState: this.basicInfoForm., 
@@ -871,21 +909,67 @@ export default {
           }
         })
     },
-    // 所在位置change
-    handleChangeAddress (value) {
-      // this.$set(this.onlineForm,'address','');
-      let labels = this.$refs['cascaderAddr'].currentLabels;
-      console.log(value, 'value')
-      if(labels && labels.length > 0) {
-        this.locationName = labels.join('');
-        this.markLocation(this.locationName);
-      } 
+
+    // 获得选中的级联对象列表
+    getCascaderObj(val, opt) {
+      return val.map(value => {
+        for (var itm of opt) {
+          if (itm.uid == value) { opt = itm.childList; return itm; }
+        }
+        return null;
+      });
     },
-    //详细地址查询
-    markAddress(val) {
-      if(val) {
-        this.markLocation(this.locationName + val)
+    // 根据key找到符合条件的对象
+    getCascaderObj2(_val, _opt, key) {
+      let res = null;
+      let func = (val, opt) => {
+        try{ 
+          opt.forEach(f => {
+            if (f[key] == val) { 
+              res = f;
+              foreach.break = new Error("找到了就跳出循环");  
+            } else {
+              if (f.childList) {
+                func(val, f.childList);
+              }
+            }
+          })
+        }catch(e){
+          console.log("跳出来了")
+        }
       }
+      func(_val, _opt);
+      return res;
+    },
+    // 回填级联时，根据详情返回的areaId，找到其所有的上级
+    getCascaderObj3(_val, _opt) {
+      const obj = this.getCascaderObj2(_val, this.areaDataList, 'uid');
+      let res = [obj];
+      let func = (val, opt) => {
+        opt.forEach(f => {
+          if (f.uid == val) { 
+            res.push(f);
+            if (f.parentUid !== '1') {
+              func(f.parentUid, this.areaDataList);
+            }
+          } else {
+            if (f.childList) {
+              func(val, f.childList);
+            }
+          }
+        })
+      }
+      func(obj.parentUid, _opt);
+      return res.reverse();
+    },
+    
+    // 所在位置change
+    handleChangeAddress () {
+      const arr = this.getCascaderObj(this.basicInfoForm.bayonetAddress, this.areaDataList);
+      let str = arr.map(m => m.cname).join('');
+      this.resAddress = str;
+      if (this.basicInfoForm.address) str = str + this.basicInfoForm.address;
+      this.markLocation(str);
     },
     //根据地址搜索
     markLocation(address) {
@@ -894,7 +978,8 @@ export default {
         let geocoder = new window.AMap.Geocoder();            
         geocoder.getLocation(address, function(status, result) {
           if (status === 'complete' && result.info === 'OK') {
-            // 经纬度                      
+            // 经纬度             
+            console.log(result, 'result')
             let lon = result.geocodes[0].location.lng;
             let lat = result.geocodes[0].location.lat;       
              _this.addMarker(lon, lat);
@@ -948,7 +1033,19 @@ export default {
                 if (status === 'complete' && result.info === 'OK') {
                     //获得了有效的地址信息:
                     //即，result.regeocode.formattedAddress
-                    _this.basicInfoForm.address = result.regeocode.formattedAddress;
+                    console.log(result)
+                    const {province, city, district, township} = result.regeocode.addressComponent;
+                    let arr = [province, city, district, township];
+                    _this.resAddress = arr.join('');
+                    let res = [];
+                    for (let item of arr) {
+                      const code = _this.getCascaderObj2(item, _this.areaDataList, 'cname');
+                      if (code) res.push(code.uid);
+                    }
+                    console.log(res)
+                    console.log( _this.areaDataList)
+                    _this.basicInfoForm.bayonetAddress = res;
+                    _this.basicInfoForm.address = result.regeocode.formattedAddress.replace(arr.join(''), '');
                     _this.addMarker(e.lnglat.getLng(), e.lnglat.getLat());
 
                 }else{

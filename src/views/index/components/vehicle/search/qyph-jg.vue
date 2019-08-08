@@ -52,7 +52,7 @@
               <span>全景图</span>
             </div>
             <div class="struc_c_d_info">
-              <h2>抓拍信息</h2>
+              <h2>分析结果</h2>
               <div class="struc_cd_info_main">
                 <vue-scroll>
                   <div class="scroll_box">

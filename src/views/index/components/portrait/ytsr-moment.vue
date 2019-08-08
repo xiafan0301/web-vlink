@@ -62,12 +62,22 @@
       <div class="ytsr_left_search"  v-show="radio === '2'">
         <div class="left_time">
           <el-date-picker
-                  v-model="searchData.shotTime"
-                  type="daterange"
-                  value-format="yyyy-MM-dd"
-                  range-separator="至"
-                  start-placeholder="开始日期"
-                  end-placeholder="结束日期">
+                  v-model="searchData.startTime"
+                  style="width: 100%;margin-bottom: 20px;"
+                  class="vl_date"
+                  type="date"
+                  @change="chooseStartTime"
+                  value-format="timestamp"
+                  placeholder="选择日期时间">
+          </el-date-picker>
+          <el-date-picker
+                  style="width: 100%;"
+                  class="vl_date vl_date_end"
+                  v-model="searchData.endTime"
+                  @change="chooseEndTime"
+                  value-format="timestamp"
+                  type="date"
+                  placeholder="选择日期时间">
           </el-date-picker>
         </div>
         <!-- 设备搜索 -->
@@ -304,7 +314,7 @@
   import { ScpGETdeviceListById, ScpGETretrievalHisById} from '../../api/api.search.js';
   import {JtcPUTAppendixsOrder, JtcPOSTAppendixInfo, JtcGETAppendixInfoList,  getShotDevice, getTailBehindList } from '../../api/api.judge'
   import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
-  import {getGroupListIsPortrait} from '../../api/api.control.js';
+  import {getGroups} from '../../api/api.judge.js';
   import { ajaxCtx, mapXupuxian } from '@/config/config.js';
   import { MapGETmonitorList } from "@/views/index/api/api.map.js";
   import { objDeepCopy, formatDate } from "@/utils/util.js";
@@ -342,7 +352,8 @@
         selectIndex: 1, // 默认已完成的任务
         pagination: { total: 0, pageSize: 10, pageNum: 1 },
         taskForm: {
-          reportTime: [], // 日期
+          startTime: '',
+          endTime: '',
           taskName: null // 任务名称
         },
         list: [], //已完成列表
@@ -365,7 +376,8 @@
         searchData: {
           minSemblance: 85, // 最小相似度
           portraitGroupId: [],
-          shotTime: ''
+          startTime: '',
+          endTime: ''
         }
       }
     },
@@ -392,7 +404,7 @@
         this.curImageUrl = x.path;
       }
       // 获取人员组，跟车辆组列表
-      getGroupListIsPortrait().then(res => {
+      getGroups({groupType: 4}).then(res => {
         if (res) {
           this.portraitGroupList = res.data;
           this.searchData.portraitGroupId = this.portraitGroupList.map(x => {
@@ -405,12 +417,28 @@
       this.setDTime();
     },
     methods: {
+      // 重置查询条件
+      resetForm (form) {
+        this.$refs[form].resetFields();
+        this.getDataList();
+      },
+      chooseEndTime (e) {
+        if (e < this.searchData.startTime) {
+          this.$message.info('结束时间必须大于开始时间才会有结果')
+        }
+      },
+      chooseStartTime (e) {
+        if (e > this.searchData.endTime) {
+          this.$message.info('结束时间必须大于开始时间才会有结果')
+        }
+      },
       setDTime() {
         let curDate = new Date(new Date().toLocaleDateString()).getTime()
         let curS = 1 * 24 * 3600 * 1000;
         let _s = curDate - curS;
 //        let _e = curDate - 1
-        this.searchData.shotTime = [formatDate(_s, "yyyy-MM-dd"), formatDate(_s, "yyyy-MM-dd")];
+        this.searchData.startTime = _s;
+        this.searchData.endTime = _s;
       },
       // 获取离线任务
       getDataList () {
@@ -825,15 +853,15 @@
           params['deviceIds'] = this.selectCameraArr.map(res => res.id).join(',');
           p1['bayonetIds'] = this.selectBayonetArr.map(res => res.id).join(',');
           params['bayonetIds'] = this.selectBayonetArr.map(res => res.id).join(',');
-          p1['startTime'] = this.searchData.shotTime[0];
-          params['startTime'] = this.searchData.shotTime[0];
-          p1['endTime'] = this.searchData.shotTime[1];
-          params['endTime'] = this.searchData.shotTime[1];
+          p1['startTime'] = formatDate(this.searchData.startTime, 'yyyy-MM-dd');
+          params['startTime'] = formatDate(this.searchData.startTime, 'yyyy-MM-dd');
+          p1['endTime'] = formatDate(this.searchData.endTime, 'yyyy-MM-dd');
+          params['endTime'] = formatDate(this.searchData.endTime, 'yyyy-MM-dd');
         }
         PortraitGetDispatch(p1)
             .then(res => {
+              this.searching = false;
               if (res) {
-                this.searching = false;
                 if (res.data === 1) {
                   this.addParams = params;
                   this.addTaskDialog = true;
