@@ -25,7 +25,7 @@
               :picker-options="pickerOptions"
               type="datetime"
               value-format="timestamp"
-              placeholder="选择日期时间">
+              placeholder="请选择开始时间">
             </el-date-picker>
           </el-form-item>
           <el-form-item>
@@ -37,7 +37,7 @@
               @change="chooseEndTime"
               value-format="timestamp"
               type="datetime"
-              placeholder="选择日期时间">
+              placeholder="请选择结束时间">
             </el-date-picker>
           </el-form-item>
           <el-form-item prop="input5">

@@ -479,15 +479,15 @@ export default {
     },
     xjSubmit () {
       if (this.xjType === 1 && !this.uploadPersonObj) {
-        this.msgTips('请上传图片！'); // 人员  无图片
+        this.msgTips('请设置目标对象'); // 人员  无图片
         return false;
       }
       if (this.xjType === 2 && this.xjVechicleType === 1 && !this.uploadVehicleObj) {
-        this.msgTips('请上传图片！'); // 车辆  无图片
+        this.msgTips('请设置目标对象'); // 车辆  无图片
         return false;
       }
       if (this.xjType === 2 && this.xjVechicleType === 2 && !this.xjPlateNo) {
-        this.msgTips('请输入车牌号码！'); // 车辆-车牌号码  无车牌号码
+        this.msgTips('请输入正确的车牌号码'); // 车辆-车牌号码  无车牌号码
         return false;
       }
       this.submitLoading = true;
@@ -805,11 +805,11 @@ export default {
 .relay_task_t {
   position: absolute; top: 0; left: 0;
   width: 100%;
-  padding: 15px 0 0 20px;
+  padding: 20px 0 0 20px;
 }
 .relay_task_m {
   height: 100%;
-  padding: 40px 10px 70px 10px;
+  padding: 50px 10px 70px 10px;
   > div {
     height: 100%;
     padding: 10px;

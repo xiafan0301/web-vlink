@@ -57,7 +57,7 @@
                           :picker-options="pickerOptions"
                           type="datetime"
                           value-format="timestamp"
-                          placeholder="选择日期时间">
+                          placeholder="请选择开始时间">
                   </el-date-picker>
                 </div>
                 <!--<p class="red_star"></p>-->
@@ -71,7 +71,7 @@
                           type="datetime"
                           @change="chooseEndTime"
                           value-format="timestamp"
-                          placeholder="选择日期时间">
+                          placeholder="请选择结束时间">
                   </el-date-picker>
                 </div>
                 <div class="search_line">

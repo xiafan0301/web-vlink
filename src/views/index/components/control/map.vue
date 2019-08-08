@@ -821,7 +821,7 @@ export default {
         }
       }
       _this.map.add(_this.markerList);
-      _this.map.setFitView();// 自动适配到合适视野范围
+      // _this.map.setFitView();// 自动适配到合适视野范围
       // 当布控状态不是进行中时，清除之前保存的定时器，并return
       clearInterval(_this.timer);
       if (this.mapForm.state !== 1) {
