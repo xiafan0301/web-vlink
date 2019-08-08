@@ -22,6 +22,7 @@
                     time-arrow-control
                     :editable="false" :clearable="false"
                     @change="searchSubmit(false)"
+                    :picker-options="startTimeOptions"
                     placeholder="选择开始时间">
                   </el-date-picker>
                 </div>
@@ -36,6 +37,7 @@
                     time-arrow-control
                     :editable="false" :clearable="false"
                     @change="searchSubmit(false)"
+                    :picker-options="endTimeOptions"
                     placeholder="选择结束时间">
                   </el-date-picker>
                 </div>
@@ -53,7 +55,7 @@
                   <ul v-if="relayList && relayList.length > 0">
                     <!-- relayList -->
                     <template v-for="(item, index) in relayList">
-                      <li v-if="item.videoPath || item.uid === '1kQHCCsC7QxL37s1Bk5tr0'" :key="'relay_li_' + index">
+                      <li v-if="item.videoPath" :key="'relay_li_' + index">
                         <div v-if="!deviceIsPlaying(item, 1)"
                           @dragstart="dragStart($event, item, 1)" @dragend="dragEnd"
                           draggable="true" style="cursor: move;">
@@ -65,7 +67,7 @@
                             </ul>
                           </div>
                           <div class="relay_ul_lii" v-else>
-                            <img :src="item.subStoragePath" alt="">
+                            <img class="bigImg" :src="item.subStoragePath" alt="">
                           </div>
                           <div class="relay_ul_lid com_ellipsis">
                             <span v-if="item.remarks">{{item.remarks}}</span>
@@ -81,7 +83,7 @@
                             </ul>
                           </div>
                           <div class="relay_ul_lii" v-else>
-                            <img :src="item.subStoragePath" alt="">
+                            <img class="bigImg" :src="item.subStoragePath" draggable="false" alt="">
                           </div>
                           <div class="relay_ul_lid com_ellipsis">
                             <span v-if="item.remarks">{{item.remarks}}</span>
@@ -103,7 +105,7 @@
                             </ul>
                           </div>
                           <div class="relay_ul_lii" v-else>
-                            <img :src="item.subStoragePath" alt="">
+                            <img class="bigImg" :src="item.subStoragePath" alt="">
                           </div>
                           <div class="relay_ul_lid com_ellipsis">
                             <span v-if="item.remarks">{{item.remarks}}</span>
@@ -119,7 +121,7 @@
                             </ul>
                           </div>
                           <div class="relay_ul_lii" v-else>
-                            <img :src="item.subStoragePath" alt="">
+                            <img class="bigImg" :src="item.subStoragePath" draggable="false" alt="">
                           </div>
                           <div class="relay_ul_lid com_ellipsis">
                             <span v-if="item.remarks">{{item.remarks}}</span>
@@ -156,6 +158,7 @@
                     time-arrow-control
                     :editable="false" :clearable="false"
                     @change="searchSubmit(true)"
+                    :picker-options="startTimeOptions"
                     placeholder="选择开始时间">
                   </el-date-picker>
                 </div>
@@ -170,6 +173,7 @@
                     time-arrow-control
                     :editable="false" :clearable="false"
                     @change="searchSubmit(true)"
+                    :picker-options="endTimeOptions2"
                     placeholder="选择结束时间">
                   </el-date-picker>
                 </div>
@@ -186,8 +190,8 @@
                 <div class="relay_ul_list">
                   <ul v-if="relayList2 && relayList2.length > 0">
                     <li v-for="(item, index) in relayList2" :key="'relay_list2_' + index">
-                      <div class="relay_ul_list_active">
-                        <div class="relay_ul_lit">{{item.createTime}}<span class="relay_ul_lit_t3" @click="relayModify(item.uid, item.type, 0, 2)">重启任务</span></div>
+                      <div class="relay_ul_list_active" draggable="false">
+                        <div class="relay_ul_lit">{{item.createTime}}<span class="relay_ul_lit_t3" @click="relayRestart(item)">重启任务</span></div>
                         <div class="relay_ul_lim" v-if="(item.type === 1 || item.type === '1') && item.plateNo && !item.storagePath">
                           <ul>
                             <li>车牌号码</li>
@@ -195,7 +199,7 @@
                           </ul>
                         </div>
                         <div class="relay_ul_lii" v-else>
-                          <img :src="item.subStoragePath" alt="">
+                          <img class="bigImg" :src="item.subStoragePath" draggable="false" alt="">
                         </div>
                         <div class="relay_ul_lid com_ellipsis">
                           <span v-if="item.remarks">{{item.remarks}}</span>
@@ -225,16 +229,17 @@
       <div class="vid_content" :class="{'vid_content2': showMenuActive}">
         <div class="vid_title">
           <ul class="vid_show_type">
-            <li class="vl_icon vl_icon_061" :class="{'vl_icon_sed': showVideoTotal === 1}" @click="showVideoTotal = 1"></li>
-            <li class="vl_icon vl_icon_062" :class="{'vl_icon_sed': showVideoTotal === 4}" @click="showVideoTotal = 4"></li>
-            <li class="vl_icon vl_icon_063" :class="{'vl_icon_sed': showVideoTotal === 5}" @click="showVideoTotal = 5"></li>
+            <li class="vl_icon vl_icon_061" :class="{'vl_icon_sed': showVideoTotal === 1}" @click="playersChange(1)"></li>
+            <li class="vl_icon vl_icon_062" :class="{'vl_icon_sed': showVideoTotal === 4}" @click="playersChange(4)"></li>
+            <li class="vl_icon vl_icon_063" :class="{'vl_icon_sed': showVideoTotal === 5}" @click="playersChange(5)"></li>
           </ul>
         </div>
         <ul class="vid_show_list" :class="'vid_list_st' + showVideoTotal">
           <li v-for="(item, index) in videoList" :key="'video_list_' + index"
             @drop="dragDrop(item, index)" @dragover.prevent="dragOver">
             <div v-if="item && item.video">
-              <div is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" :signAble="true" :bResize="showMenuActive"></div>
+              <div is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" 
+                :oConfig="{fit: false, sign: false, tape: false, download: false}"></div>
             </div>
             <div class="vid_show_empty" v-else>
               <div is="videoEmpty" :btn="false" :btn2="false" :tipMsg="'拖拽任务至窗口查看接力视频'"></div>
@@ -256,7 +261,7 @@ import relayNew from './relay-new.vue';
 import {formatDate} from '@/utils/util.js';
 import flvplayer from '@/components/common/flvplayer.vue';
 import { apiAreaServiceDeviceList, getAllMonitorList, getAllBayonetList } from "@/views/index/api/api.base.js";
-  import {selectVideoContinue, updVideoContinue, JtcPOSTAppendixInfo, JtcGETAppendixInfoList} from '@/views/index/api/api.judge.js'
+import {selectVideoContinue, updVideoContinue, JtcPOSTAppendixInfo, JtcGETAppendixInfoList} from '@/views/index/api/api.judge.js'
 import { error } from 'util';
 export default {
   components: {videoEmpty, flvplayer, relayNew},
@@ -277,7 +282,7 @@ export default {
       showConTitle: 1,
       startTime: '',
       endTime: '',
-      targetType: '',
+      targetType: '0',
       dragActiveObj: null,
 
       videoRecordList: [],
@@ -286,7 +291,7 @@ export default {
       
       startTime2: '',
       endTime2: '',
-      targetType2: '',
+      targetType2: '0',
 
       startTimeOptions: {
         disabledDate: (d) => {
@@ -300,7 +305,16 @@ export default {
       },
       endTimeOptions: {
         disabledDate: (d) => {
-          if (d > new Date() || d < (this.startTime.getTime() - 3600 * 1000 * 24) || d.getTime() > (this.startTime.getTime() + 3600 * 1000 * 24)) {
+          if (d > new Date() || d.getTime() < (this.startTime.getTime() - 3600 * 1000 * 24 + 1000)) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      },
+      endTimeOptions2: {
+        disabledDate: (d) => {
+          if (d > new Date() || d.getTime() < (this.startTime2.getTime() - 3600 * 1000 * 24 + 1000)) {
             return true;
           } else {
             return false;
@@ -335,11 +349,11 @@ export default {
       if (this.relayListIntval) {
         window.clearInterval(this.relayListIntval);
       }
-      /* if (!bClear) {
+      if (!bClear) {
         this.relayListIntval = window.setInterval(() => {
-          this.getRelayList();
-        }, 5 * 1000);
-      } */
+          this.reSearch(true);
+        }, 10 * 60 * 1000);
+      }
     },
     searchSubmit (isFinished) {
       if (isFinished) {
@@ -349,7 +363,8 @@ export default {
         this.intvalRelayList(false);
       }
     },
-    reSearch () {
+    // flag 
+    reSearch (flag) {
       this.getRelayList(); // 进行中
       this.getRelayList(true); // 已结束
       this.intvalRelayList(false); // 开启定时器
@@ -378,12 +393,35 @@ export default {
             this.relayList2 = res.data;
           } else {
             this.relayList = res.data;
+            // 播放中的视频处理
+            this.relayPlayingHandler();
           }
         }
         if (isFinished) { this.searchLoading2 = false; } else { this.searchLoading = false; }
       }).catch((error => {
         if (isFinished) { this.searchLoading2 = false; } else { this.searchLoading = false; }
       }));
+    },
+    relayPlayingHandler () {
+      for (let i = 0; i < this.videoList.length; i++) {
+        if (this.videoList[i] && this.videoList[i].video) {
+          let _o = this.videoList[i];
+          // this.relayList
+          for (let j = 0; j < this.relayList.length; j++) {
+            if (_o.video.uid === this.relayList[j].uid) {
+              this.videoList[i] = {
+                type: 5,
+                title: ' ',
+                record: false,
+                video: Object.assign({}, this.relayList[j], {
+                  videos: []
+                })
+              };
+              break;
+            }
+          }
+        }
+      }
     },
     closeNew (flag) {
       // console.log('closeNew', flag);
@@ -429,9 +467,29 @@ export default {
       }
       return flag;
     },
+    playersChange (sum) {
+      // showVideoTotal
+      if (sum != this.showVideoTotal) {
+        if (sum < this.showVideoTotal) {
+          this.$confirm('减少窗口后，将根据排列顺序结束多余的接力任务，确定切换吗？', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            this.showVideoTotal = sum;
+            this.playersHandler(sum);
+          }).catch(() => {
+            // 
+          });
+        } else {
+          this.showVideoTotal = sum;
+          this.playersHandler(sum);
+        }
+      }
+    },
     playersHandler (sum) {
       // videoList
-      let na = [], ii = 0;
+      let na = [], ii = 0, oa = [];
       for (let i = 0; i < this.videoList.length; i++) {
         if (ii < sum) {
           if (this.videoList[i] && this.videoList[i].video) {
@@ -439,7 +497,9 @@ export default {
             ii++;
           }
         } else {
-          break;
+          if (this.videoList[i] && this.videoList[i].video) {
+            oa.push(this.videoList[i]);
+          }
         }
       }
       let il = sum - na.length;
@@ -449,6 +509,11 @@ export default {
         }
       }
       this.videoList = na;
+      if (oa && oa.length > 0) {
+        for (let i = 0; i < oa.length; i++) {
+          this.relayModify(oa[i].video.uid, oa[i].video.type, 1, 1);
+        }
+      }
     },
 
     // 拖拽开始
@@ -467,16 +532,34 @@ export default {
     dragDrop (item, index) {
       if (this.dragActiveObj) {
         // let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
-        let type = this.dragActiveObj.ui_type; // 1进行中 2已结束
+        // let type = this.dragActiveObj.ui_type; // 1进行中 2已结束
         let obj = {
           type: 5,
-          title: '视频接力测试视频',
+          title: ' ',
           record: false,
           video: Object.assign({}, this.dragActiveObj, {
-            videoPath: 'http://10.116.126.10/root/image/2019/08/02/34020000001320000003598820190802115400000001.mp4'
+            videos: []
           })
+          /* video: Object.assign({}, this.dragActiveObj, {
+            videoPath: ''
+            // videoPath: 'http://10.116.126.10/root/image/2019/08/02/34020000001320000003598820190802115400000001.mp4'
+          }) */
         }
-        this.videoList.splice(index, 1, obj);
+        let oldO = this.videoList[index];
+        if (oldO && oldO.video) {
+          this.$confirm('确定结束之前的接力任务吗?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            this.videoList.splice(index, 1, obj);
+            this.relayModify(oldO.video.uid, oldO.video.type, 1, 1);
+          }).catch(() => {
+            this.videoList.splice(index, 1, obj);
+          });
+        } else {
+          this.videoList.splice(index, 1, obj);
+        }
       }
     },
     dragEnd () {
@@ -489,12 +572,32 @@ export default {
      * @param {string} sid 视频ID
      */
     playerClose (iIndex, oData) {
-      console.log(iIndex);
-      console.log(oData);
-      this.videoList.splice(iIndex, 1, {});
-      this.relayModify(oData.video.uid, oData.video.type, 1, 1);
+      // console.log(iIndex);
+      // console.log(oData);
+      this.$confirm('确定结束该接力任务吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.videoList.splice(iIndex, 1, {});
+        this.relayModify(oData.video.uid, oData.video.type, 1, 1);
+      }).catch(() => {
+        this.videoList.splice(iIndex, 1, {});
+      });
     },
     /* 播放器事件 end */
+    relayRestart (item) {
+      // relayModify(item.uid, item.type, 0, 2)
+      this.$confirm('确定重启该任务吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.relayModify(item.uid, item.type, 0, 2)
+      }).catch(() => {
+        // this.videoList.splice(iIndex, 1, {});
+      });
+    },
     // cbType  1结束任务 2重启任务
     relayModify (uid, type, isFinished, cbType) {
       if (cbType === 1) {
@@ -520,6 +623,10 @@ export default {
           this.relayList2.splice(iInd, 1);
         }
       }
+      this.relayModifyApi(uid, type, isFinished, cbType);
+    },
+    // cbType  1结束任务 2重启任务 为空则不会查询
+    relayModifyApi (uid, type, isFinished, cbType) {
       updVideoContinue({
         uid: uid,
         type: type,
@@ -546,7 +653,12 @@ export default {
       }
     },
   },
-  destroyed () {
+  beforeDestroy () {
+    for (let i = 0; i < this.videoList.length; i++) {
+      if (this.videoList[i] && this.videoList[i].video) {
+        this.relayModifyApi(this.videoList[i].video.uid, this.videoList[i].video.type, 1);
+      }
+    }
     if (this.relayListIntval) {
       window.clearInterval(this.relayListIntval);
     }
@@ -788,7 +900,7 @@ export default {
             &.relay_ul_lit_t3 {
               display: none;
               line-height: normal;
-              padding: 2px 5px;
+              padding: 2px 5px 3px 5px;
               background:rgba(12,112,248,1);
               border-radius:4px;
               color: #fff; font-size: 12px;
