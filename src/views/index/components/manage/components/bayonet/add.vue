@@ -29,6 +29,10 @@
               <el-form-item label="卡口编号:">
                 <el-input v-model="basicInfoForm.bayonetNum" placeholder="请输入卡口编号"></el-input>
               </el-form-item>
+              <!-- 编辑时才会有卡口编码 -->
+              <el-form-item label="卡口编码:" v-if="pageType === 2">
+                <el-input disabled v-model="basicInfoForm.bayonetCode" placeholder="请输入卡口编码"></el-input>
+              </el-form-item>
 
               <el-form-item prop="isEnterPoint" label="出入城卡口:" required>
                 <el-radio-group v-model="basicInfoForm.isEnterPoint">
@@ -61,11 +65,11 @@
 
               <el-form-item label="经纬度:" required class="longlat">
                 <el-form-item prop="longitude">
-                  <el-input v-model="basicInfoForm.longitude" placeholder="请输入经度"></el-input>
+                  <el-input v-model="basicInfoForm.longitude" placeholder="请输入经度" @blur="getAddressByLongLat"></el-input>
                 </el-form-item>
                 <span>(经度)</span>
                 <el-form-item prop="Latitude">
-                  <el-input v-model="basicInfoForm.Latitude" placeholder="请输入纬度"></el-input>
+                  <el-input v-model="basicInfoForm.Latitude" placeholder="请输入纬度" @blur="getAddressByLongLat"></el-input>
                 </el-form-item>
                 <span>(纬度)</span>
                 <div class="map_select" @click="isShowMap = !isShowMap">
@@ -375,6 +379,7 @@ export default {
       basicInfoForm: {
         bayonetName: null,
         bayonetNum: null,
+        bayonetCode: null,
         organ: null,
         isEnterPoint: 3,
         use: null,
@@ -536,7 +541,7 @@ export default {
   },
   mounted () {
     this.userInfo = this.$store.state.loginUser;
-    
+    this.pageType = parseInt(this.$route.query.type);
     this.resetMap();
     this.getDepartList();
     
@@ -551,7 +556,6 @@ export default {
             const data = this.handleAreaData(res.data.childList);
             this.areaDataList = data;
 
-            this.pageType = parseInt(this.$route.query.type);
             if (this.pageType === 2) {
               this.bayonetId = this.$route.query.bayonetId;
               this.getBayonetDetail();
@@ -755,6 +759,7 @@ export default {
           this.basicInfoForm.address = addr && data.bayonetAddress.replace(addr.map(m => m.cname).join(''), '');
           this.basicInfoForm.bayonetName = data.bayonetName;
           this.basicInfoForm.bayonetNum = data.bayonetNo;
+          this.basicInfoForm.bayonetCode = data.bayonetCode;
           this.basicInfoForm.organ = {organName: data.dutyUnitName, uid: data.dutyUnitId};
           this.basicInfoForm.isEnterPoint = data.isEnterPoint;
           this.basicInfoForm.use = data.use && data.use.split(',').map(m => parseInt(m));
@@ -948,7 +953,12 @@ export default {
       let res = [obj];
       if (obj.hasOwnProperty('childList') && township) {
         const _obj = obj.childList.find(c => c.cname === township);
-        res.unshift(_obj);
+        if (!_obj) {
+          this.$message.warning('所选地址在卡口地址下拉列表中无可匹配项'); 
+          return null;
+        } else {
+          res.unshift(_obj);
+        }
       }
       let func = (val, opt) => {
         opt.forEach(f => {
@@ -986,9 +996,11 @@ export default {
           if (status === 'complete' && result.info === 'OK') {
             // 经纬度             
             console.log(result, 'result')
-            let lon = result.geocodes[0].location.lng;
-            let lat = result.geocodes[0].location.lat;       
-             _this.addMarker(lon, lat);
+            let lng = result.geocodes[0].location.lng;
+            let lat = result.geocodes[0].location.lat; 
+            _this.basicInfoForm.longitude = lng;
+            _this.basicInfoForm.Latitude = lat;
+             _this.addMarker(lng, lat);
             } else {
               console.log('定位失败！');
             }
@@ -1009,6 +1021,14 @@ export default {
         this.$router.push({name: 'bayonet_manage_list'});
       }
     },
+    // 根据经纬度获得地址
+    getAddressByLongLat () {
+      const longitude = this.basicInfoForm.longitude;
+      const Latitude = this.basicInfoForm.Latitude;
+      if (!longitude || !Latitude) return;
+      this.addMarker(longitude, Latitude);
+      this.commonFunc2(longitude, Latitude);
+    },
     /* 地图选择经纬度方法start */
     resetMap () {
       let _this = this;
@@ -1025,42 +1045,48 @@ export default {
       })
       map.on('click', function (e) {
         console.log(e, 'eeee')
-        new window.AMap.service('AMap.Geocoder',function(){//回调函数
-            let geocoder = null;
-            //实例化Geocoder
-            geocoder = new window.AMap.Geocoder({
-                city: ""//城市，默认：“全国”
-            });
-            var lnglatXY = [e.lnglat.getLng(), e.lnglat.getLat()];//地图上所标点的坐标
-            _this.basicInfoForm.longitude = lnglatXY[0];
-            _this.basicInfoForm.Latitude = lnglatXY[1];
-            _this.$refs['basicInfoForm'].clearValidate(['longitude', 'Latitude']);
-            geocoder.getAddress(lnglatXY, function(status, result) {
-                if (status === 'complete' && result.info === 'OK') {
-                    console.log(result)
-                    const {province, city, district, township} = result.regeocode.addressComponent;
-                    const adcode = result.regeocode.addressComponent.adcode;
-                    let arr = [province, city, district];
-
-                    const obj = _this.getCascaderObj2(adcode, _this.areaDataList);
-                    if (!obj) return _this.$message.warning('所选地址在卡口地址下拉列表中无可匹配项'); 
-                    if (obj.hasOwnProperty('childList')) arr.push(township);
-
-                    _this.resAddress = arr.join('');
-                    const codeList = _this.getCascaderObj3(adcode, _this.areaDataList, township);
-                    console.log(codeList, 'codeList')
-                    _this.basicInfoForm.bayonetAddress = codeList && codeList.map(m => m.uid);
-                    _this.basicInfoForm.address = result.regeocode.formattedAddress.replace(arr.join(''), '');
-                    _this.addMarker(e.lnglat.getLng(), e.lnglat.getLat());
-                }else{
-                    //获取地址失败
-                    _this.$message.error('没有获取到地址');
-                }
-            });
-        })
-
+        const lng = e.lnglat.getLng();
+        const lat = e.lnglat.getLat();
+        _this.basicInfoForm.longitude = lng;
+        _this.basicInfoForm.Latitude = lat;
+        _this.commonFunc2(lng, lat);
       })
       _this.map = map;
+    },
+    commonFunc2 (lng, lat) {
+      const _this = this;
+      new window.AMap.service('AMap.Geocoder',function(){//回调函数
+        let geocoder = null;
+        //实例化Geocoder
+        geocoder = new window.AMap.Geocoder({
+            city: ""//城市，默认：“全国”
+        });
+        const lnglatXY = [lng, lat];//地图上所标点的坐标
+        _this.$refs['basicInfoForm'].clearValidate(['longitude', 'Latitude']);
+        geocoder.getAddress(lnglatXY, function(status, result) {
+          if (status === 'complete' && result.info === 'OK') {
+              console.log(result)
+              const {province, city, district, township} = result.regeocode.addressComponent;
+              const adcode = result.regeocode.addressComponent.adcode;
+              let arr = [province, city, district];
+
+              const obj = _this.getCascaderObj2(adcode, _this.areaDataList);
+              if (!obj) return _this.$message.warning('所选地址在卡口地址下拉列表中无可匹配项'); 
+              if (obj.hasOwnProperty('childList')) arr.push(township);
+
+              _this.resAddress = arr.join('');
+              const codeList = _this.getCascaderObj3(adcode, _this.areaDataList, township);
+              console.log(codeList, 'codeList')
+              if (!codeList) return;
+              _this.basicInfoForm.bayonetAddress = codeList && codeList.map(m => m.uid);
+              _this.basicInfoForm.address = result.regeocode.formattedAddress.replace(arr.join(''), '');
+              _this.addMarker(lng, lat);
+          }else{
+              //获取地址失败
+              _this.$message.error('没有获取到地址');
+          }
+        });
+      })
     },
     // 输入追踪点定位圆形覆盖物的中心点
     addMarker (lng, lat) {
@@ -1073,7 +1099,6 @@ export default {
       let offSet = [-20.5, -48], _hoverWindow = null;
       if (lng > 0 && lat > 0) {
         _this.marker = new window.AMap.Marker({ // 添加自定义点标记
-          map: _this.map,
           position: [lng, lat],
           offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
           draggable: false, // 是否可拖动

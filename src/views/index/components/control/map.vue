@@ -277,7 +277,7 @@ export default {
       }),
       // 地图参数
       map: null,
-      devicesList: null, // 布控数据列表
+      devicesList: [], // 布控数据列表
       markerAlarmList: [],//告警列表
       timer: null,
       videoObj: null,
@@ -308,6 +308,7 @@ export default {
     });
     map.setMapStyle('amap://styles/whitesmoke');
     this.map = map;
+    this.getAlarmListByDev();
   },
   methods: {
     // 跳转到告警详情页
@@ -390,16 +391,19 @@ export default {
       let devList = this.devicesList.map(m => m.uid);
       devList = Array.from(new Set(devList));
       let surveillanceList = this.devicesList.map(m => m.surveillanceIds);
-      surveillanceList = surveillanceList.join(',').split(',');
+      surveillanceList = surveillanceList.length > 0 ? surveillanceList.join(',').split(',') : [];
       surveillanceList = Array.from(new Set(surveillanceList));
-      const params = {
-        deviceIds: devList.join(','),
-        surveillanceIds: surveillanceList.join(','),
+      let params = {
         interval: 60
       } 
+      devList.length > 0 && (params.deviceIds = devList.join(','));
+      surveillanceList.length > 0 && (params.surveillanceIds = surveillanceList.join(','));
       getAlarmListByDev(params).then(res => {
         if (res && res.data) {
           this.markerAlarmList = res.data;
+          if (this.markerAlarmList.length > 0) {
+            this.getAllAlarmSnapListByDev();
+          }
           this.markerAlarmList.forEach(dev => {
             const childDiv = '<div class="vl_icon_warning">发现可疑目标</div>';
             // 给有警情的点标记追加class
@@ -409,14 +413,21 @@ export default {
               $('#mapBox #' + dev.deviceId).addClass("vl_icon_control_02");
               $('#mapBox #' + dev.deviceId).removeClass("vl_icon_control_01");
             })
-            // 让有警情的点标记的class 10s后移除
+            // 让有警情的点标记的class 10s后移除  
             setTimeout(() => {
               $('#mapBox .vl_icon_control_02').removeClass("vl_icon_alarm");
               $('#mapBox .vl_icon_warning').remove();
               $('#mapBox #' + dev.deviceId).removeClass("vl_icon_control_02");
               $('#mapBox #' + dev.deviceId).addClass("vl_icon_control_01");
-            }, 10000);
+            }, 11000);
           })
+          this.timer = setTimeout(() => {
+            // this.$once('hook:beforeDestroy', () => {
+            //   clearTimeout(this.timer);
+            //   return false; 
+            // })
+            this.getAlarmListByDev();
+          }, 12000)
         }
       })
     },
@@ -471,7 +482,7 @@ export default {
       }).then(() => {
         // 没有获取到布控设备时，清除之前保存的定时器，并return
         if (this.devicesList.length === 0) {
-          clearInterval(this.timer);
+          clearTimeout(this.timer);
           return;
         }
         this.mapMark();
@@ -820,22 +831,21 @@ export default {
           _this.markerList.push(marker);
         }
       }
-      _this.map.add(_this.markerList);
-      // _this.map.setFitView();// 自动适配到合适视野范围
+      _this.map.setFitView();// 自动适配到合适视野范围
       // 当布控状态不是进行中时，清除之前保存的定时器，并return
-      clearInterval(_this.timer);
-      if (this.mapForm.state !== 1) {
-        return;
-      }
-      _this.getAlarmListByDev();
-      // 10s重新加载一次
-      _this.timer = setInterval(() => {
-        _this.getAlarmListByDev();
-      }, 11000);
-      // 通过$once来监听定时器，在beforeDestroy钩子可以被清除。
-      _this.$once('hook:beforeDestroy', () => {
-        clearInterval(_this.timer);
-      })
+      // clearInterval(_this.timer);
+      // if (this.mapForm.state !== 1) {
+      //   return;
+      // }
+      // _this.getAlarmListByDev();
+      // // 10s重新加载一次
+      // _this.timer = setInterval(() => {
+      //   _this.getAlarmListByDev();
+      // }, 11000);
+      // // 通过$once来监听定时器，在beforeDestroy钩子可以被清除。
+      // _this.$once('hook:beforeDestroy', () => {
+      //   clearInterval(_this.timer);
+      // })
     },
     // 跳转至视频回放页面
     skipIsVideo (uid, deviceName) {
@@ -851,9 +861,12 @@ export default {
       this.$refs['mapForm'].resetFields();
     }
   },
-  destroyed () {
+  beforeDestroy () {
     if (this.map) {
       this.map.destroy();
+    }
+    if(this.timer) { //如果定时器还在运行 或者直接关闭，不用判断
+      clearTimeout(this.timer); //关闭
     }
   }
 }
