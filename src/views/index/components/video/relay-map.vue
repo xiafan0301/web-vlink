@@ -68,7 +68,12 @@ export default {
       zIndex: 100,
       showMenuActive: true,
       sedData: {},
-      listData: []
+      listData: [],
+
+      uid: '',
+      type: null,
+
+      intval: null
     }
   },
   created () {
@@ -81,9 +86,10 @@ export default {
         subStoragePath: 'http://filevlink.aorise.org/root/image/2019/08/02/800390420190801165300000001_1.JPG'
       });
     } */
-    let uid = this.$route.query.uid;
-    let type = this.$route.query.type;
-    this.getDData(uid, type);
+    this.uid = this.$route.query.uid;
+    this.type = this.$route.query.type;
+    this.getDData();
+    this.getDDataIntval();
     // this.getDGJ(uid, type);
   },
   mounted () {
@@ -102,10 +108,10 @@ export default {
     });
   },
   methods: {
-    getDData (uid, type) {
+    getDData () {
       getVideoContinue({
-        id: uid,
-        type: type
+        id: this.uid,
+        type: this.type
       }).then((res) => {
         if (res && res.data) {
           this.detailData = res.data;
@@ -125,6 +131,13 @@ export default {
           
         }
       }).catch();
+    },
+    getDDataIntval () {
+      if (this.intval) {
+        window.setInterval(() => {
+          this.getDData();
+        }, 30 * 1000);
+      }
     },
     initMap () {
       let _this = this;
