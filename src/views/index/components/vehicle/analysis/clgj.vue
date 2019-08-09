@@ -16,7 +16,7 @@
             ref="ruleForm"
             label-width="0px"
             class="demo-ruleForm_clgj"
-        >
+          >
           <el-form-item class="" prop="data1">
             <el-date-picker
               v-model="ruleForm.data1"

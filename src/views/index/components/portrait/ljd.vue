@@ -10,13 +10,13 @@
     <div :class="['left',{hide:hideleft}]">
       <div class="plane">
         <el-form
-        :rules="rules"
-          :model="ruleForm"
-          status-icon
-          ref="ruleForm"
-          label-width="0px"
-          class="demo-ruleForm"
-        >
+            :rules="rules"
+            :model="ruleForm"
+            status-icon
+            ref="ruleForm"
+            label-width="0px"
+            class="demo-ruleForm"
+          >
           <el-form-item  prop="data1">
             <el-date-picker
               v-model="ruleForm.data1"
@@ -39,7 +39,6 @@
               value-format="yyyy-MM-dd"
             ></el-date-picker>
           </el-form-item>
-         
           <el-form-item prop="minFootholdTimes" class="firstItem">
             <el-row :gutter="5">
               <el-col :span="22">
@@ -93,7 +92,7 @@
           <el-form-item v-if="ruleForm.input5=='2'">
             <el-input v-model="selectValue" :disabled="true"></el-input>
           </el-form-item>
-           <el-form-item style="text-align: center;">
+          <el-form-item style="text-align: center;">
             <div style="padding: 0 15px; height: 210px;">
               <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit" :imgData="imgData"></div>
             </div>
@@ -109,44 +108,44 @@
             </el-row>
           </el-form-item>
         </el-form>
-        <div class="insetLeft" @click="hideLeft"></div>
       </div>
+      <div class="insetLeft" @click="hideLeft"></div>
     </div>
     <div :class="['right',{hide:!hideleft}]" id="mapBox"></div>
     <ul class="map_rrt_u2">
-        <li  @click="resemt"><i class="el-icon-aim"></i></li>
-        <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
-        <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
-      </ul>
+      <li  @click="resemt"><i class="el-icon-aim"></i></li>
+      <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
+      <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
+    </ul>
     <div class="reselt" v-if="reselt">
       <div class="plane insetPadding">
         <h3 class="title">分析结果</h3>
         <div class="limitBoxs">
           <vue-scroll>
-          <el-collapse v-model="activeNames">
-            <el-collapse-item  v-for="(item,index) in evData" :key="index" :name="index">
-              <template slot="title">
-                <span class="result_device_name" :title="item.groupName">{{item.groupName}}</span>
-                <span>({{item.totalNum}}次)</span>
-                <!-- <i class="header-icon el-icon-info"></i> -->
-              </template>
-              <div class="itembox" v-for="(v,d) in item.personDetailList" :key="d">
-                <div class="imgInfo"  @click.stop="onOpenDetail(v, d, item)">
-                   <img :src="v.subStoragePath" class="img">
-                   <div>
-                     <p class="timedata"><i class="el-icon-time"></i>{{v.shotTime}}</p>
-                    <span class="subdata">
-                      <i class="vl_icon vl_icon_retrieval_03"></i>
-                      <b v-if="v.semblance">{{(v.semblance*1).toFixed(2)}}</b>%
-                    </span>
-                   </div>
-                  <i class="del_list_icon el-icon-delete" @click.stop="delItems(d,index)"></i>
+            <el-collapse v-model="activeNames">
+              <el-collapse-item  v-for="(item,index) in evData" :key="index" :name="index">
+                <template slot="title">
+                  <span class="result_device_name" :title="item.groupName">{{item.groupName}}</span>
+                  <span>({{item.totalNum}}次)</span>
+                  <!-- <i class="header-icon el-icon-info"></i> -->
+                </template>
+                <div class="itembox" v-for="(v,d) in item.personDetailList" :key="d">
+                  <div class="imgInfo"  @click.stop="onOpenDetail(v, d, item)">
+                    <img :src="v.subStoragePath" class="img">
+                    <div>
+                      <p class="timedata"><i class="el-icon-time"></i>{{v.shotTime}}</p>
+                      <span class="subdata">
+                        <i class="vl_icon vl_icon_retrieval_03"></i>
+                        <b v-if="v.semblance">{{(v.semblance*1).toFixed(2)}}</b>%
+                      </span>
+                    </div>
+                    <i class="del_list_icon el-icon-delete" @click.stop="delItems(d,index)"></i>
+                  </div>
                 </div>
-              </div>
+                
+              </el-collapse-item>
               
-            </el-collapse-item>
-            
-          </el-collapse>
+            </el-collapse>
           </vue-scroll>
         </div>
         <div class="insetLeft2" @click="hideResult"></div>
@@ -584,6 +583,7 @@ export default {
     },
     chooseOk(){
       this.reselt = true;
+
       this.dialogChoose = false
      // this.evData = this.chooseData
       this.evData = this.chooseData.map(x => {
@@ -874,6 +874,7 @@ export default {
 .point {
   width: 100%;
   height: 100%;
+  // overflow: hidden;
 }
 .breadcrumb_heaer {
   background: #ffffff;
@@ -901,6 +902,7 @@ export default {
   position: absolute;
   left: 275px;
   z-index: 2;
+  // overflow: hidden;
   box-shadow: 4px 0px 10px 0px #838383;
   box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);
   animation: fadeInLeft 0.4s ease-out 0.3s both;
@@ -930,12 +932,15 @@ export default {
   animation: fadeInLeft 0.4s ease-out 0.3s both;
   transition: marginLeft 0.3s ease-in;
   .plane {
+    // padding: 20px;
+    // position: relative;
+    // height: 100%;
+    // overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
     padding: 20px;
     position: relative;
     height: 100%;
-    overflow: auto;
-    overflow-x: hidden;
-    overflow-y: auto;
   }
   .line40 {
     line-height: 40px;
@@ -1113,14 +1118,14 @@ export default {
   }
 }
 .del{
-            position: absolute;
-            bottom: -10px;
-            right: -5px;
-            background: #999;
-            color: #ffffff;
-            padding: 4px;
-            cursor: pointer;
-          }
+  position: absolute;
+  bottom: -10px;
+  right: -5px;
+  background: #999;
+  color: #ffffff;
+  padding: 4px;
+  cursor: pointer;
+}
 .limitBox{
   height: 96%;
   .el-collapse-item{
@@ -1245,7 +1250,7 @@ export default {
   }
 }
 .limitBoxs{
-  height: 96%;
+  height: 95%;
 
   .el-collapse-item{
     .el-collapse-item__header{
