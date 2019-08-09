@@ -18,7 +18,7 @@
               style="width: 230px; vertical-align: top"
               default-time="00:00:00"
               type="datetime"
-              placeholder="选择日期时间">
+              placeholder="请选择开始时间">
           </el-date-picker>
         </div>
         <div class="jiesu">
@@ -31,7 +31,7 @@
               type="datetime"
               default-time="23:59:59"
               :picker-options="pickerOptions"
-              placeholder="选择日期时间">
+              placeholder="请选择结束时间">
           </el-date-picker>
         </div>
         <div class="kaishi">

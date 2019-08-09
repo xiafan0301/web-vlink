@@ -32,8 +32,8 @@
               <template v-if="sturcDetail.objType == 1">
               <div class="struc_cdi_line control_line" v-if="sturcDetail.basePortraitInfo">
                  <span>{{sturcDetail.basePortraitInfo.name}}</span>
-                 <span>{{sturcDetail.basePortraitInfo.sexStr}}</span>
-                 <span>{{sturcDetail.basePortraitInfo.nationStr}}</span>
+                 <span v-if="sturcDetail.basePortraitInfo.sexStr && sturcDetail.basePortraitInfo.sexStr != '未知'">{{sturcDetail.basePortraitInfo.sexStr}}</span>
+                 <span v-if="sturcDetail.basePortraitInfo.nationStr && sturcDetail.basePortraitInfo.nationStr != '未知'">{{sturcDetail.basePortraitInfo.nationStr}}</span>
               </div>
               <div class="struc_cdu_line" v-if="sturcDetail.basePortraitInfo.birthDate">
                 <p class="next_height">

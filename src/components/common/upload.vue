@@ -92,9 +92,12 @@ export default {
   },
   watch: {
     imgData (val) {
+      // console.log('imgData', val);
       if (val && val.path) {
         this.choosedHisPic = null;
         this.currentImg = Object.assign({}, val);
+      } else {
+        this.uploadClear();
       }
     },
     clear () {

@@ -35,7 +35,7 @@
                   <ul class="child_temp_detail" v-show="!item.isSXT">
                     <li v-for="(itm, idx) in item.bayonetList" :key="'itm' + idx">
                       <el-checkbox v-model="itm.isChildChecked" @change="handleLeftChildChecked(index, idx, itm.isChildChecked, item.isSXT)"></el-checkbox>
-                      <span>{{itm.deviceName}}</span>
+                      <span>{{itm.bayonetName}}</span>
                     </li>
                   </ul>
                 </div>
@@ -57,22 +57,24 @@
             <span>选择区域</span>
           </li>
         </ul>
-        <ul class="map-rrt">
+         <!--地图操作按钮-->
+        <ul class="map_rrt_u2">
+          <li @click="resetMap"><i class="el-icon-aim"></i></li>
+          <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
+          <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
+        </ul>
+        <!-- <ul class="map-rrt">
           <li><i class="vl_icon vl_icon_control_23" @click="resetMap"></i></li>
         </ul>
         <ul class="map-rrt map_rrt_u2">
           <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
           <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
-        </ul>
+        </ul> -->
       </div>
     </div>
-    <!-- <div class="close_arrow">
-      <i class="el-icon-error"></i>
-    </div> -->
   </div>
 </template>
 <script>
-// import { testData } from './testData.js';
 import { random14 } from '@/utils/util.js';
 export default {
   props: [ 'selectDeviceList', 'selectDeviceNumber', 'leftDeviceNumber', 'currentDeviceList', 'groupId', 'isInitalState', 'isSelected' ],
@@ -170,7 +172,7 @@ export default {
             bayonetList: [
               {
                 uid: item.uid,
-                deviceName: item.deviceName,
+                bayonetName: item.bayonetName,
                 isChildChecked: false,
                 latitude: item.latitude,
                 longitude: item.longitude
@@ -245,7 +247,7 @@ export default {
             bayonetList: [
               {
                 uid: item.uid,
-                deviceName: item.deviceName,
+                bayonetName: item.bayonetName,
                 isChildChecked: false,
                 latitude: item.latitude,
                 longitude: item.longitude
@@ -406,7 +408,7 @@ export default {
               parentId: item.uid,
               uid: itm.uid,
               isSxt: false, // 卡口
-              deviceName: itm.deviceName,
+              bayonetName: itm.bayonetName,
               isChildChecked: false,
               latitude: itm.latitude,
               longitude: itm.longitude
@@ -445,7 +447,7 @@ export default {
               parentId: item.uid,
               uid: itm.uid,
               isSxt: false, // 卡口
-              deviceName: itm.deviceName,
+              bayonetName: itm.bayonetName,
               isChildChecked: false,
               latitude: itm.latitude,
               longitude: itm.longitude
@@ -506,7 +508,7 @@ export default {
 
             let title = '';
             if (keyWord === 'kk') {
-              title = '卡口名称：' + obj.deviceName;
+              title = '卡口名称：' + obj.bayonetName;
             } else {
               title = '摄像头名称：' + obj.deviceName;
             }
@@ -586,7 +588,11 @@ export default {
     },
      // 重置地图
     resetMap () {
-      this.initMap();
+       if (this.map) {
+        this.map.setZoomAndCenter(18, [110.596015, 27.907662]);
+        this.map.setFitView();
+      }
+      // this.initMap();
     },
     mapZoomSet (val) {
       if (this.map) {
@@ -720,7 +726,7 @@ export default {
                 parentId: item.uid,
                 uid: itm.uid,
                 isSxt: false, // 卡口
-                deviceName: itm.deviceName,
+                bayonetName: itm.bayonetName,
                 isChildChecked: false,
                 latitude: itm.latitude,
                 longitude: itm.longitude
@@ -909,6 +915,29 @@ export default {
           span {
             text-align: center;
             display: block;
+          }
+        }
+      }
+      .map_rrt_u2 {
+        // position: absolute; right: 30px;
+        // bottom: 20px;
+        margin-top: .2rem;
+        font-size: 26px;
+        background: #ffffff;
+        width: 78px;
+        padding: 0 10px;
+        > li {
+          line-height: 70px;
+          text-align: center;
+          cursor: pointer;
+          border-bottom: 1px solid #F2F2F2;
+          > i {
+            margin-top: 0;
+            display: inline-block;
+          }
+          color: #999999;
+          &:hover {
+            color: #0C70F8;
           }
         }
       }

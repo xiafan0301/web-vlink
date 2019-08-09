@@ -68,17 +68,22 @@
     <!--检索详情弹窗-->
     <el-dialog
       :visible.sync="strucDetailDialog"
-      class="struc_detail_dialog_ytsr"
+      class="struc_detail_dialog_ytsr_shot"
       :close-on-click-modal="false"
       top="4vh"
       :show-close="false">
       <div class="struc_tab">
-        <span>检索详情</span>
-        <!--<span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>-->
-        <!--<span :class="{'active': strucCurTab === 3}" @click="strucCurTab = 3">视频回放</span>-->
+        <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">检索详情</span>
+        <span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>
+        <span :class="{'active': strucCurTab === 3}" @click="strucCurTab = 3">视频回放</span>
         <i class="el-icon-close" @click="strucDetailDialog = false"></i>
       </div>
       <div class="struc_main">
+        <ul v-show="strucCurTab === 1">
+          <!-- <li><span>抓拍设备：{{sturcDetail.deviceName}}</span></li> -->
+          <li><span style="line-height: 0.24rem;">抓拍地址：{{sturcDetail.address}}</span></li>
+          <li style="color: #999;line-height: 0.24rem;">{{sturcDetail.shotTime}}</li>
+        </ul>
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
             <img :src="sturcDetail.personStoragePath" alt="">
@@ -169,22 +174,33 @@
               </div>
             </div>
           </div>
+          <!--跳转按钮-->
+          <div class="struc_t_btn">
+            <a @click="gotoControl(sturcDetail.subStoragePath)">新建布控</a>
+            <a @click="gotoLjd(sturcDetail.subStoragePath)">落脚点分析</a>
+            <a @click="gotoGjfx(sturcDetail.subStoragePath)">轨迹分析</a>
+            <!--<a @click="gotoIden(sturcDetail.subStoragePath)">身份确认</a>-->
+          </div>
         </div>
-        <!--<div v-show="strucCurTab === 2" class="struc_c_address"></div>-->
-        <!--<div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">-->
-        <!--<div class="struc_c_d_qj struc_c_d_img">-->
-        <!--<img :src="sturcDetail.subStoragePath" alt="">-->
-        <!--<span>抓拍图</span>-->
-        <!--</div>-->
-        <!--<div class="struc_c_d_box">-->
-        <!--<video id="capVideo" :src="sturcDetail.videoPath"></video>-->
-        <!--<div class="play_btn" @click="videoTap" v-show="!playing">-->
-        <!--<i class="vl_icon vl_icon_judge_01" v-if="playing"></i>-->
-        <!--<i class="vl_icon vl_icon_control_09" v-else></i>-->
-        <!--</div>-->
-        <!--</div>-->
-        <!--<div class="download_btn"><a download="视频" :href="videoUrl"></a>下载视频</div>-->
-        <!--</div>-->
+        <div v-show="strucCurTab === 2" class="struc_c_address"></div>
+        <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
+          <div class="struc_c_d_qj struc_c_d_img">
+            <img class="bigImg" :src="sturcDetail.subStoragePath" alt="">
+            <span>抓拍图</span>
+          </div>
+          <div class="struc_c_d_box" style="float: left;" v-if="playerData">
+            <div is="flvplayer" :oData="playerData"
+                 :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
+            </div>
+          </div>
+          <div class="struc_c_d_box struc_vid_empty" style="float: left;" v-else>
+            <div class="struc_vid_empty_c com_trans50_lt">
+              <div></div>
+              <p>暂无视频</p>
+            </div>
+          </div>
+          <p class="download_tips" v-show="sturcDetail.videoPath">下载提示：右键点击视频选择“另存视频为”即可下载视频。</p>
+        </div>
       </div>
       <div class="struc-list">
         <swiper :options="swiperOption" ref="mySwiper">
@@ -206,15 +222,18 @@
 </template>
 <script>
   import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+  import flvplayer from '@/components/common/flvplayer.vue';
   import { formatDate } from "@/utils/util.js";
+  import { mapXupuxian } from "@/config/config.js";
   import noResult from '@/components/common/noResult.vue';
   import { getPeopleTaskDetail } from '@/views/index/api/api.analysis.js';
   import { PortraitPostByphotoRealtime} from '@/views/index/api/api.portrait.js';
   let AMap = window.AMap;
   export default {
-    components: {vlBreadcrumb, noResult},
+    components: {vlBreadcrumb, noResult, flvplayer},
     data() {
       return {
+        playerData: null,
         swiperOption: {
           slidesPerView: 5,
           spaceBetween: 10,
@@ -232,9 +251,6 @@
         amap: null, // 地图实例
         markerPoint: null, // 地图点集合
         InfoWindow: null,
-        curVideoUrl: '',
-        playing: false, // 视频播放是否
-        historyPicDialog: false,
         stucOrder: 4, // 1升序，2降序，3监控，4相似度
         taskDetail: {},
         strucInfoList: [], // 检索抓拍信息
@@ -247,6 +263,13 @@
       }
     },
     mounted () {
+      // 弹窗地图
+      let supMap = new AMap.Map('capMap', {
+        center: mapXupuxian.center,
+        zoom: 16
+      });
+      supMap.setMapStyle('amap://styles/whitesmoke');
+      this.map = supMap;
       if (this.$route.query.uid) {
         this.getDetail();
       } else {
@@ -254,6 +277,33 @@
       }
     },
     methods: {
+      gotoControl (url) {
+        this.$router.push({ name: 'control_create', query: {modelName: "人员追踪", imgurl: url} })
+      },
+      gotoLjd (url) {
+        this.$router.push({ name: 'portrait_ljd', query: {imgurl: url} })
+      },
+      gotoGjfx (url) {
+        this.$router.push({ name: 'portrait_gjfx', query: {imgurl: url} })
+      },
+      gotoIden (url) {
+        this.$router.push({ name: 'portrait_ljd', query: {imgurl: url} })
+      },
+      // 设置视频数据
+      setPlayerData () {
+        if (this.sturcDetail.videoPath) {
+          this.playerData = {
+            type: 3,
+            title: this.sturcDetail.deviceName,
+            video: {
+              uid: new Date().getTime() + '',
+              downUrl: this.sturcDetail.videoPath
+            }
+          }
+        } else {
+          this.playerData = null;
+        }
+      },
       timeOrderS () {
         if (this.stucOrder > 2) {
           this.stucOrder = 2;
@@ -323,26 +373,44 @@
         this.curImgIndex = index;
         this.strucDetailDialog = true;
         this.sturcDetail = data;
-        console.log(JSON.stringify(data) , 'data')
+        this.strucCurTab = 1;
+        this.drawPoint(data);
+        this.setPlayerData();
+      },
+      drawPoint (data) {
+        this.$nextTick(() => {
+          $('.struc_c_address').append($('#capMap'))
+        })
+        if (this.supMarkerPoint) {
+          this.map.remove(this.supMarkerPoint)
+        }
+        let _content = '<div class="vl_icon vl_icon_judge_02"></div>'
+        this.supMarkerPoint = new AMap.Marker({ // 添加自定义点标记
+          map: this.map,
+          position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
+          offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+          draggable: false, // 是否可拖动
+          // 自定义点标记覆盖物内容
+          content: _content
+        });
+        this.map.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
+        let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`
+        new AMap.InfoWindow({
+          map: this.map,
+          isCustom: true,
+          closeWhenClickMap: false,
+          position: [data.shotPlaceLongitude, data.shotPlaceLatitude],
+          offset: new AMap.Pixel(0, -70),
+          content: sConent
+        })
       },
       imgListTap (data, index) {
         this.curImgIndex = index;
         this.sturcDetail = data;
+        this.drawPoint(data);
+        this.setPlayerData();
       },
-      tcDiscuss () {},
-      videoTap () {
-        let vDom = document.getElementById('capVideo')
-        if (this.playing) {
-          vDom.pause();
-        } else {
-          vDom.play();
-        }
-        vDom.addEventListener('ended', (e) => {
-          e.target.currentTime = 0;
-          this.playing = false;
-        })
-        this.playing = !this.playing;
-      }
+      tcDiscuss () {}
     },
     watch: {
       stucOrder () {
@@ -708,7 +776,7 @@
         }
       }
     }
-    .struc_detail_dialog_ytsr {
+    .struc_detail_dialog_ytsr_shot {
       .el-dialog {
         max-width: 13.06rem;
         width: 100%!important;
@@ -741,7 +809,7 @@
       }
       .struc_main {
         width: 11.46rem;
-        height: 4.4rem;
+        height: 5rem;
         margin: 0 auto;
         border-bottom: 1px solid #F2F2F2;
         .struc_c_detail {
@@ -886,7 +954,7 @@
             }
             &:before {
               display: block;
-              content: none;
+              content: none!important;
               position: absolute;
               top: -.7rem;
               right: -.7rem;
@@ -896,7 +964,7 @@
             }
             &:after {
               display: block;
-              content: none;
+              content: none!important;
               position: absolute;
               top: -.4rem;
               right: -.4rem;
@@ -922,6 +990,29 @@
               z-index: 99;
             }
           }
+          .struc_t_btn {
+            margin-top: .2rem;
+            float: right;
+            a {
+              display: inline-block;
+              text-align: center;
+              line-height: .38rem;
+              border: solid 1px #eeeeee;
+              border-radius: 4px;
+              margin-top: 10px;
+              padding: 0px .15rem;
+              text-decoration: none;
+              margin-left: 10px;
+              background: rgba(246, 248, 249, 1);
+              border: 1px solid rgba(211, 211, 211, 1);
+              cursor: pointer;
+            }
+            a:hover {
+              background: #0c70f8;
+              border: solid 1px #0c70f8;
+              color: #ffffff;
+            }
+          }
         }
         .struc_c_address {
           height: 100%;
@@ -931,6 +1022,12 @@
           }
         }
         .struc_c_video {
+          .download_tips {
+            float: left;
+            width: 100%;
+            text-align: right;
+            padding-right: 40px; padding-top: 10px;
+          }
           .struc_c_d_box {
             background: #E9E7E8;
             height: 100%;

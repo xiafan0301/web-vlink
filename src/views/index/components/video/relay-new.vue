@@ -3,7 +3,7 @@
     <div class="">
       <div class="relay_task_t">
         <el-breadcrumb separator-class="el-icon-arrow-right">
-          <el-breadcrumb-item><span style="cursor: pointer;" @click="xjClose">视频接力</span></el-breadcrumb-item>
+          <el-breadcrumb-item><span style="cursor: pointer;" @click="xjClose(false)">视频接力</span></el-breadcrumb-item>
           <el-breadcrumb-item>新建任务</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -32,63 +32,40 @@
                 <el-input v-model="xjPlateNo" placeholder="请输入车牌号码"></el-input>
               </div>
               <div class="task_mtl_u" v-else>
-                <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit"></div>
-                <!-- <el-upload
-                  class="vid_relay_upload"
-                  :show-file-list="false"
-                  accept="image/*"
-                  :action="uploadAcion"
-                  list-type="picture-card"
-                  :before-upload="beforeAvatarUpload"
-                  :on-success="uploadSucess"
-                  :on-error="handleError">
-                  <i v-if="uploading" class="el-icon-loading"></i>
-                  <img v-else-if="xjType === 1 && curImageUrl" :src="curImageUrl">
-                  <img v-else-if="xjType === 2 && curImageUrl2" :src="curImageUrl2">
-                  <div style="line-height: normal; padding-top: 35px;" v-else>
-                    <span style="font-size: 60px; color: #999;" class="el-icon-plus"></span>
-                    <p style="color: #999; padding-top: 15px;">请上传清晰图片</p>
-                  </div>
-                </el-upload>
-                <p @click="showHistoryPic(1)">从上传记录中选择</p>
-                <div v-show="curImageUrl" class="del_icon">
-                  <i class="el-icon-delete" @click="delPic(1)"></i>
-                </div> -->
+                <div is="vlUpload" :imgData="imgData" :clear="uploadClear" @uploadEmit="uploadEmit"></div>
               </div>
             </div>
             <div class="relay_task_mtr">
-              <div v-if="xjType === 1 && uploadPersonObj">
+              <div class="task_mtr_ld" v-if="(xjType === 1 || (xjType === 2 && xjVechicleType === 1)) && picSearchLoading">
+                <i class="el-icon-loading"></i>正在分析图片，请稍后...
+              </div>
+              <div v-else-if="xjType === 1 && uploadPersonObj">
                 <h3>图片信息：</h3>
                 <ul>
-                  <li><span>性别：</span>{{uploadPersonObj.sex ? uploadPersonObj.sex : '-'}}</li>
-                  <li><span>年龄段：</span>{{uploadPersonObj.age ? uploadPersonObj.age : '-'}}</li>
-                  <li><span>发型：</span>{{uploadPersonObj.hair ? uploadPersonObj.hair : '-'}}</li>
-                  <li><span>戴眼镜：</span>{{uploadPersonObj.glasses ? uploadPersonObj.glasses : '-'}}</li>
-                  <li><span>戴帽子：</span>{{uploadPersonObj.hat ? uploadPersonObj.hat : '-'}}</li>
-                  <li><span>戴口罩：</span>{{uploadPersonObj.mask ? uploadPersonObj.mask : '-'}}</li>
-                  <li><span>抱小孩：</span>{{uploadPersonObj.baby ? uploadPersonObj.baby : '-'}}</li>
-                  <li><span>拎东西：</span>{{uploadPersonObj.bag ? uploadPersonObj.bag : '-'}}</li>
-                  <li><span>上身款式：</span>{{uploadPersonObj.upperType ? uploadPersonObj.upperType : '-'}}</li>
-                  <li><span>上身颜色：</span>{{uploadPersonObj.upperColor ? uploadPersonObj.upperColor : '-'}}</li>
-                  <li><span>下身款式：</span>{{uploadPersonObj.bottomType ? uploadPersonObj.bottomType : '-'}}</li>
-                  <li><span>下身颜色：</span>{{uploadPersonObj.bottomColor ? uploadPersonObj.bottomColor : '-'}}</li>
+                  <li><span>性别：</span>{{uploadPersonObj.sex ? uploadPersonObj.sex : '--'}}</li>
+                  <li><span>年龄段：</span>{{uploadPersonObj.age ? uploadPersonObj.age : '--'}}</li>
+                  <li><span>发型：</span>{{uploadPersonObj.hair ? uploadPersonObj.hair : '--'}}</li>
+                  <li><span>戴眼镜：</span>{{uploadPersonObj.glasses ? uploadPersonObj.glasses : '--'}}</li>
+                  <li><span>戴帽子：</span>{{uploadPersonObj.hat ? uploadPersonObj.hat : '--'}}</li>
+                  <li><span>戴口罩：</span>{{uploadPersonObj.mask ? uploadPersonObj.mask : '--'}}</li>
+                  <li><span>抱小孩：</span>{{uploadPersonObj.baby ? uploadPersonObj.baby : '--'}}</li>
+                  <li><span>拎东西：</span>{{uploadPersonObj.bag ? uploadPersonObj.bag : '--'}}</li>
+                  <li><span>上身款式：</span>{{uploadPersonObj.upperType ? uploadPersonObj.upperType : '--'}}</li>
+                  <li><span>上身颜色：</span>{{uploadPersonObj.upperColor ? uploadPersonObj.upperColor : '--'}}</li>
+                  <li><span>下身款式：</span>{{uploadPersonObj.bottomType ? uploadPersonObj.bottomType : '--'}}</li>
+                  <li><span>下身颜色：</span>{{uploadPersonObj.bottomColor ? uploadPersonObj.bottomColor : '--'}}</li>
                 </ul>
               </div>
-              <div v-if="xjType === 2 && uploadPersonObj">
+              <div v-else-if="xjType === 2 && xjVechicleType === 1 && uploadVehicleObj">
                 <h3>图片信息：</h3>
                 <ul>
-                  <li><span>性别：</span>{{uploadPersonObj.sex ? uploadPersonObj.sex : '-'}}</li>
-                  <li><span>年龄段：</span>{{uploadPersonObj.age ? uploadPersonObj.age : '-'}}</li>
-                  <li><span>发型：</span>{{uploadPersonObj.hair ? uploadPersonObj.hair : '-'}}</li>
-                  <li><span>戴眼镜：</span>{{uploadPersonObj.glasses ? uploadPersonObj.glasses : '-'}}</li>
-                  <li><span>戴帽子：</span>{{uploadPersonObj.hat ? uploadPersonObj.hat : '-'}}</li>
-                  <li><span>戴口罩：</span>{{uploadPersonObj.mask ? uploadPersonObj.mask : '-'}}</li>
-                  <li><span>抱小孩：</span>{{uploadPersonObj.baby ? uploadPersonObj.baby : '-'}}</li>
-                  <li><span>拎东西：</span>{{uploadPersonObj.bag ? uploadPersonObj.bag : '-'}}</li>
-                  <li><span>上身款式：</span>{{uploadPersonObj.upperType ? uploadPersonObj.upperType : '-'}}</li>
-                  <li><span>上身颜色：</span>{{uploadPersonObj.upperColor ? uploadPersonObj.upperColor : '-'}}</li>
-                  <li><span>下身款式：</span>{{uploadPersonObj.bottomType ? uploadPersonObj.bottomType : '-'}}</li>
-                  <li><span>下身颜色：</span>{{uploadPersonObj.bottomColor ? uploadPersonObj.bottomColor : '-'}}</li>
+                  <li style="width: 50%;"><span>车牌号码：</span>{{uploadVehicleObj.plateNo ? uploadVehicleObj.plateNo : '--'}}</li>
+                  <li style="width: 50%;"><span>车辆分组：</span>{{(uploadVehicleObj.vehicleType && uploadVehicleObj.vehicleType.length > 0) ? uploadVehicleObj.vehicleType.join(',') : '--'}}</li>
+                  <li style="width: 50%;"><span>车牌颜色：</span>{{uploadVehicleObj.plateColor ? uploadVehicleObj.plateColor : '--'}}</li>
+                  <li style="width: 50%;"><span>车辆型号：</span>{{uploadVehicleObj.vehicleModel ? uploadVehicleObj.vehicleModel : '--'}}</li>
+                  <li style="width: 50%;"><span>车辆颜色：</span>{{uploadVehicleObj.vehicleColor ? uploadVehicleObj.vehicleColor : '--'}}</li>
+                  <li style="width: 50%;"><span>车辆类型：</span>{{uploadVehicleObj.vehicleClass ? uploadVehicleObj.vehicleClass : '--'}}</li>
+                  <li style="width: 50%;"><span>车牌类型：</span>{{uploadVehicleObj.plateClass ? dicFormater(45, uploadVehicleObj.plateClass) : '--'}}</li>
                 </ul>
               </div>
             </div>
@@ -109,7 +86,7 @@
                 <div class="mb_map_map_l">
                   <div class="mb_map_map_lt">
                     已选设备（{{xjMapListSum}}）
-                    <span v-if="xjMapTree && xjMapTree.length > 0" @click="xjMapTreeDel">移除设备</span>
+                    <span :class="{'map_lt_sed': xjMapTreeChecked}" :title="xjMapTreeChecked ? '移除选择设备' : ''" v-if="xjMapTree && xjMapTree.length > 0" @click="xjMapTreeDel">移除设备</span>
                   </div>
                   <div class="mb_map_map_lb">
                     <el-tree
@@ -118,6 +95,7 @@
                       :data="xjMapTree"
                       show-checkbox
                       node-key="id"
+                      @check="xjMapTreeCheck"
                       :default-expand-all="true"
                       :props="xjMapTreeDefaultProps">
                     </el-tree>
@@ -125,7 +103,7 @@
                   </div>
                 </div>
                 <div class="mb_map_map_r">
-                  <h4>可选设备({{listDevice.length + listBayonet.length}})</h4>
+                  <h4>可选设备（{{xjMapListAllSum}}）</h4>
                   <div>
                     <div style="width: 100%; height: 100%;" id="video_relay_xj_map"></div>
                     <ul>
@@ -146,6 +124,18 @@
                   </div>
                 </div>
               </div>
+              <div class="mb_map_list" v-show="xjSelType === 2">
+                <el-tree
+                  v-if="monitorListTreeData && monitorListTreeData.length > 0"
+                  ref="monitorListTree"
+                  :data="monitorListTreeData"
+                  show-checkbox
+                  node-key="id"
+                  @check="xjMapTreeCheck"
+                  :default-expand-all="false"
+                  :props="xjMapTreeDefaultProps">
+                </el-tree>
+              </div>
             </div>
             <div class="task_mb_d">
               <span>备注说明：</span>
@@ -155,8 +145,8 @@
         </div>
       </div>
       <div class="relay_task_b">
-        <el-button size="small" @click="xjSubmit" type="primary">&nbsp;&nbsp;&nbsp;&nbsp;确&nbsp;&nbsp;定&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
-        <el-button size="small" @click="xjClose">&nbsp;&nbsp;&nbsp;&nbsp;取&nbsp;&nbsp;消&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
+        <el-button size="small" @click="xjSubmit" :loading="submitLoading" type="primary">&nbsp;&nbsp;&nbsp;&nbsp;确&nbsp;&nbsp;定&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
+        <el-button size="small" @click="xjClose(false)">&nbsp;&nbsp;&nbsp;&nbsp;取&nbsp;&nbsp;消&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
       </div>
     </div>
   </div>
@@ -165,16 +155,18 @@
 import {ajaxCtx} from '@/config/config';
 import {mapXupuxian} from '@/config/config.js';
 import vlUpload from '@/components/common/upload.vue';
-import {apiAreaServiceDeviceList, getAllMonitorList, getAllBayonetList} from "@/views/index/api/api.base.js";
+import {apiAreaServiceDeviceList, getAllMonitorList, getAllBayonetList, getDeviceByBayonetUids} from "@/views/index/api/api.base.js";
 import {JtcGETAppendixInfoList, addPersonVideoContinue, addVhicleVideoContinue} from '@/views/index/api/api.judge.js';
 import {getPhotoAnalysis} from "@/views/index/api/api.analysis.js"; // 车辆特征检索接口
 import {getPicRecognize} from '../../api/api.structuring.js';
+import {MapGETmonitorList} from '@/views/index/api/api.map.js'; // 获取设备树接口
 export default {
   components: {vlUpload},
   data () {
     return {
       /* 新建任务 begin */
       xjType: 1, // 1人员 2车辆
+      picSearchLoading: false,
       xjVechicleType: 1, // 1上传图片  2输入车牌号
       xjPlateNo: '',
       xjMoreInfo: false,
@@ -187,6 +179,7 @@ export default {
       mouseTool: null,
       xjDrawPolygon: [],
       xjMapTree: [],
+      xjMapTreeChecked: false,
       xjMapTreeDefaultProps: {
         children: 'children',
         label: 'name'
@@ -194,17 +187,23 @@ export default {
 
       xjDesVal: '',
 
+      submitLoading: false,
+
       uploadPersonObj: null,
       uploadVehicleObj: null,
+      imgData: null,
       curImageUrl: '', // 当前上传的图片 人员
       curImageUrl2: '', // 当前上传的图片 车辆
-      uploadClear: {}
+      uploadClear: {},
       /* 新建任务 end */
+      xjMapListAllSum: 0,
+      monitorListDefault: null,
+      monitorListTreeData: null
+
     }
   },
   watch: {
     xjMoreInfo (val) {
-      console.log(val);
       if (val) {
         if (this.xjSelType === 1) {
           if (!this.xjMap) {
@@ -238,12 +237,13 @@ export default {
     }
   },
   created () {
+    this.getMonitorList();
   },
   mounted () {
   },
   methods: {
-    xjClose () {
-      this.$emit('closeNew');
+    xjClose (flag) {
+      this.$emit('closeNew', flag);
     },
     xjInitMap () {
       let _this = this;
@@ -264,75 +264,105 @@ export default {
       this.mouseTool.on('draw', (event) => {
         // event.obj 为绘制出来的覆盖物对象
         console.log('draw event', event);
+        if (this.xjDrawPolygon && this.xjDrawPolygon[0]) {
+          _this.xjMap.remove(this.xjDrawPolygon[0]);
+        }
+        this.xjDrawPolygon = [];
         this.xjDrawPolygon.push(event.obj);
+        this.xjMapSelActive = false;
+        this.mouseTool.close(false);
+        this.xjMap.setDefaultCursor();
         this.xjDrawSelComp();
       });
-      this.getListDevice();
-      this.getListBayonet();
+      this.markMonitorList();
     },
     xjMapTreeDel () {
       let aL = this.$refs.xjMapTree.getCheckedNodes();
       for (let i = 0; i < aL.length; i++) {
+        this.$refs.xjMapTree.setChecked(aL[i], false);
         this.$refs.xjMapTree.remove(aL[i]);
       }
-      console.log('xjMapTree', this.xjMapTree);
+      this.xjMapTreeChecked = false;
+      // console.log('xjMapTree', this.xjMapTree);
     },
+    xjMapTreeCheck (cData, sedData) {
+      if (cData && sedData && sedData.checkedNodes && sedData.checkedNodes.length > 0) {
+        this.xjMapTreeChecked = true;
+      } else {
+        this.xjMapTreeChecked = false;
+      }
+    },
+    // 画完后处理数据
     xjDrawSelComp () {
-      let oList = {};
-      if (this.listDevice && this.listDevice.length > 0) {
-        for (let i = 0; i < this.listDevice.length; i++) {
-          let o = this.listDevice[i];
-          for (let k in this.xjDrawPolygon) {
-            let so = this.xjDrawPolygon[k];
-            if (so && so.contains(new window.AMap.LngLat(o.longitude, o.latitude))) {
-              // dObj[o.uid] = o;
-              if (!oList[o.areaUid]) { 
-                oList[o.areaUid] = {
-                  id: o.areaUid,
-                  name: o.areaCname,
-                  children: []
-                };
-              }
-              oList[o.areaUid].children.push({
-                type: 1,
-                id: o.uid,
-                name: o.deviceName
-              });
-            }
-          }
-        }
-      }
-      if (this.listBayonet && this.listBayonet.length > 0) {
-        for (let i = 0; i < this.listBayonet.length; i++) {
-          let o = this.listBayonet[i];
-          for (let k in this.xjDrawPolygon) {
-            let so = this.xjDrawPolygon[k];
-            if (so && so.contains(new window.AMap.LngLat(o.longitude, o.latitude))) {
-              if (o.areaUid) {
-                if (!oList[o.areaUid]) { 
-                  oList[o.areaUid] = {
-                    id: o.areaUid,
-                    name: o.areaName,
-                    children: []
-                  };
+      this.xjMapTreeChecked = false;
+      let aDids = [], aBids = [];
+      if (this.monitorListDefault && this.monitorListDefault.areaTreeList && this.monitorListDefault.areaTreeList.length > 0) {
+        for (let i = 0; i < this.monitorListDefault.areaTreeList.length; i++) {
+          let _o = this.monitorListDefault.areaTreeList[i];
+          // 设备
+          if (_o.deviceBasicList && _o.deviceBasicList.length > 0) {
+            for (let j = 0; j < _o.deviceBasicList.length; j++) {
+              let _d = _o.deviceBasicList[j];
+              for (let k in this.xjDrawPolygon) {
+                let so = this.xjDrawPolygon[k];
+                if (so && so.contains(new window.AMap.LngLat(_d.longitude, _d.latitude))) {
+                  aDids.push(_d.uid);
                 }
-                oList[o.areaUid].children.push({
-                  type: 2,
-                  id: o.uid,
-                  name: o.bayonetName
-                });
+              }
+            }
+          }
+          // 卡口 
+          if (_o.bayonetList && _o.bayonetList.length > 0) {
+            for (let j = 0; j < _o.bayonetList.length; j++) {
+              let _b = _o.bayonetList[j];
+              for (let k in this.xjDrawPolygon) {
+                let so = this.xjDrawPolygon[k];
+                if (so && so.contains(new window.AMap.LngLat(_b.longitude, _b.latitude))) {
+                  aBids.push(_b.uid);
+                }
               }
             }
           }
         }
       }
-      for (let k in oList) {
-        this.xjMapTree.push(oList[k]);
+      let oList = {};
+      for (let i = 0; i < this.monitorListTreeData.length; i++) {
+        let _o = this.monitorListTreeData[i];
+        for (let j = 0; j < _o.children.length; j++) {
+          let _c = _o.children[j];
+          if (aDids.indexOf(_c.id) >= 0) {
+            if (!oList[_o.id]) {
+              oList[_o.id] = {
+                id: _o.id,
+                name: _o.name,
+                children: []
+              };
+            }
+            oList[_o.id].children.push(Object.assign({}, _c));
+          } else if (aBids.indexOf(_c.id) >= 0) {
+            if (!oList[_o.id]) {
+              oList[_o.id] = {
+                id: _o.id,
+                name: _o.name,
+                children: []
+              };
+            }
+            oList[_o.id].children.push(Object.assign({}, _c));
+          }
+        }
       }
+      let aRst = [];
+      for (let k in oList) {
+        aRst.push(oList[k]);
+      }
+      this.xjMapTree = aRst;
     },
     xjMapSelChange () {
-      this.xjMapSelActive = !this.xjMapSelActive;
-      if (this.xjMapSelActive) {
+      if (this.xjDrawPolygon && this.xjDrawPolygon[0]) {
+        this.xjMap.remove(this.xjDrawPolygon[0]);
+      }
+      if (!this.xjMapSelActive) {
+        this.xjMapSelActive = true;
         this.xjMap.setDefaultCursor("crosshair");
         this.mouseTool.polygon({
           strokeColor: "#FA453A",
@@ -344,9 +374,6 @@ export default {
           isRing: false,
           zIndex: 10
         });
-      } else {
-        this.mouseTool.close(false);
-        this.xjMap.setDefaultCursor();
       }
     },
     setMapStatus (status) {
@@ -360,39 +387,94 @@ export default {
         }
       }
     },
-    // 设备
-    getListDevice () {
-      getAllMonitorList({ccode: mapXupuxian.adcode}).then(res => {
-        if (res) {
-          this.listDevice = res.data;
-          for (let i = 0; i < this.listDevice.length; i++) {
-            let _d = this.listDevice[i];
-            let sC = 'vl_icon_sxt';
-            if (_d.deviceStatus !== 1) { sC = 'vl_icon_sxt_dis'; }
-            this.doMark([_d.longitude, _d.latitude],
-              _d.deviceName, 'vl_icon ' + sC);
-          }
-          this.xjMap.setFitView();
+    // 获取设备
+    getMonitorList() {
+      let params = {
+        areaUid: mapXupuxian.adcode
+      };
+      MapGETmonitorList(params).then(res => {
+        if (res && res.data) {
+          this.monitorListDefault = res.data;
+          this.setMonitorListTreeData();
+          // monitorListTreeData
+          /* let camera = objDeepCopy(res.data.areaTreeList);
+          let bayonet = objDeepCopy(res.data.areaTreeList);
+          this.cameraTree = this.getTreeList(camera);
+          this.getLeafCountTree(this.cameraTree);
+          this.initCheckTree(); // 初始化全选树节点 */
         }
       });
     },
-    // 卡口
-    getListBayonet () {
-      getAllBayonetList({areaId: mapXupuxian.adcode}).then(res => {
-        if (res) {
-          this.listBayonet = res.data;
-          for (let i = 0; i < this.listBayonet.length; i++) {
-            let _d = this.listBayonet[i];
-            let sC = 'vl_icon_kk';
-            if (!_d.isEnabled) { sC = 'vl_icon_kk_dis'; }
-            this.doMark([_d.longitude, _d.latitude],
-              _d.bayonetName, 'vl_icon ' + sC);
+    setMonitorListTreeData () {
+      if (this.monitorListDefault && this.monitorListDefault.areaTreeList && this.monitorListDefault.areaTreeList.length > 0) {
+        let aTreeList = [];
+        for (let i = 0; i < this.monitorListDefault.areaTreeList.length; i++) {
+          let _o = this.monitorListDefault.areaTreeList[i];
+          let _t = {
+            id: _o.areaId,
+            name: _o.areaName,
+            children: []
           }
-          this.xjMap.setFitView();
+          // 设备
+          if (_o.deviceBasicList && _o.deviceBasicList.length > 0) {
+            this.xjMapListAllSum += _o.deviceBasicList.length;
+            for (let j = 0; j < _o.deviceBasicList.length; j++) {
+              let _d = _o.deviceBasicList[j];
+              _t.children.push({
+                id: _d.uid,
+                name: _d.deviceName,
+                type: 1 // 1设备 2卡口
+              });
+            }
+          }
+          // 卡口 
+          if (_o.bayonetList && _o.bayonetList.length > 0) {
+            this.xjMapListAllSum += _o.bayonetList.length;
+            for (let j = 0; j < _o.bayonetList.length; j++) {
+              let _b = _o.bayonetList[j];
+              _t.children.push({
+                id: _b.uid,
+                name: _b.bayonetName,
+                type: 2 // 1设备 2卡口
+              });
+            }
+          }
+          aTreeList.push(_t);
         }
-      });
+        this.monitorListTreeData = aTreeList;
+        // console.log('this.monitorListTreeData', this.monitorListTreeData);
+      }
     },
-    // 
+    // 标记设备/卡口
+    markMonitorList () {
+      if (this.monitorListDefault && this.monitorListDefault.areaTreeList && this.monitorListDefault.areaTreeList.length > 0) {
+        for (let i = 0; i < this.monitorListDefault.areaTreeList.length; i++) {
+          let _o = this.monitorListDefault.areaTreeList[i];
+          // 设备
+          if (_o.deviceBasicList && _o.deviceBasicList.length > 0) {
+            for (let j = 0; j < _o.deviceBasicList.length; j++) {
+              let _d = _o.deviceBasicList[j];
+              let sC = 'vl_icon_sxt';
+              if (_d.deviceStatus !== 1) { sC = 'vl_icon_sxt_dis'; }
+              this.doMark([_d.longitude, _d.latitude],
+                _d.deviceName, 'vl_icon ' + sC);
+            }
+          }
+          // 卡口 
+          if (_o.bayonetList && _o.bayonetList.length > 0) {
+            for (let j = 0; j < _o.bayonetList.length; j++) {
+              let _b = _o.bayonetList[j];
+              let sC = 'vl_icon_kk';
+              if (!_b.isEnabled) { sC = 'vl_icon_kk_dis'; }
+              this.doMark([_b.longitude, _b.latitude],
+                _b.bayonetName, 'vl_icon ' + sC);
+            }
+          }
+        }
+        this.xjMap.setFitView();
+      }
+    },
+    // 标记设备/卡口
     doMark (lnglat, title, sClass) {
       // console.log('doMark', obj);
       let marker = new window.AMap.Marker({ // 添加自定义点标记
@@ -408,20 +490,37 @@ export default {
 
     /* 新建任务 */
     xjTypeChanged (type) {
+      if (type === 1) {
+        if (this.curImageUrl) {
+          this.imgData = { path: this.curImageUrl };
+        } else {
+          this.imgData = {};
+        }
+      } else if (type === 2) {
+        if (this.curImageUrl2) {
+          this.imgData = { path: this.curImageUrl2 };
+        } else {
+          this.imgData = {};
+        }
+      }
     },
     uploadEmit (data) {
       if (data) {
         this.getPicInfo(data);
       } else {
         if (this.xjType === 1) {
+          this.curImageUrl = '';
           this.uploadPersonObj = null;
         } else if (this.xjType === 2) {
+          this.curImageUrl2 = '';
           this.uploadVehicleObj = null;
         }
       }
     },
     getPicInfo (data) {
       if (this.xjType === 1) {
+        this.curImageUrl = data.path;
+        this.picSearchLoading = true;
         getPicRecognize({
           bussType: 'person', // vehicle机动车、face人脸、person人体
           url: data.path
@@ -432,73 +531,178 @@ export default {
               img_thumbnailPath: data.thumbnailPath
             });
           }
+          this.picSearchLoading = false;
         }).catch(() => {
+          this.picSearchLoading = false;
         })
       }
       if (this.xjType === 2) {
+        this.curImageUrl2 = data.path;
+        this.picSearchLoading = true;
         getPhotoAnalysis(data.path).then(jRes => {
-          console.log('getPhotoAnalysis', jRes);
           if (jRes && jRes.data && jRes.data.length > 0) {
             this.uploadVehicleObj = Object.assign(jRes.data[0], {
               img_path: data.path,
               img_thumbnailPath: data.thumbnailPath
             });
           }
+          this.picSearchLoading = false;
         }).catch(() => {
+          this.picSearchLoading = false;
         })
       }
     },
-    delPic (index) {
-      this.compSim = '';
-      this.compSimWord = '';
-      if (index === 1) {
-        this.uploadFileList.splice(0, 1);
-        this.curImageUrl = '';
+    xjSubmit () {
+      if (this.xjType === 1 && !this.uploadPersonObj) {
+        this.msgTips('请设置目标对象'); // 人员  无图片
+        return false;
+      }
+      if (this.xjType === 2 && this.xjVechicleType === 1 && !this.uploadVehicleObj) {
+        this.msgTips('请设置目标对象'); // 车辆  无图片
+        return false;
+      }
+      if (this.xjType === 2 && this.xjVechicleType === 2 && !this.xjPlateNo) {
+        this.msgTips('请输入正确的车牌号码'); // 车辆-车牌号码  无车牌号码
+        return false;
+      }
+      this.submitLoading = true;
+      // 获取设备 xjMoreInfo  true/false
+      let params = {};
+      let dids = [], bids = [];
+      if (this.xjMoreInfo) {
+        // 更多设置
+        params.remarks = this.xjDesVal;
+        // id: "3" name: "长沙创谷广告园44" type: 1摄像头/2卡口
+        // console.log('this.xjMapTree', this.xjMapTree);
+        if (this.xjSelType === 1) {
+          for (let i = 0; i < this.xjMapTree.length; i++) {
+            if (this.xjMapTree[i] && this.xjMapTree[i].children && this.xjMapTree[i].children.length > 0) {
+              for (let j = 0; j < this.xjMapTree[i].children.length; j++) {
+                let oj = this.xjMapTree[i].children[j];
+                if (oj.type === 1) {
+                  dids.push(oj.id);
+                } else if (oj.type === 2) {
+                  bids.push(oj.id);
+                }
+              }
+            }
+          }
+        } else if (this.xjSelType === 2) {
+          let checkedNodes = this.$refs.monitorListTree.getCheckedNodes();
+          console.log('checkedNodes', checkedNodes);
+          for (let i = 0; i < checkedNodes.length; i++) {
+            let _ot = checkedNodes[i];
+            if (_ot.type === 1) {
+              dids.push(_ot.id);
+            } else if (_ot.type === 2) {
+              bids.push(_ot.id);
+            }
+          }
+        }
       } else {
-        this.uploadFileList2.splice(0, 1);
-        this.curImageUrl2 = '';
+        // 没设置更多，则是所有的设备/卡口
+        if (this.monitorListDefault && this.monitorListDefault.areaTreeList && this.monitorListDefault.areaTreeList.length > 0) {
+          for (let i = 0; i < this.monitorListDefault.areaTreeList.length; i++) {
+            let _o = this.monitorListDefault.areaTreeList[i];
+            // 设备
+            if (_o.deviceBasicList && _o.deviceBasicList.length > 0) {
+              for (let j = 0; j < _o.deviceBasicList.length; j++) {
+                dids.push(_o.deviceBasicList[j].uid);
+              }
+            }
+            // 卡口 
+            if (_o.bayonetList && _o.bayonetList.length > 0) {
+              for (let j = 0; j < _o.bayonetList.length; j++) {
+                bids.push(_o.bayonetList[j].uid);
+              }
+            }
+          }
+        }
+      }
+      // console.log('dids', dids);
+      // console.log('bids', bids);
+      if (bids && bids.length > 0) {
+        getDeviceByBayonetUids(bids).then(res => {
+          if (res && res.data) {
+            for (let i = 0; i < res.data.length; i++) {
+              dids.push(res.data[i].uid);
+            }
+          }
+          this.xjSubmitTh(params, dids);
+        }).catch(() => {
+          this.submitLoading = false;
+        });
+      } else {
+        this.xjSubmitTh(params, dids);
       }
     },
-    xjSubmit () {
+    xjSubmitTh (params, dids) {
+      if (dids && dids.length > 0) {
+        dids = [...new Set(dids)];
+        params.spotLists = dids.join(';'); // 监控点(集合形式‘;’号分隔)
+      }
+      if (!params.spotLists || params.spotLists.length <= 0) {
+        this.msgTips('请选择设备！');
+        this.submitLoading = false;
+        return false;
+      }
+      // 验证通过，可以提交
+      this.xjSubmitDo(params);
+    },
+    xjSubmitDo (params) {
       if (this.xjType === 1) {
-        let params = {
-          // spotLists: '', // 监控点(集合形式‘；’号分隔)
+        params = Object.assign(params, this.uploadPersonObj, {
           imgUrl: this.uploadPersonObj.img_path,
           subStoragePath: this.uploadPersonObj.img_thumbnailPath,
-          // personStoragePath: this.curImageUrl,
-          // type: '0', // 0是人 1是车
-          sex: this.uploadPersonObj.sex,
-          sexCode: this.uploadPersonObj.sexCode,
-          hair: this.uploadPersonObj.hair,
-          hairCode: this.uploadPersonObj.hairCode,
-          age: this.uploadPersonObj.age,
-          ageCode: this.uploadPersonObj.ageCode,
-          upperType: this.uploadPersonObj.upperType,
-          upperTypeCode: this.uploadPersonObj.upperTypeCode,
-          upperColor: this.uploadPersonObj.upperColor,
-          upperColorCode: this.uploadPersonObj.upperColorCode,
-          bottomType: this.uploadPersonObj.bottomType,
-          bottomTypeCode: this.uploadPersonObj.bottomTypeCode,
-          bottomColor: this.uploadPersonObj.bottomColor,
-          bottomColorCode: this.uploadPersonObj.bottomColorCode,
-          hat: this.uploadPersonObj.hat,
-          hatCode: this.uploadPersonObj.hatCode,
-          bag: this.uploadPersonObj.bag,
-          bagCode: this.uploadPersonObj.bagCode,
-          baby: this.uploadPersonObj.baby,
-          babyCode: this.uploadPersonObj.babyCode,
-          glasses: this.uploadPersonObj.glasses,
-          glassesCode: this.uploadPersonObj.glassesCode,
-          mask: this.uploadPersonObj.mask,
-          maskCode: this.uploadPersonObj.maskCode
-        }
+        });
+        // console.log('addPersonVideoContinue', params);
         addPersonVideoContinue(params).then((res) => {
+          if (res) {
+            this.xjClose(true);
+          }
+          this.submitLoading = false;
         }).catch((error => {
+          this.submitLoading = false;
         }));
+      } else if (this.xjType === 2) {
+        if (this.xjVechicleType === 1) {
+          params = Object.assign(params, this.uploadVehicleObj, {
+            imgUrl: this.uploadVehicleObj.img_path,
+            subStoragePath: this.uploadVehicleObj.img_thumbnailPath,
+          });
+        } else if (this.xjVechicleType === 2) {
+          params = Object.assign(params, {
+            plateNo: this.xjPlateNo
+          });
+        }
+        // console.log('addVhicleVideoContinue', params);
+        addVhicleVideoContinue(params).then((res) => {
+          if (res) {
+            this.xjClose(true);
+          }
+          this.submitLoading = false;
+        }).catch((error => {
+          this.submitLoading = false;
+        }));
+      }
+    },
+    // 信息提示
+    msgTips (smsg) {
+      let nMsg = $('.el-message--info');
+      if (nMsg && nMsg.length > 0) {
+        nMsg.find('.el-message__content').text(smsg);
+      } else {
+        this.$message({
+          message: smsg,
+          type: 'info'
+        });
       }
     }
   },
   destroyed () {
+    if (this.xjMap) {
+      this.xjMap.destroy();
+    }
   }
 }
 </script>
@@ -506,6 +710,11 @@ export default {
 .relay_new {
   width: 100%; height: 100%;
   > div { width: 100%; height: 100%; position: relative; }
+}
+.mb_map_list {
+  padding: 10px 0 10px 20px;
+  height: 640px;
+  overflow: auto;
 }
 .mb_map_map {
   overflow: hidden;
@@ -518,8 +727,10 @@ export default {
       border-bottom: 1px solid #f2f2f2;
       overflow: hidden;
       > span {
+        cursor: default;
         float: right;
         color: #999;
+        &.map_lt_sed { color: #186DFB; cursor: pointer; }
       }
     }
     > .mb_map_map_lb {
@@ -686,15 +897,24 @@ export default {
       }
     }
   }
+  > .task_mtr_ld {
+    border: 0;
+    color: #999;
+    > i {
+      position: relative; top: 2px;
+      font-size: 20px;
+      margin-right: 5px;
+    }
+  }
 }
 .relay_task_t {
   position: absolute; top: 0; left: 0;
   width: 100%;
-  padding: 15px 0 0 20px;
+  padding: 20px 0 0 20px;
 }
 .relay_task_m {
   height: 100%;
-  padding: 40px 10px 70px 10px;
+  padding: 50px 10px 70px 10px;
   > div {
     height: 100%;
     padding: 10px;

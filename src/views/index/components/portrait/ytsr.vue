@@ -69,7 +69,7 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.upPhotoUrl" alt="">
+            <img  class="bigImg" :src="sturcDetail.upPhotoUrl" alt="">
             <span>上传图</span>
           </div>
           <div class="struc_c_d_box">
@@ -89,7 +89,7 @@
               <div class="struc_cdi_line">
                 <span>{{sturcDetail.idNo}}<i class="el-icon-postcard"></i></span>
               </div>
-              <div class="struc_cdi_line">
+              <div class="struc_cdi_line" v-show="sturcDetail.group">
                 <span>{{sturcDetail.group}}</span>
               </div>
               <div class="struc_cdi_line"></div>
@@ -97,21 +97,6 @@
             <span>布控库信息</span>
           </div>
         </div>
-        <!--<div v-show="strucCurTab === 2" class="struc_c_address"></div>-->
-        <!--<div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">-->
-          <!--<div class="struc_c_d_qj struc_c_d_img">-->
-            <!--<img :src="sturcDetail.subStoragePath" alt="">-->
-            <!--<span>抓拍图</span>-->
-          <!--</div>-->
-          <!--<div class="struc_c_d_box">-->
-            <!--<video id="capVideo" :src="sturcDetail.videoPath"></video>-->
-            <!--<div class="play_btn" @click="videoTap" v-show="!playing">-->
-              <!--<i class="vl_icon vl_icon_judge_01" v-if="playing"></i>-->
-              <!--<i class="vl_icon vl_icon_control_09" v-else></i>-->
-            <!--</div>-->
-          <!--</div>-->
-          <!--<div class="download_btn"><a download="视频" :href="videoUrl"></a>下载视频</div>-->
-        <!--</div>-->
       </div>
       <div class="struc-list">
         <swiper :options="swiperOption" ref="mySwiper">
@@ -128,7 +113,6 @@
         </swiper>
       </div>
     </el-dialog>
-    <div id="capMap"></div>
   </div>
 </template>
 <script>
@@ -219,19 +203,6 @@
       imgListTap (data, index) {
         this.curImgIndex = index;
         this.sturcDetail = data;
-      },
-      videoTap () {
-        let vDom = document.getElementById('capVideo')
-        if (this.playing) {
-          vDom.pause();
-        } else {
-          vDom.play();
-        }
-        vDom.addEventListener('ended', (e) => {
-          e.target.currentTime = 0;
-          this.playing = false;
-        })
-        this.playing = !this.playing;
       }
     }
   }
