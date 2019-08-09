@@ -214,7 +214,7 @@
         class="info-right"
         v-loading="searching"
         :class="{ 'video-menu-close': !videoMenuStatus }"
-      >
+        >
         <!-- 行车记录列表 -->
         <div class="driving-record" v-if="videoMenuStatus && deviceList && deviceList.length > 0">
           <vue-scroll>

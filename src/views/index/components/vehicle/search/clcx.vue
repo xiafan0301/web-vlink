@@ -93,7 +93,7 @@
             </el-option-group>
           </el-select>
           </el-form-item>
-          <el-form-item prop="plateNo">
+          <el-form-item prop="plateNo" class="plate_no">
             <p class="carCold">车牌：<el-checkbox style="float: right;" v-model="ruleForm._include">排除</el-checkbox></p>
             <el-input placeholder="请输入车牌号" v-model="ruleForm.plateNo" class="input-with-select">
               <el-select v-model="select" slot="prepend" placeholder="">
@@ -225,7 +225,7 @@ export default {
       strucDetailDialog: false,
       isload: false,
       value1: null,
-      select: "",
+      select: "湘",
       selectValue:"已选设备0个",
       ruleForm: {
         dateStart:'',
@@ -479,7 +479,7 @@ export default {
       this.ruleForm.pageNum =this.pagination.pageNum
       let d = JSON.stringify(this.ruleForm)
       d = JSON.parse(d)
-      d.plateNo= this.ruleForm.plateNo;
+      this.ruleForm.plateNo && (d.plateNo = this.select + this.ruleForm.plateNo);
       d.pageNum = this.pagination.pageNum;
       d.pageSize = this.pagination.pageSize;
       if(!d.plateNo){
@@ -732,5 +732,8 @@ export default {
 .el-form-item__label{
   padding-right: 0px;
 }
-
+.plate_no .el-input-group__prepend{
+  padding: 0px 15px!important;
+  width: 56px!important;
+}
 </style>

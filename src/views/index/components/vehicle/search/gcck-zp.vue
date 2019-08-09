@@ -37,7 +37,7 @@
             </el-form-item>
             <el-form-item>
               <el-select v-model="formInline.lx" placeholder="请选择车辆类型" style="width: 150px;">
-                <el-option v-for="(item, index) in lxList" :label="item.enumValue" :key="'user-list-' + index" :value="item.uid"></el-option>
+                <el-option v-for="(item, index) in lxList" :label="item.enumValue" :key="'user-list-' + index" :value="item.enumValue"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item style="margin-right: 2px;">

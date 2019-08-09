@@ -385,7 +385,7 @@ export default {
         if (column.order === 'descending') {
           this.pagination.order = 'desc';
         }
-        this.pagination.orderBy = column.prop;
+        this.pagination.orderBy = 'device_seq';
       } else {
         this.pagination.order = 'desc';
         this.pagination.orderBy = 'create_time';

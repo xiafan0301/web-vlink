@@ -869,7 +869,6 @@ export default {
             // }
           }
           let marker = new window.AMap.Marker({ // 添加自定义点标记
-            map: _this.map,
             position: [obj.longitude, obj.latitude],
             offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
             draggable: false, // 是否可拖动
@@ -944,7 +943,7 @@ export default {
       _this.controlArea(1);
     }
   },
-  destroyed () {
+  beforeDestroy () {
     if (this.map) {
       this.map.destroy();
     }
