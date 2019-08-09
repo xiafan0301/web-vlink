@@ -184,7 +184,7 @@
   </div>
 </template>
 <script>
-import vehicleDetail from '../common/vehicleDetail.vue';
+import vehicleDetail from '../common/vl-dialog.vue';
 import { mapXupuxian } from "@/config/config.js";
 import { cityCode } from "@/utils/data.js";
 import { getVehicleShot,getAllDevice,getGroups,getSnapList,exportNightVehicle,getSnapDetail} from "@/views/index/api/api.judge.js";
@@ -332,15 +332,8 @@ export default {
           } */
           let _d = res.data.snapDtoList;
           this.detailData = {
-            type: 11, // 11车辆查询
-            params: {
-              where: {}
-            }, // 查询参数
             list: _d, // 列表
-            index: 0, // 第几个
-            pageSize: _d.length,
-            total: _d.length,
-            pageNum: 1
+            index: 0 // 第几个
           }
           
           //this.snapObj=res.data.snapDtoList[0]
