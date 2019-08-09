@@ -451,9 +451,7 @@
       this.getMarkHistory();
       // map click event
       _this.mapMarkerEvents();
-      setTimeout(() => {
-        this.getAlarmListByDev();
-      }, 12000);
+      this.getAlarmListByDev();
     },
     methods: {
       // 获取标注列表
