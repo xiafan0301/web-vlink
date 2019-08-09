@@ -84,7 +84,7 @@
               <!-- <p>数量（次）</p> -->
               <div id="chartContainer1">
                 <div class="chart_table">
-                  <el-table :data="chartData1" height="192">
+                  <el-table :data="chartData1">
                     <el-table-column label="设备名称" prop="name" show-overflow-tooltip></el-table-column>
                     <el-table-column label="过车数" prop="total" width="100" show-overflow-tooltip></el-table-column>
                   </el-table>
@@ -248,8 +248,8 @@ export default {
       let dv = new View().source(this.chartData2);
       dv.transform({
         type: 'percent',
-        field: 'count',
-        dimension: 'item',
+        field: 'total',
+        dimension: 'name',
         as: 'percent'
       });
       chart.source(dv, {
@@ -270,7 +270,7 @@ export default {
           console.log(value, color, checked, index)
           var markerDom = '<div class="stat11_leg_marker" style="background-color:' + color + '"></div>';
           var markerDom2 = '<i class="stat11_leg_marker2" style="background-color:' + color + '"></i>';
-          var percentDom = '<div class="stat11_leg_percent">' + _this.chartData2[index].count + '辆</div>';
+          var percentDom = '<div class="stat11_leg_percent">' + _this.chartData2[index].total + '辆</div>';
           var nameDom = '<div class="stat11_leg_name com_keepall">' + value + '</div>';
           return '<div class="g2-legend-list-item">' + markerDom + markerDom2 + nameDom + percentDom + '</div>';
         }
@@ -284,8 +284,8 @@ export default {
         itemTpl: '<li><span style="background-color:{color};" class="g2-tooltip-marker"></span>{name}: {value}</li>'
       });
       chart.intervalStack().position('percent')
-        .color('item', ['#00C888', '#8949F3', '#115BFA', '#CC00FF', '#0D9DF4'])
-        .tooltip('item*percent', function(item, percent) {
+        .color('name', ['#00C888', '#8949F3', '#115BFA', '#CC00FF', '#0D9DF4'])
+        .tooltip('name*percent', function(item, percent) {
         percent = (percent * 100).toFixed(2) + '%';
         return {
           name: item,
@@ -313,7 +313,6 @@ export default {
       this.charts.chart2 = chart;
     },
     drawChart3 () {
-      // if (this.chartData3.length === 0) return;
       let _this = this, chart = null;
       if (this.charts.chart3) {
         this.charts.chart3.clear();
@@ -328,41 +327,23 @@ export default {
           height: G2.DomUtil.getHeight(temp)
         });
       }
-      let dv = new View().source(this.chartData3);
-      dv.transform({
-        type: 'fold',
-        fields: ['count'], // 展开字段集
-        key: 'type', // key字段
-        value: 'value', // value字段
-        retains: ['time']
-      });
-      chart.source(dv, {
-        'value': {
+      chart.source(this.chartData3, {
+        'total': {
           min: 0
         }
       });
       // 坐标轴刻度
-      chart.scale('value', {
+      chart.scale('total', {
         title: {
           offset: 50
         }
       });
-      chart.axis('value', {
-        title: null
-      });
-      chart.axis('time', {
+      chart.axis('name', {
         label: {
           textStyle: {
             fill: '#999999',
             fontSize: 12
           }
-        },
-        tickLine: {
-          alignWithLabel: false,
-          length: 0
-        },
-        line: {
-          lineWidth: 0
         }
       });
       chart.tooltip({
@@ -382,13 +363,12 @@ export default {
         }
       });
       chart.legend(false);
-      chart.line().position('time*value').shape('hv').color('type', [ '#489CED']).size(2);
+      chart.line().position('name*total').shape('hv').color('#489CED').size(2);
       // chart.area().position('time*value').shape('hv').color([ 'l(270) 0:#ffffff 1:#088BFD' ]);
       chart.render();
       this.charts.chart3 = chart;
     },
     drawChart4 () {
-      // if (this.chartData4.length === 0) return;
       let chart = null;
       if (this.charts.chart4) {
         this.charts.chart4.clear();
@@ -403,60 +383,23 @@ export default {
           height: G2.DomUtil.getHeight(temp)
         });
       }
-      let dv = new View().source(this.chartData4);
-      dv.transform({
-        type: 'fold',
-        fields: ['count'], // 展开字段集
-        key: 'type', // key字段
-        value: 'value', // value字段
-        retains: ['carType']
-      });
-       // impute 补全列/补全字段
-      dv.transform({
-        type: 'impute',
-        field: 'count1',       // 待补全字段
-        // groupBy: [ 'value' ], // 分组字段集（传空则不分组）
-        method: 'value',  // 补全常量
-        value: 1     // 补全字段值时执行的规则
-      });
-      let view2 = chart.view();
-      view2.source(dv);
-      view2.tooltip(false);
-      view2.axis(false);
-      chart.interval()
-      .position('carType*count1') 
-      .color('#F2F2F2')
-      .size(30);
-
-      chart.source(dv, {
-        'value': {
+      chart.source(this.chartData4, {
+        'total': {
           min: 0
         }
       });
       // 坐标轴刻度
-      chart.scale('value', {
+      chart.scale('total', {
         title: {
           offset: 50
         }
       });
-      chart.axis('value', {
-        title: null,
-        position: 'left'
-      });
-      chart.axis('count1', false);
-      chart.axis('carType', {
+      chart.axis('name', {
         label: {
           textStyle: {
             fill: '#999999',
             fontSize: 12
           }
-        },
-        tickLine: {
-          alignWithLabel: false,
-          length: 0
-        },
-        line: {
-          lineWidth: 0
         }
       });
       chart.tooltip({
@@ -464,15 +407,14 @@ export default {
         htmlContent: function (title, items) {
           return `<div class="my_tooltip">
             <h1>${title}</h1>
-            <span><span>${items[1].value}辆</span></span></div>`;
+            <span><span>${items[0].value}辆</span></span></div>`;
         }
       });
       chart.legend(false);
       chart.interval()
-      .position('carType*value')
-      .color('type', ['l(270) 0:#0C70F8 1:#0D9DF4'])
+      .position('name*total')
+      .color('l(270) 0:#0C70F8 1:#0D9DF4')
       .size(30)
-
       chart.render();
       this.charts.chart4 = chart;
     },
@@ -505,15 +447,9 @@ export default {
         if (res) {
           this.gcsjDetail = res.data;
           this.chartData1 = res.data.device;
-          this.chartData2 = res.data.brandDto.map(m => {
-            return { item: m.name, count: m.total };
-          })
-          this.chartData3 = res.data.timeDto.map(m => {
-            return { time: m.name, count: m.total };
-          })
-          this.chartData4 = res.data.carTypeDto.map(m => {
-            return { carType: m.name, count: m.total, count1: 1 };
-          })
+          this.chartData2 = res.data.brandDto
+          this.chartData3 = res.data.timeDto;
+          this.chartData4 = res.data.carTypeDto;
           
           if (this.chartData2.length === 0) {
             if (this.charts.chart2) {
@@ -560,7 +496,7 @@ export default {
     display: flex;
     flex-wrap: nowrap;
     width: 100%;
-    height: calc(100% - .55rem);
+    height: calc(100% - 55px);
     .con_left{
       width: 272px;
       height: 100%;
@@ -645,7 +581,7 @@ export default {
         padding: 0 5px 5px;
         > div{
           width: 50%;
-          height: 50%;
+          // height: 50%;
           min-height: 300px;
           padding: 5px;
           &:nth-child(1), &:nth-child(2){
@@ -697,6 +633,9 @@ export default {
               color: #999;
             }
           }
+        }
+        > div:nth-child(3), > div:nth-child(4){
+          padding-bottom: 10px;
         }
       }
     }

@@ -16,7 +16,7 @@
       <div class="info-left">
         <vue-scroll>
           <!-- 时间 -->
-          <div class="time-search date-comp">
+          <!-- <div class="time-search date-comp">
             <el-date-picker
                 class="vl_date"
                 v-model="searchData.startTime"
@@ -26,18 +26,6 @@
                 :clearable="false"
                 format="yyyy-MM-dd HH:mm:ss">
             </el-date-picker>
-            <!-- <el-date-picker
-              class="vl_date"
-              v-model="searchData.time"
-              type="daterange"
-              range-separator="至"
-              value-format="yyyy-MM-dd"
-              format="yyyy-MM-dd"
-              :picker-options="pickerOptions"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              :clearable="false"
-            ></el-date-picker> -->
           </div>
           <div class="time-search date-comp">
             <el-date-picker
@@ -50,7 +38,7 @@
                 format="yyyy-MM-dd HH:mm:ss"
                 @change="dateChange">
             </el-date-picker>
-          </div>
+          </div> -->
           <!-- 车牌号搜索 -->
           <div class="license-plate-search">
             <el-input v-model="searchData.licensePlateNum" placeholder="请输入车牌号" @blur="blurJudge" @clear="blurJudge" clearable></el-input>
@@ -235,7 +223,7 @@ export default {
     if (this.$route.query.plateNo) {
       this.searchData.licensePlateNum = this.$route.query.plateNo;
     }
-    this.setDTime();
+    /* this.setDTime(); */
     this.getSearchData();
   },
   methods: {
@@ -285,7 +273,7 @@ export default {
       this.searchData.licensePlateNum = null;
       this.vehicleArch = {};
       this.regulationsList = [];
-      this.setDTime();
+      /* this.setDTime(); */
     },
     //查询
     search() {
@@ -298,8 +286,8 @@ export default {
     },
     getSearchData() {
       let params = {
-        dateStart: formatDate(this.searchData.startTime, "yyyy-MM-dd HH:mm:ss"),
-        dateEnd: formatDate(this.searchData.endTime, "yyyy-MM-dd HH:mm:ss"),
+        /* dateStart: formatDate(this.searchData.startTime, "yyyy-MM-dd HH:mm:ss"),
+        dateEnd: formatDate(this.searchData.endTime, "yyyy-MM-dd HH:mm:ss"), */
       };
       if (this.searchData.licensePlateNum) {
         params["plateNo"] = this.searchData.licensePlateNum;

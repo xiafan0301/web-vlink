@@ -22,7 +22,12 @@
       <span @click="showMenuActive = !showMenuActive;" class="vl_icon vid_icon_ssz" :class="{'vid_icon_sss': showMenuActive}"></span>
     </div>
     <div class="vid_relay_map" id="video_relay_map"></div>
-    <ul class="vid_relay_list">
+    <ul class="vid_relay_map_opts">
+      <li @click="mapState(1)"><i class="el-icon-aim"></i></li>
+      <li @click="mapState(2)"><i class="el-icon-plus"></i></li>
+      <li @click="mapState(3)"><i class="el-icon-minus"></i></li>
+    </ul>
+    <ul class="vid_relay_list" :class="{'vid_relay_list_ss': !showMenuActive}">
       <li class="relay_list_fst">
         <div class="relay_list_fst">
           <p class="relay_list_fst_t">目标对象</p>
@@ -42,14 +47,20 @@
         </div>
       </li>
     </ul>
+    <div is="mapVideoPlay" :oData="mapVideoData"></div>
   </div>
 </template>
 <script>
+// http://localhost:9101/#/video-relay-map?uid=0xBrpzEdZKEidWSzxIY5S6&type=0
 import {formatDate} from '@/utils/util.js';
 import {mapXupuxian} from '@/config/config.js';
+import mapVideoPlay from '@/components/common/mapVideoPlay.vue';
 export default {
+  components: {mapVideoPlay},
   data () {
     return {
+      mapVideoData: null,
+      zIndex: 100,
       showMenuActive: true,
       sedData: {},
       listData: []
@@ -61,13 +72,24 @@ export default {
         uid: i + 1,
         name: '测试接力地图数据-' + (i + 1),
         longitude: 110.394280 + (0.03 * i),
-        latitude: 27.708490 + (0.02 * i)
+        latitude: 27.708490 + (0.02 * i),
+        subStoragePath: 'http://filevlink.aorise.org/root/image/2019/08/02/800390420190801165300000001_1.JPG'
       });
     }
   },
   mounted () {
+    let _this = this;
     $('title').text('接力地图');
     this.initMap();
+    $('.vid_relay').on('click', '.vid_relay_marker_img', function () {
+      _this.videoPlayDialog = true;
+      _this.$nextTick(() => {
+        _this.mapVideoData = {
+          name: '视频接力测试视频',
+          url: 'http://10.116.126.10/root/image/2019/08/02/34020000001320000003598820190802115400000001.mp4'
+        }
+      });
+    });
   },
   methods: {
     initMap () {
@@ -88,39 +110,75 @@ export default {
     },
     selData (data) {
       this.sedData = data;
+      $('.amap-marker').css('z-index', 100);
       $('.vid_relay_marker_mk').removeClass('relay_marker_mk_sed');
       $('#relay_marker_' + data.uid).addClass('relay_marker_mk_sed');
+      $('#relay_marker_' + data.uid).closest('.amap-marker').css('z-index', 101);
+      if (data.longitude > 0 && data.latitude > 0) {
+        this.amap.setCenter([data.longitude, data.latitude]);
+      }
     },
     setMarks () {
       let gjPath = [];
+      let ism = this.listData.length > 1;
       for (let i = 0; i < this.listData.length; i++) {
         let _d = this.listData[i];
-        let marker = new window.AMap.Marker({ // 添加自定义点标记
-          map: this.amap,
-          position: [_d.longitude, _d.latitude], // 基点位置 [116.397428, 39.90923]
-          offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
-          draggable: false, // 是否可拖动
-          extData: _d,
-          // 自定义点标记覆盖物内容 vl_icon_map_car0 vl_icon_sxt_dis
-          content: '<div id="relay_marker_' + _d.uid + '" title="' + _d.name + '"' +
-            ' class="vid_relay_marker_mk">' +
-            '<span class="vl_icon vl_icon_sxt_dis"></span>' +
-            '<span class="vl_icon vl_icon_map_hover_mark0"></span>' +
-            '</div>'
-        });
-        gjPath.push([_d.longitude, _d.latitude]);
+        if (_d.longitude > 0 && _d.latitude > 0) {
+          let sClass = '', sContent = '';
+          if (ism && i === 0) {
+            // 起点
+            sContent += '<span class="cl_relay_gj_qz cl_relay_gj_q"></span>';
+            sClass += 'cl_relay_qz';
+          } else if (ism && i === (this.listData.length - 1)) {
+            // 终点
+            sClass += 'cl_relay_qz';
+            sContent += '<span class="cl_relay_gj_qz cl_relay_gj_z"></span>';
+          } else {
+            sContent += '<span class="vl_icon vl_icon_sxt_dis"></span>' +
+              '<span class="vl_icon vl_icon_map_hover_mark0"></span>';
+          }
+          sContent = '<div id="relay_marker_' + _d.uid + '" title="' + _d.name + '"' +
+            ' class="vid_relay_marker_mk ' + sClass + '">' +
+            sContent +
+            '<div class="vid_relay_marker_img">' +
+              '<img src="' + _d.subStoragePath + '" controls></img><span class="vl_icon"></span>' +
+            '</div>' +
+          '</div>';
+          new window.AMap.Marker({ // 添加自定义点标记
+            map: this.amap,
+            position: [_d.longitude, _d.latitude], // 基点位置 [116.397428, 39.90923]
+            offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
+            draggable: false, // 是否可拖动
+            extData: _d,
+            // 自定义点标记覆盖物内容 vl_icon_map_car0 vl_icon_sxt_dis
+            content: sContent,
+            zIndex: 100
+          });
+          gjPath.push([_d.longitude, _d.latitude]);
+        }
       }
-      // 绘制轨迹
-      var polyline = new window.AMap.Polyline({
-        map: this.amap,
-        showDir: true,
-        path: gjPath,
-        strokeColor: "#61c772",  // 线颜色
-        strokeOpacity: 1,     // 线透明度
-        strokeWeight: 10,      // 线宽
-        strokeStyle: "solid"  // 线样式 dashed solid
-      });
+      if (gjPath && gjPath.length > 0) {
+        // 绘制轨迹
+        var polyline = new window.AMap.Polyline({
+          map: this.amap,
+          showDir: true,
+          path: gjPath,
+          strokeColor: "#61c772",  // 线颜色
+          strokeOpacity: 1,     // 线透明度
+          strokeWeight: 10,      // 线宽
+          strokeStyle: "solid"  // 线样式 dashed solid
+        });
+      }
       this.amap.setFitView();
+    },
+    mapState (type) {
+      if (type === 1) {
+        this.amap.setFitView();
+      } else if (type === 2) {
+        this.amap.setZoom(this.amap.getZoom() + 1);
+      } else if (type === 3) {
+        this.amap.setZoom(this.amap.getZoom() - 1);
+      }
     },
     doMark (obj, sClass) {
       // console.log('doMark', obj);
@@ -129,16 +187,40 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.vid_relay_map_opts {
+  position: absolute; right: 10px; bottom: 238px;
+  font-size: 24px;
+  background: #ffffff;
+  width: 68px;
+  padding: 0 10px;
+  > li {
+    line-height: 60px;
+    text-align: center;
+    cursor: pointer;
+    border-bottom: 1px solid #F2F2F2;
+    > i {
+      margin-top: 0;
+      display: inline-block;
+    }
+    color: #999999;
+    &:hover {
+      color: #0C70F8;
+    }
+  }
+}
 .vid_relay {
   position: relative;
   width: 100%; height: 100%;
   overflow: hidden;
 }
 .vid_relay_list {
-  position: absolute; bottom: 0px; left: 265px;
+  position: absolute; bottom: 0px; left: 270px;
   padding: 5px;
   overflow: hidden;
   height: 238px; overflow: hidden;
+  &.vid_relay_list_ss {
+    left: 0px;
+  }
   > li {
     float: left;
     padding: 5px;
@@ -279,6 +361,34 @@ export default {
 .vid_relay_marker_mk {
   position: relative;
   width: 41px; height: 48px;
+  .cl_relay_gj_qz {
+    position: absolute; top: 8px; left: -20px;
+    width: 80px; height: 80px;
+    &.cl_relay_gj_q {
+      background: url(../../../../assets/img/icons/icons_qd.png) center center no-repeat;
+    }
+    &.cl_relay_gj_z {
+      background: url(../../../../assets/img/icons/icons_zd.png) center center no-repeat;
+    }
+  }
+  .vid_relay_marker_img {
+    display: none;
+    position: absolute; top: -45px; left: 48px; z-index: 1000;
+    width: 160px; height: 120px;
+    cursor: pointer;
+    > img { width: 160px; height: 120px; }
+    > span { 
+      position: absolute; top: 50%; left: 50%;
+      width: 80px; height: 80px;
+      margin-top: -40px; margin-left: -40px;
+      background-position: -659px -254px;
+    }
+  }
+  &.cl_relay_qz {
+    img {
+      top: -10px; left: 62px;
+    }
+  }
   > .vl_icon_sxt_dis {
     width: 100%; height: 100%;
   }
@@ -291,6 +401,9 @@ export default {
       display: none;
     }
     > .vl_icon_map_hover_mark0 {
+      display: block;
+    }
+    .vid_relay_marker_img {
       display: block;
     }
   }

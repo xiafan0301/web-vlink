@@ -19,11 +19,10 @@
             <div><span>卡口编码</span><span>{{bayonetDetail.bayonetCode || '无'}}</span></div>
             <div><span>卡口IP</span><span>{{bayonetDetail.ipAddress || '无'}}</span></div>
             <div><span>管理车道数</span><span>{{bayonetDetail.laneNum || '无'}}</span></div>
-            <div><span>描述</span><span>{{bayonetDetail.desci || '无'}}</span></div>
           </li>
           <li>
             <div><span>卡口编号</span><span>{{bayonetDetail.bayonetNo || '无'}}</span></div>
-            <div><span>卡口用途</span><span>{{transcodingUse(bayonetDetail.use || '无')}}</span></div>
+            <div><span>卡口用途</span><span :title="transcodingUse(bayonetDetail.use, 1)">{{transcodingUse(bayonetDetail.use)}}</span></div>
             <div><span>是否启用</span><span>{{bayonetDetail.isEnabled ? '启用' : '停用'}}</span></div>
           </li>
           <li>
@@ -32,10 +31,10 @@
           </li>
           <li>
             <div><span>出入城卡口</span><span>{{bayonetDetail.isEnterPoint === 1 ? '入城卡口' : bayonetDetail.isEnterPoint === 2 ? '出城卡口' : bayonetDetail.isEnterPoint === 3 ? '其他' : ''}}</span></div>
-            <div><span>卡口地址</span><span>{{bayonetDetail.bayonetAddress || '无'}}</span></div>
-            
+            <div><span>卡口地址</span><span :title="bayonetDetail.bayonetAddress">{{bayonetDetail.bayonetAddress | strCutWithLen(30)}}</span></div>
           </li> 
         </ul>
+        <div><span>描述</span><span>{{bayonetDetail.desci || '无'}}</span></div>
       </div>
       <div class="camera_info">
         <h1>卡口设备</h1>
@@ -142,11 +141,11 @@
           <div><span>摄像头类型</span><span>{{dicFormater(datalist.cameraType, String(devDetail.type)) || '无'}}</span></div>
           <div><span>拍摄方向</span><span>{{devDetail.filmDirection || '无'}}</span></div>
           <div><span>视频接入编码</span><span>{{devDetail.deviceCode || '无'}}</span></div>
-          <div><span>用途</span><span>{{devDetail.deviceUse || '无'}}</span></div>
+          <div><span>用途</span><span>{{devDetail.deviceUse === 1 ? '抓拍摄像头' : devDetail.deviceUse === 2 ? '全景摄像头' : '无'}}</span></div>
         </li>
         <li>
           <div><span>厂商</span><span>{{dicFormater(datalist.manufacturer, String(devDetail.manufacturer)) || '无'}}</span></div>
-          <div><span>智能特性</span><span>{{devDetail.intelligentCharacs && devDetail.intelligentCharacs.split(',').map(m => dicFormater(datalist.intelCharac, String(m))).join(',') || '无'}}</span></div>
+          <div><span>智能特性</span><span :title="transcodingIntelCharac(devDetail.intelligentCharacs, 1)">{{transcodingIntelCharac(devDetail.intelligentCharacs)}}</span></div>
           <div><span>结构化设备编码</span><span>{{devDetail.viewClassCode || '无'}}</span></div>
         </li>
       </ul>
@@ -194,8 +193,8 @@ export default {
     this.getBayonetDetail();
   },
   methods: {
-    transcodingUse (use) {
-      if (!use) return;
+    transcodingUse (use, type) {
+      if (!use) return '无';
       let list = ['人脸抓拍', '车辆抓拍', '全结构化', '其他用途'];
       let str = '';
       let data = use.split(',');
@@ -206,11 +205,18 @@ export default {
           str += list[f - 1] + ',';
         }
       })
-      return str;
+      if (type) return str;
+      return this.strCutWithLen(str, 30);
     },
     transcodingDirection (type) { 
       let list = ['直行', '左转', '右转', '调头'];
       return list[type - 1];
+    },
+    transcodingIntelCharac (data, type) {
+      if (!data) return '无';
+      const str = data.split(',').map(m => this.dicFormater(this.datalist.intelCharac, String(m))).join(',');
+      if (type) return str;
+      return this.strCutWithLen(str, 25);
     },
     // 获取卡口详情
     getBayonetDetail () {
@@ -261,6 +267,30 @@ export default {
   width: 100%;
   height: 100%;
   position: relative;
+  @mixin text_alignment{
+    position: relative;
+    > span:nth-child(1){
+      position: absolute;
+      width: 70px;
+      text-align: right;
+      color: #666;
+    }
+    > span:after{
+      display: inline-block;
+      content: '';
+      width: 100%;
+      height: 0;
+    }
+    > span:before{
+      position: absolute;
+      left: 70px;
+      content: '\FF1A';
+    }
+    > span:nth-child(2){
+      padding-left: 84px;
+      color: #333;
+    }
+  }
   .content_box{
     width: 100%;
     height: calc(100% - 128px);
@@ -318,30 +348,14 @@ export default {
         > li{
           width: 25%;
           > div{
-            position: relative;
-            > span:nth-child(1){
-              position: absolute;
-              width: 70px;
-              text-align: right;
-              color: #666;
-            }
-            > span:after{
-              display: inline-block;
-              content: '';
-              width: 100%;
-              height: 0;
-            }
-            > span:before{
-              position: absolute;
-              left: 70px;
-              content: '\FF1A';
-            }
-            > span:nth-child(2){
-              padding-left: 84px;
-              color: #333;
-            }
+            @include text_alignment;
           }
         }
+      }
+      > div{
+        display: flex;
+        padding: 0 20px;
+        @include text_alignment;
       }
     }
     .camera_info{
