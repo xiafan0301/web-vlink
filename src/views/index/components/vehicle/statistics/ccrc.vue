@@ -34,7 +34,7 @@
           </el-date-picker>
         </div>
         <div class="kakou">
-          <el-select v-model="lll" placeholder="请选择卡口" style="width: 230px" multiple collapse-tags @change="selchange">
+          <el-select v-model="lll" placeholder="请选择入城卡口" style="width: 230px" multiple collapse-tags @change="selchange">
             <el-option key="全选" lable="全选" value="全选"  :class="{selected: showselected}"></el-option>
             <el-option
                 v-for="item in kakou"
