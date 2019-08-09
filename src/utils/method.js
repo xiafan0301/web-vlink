@@ -2,6 +2,24 @@
  * vue全局方法
  */
 import Vue from 'vue';
+import ElementUI from 'element-ui';
+/*
+ * 消息提示全局方法
+ * @param {string} msg 消息提示内容
+ * @param {string} type 主题 success/warning/info/error
+ * */
+Vue.prototype.$MyMessage = function (msg, type) {
+  if (!type) { type = 'info'; } 
+  let nMsg = $('.el-message--' + type);
+  if (nMsg && nMsg.length > 0) {
+    nMsg.find('.el-message__content').text(msg);
+  } else {
+    ElementUI.Message({
+      message: msg,
+      type: type
+    });
+  }
+}
 /*
  * 获取字符串长度
  * @param {string} str 字符串

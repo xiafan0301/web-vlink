@@ -745,15 +745,7 @@ export default {
     },
     // 信息提示
     msgTips (smsg) {
-      let nMsg = $('.el-message--info');
-      if (nMsg && nMsg.length > 0) {
-        nMsg.find('.el-message__content').text(smsg);
-      } else {
-        this.$message({
-          message: smsg,
-          type: 'info'
-        });
-      }
+      this.$MyMessage(smsg, 'error');
     }
   },
   destroyed () {
