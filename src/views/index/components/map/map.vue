@@ -361,7 +361,6 @@
         }
       },
       mapTypeList (newValue, oldValue) {
-        console.log(newValue, oldValue);
         let arr = [], bool = false;
         if (oldValue.length > newValue.length) { // 隐藏
           arr = oldValue.filter(x => !newValue.includes(x))
@@ -381,13 +380,11 @@
         })
         // 更新地图Top栏 跟
         this.isInAreaAndCheckBox();
-        console.log(this.mapTreeData[0].infoList)
         this.operClassToEL();
         this.updateNumberss();
       },
       // 视频通话相关
       stateHandler (oData) {
-        console.log('----------------------------->', oData)
         if (oData.state > 20) {
           if (oData.mark) {
             this.map.remove(oData.mark);
@@ -484,7 +481,6 @@
               let _i = this.markList.findIndex(x => {
                 return x.uid === this.curSignObj.uid;
               })
-              console.log(this.curSignObj.dataType, _i)
               this.clearSign(false, this.curSignObj.dataType, _i);
               if (this.hoverWindow ){this.hoverWindow.close()}
               this.markList = this.markList.filter(x => x.uid !== this.curSignObj.uid);
@@ -665,7 +661,6 @@
                   this.mapTreeData = this.switchData(res.data);
                   // 这里执行isInAreaAndCheckBox只是为了，把没有经纬度的数据过滤掉；
                   this.isInAreaAndCheckBox();
-                  console.log('树的数据', this.mapTreeData);
                   this.$_hideLoading();
                   this.mapMark(this.mapTreeData[0].infoList);
                   // 定时查询车辆数据
@@ -1209,7 +1204,6 @@
                 _this.mapMark([obj], true);
               }
             }).catch(err => {
-              console.log(err)
               _this.$_hideLoading();
             })
           }
@@ -1457,7 +1451,6 @@
         newNum.forEach((x, _index) => {
           this.mapTreeData[0][this.constObj[_index]._key] = x[this.constObj[_index]._key];
         })
-        console.log(this.mapTreeData[0])
       },
       // boolean 为 true时 显示, false 隐藏.  operLeft 存在的话，说明是操作了左侧地图信息树，
       operClassToEL () {
@@ -1519,7 +1512,6 @@
         let _this = this;
         $('.add_sign_text').unbind('keyup');
         this.markListener = window.AMap.event.addListener(this.map, 'click', function (e) {
-          console.log('222')
           if (_this.markEditMarker) {return false;}
           let marker = new window.AMap.Marker({ // 添加自定义点标记
             map: _this.map,
@@ -1656,7 +1648,6 @@
             this.mapTypeList = this.mapTypeList.includes(_i) ? this.mapTypeList.concat([]) : this.mapTypeList.concat([_i])
           }
         }
-        console.log(item, index);
         // 类型字段伪造
         this.isInAreaAndCheckBox();
         this.updateNumberss();
@@ -1765,7 +1756,6 @@
         this.callingList.forEach(x => {
           let _m = this.markCalling(x);
           x.mark = _m;
-          console.log($('#' + x._mid))
           this.map.setZoomAndCenter(16, [x.longitude, x.latitude])
           setTimeout(() => {
             $('#' + x._mid).addClass('vl_icon_map_mark_calling');
