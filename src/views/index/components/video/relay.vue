@@ -321,9 +321,10 @@ export default {
   watch: {
     showVideoTotal () {
       this.playersHandler(this.showVideoTotal);
+    },
+    showConTitle () {
+      this.searchSubmit();
     }
-  },
-  computed: {
   },
   created () {
     // window.localStorage.getItem(name);
@@ -334,7 +335,7 @@ export default {
     this.startTime2 = this.initTime[0];
     this.endTime2 = this.initTime[1];
 
-    this.reSearch();
+    this.searchSubmit();
   },
   mounted () {
   },
@@ -346,23 +347,27 @@ export default {
       }
       if (!bClear) {
         this.relayListIntval = window.setInterval(() => {
-          this.reSearch(true);
-        }, 30 * 1000);
+          this.reSearch();
+        }, 60 * 1000);
       }
     },
-    searchSubmit (isFinished) {
-      if (isFinished) {
+    searchSubmit () {
+      /* if (isFinished) {
         this.getRelayList(true); // 已结束
       } else {
         this.getRelayList(); // 进行中
         this.intvalRelayList(false);
-      }
+      } */
+      this.reSearch();
+      this.intvalRelayList(false);
     },
     // flag 
-    reSearch (flag) {
-      this.getRelayList(); // 进行中
-      this.getRelayList(true); // 已结束
-      this.intvalRelayList(false); // 开启定时器
+    reSearch () {
+      if (this.showConTitle === 1) {
+        this.getRelayList(); // 进行中
+      } else if (this.showConTitle === 2) {
+        this.getRelayList(true); // 已结束
+      }
     },
     getRelayList (isFinished) {
       let st = null, et = null, stype = '';
@@ -408,9 +413,7 @@ export default {
                 type: 5,
                 title: ' ',
                 record: false,
-                video: Object.assign({}, this.relayList[j], {
-                  videos: []
-                })
+                video: Object.assign({}, this.relayList[j])
               };
               break;
             }
@@ -532,9 +535,7 @@ export default {
           type: 5,
           title: ' ',
           record: false,
-          video: Object.assign({}, this.dragActiveObj, {
-            videos: []
-          })
+          video: Object.assign({}, this.dragActiveObj)
           /* video: Object.assign({}, this.dragActiveObj, {
             videoPath: ''
             // videoPath: 'http://10.116.126.10/root/image/2019/08/02/34020000001320000003598820190802115400000001.mp4'
@@ -630,11 +631,11 @@ export default {
         if (res) {
           // this.reSearch();
         }
-        if (cbType === 1) {
+        /* if (cbType === 1) {
           this.getRelayList(true); // 已结束 
         } else if (cbType === 2) {
           this.getRelayList(); // 进行中
-        }
+        } */
           
       }).catch(error => {});
     },
@@ -906,7 +907,7 @@ export default {
         > .relay_ul_lii {
           height: 60px;
           text-align: center;
-          margin-bottom: 5px;
+          margin-bottom: 5px; padding-right: 10px;
           > img { max-height: 100%; max-width: 100%; text-align: center; }
         }
         > .relay_ul_lid {
