@@ -3,7 +3,7 @@
       :visible.sync="strucDetailDialog"
       class="struc_detail_dialog_qypz"
       :close-on-click-modal="false"
-      top="4vh"
+      :append-to-body="true"
       :show-close="false">
     <div class="struc_tab">
       <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">抓拍详情</span>
@@ -292,8 +292,9 @@
       width: 100%!important;
       /* 祖先元素设置了transform属性则会导致固定定位属性position: fixed失效。 */
       transform: none !important;
-      top: calc(100% - 8.8rem);
+      /* top: calc(100% - 8.8rem); */
       left: calc((100% - 13.06rem)/2);
+      margin-top: -296px !important;
     }
     .el-dialog__header {
       display: none;
