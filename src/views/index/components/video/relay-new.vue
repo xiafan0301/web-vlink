@@ -194,9 +194,13 @@
                 </el-tree>
               </div>
             </div>
-            <div class="task_mb_d">
-              <span>备注说明：</span>
-              <el-input v-model="xjDesVal" style="width: 500px;" size="small" maxlength="50" placeholder="请输入50字以内的备注说明"></el-input>
+            <div class="task_mb_d" style="padding-bottom: 0;">
+              <el-form :model="desForm" :rules="desFormRules" ref="desForm" label-width="100px">
+                <el-form-item label="备注说明：" prop="xjDesVal">
+                  <el-input v-model="desForm.xjDesVal" style="width: 500px;" size="small" placeholder="请输入50字以内的备注说明"></el-input>
+                </el-form-item>
+              </el-form>
+              <!-- desForm -->
             </div>
           </div>
         </div>
@@ -242,7 +246,14 @@ export default {
         label: 'name'
       },
 
-      xjDesVal: '',
+      desForm: {
+         xjDesVal: ''
+      },
+      desFormRules: {
+        xjDesVal: [
+          { max: 50, message: '最多输入50个字符', trigger: 'change' }
+        ]
+      },
 
       submitLoading: false,
 
@@ -627,8 +638,13 @@ export default {
       let params = {};
       let dids = [], bids = [];
       if (this.xjMoreInfo) {
+        if (this.desForm.xjDesVal && this.desForm.xjDesVal.length > 50) {
+          this.msgTips('备注说明最多可输入50个字符');
+          this.submitLoading = false;
+          return false;
+        }
         // 更多设置
-        params.remarks = this.xjDesVal;
+        params.remarks = this.desForm.xjDesVal;
         // id: "3" name: "长沙创谷广告园44" type: 1摄像头/2卡口
         // console.log('this.xjMapTree', this.xjMapTree);
         if (this.xjSelType === 1) {
@@ -745,15 +761,7 @@ export default {
     },
     // 信息提示
     msgTips (smsg) {
-      let nMsg = $('.el-message--info');
-      if (nMsg && nMsg.length > 0) {
-        nMsg.find('.el-message__content').text(smsg);
-      } else {
-        this.$message({
-          message: smsg,
-          type: 'info'
-        });
-      }
+      this.$MyMessage(smsg, 'error');
     }
   },
   destroyed () {

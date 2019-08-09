@@ -11,7 +11,7 @@
         <div class="top">
           <i class="vl_icon vl_icon_event_4"></i>
           <span class="name">{{detailInfo.deviceName}}</span>
-          <span class="status online-status">在线</span>
+          <span class="status" :class="[detailInfo.deviceStatusStr === '正常' ? 'online-status' : 'offline-status']" v-show="detailInfo.deviceStatusStr">{{detailInfo.deviceStatusStr}}</span>
         </div>
         <p class="create_time">创建于{{detailInfo.createTime}}，最近更新于{{detailInfo.updateTime}}</p>
       </div>
