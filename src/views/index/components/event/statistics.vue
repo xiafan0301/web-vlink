@@ -473,6 +473,7 @@ export default {
         .shape('sliceShape')
         .label('percent', {
           offset: 20,
+          textBaseline: 'bottom',
           htmlTemplate: (text, item, index) => {
             if (item.point.percent > 0) {
               let levelName = null;
@@ -1229,6 +1230,9 @@ export default {
   background-color: #ffffff;
   padding: 10px;
   min-width: 150px;
+  &:hover {
+    z-index: 111;
+  }
   .icon_number {
     display: flex;
     align-items: center;

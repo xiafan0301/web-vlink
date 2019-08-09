@@ -77,18 +77,6 @@
               <h2>分析结果</h2>
                 <ul class="stru_ul">
                   <vue-scroll>
-                    <!-- <li>
-                      <span>抓拍时间</span>
-                      <span>{{sturcDetail.shotTime ? sturcDetail.shotTime : '无'}}</span>
-                    </li> -->
-                    <!-- <li>
-                      <span>抓拍摄像头</span>
-                      <span :title="sturcDetail.deviceName" class="info_span">{{sturcDetail.deviceName ? sturcDetail.deviceName : '无'}}</span>
-                    </li> -->
-                    <!-- <li>
-                      <span>抓拍地点</span>
-                      <span :title="sturcDetail.address" class="info_span">{{sturcDetail.address ? sturcDetail.address : '无'}}</span>
-                    </li> -->
                     <li>
                       <span>车牌号码</span>
                       <span>{{sturcDetail.plateNo ? sturcDetail.plateNo : '无'}}</span>
