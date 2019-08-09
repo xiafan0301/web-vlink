@@ -66,6 +66,7 @@
     </div>
     <div class="table_box">
       <el-table
+        ref="tableBox"
         v-loading="loading"
         @sort-change="bayonetNoSort"
         :data="bayonetManageList.list"
@@ -270,6 +271,10 @@ export default {
         state: null,
         bayonetName: null
       };
+      this.$nextTick(() => {
+        this.$refs['tableBox'].clearSort();
+      })
+      this.getBayonetManageList();
     },
     // 导出
     exportBayonetList () {
