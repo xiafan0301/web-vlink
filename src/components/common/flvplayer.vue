@@ -1319,7 +1319,7 @@ export default {
 /* 视频接力 begin */
 .player_fit { object-fit: fill; }
 .player_relay_i {
-  position: absolute; top: 10px; left: 10px; z-index: 1001;
+  position: absolute; top: 10px; left: 10px; z-index: 191;
   > .player_relay_icp {
     > ul {
       margin: 0 auto; padding: 8px 10px;
@@ -1345,7 +1345,7 @@ export default {
 /* 视频接力 end */
 .flvplayer_ptz {
   width: 174px;
-  position: absolute; bottom: 50px; left: 50%; z-index: 200;
+  position: absolute; bottom: 50px; left: 50%; z-index: 180;
   margin-left: -87px;
   > ul {
     position: relative;
@@ -1405,7 +1405,7 @@ export default {
     cursor: pointer;
   }
   > .player_loading {
-    position: absolute; top: 0; left: 0; z-index: 1000;
+    position: absolute; top: 0; left: 0; z-index: 190;
     height: 100%; width: 100%;
     background-color: #000;
     text-align: center;
@@ -1415,7 +1415,7 @@ export default {
     }
   }
   > .vl_icon_close {
-    position: absolute; top: 10px; right: 10px; z-index: 1001;
+    position: absolute; top: 10px; right: 10px; z-index: 191;
     cursor: pointer;
   }
   > .vl_icon_v51 {

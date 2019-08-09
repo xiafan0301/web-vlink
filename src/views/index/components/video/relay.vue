@@ -70,8 +70,7 @@
                             <img class="bigImg" :src="item.subStoragePath" alt="">
                           </div>
                           <div class="relay_ul_lid com_ellipsis">
-                            <span v-if="item.remarks">{{item.remarks}}</span>
-                            <span style="color: #999;" v-else>暂无备注</span>
+                            <span v-if="item.remarks" :title="item.remarks">{{item.remarks}}</span>
                           </div>
                         </div>
                         <div class="relay_ul_list_active" draggable="false" v-else>
@@ -86,8 +85,7 @@
                             <img class="bigImg" :src="item.subStoragePath" draggable="false" alt="">
                           </div>
                           <div class="relay_ul_lid com_ellipsis">
-                            <span v-if="item.remarks">{{item.remarks}}</span>
-                            <span style="color: #999;" v-else>暂无备注</span>
+                            <span v-if="item.remarks" :title="item.remarks">{{item.remarks}}</span>
                           </div>
                         </div>
                       </li>
@@ -108,8 +106,7 @@
                             <img class="bigImg" :src="item.subStoragePath" alt="">
                           </div>
                           <div class="relay_ul_lid com_ellipsis">
-                            <span v-if="item.remarks">{{item.remarks}}</span>
-                            <span style="color: #999;" v-else>暂无备注</span>
+                            <span v-if="item.remarks" :title="item.remarks">{{item.remarks}}</span>
                           </div>
                         </div>
                         <div class="relay_ul_list_active" draggable="false" v-else>
@@ -124,8 +121,7 @@
                             <img class="bigImg" :src="item.subStoragePath" draggable="false" alt="">
                           </div>
                           <div class="relay_ul_lid com_ellipsis">
-                            <span v-if="item.remarks">{{item.remarks}}</span>
-                            <span style="color: #999;" v-else>暂无备注</span>
+                            <span v-if="item.remarks" :title="item.remarks">{{item.remarks}}</span>
                           </div>
                         </div>
                       </li>
@@ -202,8 +198,7 @@
                           <img class="bigImg" :src="item.subStoragePath" draggable="false" alt="">
                         </div>
                         <div class="relay_ul_lid com_ellipsis">
-                          <span v-if="item.remarks">{{item.remarks}}</span>
-                          <span style="color: #999;" v-else>暂无备注</span>
+                          <span v-if="item.remarks" :title="item.remarks">{{item.remarks}}</span>
                         </div>
                       </div>
                     </li>
@@ -352,7 +347,7 @@ export default {
       if (!bClear) {
         this.relayListIntval = window.setInterval(() => {
           this.reSearch(true);
-        }, 10 * 60 * 1000);
+        }, 30 * 1000);
       }
     },
     searchSubmit (isFinished) {
@@ -953,6 +948,9 @@ export default {
   width: 100%; height: 50px; line-height: 48px;
   text-align: center;
   background-color: #fff;
+}
+.vid_show_menu {
+  > .vl_icon { z-index: 2000; }
 }
 </style>
 <style lang="scss">

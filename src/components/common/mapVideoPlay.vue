@@ -48,7 +48,7 @@ export default {
             record: false,
             video: {
               uid: new Date().getTime(),
-              downUrl: 'http://10.116.126.10/root/image/2019/08/02/34020000001320000003598820190802115400000001.mp4'
+              downUrl: val.url
             }
           }
         });
