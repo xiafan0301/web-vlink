@@ -27,7 +27,7 @@
           </div>
         </div>
         <div class="list-box">
-          <div class="list-item" v-for="item in dataList" :key="item.uid" @click="onOpenDetail(item)">
+          <div class="list-item" v-for="(item, index) in dataList" :key="item.uid" @click="onOpenDetail(item, index)">
             <img :src="item.subStoragePath" alt="">
             <p class="time"><i></i>{{item.shotTime}}</p>
             <p class="address"><i></i>抓拍设备:{{item.deviceName}}</p>
@@ -46,7 +46,7 @@
         <div is="noResult" :isInitPage="isInitPage"></div>
       </template>
     </div>
-    <el-dialog
+    <!-- <el-dialog
       :visible.sync="strucDetailDialog"
       class="struc_detail_ycxc_dialog"
       :close-on-click-modal="false"
@@ -127,7 +127,6 @@
       </div>
       <div class="struc-list">
         <swiper :options="swiperOption" ref="mySwiper">
-          <!-- slides -->
           <swiper-slide v-for="(item, index) in allDataList" :key="index + 'isgm'">
             <div class="swiper_img_item" :class="{'active': item.uid === curImgIndex}" @click="imgListTap(item)">
               <img style="display: block; width: 100%; height: .88rem;" :src="item.subStoragePath" alt="">
@@ -137,10 +136,12 @@
           <div class="swiper-button-next" slot="button-next"></div>
         </swiper>
       </div>
-    </el-dialog>
+    </el-dialog> -->
+    <div is="vlDialog" :detailData="detailData"></div>
   </div>
 </template>
 <script>
+import vlDialog from '../common/vl-dialog.vue';
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import noResult from '@/components/common/noResult.vue';
@@ -149,6 +150,7 @@ import { getNightVehicleRecordList, getSnapDetail  }from "@/views/index/api/api.
 export default {
   components: {
     noResult,
+    vlDialog,
     vlBreadcrumb
   },
   data () {
@@ -167,34 +169,35 @@ export default {
       currentPage: 1,
       sortTimeType: 'asc', // 时间排序active  默认升序
       sortMonitoryType: null, // 监控排序active
-      /* 抓拍记录页面参数 */
-      strucDetailDialog: false, // 抓拍记录弹窗
-      strucCurTab: 1, // 抓拍记录弹窗tab
-      curImgIndex: 0, // 当前选择的图片index
-      strucInfoList: [],
-      sturcDetail: {},
-      bResize: {},
-      markerPoint: null, // 地图icon
-      newMarker: null,
-      playUrl: {},
-      videoUrl: null, // 下载地址
-      map: null,
-      swiperOption: {
-        initialSlide: 5,
-        slidesPerView: 10,
-        spaceBetween: 18,
-        slidesPerGroup: 10,
-        loop: false,
-        slideToClickedSlide: true,
-        loopFillGroupWithBlank: true,
-        navigation: {
-          nextEl: '.swiper-button-next',
-          prevEl: '.swiper-button-prev',
-        },
-      },
+      // /* 抓拍记录页面参数 */
+      // strucDetailDialog: false, // 抓拍记录弹窗
+      // strucCurTab: 1, // 抓拍记录弹窗tab
+      // curImgIndex: 0, // 当前选择的图片index
+      // strucInfoList: [],
+      // sturcDetail: {},
+      // bResize: {},
+      // markerPoint: null, // 地图icon
+      // newMarker: null,
+      // playUrl: {},
+      // videoUrl: null, // 下载地址
+      // map: null,
+      detailData: null,
+      // swiperOption: {
+      //   initialSlide: 5,
+      //   slidesPerView: 10,
+      //   spaceBetween: 18,
+      //   slidesPerGroup: 10,
+      //   loop: false,
+      //   slideToClickedSlide: true,
+      //   loopFillGroupWithBlank: true,
+      //   navigation: {
+      //     nextEl: '.swiper-button-next',
+      //     prevEl: '.swiper-button-prev',
+      //   },
+      // },
       dataList: [], // 分页抓拍记录
       allDataList: [], // 所有的抓拍记录
-      playing: false, // 视频播放是否
+      // playing: false, // 视频播放是否
       queryObj: {},
       numberTypeList: [], // 号牌种类列表
     }
@@ -217,6 +220,7 @@ export default {
   mounted () {
     this.getNumberTypeList();
     this.getList();
+    this.getAllList();
   },
   methods: {
     // 获取号牌种类列表
@@ -230,20 +234,20 @@ export default {
         })
     },
     // 播放视频
-    videoTap() {
-      // 播放视频
-      let vDom = document.getElementById("capVideo");
-      if (this.playing) {
-        vDom.pause();
-      } else {
-        vDom.play();
-      }
-      vDom.addEventListener("ended", e => {
-        e.target.currentTime = 0;
-        this.playing = false;
-      });
-      this.playing = !this.playing;
-    },
+    // videoTap() {
+    //   // 播放视频
+    //   let vDom = document.getElementById("capVideo");
+    //   if (this.playing) {
+    //     vDom.pause();
+    //   } else {
+    //     vDom.play();
+    //   }
+    //   vDom.addEventListener("ended", e => {
+    //     e.target.currentTime = 0;
+    //     this.playing = false;
+    //   });
+    //   this.playing = !this.playing;
+    // },
     // 获取所有的抓拍记录
     getAllList () {
     
@@ -285,48 +289,48 @@ export default {
     /**
      * 弹框地图初始化
      */
-    initMap (obj) {
-      // this.map.setZoomAndCenter(iZoom, aCenter);
-      let map = new window.AMap.Map('container', {
-        zoom: 14, // 级别
-        center: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 中心点坐标
-      });
-      map.setMapStyle('amap://styles/whitesmoke');
-      this.map = map;
-      this.drawPoint(obj)
-    },
+    // initMap (obj) {
+    //   // this.map.setZoomAndCenter(iZoom, aCenter);
+    //   let map = new window.AMap.Map('container', {
+    //     zoom: 14, // 级别
+    //     center: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 中心点坐标
+    //   });
+    //   map.setMapStyle('amap://styles/whitesmoke');
+    //   this.map = map;
+    //   this.drawPoint(obj)
+    // },
     /**
      * 地图描点
      */
-    drawPoint (data) {
-      console.log(data)
-      if (this.markerPoint) {
-        this.map.remove(this.markerPoint)
-      }
-      if (this.newMarker) {
-        this.map.remove(this.newMarker);
-        this.newMarker = null;
-      }
-      let _content = '<div class="vl_icon vl_icon_judge_02"></div>'
-      this.markerPoint = new window.AMap.Marker({ // 添加自定义点标记
-        map: this.map,
-        position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-        offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
-        draggable: false, // 是否可拖动
-        // 自定义点标记覆盖物内容
-        content: _content
-      });
-      this.map.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
-      let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`
-      this.newMarker = new window.AMap.InfoWindow({
-        map: this.map,
-        isCustom: true,
-        closeWhenClickMap: false,
-        position: [data.shotPlaceLongitude, data.shotPlaceLatitude],
-        offset: new window.AMap.Pixel(0, -70),
-        content: sConent
-      })
-    },
+    // drawPoint (data) {
+    //   console.log(data)
+    //   if (this.markerPoint) {
+    //     this.map.remove(this.markerPoint)
+    //   }
+    //   if (this.newMarker) {
+    //     this.map.remove(this.newMarker);
+    //     this.newMarker = null;
+    //   }
+    //   let _content = '<div class="vl_icon vl_icon_judge_02"></div>'
+    //   this.markerPoint = new window.AMap.Marker({ // 添加自定义点标记
+    //     map: this.map,
+    //     position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
+    //     offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+    //     draggable: false, // 是否可拖动
+    //     // 自定义点标记覆盖物内容
+    //     content: _content
+    //   });
+    //   this.map.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
+    //   let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`
+    //   this.newMarker = new window.AMap.InfoWindow({
+    //     map: this.map,
+    //     isCustom: true,
+    //     closeWhenClickMap: false,
+    //     position: [data.shotPlaceLongitude, data.shotPlaceLatitude],
+    //     offset: new window.AMap.Pixel(0, -70),
+    //     content: sConent
+    //   })
+    // },
     /*sort排序方法*/
     clickTime() {
       if (this.sortType === 1) {
@@ -376,61 +380,65 @@ export default {
     /**
      * 打开抓拍弹框
      */
-    onOpenDetail (obj) {
-      this.playing = false;
-      this.numberTypeList.map(item => {
-        if (item.enumField === obj.plateClass) {
-          obj.plateClass = item.enumValue;
-        }
-      });
-      this.sturcDetail = obj;
-      this.curImgIndex = obj.uid;
+    onOpenDetail (obj, index) {
+      this.detailData = {
+        index: index,
+        list: this.allDataList
+      }
+      // this.playing = false;
+      // this.numberTypeList.map(item => {
+      //   if (item.enumField === obj.plateClass) {
+      //     obj.plateClass = item.enumValue;
+      //   }
+      // });
+      // this.sturcDetail = obj;
+      // this.curImgIndex = obj.uid;
 
-      let currentIndex;
-      this.allDataList.map((item, index) => {
-        if (item.uid === obj.uid) {
-          currentIndex = index;
-        }
-      })
+      // let currentIndex;
+      // this.allDataList.map((item, index) => {
+      //   if (item.uid === obj.uid) {
+      //     currentIndex = index;
+      //   }
+      // })
 
-      this.strucDetailDialog = true;
+      // this.strucDetailDialog = true;
 
-      let _this = this;
+      // let _this = this;
 
-      _this.$nextTick(() => {
-        _this.getAllList();
-        _this.initMap(obj);
+      // _this.$nextTick(() => {
+      //   _this.getAllList();
+      //   _this.initMap(obj);
 
-        _this.$refs.mySwiper.slideTo(currentIndex);
-      })
+      //   _this.$refs.mySwiper.slideTo(currentIndex);
+      // })
     },
     /**
      * 关闭抓拍弹框
      */
-    onCloseDetail () {
-      this.strucCurTab = 1;
-      this.strucDetailDialog = false;
-    },
+    // onCloseDetail () {
+    //   this.strucCurTab = 1;
+    //   this.strucDetailDialog = false;
+    // },
     /**
      * 图片切换
      */
-    imgListTap (obj) {
-      // this.sturcDetail = {};
+    // imgListTap (obj) {
+    //   // this.sturcDetail = {};
 
-      this.numberTypeList.map(item => {
-        if (item.enumField === obj.plateClass) {
-          obj.plateClass = item.enumValue;
-        }
-      });
+    //   this.numberTypeList.map(item => {
+    //     if (item.enumField === obj.plateClass) {
+    //       obj.plateClass = item.enumValue;
+    //     }
+    //   });
       
-      this.curImgIndex = obj.uid;
-      this.sturcDetail = obj;
-      this.playing = false;
-      this.$nextTick(() => {
-        this.initMap(obj);
-      })
-    }
-  },
+    //   this.curImgIndex = obj.uid;
+    //   this.sturcDetail = obj;
+    //   this.playing = false;
+    //   this.$nextTick(() => {
+    //     this.initMap(obj);
+    //   })
+    // }
+  }
 }
 </script>
 <style lang="scss" scoped>
