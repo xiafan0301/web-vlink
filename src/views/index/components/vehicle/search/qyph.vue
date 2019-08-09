@@ -295,51 +295,78 @@
       mapMark (data) {
         if (data && data.length > 0) {
           let _this = this;
-          data.forEach(obj => {
-              if (obj.longitude > 0 && obj.latitude > 0) {
-                let offSet = {0: [-15, -16],1: [-15, -16],2: [-15, -60],3: [-15, -16], 4: [-15, -16],5: [-15, -16]}, sDataType;
-                if (obj.dataType === 0 && obj.deviceStatus !== 1) {
-                  sDataType = 6;
-                }else if (obj.dataType === 2) {
-                  sDataType = '2' + obj.vehicleType
-                } else {
-                  sDataType = obj.dataType;
-                }
-                let uContent = '<div id="' + obj.markSid + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + '"></div>'
-                if (obj.dataType === 2 && !_this.constObj[obj.dataType].supTypeList.includes(obj.vehicleType - 1)) {
-                  uContent = '<div id="' + obj.markSid + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + ' '+ _this.hideClass +'"></div>'
-                }
-                let marker = new window.AMap.Marker({ // 添加自定义点标记
-                  map: _this.map,
-                  position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
-                  offset: new window.AMap.Pixel(offSet[obj.dataType][0], offSet[obj.dataType][1]), // 相对于基点的偏移位置
-                  draggable: false, // 是否可拖动
-                  extData: obj,
-                  // 自定义点标记覆盖物内容
-                  content: uContent,
-                  bubble: true
-                });
-                _this.marks[obj.dataType].push(marker);
-                // hover
-                marker.on('mouseover', function () {
-//                  $('#' + obj.markSid).addClass('vl_icon_map_hover_mark' + obj.dataType)
-                  let curP = marker.getPosition();
-                  let sContent = '<div class="vl_map_hover" >' + _this.mapHoverInfo(obj) + '</div>';
-                  _this.hoverWindow = new window.AMap.InfoWindow({
-                    isCustom: true,
-                    closeWhenClickMap: true,
-                    offset: new window.AMap.Pixel(9, 34), // 相对于基点的偏移位置
-                    content: sContent,
-                    bubble: true
-                  });
-                  _this.hoverWindow.open(_this.map, new window.AMap.LngLat(curP.lng, curP.lat));
-
-                });
-                marker.on('mouseout', function () {
-//                  $('#' + obj.markSid).removeClass('vl_icon_map_hover_mark' + obj.dataType)
-                })
-              }
-            })
+//          data.forEach(obj => {
+//              if (obj.longitude > 0 && obj.latitude > 0) {
+//                let offSet = {0: [-15, -16],1: [-15, -16],2: [-15, -60],3: [-15, -16], 4: [-15, -16],5: [-15, -16]}, sDataType;
+//                if (obj.dataType === 0 && obj.deviceStatus !== 1) {
+//                  sDataType = 6;
+//                }else if (obj.dataType === 2) {
+//                  sDataType = '2' + obj.vehicleType
+//                } else {
+//                  sDataType = obj.dataType;
+//                }
+//                let uContent = '<div id="' + obj.markSid + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + '"></div>'
+//                if (obj.dataType === 2 && !_this.constObj[obj.dataType].supTypeList.includes(obj.vehicleType - 1)) {
+//                  uContent = '<div id="' + obj.markSid + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + ' '+ _this.hideClass +'"></div>'
+//                }
+//                let marker = new window.AMap.Marker({ // 添加自定义点标记
+//                  map: _this.map,
+//                  position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+//                  offset: new window.AMap.Pixel(offSet[obj.dataType][0], offSet[obj.dataType][1]), // 相对于基点的偏移位置
+//                  draggable: false, // 是否可拖动
+//                  extData: obj,
+//                  // 自定义点标记覆盖物内容
+//                  content: uContent,
+//                  bubble: true
+//                });
+//                _this.marks[obj.dataType].push(marker);
+//                // hover
+//                marker.on('mouseover', function () {
+////                  $('#' + obj.markSid).addClass('vl_icon_map_hover_mark' + obj.dataType)
+//                  let curP = marker.getPosition();
+//                  let sContent = '<div class="vl_map_hover" >' + _this.mapHoverInfo(obj) + '</div>';
+//                  _this.hoverWindow = new window.AMap.InfoWindow({
+//                    isCustom: true,
+//                    closeWhenClickMap: true,
+//                    offset: new window.AMap.Pixel(9, 34), // 相对于基点的偏移位置
+//                    content: sContent,
+//                    bubble: true
+//                  });
+//                  _this.hoverWindow.open(_this.map, new window.AMap.LngLat(curP.lng, curP.lat));
+//
+//                });
+//                marker.on('mouseout', function () {
+////                  $('#' + obj.markSid).removeClass('vl_icon_map_hover_mark' + obj.dataType)
+//                })
+//              }
+//            })
+          data.forEach(x =>{
+            x['style'] = Math.random() > 0.5 ? 1 : 2;
+          })
+          console.log(data);
+          var style = [{
+            url: 'https://a.amap.com/jsapi_demos/static/images/mass0.png',
+            anchor: new window.AMap.Pixel(6, 6),
+            size: new window.AMap.Size(11, 11)
+          }, {
+            url: 'https://a.amap.com/jsapi_demos/static/images/mass1.png',
+            anchor: new window.AMap.Pixel(4, 4),
+            size: new window.AMap.Size(7, 7)
+          }, {
+            url: 'https://a.amap.com/jsapi_demos/static/images/mass2.png',
+            anchor: new window.AMap.Pixel(3, 3),
+            size: new window.AMap.Size(5, 5)
+          }
+          ];
+          var mass = new window.AMap.MassMarks(data, {
+            opacity: 0.8,
+            zIndex: 111,
+            cursor: 'pointer',
+            style: style
+          });
+          console.log('fssd')
+//          mass.setMap(_this.map);
+          console.log(mass)
         }
       },
       renderMap() {

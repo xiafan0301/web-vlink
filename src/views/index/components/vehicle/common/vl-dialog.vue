@@ -125,7 +125,7 @@
         ]
         *<div is="vlDialog" :detailData="detailData" :btnList="btnList" @gotoControl="gotoControl"></div>
         * detailLeftInfo,detailRightInfo,detailBottomInfo,
-        * 这三个是指弹窗抓拍详情里的，左侧图片信息，右侧图片信息，底部图片信息，label为左上角文字内容，imgKey为当前图片使用的字段
+        *
     * */
     name: 'VlDialog',
     props: {
