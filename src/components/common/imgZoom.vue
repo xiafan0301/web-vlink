@@ -139,7 +139,7 @@ export default {
   display: none;
   position: fixed; top: 0;left: 0; z-index: 20001;
   width: 100%;height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
   > span {
     display: inline-block;
     position: absolute; top: 50%; left: 50%;

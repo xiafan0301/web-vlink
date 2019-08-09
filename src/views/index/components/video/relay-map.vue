@@ -3,7 +3,7 @@
     <div class="vid_relay_menu" :class="{'vid_relay_menu_ss': !showMenuActive}">
       <h2>行动轨迹</h2>
       <div>
-        <ul>
+        <ul v-if="listData && listData.length > 0">
           <li v-for="(item, index) in listData" :key="'vrm_' + index" @click="selData(item, true)"
             :class="{'relay_mli_sed': item.uid === sedData.uid}">
             <div>
@@ -18,6 +18,9 @@
             </ul>
           </li>
         </ul>
+        <div style="padding: 10px; text-align: center; color: #999;" v-else>
+          暂无数据
+        </div>
       </div>
       <span @click="showMenuActive = !showMenuActive;" class="vl_icon vid_icon_ssz" :class="{'vid_icon_sss': showMenuActive}"></span>
     </div>
@@ -32,7 +35,12 @@
         <div class="relay_list_fst">
           <p class="relay_list_fst_t">目标对象</p>
           <div class="relay_list_fst_i">
-            <img v-if="detailData.subStoragePath" :src="detailData.subStoragePath" class="bigImg" alt="">
+            <!-- <ul v-if="(type === 1 || type === '1') && detailData.plateNo && !detailData.subStoragePath"> -->
+            <ul v-if="(type === 1 || type === '1') && detailData.plateNo && !detailData.subStoragePath">
+              <li>车牌号码</li>
+              <li>{{detailData.plateNo}}</li>
+            </ul>
+            <img v-else-if="detailData.subStoragePath" :src="detailData.subStoragePath" class="bigImg" alt="">
           </div>
           <div class="relay_list_fst_b">抓拍图片&nbsp;<span>{{listData.length | fmTenThousand}}</span></div>
         </div>
@@ -63,6 +71,7 @@ export default {
   components: {mapVideoPlay, imgZoom},
   data () {
     return {
+      amap: null,
       detailData: {},
       mapVideoData: null,
       zIndex: 100,
@@ -77,18 +86,9 @@ export default {
     }
   },
   created () {
-    /* for (let i = 0; i < 20; i++) {
-      this.listData.push({
-        uid: i + 1,
-        name: '测试接力地图数据-' + (i + 1),
-        longitude: 110.394280 + (0.03 * i),
-        latitude: 27.708490 + (0.02 * i),
-        subStoragePath: 'http://filevlink.aorise.org/root/image/2019/08/02/800390420190801165300000001_1.JPG'
-      });
-    } */
     this.uid = this.$route.query.uid;
     this.type = this.$route.query.type;
-    this.getDData();
+    this.getDData(true);
     this.getDDataIntval();
     // this.getDGJ(uid, type);
   },
@@ -108,36 +108,36 @@ export default {
     });
   },
   methods: {
-    getDData () {
+    getDData (bInit) {
       getVideoContinue({
         id: this.uid,
         type: this.type
       }).then((res) => {
         if (res && res.data) {
           this.detailData = res.data;
-          
-          if (this.detailData.videos &&  this.detailData.videos.length > 0) {
-            let ld = [];
-            for (let i = 0; i < this.detailData.videos.length; i++) {
-              ld.push(Object.assign({}, this.detailData.videos[i], {
-                uid: random14()
-              }));
-            }
-            this.listData = ld;
-            this.$nextTick(() => {
-              this.setMarks();
-            });
+          let ld = [];
+          for (let i = 0; i < this.detailData.videos.length; i++) {
+            ld.push(Object.assign({}, this.detailData.videos[i], {
+              uid: random14()
+            }));
           }
-          
+          this.listData = ld;
+          this.$nextTick(() => {
+            if (this.amap) {
+              this.amap.clearMap();
+            }
+            this.setMarks(bInit);
+          });
         }
       }).catch();
     },
     getDDataIntval () {
       if (this.intval) {
-        window.setInterval(() => {
-          this.getDData();
-        }, 30 * 1000);
+        window.clearInterval(this.intval);
       }
+      this.intval = window.setInterval(() => {
+        this.getDData();
+      }, 60 * 1000);
     },
     initMap () {
       let _this = this;
@@ -164,7 +164,7 @@ export default {
         this.amap.setCenter([data.shotPlaceLongitude, data.shotPlaceLatitude]);
       }
     },
-    setMarks () {
+    setMarks (bInit) {
       let gjPath = [];
       let ism = this.listData.length > 1;
       for (let i = 0; i < this.listData.length; i++) {
@@ -214,13 +214,15 @@ export default {
           strokeWeight: 10,      // 线宽
           strokeStyle: "solid"  // 线样式 dashed solid
         });
-        this.amap.setFitView();
+        if (bInit) {
+          this.amap.setFitView();
+        }
         // this.amap.setCenter(gjPath[gjPath.length - 1]);
       }
       if (this.listData && this.listData.length > 0) {
         window.setTimeout(() => {
           this.selData(this.listData[this.listData.length - 1], true);
-        }, 1000);
+        }, 500);
       }
     },
     mapState (type) {
@@ -234,6 +236,14 @@ export default {
     },
     doMark (obj, sClass) {
       // console.log('doMark', obj);
+    }
+  },
+  beforeDestroy () {
+    if (this.amap) {
+      this.amap.destroy();
+    }
+    if (this.intval) {
+      window.clearInterval(this.intval);
     }
   }
 }
@@ -289,6 +299,18 @@ export default {
           width: 100px; height: 100px;
           margin: 0 auto;
           > img  { width: 100%; height: 100%; }
+          > ul {
+            width: 98px;
+            margin: 10px auto 0 auto; padding: 18px 0 8px 0;
+            background:rgba(242,242,242,1);
+            border:1px solid rgba(211, 211, 211, 0.97);
+            border-radius:3px;
+            > li {
+              text-align: center;
+              font-size: 14px;
+              padding-bottom: 10px;
+            }
+          }
         }
         > .relay_list_fst_b {
           border-top: 1px solid #D3D3D3;
