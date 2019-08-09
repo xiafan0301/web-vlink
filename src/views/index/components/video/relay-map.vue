@@ -38,7 +38,7 @@
         </div>
       </li>
       <li v-for="(item, index) in listData" :key="'zp_li_' + index">
-        <div class="relay_list_li">
+        <div class="relay_list_li" v-if="index < 10">
           <div class="relay_list_li_i">
             <img :src="item.subStoragePath" class="bigImg" alt="">
           </div>
@@ -53,7 +53,7 @@
 </template>
 <script>
 // http://localhost:9101/#/video-relay-map?uid=0xBrpzEdZKEidWSzxIY5S6&type=0
-import {formatDate} from '@/utils/util.js';
+import {formatDate, random14} from '@/utils/util.js';
 import {mapXupuxian} from '@/config/config.js';
 import mapVideoPlay from '@/components/common/mapVideoPlay.vue';
 import imgZoom from '@/components/common/imgZoom.vue';
@@ -109,10 +109,20 @@ export default {
       }).then((res) => {
         if (res && res.data) {
           this.detailData = res.data;
-          this.listData = this.detailData.videos;
-          this.$nextTick(() => {
-            this.setMarks();
-          });
+          
+          if (this.detailData.videos &&  this.detailData.videos.length > 0) {
+            let ld = [];
+            for (let i = 0; i < this.detailData.videos.length; i++) {
+              ld.push(Object.assign({}, this.detailData.videos[i], {
+                uid: random14()
+              }));
+            }
+            this.listData = ld;
+            this.$nextTick(() => {
+              this.setMarks();
+            });
+          }
+          
         }
       }).catch();
     },
@@ -137,8 +147,8 @@ export default {
       $('.vid_relay_marker_mk').removeClass('relay_marker_mk_sed');
       $('#relay_marker_' + data.uid).addClass('relay_marker_mk_sed');
       $('#relay_marker_' + data.uid).closest('.amap-marker').css('z-index', 101);
-      if (bCenter && data.longitude > 0 && data.latitude > 0) {
-        this.amap.setCenter([data.longitude, data.latitude]);
+      if (bCenter && data.shotPlaceLongitude > 0 && data.shotPlaceLatitude > 0) {
+        this.amap.setCenter([data.shotPlaceLongitude, data.shotPlaceLatitude]);
       }
     },
     setMarks () {
@@ -163,7 +173,7 @@ export default {
           sContent = '<div id="relay_marker_' + _d.uid + '" title="' + _d.name + '"' +
             ' class="vid_relay_marker_mk ' + sClass + '">' +
             sContent +
-            '<div class="vid_relay_marker_img" title="' + _d.spotName + '" _url="' + _d.videoPath + '">' +
+            '<div class="vid_relay_marker_img" title="' + _d.spotName + '" _url="' + _d.videoUrl + '">' +
               '<img src="' + _d.subStoragePath + '" controls></img><span class="vl_icon"></span>' +
             '</div>' +
           '</div>';
@@ -199,7 +209,6 @@ export default {
           this.selData(this.listData[this.listData.length - 1], true);
         }, 1000);
       }
-      
     },
     mapState (type) {
       if (type === 1) {

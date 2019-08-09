@@ -65,7 +65,7 @@
                   <li style="width: 50%;"><span>车辆型号：</span>{{uploadVehicleObj.vehicleModel ? uploadVehicleObj.vehicleModel : '--'}}</li>
                   <li style="width: 50%;"><span>车辆颜色：</span>{{uploadVehicleObj.vehicleColor ? uploadVehicleObj.vehicleColor : '--'}}</li>
                   <li style="width: 50%;"><span>车辆类型：</span>{{uploadVehicleObj.vehicleClass ? uploadVehicleObj.vehicleClass : '--'}}</li>
-                  <li style="width: 50%;"><span>车牌类型：</span>{{uploadVehicleObj.baby ? dicFormater(45, uploadVehicleObj.plateClass) : '--'}}</li>
+                  <li style="width: 50%;"><span>车牌类型：</span>{{uploadVehicleObj.plateClass ? dicFormater(45, uploadVehicleObj.plateClass) : '--'}}</li>
                 </ul>
               </div>
             </div>
