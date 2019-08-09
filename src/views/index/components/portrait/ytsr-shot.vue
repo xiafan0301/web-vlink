@@ -780,6 +780,10 @@
       .el-dialog {
         max-width: 13.06rem;
         width: 100%!important;
+        /* 祖先元素设置了transform属性则会导致固定定位属性position: fixed失效。 */
+        transform: none !important;
+        top: calc(100% - 8.8rem);
+        left: calc((100% - 13.06rem)/2);
       }
       .el-dialog__header {
         display: none;
