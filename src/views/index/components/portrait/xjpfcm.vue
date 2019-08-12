@@ -356,7 +356,7 @@ export default {
       let endTime = curDate - 1
       this.searchData.startTime = formatDate(startTime);
       this.searchData.endTime = formatDate(endTime); */
-      let _s = new Date(dateOrigin().getTime() - 3600 * 1000 * 24 * 1);
+      let _s = dateOrigin(false, new Date(new Date().getTime() - 3600 * 1000 * 24 * 1));
       /* let _e = new Date(dateOrigin(true).getTime() - 3600 * 1000 * 24 * 1); */
       let _e = new Date();
       this.searchData.startTime = _s;
