@@ -366,10 +366,9 @@
 </template>
 <script>
 import vlBreadcrumb from "@/components/common/breadcrumb.vue";
-
 import swiper from "vue-awesome-swiper";
 import { mapXupuxian } from "@/config/config.js";
-import { formatDate } from "@/utils/util.js";
+import { formatDate, dateOrigin } from "@/utils/util.js";
 import {
   getAllMonitorList,
   getAllBayonetList
@@ -530,9 +529,7 @@ export default {
           polyline: {},
           polygon: {},
           circle10km: {},
-          startTime:
-            formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
-            " 00:00:00",
+          startTime: formatDate(dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000))),
           endTime: formatDate(new Date().getTime()),
           drawActiveType: 0, // 当前活跃的选中区域
           canPosition: false // 是否可以定位
@@ -649,9 +646,7 @@ export default {
           polyline: {},
           polygon: {},
           circle10km: {},
-          startTime:
-            formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
-            " 00:00:00",
+          startTime: formatDate(dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000))),
           endTime: formatDate(new Date().getTime()),
           drawActiveType: 0, // 当前活跃的选中区域
           canPosition: false
@@ -917,9 +912,7 @@ export default {
           polyline: {},
           polygon: {},
           circle10km: {},
-          startTime:
-            formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
-            " 00:00:00",
+          startTime: formatDate(dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000))),
           endTime: formatDate(new Date().getTime()),
           drawActiveType: 0, // 当前活跃的选中区域
           canPosition: false
