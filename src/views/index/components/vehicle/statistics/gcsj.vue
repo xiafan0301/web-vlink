@@ -17,7 +17,7 @@
             :picker-options="pickerOptions"
             v-model="queryForm.startTime"
             type="datetime"
-            value-format="yyyy-MM-dd HH:mm:ss"
+            :time-arrow-control="true"
             placeholder="请选择开始时间">
           </el-date-picker>
         </div>
@@ -29,7 +29,7 @@
             :picker-options="pickerOptions1"
             v-model="queryForm.endTime"
             type="datetime"
-            value-format="yyyy-MM-dd HH:mm:ss"
+            :time-arrow-control="true"
             placeholder="请选择结束时间">
           </el-date-picker>
         </div>
@@ -123,20 +123,20 @@
   </div>
 </template>
 <script>
-let startTime = formatDate(new Date(new Date(new Date().toLocaleDateString('zh-Hans-CN').replace(/日/g, '').replace(/\/|年|月/g, '/').replace(/[^\d/]/g,''))).getTime() - 24*60*60*1000, 'yyyy-MM-dd HH:mm:ss');
-let endTime = formatDate(new Date(new Date(new Date().toLocaleDateString('zh-Hans-CN').replace(/日/g, '').replace(/\/|年|月/g, '/').replace(/[^\d/]/g,''))).getTime() - 1, 'yyyy-MM-dd HH:mm:ss');
+// let startTime = formatDate(new Date(new Date(new Date().toLocaleDateString('zh-Hans-CN').replace(/日/g, '').replace(/\/|年|月/g, '/').replace(/[^\d/]/g,''))).getTime() - 24*60*60*1000, 'yyyy-MM-dd HH:mm:ss');
+// let endTime = formatDate(new Date(new Date(new Date().toLocaleDateString('zh-Hans-CN').replace(/日/g, '').replace(/\/|年|月/g, '/').replace(/[^\d/]/g,''))).getTime() - 1, 'yyyy-MM-dd HH:mm:ss');
 import G2 from '@antv/g2';
 import { View } from '@antv/data-set';
 import {apiPassingCarSta} from '@/views/index/api/api.vehicle.js';
 import devSelect from '@/components/common/devSelect.vue';
-import {formatDate} from '@/utils/util.js';
+import {formatDate, dateOrigin} from '@/utils/util.js';
 export default {
   components: {devSelect},
   data () {
     return {
       queryForm: {
-        startTime: startTime,
-        endTime: endTime,
+        startTime: formatDate(dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)), 'yyyy-MM-dd HH:mm:ss'),
+        endTime: formatDate(new Date(), 'yyyy-MM-dd HH:mm:ss'),
         devIdData: {
           selSelectedData1: [],
           selSelectedData2: []
@@ -357,14 +357,10 @@ export default {
           }
           str += `<span><span>${items[0].value}</span><span>辆</span></span></div>`;
           return str;
-          // let str = `<div class="my_tooltip">`;
-          // str += `<h1>${title}</h1><span><span>${items[0].value}</span><span>辆</span></span></div>`;
-          // return str;
         }
       });
       chart.legend(false);
       chart.line().position('name*total').shape('hv').color('#489CED').size(2);
-      // chart.area().position('time*value').shape('hv').color([ 'l(270) 0:#ffffff 1:#088BFD' ]);
       chart.render();
       this.charts.chart3 = chart;
     },
@@ -425,8 +421,8 @@ export default {
     },
     // 重置表单
     resetQueryForm () {
-      this.queryForm.startTime = startTime;
-      this.queryForm.endTime = endTime;
+      this.queryForm.startTime = formatDate(dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)), 'yyyy-MM-dd HH:mm:ss');
+      this.queryForm.endTime = formatDate(new Date(), 'yyyy-MM-dd HH:mm:ss');
       // 设备全选
       this.$refs['devSelect'].checkedAll();
     },

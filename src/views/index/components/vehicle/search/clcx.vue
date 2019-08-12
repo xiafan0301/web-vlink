@@ -95,12 +95,28 @@
           </el-form-item>
           <el-form-item prop="plateNo" class="plate_no">
             <p class="carCold">车牌：<el-checkbox style="float: right;" v-model="ruleForm._include">排除</el-checkbox></p>
-            <el-input placeholder="请输入车牌号" v-model="ruleForm.plateNo" class="input-with-select">
-              <el-select v-model="select" slot="prepend" placeholder="">
-               <!-- <el-option v-for="item in pricecode" :label="item" :value="item"></el-option> -->
-               <el-option v-for="(item, index) in pricecode" :label="item" :value="item" :key="'cph_' + index"></el-option>
+
+            <el-input
+              placeholder
+              v-model="ruleForm.plateNo"
+              class="input-with-select width232"
+            >
+              <el-select
+                clearable
+                v-model="select"
+                style="width: 70px;"
+                slot="prepend"
+                placeholder
+              >
+                <el-option
+                  v-for="item in pricecode"
+                  :key="item.enumField"
+                  :label="item.enumValue"
+                  :value="item.enumValue"
+                ></el-option>
               </el-select>
             </el-input>
+      
           </el-form-item>
           <el-form-item>
             <el-row :gutter="10">
@@ -186,7 +202,6 @@
 <script>
 import vehicleDetail from '../common/vl-dialog.vue';
 import { mapXupuxian } from "@/config/config.js";
-import { cityCode } from "@/utils/data.js";
 import { getVehicleShot,getAllDevice,getGroups,getSnapList,exportNightVehicle,getSnapDetail} from "@/views/index/api/api.judge.js";
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 // import mapselect from "@/views/index/components/common/mapSelect";
@@ -219,7 +234,7 @@ export default {
         },
         isNull:true,
         isDao:false,
-      pricecode:cityCode,
+      pricecode: this.dicFormater(dataList.ownership)[0].dictList,
       input5: "1",
       dialogVisible: false,
       strucDetailDialog: false,
@@ -728,5 +743,6 @@ export default {
 .plate_no .el-input-group__prepend{
   padding: 0px 15px!important;
   width: 56px!important;
+  background: #fff;
 }
 </style>
