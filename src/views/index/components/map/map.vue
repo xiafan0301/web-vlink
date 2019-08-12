@@ -876,9 +876,9 @@
                           .then(res => {
                             if (res) {
                               _this.$_hideLoading();
-                              if (res.data.deviceBasicInfoList.length) {
-                                let deviceList = res.data.deviceBasicInfoList.filter(s => s.deviceStatus === 1);
-                                let badDeviceList = res.data.deviceBasicInfoList.filter(s => s.deviceStatus !== 1);
+                              if (res.data.bayonetDevInfoDtoList.length) {
+                                let deviceList = res.data.bayonetDevInfoDtoList.filter(s => s.deviceStatus === 1);
+                                let badDeviceList = res.data.bayonetDevInfoDtoList.filter(s => s.deviceStatus !== 1);
                                 if (deviceList.length) {
                                   _this.signListTap(deviceList, 'Marker', obj);
                                   let _bay = {uid: obj.uid, deviceList: deviceList}

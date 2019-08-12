@@ -299,7 +299,7 @@ export default {
       getEventList(params).then(res => {
         if (res && res.data) {
           // 过滤掉事件状态为已结束的关联事件
-          this.eventList = res.data.list.filter(f => f.eventStatus !== 3).map(m => {
+          this.eventList = res.data.list.filter(f => f.eventStatus !== 3 && f.eventCode).map(m => {
             return {
               label: m.eventCode,
               value: m.uid,

@@ -269,9 +269,13 @@ export default {
           this.isShowEmoji = false;
           this.commentList.forEach(f => {
             if (this.commentId === f.uid) {
-              const obj = objDeepCopy(f.replayList[f.replayList.length - 1]);
-              if (!('uid' in obj)) obj.uid = 1;
-              obj.uid = obj.uid + 1;
+              let obj = {};
+              if (f.replayList.length === 0) {
+                obj.uid = 1;
+              } else {
+                obj = objDeepCopy(f.replayList[f.replayList.length - 1]);
+                obj.uid = obj.uid + 1;
+              }
               obj.replayOrganName = this.$store.state.loginUser.organList[0].organName;
               obj.replayContent = this.content;
               f.replayList.push(obj);

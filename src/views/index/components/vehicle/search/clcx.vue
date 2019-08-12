@@ -225,7 +225,7 @@ export default {
       strucDetailDialog: false,
       isload: false,
       value1: null,
-      select: "湘",
+      select: '',
       selectValue:"已选设备0个",
       ruleForm: {
         dateStart:'',
@@ -472,7 +472,7 @@ export default {
       this.ruleForm.pageNum =this.pagination.pageNum
       let d = JSON.stringify(this.ruleForm)
       d = JSON.parse(d)
-      this.ruleForm.plateNo && (d.plateNo = this.select + this.ruleForm.plateNo);
+      d.plateNo = this.select + this.ruleForm.plateNo;
       d.pageNum = this.pagination.pageNum;
       d.pageSize = this.pagination.pageSize;
       if(!d.plateNo){
