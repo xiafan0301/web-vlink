@@ -168,8 +168,10 @@
             <div class="list_con_info">
               <div>布控名：{{item.surveillanceName}}</div>
               <div>
-                <span>设备名：{{item.devName}}</span>&nbsp;
-                <span>{{item.snapTime}}</span>
+                <span class="small_text">抓拍设备：{{item.devName}}</span>
+              </div>
+              <div>
+                <span class="small_text">抓拍时间：{{item.snapTime}}</span>
               </div>
             </div>
             <div v-if="item.isSeen" @click="toAlarmDetail(item.uid, item.objType)">
@@ -859,7 +861,7 @@ export default {
           margin-right: 1%;
           max-width: 342px;
           width: 32%;
-          height: 266px;
+          height: 286px;
           padding: 30px 20px 0;
           margin-bottom: 20px;
           background:rgba(255,255,255,1);
@@ -912,11 +914,12 @@ export default {
             justify-content: space-between;
             line-height: 50px; */
             padding-top: 16px;
+            padding-bottom: 16px;
             > div:nth-child(1){
               color: #333;
               margin-bottom: 6px;
             }
-            > div:nth-child(2) > span{
+            .small_text {
               color: #999;
               font-size: 12px;
             }
