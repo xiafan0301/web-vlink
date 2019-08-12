@@ -27,7 +27,7 @@
             :picker-options="pickerOptions"
             placeholder="结束时间"
             class="full vl_date vl_date_end"
-          ></el-date-picker>
+        ></el-date-picker>
           <el-select class="full" v-model="searchData.portraitGroupId" placeholder="关注人群">
             <el-option
               v-for="item in portraitGroupList"
@@ -304,17 +304,17 @@ export default {
       
       pickerOptions: {
         disabledDate (time) {
-          let date = new Date();
-          let curDate = date.getTime();
-          let curS = 3 * 24 * 3600 * 1000;
-            let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
-          let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
-          let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
-          let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
-          let start = new Date(curDate - curS).getFullYear() +
-        "-" + _sm + "-" +_sd;
+        //   let date = new Date();
+        //   let curDate = date.getTime();
+        //   let curS = 3 * 24 * 3600 * 1000;
+        //     let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
+        //   let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
+        //   let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
+        //   let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
+        //   let start = new Date(curDate - curS).getFullYear() +
+        // "-" + _sm + "-" +_sd;
           
-          let threeMonths = new Date(start).getTime();
+        //   let threeMonths = new Date(start).getTime();
           //return time.getTime() > Date.now() || time.getTime() < threeMonths;
           return time.getTime() > Date.now();
         }
@@ -350,7 +350,7 @@ export default {
     }
   },
   mounted () {
-    this.setDTime();
+    // this.setDTime();
     let map = new AMap.Map('tcMap', {
       center: [112.974691, 28.093846],
       zoom: 16
@@ -469,7 +469,7 @@ export default {
       this.searchData.time2 = _s */
     },
     resetSearch () {
-      this.setDTime()
+      // this.setDTime()
       this.searchData.type = null;
       this.searchData.portraitGroupId = null;
       this.searchData.sex = null;
@@ -643,8 +643,8 @@ export default {
         personGroupId:this.searchData.portraitGroupId,
         deviceCode:data.groupName,
         sex:this.searchData.sex,
-        startTime :this.searchData.time1?formatDate(this.searchData.time1):null,
-        endTime :this.searchData.time2?formatDate(this.searchData.time2):null,
+        startTime :this.searchData.time1 ? formatDate(this.searchData.time1):null,
+        endTime :this.searchData.time2 ? formatDate(this.searchData.time2):null,
         age:this.searchData.ageGroup,
         // surveillanceId: this.curSXT.surveillanceId ? this.curSXT.surveillanceId : '',
         // deviceId: this.curSXT.deviceId,

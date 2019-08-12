@@ -93,7 +93,7 @@
 <script>
 import { mapXupuxian } from "@/config/config.js";
 // import { cityCode } from "@/utils/data.js";
-import { transMinute, formatDate, dateOrigin } from '@/utils/util.js';
+import { transMinute, dateOrigin, formatDate } from '@/utils/util.js';
 import { checkPlateNumber } from '@/utils/validator.js';
 import { getVehicleShot,getAllDevice } from "@/views/index/api/api.judge.js";
 import { getAllBayonetList } from "@/views/index/api/api.base.js";
@@ -168,7 +168,7 @@ export default {
   },
   mounted() {
     //this.getControlMap(1);
-    this.setDTime();
+    // this.setDTime();
     let pNo=this.$route.query.plateNo
     //this.select = pNo?pNo.substring(0,1):"湘";
     this.ruleForm.input3 = pNo;
@@ -259,7 +259,7 @@ export default {
           // let isP=/([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})/
           // let  result = isP.test(this.ruleForm.input3);
           // if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data2 && this.ruleForm.input3){
-          let pg={
+          let pg = {
             //shotTime:+"_"+this.ruleForm.data1[1]+" 23:59:59",
             startTime: formatDate(this.ruleForm.data1),
             endTime: formatDate(this.ruleForm.data2),
@@ -295,7 +295,6 @@ export default {
     },
     resetForm(v){
       this.$refs[v].resetFields();
-      this.setDTime() 
       this.ruleForm.data1 = dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000));
       this.ruleForm.data2 = new Date();
       this.ruleForm.input3=null

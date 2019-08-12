@@ -3,10 +3,10 @@
   <div class="ytsc_wrap">
     <!-- 面包屑通用样式 -->
     <div
-        is="vlBreadcrumb"
-        :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
+      is="vlBreadcrumb"
+      :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
           {name: '以图搜车'}]"
-      ></div>
+    ></div>
     <div class="sc_content">
       <!-- 通用的左边菜单 -->
       <div class="left_menu">
@@ -20,9 +20,11 @@
                   <el-form-item label prop="startTime">
                     <el-date-picker
                       v-model="ytscMenuForm.startTime"
-                      type="date"
+                      type="datetime"
                       :clearable="false"
                       :picker-options="startDateOpt"
+                      value-format="yyyy-MM-dd HH:mm:ss"
+                      :time-arrow-control="true"
                       placeholder="开始时间"
                       class="width232 vl_date"
                     ></el-date-picker>
@@ -30,9 +32,11 @@
                   <el-form-item label prop="endTime">
                     <el-date-picker
                       v-model="ytscMenuForm.endTime"
-                      type="date"
+                      type="datetime"
                       :clearable="false"
                       :picker-options="endDateOpt"
+                      value-format="yyyy-MM-dd HH:mm:ss"
+                      :time-arrow-control="true"
                       placeholder="结束时间"
                       class="width232 vl_date vl_date_end"
                     ></el-date-picker>
@@ -162,7 +166,7 @@
               >
                 <div class="img_wrap">
                   <img
-                   :alt="item.deviceName"
+                    :alt="item.deviceName"
                     @dragstart="dragStart($event, item)"
                     @dragend="dragEnd"
                     draggable="true"
@@ -211,19 +215,18 @@
         </div>
       </div>
     </div>
-  
+
     <!--检索详情弹窗-->
     <div is="vehicleDetail" :detailData="detailData"></div>
   </div>
 </template>
 <script>
-
 import vlUpload from "@/components/common/upload.vue";
 import vlBreadcrumb from "@/components/common/breadcrumb.vue";
-import vehicleDetail from '../common/vehicleDetail.vue';
+import vehicleDetail from "../common/vehicleDetail.vue";
 
 import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入一个地图的地址
-import { formatDate } from "@/utils/util.js";
+import { formatDate, dateOrigin } from "@/utils/util.js";
 import {
   JtcPOSTAppendixInfo,
   JtcGETAppendixInfoList
@@ -246,7 +249,7 @@ export default {
       // 菜单表单变量
       ytscMenuForm: {
         startTime: "",
-        endTime: "",
+        endTime: ""
       },
       rules: {},
       startDateOpt: {
@@ -359,7 +362,6 @@ export default {
     }
   },
   methods: {
-    
     /*重置菜单的数据 */
     resetMenu() {
       this.uploadClear = {};
@@ -374,7 +376,7 @@ export default {
       this.curImageUrl = ""; // 清空上传的图片
       this.initCheckTree(); // 初始化全选树节点
     },
-    getStrucParams () {
+    getStrucParams() {
       // 处理设备UID
       let deviceUidArr = this.selectCameraArr.map(item => {
         return item.id;
@@ -384,12 +386,8 @@ export default {
       });
       let queryParams = {
         where: {
-          startTime:
-            formatDate(this.ytscMenuForm.startTime, "yyyy-MM-dd") +
-              " 00:00:00" || null, // 开始时间
-          endTime:
-            formatDate(this.ytscMenuForm.endTime, "yyyy-MM-dd") +
-              " 23:59:59" || null, // 结束时间
+          startTime: this.ytscMenuForm.startTime || null, // 开始时间
+          endTime: this.ytscMenuForm.endTime || null, // 结束时间
           uploadImgUrl: this.curImageUrl || null, // 车辆图片信息
           deviceUid: deviceUidArr.join(), // 摄像头标识
           bayonetUid: bayonetUidArr.join() // 卡口标识
@@ -480,13 +478,9 @@ export default {
     setDTime() {
       //设置默认时间
       this.ytscMenuForm.startTime = formatDate(
-        new Date().getTime() - 3600 * 1000 * 24,
-        "yyyy-MM-dd"
+        dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000))
       );
-      this.ytscMenuForm.endTime = formatDate(
-        new Date().getTime() - 3600 * 1000 * 24,
-        "yyyy-MM-dd"
-      );
+      this.ytscMenuForm.endTime = formatDate(new Date());
     },
     /*sort排序方法*/
     clickTime() {
@@ -519,7 +513,7 @@ export default {
         pageSize: this.pageSize,
         total: this.total,
         pageNum: this.pageNum
-      }
+      };
       // 打开抓拍详情
       /* this.curImgIndex = index;
       this.strucDetailDialog = true;

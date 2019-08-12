@@ -401,7 +401,7 @@ export default {
       getAlarmListByDev(params).then(res => {
         if (res && res.data) {
           this.markerAlarmList = res.data;
-          if (this.markerAlarmList.length > 0) {
+          if (this.markerAlarmList.length > 0 && this.devicesList.length > 0) {
             this.getAllAlarmSnapListByDev();
           }
           this.markerAlarmList.forEach(dev => {

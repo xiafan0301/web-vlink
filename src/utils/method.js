@@ -8,7 +8,7 @@ import ElementUI from 'element-ui';
  * @param {string} msg 消息提示内容
  * @param {string} type 主题 success/warning/info/error
  * */
-Vue.prototype.$MyMessage = function (msg, type) {
+Vue.prototype.$MyMessage = function (msg, type) { 
   if (!type) { type = 'info'; } 
   let nMsg = $('.el-message--' + type);
   if (nMsg && nMsg.length > 0) {
@@ -84,4 +84,3 @@ Vue.prototype.Trim = function (str, isGlobal) {
   }
   return result;
 };
-
