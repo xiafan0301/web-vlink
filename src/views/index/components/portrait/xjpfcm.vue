@@ -120,6 +120,8 @@
                   :picker-options="startDateOpt"
                   placeholder="开始时间"
                   :clearable="false"
+                  :time-arrow-control="true"
+                  default-time="00:00:00"
                 ></el-date-picker>
               </div>
             </el-form-item>
@@ -134,6 +136,7 @@
                   type="datetime"
                   default-time="23:59:59"
                   placeholder="结束时间"
+                  :time-arrow-control="true"
                   :clearable="false"
                 ></el-date-picker>
               </div>
@@ -275,12 +278,12 @@ export default {
         disabledDate: time => {
           if (this.searchData.endTime) {
             return (
-              time.getTime() > new Date(this.searchData.endTime).getTime() ||
-              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 30
+              time.getTime() > new Date(this.searchData.endTime).getTime()
+              /*  || time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 30 */
             );
           } else {
             return (
-              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 30 ||
+              /* time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 30 || */
               time.getTime() > new Date().getTime()
             );
           }
@@ -295,7 +298,7 @@ export default {
             );
           } else {
             return (
-              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 30 ||
+              /* time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 30 || */
               time.getTime() > new Date().getTime()
             );
           }
@@ -354,7 +357,8 @@ export default {
       this.searchData.startTime = formatDate(startTime);
       this.searchData.endTime = formatDate(endTime); */
       let _s = new Date(dateOrigin().getTime() - 3600 * 1000 * 24 * 1);
-      let _e = new Date(dateOrigin(true).getTime() - 3600 * 1000 * 24 * 1);
+      /* let _e = new Date(dateOrigin(true).getTime() - 3600 * 1000 * 24 * 1); */
+      let _e = new Date();
       this.searchData.startTime = _s;
       this.searchData.endTime = _e;
     },
