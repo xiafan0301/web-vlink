@@ -20,23 +20,27 @@
           <el-form-item  prop="data1">
             <el-date-picker
               v-model="ruleForm.data1"
-              type="date"
               :clearable="false"
               placeholder="开始时间"
               :picker-options="pickerOptions"
               class="full vl_date"
-              value-format="yyyy-MM-dd"
+              :time-arrow-control="true"
+              value-format="yyyy-MM-dd HH:mm:ss"
+              format="yyyy-MM-dd HH:mm:ss"
+              type="datetime"
             ></el-date-picker>
           </el-form-item>
           <el-form-item  prop="data2">
             <el-date-picker
               v-model="ruleForm.data2"
-              type="date"
               :clearable="false"
               :picker-options="pickerOptions"
               placeholder="结束时间"
               class="full vl_date vl_date_end"
-              value-format="yyyy-MM-dd"
+              :time-arrow-control="true"
+              value-format="yyyy-MM-dd HH:mm:ss"
+              format="yyyy-MM-dd HH:mm:ss"
+              type="datetime"
             ></el-date-picker>
           </el-form-item>
           <el-form-item prop="minFootholdTimes" class="firstItem">
@@ -244,6 +248,7 @@ import mapSelector from '@/components/common/mapSelector.vue';
 import portraitDetail from './common/portraitDetail.vue';
 import { log } from 'util';
 import vlUpload from '@/components/common/upload.vue';
+import { dateOrigin, formatDate } from '@/utils/util.js';
 export default {
   components: {
     mapSelector,
@@ -271,17 +276,18 @@ export default {
       showDetail:false,
       pickerOptions: {
         disabledDate (time) {
-          let date = new Date();
-          let curDate = date.getTime();
-          let curS = 30 * 24 * 3600 * 1000;
-            let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
-          let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
-          let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
-          let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
-          let start = new Date(curDate - curS).getFullYear() +
-        "-" + _sm + "-" +_sd;
-          let threeMonths = new Date(start).getTime();
-          return time.getTime() > Date.now() || time.getTime() < threeMonths;
+        //   let date = new Date();
+        //   let curDate = date.getTime();
+        //   let curS = 30 * 24 * 3600 * 1000;
+        //     let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
+        //   let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
+        //   let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
+        //   let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
+        //   let start = new Date(curDate - curS).getFullYear() +
+        // "-" + _sm + "-" +_sd;
+        //   let threeMonths = new Date(start).getTime();
+        // return time.getTime() > Date.now() || time.getTime() < threeMonths;
+          return time.getTime() > Date.now();
         }
       },
     
@@ -305,8 +311,8 @@ export default {
       reselt: false,
       hideleft: false,
       ruleForm: {
-        data1: null,
-        data2: null,
+        data1: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)),
+        data2: new Date(),
         minFootholdTimes: 3,
         input5: "1",
         value1: null
@@ -330,7 +336,7 @@ export default {
     
 
     //this.getControlMap(1);
-    this.setDTime()
+    // this.setDTime()
     let map = new window.AMap.Map("mapBox", {
       zoom: 10,
       center: mapXupuxian.center
@@ -364,21 +370,21 @@ export default {
         }
       
     },
-    setDTime () {
-      let date = new Date();
-      let curDate = date.getTime();
-      let curS = 1 * 24 * 3600 * 1000;
-        let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
-      let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
-      let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
-      let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
+    // setDTime () {
+    //   let date = new Date();
+    //   let curDate = date.getTime();
+    //   let curS = 1 * 24 * 3600 * 1000;
+    //     let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
+    //   let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
+    //   let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
+    //   let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
       
-      let _s = new Date(curDate - curS).getFullYear() +
-        "-" + _sm + "-" +_sd;
-      let _e = date.getFullYear() + "-" + _em + "-" + _ed;
-      this.ruleForm.data1 = _s
-      this.ruleForm.data2 = _s
-    },
+    //   let _s = new Date(curDate - curS).getFullYear() +
+    //     "-" + _sm + "-" +_sd;
+    //   let _e = date.getFullYear() + "-" + _em + "-" + _ed;
+    //   this.ruleForm.data1 = _s
+    //   this.ruleForm.data2 = _s
+    // },
     /**
      * 弹框地图初始化
      */
@@ -496,8 +502,8 @@ export default {
         this.curImageUrl
       ) {
         let pg = {
-          startDate: this.ruleForm.data1 + " 00:00:00",
-          endDate: this.ruleForm.data2 + " 23:59:59",
+          startDate: formatDate(this.ruleForm.data1),
+          endDate: formatDate(this.ruleForm.data2),
           minFootholdTimes: this.ruleForm.minFootholdTimes || 0,
         };
         if (this.ruleForm.input5 == 1 && this.ruleForm.value1.length != 0) {
@@ -515,7 +521,7 @@ export default {
     },
     resetForm(v) {
       this.curImageUrl = "";
-      this.setDTime()
+      // this.setDTime()
       this.ruleForm.minFootholdTimes=3 
       this.ruleForm.input5='1'
       this.ruleForm.value1=[];

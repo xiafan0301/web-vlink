@@ -450,6 +450,8 @@ export default {
       this.queryForm.surveillanceIds = surveillanceIds;
       this.queryForm.vehicleTypes = vehicleTypes;
 
+      this.pagination.pageNum = this.$route.query.pageNum;
+      this.pagination.pageSize = this.$route.query.pageSize;
     },
     // 获取布控车辆
     getControlVehicleList () {

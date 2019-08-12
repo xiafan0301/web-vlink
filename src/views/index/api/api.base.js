@@ -172,6 +172,16 @@ export function editDeviceInfo (data) {
     mode: baseModeName
   });
 }
+/**
+ * 摄像头模板下载
+ */
+export function downloadCameraModel () {
+  return request({
+    url: '/device-service/templateDown',
+    method: 'get',
+    mode: baseModeName
+  });
+}
 /**********************  卡口管理  ********************/
 /**
  * 新增卡口
