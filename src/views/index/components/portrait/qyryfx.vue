@@ -157,6 +157,7 @@
                     :clearable="false"
                     value-format="yyyy-MM-dd HH:mm:ss"
                     :picker-options="startDateOptArr[index]"
+                    :time-arrow-control="true"
                     placeholder="开始时间"
                     class="width232 vl_date"
                   ></el-date-picker>
@@ -166,9 +167,9 @@
                     v-model="item.endTime"
                     :clearable="false"
                     :picker-options="endDateOptArr[index]"
+                    :time-arrow-control="true"
                     value-format="yyyy-MM-dd HH:mm:ss"
                     type="datetime"
-                    default-time="23:59:59"
                     placeholder="结束时间"
                     class="width232 vl_date vl_date_end"
                   ></el-date-picker>
@@ -532,9 +533,7 @@ export default {
           startTime:
             formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
             " 00:00:00",
-          endTime:
-            formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
-            " 23:59:59",
+          endTime: formatDate(new Date().getTime()),
           drawActiveType: 0, // 当前活跃的选中区域
           canPosition: false // 是否可以定位
         }
@@ -653,9 +652,7 @@ export default {
           startTime:
             formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
             " 00:00:00",
-          endTime:
-            formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
-            " 23:59:59",
+          endTime: formatDate(new Date().getTime()),
           drawActiveType: 0, // 当前活跃的选中区域
           canPosition: false
         }
@@ -923,9 +920,7 @@ export default {
           startTime:
             formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
             " 00:00:00",
-          endTime:
-            formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
-            " 23:59:59",
+          endTime: formatDate(new Date().getTime()),
           drawActiveType: 0, // 当前活跃的选中区域
           canPosition: false
         }

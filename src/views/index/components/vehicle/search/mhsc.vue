@@ -20,9 +20,11 @@
                   <el-form-item label prop="startTime">
                     <el-date-picker
                       v-model="mhscMenuForm.startTime"
-                      type="date"
+                      type="datetime"
                       :clearable="false"
                       :picker-options="startDateOpt"
+                      :time-arrow-control="true"
+                      value-format="yyyy-MM-dd HH:mm:ss"
                       placeholder="开始时间"
                       class="width232 vl_date"
                     ></el-date-picker>
@@ -30,10 +32,11 @@
                   <el-form-item label prop="endTime">
                     <el-date-picker
                       v-model="mhscMenuForm.endTime"
-                      type="date"
+                      type="datetime"
                       :clearable="false"
-                     
                       :picker-options="endDateOpt"
+                      value-format="yyyy-MM-dd HH:mm:ss"
+                      :time-arrow-control="true"
                       placeholder="结束时间"
                       class="width232 vl_date vl_date_end"
                     ></el-date-picker>
@@ -430,11 +433,9 @@ export default {
           // }
           const queryParams = {
             startTime:
-              formatDate(this.mhscMenuForm.startTime, "yyyy-MM-dd") +
-                " 00:00:00" || null, // 开始时间
+              formatDate(this.mhscMenuForm.startTime) || null, // 开始时间
             endTime:
-              formatDate(this.mhscMenuForm.endTime, "yyyy-MM-dd") +
-                " 23:59:59" || null, // 结束时间
+              formatDate(this.mhscMenuForm.endTime) || null, // 结束时间
             deviceUid: deviceUidArr.join(), // 摄像头标识
             bayonetUid: bayonetUidArr.join(), // 卡口标识
             vehicleType: this.mhscMenuForm.carType.join() || null, // 车辆类型
@@ -529,10 +530,9 @@ export default {
       this.mhscMenuForm.startTime = formatDate(
         new Date().getTime() - 3600 * 1000 * 24,
         "yyyy-MM-dd"
-      );
+      ) + ' 00:00:00';
       this.mhscMenuForm.endTime = formatDate(
-        new Date().getTime() - 3600 * 1000 * 24,
-        "yyyy-MM-dd"
+        new Date().getTime()
       );
     },
     /*sort排序方法*/

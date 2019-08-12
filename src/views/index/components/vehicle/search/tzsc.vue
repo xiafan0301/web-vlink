@@ -19,9 +19,11 @@
                 <el-form-item label prop="startTime">
                   <el-date-picker
                     v-model="tzscMenuForm.startTime"
-                    type="date"
+                    type="datetime"
                     :clearable="false"
                     :picker-options="startDateOpt"
+                    value-format="yyyy-MM-dd HH:mm:ss"
+                    :time-arrow-control="true"
                     placeholder="开始时间"
                     class="width232 vl_date"
                   ></el-date-picker>
@@ -29,9 +31,11 @@
                 <el-form-item label prop="endTime">
                   <el-date-picker
                     v-model="tzscMenuForm.endTime"
-                    type="date"
+                    type="datetime"
                     :clearable="false"
                     :picker-options="endDateOpt"
+                    value-format="yyyy-MM-dd HH:mm:ss"
+                    :time-arrow-control="true"
                     placeholder="结束时间"
                     class="width232 vl_date vl_date_end"
                   ></el-date-picker>
@@ -381,9 +385,7 @@ export default {
         sunVisor: "",
         inspectionCount: ""
       },
-      rules: {
-        
-      },
+      rules: {},
       startDateOpt: {
         disabledDate: time => {
           if (this.tzscMenuForm.endTime) {
@@ -583,11 +585,8 @@ export default {
       if (this.selectType === 2) {
         queryParams = {
           where: {
-            startTime:
-              formatDate(this.tzscMenuForm.startTime, "yyyy-MM-dd") +
-              " 00:00:00", // 开始时间
-            endTime:
-              formatDate(this.tzscMenuForm.endTime, "yyyy-MM-dd") + " 23:59:59", // 结束时间
+            startTime: formatDate(this.tzscMenuForm.startTime), // 开始时间
+            endTime: formatDate(this.tzscMenuForm.endTime), // 结束时间
             deviceUid: deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
             bayonetUid: bayonetUidArr.length > 0 ? bayonetUidArr.join() : null, // 卡口标识
             plateClass: this.tzscMenuForm.licenseType || null, // 号牌类型
@@ -607,11 +606,8 @@ export default {
         // 从图片提取
         queryParams = {
           where: {
-            startTime:
-              formatDate(this.tzscMenuForm.startTime, "yyyy-MM-dd") +
-              " 00:00:00", // 开始时间
-            endTime:
-              formatDate(this.tzscMenuForm.endTime, "yyyy-MM-dd") + " 23:59:59", // 结束时间
+            startTime: formatDate(this.tzscMenuForm.startTime), // 开始时间
+            endTime: formatDate(this.tzscMenuForm.endTime), // 结束时间
             deviceUid: deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
             bayonetUid: bayonetUidArr.length > 0 ? bayonetUidArr.join() : null // 卡口标识
           }
@@ -814,14 +810,10 @@ export default {
     /*选择日期的方法 */
     setDTime() {
       //设置默认时间
-      this.tzscMenuForm.startTime = formatDate(
-        new Date().getTime() - 3600 * 1000 * 24,
-        "yyyy-MM-dd"
-      );
-      this.tzscMenuForm.endTime = formatDate(
-        new Date().getTime() - 3600 * 1000 * 24,
-        "yyyy-MM-dd"
-      );
+      this.tzscMenuForm.startTime =
+        formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
+        " 00:00:00";
+      this.tzscMenuForm.endTime = formatDate(new Date().getTime());
     },
     /*选择设备的方法*/
     initCheckTree() {
@@ -1053,7 +1045,7 @@ export default {
   },
   watch: {
     curImageUrl(e) {
-      if (e === '') {
+      if (e === "") {
         this.characteristicList = [];
       }
     },
@@ -1375,7 +1367,7 @@ export default {
       padding: 0;
     }
     .have_character {
-      background: #0C70F8;
+      background: #0c70f8;
       color: #fff;
     }
   }
