@@ -11,7 +11,8 @@
               class="vl_date"
               style="width: 100%;"
               v-model="searchForm.time[0]"
-              type="date"
+              type="datetime"
+              time-arrow-control
               :editable="false" :clearable="false"
               :picker-options="startTimeOptions"
               range-separator="至"
@@ -23,7 +24,8 @@
               class="vl_date vl_date_end"
               style="width: 100%;"
               v-model="searchForm.time[1]"
-              type="date"
+              type="datetime"
+              time-arrow-control
               :editable="false" :clearable="false"
               :picker-options="endTimeOptions"
               range-separator="至"
@@ -263,7 +265,7 @@ import vlUpload from '@/components/common/upload.vue';
 import {getFaceRetrievalPerson, JtcGETAppendixInfoList} from '../../api/api.judge.js';
 import {getPicRecognize} from '../../api/api.structuring.js';
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
-import {formatDate} from '@/utils/util.js';
+import {formatDate, dateOrigin} from '@/utils/util.js';
 import portraitDetail from './common/portraitDetail.vue';
 import {ajaxCtx} from '@/config/config';
 export default {
@@ -298,7 +300,7 @@ export default {
       deData:null,
       seData:null,
       searchForm: {
-        time: [new Date(new Date().getTime() - 2 * 24 * 60 * 60 * 1000), new Date()],
+        time: [dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)), new Date()],
         type: 1, // 1列表选择 2地图选择
         type2: 1, // 1图片  2自定义
         area: [],
@@ -556,8 +558,8 @@ export default {
     searchParams () {
       let params = {
         where: {
-          startDate: formatDate(this.searchForm.time[0], 'yyyy-MM-dd 00:00:00'),
-          endDate: formatDate(this.searchForm.time[1], 'yyyy-MM-dd 23:59:59')
+          startDate: formatDate(this.searchForm.time[0]),
+          endDate: formatDate(this.searchForm.time[1])
         },
         orderBy: this.orderType === 1 ? 'shotTime' : 'deviceNamePinyin',
         order: this.order === 1 ? 'desc' : 'asc'

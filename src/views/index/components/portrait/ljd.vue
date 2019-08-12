@@ -20,27 +20,23 @@
           <el-form-item  prop="data1">
             <el-date-picker
               v-model="ruleForm.data1"
+              type="datetime"
+              time-arrow-control
               :clearable="false"
               placeholder="开始时间"
               :picker-options="pickerOptions"
               class="full vl_date"
-              :time-arrow-control="true"
-              value-format="yyyy-MM-dd HH:mm:ss"
-              format="yyyy-MM-dd HH:mm:ss"
-              type="datetime"
             ></el-date-picker>
           </el-form-item>
           <el-form-item  prop="data2">
             <el-date-picker
               v-model="ruleForm.data2"
+              type="datetime"
+              time-arrow-control
               :clearable="false"
               :picker-options="pickerOptions"
               placeholder="结束时间"
               class="full vl_date vl_date_end"
-              :time-arrow-control="true"
-              value-format="yyyy-MM-dd HH:mm:ss"
-              format="yyyy-MM-dd HH:mm:ss"
-              type="datetime"
             ></el-date-picker>
           </el-form-item>
           <el-form-item prop="minFootholdTimes" class="firstItem">
@@ -247,8 +243,8 @@ import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import mapSelector from '@/components/common/mapSelector.vue';
 import portraitDetail from './common/portraitDetail.vue';
 import { log } from 'util';
+import {formatDate, dateOrigin} from '@/utils/util.js';
 import vlUpload from '@/components/common/upload.vue';
-import { dateOrigin, formatDate } from '@/utils/util.js';
 export default {
   components: {
     mapSelector,
@@ -370,21 +366,21 @@ export default {
         }
       
     },
-    // setDTime () {
-    //   let date = new Date();
-    //   let curDate = date.getTime();
-    //   let curS = 1 * 24 * 3600 * 1000;
-    //     let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
-    //   let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
-    //   let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
-    //   let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
+    setDTime () {
+      /* let date = new Date();
+      let curDate = date.getTime();
+      let curS = 1 * 24 * 3600 * 1000;
+        let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
+      let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
+      let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
+      let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
       
-    //   let _s = new Date(curDate - curS).getFullYear() +
-    //     "-" + _sm + "-" +_sd;
-    //   let _e = date.getFullYear() + "-" + _em + "-" + _ed;
-    //   this.ruleForm.data1 = _s
-    //   this.ruleForm.data2 = _s
-    // },
+      let _s = new Date(curDate - curS).getFullYear() +
+        "-" + _sm + "-" +_sd;
+      let _e = date.getFullYear() + "-" + _em + "-" + _ed;
+      this.ruleForm.data1 = _s
+      this.ruleForm.data2 = _s */
+    },
     /**
      * 弹框地图初始化
      */
@@ -521,7 +517,9 @@ export default {
     },
     resetForm(v) {
       this.curImageUrl = "";
-      // this.setDTime()
+      this.setDTime()
+      this.ruleForm.data1 = dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000));
+      this.ruleForm.data2 = new Date();
       this.ruleForm.minFootholdTimes=3 
       this.ruleForm.input5='1'
       this.ruleForm.value1=[];

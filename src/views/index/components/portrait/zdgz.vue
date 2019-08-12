@@ -12,26 +12,22 @@
       <div class="vl_jtc_search" style="padding-top: 0;">
         <el-date-picker
           v-model="searchData.time1"
+          type="datetime"
+          time-arrow-control
           placeholder="开始时间"
           :picker-options="pickerOptions"
           class="full vl_date"
           :clearable="false"
-          :time-arrow-control="true"
-          value-format="yyyy-MM-dd HH:mm:ss"
-          format="yyyy-MM-dd HH:mm:ss"
-          type="datetime"
         ></el-date-picker>
         <el-date-picker
             v-model="searchData.time2"
+            type="datetime"
+            time-arrow-control
             :clearable="false"
             :picker-options="pickerOptions"
             placeholder="结束时间"
             class="full vl_date vl_date_end"
-            :time-arrow-control="true"
-            value-format="yyyy-MM-dd HH:mm:ss"
-            format="yyyy-MM-dd HH:mm:ss"
-            type="datetime"
-          ></el-date-picker>
+        ></el-date-picker>
           <el-select class="full" v-model="searchData.portraitGroupId" placeholder="关注人群">
             <el-option
               v-for="item in portraitGroupList"
@@ -457,21 +453,21 @@ export default {
         this.searchData.ageGroup = null;
       }
     },
-    // setDTime () {
-    //   let date = new Date();
-    //   let curDate = date.getTime();
-    //   let curS = 1 * 24 * 3600 * 1000;
-    //     let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
-    //   let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
-    //   let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
-    //   let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
+    setDTime () {
+      /* let date = new Date();
+      let curDate = date.getTime();
+      let curS = 1 * 24 * 3600 * 1000;
+        let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
+      let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
+      let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
+      let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
       
-    //   let _s = new Date(curDate - curS).getFullYear() +
-    //     "-" + _sm + "-" +_sd;
-    //   let _e = date.getFullYear() + "-" + _em + "-" + _ed;
-    //   this.searchData.time1 = _s
-    //   this.searchData.time2 = _s
-    // },
+      let _s = new Date(curDate - curS).getFullYear() +
+        "-" + _sm + "-" +_sd;
+      let _e = date.getFullYear() + "-" + _em + "-" + _ed;
+      this.searchData.time1 = _s
+      this.searchData.time2 = _s */
+    },
     resetSearch () {
       // this.setDTime()
       this.searchData.type = null;
@@ -481,6 +477,8 @@ export default {
       this.searchData.ageGroup = null;
       this.searchData.vehicleGroupId = '';
       this.searchData.plateType = null;
+      this.searchData.time1 = dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000));
+      this.searchData.time2 = new Date();
       this.selectDevice = [];
       this.selectBayonet = [];
       this.selectValue = "已选设备0个";
