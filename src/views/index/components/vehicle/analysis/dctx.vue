@@ -15,6 +15,7 @@
               style="width: 100%"
               :picker-options="pickerStart"
               v-model="searchForm.startTime"
+              :time-arrow-control="true"
               type="datetime"
               @blur="judgeBaseVehicle"
               placeholder="选择日期"
@@ -26,6 +27,7 @@
               class="vl_date vl_date_end"
               v-model="searchForm.endTime"
               :clearable="false"
+              :time-arrow-control="true"
               value-format="yyyy-MM-dd HH:mm:ss"
               format="yyyy-MM-dd HH:mm:ss"
               style="width: 100%"
@@ -150,7 +152,7 @@
 import noResult from '@/components/common/noResult.vue';
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { mapXupuxian } from "@/config/config.js";
-import { formatDate, objDeepCopy } from "@/utils/util.js";
+import { formatDate, objDeepCopy, dateOrigin } from "@/utils/util.js";
 import { checkPlateNumber } from '@/utils/validator.js';
 import { getMultiVehicleList, getBaseVehicleList } from '@/views/index/api/api.judge.js';
 const overStartTime = new Date() - 24 * 60 * 60 * 1000;
@@ -189,7 +191,7 @@ export default {
       resultList: null,
       map: null, // 地图对象
       searchForm: {
-        startTime: new Date(overStartTime),
+        startTime: dateOrigin(false, new Date(overStartTime)),
         endTime: new Date(),
         basicVehicleNumber: null,
         peerVehicleNumber: null,
