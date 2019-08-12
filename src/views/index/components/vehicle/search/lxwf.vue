@@ -801,7 +801,9 @@ export default {
       }),
       this.photoAnalysis = null;
       this.regulationsList = [];
-        this.setDTime();
+      this.setDTime();
+      this.data1 = dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000));
+      this.data2 = new Date();
       //this.getVehicleDetail();
     },
     //查询
