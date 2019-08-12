@@ -338,7 +338,7 @@ import vlBreadcrumb from "@/components/common/breadcrumb.vue";
 import vehicleDetail from "../common/vehicleDetail.vue";
 
 import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入溆浦县地图
-import { formatDate } from "@/utils/util.js";
+import { formatDate, dateOrigin } from "@/utils/util.js";
 
 import {
   JtcPOSTAppendixInfo,
@@ -585,8 +585,8 @@ export default {
       if (this.selectType === 2) {
         queryParams = {
           where: {
-            startTime: formatDate(this.tzscMenuForm.startTime), // 开始时间
-            endTime: formatDate(this.tzscMenuForm.endTime), // 结束时间
+            startTime: this.tzscMenuForm.startTime, // 开始时间
+            endTime: this.tzscMenuForm.endTime, // 结束时间
             deviceUid: deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
             bayonetUid: bayonetUidArr.length > 0 ? bayonetUidArr.join() : null, // 卡口标识
             plateClass: this.tzscMenuForm.licenseType || null, // 号牌类型
@@ -606,8 +606,8 @@ export default {
         // 从图片提取
         queryParams = {
           where: {
-            startTime: formatDate(this.tzscMenuForm.startTime), // 开始时间
-            endTime: formatDate(this.tzscMenuForm.endTime), // 结束时间
+            startTime: this.tzscMenuForm.startTime, // 开始时间
+            endTime: this.tzscMenuForm.endTime, // 结束时间
             deviceUid: deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
             bayonetUid: bayonetUidArr.length > 0 ? bayonetUidArr.join() : null // 卡口标识
           }
@@ -810,10 +810,8 @@ export default {
     /*选择日期的方法 */
     setDTime() {
       //设置默认时间
-      this.tzscMenuForm.startTime =
-        formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
-        " 00:00:00";
-      this.tzscMenuForm.endTime = formatDate(new Date().getTime());
+      this.tzscMenuForm.startTime = formatDate(dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)));
+      this.tzscMenuForm.endTime = formatDate(new Date());
     },
     /*选择设备的方法*/
     initCheckTree() {

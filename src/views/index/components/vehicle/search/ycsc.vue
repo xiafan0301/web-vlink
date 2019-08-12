@@ -226,7 +226,7 @@ import vlBreadcrumb from "@/components/common/breadcrumb.vue";
 import vehicleDetail from "../common/vehicleDetail.vue";
 
 import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入一个地图的地址
-import { formatDate } from "@/utils/util.js";
+import { formatDate, dateOrigin } from "@/utils/util.js";
 import {
   JtcPOSTAppendixInfo,
   JtcGETAppendixInfoList
@@ -386,8 +386,8 @@ export default {
       });
       let queryParams = {
         where: {
-          startTime: formatDate(this.ytscMenuForm.startTime) || null, // 开始时间
-          endTime: formatDate(this.ytscMenuForm.endTime) || null, // 结束时间
+          startTime: this.ytscMenuForm.startTime || null, // 开始时间
+          endTime: this.ytscMenuForm.endTime || null, // 结束时间
           uploadImgUrl: this.curImageUrl || null, // 车辆图片信息
           deviceUid: deviceUidArr.join(), // 摄像头标识
           bayonetUid: bayonetUidArr.join() // 卡口标识
@@ -477,10 +477,10 @@ export default {
     /*选择日期的方法 */
     setDTime() {
       //设置默认时间
-      this.ytscMenuForm.startTime =
-        formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
-        " 00:00:00";
-      this.ytscMenuForm.endTime = formatDate(new Date().getTime());
+      this.ytscMenuForm.startTime = formatDate(
+        dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000))
+      );
+      this.ytscMenuForm.endTime = formatDate(new Date());
     },
     /*sort排序方法*/
     clickTime() {

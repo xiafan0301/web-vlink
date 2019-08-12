@@ -3,10 +3,10 @@
   <div class="mhsc_wrap">
     <!-- 面包屑通用样式 -->
     <div
-        is="vlBreadcrumb"
-        :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
+      is="vlBreadcrumb"
+      :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
           {name: '模糊搜车'}]"
-      ></div>
+    ></div>
     <div class="sc_content">
       <!-- 通用的左边菜单 -->
       <div class="left_menu">
@@ -253,13 +253,13 @@
 import vlBreadcrumb from "@/components/common/breadcrumb.vue";
 
 import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入一个地图的地址
-import { formatDate } from "@/utils/util.js";
+import { formatDate, dateOrigin } from "@/utils/util.js";
 
 import { getGroupsByType } from "@/views/index/api/api.js";
 import { getVagueSearch } from "../../../api/api.analysis.js"; // 根据图检索接口
 import { MapGETmonitorList } from "../../../api/api.map.js"; // 获取到设备树的接口
 import { objDeepCopy } from "../../../../../utils/util.js"; // 深拷贝方法
-import vehicleDetail from '../common/vehicleDetail.vue';
+import vehicleDetail from "../common/vehicleDetail.vue";
 export default {
   components: { vehicleDetail, vlBreadcrumb },
   data() {
@@ -381,7 +381,7 @@ export default {
       isInit: true, // 是否是页面初始化状态
       pageNum: 1,
       pageSize: 20,
-      total: 0,
+      total: 0
       /* 检索详情弹窗变量 */
     };
   },
@@ -432,10 +432,8 @@ export default {
           //   this.$message.warning("请您填写完整的车牌号码");
           // }
           const queryParams = {
-            startTime:
-              formatDate(this.mhscMenuForm.startTime) || null, // 开始时间
-            endTime:
-              formatDate(this.mhscMenuForm.endTime) || null, // 结束时间
+            startTime: this.mhscMenuForm.startTime || null, // 开始时间
+            endTime: this.mhscMenuForm.endTime || null, // 结束时间
             deviceUid: deviceUidArr.join(), // 摄像头标识
             bayonetUid: bayonetUidArr.join(), // 卡口标识
             vehicleType: this.mhscMenuForm.carType.join() || null, // 车辆类型
@@ -528,12 +526,9 @@ export default {
     setDTime() {
       //设置默认时间
       this.mhscMenuForm.startTime = formatDate(
-        new Date().getTime() - 3600 * 1000 * 24,
-        "yyyy-MM-dd"
-      ) + ' 00:00:00';
-      this.mhscMenuForm.endTime = formatDate(
-        new Date().getTime()
+        dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000))
       );
+      this.mhscMenuForm.endTime = formatDate(new Date());
     },
     /*sort排序方法*/
     clickTime() {
@@ -723,7 +718,7 @@ export default {
         pageSize: this.strucInfoList.length,
         total: this.strucInfoList.length,
         pageNum: 1
-      }
+      };
     }
   }
 };
