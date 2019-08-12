@@ -8,12 +8,15 @@
       </div>
     </div>
     <!-- loading -->
-    <div class="player_loading com_trans50_lt" v-show="videoLoading">
-      <div v-if="videoLoadingFailed">
+    <div class="player_loading" v-if="oData.type === 5 && videoRelayEmpty">
+      <div class="com_trans50_lt">目标抓拍中，请稍候...</div>
+    </div>
+    <div class="player_loading" v-show="videoLoading">
+      <div class="com_trans50_lt" v-if="videoLoadingFailed">
         <p>视频加载失败</p>
         <el-button round size="small" @click="relaodPlayer">重新获取</el-button>
       </div>
-      <div v-else>视频加载中，请稍后...</div>
+      <div class="com_trans50_lt" v-else>视频加载中，请稍后...</div>
     </div>
     <!-- oData.type === 5 视频接力 -->
     <div class="player_relay_i" v-if="oData.type === 5 && oData">
@@ -238,7 +241,7 @@ export default {
   /** 
    * index: 视频序号（在列表页面的位置）
    * oData：视频信息 object {
-   *    type: 1, // 1直播 2回放 3录像
+   *    type: 1, // 1直播 2回放 3录像 5视频接力（回放）
    *    title: '设备名称',
    *    startTime: Date 回放开始时间
    *    endTime: Date 回放结束时间
@@ -369,7 +372,8 @@ export default {
         minCtrTime: 2000, // 最小控制时间
         para: 100,
         position: null // { cmd: , action: 1 } 正在调节的方向
-      }
+      },
+      videoRelayEmpty: false
     }
   },
   filters: {
@@ -377,7 +381,18 @@ export default {
   watch: {
     oData (newData, oldData) {
       console.log('watch oData', newData);
-      if (oldData && oldData.video.uid === newData.video.uid) {
+      if (newData.type === 5) {
+        let od = null, nd = null;
+        if (oldData && oldData.video.videos && oldData.video.videos.length > 0) {
+          od = oldData.video.videos[0];
+        }
+        if (newData && newData.video.videos && newData.video.videos.length > 0) {
+          nd = newData.video.videos[0];
+        }
+        if (od && nd && od.uid === nd.uid) {
+          return false;
+        }
+      } else if (oldData && oldData.video.uid === newData.video.uid) {
         return false;
       }
       // 去掉暂停按钮
@@ -500,8 +515,50 @@ export default {
         this.initPlayerDoForNormal(this.oData.video.downUrl);
       } else if (this.oData.type === 5) {
         // 视频接力
+        let relayD = null;
+        if (this.oData.video.videos && this.oData.video.videos.length > 0) {
+          relayD = this.oData.video.videos[0];
+        }
         // console.log('视频接力');
-        this.initPlayerDoForNormal(this.oData.video.videoPath);
+        if (relayD) {
+          obj.deviceId = relayD.deviceID;
+          let st = null, et = new Date(), showt = null;
+          // 回放
+          if (relayD.showTime) {
+            showt = getDate(relayD.showTime);
+            st = new Date(showt.getTime() - 60 * 1000);
+          }
+          if (!st) { st = new Date(new Date().getTime() - 60 * 1000); }
+          if (showt.getTime() > et.getTime()) {
+            et = showt;
+          }
+          obj.startTime = formatDate(st, 'yyyy-MM-dd HH:mm:ss');
+          obj.endTime = formatDate(et, 'yyyy-MM-dd HH:mm:ss');
+          apiVideoPlayBack(obj).then(res => {
+            if (res && res.data && res.data.length > 0) {
+              // 为一个LIST
+              if (res.data.length >= (this.playBackIndex + 1)) {
+                console.log('回放第' + (this.playBackIndex + 1) + '段视频，URL：', res.data[this.playBackIndex].liveFlvUrl);
+                this.initPlayerDo(res.data[this.playBackIndex].liveFlvUrl);
+                this.playBackList = res.data;
+              } else {
+                // 播放结束处理
+              }
+            } else {
+              // 未获取到视频
+              console.log('未获取到视频');
+              this.videoLoadingFailed = true;
+            }
+            this.videoRelayEmpty = false;
+          }).catch(error => {
+            this.videoRelayEmpty = false;
+            console.log("apiVideoPlayBack error：", error);
+          });
+          // this.initPlayerDoForNormal(this.oData.video.videoPath);
+        } else {
+          this.videoLoading = false;
+          this.videoRelayEmpty = true;
+        }
       }
       
     },
@@ -619,6 +676,11 @@ export default {
         console.log('播放结束');
         this.playActive = false;
         // videoElement.pause();
+        if (this.oData.type === 5) {
+          this.videoRelayEmpty = true;
+          if (this.video) {
+          }
+        }
       };
       videoElement.onerror = () => {
         this.videoLoadingFailed = true;
@@ -1302,7 +1364,7 @@ export default {
 /* 视频接力 begin */
 .player_fit { object-fit: fill; }
 .player_relay_i {
-  position: absolute; top: 10px; left: 10px; z-index: 100;
+  position: absolute; top: 10px; left: 10px; z-index: 191;
   > .player_relay_icp {
     > ul {
       margin: 0 auto; padding: 8px 10px;
@@ -1328,7 +1390,7 @@ export default {
 /* 视频接力 end */
 .flvplayer_ptz {
   width: 174px;
-  position: absolute; bottom: 50px; left: 50%; z-index: 200;
+  position: absolute; bottom: 50px; left: 50%; z-index: 180;
   margin-left: -87px;
   > ul {
     position: relative;
@@ -1388,15 +1450,17 @@ export default {
     cursor: pointer;
   }
   > .player_loading {
-    position: absolute; top: 50%; left: 50%; z-index: 10;
-    color: #fff;
+    position: absolute; top: 0; left: 0; z-index: 190;
+    height: 100%; width: 100%;
+    background-color: #000;
     text-align: center;
     > div {
+      color: #fff;
       > p { padding-bottom: 10px; }
     }
   }
   > .vl_icon_close {
-    position: absolute; top: 10px; right: 10px; z-index: 10;
+    position: absolute; top: 10px; right: 10px; z-index: 191;
     cursor: pointer;
   }
   > .vl_icon_v51 {

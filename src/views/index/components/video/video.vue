@@ -87,7 +87,7 @@ export default {
   }
 }
 .vid_show_menu {
-  position: absolute; top: 0; left: -230px; z-index: 10;
+  position: absolute; top: 0; left: -230px; z-index: 200;
   width: 230px; height: 100%;
   transition: left 0.3s ease-out;
   > .show_menu_b {

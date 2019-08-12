@@ -58,14 +58,71 @@
               </div>
               <div v-else-if="xjType === 2 && xjVechicleType === 1 && uploadVehicleObj">
                 <h3>图片信息：</h3>
-                <ul>
-                  <li style="width: 50%;"><span>车牌号码：</span>{{uploadVehicleObj.plateNo ? uploadVehicleObj.plateNo : '--'}}</li>
-                  <li style="width: 50%;"><span>车辆分组：</span>{{(uploadVehicleObj.vehicleType && uploadVehicleObj.vehicleType.length > 0) ? uploadVehicleObj.vehicleType.join(',') : '--'}}</li>
-                  <li style="width: 50%;"><span>车牌颜色：</span>{{uploadVehicleObj.plateColor ? uploadVehicleObj.plateColor : '--'}}</li>
-                  <li style="width: 50%;"><span>车辆型号：</span>{{uploadVehicleObj.vehicleModel ? uploadVehicleObj.vehicleModel : '--'}}</li>
-                  <li style="width: 50%;"><span>车辆颜色：</span>{{uploadVehicleObj.vehicleColor ? uploadVehicleObj.vehicleColor : '--'}}</li>
-                  <li style="width: 50%;"><span>车辆类型：</span>{{uploadVehicleObj.vehicleClass ? uploadVehicleObj.vehicleClass : '--'}}</li>
-                  <li style="width: 50%;"><span>车牌类型：</span>{{uploadVehicleObj.baby ? dicFormater(45, uploadVehicleObj.plateClass) : '--'}}</li>
+                <ul class="task_mtr_ls2">
+                  <li>
+                    <span>有无车牌：</span>
+                    <span :title="uploadVehicleObj.hasPlate">{{uploadVehicleObj.hasPlate ? uploadVehicleObj.hasPlate : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>车牌种类：</span>
+                    <span :title="uploadVehicleObj.plateClass">{{uploadVehicleObj.plateClass ? uploadVehicleObj.plateClass : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>车牌颜色：</span>
+                    <span :title="uploadVehicleObj.plateColor">{{uploadVehicleObj.plateColor ? uploadVehicleObj.plateColor : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>车牌号码：</span>
+                    <span :title="uploadVehicleObj.plateNo">{{uploadVehicleObj.plateNo ? uploadVehicleObj.plateNo : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>车辆类型：</span>
+                    <span :title="uploadVehicleObj.vehicleClass">{{uploadVehicleObj.vehicleClass ? uploadVehicleObj.vehicleClass : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>车辆品牌：</span>
+                    <span :title="uploadVehicleObj.vehicleBrand">{{uploadVehicleObj.vehicleBrand ? uploadVehicleObj.vehicleBrand : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>车辆型号：</span>
+                    <span :title="uploadVehicleObj.vehicleModel">{{uploadVehicleObj.vehicleModel ? uploadVehicleObj.vehicleModel : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>车辆年款：</span>
+                    <span :title="uploadVehicleObj.vehicleStyles">{{uploadVehicleObj.vehicleStyles ? uploadVehicleObj.vehicleStyles : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>车辆颜色：</span>
+                    <span :title="uploadVehicleObj.vehicleColor">{{uploadVehicleObj.vehicleColor ? uploadVehicleObj.vehicleColor : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>车顶：</span>
+                    <span :title="uploadVehicleObj.vehicleRoof">{{uploadVehicleObj.vehicleRoof ? uploadVehicleObj.vehicleRoof : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>撞痕：</span>
+                    <span :title="uploadVehicleObj.hitMarkInfo">{{uploadVehicleObj.hitMarkInfo ? uploadVehicleObj.hitMarkInfo : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>车前物品描述：</span>
+                    <span :title="uploadVehicleObj.descOfFrontItem">{{uploadVehicleObj.descOfFrontItem ? uploadVehicleObj.descOfFrontItem : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>车后物品描述：</span>
+                    <span :title="uploadVehicleObj.descOfRearItem">{{uploadVehicleObj.descOfRearItem ? uploadVehicleObj.descOfRearItem : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>遮阳板状态：</span>
+                    <span :title="uploadVehicleObj.sunvisor">{{uploadVehicleObj.sunvisor ? uploadVehicleObj.sunvisor : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>安全带状态：</span>
+                    <span :title="uploadVehicleObj.safetyBelt">{{uploadVehicleObj.safetyBelt ? uploadVehicleObj.safetyBelt : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>打电话状态：</span>
+                    <span :title="uploadVehicleObj.calling">{{uploadVehicleObj.calling ? uploadVehicleObj.calling : '--'}}</span>
+                  </li>
                 </ul>
               </div>
             </div>
@@ -80,7 +137,7 @@
             <div class="task_mb_map">
               <ul class="task_mb_mt">
                 <li @click="xjSelType = 1" :class="{'task_mb_mt_sed': xjSelType === 1}">地图选择</li>
-                <li @click="xjSelType = 1" :class="{'task_mb_mt_sed': xjSelType === 2}">列表选择</li>
+                <li @click="xjSelType = 2" :class="{'task_mb_mt_sed': xjSelType === 2}">列表选择</li>
               </ul>
               <div class="mb_map_map" v-show="xjSelType === 1">
                 <div class="mb_map_map_l">
@@ -103,7 +160,7 @@
                   </div>
                 </div>
                 <div class="mb_map_map_r">
-                  <h4>可选设备({{listDevice.length + listBayonet.length}})</h4>
+                  <h4>可选设备（{{xjMapListAllSum}}）</h4>
                   <div>
                     <div style="width: 100%; height: 100%;" id="video_relay_xj_map"></div>
                     <ul>
@@ -124,10 +181,26 @@
                   </div>
                 </div>
               </div>
+              <div class="mb_map_list" v-show="xjSelType === 2">
+                <el-tree
+                  v-if="monitorListTreeData && monitorListTreeData.length > 0"
+                  ref="monitorListTree"
+                  :data="monitorListTreeData"
+                  show-checkbox
+                  node-key="id"
+                  @check="xjMapTreeCheck"
+                  :default-expand-all="false"
+                  :props="xjMapTreeDefaultProps">
+                </el-tree>
+              </div>
             </div>
-            <div class="task_mb_d">
-              <span>备注说明：</span>
-              <el-input v-model="xjDesVal" style="width: 500px;" size="small" maxlength="50" placeholder="请输入50字以内的备注说明"></el-input>
+            <div class="task_mb_d" style="padding-bottom: 0;">
+              <el-form :model="desForm" :rules="desFormRules" ref="desForm" label-width="100px">
+                <el-form-item label="备注说明：" prop="xjDesVal">
+                  <el-input v-model="desForm.xjDesVal" style="width: 500px;" size="small" placeholder="请输入50字以内的备注说明"></el-input>
+                </el-form-item>
+              </el-form>
+              <!-- desForm -->
             </div>
           </div>
         </div>
@@ -147,6 +220,7 @@ import {apiAreaServiceDeviceList, getAllMonitorList, getAllBayonetList, getDevic
 import {JtcGETAppendixInfoList, addPersonVideoContinue, addVhicleVideoContinue} from '@/views/index/api/api.judge.js';
 import {getPhotoAnalysis} from "@/views/index/api/api.analysis.js"; // 车辆特征检索接口
 import {getPicRecognize} from '../../api/api.structuring.js';
+import {MapGETmonitorList} from '@/views/index/api/api.map.js'; // 获取设备树接口
 export default {
   components: {vlUpload},
   data () {
@@ -172,7 +246,14 @@ export default {
         label: 'name'
       },
 
-      xjDesVal: '',
+      desForm: {
+         xjDesVal: ''
+      },
+      desFormRules: {
+        xjDesVal: [
+          { max: 50, message: '最多输入50个字符', trigger: 'change' }
+        ]
+      },
 
       submitLoading: false,
 
@@ -181,8 +262,12 @@ export default {
       imgData: null,
       curImageUrl: '', // 当前上传的图片 人员
       curImageUrl2: '', // 当前上传的图片 车辆
-      uploadClear: {}
+      uploadClear: {},
       /* 新建任务 end */
+      xjMapListAllSum: 0,
+      monitorListDefault: null,
+      monitorListTreeData: null
+
     }
   },
   watch: {
@@ -220,8 +305,7 @@ export default {
     }
   },
   created () {
-    this.getListDevice();
-    this.getListBayonet();
+    this.getMonitorList();
   },
   mounted () {
   },
@@ -258,8 +342,7 @@ export default {
         this.xjMap.setDefaultCursor();
         this.xjDrawSelComp();
       });
-      this.markListDevice();
-      this.markListBayonet();
+      this.markMonitorList();
     },
     xjMapTreeDel () {
       let aL = this.$refs.xjMapTree.getCheckedNodes();
@@ -279,51 +362,60 @@ export default {
     },
     // 画完后处理数据
     xjDrawSelComp () {
-      let oList = {};
-      if (this.listDevice && this.listDevice.length > 0) {
-        for (let i = 0; i < this.listDevice.length; i++) {
-          let o = this.listDevice[i];
-          for (let k in this.xjDrawPolygon) {
-            let so = this.xjDrawPolygon[k];
-            if (so && so.contains(new window.AMap.LngLat(o.longitude, o.latitude))) {
-              // dObj[o.uid] = o;
-              if (!oList[o.areaUid]) { 
-                oList[o.areaUid] = {
-                  id: o.areaUid,
-                  name: o.areaCname,
-                  children: []
-                };
+      this.xjMapTreeChecked = false;
+      let aDids = [], aBids = [];
+      if (this.monitorListDefault && this.monitorListDefault.areaTreeList && this.monitorListDefault.areaTreeList.length > 0) {
+        for (let i = 0; i < this.monitorListDefault.areaTreeList.length; i++) {
+          let _o = this.monitorListDefault.areaTreeList[i];
+          // 设备
+          if (_o.deviceBasicList && _o.deviceBasicList.length > 0) {
+            for (let j = 0; j < _o.deviceBasicList.length; j++) {
+              let _d = _o.deviceBasicList[j];
+              for (let k in this.xjDrawPolygon) {
+                let so = this.xjDrawPolygon[k];
+                if (so && so.contains(new window.AMap.LngLat(_d.longitude, _d.latitude))) {
+                  aDids.push(_d.uid);
+                }
               }
-              oList[o.areaUid].children.push({
-                type: 1,
-                id: o.uid,
-                name: o.deviceName
-              });
+            }
+          }
+          // 卡口 
+          if (_o.bayonetList && _o.bayonetList.length > 0) {
+            for (let j = 0; j < _o.bayonetList.length; j++) {
+              let _b = _o.bayonetList[j];
+              for (let k in this.xjDrawPolygon) {
+                let so = this.xjDrawPolygon[k];
+                if (so && so.contains(new window.AMap.LngLat(_b.longitude, _b.latitude))) {
+                  aBids.push(_b.uid);
+                }
+              }
             }
           }
         }
       }
-      if (this.listBayonet && this.listBayonet.length > 0) {
-        for (let i = 0; i < this.listBayonet.length; i++) {
-          let o = this.listBayonet[i];
-          for (let k in this.xjDrawPolygon) {
-            let so = this.xjDrawPolygon[k];
-            if (so && so.contains(new window.AMap.LngLat(o.longitude, o.latitude))) {
-              if (o.areaUid) {
-                if (!oList[o.areaUid]) { 
-                  oList[o.areaUid] = {
-                    id: o.areaUid,
-                    name: o.areaName,
-                    children: []
-                  };
-                }
-                oList[o.areaUid].children.push({
-                  type: 2,
-                  id: o.uid,
-                  name: o.bayonetName
-                });
-              }
+      let oList = {};
+      for (let i = 0; i < this.monitorListTreeData.length; i++) {
+        let _o = this.monitorListTreeData[i];
+        for (let j = 0; j < _o.children.length; j++) {
+          let _c = _o.children[j];
+          if (aDids.indexOf(_c.id) >= 0) {
+            if (!oList[_o.id]) {
+              oList[_o.id] = {
+                id: _o.id,
+                name: _o.name,
+                children: []
+              };
             }
+            oList[_o.id].children.push(Object.assign({}, _c));
+          } else if (aBids.indexOf(_c.id) >= 0) {
+            if (!oList[_o.id]) {
+              oList[_o.id] = {
+                id: _o.id,
+                name: _o.name,
+                children: []
+              };
+            }
+            oList[_o.id].children.push(Object.assign({}, _c));
           }
         }
       }
@@ -363,43 +455,94 @@ export default {
         }
       }
     },
-    // 设备
-    getListDevice () {
-      getAllMonitorList({ccode: mapXupuxian.adcode}).then(res => {
-        if (res) {
-          this.listDevice = res.data;
+    // 获取设备
+    getMonitorList() {
+      let params = {
+        areaUid: mapXupuxian.adcode
+      };
+      MapGETmonitorList(params).then(res => {
+        if (res && res.data) {
+          this.monitorListDefault = res.data;
+          this.setMonitorListTreeData();
+          // monitorListTreeData
+          /* let camera = objDeepCopy(res.data.areaTreeList);
+          let bayonet = objDeepCopy(res.data.areaTreeList);
+          this.cameraTree = this.getTreeList(camera);
+          this.getLeafCountTree(this.cameraTree);
+          this.initCheckTree(); // 初始化全选树节点 */
         }
       });
     },
-    markListDevice () {
-      for (let i = 0; i < this.listDevice.length; i++) {
-        let _d = this.listDevice[i];
-        let sC = 'vl_icon_sxt';
-        if (_d.deviceStatus !== 1) { sC = 'vl_icon_sxt_dis'; }
-        this.doMark([_d.longitude, _d.latitude],
-          _d.deviceName, 'vl_icon ' + sC);
-      }
-      this.xjMap.setFitView();
-    },
-    // 卡口
-    getListBayonet () {
-      getAllBayonetList({areaId: mapXupuxian.adcode}).then(res => {
-        if (res) {
-          this.listBayonet = res.data;
+    setMonitorListTreeData () {
+      if (this.monitorListDefault && this.monitorListDefault.areaTreeList && this.monitorListDefault.areaTreeList.length > 0) {
+        let aTreeList = [];
+        for (let i = 0; i < this.monitorListDefault.areaTreeList.length; i++) {
+          let _o = this.monitorListDefault.areaTreeList[i];
+          let _t = {
+            id: _o.areaId,
+            name: _o.areaName,
+            children: []
+          }
+          // 设备
+          if (_o.deviceBasicList && _o.deviceBasicList.length > 0) {
+            this.xjMapListAllSum += _o.deviceBasicList.length;
+            for (let j = 0; j < _o.deviceBasicList.length; j++) {
+              let _d = _o.deviceBasicList[j];
+              _t.children.push({
+                id: _d.uid,
+                name: _d.deviceName,
+                type: 1 // 1设备 2卡口
+              });
+            }
+          }
+          // 卡口 
+          if (_o.bayonetList && _o.bayonetList.length > 0) {
+            this.xjMapListAllSum += _o.bayonetList.length;
+            for (let j = 0; j < _o.bayonetList.length; j++) {
+              let _b = _o.bayonetList[j];
+              _t.children.push({
+                id: _b.uid,
+                name: _b.bayonetName,
+                type: 2 // 1设备 2卡口
+              });
+            }
+          }
+          aTreeList.push(_t);
         }
-      });
-    },
-    markListBayonet () {
-      for (let i = 0; i < this.listBayonet.length; i++) {
-        let _d = this.listBayonet[i];
-        let sC = 'vl_icon_kk';
-        if (!_d.isEnabled) { sC = 'vl_icon_kk_dis'; }
-        this.doMark([_d.longitude, _d.latitude],
-          _d.bayonetName, 'vl_icon ' + sC);
+        this.monitorListTreeData = aTreeList;
+        // console.log('this.monitorListTreeData', this.monitorListTreeData);
       }
-      this.xjMap.setFitView();
     },
-    // 
+    // 标记设备/卡口
+    markMonitorList () {
+      if (this.monitorListDefault && this.monitorListDefault.areaTreeList && this.monitorListDefault.areaTreeList.length > 0) {
+        for (let i = 0; i < this.monitorListDefault.areaTreeList.length; i++) {
+          let _o = this.monitorListDefault.areaTreeList[i];
+          // 设备
+          if (_o.deviceBasicList && _o.deviceBasicList.length > 0) {
+            for (let j = 0; j < _o.deviceBasicList.length; j++) {
+              let _d = _o.deviceBasicList[j];
+              let sC = 'vl_icon_sxt';
+              if (_d.deviceStatus !== 1) { sC = 'vl_icon_sxt_dis'; }
+              this.doMark([_d.longitude, _d.latitude],
+                _d.deviceName, 'vl_icon ' + sC);
+            }
+          }
+          // 卡口 
+          if (_o.bayonetList && _o.bayonetList.length > 0) {
+            for (let j = 0; j < _o.bayonetList.length; j++) {
+              let _b = _o.bayonetList[j];
+              let sC = 'vl_icon_kk';
+              if (!_b.isEnabled) { sC = 'vl_icon_kk_dis'; }
+              this.doMark([_b.longitude, _b.latitude],
+                _b.bayonetName, 'vl_icon ' + sC);
+            }
+          }
+        }
+        this.xjMap.setFitView();
+      }
+    },
+    // 标记设备/卡口
     doMark (lnglat, title, sClass) {
       // console.log('doMark', obj);
       let marker = new window.AMap.Marker({ // 添加自定义点标记
@@ -479,44 +622,74 @@ export default {
     },
     xjSubmit () {
       if (this.xjType === 1 && !this.uploadPersonObj) {
-        this.msgTips('请上传图片！'); // 人员  无图片
+        this.msgTips('请设置目标对象'); // 人员  无图片
         return false;
       }
       if (this.xjType === 2 && this.xjVechicleType === 1 && !this.uploadVehicleObj) {
-        this.msgTips('请上传图片！'); // 车辆  无图片
+        this.msgTips('请设置目标对象'); // 车辆  无图片
         return false;
       }
       if (this.xjType === 2 && this.xjVechicleType === 2 && !this.xjPlateNo) {
-        this.msgTips('请输入车牌号码！'); // 车辆-车牌号码  无车牌号码
+        this.msgTips('请输入正确的车牌号码'); // 车辆-车牌号码  无车牌号码
         return false;
       }
       this.submitLoading = true;
       // 获取设备 xjMoreInfo  true/false
       let params = {};
-      // 更多设置
       let dids = [], bids = [];
       if (this.xjMoreInfo) {
-        params.remarks = this.xjDesVal;
-        // id: "3" name: "长沙创谷广告园44" type: 1摄像头/卡口
+        if (this.desForm.xjDesVal && this.desForm.xjDesVal.length > 50) {
+          this.msgTips('备注说明最多可输入50个字符');
+          this.submitLoading = false;
+          return false;
+        }
+        // 更多设置
+        params.remarks = this.desForm.xjDesVal;
+        // id: "3" name: "长沙创谷广告园44" type: 1摄像头/2卡口
         // console.log('this.xjMapTree', this.xjMapTree);
-        for (let i = 0; i < this.xjMapTree.length; i++) {
-          if (this.xjMapTree[i] && this.xjMapTree[i].children && this.xjMapTree[i].children.length > 0) {
-            for (let j = 0; j < this.xjMapTree[i].children.length; j++) {
-              let oj = this.xjMapTree[i].children[j];
-              if (oj.type === 1) {
-                dids.push(oj.id);
-              } else if (oj.type === 2) {
-                bids.push(oj.id);
+        if (this.xjSelType === 1) {
+          for (let i = 0; i < this.xjMapTree.length; i++) {
+            if (this.xjMapTree[i] && this.xjMapTree[i].children && this.xjMapTree[i].children.length > 0) {
+              for (let j = 0; j < this.xjMapTree[i].children.length; j++) {
+                let oj = this.xjMapTree[i].children[j];
+                if (oj.type === 1) {
+                  dids.push(oj.id);
+                } else if (oj.type === 2) {
+                  bids.push(oj.id);
+                }
               }
+            }
+          }
+        } else if (this.xjSelType === 2) {
+          let checkedNodes = this.$refs.monitorListTree.getCheckedNodes();
+          console.log('checkedNodes', checkedNodes);
+          for (let i = 0; i < checkedNodes.length; i++) {
+            let _ot = checkedNodes[i];
+            if (_ot.type === 1) {
+              dids.push(_ot.id);
+            } else if (_ot.type === 2) {
+              bids.push(_ot.id);
             }
           }
         }
       } else {
-        for (let i = 0; i < this.listDevice.length; i++) {
-          dids.push(this.listDevice[i].uid);
-        }
-        for (let i = 0; i < this.listBayonet.length; i++) {
-          bids.push(this.listBayonet[i].uid);
+        // 没设置更多，则是所有的设备/卡口
+        if (this.monitorListDefault && this.monitorListDefault.areaTreeList && this.monitorListDefault.areaTreeList.length > 0) {
+          for (let i = 0; i < this.monitorListDefault.areaTreeList.length; i++) {
+            let _o = this.monitorListDefault.areaTreeList[i];
+            // 设备
+            if (_o.deviceBasicList && _o.deviceBasicList.length > 0) {
+              for (let j = 0; j < _o.deviceBasicList.length; j++) {
+                dids.push(_o.deviceBasicList[j].uid);
+              }
+            }
+            // 卡口 
+            if (_o.bayonetList && _o.bayonetList.length > 0) {
+              for (let j = 0; j < _o.bayonetList.length; j++) {
+                bids.push(_o.bayonetList[j].uid);
+              }
+            }
+          }
         }
       }
       // console.log('dids', dids);
@@ -588,15 +761,7 @@ export default {
     },
     // 信息提示
     msgTips (smsg) {
-      let nMsg = $('.el-message--info');
-      if (nMsg && nMsg.length > 0) {
-        nMsg.find('.el-message__content').text(smsg);
-      } else {
-        this.$message({
-          message: smsg,
-          type: 'info'
-        });
-      }
+      this.$MyMessage(smsg, 'error');
     }
   },
   destroyed () {
@@ -610,6 +775,11 @@ export default {
 .relay_new {
   width: 100%; height: 100%;
   > div { width: 100%; height: 100%; position: relative; }
+}
+.mb_map_list {
+  padding: 10px 0 10px 20px;
+  height: 640px;
+  overflow: auto;
 }
 .mb_map_map {
   overflow: hidden;
@@ -781,13 +951,34 @@ export default {
       overflow: hidden;
       padding-top: 10px;
       > li {
-        width: 25%; float: left;
-        height: 40px; line-height: 40px;
+        width: 33.33%; float: left;
+        line-height: 20px;
+        padding: 10px 0;
         > span {
           display: inline-block;
           width: 95px; padding-right: 5px;
           text-align: right;
           color: #666;
+        }
+      }
+      &.task_mtr_ls2 {
+        > li {
+          width: 33.33%;
+          > span { 
+            width: 112px;
+            &:first-child {
+              width: 112px;
+              float: left;
+            }
+            &:last-child {
+              display: block;
+              width: auto; height: 20px; line-height: 20px;
+              text-align: left;
+              margin-left: 112px;
+              padding: 0 0 0 10px;
+              overflow: hidden; text-overflow: ellipsis; white-space: nowrap; word-break: break-all;
+            }
+          }
         }
       }
     }
@@ -805,11 +996,11 @@ export default {
 .relay_task_t {
   position: absolute; top: 0; left: 0;
   width: 100%;
-  padding: 15px 0 0 20px;
+  padding: 20px 0 0 20px;
 }
 .relay_task_m {
   height: 100%;
-  padding: 40px 10px 70px 10px;
+  padding: 50px 10px 70px 10px;
   > div {
     height: 100%;
     padding: 10px;

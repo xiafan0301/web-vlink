@@ -86,7 +86,12 @@ const router = new VueRouter({
       name: 'vehicle_report_save',
       meta: { unrequireLogin: true },
       component: () => import('@/views/index/components/vehicle/analysis/reportSave.vue')
-    }, {
+    },  {
+      path: '/reportnrsave',    //人员侦察报告内容
+      name: 'portrait_save',
+      meta: { unrequireLogin: true },
+      component: () => import('@/views/index/components/portrait/reportnrsave.vue')
+    },{
       path: '/video-relay-map',
       name: 'video_relay_map',
       meta: { unrequireLogin: true },

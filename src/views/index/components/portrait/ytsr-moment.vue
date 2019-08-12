@@ -62,13 +62,13 @@
       <div class="ytsr_left_search"  v-show="radio === '2'">
         <div class="left_time">
           <el-date-picker
-                  v-model="searchData.startTime"
-                  style="width: 100%;margin-bottom: 20px;"
-                  class="vl_date"
-                  type="date"
-                  @change="chooseStartTime"
-                  value-format="timestamp"
-                  placeholder="选择日期时间">
+            v-model="searchData.startTime"
+            style="width: 100%;margin-bottom: 20px;"
+            class="vl_date"
+            type="date"
+            @change="chooseStartTime"
+            value-format="timestamp"
+            placeholder="选择日期时间">
           </el-date-picker>
           <el-date-picker
                   style="width: 100%;"
@@ -148,94 +148,163 @@
                   @click="selectTab(item.value)"
           >{{item.label}}</li>
         </ul>
-        <div class="search_box">
-          <el-form :inline="true" :model="taskForm" class="event_form" ref="taskForm">
-            <el-form-item label="任务名称：" prop="taskName">
-              <el-input
-                      style="width: 200px;"
-                      type="text"
-                      placeholder="请输入任务名称"
-                      v-model="taskForm.taskName"
-              />
-            </el-form-item>
-            <el-form-item label="创建时间：" prop="reportTime">
-              <el-date-picker
-                v-model="taskForm.reportTime"
-                type="datetimerange"
-                value-format="yyyy-MM-dd HH:mm:ss"
-                format="yyyy-MM-dd HH:mm:ss"
-                range-separator="至"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期"
-                :default-time="['00:00:00', '23:59:59']"
-              ></el-date-picker>
-            </el-form-item>
-            <el-form-item>
-              <el-button class="select_btn" @click="selectDataList">查询</el-button>
-              <el-button class="reset_btn" @click="resetForm('taskForm')">重置</el-button>
-            </el-form-item>
-          </el-form>
-          <div class="divide"></div>
-          <!--<el-button @click="skipAddTaskPage" class="th-button-export-color">新建任务</el-button>-->
-        </div>
-        <div class="content-box">
-          <div class="table_box">
-            <el-table :data="list">
-              <el-table-column label="序号" type="index" width="100"></el-table-column>
-              <el-table-column label="任务名称" prop="taskName" show-overflow-tooltip></el-table-column>
-              <el-table-column label="创建时间" prop="createTime" show-overflow-tooltip></el-table-column>
-              <el-table-column label="相似度" show-overflow-tooltip>
-                <template slot-scope="scope">
-                  ≥{{scope.row.taskWebParam.minSemblance ? scope.row.taskWebParam.minSemblance : 0}}%
-                </template>
-              </el-table-column>
-              <el-table-column label="状态" v-if="selectIndex === 0" prop="taskStatus" show-overflow-tooltip>
-                <template slot-scope="scope">
-                  <span>{{scope.row.taskStatus && scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 3 ? '失败' : '已中断'}}</span>
-                </template>
-              </el-table-column>
-              <el-table-column label="操作" fixed="right">
-                <template slot-scope="scope">
+        <!--基础信息库-->
+        <template v-if="selectIndex === 2 && isBase === 1">
+          <div class="vl_jig_right">
+            <template v-if="strucInfoList && strucInfoList.length > 0">
+              <div class="vl_jig_right_title">
+                <div class="vl_jr_t_item">
+                  <span><span style="color: #333333">检索结果 </span> ({{strucInfoList.length}})</span>
+                </div>
+              </div>
+              <div class="vl_jfo_event">
+                <vue-scroll>
+                  <div class="vl_jfo_event_box clearfix">
+                    <div class="vl_jfo_box_item" v-for="(item, index) in strucInfoList" :key="item.id" @click="showStrucInfo(item, index)">
+                      <div class="vl_jfo_i_left"><img :src="item.photoUrl" alt=""></div>
+                      <div class="vl_jfo_i_right">
+                        <p>检索资料</p>
+                        <div class="vl_jfo_line"><span>{{item.name}}</span></div>
+                        <br>
+                        <div class="vl_jfo_line"><span>{{item.originBank}}</span></div>
+                        <div class="vl_jfo_sim"><i class="vl_icon vl_icon_retrieval_03"></i>{{(item.semblance*1).toFixed(2)}}<span style="font-size: 12px;">%</span></div>
+                      </div>
+                    </div>
+                  </div>
+                </vue-scroll>
+              </div>
+            </template>
+            <template v-else>
+              <div is="noResult"></div>
+            </template>
+          </div>
+        </template>
+        <!--抓拍视图库-->
+        <template v-else-if="selectIndex === 2 && isBase === 2">
+          <div class="vl_jig_right">
+            <template v-if="strucInfoList && strucInfoList.length > 0">
+              <div class="vl_jig_right_title">
+                <div class="vl_jr_t_item">
+                  <span><span style="color: #333333">检索结果 </span> ({{strucInfoList.length}})</span>
+                  <div :class="{'active-item': stucOrder < 3}" @click="timeOrderS">时间排序 <span><i :class="{'active': stucOrder === 2}" class="el-icon-caret-top"></i><i :class="{'active': stucOrder === 1}" class="el-icon-caret-bottom"></i></span></div>
+                </div>
+                <div class="vl_jr_t_item">
+                  <div :class="{'active-item': stucOrder === 3}" @click="stucOrder = 3">监控排序</div>
+                  <div :class="{'active-item': stucOrder === 4}" @click="stucOrder = 4" style="margin-left: .1rem;">相似度排序</div>
+                </div>
+              </div>
+              <div class="vl_jfo_event">
+                <vue-scroll>
+                  <div class="vl_jfo_event_box clearfix">
+                    <div class="vl_jfo_box_item" v-for="(item, index) in strucInfoList" :key="item.id" @click="showStrucInfo(item, index)">
+                      <div class="vl_jfo_i_left"><img :src="item.subStoragePath" alt=""></div>
+                      <div class="vl_jfo_i_right">
+                        <p>检索资料</p>
+                        <div class="vl_jfo_line"><span>{{item.shotTime}}</span></div>
+                        <br>
+                        <div class="vl_jfo_line"><span>{{item.deviceName}}</span></div>
+                        <div class="vl_jfo_sim"><i class="vl_icon vl_icon_retrieval_03"></i>{{(item.semblance*1).toFixed(2)}}<span style="font-size: 12px;">%</span></div>
+                      </div>
+                    </div>
+                  </div>
+                </vue-scroll>
+              </div>
+            </template>
+            <template v-else>
+              <div is="noResult"></div>
+            </template>
+          </div>
+        </template>
+        <template v-else>
+          <div class="search_box">
+            <el-form :inline="true" :model="taskForm" class="event_form" ref="taskForm">
+              <el-form-item label="任务名称：" prop="taskName">
+                <el-input
+                        style="width: 200px;"
+                        type="text"
+                        placeholder="请输入任务名称"
+                        v-model="taskForm.taskName"
+                />
+              </el-form-item>
+              <el-form-item label="创建时间：" prop="reportTime">
+                <el-date-picker
+                        v-model="taskForm.reportTime"
+                        type="datetimerange"
+                        value-format="yyyy-MM-dd HH:mm:ss"
+                        format="yyyy-MM-dd HH:mm:ss"
+                        range-separator="至"
+                        start-placeholder="开始日期"
+                        end-placeholder="结束日期"
+                        :default-time="['00:00:00', '23:59:59']"
+                ></el-date-picker>
+              </el-form-item>
+              <el-form-item>
+                <el-button class="select_btn" @click="selectDataList">查询</el-button>
+                <el-button class="reset_btn" @click="resetForm('taskForm')">重置</el-button>
+              </el-form-item>
+            </el-form>
+            <div class="divide"></div>
+            <!--<el-button @click="skipAddTaskPage" class="th-button-export-color">新建任务</el-button>-->
+          </div>
+          <div class="content-box">
+            <div class="table_box">
+              <el-table :data="list">
+                <el-table-column label="序号" type="index" width="100"></el-table-column>
+                <el-table-column label="任务名称" prop="taskName" show-overflow-tooltip></el-table-column>
+                <el-table-column label="创建时间" prop="createTime" show-overflow-tooltip></el-table-column>
+                <el-table-column label="相似度" show-overflow-tooltip>
+                  <template slot-scope="scope">
+                    ≥{{scope.row.taskWebParam.minSemblance ? scope.row.taskWebParam.minSemblance : 0}}%
+                  </template>
+                </el-table-column>
+                <el-table-column label="状态" v-if="selectIndex === 0" prop="taskStatus" show-overflow-tooltip>
+                  <template slot-scope="scope">
+                    <span>{{scope.row.taskStatus && scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 3 ? '失败' : '已中断'}}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="操作" fixed="right">
+                  <template slot-scope="scope">
                   <span
                           class="operation_btn"
                           @click="skipResultPage(scope.row)"
                           v-if="selectIndex === 1"
                   >查看</span>
-                  <span
-                          class="operation_btn"
-                          @click="showInterruptDialog(scope.row)"
-                          v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 1"
-                  >中断任务</span>
-                  <span
-                          class="operation_btn"
-                          @click="recoveryOrRestart(scope.row)"
-                          v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 4"
-                  >恢复任务</span>
-                  <span
-                          class="operation_btn"
-                          @click="recoveryOrRestart(scope.row)"
-                          v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 3"
-                  >重启任务</span>
-                  <span
-                          class="operation_btn"
-                          @click="showDeleteDialog(scope.row)"
-                          v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus !== 4"
-                  >删除任务</span>
-                </template>
-              </el-table-column>
-            </el-table>
+                    <span
+                            class="operation_btn"
+                            @click="showInterruptDialog(scope.row)"
+                            v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 1"
+                    >中断任务</span>
+                    <span
+                            class="operation_btn"
+                            @click="recoveryOrRestart(scope.row)"
+                            v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 4"
+                    >恢复任务</span>
+                    <span
+                            class="operation_btn"
+                            @click="recoveryOrRestart(scope.row)"
+                            v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 3"
+                    >重启任务</span>
+                    <span
+                            class="operation_btn"
+                            @click="showDeleteDialog(scope.row)"
+                            v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus !== 4"
+                    >删除任务</span>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </div>
           </div>
-        </div>
-        <template v-if="pagination.total > 0">
-          <el-pagination
-                  class="cum_pagination"
-                  @current-change="handleCurrentChange"
-                  :current-page.sync="pagination.pageNum"
-                  :page-sizes="[100, 200, 300, 400]"
-                  :page-size="pagination.pageSize"
-                  layout="total, prev, pager, next, jumper"
-                  :total="pagination.total"
-          ></el-pagination>
+          <template v-if="pagination.total > 0">
+            <el-pagination
+                    class="cum_pagination"
+                    @current-change="handleCurrentChange"
+                    :current-page.sync="pagination.pageNum"
+                    :page-sizes="[100, 200, 300, 400]"
+                    :page-size="pagination.pageSize"
+                    layout="total, prev, pager, next, jumper"
+                    :total="pagination.total"
+            ></el-pagination>
+          </template>
         </template>
       </div>
     </div>
@@ -306,6 +375,203 @@
         <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="onConfirmAddTask">确认</el-button>
       </div>
     </el-dialog>
+    <!--检索详情弹窗-->
+    <el-dialog
+            :visible.sync="strucDetailDialog"
+            class="struc_detail_dialog_ytsr_shot"
+            :close-on-click-modal="false"
+            top="4vh"
+            :show-close="false">
+      <div class="struc_tab_shot" v-if="isBase === 2">
+        <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">检索详情</span>
+        <span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>
+        <span :class="{'active': strucCurTab === 3}" @click="strucCurTab = 3">视频回放</span>
+        <i class="el-icon-close" @click="strucDetailDialog = false"></i>
+      </div>
+      <div class="struc_tab" v-else>
+        <span>检索详情</span>
+        <!--<span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>-->
+        <!--<span :class="{'active': strucCurTab === 3}" @click="strucCurTab = 3">视频回放</span>-->
+        <i class="el-icon-close" @click="strucDetailDialog = false"></i>
+      </div>
+      <div class="struc_main_shot" v-if="isBase === 2">
+        <ul v-show="strucCurTab === 1">
+          <!-- <li><span>抓拍设备：{{sturcDetail.deviceName}}</span></li> -->
+          <li><span style="line-height: 0.24rem;">抓拍地址：{{sturcDetail.address}}</span></li>
+          <li style="color: #999;line-height: 0.24rem;">{{sturcDetail.shotTime}}</li>
+        </ul>
+        <div v-show="strucCurTab === 1" class="struc_c_detail">
+          <div class="struc_c_d_qj struc_c_d_img">
+            <img :src="sturcDetail.personStoragePath" alt="">
+            <span>上传图</span>
+          </div>
+          <div class="struc_c_d_box">
+            <div class="struc_c_d_img">
+              <img class="bigImg" :src="sturcDetail.subStoragePath" alt="">
+              <span>抓拍图</span>
+            </div>
+            <div class="struc_c_d_info">
+              <h2>分析结果<div class="vl_jfo_sim" ><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? (sturcDetail.semblance*1).toFixed(2) : '0.00'}}<span style="font-size: 12px;">%</span></div></h2>
+              <div class="struc_cd_info_main">
+                <vue-scroll>
+                  <div class="struc_cdi_line" v-if="sturcDetail.sex">
+                    <p>
+                      <b>性别</b>
+                      <span>{{sturcDetail.sex}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.age">
+                    <p>
+                      <b>年龄段</b>
+                      <span>{{sturcDetail.age}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.glasses">
+                    <p>
+                      <b>眼镜</b>
+                      <span>{{sturcDetail.glasses}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.hat">
+                    <p>
+                      <b>帽子</b>
+                      <span>{{sturcDetail.hat}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.mask">
+                    <p>
+                      <b>口罩</b>
+                      <span>{{sturcDetail.mask}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.hair">
+                    <p>
+                      <b>发型</b>
+                      <span>{{sturcDetail.hair}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.upperType">
+                    <p>
+                      <b>上身款式</b>
+                      <span>{{sturcDetail.upperType}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.upperColor">
+                    <p>
+                      <b>上身颜色</b>
+                      <span>{{sturcDetail.upperColor}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.bottomType">
+                    <p>
+                      <b>下身款式</b>
+                      <span>{{sturcDetail.bottomType}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.bottomColor">
+                    <p>
+                      <b>下身颜色</b>
+                      <span>{{sturcDetail.bottomColor}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.baby">
+                    <p>
+                      <b>抱小孩</b>
+                      <span>{{sturcDetail.baby}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.bag">
+                    <p>
+                      <b>拎东西</b>
+                      <span>{{sturcDetail.bag}}</span>
+                    </p>
+                  </div>
+                </vue-scroll>
+              </div>
+            </div>
+          </div>
+          <!--跳转按钮-->
+          <div class="struc_t_btn">
+            <a @click="gotoControl(sturcDetail.subStoragePath)">新建布控</a>
+            <a @click="gotoLjd(sturcDetail.subStoragePath)">落脚点分析</a>
+            <a @click="gotoGjfx(sturcDetail.subStoragePath)">轨迹分析</a>
+            <!--<a @click="gotoIden(sturcDetail.subStoragePath)">身份确认</a>-->
+          </div>
+        </div>
+        <div v-show="strucCurTab === 2" class="struc_c_address"></div>
+        <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
+          <div class="struc_c_d_qj struc_c_d_img">
+            <img class="bigImg" :src="sturcDetail.subStoragePath" alt="">
+            <span>抓拍图</span>
+          </div>
+          <div class="struc_c_d_box" style="float: left;" v-if="playerData">
+            <div is="flvplayer" :oData="playerData"
+                 :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
+            </div>
+          </div>
+          <div class="struc_c_d_box struc_vid_empty" style="float: left;" v-else>
+            <div class="struc_vid_empty_c com_trans50_lt">
+              <div></div>
+              <p>暂无视频</p>
+            </div>
+          </div>
+          <p class="download_tips" v-show="sturcDetail.videoPath">下载提示：右键点击视频选择“另存视频为”即可下载视频。</p>
+        </div>
+      </div>
+      <div class="struc_main" v-else>
+        <div v-show="strucCurTab === 1" class="struc_c_detail">
+          <div class="struc_c_d_qj struc_c_d_img">
+            <img  class="bigImg" :src="sturcDetail.upPhotoUrl" alt="">
+            <span>上传图</span>
+          </div>
+          <div class="struc_c_d_box">
+            <div class="struc_c_d_img">
+              <img class="bigImg" :src="sturcDetail.photoUrl" alt="">
+              <span>底库图</span>
+            </div>
+            <div class="struc_c_d_info">
+              <h2>{{sturcDetail.name}}<div class="vl_jfo_sim" ><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? (sturcDetail.semblance*1).toFixed(2) : '0.00'}}<span style="font-size: 12px;">%</span></div></h2>
+              <div class="struc_cdi_line">
+                <span v-show="sturcDetail.sex">{{sturcDetail.sex}}</span>
+                <span v-show="sturcDetail.nation">{{sturcDetail.nation}}</span>
+              </div>
+              <div class="struc_cdi_line">
+                <span>{{sturcDetail.birthDate}}</span>
+              </div>
+              <div class="struc_cdi_line">
+                <span>{{sturcDetail.idNo}}<i class="el-icon-postcard"></i></span>
+              </div>
+              <div class="struc_cdi_line" v-show="sturcDetail.group">
+                <span>{{sturcDetail.group}}</span>
+              </div>
+              <div class="struc_cdi_line"></div>
+            </div>
+            <span>布控库信息</span>
+          </div>
+        </div>
+      </div>
+      <div class="struc-list">
+        <swiper :options="swiperOption" ref="mySwiper">
+          <!-- slides -->
+          <swiper-slide v-for="(item, index) in strucInfoList" :key="item.id">
+            <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
+              <template v-if="isBase === 2">
+                <img style="height: .88rem;width: 50%;padding-right: .02rem;" :src="item.personStoragePath" alt="">
+                <img style="height: .88rem;width: 50%;padding-left: .02rem;" :src="item.subStoragePath" alt="">
+              </template>
+              <template v-else>
+                <img style="height: .88rem;width: 50%;padding-right: .02rem;" :src="item.upPhotoUrl" alt="">
+                <img style="height: .88rem;width: 50%;padding-left: .02rem;" :src="item.photoUrl" alt="">
+              </template>
+              <div class="vl_jfo_sim"><i class="vl_icon vl_icon_retrieval_05" :class="{'vl_icon_retrieval_06':  index === curImgIndex}"></i>{{item.semblance ? (item.semblance*1).toFixed(2) : '0.00'}}<span style="font-size: 12px;">%</span></div>
+            </div>
+          </swiper-slide>
+          <div class="swiper-button-prev" slot="button-prev"></div>
+          <div class="swiper-button-next" slot="button-next"></div>
+        </swiper>
+      </div>
+    </el-dialog>
+    <div id="capMap"></div>
   </div>
 </template>
 <script>
@@ -315,13 +581,18 @@
   import {JtcPUTAppendixsOrder, JtcPOSTAppendixInfo, JtcGETAppendixInfoList,  getShotDevice, getTailBehindList } from '../../api/api.judge'
   import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
   import {getGroups} from '../../api/api.judge.js';
+  import noResult from '@/components/common/noResult.vue';
+  import flvplayer from '@/components/common/flvplayer.vue';
   import { ajaxCtx, mapXupuxian } from '@/config/config.js';
   import { MapGETmonitorList } from "@/views/index/api/api.map.js";
   import { objDeepCopy, formatDate } from "@/utils/util.js";
   export default {
-    components: {vlBreadcrumb},
+    components: {vlBreadcrumb, noResult, flvplayer},
     data() {
       return {
+        map: null,
+        playerData: null,
+        isBase: 1,
         radio: "1",
         cameraTree: [],
         videoTreeNodeCount: 0, // 摄像头节点数量
@@ -347,6 +618,10 @@
           {
             label: "未完成任务",
             value: 0
+          },
+          {
+            label: "查询结果",
+            value: 2
           }
         ],
         selectIndex: 1, // 默认已完成的任务
@@ -378,6 +653,26 @@
           portraitGroupId: [],
           startTime: '',
           endTime: ''
+        },
+        stucOrder: 4, // 1升序，2降序，3监控，4相似度
+        strucInfoList: [], // 检索抓拍信息
+        strucCurTab: 1,
+        curImgIndex: 0,
+        sturcDetail: {},
+        strucDetailDialog: false,
+        devicePinYin: 'abcdefghijklmnopqrstuvwxyz',
+        videoUrl: '', // 弹窗视频回放里的视频
+        swiperOption: {
+          slidesPerView: 5,
+          spaceBetween: 10,
+          slidesPerGroup: 5,
+          loop: false,
+          slideToClickedSlide: true,
+          loopFillGroupWithBlank: true,
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
         }
       }
     },
@@ -387,6 +682,13 @@
       }
     },
     mounted () {
+      // 弹窗地图
+      let supMap = new AMap.Map('capMap', {
+        center: mapXupuxian.center,
+        zoom: 16
+      });
+      supMap.setMapStyle('amap://styles/whitesmoke');
+      this.map = supMap;
       if (this.$route.query.imgurl) {
         let x = {
           contentUid: this.$store.state.loginUser.uid,
@@ -417,6 +719,21 @@
       this.setDTime();
     },
     methods: {
+      // 设置视频数据
+      setPlayerData () {
+        if (this.sturcDetail.videoPath) {
+          this.playerData = {
+            type: 3,
+            title: this.sturcDetail.deviceName,
+            video: {
+              uid: new Date().getTime() + '',
+              downUrl: this.sturcDetail.videoPath
+            }
+          }
+        } else {
+          this.playerData = null;
+        }
+      },
       // 重置查询条件
       resetForm (form) {
         this.$refs[form].resetFields();
@@ -667,7 +984,9 @@
       //tab切换
       selectTab (val) {
         this.selectIndex = val;
-        this.getDataList();
+        if(parseFloat(val) < 2) {
+          this.getDataList();
+        }
       },
       skipResultPage (obj) {
         if (obj.taskWebParam.origin === 1) {
@@ -821,9 +1140,6 @@
           params['appendixIds'] = this.imgList.uid;
           params['uploadImgUrls'] = this.imgList.path;
         }
-        if (!boolean) {
-          this.searching = true;
-        }
         if (this.searchData.minSemblance) {
           params['minSemblance'] = this.searchData.minSemblance;
         } else {
@@ -843,7 +1159,7 @@
           let bList = this.selectBayonetArr.map(res => res.bayonetName);
           dNameList = dList.concat(bList);
           if (dNameList.length > 3) {
-            params['deviceNames'] = dNameList.splice(0, 3);
+            params['deviceNames'] = dNameList.splice(0, 2);
             params['deviceNames'].push('等' + dNameList.length + '个设备');
             params['deviceNames'] =  params['deviceNames'].join(',')
           } else {
@@ -858,29 +1174,38 @@
           p1['endTime'] = formatDate(this.searchData.endTime, 'yyyy-MM-dd');
           params['endTime'] = formatDate(this.searchData.endTime, 'yyyy-MM-dd');
         }
+        if (!boolean) {
+          this.searching = true;
+        }
         PortraitGetDispatch(p1)
             .then(res => {
-              this.searching = false;
               if (res) {
                 if (res.data === 1) {
+                  this.searching = false;
                   this.addParams = params;
                   this.addTaskDialog = true;
+                } else if (res.data === 2) {
+                  PortraitPostByphotoRealtime(params)
+                      .then(sRes => {
+                        this.searching = false;
+                        if (sRes) {
+                          this.selectIndex = 2;
+                          this.$set(sRes.data, 'taskResult', JSON.parse(sRes.data.taskResult));
+                          this.strucInfoList = sRes.data.taskResult;
+                          if (this.radio === "1") {
+                            this.isBase = 1;
+                          } else {
+                            this.isBase = 2;
+                            this.changeOrder();
+                          }
+                        }
+                      })
                 } else {
-                  if (this.radio === "1") {
-                    this.$router.push({name: 'portrait_ytsr', query: params})
-                  } else {
-                    this.$router.push({name: 'portrait_ytsr_shot', query: params})
-                  }
-//                  PortraitPostByphotoRealtime(params)
-//                      .then(sRes => {
-//                        if (sRes) {
-//                          this.$set(sRes.data, 'taskResult', JSON.parse(sRes.data.taskResult));
-//                          this.$set(sRes.data, 'taskWebParam', JSON.parse(sRes.data.taskWebParam));
-//                          console.log(sRes.data)
-//                          this.searching = false;
-//                        }
-//                      })
+                  this.searching = false;
+                  this.$message.info('抱歉，没有找到匹配结果');
                 }
+              } else {
+                this.searching = false;
               }
             })
       },
@@ -911,13 +1236,93 @@
       },
       handleCurrentChange (e) {
         this.pagination.pageNum = e;
-        this.tcDiscuss(true);
+        this.getDataList();
       },
       delPic () {
         this.curImageUrl = '';
-      }
+      },
+      timeOrderS () {
+        if (this.stucOrder > 2) {
+          this.stucOrder = 2;
+        } else {
+          this.stucOrder === 1 ? this.stucOrder = 2 : this.stucOrder = 1;
+        }
+      },
+      changeOrder () {
+        console.log(this.stucOrder);
+        switch (this.stucOrder) {
+          case 1:
+            this.strucInfoList.sort((a, b) => {
+              return new Date(b.shotTime).getTime() - new Date(a.shotTime).getTime();
+            })
+            break;
+          case 2:
+            this.strucInfoList.sort((a, b) => {
+              return new Date(a.shotTime).getTime() - new Date(b.shotTime).getTime();
+            })
+            break;
+          case 3:
+            this.strucInfoList.sort((a, b) => {
+              return this.devicePinYin.indexOf(b.deviceNamePinyin.toLowerCase()[0]) - this.devicePinYin.indexOf(a.deviceNamePinyin.toLowerCase()[0]);
+            })
+            break;
+          case 4:
+            this.strucInfoList.sort((a, b) => {
+              return b.semblance - a.semblance;
+            })
+            break;
+        }
+      },
+      showStrucInfo (data, index) {
+        this.curImgIndex = index;
+        this.strucDetailDialog = true;
+        this.sturcDetail = data;
+        this.strucCurTab = 1;
+        if (this.isBase === 2) {
+          this.drawPoint(data);
+          this.setPlayerData();
+        }
+      },
+      drawPoint (data) {
+        this.$nextTick(() => {
+          $('.struc_c_address').append($('#capMap'))
+        })
+        if (this.supMarkerPoint) {
+          this.map.remove(this.supMarkerPoint)
+        }
+        let _content = '<div class="vl_icon vl_icon_judge_02"></div>'
+        this.supMarkerPoint = new AMap.Marker({ // 添加自定义点标记
+          map: this.map,
+          position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
+          offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+          draggable: false, // 是否可拖动
+          // 自定义点标记覆盖物内容
+          content: _content
+        });
+        this.map.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
+        let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`
+        new AMap.InfoWindow({
+          map: this.map,
+          isCustom: true,
+          closeWhenClickMap: false,
+          position: [data.shotPlaceLongitude, data.shotPlaceLatitude],
+          offset: new AMap.Pixel(0, -70),
+          content: sConent
+        })
+      },
+      imgListTap (data, index) {
+        this.curImgIndex = index;
+        this.sturcDetail = data;
+        if (this.isBase === 2) {
+          this.drawPoint(data);
+          this.setPlayerData();
+        }
+      },
     },
     watch: {
+      stucOrder () {
+        this.changeOrder();
+      }
     }
   }
 </script>
@@ -1047,7 +1452,7 @@
       float: left;
       width: 272px;
       padding-top: 20px;
-      height: calc(100% - 56px);
+      height: calc(100% - 50px);
       min-height: 763px;
       background: #ffffff;
       box-shadow: 2px 3px 10px 0px rgba(131, 131, 131, 0.28);
@@ -1326,7 +1731,10 @@
       height: calc(100% - 60px);
       position: relative;
       .frequent-a-content {
+        height: calc(100% - 20px);
+        min-height: 760px;
         margin: 20px;
+        margin-bottom: 0px;
         background: #ffffff;
         box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);
         .tab-menu {
@@ -1383,6 +1791,113 @@
               border-right: 1px solid #f2f2f2;
               &:last-child {
                 border-right: none;
+              }
+            }
+          }
+        }
+        .vl_jig_right {
+          width: 100%;
+          height: calc(100% - 50px);
+          padding: 0 20px;
+          padding-right: 0;
+          .vl_jig_right_title {
+            width: 100%;
+            height: 70px;
+            line-height: 70px;
+            color: #999999;
+            .vl_jr_t_item {
+              float: left;
+              width: 50%;
+              text-align: left;
+              padding-left: 10px;
+              >div {
+                cursor: pointer;
+                display: inline-block;
+              }
+              .active-item {
+                color: #2580FC;
+                i {
+                  color: #999999;
+                }
+                .active {
+                  color: #2580FC;
+                }
+              }
+              &:first-child {
+                padding-right: 10px;
+                padding-left: 0;
+                >div {
+                  float: right;
+                  span {
+                    display: inline-block;
+                    vertical-align: middle;
+                    i {
+                      display: block;
+                      font-size: 10px;
+                    }
+                  }
+                }
+              }
+            }
+          }
+          .vl_jfo_event {
+            height: calc(100% - 159px);
+            min-height: 598px;
+            .vl_jfo_event_box {
+              width: 100%;
+              height: auto;
+              .vl_jfo_box_item {
+                float: left;
+                cursor: pointer;
+                width: 387px;
+                height: 203px;
+                padding: 20px;
+                margin-right: 20px;
+                margin-bottom: 20px;
+                background: rgba(255, 255, 255, 1);
+                box-shadow: 0px 5px 16px 0px rgba(169, 169, 169, 0.2);
+                .vl_jfo_i_left {
+                  float: left;
+                  width: 163px;
+                  height: 163px;
+                  >img {
+                    width: 100%;
+                    height: 100%;
+                  }
+                }
+                .vl_jfo_i_right {
+                  width: calc(100% - 163px);
+                  height: 100%;
+                  margin-left: 163px;
+                  padding-left: 10px;
+                  >p {
+                    color: #999999;
+                    margin-bottom: 13px;
+                  }
+                  .vl_jfo_line {
+                    position: relative;
+                    max-width: 100%;
+                    display: inline-block;
+                    height: 28px;
+                    line-height: 28px;
+                    margin-bottom: 8px;
+                    border: 1px solid #F2F2F2;
+                    background: #FAFAFA;
+                    color: #333333;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    border-radius:3px;
+                    font-size: 12px;
+                    overflow: hidden;
+                    padding-right: 4px;
+                    > i {
+                      vertical-align: middle;
+                    }
+                    span {
+                      padding: 0 4px;
+                    }
+                  }
+                }
               }
             }
           }
@@ -1572,13 +2087,337 @@
         }
       }
     }
-    .struc_detail_dialog_ytsr {
+    .struc_detail_dialog_ytsr_shot {
       .el-dialog {
         max-width: 13.06rem;
         width: 100%!important;
+        /* 祖先元素设置了transform属性则会导致固定定位属性position: fixed失效。 */
+        transform: none !important;
+        top: calc(100% - 8.8rem);
+        left: calc((100% - 13.06rem)/2);
       }
       .el-dialog__header {
         display: none;
+      }
+      .struc_tab_shot {
+        height: 1.16rem;
+        padding: .3rem 0;
+        position: relative;
+        color: #333333;
+        span {
+          display: inline-block;
+          margin-right: .55rem;
+          padding-bottom: .1rem;
+          cursor: pointer;
+        }
+        .active {
+          color: #0C70F8;
+          border-bottom: 2px solid #0C70F8;
+        }
+        i {
+          display: block;
+          position: absolute;
+          top: .3rem;
+          right: 0px;
+          cursor: pointer;
+        }
+      }
+      .struc_main_shot {
+        width: 11.46rem;
+        height: 5rem;
+        margin: 0 auto;
+        border-bottom: 1px solid #F2F2F2;
+        .struc_c_detail {
+          width:  100%;
+          height: 3.6rem;
+          >div {
+            float: left;
+          }
+          .struc_c_d_img {
+            width: 3.6rem;
+            height: 3.6rem;
+            background: #EAEAEA;
+            position: relative;
+            img {
+              width: 100%;
+              height: auto;
+              max-height: 100%;
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              margin: auto;
+            }
+            i {
+              display: block;
+              position: absolute;
+              top: .1rem;
+              right: .1rem;
+              line-height: .26rem;
+              height: .26rem;
+              background: rgba(255, 255, 255, .8);
+              border-radius: .13rem;
+              font-style: normal;
+              color: #0C70F8;
+              font-size: 12px;
+              padding: 0 .1rem;
+            }
+            &:before {
+              display: block;
+              content: '';
+              position: absolute;
+              top: -.5rem;
+              left: -.5rem;
+              transform: rotate(-45deg);
+              border: .5rem solid #50CC62;
+              border-color: transparent transparent #50CC62;
+              z-index: 9;
+            }
+            span {
+              display: block;
+              position: absolute;
+              top: .1rem;
+              left: .1rem;
+              width: .6rem;
+              height: .6rem;
+              text-align: center;
+              color: #FFFFFF;
+              font-size: .12rem;
+              -webkit-transform: rotate(-45deg);
+              -moz-transform: rotate(-45deg);
+              -ms-transform: rotate(-45deg);
+              -o-transform: rotate(-45deg);
+              transform: rotate(-45deg);
+              z-index: 99;
+            }
+          }
+          .struc_c_d_qj {
+            margin-right: .3rem;
+            &:before {
+              border: .5rem solid #0c70f8;
+              border-color: transparent transparent #0C70F8;
+            }
+          }
+          .struc_c_d_box {
+            width: calc(100% - 3.9rem);
+            box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
+            border-radius:1px;
+            position: relative;
+            overflow: hidden;
+            >div {
+              float: left;
+            }
+            .struc_c_d_info {
+              width: calc(100% - 3.6rem);
+              padding-left: .24rem;
+              color: #333333;
+              h2 {
+                font-weight: bold;
+                line-height: .74rem;
+                padding-right: 1rem;
+                .vl_jfo_sim {
+                  color: #0C70F8;
+                  font-weight: bold;
+                  font-size: .24rem;
+                  float: right;
+                  i {
+                    vertical-align: text-bottom;
+                    margin-right: .1rem;
+                  }
+                  span {
+                    font-weight: normal;
+                  }
+                }
+              }
+              .struc_cd_info_main {
+                height: 2.75rem;
+              }
+              .struc_cdi_line {
+                flex: none;
+                width: 50%;
+                display: inline-block;
+                p {
+                  max-width: 100%;
+                  overflow: hidden;
+                  display: table;
+                  min-height: 30px;
+                  margin-bottom: 0.08rem;
+                  padding-right: 10px;
+                  margin-right: 0.08rem;
+                  border: 1px solid #f2f2f2;
+                  border-radius: 3px;
+                  font-size: 12px;
+                  > b {
+                    width: 70px;
+                    background: #fafafa;
+                    color: #999;
+                    font-weight: normal;
+                    padding-right: 10px;
+                    padding-left: 10px;
+                    display: table-cell;
+                    vertical-align: middle;
+                    border-right: 1px solid #f2f2f2;
+                  }
+                  >span {
+                    display: table-cell;
+                    vertical-align: middle;
+                    padding-left: 5px;
+                  }
+                }
+              }
+            }
+            &:before {
+              display: block;
+              content: none!important;
+              position: absolute;
+              top: -.7rem;
+              right: -.7rem;
+              transform: rotate(-46deg);
+              border: .7rem solid #0c70f8;
+              border-color: transparent transparent transparent #0C70F8;
+            }
+            &:after {
+              display: block;
+              content: none!important;
+              position: absolute;
+              top: -.4rem;
+              right: -.4rem;
+              transform: rotate(-45deg);
+              border: .4rem solid #FFFFFF;
+              border-color: transparent transparent transparent #FFFFFF;
+            }
+            >span {
+              display: block;
+              position: absolute;
+              top: .19rem;
+              right: .19rem;
+              width: 1rem;
+              height: 1rem;
+              text-align: center;
+              color: #FFFFFF;
+              font-size: .12rem;
+              -webkit-transform: rotate(45deg);
+              -moz-transform: rotate(45deg);
+              -ms-transform: rotate(45deg);
+              -o-transform: rotate(45deg);
+              transform: rotate(45deg);
+              z-index: 99;
+            }
+          }
+          .struc_t_btn {
+            margin-top: .2rem;
+            float: right;
+            a {
+              display: inline-block;
+              text-align: center;
+              line-height: .38rem;
+              border: solid 1px #eeeeee;
+              border-radius: 4px;
+              margin-top: 10px;
+              padding: 0px .15rem;
+              text-decoration: none;
+              margin-left: 10px;
+              background: rgba(246, 248, 249, 1);
+              border: 1px solid rgba(211, 211, 211, 1);
+              cursor: pointer;
+            }
+            a:hover {
+              background: #0c70f8;
+              border: solid 1px #0c70f8;
+              color: #ffffff;
+            }
+          }
+        }
+        .struc_c_address {
+          height: 100%;
+          #capMap {
+            width:  100%;
+            height: 100%;
+          }
+        }
+        .struc_c_video {
+          .download_tips {
+            float: left;
+            width: 100%;
+            text-align: right;
+            padding-right: 40px; padding-top: 10px;
+          }
+          .struc_c_d_box {
+            background: #E9E7E8;
+            height: 100%;
+            text-align: center;
+            &:hover {
+              .play_btn {
+                display: block!important;
+              }
+            }
+            .play_btn {
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              margin: auto;
+              background: rgba(0, 0, 0, .4);
+              width: 1rem;
+              height: 1rem;
+              text-align: center;
+              line-height: 1rem;
+              -webkit-border-radius: 50%;
+              -moz-border-radius: 50%;
+              border-radius: 50%;
+              cursor: pointer;
+              i {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                margin: auto;
+                height: 22px!important;
+              }
+            }
+            >video {
+              width: auto;
+              height: 100%;
+            }
+            &:after {
+              content: none!important;
+            }
+            &:before {
+              content: none!important;
+            }
+            -webkit-box-shadow: 0 0 0!important;
+            -moz-box-shadow: 0 0 0!important;
+            box-shadow: 0 0 0!important;
+          }
+          .download_btn {
+            text-align: center;
+            width: 1.1rem;
+            height: .4rem;
+            float: right!important;
+            margin-top: .2rem;
+            background: rgba(246,248,249,1);
+            border: 1px solid rgba(211,211,211,1);
+            border-radius: 4px;
+            line-height: .4rem;
+            cursor: pointer;
+            color: #666666;
+            position: relative;
+            &:hover {
+              color: #FFFFFF;
+              background: #0C70F8;
+              border-color: #0C70F8;
+            }
+            a {
+              display: block;
+              position: absolute;
+              width: 100%;
+              height: 100%;
+            }
+          }
+        }
       }
       .struc_tab {
         height: 1.16rem;

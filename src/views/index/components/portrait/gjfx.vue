@@ -8,14 +8,37 @@
     </div>
 
     <div :class="['left',{hide:hideleft}]">
-      <div class="plane">
+      <div class="plane" style="padding-top: 20px;">
         <el-form
           :model="ruleForm"
           status-icon
           ref="ruleForm"
           label-width="0px"
           class="demo-ruleForm"
-        >
+          >
+          <el-form-item class="" prop="data1">
+            <el-date-picker
+                    v-model="ruleForm.data1"
+                    style="width: 100%;"
+                    class="vl_date"
+                    :picker-options="pickerOptions"
+                    type="date"
+                    value-format="timestamp"
+                    placeholder="选择日期时间">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item>
+            <el-date-picker
+                    style="width: 100%;"
+                    class="vl_date vl_date_end"
+                    :picker-options="pickerOptions"
+                    v-model="ruleForm.data2"
+                    @change="chooseEndTime"
+                    value-format="timestamp"
+                    type="date"
+                    placeholder="选择日期时间">
+            </el-date-picker>
+          </el-form-item>
           <el-form-item>
             <div class="upload_warp">
               <el-upload
@@ -42,29 +65,6 @@
                 <i class="el-icon-delete" @click="delPic()"></i>
               </div>
             </div>
-          </el-form-item>
-          <el-form-item class="" prop="data1">
-            <el-date-picker
-                    v-model="ruleForm.data1"
-                    style="width: 100%;"
-                    class="vl_date"
-                    :picker-options="pickerOptions"
-                    type="date"
-                    value-format="timestamp"
-                    placeholder="选择日期时间">
-            </el-date-picker>
-          </el-form-item>
-          <el-form-item>
-            <el-date-picker
-                    style="width: 100%;"
-                    class="vl_date vl_date_end"
-                    :picker-options="pickerOptions"
-                    v-model="ruleForm.data2"
-                    @change="chooseEndTime"
-                    value-format="timestamp"
-                    type="date"
-                    placeholder="选择日期时间">
-            </el-date-picker>
           </el-form-item>
           <el-form-item>
             <el-row :gutter="10">
@@ -1366,6 +1366,10 @@
     .el-dialog {
       max-width: 13.06rem;
       width: 100%!important;
+      /* 祖先元素设置了transform属性则会导致固定定位属性position: fixed失效。 */
+      transform: none !important;
+      top: calc(100% - 8.8rem);
+      left: calc((100% - 13.06rem)/2);
     }
     .el-dialog__header {
       display: none;
