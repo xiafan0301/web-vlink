@@ -65,7 +65,9 @@
                   </li>
                   <li>
                     <span>车牌种类：</span>
-                    <span :title="uploadVehicleObj.plateClass">{{uploadVehicleObj.plateClass ? uploadVehicleObj.plateClass : '--'}}</span>
+                    <span :title="uploadVehicleObj.plateClass">
+                      {{(uploadVehicleObj.plateClass || uploadVehicleObj.plateClass === 0 || uploadVehicleObj.plateClass === '0') ? dicFormater(45, uploadVehicleObj.plateClass) : '--'}}
+                    </span>
                   </li>
                   <li>
                     <span>车牌颜色：</span>

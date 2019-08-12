@@ -124,7 +124,7 @@ export default {
       detailData: null,
 
       formInline: {
-        time: [nDate, nDate],
+        time: [new Date(nDate.getTime() - 24 * 3600000), nDate],
         lb: '',
         lx: '',
         no: false,
