@@ -241,7 +241,7 @@ export default {
   /** 
    * index: 视频序号（在列表页面的位置）
    * oData：视频信息 object {
-   *    type: 1, // 1直播 2回放 3录像
+   *    type: 1, // 1直播 2回放 3录像 5视频接力（回放）
    *    title: '设备名称',
    *    startTime: Date 回放开始时间
    *    endTime: Date 回放结束时间
@@ -381,9 +381,18 @@ export default {
   watch: {
     oData (newData, oldData) {
       console.log('watch oData', newData);
-      if (newData.type === 5 && oldData && oldData.video.videoPath === newData.video.videoPath) {
-        return false;
-      } else if (newData.type != 5 && oldData && oldData.video.uid === newData.video.uid) {
+      if (newData.type === 5) {
+        let od = null, nd = null;
+        if (oldData && oldData.video.videos && oldData.video.videos.length > 0) {
+          od = oldData.video.videos[0];
+        }
+        if (newData && newData.video.videos && newData.video.videos.length > 0) {
+          nd = newData.video.videos[0];
+        }
+        if (od && nd && od.uid === nd.uid) {
+          return false;
+        }
+      } else if (oldData && oldData.video.uid === newData.video.uid) {
         return false;
       }
       // 去掉暂停按钮
@@ -506,10 +515,46 @@ export default {
         this.initPlayerDoForNormal(this.oData.video.downUrl);
       } else if (this.oData.type === 5) {
         // 视频接力
+        let relayD = null;
+        if (this.oData.video.videos && this.oData.video.videos.length > 0) {
+          relayD = this.oData.video.videos[0];
+        }
         // console.log('视频接力');
-        if (this.oData.video.videoPath) {
-          this.initPlayerDoForNormal(this.oData.video.videoPath);
-          this.videoRelayEmpty = false;
+        if (relayD) {
+          obj.deviceId = relayD.deviceID;
+          let st = null, et = new Date(), showt = null;
+          // 回放
+          if (relayD.showTime) {
+            showt = getDate(relayD.showTime);
+            st = new Date(showt.getTime() - 60 * 1000);
+          }
+          if (!st) { st = new Date(new Date().getTime() - 60 * 1000); }
+          if (showt.getTime() > et.getTime()) {
+            et = showt;
+          }
+          obj.startTime = formatDate(st, 'yyyy-MM-dd HH:mm:ss');
+          obj.endTime = formatDate(et, 'yyyy-MM-dd HH:mm:ss');
+          apiVideoPlayBack(obj).then(res => {
+            if (res && res.data && res.data.length > 0) {
+              // 为一个LIST
+              if (res.data.length >= (this.playBackIndex + 1)) {
+                console.log('回放第' + (this.playBackIndex + 1) + '段视频，URL：', res.data[this.playBackIndex].liveFlvUrl);
+                this.initPlayerDo(res.data[this.playBackIndex].liveFlvUrl);
+                this.playBackList = res.data;
+              } else {
+                // 播放结束处理
+              }
+            } else {
+              // 未获取到视频
+              console.log('未获取到视频');
+              this.videoLoadingFailed = true;
+            }
+            this.videoRelayEmpty = false;
+          }).catch(error => {
+            this.videoRelayEmpty = false;
+            console.log("apiVideoPlayBack error：", error);
+          });
+          // this.initPlayerDoForNormal(this.oData.video.videoPath);
         } else {
           this.videoLoading = false;
           this.videoRelayEmpty = true;
@@ -1389,7 +1434,7 @@ export default {
   width: 100%; height: 100%;
   overflow: hidden;
   &.flvplayer_fullscreen {
-    position: fixed; z-index: 100; top: 0; left: 0;
+    position: fixed; z-index: 300; top: 0; left: 0;
   }
   > .flvplayer_player {
     position: relative;

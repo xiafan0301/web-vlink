@@ -14,6 +14,7 @@
               :clearable="false"
               value-format="yyyy-MM-dd HH:mm:ss"
               format="yyyy-MM-dd HH:mm:ss"
+              :time-arrow-control="true"
               style="width: 100%"
               @blur="blurStartTime"
               :picker-options="pickerStart"
@@ -29,6 +30,7 @@
               @blur="blurEndTime"
               @focus="handleEndTime"
               :picker-options="pickerEnd"
+              :time-arrow-control="true"
               value-format="yyyy-MM-dd HH:mm:ss"
               format="yyyy-MM-dd HH:mm:ss"
               type="datetime"
@@ -123,7 +125,7 @@ import { checkPlateNumber } from '@/utils/validator.js';
 import { getShotDevice, getTailBehindList } from '@/views/index/api/api.judge.js'
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
-import { formatDate } from '@/utils/util.js';
+import { formatDate, dateOrigin } from '@/utils/util.js';
 export default {
   components: { vlBreadcrumb, noResult },
   data () {
@@ -136,7 +138,7 @@ export default {
       searchForm: {
         plateNo: null, // 车牌号码
         deviceCode: null, // 起点设备编号
-        shotTime: new Date(startTime), // 开始时间
+        shotTime: dateOrigin(false, new Date(startTime)), // 开始时间
         dateEnd: new Date(), // 结束时间
         vehicleClass: [], // 车辆类型
         interval: 3 // 尾随间隔

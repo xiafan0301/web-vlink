@@ -20,11 +20,14 @@
             <el-date-picker
               class="vl_date"
               v-model="searchData.startTime"
-              type="date"
+              type="datetime"
+              value-format="yyyy-MM-dd HH:mm:ss"
               :picker-options="startDateOpt"
               placeholder="请选择开始时间"
               :clearable="false"
+              :time-arrow-control="true"
               format="yyyy-MM-dd HH:mm:ss"
+              default-time="00:00:00"
             ></el-date-picker>
             <!-- <el-date-picker
               class="vl_date"
@@ -44,12 +47,13 @@
             <el-date-picker
               class="vl_date vl_date_end"
               v-model="searchData.endTime"
-              type="date"
+              type="datetime"
+              value-format="yyyy-MM-dd HH:mm:ss"
               :picker-options="endDateOpt"
               placeholder="请选择结束时间"
               :clearable="false"
+              :time-arrow-control="true"
               format="yyyy-MM-dd HH:mm:ss"
-              @change="dateChange"
             ></el-date-picker>
           </div>
           <!-- 设备搜索 -->
@@ -214,7 +218,7 @@
         class="info-right"
         v-loading="searching"
         :class="{ 'video-menu-close': !videoMenuStatus }"
-      >
+        >
         <!-- 行车记录列表 -->
         <div class="driving-record" v-if="videoMenuStatus && deviceList && deviceList.length > 0">
           <vue-scroll>
@@ -595,8 +599,9 @@ export default {
       let _e = curDate - 1;
       this.searchData.startTime = formatDate(_s);
       this.searchData.endTime = formatDate(_e); */
-      let _s = new Date(dateOrigin().getTime() - 3600 * 1000 * 24 * 1);
-      let _e = new Date(dateOrigin(true).getTime() - 3600 * 1000 * 24 * 1);
+      let _s = dateOrigin(false, new Date(new Date().getTime() - 3600 * 1000 * 24 * 1));
+      /* let _e = new Date(dateOrigin(true).getTime() - 3600 * 1000 * 24 * 1); */
+      let _e = new Date();
       this.searchData.startTime = _s;
       this.searchData.endTime = _e;
     },

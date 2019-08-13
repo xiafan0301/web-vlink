@@ -175,7 +175,7 @@ export default {
         'where.organId': organId,
         pageNum: this.pagination.pageNum,
         order: 'asc',
-        orderBy: 'userName'
+        orderBy: 'user_name'
       }
       getUserList(params)
         .then(res => {

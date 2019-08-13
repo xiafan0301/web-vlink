@@ -58,14 +58,73 @@
               </div>
               <div v-else-if="xjType === 2 && xjVechicleType === 1 && uploadVehicleObj">
                 <h3>图片信息：</h3>
-                <ul>
-                  <li style="width: 50%;"><span>车牌号码：</span>{{uploadVehicleObj.plateNo ? uploadVehicleObj.plateNo : '--'}}</li>
-                  <li style="width: 50%;"><span>车辆分组：</span>{{(uploadVehicleObj.vehicleType && uploadVehicleObj.vehicleType.length > 0) ? uploadVehicleObj.vehicleType.join(',') : '--'}}</li>
-                  <li style="width: 50%;"><span>车牌颜色：</span>{{uploadVehicleObj.plateColor ? uploadVehicleObj.plateColor : '--'}}</li>
-                  <li style="width: 50%;"><span>车辆型号：</span>{{uploadVehicleObj.vehicleModel ? uploadVehicleObj.vehicleModel : '--'}}</li>
-                  <li style="width: 50%;"><span>车辆颜色：</span>{{uploadVehicleObj.vehicleColor ? uploadVehicleObj.vehicleColor : '--'}}</li>
-                  <li style="width: 50%;"><span>车辆类型：</span>{{uploadVehicleObj.vehicleClass ? uploadVehicleObj.vehicleClass : '--'}}</li>
-                  <li style="width: 50%;"><span>车牌类型：</span>{{uploadVehicleObj.plateClass ? dicFormater(45, uploadVehicleObj.plateClass) : '--'}}</li>
+                <ul class="task_mtr_ls2">
+                  <li>
+                    <span>有无车牌：</span>
+                    <span :title="uploadVehicleObj.hasPlate">{{uploadVehicleObj.hasPlate ? uploadVehicleObj.hasPlate : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>车牌种类：</span>
+                    <span :title="uploadVehicleObj.plateClass">
+                      {{(uploadVehicleObj.plateClass || uploadVehicleObj.plateClass === 0 || uploadVehicleObj.plateClass === '0') ? dicFormater(45, uploadVehicleObj.plateClass) : '--'}}
+                    </span>
+                  </li>
+                  <li>
+                    <span>车牌颜色：</span>
+                    <span :title="uploadVehicleObj.plateColor">{{uploadVehicleObj.plateColor ? uploadVehicleObj.plateColor : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>车牌号码：</span>
+                    <span :title="uploadVehicleObj.plateNo">{{uploadVehicleObj.plateNo ? uploadVehicleObj.plateNo : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>车辆类型：</span>
+                    <span :title="uploadVehicleObj.vehicleClass">{{uploadVehicleObj.vehicleClass ? uploadVehicleObj.vehicleClass : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>车辆品牌：</span>
+                    <span :title="uploadVehicleObj.vehicleBrand">{{uploadVehicleObj.vehicleBrand ? uploadVehicleObj.vehicleBrand : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>车辆型号：</span>
+                    <span :title="uploadVehicleObj.vehicleModel">{{uploadVehicleObj.vehicleModel ? uploadVehicleObj.vehicleModel : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>车辆年款：</span>
+                    <span :title="uploadVehicleObj.vehicleStyles">{{uploadVehicleObj.vehicleStyles ? uploadVehicleObj.vehicleStyles : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>车辆颜色：</span>
+                    <span :title="uploadVehicleObj.vehicleColor">{{uploadVehicleObj.vehicleColor ? uploadVehicleObj.vehicleColor : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>车顶：</span>
+                    <span :title="uploadVehicleObj.vehicleRoof">{{uploadVehicleObj.vehicleRoof ? uploadVehicleObj.vehicleRoof : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>撞痕：</span>
+                    <span :title="uploadVehicleObj.hitMarkInfo">{{uploadVehicleObj.hitMarkInfo ? uploadVehicleObj.hitMarkInfo : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>车前物品描述：</span>
+                    <span :title="uploadVehicleObj.descOfFrontItem">{{uploadVehicleObj.descOfFrontItem ? uploadVehicleObj.descOfFrontItem : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>车后物品描述：</span>
+                    <span :title="uploadVehicleObj.descOfRearItem">{{uploadVehicleObj.descOfRearItem ? uploadVehicleObj.descOfRearItem : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>遮阳板状态：</span>
+                    <span :title="uploadVehicleObj.sunvisor">{{uploadVehicleObj.sunvisor ? uploadVehicleObj.sunvisor : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>安全带状态：</span>
+                    <span :title="uploadVehicleObj.safetyBelt">{{uploadVehicleObj.safetyBelt ? uploadVehicleObj.safetyBelt : '--'}}</span>
+                  </li>
+                  <li>
+                    <span>打电话状态：</span>
+                    <span :title="uploadVehicleObj.calling">{{uploadVehicleObj.calling ? uploadVehicleObj.calling : '--'}}</span>
+                  </li>
                 </ul>
               </div>
             </div>
@@ -137,9 +196,13 @@
                 </el-tree>
               </div>
             </div>
-            <div class="task_mb_d">
-              <span>备注说明：</span>
-              <el-input v-model="xjDesVal" style="width: 500px;" size="small" maxlength="50" placeholder="请输入50字以内的备注说明"></el-input>
+            <div class="task_mb_d" style="padding-bottom: 0;">
+              <el-form :model="desForm" :rules="desFormRules" ref="desForm" label-width="100px">
+                <el-form-item label="备注说明：" prop="xjDesVal">
+                  <el-input v-model="desForm.xjDesVal" style="width: 500px;" size="small" placeholder="请输入50字以内的备注说明"></el-input>
+                </el-form-item>
+              </el-form>
+              <!-- desForm -->
             </div>
           </div>
         </div>
@@ -185,7 +248,14 @@ export default {
         label: 'name'
       },
 
-      xjDesVal: '',
+      desForm: {
+         xjDesVal: ''
+      },
+      desFormRules: {
+        xjDesVal: [
+          { max: 50, message: '最多输入50个字符', trigger: 'change' }
+        ]
+      },
 
       submitLoading: false,
 
@@ -570,8 +640,13 @@ export default {
       let params = {};
       let dids = [], bids = [];
       if (this.xjMoreInfo) {
+        if (this.desForm.xjDesVal && this.desForm.xjDesVal.length > 50) {
+          this.msgTips('备注说明最多可输入50个字符');
+          this.submitLoading = false;
+          return false;
+        }
         // 更多设置
-        params.remarks = this.xjDesVal;
+        params.remarks = this.desForm.xjDesVal;
         // id: "3" name: "长沙创谷广告园44" type: 1摄像头/2卡口
         // console.log('this.xjMapTree', this.xjMapTree);
         if (this.xjSelType === 1) {
@@ -688,15 +763,7 @@ export default {
     },
     // 信息提示
     msgTips (smsg) {
-      let nMsg = $('.el-message--info');
-      if (nMsg && nMsg.length > 0) {
-        nMsg.find('.el-message__content').text(smsg);
-      } else {
-        this.$message({
-          message: smsg,
-          type: 'info'
-        });
-      }
+      this.$MyMessage(smsg, 'error');
     }
   },
   destroyed () {
@@ -886,13 +953,34 @@ export default {
       overflow: hidden;
       padding-top: 10px;
       > li {
-        width: 25%; float: left;
-        height: 40px; line-height: 40px;
+        width: 33.33%; float: left;
+        line-height: 20px;
+        padding: 10px 0;
         > span {
           display: inline-block;
           width: 95px; padding-right: 5px;
           text-align: right;
           color: #666;
+        }
+      }
+      &.task_mtr_ls2 {
+        > li {
+          width: 33.33%;
+          > span { 
+            width: 112px;
+            &:first-child {
+              width: 112px;
+              float: left;
+            }
+            &:last-child {
+              display: block;
+              width: auto; height: 20px; line-height: 20px;
+              text-align: left;
+              margin-left: 112px;
+              padding: 0 0 0 10px;
+              overflow: hidden; text-overflow: ellipsis; white-space: nowrap; word-break: break-all;
+            }
+          }
         }
       }
     }

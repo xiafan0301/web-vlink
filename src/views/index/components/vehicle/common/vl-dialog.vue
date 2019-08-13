@@ -3,7 +3,7 @@
       :visible.sync="strucDetailDialog"
       class="struc_detail_dialog_qypz"
       :close-on-click-modal="false"
-      top="4vh"
+      :append-to-body="true"
       :show-close="false">
     <div class="struc_tab">
       <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">抓拍详情</span>
@@ -125,7 +125,7 @@
         ]
         *<div is="vlDialog" :detailData="detailData" :btnList="btnList" @gotoControl="gotoControl"></div>
         * detailLeftInfo,detailRightInfo,detailBottomInfo,
-        * 这三个是指弹窗抓拍详情里的，左侧图片信息，右侧图片信息，底部图片信息，label为左上角文字内容，imgKey为当前图片使用的字段
+        *
     * */
     name: 'VlDialog',
     props: {
@@ -292,7 +292,7 @@
       width: 100%!important;
       /* 祖先元素设置了transform属性则会导致固定定位属性position: fixed失效。 */
       transform: none !important;
-      top: calc(100% - 8.8rem);
+      top: calc((100% - 7.96rem)/2);
       left: calc((100% - 13.06rem)/2);
     }
     .el-dialog__header {

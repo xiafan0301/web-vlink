@@ -13,10 +13,10 @@
             :clearable="false"
             class="vl_date"
             style="width: 100%"
+            :time-arrow-control="true"
             v-model="queryForm.startTime"
             :picker-options="pickerOptions"
             type="datetime"
-            value-format="yyyy-MM-dd HH:mm:ss"
             placeholder="请选择开始时间">
           </el-date-picker>
         </div>
@@ -25,10 +25,10 @@
             :clearable="false"
             class="vl_date vl_date_end"
             style="width: 100%"
+            :time-arrow-control="true"
             :picker-options="pickerOptions1"
             v-model="queryForm.endTime"
             type="datetime"
-            value-format="yyyy-MM-dd HH:mm:ss"
             placeholder="请选择结束时间">
           </el-date-picker>
         </div>
@@ -57,12 +57,12 @@
           </el-select>
         <div class="left_radio" style="overflow: hidden;"><span>车牌：</span><el-checkbox style="float: right;" v-model="queryForm.radio" :label="true">排除</el-checkbox></div>
         <div class="left_province">
-          <el-select v-model="queryForm.province">
+          <el-select v-model="queryForm.province" clearable placeholder="">
             <el-option
               v-for="item in provinceList"
-              :key="item.value"
-              :label="item.label"
-              :value="item">
+              :key="item.enumField"
+              :label="item.enumValue"
+              :value="item.enumValue">
             </el-option>
           </el-select>
           <el-input v-model="queryForm.provinceName" placeholder="请输入车牌号"></el-input>
@@ -146,11 +146,11 @@
 <script>
 // let startTime = formatDate(new Date().getTime() - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss');
 // let endTime = formatDate(new Date().getTime() + (24 * 60 * 60 * 1000 - 1) - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss');
-let startTime = formatDate(new Date(new Date(new Date().toLocaleDateString('zh-Hans-CN').replace(/日/g, '').replace(/\/|年|月/g, '/').replace(/[^\d/]/g,''))).getTime() - 24*60*60*1000, 'yyyy-MM-dd HH:mm:ss');
-let endTime = formatDate(new Date(new Date(new Date().toLocaleDateString('zh-Hans-CN').replace(/日/g, '').replace(/\/|年|月/g, '/').replace(/[^\d/]/g,''))).getTime() - 1, 'yyyy-MM-dd HH:mm:ss');
+// let startTime = formatDate(new Date(new Date(new Date().toLocaleDateString('zh-Hans-CN').replace(/日/g, '').replace(/\/|年|月/g, '/').replace(/[^\d/]/g,''))).getTime() - 24*60*60*1000, 'yyyy-MM-dd HH:mm:ss');
+// let endTime = formatDate(new Date(new Date(new Date().toLocaleDateString('zh-Hans-CN').replace(/日/g, '').replace(/\/|年|月/g, '/').replace(/[^\d/]/g,''))).getTime() - 1, 'yyyy-MM-dd HH:mm:ss');
 import {getOutCityBayonet, apiOutCityStatistics} from '@/views/index/api/api.vehicle.js';
 import {dataList} from '@/utils/data.js';
-import {formatDate} from '@/utils/util.js';
+import {formatDate, dateOrigin} from '@/utils/util.js';
 import { getGroupsByType } from "@/views/index/api/api.js";
 import noResult from '@/components/common/noResult.vue';
 import vehicleDetail from '../common/vehicleDetail.vue';
@@ -160,11 +160,11 @@ export default {
     return {
       isInitPage: false,
       queryForm: {
-        startTime: startTime,
-        endTime: endTime,
+        startTime: formatDate(dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)), 'yyyy-MM-dd HH:mm:ss'),
+        endTime: formatDate(new Date(), 'yyyy-MM-dd HH:mm:ss'),
         bayonet: '',
         carType: '',
-        province: {label: '湘', value: 9},
+        province: '湘',
         provinceName: '',
         radio: false
       },
@@ -180,12 +180,7 @@ export default {
           enumValue: "布控库车辆"
         }
       ],
-      provinceList: this.dicFormater(dataList.ownership)[0].dictList.map(m => {
-        return {
-          value: parseInt(m.enumField),
-          label: m.enumValue
-        }
-      }),
+      provinceList: this.dicFormater(dataList.ownership)[0].dictList,
       loading: false,
       loadingBtn: false,
       bkclccList: {},
@@ -225,6 +220,10 @@ export default {
       // 
       detailData: {},// 抓拍详情数据
     }
+  },
+  created () {
+    this.provinceList.shift();
+    this.provinceList.unshift({enumField: 1111, enumValue: '湘'});
   },
   mounted () {
     this.getListBayonet();
@@ -280,11 +279,11 @@ export default {
     resetQueryForm () {
       this.currentPage = 1;
       this.queryForm = {
-        startTime: startTime,
-        endTime: endTime,
+        startTime: formatDate(dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)), 'yyyy-MM-dd HH:mm:ss'),
+        endTime: formatDate(new Date(), 'yyyy-MM-dd HH:mm:ss'),
         bayonet: '',
         carType: '',
-        province: {label: '湘', value: 9},
+        province: '湘',
         provinceName: '',
         radio: false
       };
@@ -296,7 +295,7 @@ export default {
       const data = {
         'startTime': this.queryForm.startTime,
         'endTime': this.queryForm.endTime,
-        'vehicleNumber': this.queryForm.province.label + this.queryForm.provinceName,
+        'vehicleNumber': this.queryForm.province + this.queryForm.provinceName,
         'unvehicleFlag': this.queryForm.radio
       }
       if(this.queryForm.bayonet && this.queryForm.bayonet.length > 0) {
