@@ -179,6 +179,7 @@ export function downloadCameraModel () {
   return request({
     url: '/device-service/templateDown',
     method: 'get',
+    responseType: 'blob',
     mode: baseModeName
   });
 }
