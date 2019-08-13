@@ -19,23 +19,23 @@
         <el-form-item  prop="data1">
             <el-date-picker
               v-model="ruleForm.data1"
-              type="date"
+              type="datetime"
+              time-arrow-control
               placeholder="开始时间"
               :picker-options="pickerOptions"
               class="full vl_date"
               :clearable="false"
-              value-format="yyyy-MM-dd"
             ></el-date-picker>
           </el-form-item>
           <el-form-item  prop="data2">
             <el-date-picker
               v-model="ruleForm.data2"
               :clearable="false"
-              type="date"
+              type="datetime"
+              time-arrow-control
               :picker-options="pickerOptions"
               placeholder="结束时间"
               class="full vl_date vl_date_end"
-              value-format="yyyy-MM-dd"
             ></el-date-picker>
           </el-form-item>
           <el-form-item prop="input3">
@@ -93,7 +93,7 @@
 <script>
 import { mapXupuxian } from "@/config/config.js";
 // import { cityCode } from "@/utils/data.js";
-import { transMinute } from '@/utils/util.js';
+import { transMinute, dateOrigin, formatDate } from '@/utils/util.js';
 import { checkPlateNumber } from '@/utils/validator.js';
 import { getVehicleShot,getAllDevice } from "@/views/index/api/api.judge.js";
 import { getAllBayonetList } from "@/views/index/api/api.base.js";
@@ -122,8 +122,8 @@ export default {
       bResize: {},
       playUrl: {},
       ruleForm: {
-        data1:null,
-        data2:null,
+        data1: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)),
+        data2: new Date(),
         input3: null,
         input4: 3,
         input5: "1",
@@ -168,7 +168,7 @@ export default {
   },
   mounted() {
     //this.getControlMap(1);
-    this.setDTime();
+    // this.setDTime();
     let pNo=this.$route.query.plateNo
     //this.select = pNo?pNo.substring(0,1):"湘";
     this.ruleForm.input3 = pNo;
@@ -200,20 +200,6 @@ export default {
       
     },
     setDTime () {
-      
-      let date = new Date();
-      let curDate = date.getTime();
-      let curS = 1 * 24 * 3600 * 1000;
-       let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
-      let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
-      let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
-      let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
-      
-      let _s = new Date(curDate - curS).getFullYear() +
-        "-" + _sm + "-" +_sd;
-      let _e = date.getFullYear() + "-" + _em + "-" + _ed;
-      this.ruleForm.data1 = _s
-      this.ruleForm.data2 =  _s
     },
     hideResult() {
       this.reselt = false;
@@ -273,10 +259,10 @@ export default {
           // let isP=/([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})/
           // let  result = isP.test(this.ruleForm.input3);
           // if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data2 && this.ruleForm.input3){
-          let pg={
+          let pg = {
             //shotTime:+"_"+this.ruleForm.data1[1]+" 23:59:59",
-            startTime:this.ruleForm.data1 + " 00:00:00",
-            endTime:this.ruleForm.data2 + " 23:59:59",
+            startTime: formatDate(this.ruleForm.data1),
+            endTime: formatDate(this.ruleForm.data2),
             //shotTime:this.ruleForm.data1[0]+"_"+this.ruleForm.data1[1],
             // minSnapNum: this.ruleForm.input4 || 0,
             plateNo: this.ruleForm.input3
@@ -309,7 +295,8 @@ export default {
     },
     resetForm(v){
       this.$refs[v].resetFields();
-      this.setDTime() 
+      this.ruleForm.data1 = dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000));
+      this.ruleForm.data2 = new Date();
       this.ruleForm.input3=null
       // this.ruleForm.input4=3
       // this.ruleForm.input5="1"

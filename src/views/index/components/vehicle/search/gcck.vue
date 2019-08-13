@@ -203,7 +203,7 @@ export default {
       searchVal2: '',
       doSearch1: {},
       doSearch2: {},
-      searchTime2: [dateOrigin(), dateOrigin(true)],
+      searchTime2: [dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)), new Date()],
       treeList1: [],
       treeList2: [],
       bResize: {},

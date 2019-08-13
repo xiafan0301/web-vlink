@@ -33,6 +33,7 @@
               class="vl_date"
               v-model="searchForm.reportTime"
               type="datetimerange"
+              :time-arrow-control="true"
               value-format="yyyy-MM-dd HH:mm:ss"
               format="yyyy-MM-dd HH:mm:ss"
               range-separator="至"
@@ -182,6 +183,8 @@
                 class="vl_date"
                 @change="handleDateTime"
                 :picker-options="pickerDateTime"
+                :time-arrow-control="true"
+                :default-time="['00:00:00', '23:59:59']"
                 value-format="yyyy-MM-dd HH:mm:ss"
                 format="yyyy-MM-dd HH:mm:ss"
                 range-separator="至"
@@ -232,7 +235,7 @@ import { checkPlateNumber } from '@/utils/validator.js';
 import { getShotDevice, getTailBehindList } from '@/views/index/api/api.judge.js';
 import { getPersonShotDev, getPersonFollowing } from '@/views/index/api/api.portrait.js';
 import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
-import { formatDate } from '@/utils/util.js';
+import { formatDate, dateOrigin } from '@/utils/util.js';
 import vlUpload from '@/components/common/upload.vue';
 export default {
   components: { vlBreadcrumb, vlUpload },
@@ -271,7 +274,7 @@ export default {
         taskName: null, // 任务名称
         deviceCode: null, // 起点设备编号
         deviceName: null, // 起点设备名称
-        dateTime: [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()],
+        dateTime: [dateOrigin(false, new Date(new Date() - 24 * 60 * 60 * 1000)), new Date()],
         interval: 3 // 尾随间隔
       },
       intervalList: [
@@ -509,7 +512,7 @@ export default {
         taskName: null, // 任务名称
         deviceCode: null, // 起点设备编号
         deviceName: null, // 起点设备名称
-        dateTime: [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()],
+        dateTime: [dateOrigin(false, new Date(new Date() - 24 * 60 * 60 * 1000)), new Date()],
         interval: 3 // 尾随间隔
       };
       this.dialogImageUrl = null;

@@ -4,21 +4,22 @@
     <div class="vc_rep">
       <div class="vc_rep_t">
         <div class="vc_rep_sc">
-          <el-input style="width: 200px;" v-model="searchForm.plateNo" placeholder="请输入车牌信息" size="small"></el-input>&nbsp;&nbsp;&nbsp;&nbsp;
-          <el-date-picker style="width: 280px;" size="small" 
+          <el-date-picker style="width: 420px;" size="small" 
             class="vl_date"
             v-model="searchForm.time"
-            type="daterange"
+            type="datetimerange"
             align="left"
             unlink-panels
             :editable="false"
             :clearable="false"
+            time-arrow-control
             range-separator="至"
             start-placeholder="开始日期"
             @change="pickerChanged"
             :picker-options="pickerOptions"
             end-placeholder="结束日期">
           </el-date-picker>&nbsp;&nbsp;&nbsp;&nbsp;
+          <el-input style="width: 200px;" v-model="searchForm.plateNo" placeholder="请输入车牌信息" size="small"></el-input>&nbsp;&nbsp;&nbsp;&nbsp;
           <el-button size="small" :disabled="!searchForm.plateNo" :loading="searchLoading" type="primary" @click="searchSubmit">查询</el-button>
           <!-- <el-button style="float: right;" size="small" :disabled="!clInfo || searchLoading" type="primary" @click="vehicleExport">导出为PDF</el-button> -->
           
@@ -302,7 +303,7 @@
 </template>
 <script>
 import vehicleBreadcrumb from '../breadcrumb.vue';
-import {getDate, formatDate} from '@/utils/util.js';
+import {getDate, formatDate, dateOrigin} from '@/utils/util.js';
 import {mapXupuxian} from '@/config/config.js';
 import {getVehicleInvestigationReport} from '@/views/index/api/api.judge.js';
 export default {
@@ -313,7 +314,7 @@ export default {
       mapPicShow2: false,
       searchForm: {
         plateNo: '', // 湘A757BW
-        time: [new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000), new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000)]
+        time: [dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)), new Date()]
         // time: [new Date(new Date().getTime() - 5 * 24 * 60 * 60 * 1000), new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000)]
       },
       timeStr: ['', ''],
@@ -372,8 +373,8 @@ export default {
     // 湘AN8888 2019-07-01 00:00:00 2019-07-04 00:00:00
     searchSubmit () {
       this.searchLoading = true;
-      this.timeStr = [formatDate(this.searchForm.time[0], 'yyyy-MM-dd 00:00:00'),
-        formatDate(this.searchForm.time[1], 'yyyy-MM-dd 23:59:59')];
+      this.timeStr = [formatDate(this.searchForm.time[0]),
+        formatDate(this.searchForm.time[1])];
       getVehicleInvestigationReport({
         plateNo: this.searchForm.plateNo,
         startTime: this.timeStr[0],
