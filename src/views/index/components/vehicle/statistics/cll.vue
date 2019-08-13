@@ -136,8 +136,8 @@ export default {
         // lane: null,
         statementType: 1,
         warningNum: '',
-        startTime: formatDate(dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)), 'yyyy-MM-dd HH:mm:ss'),
-        endTime: formatDate(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+        startTime: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)),
+        endTime: new Date(),
       },
       pickerOptions: {
         disabledDate: time => {
@@ -461,8 +461,8 @@ export default {
         // lane: null,
         statementType: 1,
         warningNum: '',
-        startTime: formatDate(dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)), 'yyyy-MM-dd HH:mm:ss'),
-        endTime: formatDate(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+        startTime: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)),
+        endTime: new Date(),
       };
       this.charts = {
         chart1: null,
@@ -486,8 +486,8 @@ export default {
       if (this.queryForm.statementType !== 5) {
         params.reportType = this.queryForm.statementType
       } else {
-        params.startTime = this.queryForm.startTime;
-        params.endTime = this.queryForm.endTime;
+        params.startTime = formatDate(this.queryForm.startTime);
+        params.endTime = formatDate(this.queryForm.endTime);
       }
       this.loadingBtn = true;
       apiCarFlow(params).then(res => {
