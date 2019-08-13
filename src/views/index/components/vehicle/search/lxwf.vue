@@ -209,23 +209,23 @@
               <el-form-item  prop="data1">
                 <el-date-picker
                   v-model="data1"
-                  type="date"
+                  type="datetime"
+                  time-arrow-control
                   :clearable="false"
                   placeholder="开始时间"
                   :picker-options="pickerOptions"
                   class="full vl_date"
-                  value-format="yyyy-MM-dd"
                 ></el-date-picker>
               </el-form-item>
               <el-form-item  prop="data2">
                 <el-date-picker
                   v-model="data2"
                   :clearable="false"
-                  type="date"
+                  type="datetime"
+                  time-arrow-control
                   :picker-options="pickerOptions"
                   placeholder="结束时间"
                   class="full vl_date vl_date_end"
-                  value-format="yyyy-MM-dd"
                 ></el-date-picker>
               </el-form-item>
               <el-form-item prop="input4">
@@ -348,6 +348,7 @@
 import { ajaxCtx } from "@/config/config";
 import BigImg from "@/components/common/bigImg.vue";
 import vlUpload from '@/components/common/upload.vue';
+import {formatDate, dateOrigin} from '@/utils/util.js';
 import {
   JtcPOSTAppendixInfo,
   JtcGETAppendixInfoList,
@@ -381,8 +382,8 @@ export default {
       isDao: false,
       // imgData: null,
       input5: "1",
-      data1: "",
-      data2: "",
+      data1: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)),
+      data2: new Date(),
 
       uploadClear: {},
 
@@ -516,8 +517,8 @@ export default {
       let ad=null
       if (this.input5 == 1 ) {
         let datas = {
-          dateStart: this.data1 + " 00:00:00",
-          dateEnd: this.data2 + " 23:59:59",
+          dateStart: formatDate(this.data1),
+          dateEnd: formatDate(this.data2),
           vilolationNum: this.tzscMenuForm.input4
         };
         if (this.sou.plateNo) {
@@ -545,8 +546,8 @@ export default {
         //this.getViolation(datas);
       } else {
         let params = {
-          dateStart: this.data1 + " 00:00:00",
-          dateEnd: this.data2 + " 23:59:59",
+          dateStart: formatDate(this.data1),
+          dateEnd: formatDate(this.data2),
           vilolationNum: this.tzscMenuForm.input4,
           plateClass: this.tzscMenuForm.licenseType,
           plateColor: this.tzscMenuForm.licenseColor,
@@ -614,8 +615,8 @@ export default {
     // },
     //查看详情
     handleClick(v) {
-      v.datastart = this.data1;
-      v.dataend = this.data2;
+      v.datastart = formatDate(this.data1);
+      v.dataend = formatDate(this.data2);
       if (this.curImageUrl) {
         v.imgurl = this.curImageUrl;
       }
@@ -762,7 +763,7 @@ export default {
     // },
     //设置默认时间
     setDTime() {
-      let date = new Date();
+      /* let date = new Date();
       let curDate = date.getTime();
       let curS = 1 * 24 * 3600 * 1000;
       let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
@@ -776,7 +777,7 @@ export default {
       let _s = new Date(curDate - curS).getFullYear() + "-" + _sm + "-" +_sd;
       // let _e = date.getFullYear() + "-" + _em + "-" + _ed;
       this.data1 = _s;
-      this.data2 = _s;
+      this.data2 = _s; */
     },
     //重置
     resetSearch() {
@@ -800,7 +801,9 @@ export default {
       }),
       this.photoAnalysis = null;
       this.regulationsList = [];
-        this.setDTime();
+      this.setDTime();
+      this.data1 = dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000));
+      this.data2 = new Date();
       //this.getVehicleDetail();
     },
     //查询
@@ -819,8 +822,8 @@ export default {
            return
         }
         let datas = {
-          dateStart: this.data1 + " 00:00:00",
-          dateEnd: this.data2 + " 23:59:59",
+          dateStart: formatDate(this.data1),
+          dateEnd: formatDate(this.data2),
           vilolationNum: this.tzscMenuForm.input4
         };
         if (this.sou.plateNo) {
@@ -849,8 +852,8 @@ export default {
         this.getViolation(datas);
       } else {
         let params = {
-          dateStart: this.data1 + " 00:00:00",
-          dateEnd: this.data2 + " 23:59:59",
+          dateStart: formatDate(this.data1),
+          dateEnd: formatDate(this.data2),
           vilolationNum: this.tzscMenuForm.input4,
           plateClass: this.tzscMenuForm.licenseType,
           plateColor: this.tzscMenuForm.licenseColor,

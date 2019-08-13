@@ -20,13 +20,11 @@
             <el-date-picker
               v-model="ruleForm.data1"
               type="datetime"
+              time-arrow-control
               placeholder="开始时间"
               :picker-options="pickerOptions"
               class="full vl_date"
-              :time-arrow-control="true"
               :clearable="false"
-              value-format="yyyy-MM-dd HH:mm:ss"
-              format="yyyy-MM-dd HH:mm:ss"
             ></el-date-picker>
           </el-form-item>
           <el-form-item  prop="data2">
@@ -34,12 +32,10 @@
               v-model="ruleForm.data2"
               :clearable="false"
               type="datetime"
-              :time-arrow-control="true"
+              time-arrow-control
               :picker-options="pickerOptions"
               placeholder="结束时间"
               class="full vl_date vl_date_end"
-              value-format="yyyy-MM-dd HH:mm:ss"
-              format="yyyy-MM-dd HH:mm:ss"
             ></el-date-picker>
           </el-form-item>
           <el-form-item prop="input3">
@@ -203,22 +199,8 @@ export default {
         }
       
     },
-    // setDTime () {
-      
-    //   let date = new Date();
-    //   let curDate = date.getTime();
-    //   let curS = 1 * 24 * 3600 * 1000;
-    //    let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
-    //   let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
-    //   let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
-    //   let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
-      
-    //   let _s = new Date(curDate - curS).getFullYear() +
-    //     "-" + _sm + "-" +_sd;
-    //   let _e = date.getFullYear() + "-" + _em + "-" + _ed;
-    //   this.ruleForm.data1 = _s
-    //   this.ruleForm.data2 =  _s
-    // },
+    setDTime () {
+    },
     hideResult() {
       this.reselt = false;
       this.hideLeft();
@@ -313,7 +295,8 @@ export default {
     },
     resetForm(v){
       this.$refs[v].resetFields();
-      // this.setDTime() 
+      this.ruleForm.data1 = dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000));
+      this.ruleForm.data2 = new Date();
       this.ruleForm.input3=null
       // this.ruleForm.input4=3
       // this.ruleForm.input5="1"
