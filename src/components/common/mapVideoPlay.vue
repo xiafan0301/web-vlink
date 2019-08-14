@@ -43,7 +43,7 @@ export default {
         this.videoPlayDialog = true;
         this.$nextTick(() => {
           this.playerData = {
-            type: 3,
+            type: 6,
             title: val.name,
             record: false,
             video: {

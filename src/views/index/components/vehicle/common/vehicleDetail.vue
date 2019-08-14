@@ -188,7 +188,7 @@ export default {
     setPlayerData () {
       if (this.sturcDetail.videoPath) {
         this.playerData = {
-          type: 3,
+          type: 6,
           title: this.sturcDetail.deviceName,
           video: {
             uid: new Date().getTime() + '',
