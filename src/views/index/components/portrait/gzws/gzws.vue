@@ -13,12 +13,12 @@
       <div class="content_left">
         <vue-scroll>
           <el-form class="left_form" :model="addForm" ref="addForm" :rules="rules">
-            <el-form-item label="查询方式：">
+            <!-- <el-form-item label="查询方式：">
               <el-radio-group v-model="selectType" style="width: 100%">
                 <el-radio :label="1">在线查询</el-radio>
                 <el-radio :label="2">离线任务</el-radio>
               </el-radio-group>
-            </el-form-item>
+            </el-form-item> -->
             <el-form-item  prop="startTime">
               <el-date-picker
                 class="vl_date"
@@ -81,7 +81,7 @@
               </el-select>
               <span class="span_tips" v-show="isShowDeviceTip">该人像在该时间内无抓拍设备</span>
             </el-form-item>
-            <el-form-item prop="taskName" v-if="selectType === 2">
+            <el-form-item prop="taskName">
               <el-input placeholder="请输入任务名称，最多20字" maxlength="20" v-model="addForm.taskName"></el-input>
             </el-form-item>
             <el-form-item prop="interval">
@@ -156,7 +156,7 @@
                 </el-table-column>
                 <el-table-column label="尾随间隔" prop="taskWebParam" show-overflow-tooltip>
                   <template slot-scope="scope">
-                    <span>{{scope.row.taskWebParam.interval}}分钟</span>
+                    <span>{{scope.row.taskWebParam.interval ? scope.row.taskWebParam.interval + '分钟' : '-'}}</span>
                   </template>
                 </el-table-column>
                 <el-table-column label="状态" v-if="selectIndex === 0" prop="taskStatus" show-overflow-tooltip>
@@ -164,7 +164,7 @@
                     <span>{{scope.row.taskStatus && scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 3 ? '失败' : '已中断'}}</span>
                   </template>
                 </el-table-column>
-                <el-table-column label="操作" fixed="right">
+                <el-table-column label="操作" fixed="right" width="200px">
                   <template slot-scope="scope">
                     <span
                       class="operation_btn"
@@ -387,10 +387,10 @@ export default {
     // const startTime = new Date() - 24 * 60 * 60 *1000;
     return {
       tabList: [
-        {
-          label: "查询结果",
-          value: 2
-        },
+        // {
+        //   label: "查询结果",
+        //   value: 2
+        // },
         {
           label: "已完成任务",
           value: 1
@@ -597,8 +597,8 @@ export default {
             targetPicUrl: this.dialogImageUrl,
             deviceId: deviceCode,
             deviceName: this.addForm.deviceName,
-            startTime: formatDate(this.addForm.dateTime[0]),
-            endTime: formatDate(this.addForm.dateTime[1]),
+            startTime: formatDate(this.addForm.startTime),
+            endTime: formatDate(this.addForm.endTime),
             taskName: this.addForm.taskName,
             interval: this.addForm.interval
           };
