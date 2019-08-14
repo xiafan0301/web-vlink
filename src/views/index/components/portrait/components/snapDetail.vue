@@ -321,6 +321,11 @@ export default {
           this.initMap();
         }, 200);
       }
+
+      // 更新视频
+      if (this.strucCurTab === 3) {
+        this.setPlayerData();
+      }
     },
     initMap() {
       if (this.amap) {
