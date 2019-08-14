@@ -123,6 +123,11 @@ export default {
       path: 'report',
       name: 'portrait_report',
       component: () => import('@/views/index/components/portrait/report.vue')
+    },
+    {
+      path: 'new_pfcm',    //频繁出没
+      name: 'portrait_new_pfcm',
+      component: () => import('@/views/index/components/portrait/newPfcm.vue')
     }
   ]
 }
