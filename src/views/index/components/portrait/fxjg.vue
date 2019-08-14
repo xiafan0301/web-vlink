@@ -1,20 +1,31 @@
 <template>
   <div class="analysis-results">
     <div class="">
-      <!-- <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">检索</el-breadcrumb-item>
-        <el-breadcrumb-item :to="{ path: '/portrait/pfcm' }">频繁出没</el-breadcrumb-item>
-        <el-breadcrumb-item>分析结果</el-breadcrumb-item>
-      </el-breadcrumb> -->
       <div is="vlBreadcrumb" 
           :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
-            {name: '频繁出没', routerName: 'portrait_pfcm'},
+            {name: '频繁出没', routerName: 'portrait_new_pfcm'},
             {name: '分析结果'}]">
         </div>
     </div>
-    <vue-scroll>
-      <div v-loading="loading">
-      <div class="analysis-rc-info" v-if="list && list.length > 0">
+      <div class="analysis-r-body">
+        <div class="task-info" v-if="analysisObj">
+          <vue-scroll> 
+          <div class="task-info-row"><span class="left-text">任务名称：</span><span class="right-text">{{analysisObj.taskName}}</span></div>
+          <div class="task-info-row double-row"><span class="left-text">所选时间：</span><span class="right-text">{{analysisObj.taskParam.startDate}}</span></div>
+          <div class="task-info-row"><span class="left-text none-text">所选时间：</span><span class="right-text">{{analysisObj.taskParam.endDate}}</span></div>
+          <div class="task-info-row"><span class="left-text">相似度：</span><span class="right-text">{{analysisObj.taskParam.semblance}}%</span></div>
+          <div class="task-info-row"><span class="left-text">频次：</span><span class="right-text">{{analysisObj.taskParam.frequency}}</span></div>
+          <div class="task-info-row"><span class="left-text">区域设备：</span>
+          <div class="right-text">
+            <span v-if="analysisObj.taskParam.deviceIdNames">{{analysisObj.taskParam.deviceIdNames}}</span>
+            <span v-if="analysisObj.taskParam.bayonetNames">,{{analysisObj.taskParam.bayonetNames}}</span>
+          </div></div>
+          </vue-scroll>
+        </div>
+      <div v-loading="loading" class="analysis-rc-info">
+      <vue-scroll> 
+      <div v-if="list && list.length > 0">
+        <p class="result-info">检索结果<span class="num">({{list.length}})</span></p>
         <div class="analysis-r-content">
           <div class="img-item" v-for="(item,index) of list.slice((pagination.pageNum-1)*pagination.pageSize,pagination.pageNum*pagination.pageSize)" :key="index">
             <div class="img-box" @click="toSnapDetail(item)">
@@ -45,26 +56,37 @@
         <p style="color: #666666; margin-top: 30px;">抱歉，没有相关的结果!</p>
         </div>
       </div>
+      </vue-scroll>  
+      </div>
       </div>
       <snapDialog ref="snapDialogComp" :snapObj="snapObj"></snapDialog>
-    </vue-scroll>  
+    
   </div>
 </template>
 
 <script>
 import { getTaskInfosDetail } from "../../api/api.analysis.js";
+import {
+  getAllMonitorList,
+  getAllBayonetList
+} from "@/views/index/api/api.base.js";
 import snapDialog from './components/snapDetail';
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+import { mapXupuxian } from "@/config/config";
 export default {
   components: { snapDialog , vlBreadcrumb},
   data() {
     return {
       uid: '',
-      pagination: { total: 0, pageSize: 24, pageNum: 1 },
+      pagination: { total: 0, pageSize: 18, pageNum: 1 },
       list: [],
       snapObj: {},
       isShow: false,
       loading: false,
+      analysisObj: null,
+      cameraIds: [], //摄像头
+      bayonetIds: [], //卡口
+      allNames: '',
     };
   },
   mounted() {
@@ -121,6 +143,40 @@ export default {
     this.getDetail();
   },
   methods: {
+    // 设备
+    getListDevice() {
+      getAllMonitorList({ ccode: mapXupuxian.adcode }).then(res => {
+        if (res) {
+          this.listDevice = res.data;
+          if(this.analysisObj.taskParam.deviceIds) {
+            let data = this.analysisObj.taskParam
+            let deviceIds = data.deviceIds.split(",")
+            if(this.listDevice && this.listDevice.length > 0) {
+              let arr = [...this.listDevice].filter(x => [...deviceIds].some(y => y === x.uid));
+              let deviceIdNames = [...arr].map(x => x.deviceName).join()
+              this.$set(this.analysisObj.taskParam, 'deviceIdNames', deviceIdNames)
+            }
+          }
+        }
+      });
+    },
+    // 卡口
+    getListBayonet() {
+      getAllBayonetList({ areaId: mapXupuxian.adcode }).then(res => {
+        if (res) {
+          this.listBayonet = res.data;
+          if(this.analysisObj.taskParam.bayonetIds) {
+            let data = this.analysisObj.taskParam
+            let bayonetIds = data.bayonetIds.split(",")
+            if(this.listBayonet && this.listBayonet.length > 0) {
+              let arr = [...this.listBayonet].filter(x => [...bayonetIds].some(y => y === x.uid));
+              let bayonetNames = [...arr].map(x => x.bayonetName).join()
+              this.$set(this.analysisObj.taskParam, 'bayonetNames', bayonetNames)
+            }
+          }
+        }
+      });
+    },
     handleCurrentChange(page) {
       this.pagination.pageNum = page;
     },
@@ -131,6 +187,10 @@ export default {
         console.log("------getTaskInfosDetail-------",res,JSON.parse(res.data.taskResult))
         if(res && res.data) {
           let taskResult = JSON.parse(res.data.taskResult)
+          let taskWebParam = JSON.parse(res.data.taskWebParam)
+          this.analysisObj = res.data
+          this.$set(this.analysisObj,'taskParam',taskWebParam)
+        
           this.list = taskResult.resultList
           if(this.list && this.list.length > 0) {
             this.list.sort(this.sortVal)
@@ -140,6 +200,8 @@ export default {
               this.isShow = true
             })
           }
+          this.getListDevice();
+          this.getListBayonet();
         }
         this.$nextTick(() => {
           this.loading = false
@@ -173,89 +235,131 @@ export default {
     background: #fff;
     border-bottom: 1px solid #d3d3d3;
   }
-  .analysis-rc-info {
+  .analysis-r-body {
     height: 100%;
-    .analysis-r-content {
-      padding: .3rem 0 0 0;
-      display: flex;
-      flex-wrap: wrap;
-      .img-item {
-        width: 2.17rem;
-        height: 2.17rem;
-        margin: 0 0 .2rem .2rem;
-        background-color: #fff;
-        box-shadow: 0px 2px 10px 0px rgba(131, 131, 131, 0.12);
-        .img-box {
-          position: relative;
-          width: 1.85rem;
-          height: 1.85rem;
-          background-color: #999;
-          margin: .16rem;
-          >img {
-            width: 1.85rem;
-            height: 1.85rem;
-          }
-          i {
-            position: absolute;
-            top: -0.01rem;
-            right: -0.01rem;
-          }
-          .num {
-            display: block;
-            position: absolute;
-            top: -3px;
-            right: -5px;
-            width: 100px;
-            height: 100px;
-            text-align: center;
-            font-size: .2rem;
-            font-weight: 600;
-            color: #fff;
-            -webkit-transform: rotate(45deg);
-            -moz-transform: rotate(45deg);
-            -ms-transform: rotate(45deg);
-            -o-transform: rotate(45deg);
-            transform: rotate(45deg);
-            z-index: 99;
-          }
-          .text {
-            font-weight: 500;
-            font-size: 12px;  
+    display: flex;
+    .task-info {
+      width: 272px;
+      height: 100%;
+      padding: 20px 0 20px 20px;
+      color: #999;
+      background: #fff;
+      box-shadow: 2px 3px 10px 0px rgba(131, 131, 131, 0.28);
+      /* animation: fadeInLeft 0.4s ease-out 0.3s both; */
+      .task-info-row {
+        line-height: 24px;
+        padding-bottom: 10px;
+        display: flex;
+        margin-right: 20px;
+        .left-text {
+          flex: none;
+          width: 70px;
+        }
+        .none-text {
+          color: #fff;
+        }
+        .right-text {
+          color: #555;
+        }
+      }
+      .double-row {
+        padding-bottom: 0;
+      }
+  }
+  .analysis-rc-info {
+      width: calc(100% - 272px);
+      height: 100%;
+      .result-info {
+        color: #333;
+        font-size: 14px;
+        padding: .2rem;
+        .num {
+          color: #666;
+        }
+      }
+      .analysis-r-content {
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        .img-item {
+          width: 2.36rem;
+          height: 2.36rem;
+          margin: 0 0 .2rem .2rem;
+          background-color: #fff;
+          box-shadow: 0px 2px 10px 0px rgba(131, 131, 131, 0.12);
+          .img-box {
+            position: relative;
+            width: 2.02rem;
+            height: 2.02rem;
+            background-color: #999;
+            margin: .16rem;
+            >img {
+              width: 2.02rem;
+              height: 2.02rem;
+            }
+            i {
+              position: absolute;
+              top: -0.01rem;
+              right: -0.01rem;
+            }
+            .num {
+              display: block;
+              position: absolute;
+              top: -3px;
+              right: -5px;
+              width: 100px;
+              height: 100px;
+              text-align: center;
+              font-size: .2rem;
+              font-weight: 600;
+              color: #fff;
+              -webkit-transform: rotate(45deg);
+              -moz-transform: rotate(45deg);
+              -ms-transform: rotate(45deg);
+              -o-transform: rotate(45deg);
+              transform: rotate(45deg);
+              z-index: 99;
+            }
+            .text {
+              font-weight: 500;
+              font-size: 12px;  
+            }
           }
         }
       }
+      .cum_pagination {
+        padding: .3rem 0 .4rem 0;
+        text-align: center;
+      }
     }
-    .cum_pagination {
-      padding: .3rem 0 .4rem 0;
+    .no-data {
+      position: fixed;
+      top: 1.5rem;
+      right: 0;
+      bottom: 0;
+      left: 272px;
       text-align: center;
+      font-size: 0;
+      white-space: nowrap;
+      overflow: auto;
+      &:after {
+        content: '';
+        display: inline-block;
+        height: 100%;
+        vertical-align: middle;
+        margin-top: -.3rem;
+      }
+      .content {
+        display: inline-block;
+        vertical-align: middle;
+        text-align: center;
+        font-size: 14px;
+        white-space: normal;
+        margin-top: -.3rem;
+      }
     }
   }
-  .no-data {
-    position: fixed;
-    top: 1.5rem;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    text-align: center;
-    font-size: 0;
-    white-space: nowrap;
-    overflow: auto;
-    &:after {
-      content: '';
-      display: inline-block;
-      height: 100%;
-      vertical-align: middle;
-      margin-top: -.3rem;
-    }
-    .content {
-      display: inline-block;
-      vertical-align: middle;
-      text-align: center;
-      font-size: 14px;
-      white-space: normal;
-      margin-top: -.3rem;
-    }
-  }
+  
 }
 </style>
 <style lang="scss">
