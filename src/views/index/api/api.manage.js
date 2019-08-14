@@ -874,6 +874,17 @@ export function vehicleExport (params) {
   });
 }
 /**
+ * 特殊车辆模板下载
+ * @param {*} data
+ */
+export function downloadVehicleModel() {
+  return request({
+    url: '/vehicle-special/template',
+    responseType: 'blob',
+    method: 'get'
+  });
+}
+/**
  * 车辆品牌数据获取
  * @param {*} data
  */

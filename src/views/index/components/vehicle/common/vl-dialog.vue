@@ -56,7 +56,7 @@
                   <div class="struc_cdi_line">
                     <span><font>车辆类型</font>{{sturcDetail.vehicleClass ? sturcDetail.vehicleClass : '未知'}}</span>
                   </div>
-                  <div class="struc_cdi_line">
+                  <div class="struc_cdi_line" v-if="sturcDetail.plateNo && sturcDetail.plateClass">
                     <span><font>号牌类型</font>{{dicFormater(45, sturcDetail.plateClass)}}</span>
                   </div>
                 </div>

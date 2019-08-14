@@ -42,7 +42,7 @@
               <li v-if="sturcDetail.vehicleModel"><span>车辆型号</span><span :title="sturcDetail.vehicleModel">{{sturcDetail.vehicleModel}}</span></li>
               <li v-if="sturcDetail.vehicleColor"><span>车辆颜色</span><span :title="sturcDetail.vehicleColor">{{sturcDetail.vehicleColor}}</span></li>
               <li v-if="sturcDetail.vehicleClass"><span>车辆类型</span><span :title="sturcDetail.vehicleClass">{{sturcDetail.vehicleClass}}</span></li>
-              <li v-if="sturcDetail.plateClass || sturcDetail.plateClass === 0 || sturcDetail.plateClass === '0'">
+              <li v-if="sturcDetail.plateNo && (sturcDetail.plateClass || sturcDetail.plateClass === 0 || sturcDetail.plateClass === '0')">
                 <span>车牌类型</span>
                 <span :title="sturcDetail.plateClass">{{dicFormater(45, sturcDetail.plateClass)}}</span>
               </li>
