@@ -396,7 +396,7 @@ html {font-size: 100px;}
   @media screen and (min-width: 1680px) and (max-width: 1919px) {html {font-size: 90px !important;}}
   @media screen and (min-width: 1920px) {html {font-size: 100px !important;} }
 .snap_dialog {
-  height: 100%;
+  /* height: 100%; */
   .struc_detail_dialog_comp {
     .el-dialog {
       max-width: 13.06rem;

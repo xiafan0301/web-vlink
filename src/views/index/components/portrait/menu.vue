@@ -36,7 +36,7 @@
       </router-link>
     </li>
     <li>
-      <router-link :to="{name: 'portrait_pfcm'}">
+      <router-link :to="{name: 'portrait_new_pfcm'}">
         <img src="../../../../assets/img/portrait_li_bg.png" alt="">
         <span class="ptt_li_icon vl_icon2 vl_icon2_106"></span>
         <span class="ptt_li_text">频繁出没</span>
