@@ -81,7 +81,7 @@
 </template>
 <script>
 import { validatePhone } from '@/utils/validator.js';
-import { createUser, getDepartmentList } from '@/views/index/api/api.manage.js';
+import { createUser, getDepartmentList, getAuthUserDetail } from '@/views/index/api/api.manage.js';
 import { getUserList, getUserDetail } from '@/views/index/api/api.user.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import {dataList } from '@/utils/data.js';
@@ -119,6 +119,7 @@ export default {
       userList: [], // 已有用户
       memberJobList: [], // 成员职位
       departmentList: [], // 部门列表
+      hasMember: false, // 该成员已存在
     }
   },
   mounted () {
@@ -128,6 +129,24 @@ export default {
     this.getList();
   },
   methods: {
+    //根据用户名查询该用户是否已存在某机构单位
+    judgeUserIsOrgan () {
+      const params = {
+        proKey: this.userInfo.proKey,
+        userMobile: this.addUser.userMobile
+      };
+      getAuthUserDetail (params)
+        .then(res => {
+          if (res && res.data) {
+            if (res.data.organList && res.data.organList.length > 0) {
+              this.hasMember = true;
+              
+            } else {
+              this.hasMember = false;
+            }
+          }
+        })
+    },
     // 获取已有用户,未关联单位的
     getList () {
       const params = {
@@ -156,37 +175,40 @@ export default {
     getDepartList () {
       const params = {
         'where.proKey': this.userInfo.proKey,
-        'where.organPid': this.$route.query.organObj.uid,
+        'where.organPid': JSON.parse(this.$route.query.organObj).uid,
         pageSize: 0
       };
       getDepartmentList(params)
         .then(res => {
           if (res) {
-            this.departmentList.push(this.$route.query.organObj);
+            this.departmentList.push(JSON.parse(this.$route.query.organObj));
             res.data.list.map(item => {
               this.departmentList.push(item);
             });
             this.departmentList.map(val => {
-              if (val.uid == this.$route.query.organObj.uid) {
+              if (val.uid == JSON.parse(this.$route.query.organObj).uid) {
                 this.addUser.organId = val.uid;
                 this.addUser.organName = val.organName;
               } 
             });
+
           }
         });
     },
     // 所属单位change
     handleDepartment (val) {
+      // this.judgeUserIsOrgan();
       this.departmentList.map(item => {
         if (item.uid === val) {
           this.addUser.organName = item.organName;
         }
-      })
+      });
     },
     // 成员账户change
     handleUserChange (val) {
       let userId = null;
       if (val) {
+        this.judgeUserIsOrgan();
         this.userList.map(item => {
           if (item.userMobile === val) {
             userId = item.uid;
@@ -245,6 +267,12 @@ export default {
     submitData (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
+          if (this.hasMember) {
+            if (!document.querySelector(".el-message")) {
+              this.$message.info("该成员已存在");
+            }
+            return;
+          }
           this.isAddLoading = true;
           createUser(this.addUser)
             .then(res => {

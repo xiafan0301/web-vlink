@@ -298,9 +298,9 @@ export default {
     });
     $('#app').css({ 'height': 'auto' });
     $('#app').css({ 'height': 'auto' });
-    $('title').text('车辆综合分析报告');
     this.pn = this.$route.query.pn;
     this.time = [this.$route.query.st, this.$route.query.et];
+    $('title').text('车辆综合分析报告 - ' + this.pn);
     this.initClgjMap();
     this.initYjcmMap();
     this.searchSubmit();
@@ -322,14 +322,14 @@ export default {
           this.rcList = data.inCityDtoList;
           this.ccList = data.outCityDtoList;
           this.yjcmList = data.analysisResultDto;
-          this.yjcmjlList = data.nightHauntConclusionList;
+          this.yjcmjlList = data.nightHauntConclusionDto;
           this.pfcmList = data.oftenCarAnalysisDtoList;
           this.tpcList = data.fakePlateResultDtoList;
           this.txclList =  data.tailBehindListForReportList; // 同行车
           this.clgjList = data.struVehicleDtoList;
           this.setMapMarkerForYjcm(); // 夜间出没
           this.setMapMarkerForClgj(); // 车辆轨迹
-          $('title').text('车辆侦察报告 - ' + this.clInfo.plateno);
+          // $('title').text('车辆侦察报告 - ' + this.clInfo.plateno);
           this.$nextTick(() => {
             this.$msgbox({
               title: '确认',
@@ -350,7 +350,7 @@ export default {
                     background: '#FFFFFF'   //如果导出的pdf为黑色背景，需要将导出的html模块内容背景 设置成白色。
                   };
                   pdf.addHTML($('#vehicle_report_save_c')[0], 0, 0, options, function () {
-                      pdf.save('车辆侦察报告_' + _this.clInfo.plateno + '_' +
+                      pdf.save('车辆侦察报告_' + _this.pn + '_' +
                         formatDate(params.startTime, 'yyyyMMdd') + '-'  + formatDate(params.endTime, 'yyyyMMdd') + '.pdf');
                   });
                   setTimeout(() => {
@@ -412,22 +412,37 @@ export default {
     },
     setMapMarkerForClgj () {
       let gjPath = [];
+      let ism = this.clgjList.length > 1;
       for (let i = 0; i < this.clgjList.length; i++) {
         // console.log('doMark', obj);
         let obj = this.clgjList[i];
+        let offset = [-20, -48];
+        let sClass = 'cl_report_gj';
         if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
+          // 起点
+          if (ism && i === 0) {
+            offset = [-40, -40];
+            sClass += ' cl_report_gj_qz cl_report_gj_q';
+          }
+          // 终点
+          if (ism && i === (this.clgjList.length - 1)) {
+            offset = [-40, -40];
+            sClass += ' cl_report_gj_qz cl_report_gj_z';
+          }
           let  sVideo = '';
           if (obj.storagePath) {
-            sVideo = '<div><img src="' + obj.storagePath + '" controls></img></div>';
+            /* sVideo = '<div><img class="bigImg" src="' + obj.storagePath + '" controls></img></div>' +
+              '<p>' + obj.shotTime + '</p>'; */
+            sVideo = '<p>' + obj.shotTime + '</p>';
           }
-          let marker = new window.AMap.Marker({ // 添加自定义点标记
+          new window.AMap.Marker({ // 添加自定义点标记
             map: this.clgjMap,
             position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-            offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
+            offset: new window.AMap.Pixel(offset[0], offset[1]), // 相对于基点的偏移位置
             draggable: false, // 是否可拖动
             // extData: obj,
             // 自定义点标记覆盖物内容
-            content: '<div title="' + obj.deviceName + '" class="cl_report_gj">' +
+            content: '<div title="' + obj.deviceName + '" class="' + sClass + '">' +
               sVideo +
               '</div>'
           });
@@ -757,6 +772,30 @@ export default {
     > img {
       width: 100%; height: 100%;
     }
+  }
+  > p {
+    position: absolute; bottom: 17px; left: 95%; z-index: 1;
+    width: 150px; height: 20px; line-height: 20px;
+    background-color: #0C70F8;
+    border-radius: 10px;
+    color: #fff; font-size: 12px;
+    text-align: center;
+    &:hover { z-index: 2; }
+  }
+  &.cl_report_gj_qz {
+    width: 80px; height: 80px;
+    > div {
+      bottom: -25px; left: 100%;
+    }
+    > p {
+      bottom: 27px; left: 100%;
+    }
+  }
+  &.cl_report_gj_q {
+    background: url(../../../../../assets/img/icons/icons_qd.png) center center no-repeat;
+  }
+  &.cl_report_gj_z {
+    background: url(../../../../../assets/img/icons/icons_zd.png) center center no-repeat;
   }
 }
 .cl_report_cm {

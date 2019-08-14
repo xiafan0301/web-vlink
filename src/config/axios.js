@@ -56,7 +56,7 @@ service.interceptors.response.use(function (response) {
       return null;
       // 未登录
       // ElementUI.Message({ message: _data.viewMsg, type: 'error', customClass: 'request_tip' });
-    } else if ( contenType === 'application/msexcel') {
+    } else if ( contenType === 'application/msexcel' || contenType === 'application/octet-stream;charset=UTF-8') {
       return _data;
     } else {
       let msg = '网络繁忙，请稍后重试！';

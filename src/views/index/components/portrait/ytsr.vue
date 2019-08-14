@@ -3,18 +3,24 @@
     <div class="">
       <div is="vlBreadcrumb"
            :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
-            {name: '以图搜人', routerName: 'portrait_ytsr_list'},
+            {name: '以图搜人', routerName: 'portrait_ytsr_moment'},
             {name: '搜索结果'}]">
       </div>
     </div>
     <div class="vl_j_left">
       <img :src="taskDetail.uploadImgUrls" alt="">
       <!--<img src="http://file.aorise.org/vlink/image/447e505b-03f9-4775-8416-68ca3f9e6ee5.jpg" alt="">-->
-      <div class="vl_ytsr_left_line">
-        <span>任务名称：</span>{{taskDetail ? taskDetail.taskName : ''}}
+      <div class="vl_ytsr_left_line" v-show="taskDetail.taskName">
+        <span>任务名称：</span>{{taskDetail.taskName}}
       </div>
       <div class="vl_ytsr_left_line">
         <span>相似度：</span>≥{{taskDetail ? taskDetail.minSemblance : 0}}%
+      </div>
+      <div class="vl_ytsr_left_line">
+        <span>基础信息库：</span>
+        <span>
+          <p v-for="item in taskDetail.portraitGroupName" :key="item.id">{{item}}</p>
+        </span>
       </div>
     </div>
     <div class="vl_s_right">
@@ -39,15 +45,6 @@
                   </div>
                 </div>
               </div>
-              <el-pagination
-                      v-show="pagination.total > 12"
-                      style="text-align: center"
-                      background
-                      @current-change="handleCurrentChange"
-                      :current-page="pagination.pageNum"
-                      layout="prev, pager, next"
-                      :total="pagination.total">
-              </el-pagination>
             </vue-scroll>
           </div>
         </template>
@@ -64,21 +61,21 @@
       top="4vh"
       :show-close="false">
       <div class="struc_tab">
-        <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">抓拍详情</span>
-        <span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>
-        <span :class="{'active': strucCurTab === 3}" @click="strucCurTab = 3">视频回放</span>
+        <span>检索详情</span>
+        <!--<span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>-->
+        <!--<span :class="{'active': strucCurTab === 3}" @click="strucCurTab = 3">视频回放</span>-->
         <i class="el-icon-close" @click="strucDetailDialog = false"></i>
       </div>
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.upPhotoUrl" alt="">
+            <img  class="bigImg" :src="sturcDetail.upPhotoUrl" alt="">
             <span>上传图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img">
-              <img :src="sturcDetail.photoUrl" alt="">
-              <span>布控库图</span>
+              <img class="bigImg" :src="sturcDetail.photoUrl" alt="">
+              <span>底库图</span>
             </div>
             <div class="struc_c_d_info">
               <h2>{{sturcDetail.name}}<div class="vl_jfo_sim" ><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? (sturcDetail.semblance*1).toFixed(2) : '0.00'}}<span style="font-size: 12px;">%</span></div></h2>
@@ -92,7 +89,7 @@
               <div class="struc_cdi_line">
                 <span>{{sturcDetail.idNo}}<i class="el-icon-postcard"></i></span>
               </div>
-              <div class="struc_cdi_line">
+              <div class="struc_cdi_line" v-show="sturcDetail.group">
                 <span>{{sturcDetail.group}}</span>
               </div>
               <div class="struc_cdi_line"></div>
@@ -100,21 +97,6 @@
             <span>布控库信息</span>
           </div>
         </div>
-        <!--<div v-show="strucCurTab === 2" class="struc_c_address"></div>-->
-        <!--<div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">-->
-          <!--<div class="struc_c_d_qj struc_c_d_img">-->
-            <!--<img :src="sturcDetail.subStoragePath" alt="">-->
-            <!--<span>抓拍图</span>-->
-          <!--</div>-->
-          <!--<div class="struc_c_d_box">-->
-            <!--<video id="capVideo" :src="sturcDetail.videoPath"></video>-->
-            <!--<div class="play_btn" @click="videoTap" v-show="!playing">-->
-              <!--<i class="vl_icon vl_icon_judge_01" v-if="playing"></i>-->
-              <!--<i class="vl_icon vl_icon_control_09" v-else></i>-->
-            <!--</div>-->
-          <!--</div>-->
-          <!--<div class="download_btn"><a download="视频" :href="videoUrl"></a>下载视频</div>-->
-        <!--</div>-->
       </div>
       <div class="struc-list">
         <swiper :options="swiperOption" ref="mySwiper">
@@ -131,7 +113,6 @@
         </swiper>
       </div>
     </el-dialog>
-    <div id="capMap"></div>
   </div>
 </template>
 <script>
@@ -139,6 +120,7 @@
   import { formatDate } from "@/utils/util.js";
   import noResult from '@/components/common/noResult.vue';
   import { getPeopleTaskDetail } from '@/views/index/api/api.analysis.js';
+  import { PortraitPostByphotoRealtime} from '@/views/index/api/api.portrait.js';
   let AMap = window.AMap;
   export default {
     components: {vlBreadcrumb, noResult},
@@ -175,9 +157,26 @@
       }
     },
     mounted () {
-      this.getDetail();
+      if (this.$route.query.uid) {
+        this.getDetail();
+      } else {
+        this.getTheList();
+      }
     },
     methods: {
+      // 获取实时
+      getTheList () {
+          PortraitPostByphotoRealtime(this.$route.query)
+            .then(sRes => {
+              if (sRes) {
+                this.$set(sRes.data, 'taskResult', JSON.parse(sRes.data.taskResult));
+                this.$set(sRes.data, 'taskWebParam', JSON.parse(sRes.data.taskWebParam));
+                console.log(sRes.data);
+                this.strucInfoList = sRes.data.taskResult;
+                this.taskDetail = sRes.data.taskWebParam;
+              }
+            })
+      },
       // 获取离线任务详情
       getDetail () {
         const id = this.$route.query.uid
@@ -188,7 +187,6 @@
                   this.$set(res.data, 'taskResult', JSON.parse(res.data.taskResult));
                   this.$set(res.data, 'taskWebParam', JSON.parse(res.data.taskWebParam));
                   // res.data.taskResult.push(...res.data.taskResult)
-                  this.pagination.total = res.data.taskResult ? res.data.taskResult.length : 0;
                   this.strucInfoList = res.data.taskResult;
                   this.taskDetail = res.data.taskWebParam;
                   console.log(res.data)
@@ -205,23 +203,6 @@
       imgListTap (data, index) {
         this.curImgIndex = index;
         this.sturcDetail = data;
-      },
-      handleCurrentChange (e) {
-        this.pagination.pageNum = e;
-        this.tcDiscuss(true);
-      },
-      videoTap () {
-        let vDom = document.getElementById('capVideo')
-        if (this.playing) {
-          vDom.pause();
-        } else {
-          vDom.play();
-        }
-        vDom.addEventListener('ended', (e) => {
-          e.target.currentTime = 0;
-          this.playing = false;
-        })
-        this.playing = !this.playing;
       }
     }
   }
@@ -271,11 +252,19 @@
       .vl_ytsr_left_line {
         color: #555555;
         margin-bottom: 20px;
+        display: flex;
         span {
-          width: 70px;
+          /*width: 70px;*/
           text-align: right;
-          display: inline-block;
+          display: block;
           color: #999999;
+          p {
+            color: #555555;
+            text-align: left;
+          }
+          &:first-child {
+            width: 85px;
+          }
         }
       }
     }
@@ -579,6 +568,10 @@
       .el-dialog {
         max-width: 13.06rem;
         width: 100%!important;
+        /* 祖先元素设置了transform属性则会导致固定定位属性position: fixed失效。 */
+        transform: none !important;
+        top: calc(100% - 8.8rem);
+        left: calc((100% - 13.06rem)/2);
       }
       .el-dialog__header {
         display: none;
@@ -587,7 +580,7 @@
         height: 1.16rem;
         padding: .3rem 0;
         position: relative;
-        color: #999999;
+        color: #333333;
         span {
           display: inline-block;
           margin-right: .55rem;

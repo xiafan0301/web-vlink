@@ -18,7 +18,7 @@
               style="width: 230px; vertical-align: top"
               default-time="00:00:00"
               type="datetime"
-              placeholder="选择日期时间">
+              placeholder="请选择开始时间">
           </el-date-picker>
         </div>
         <div class="jiesu">
@@ -31,13 +31,13 @@
               type="datetime"
               default-time="23:59:59"
               :picker-options="pickerOptions"
-              placeholder="选择日期时间">
+              placeholder="请选择结束时间">
           </el-date-picker>
         </div>
         <div class="kaishi">
           <el-input v-model.trim="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" clearable></el-input>
         </div>
-        <div class="kaishi">
+        <div class="kaishi" style="padding-top: 20px">
           <el-button style="width: 110px" @click="rester">重置</el-button>
           <el-button type="primary" style="width: 110px" @click="search" :loading="searchLoading">查询</el-button>
         </div>
@@ -67,7 +67,7 @@
               <div style="width: 70px; white-space:nowrap" class="smalltitle">
                 中文品牌：
               </div>
-              <div class="ttt-2">{{vehicleArch.vehicleBrand}}</div>
+              <div class="ttt-2">{{vehicleArch.brand}}</div>
             </div>
             <div>
               <div style="width: 70px; white-space:nowrap" class="smalltitle">
@@ -148,11 +148,12 @@
           <div class="th-ycxc-record">
             <div class="th-ycxc-record-list">
               <div class="list-box">
-                <div class="list-item" v-for="(item, index) in regulationsList" :key="item.vehicleDto.uid" @click="onOpenDetail(index)">
+                <div class="list-item" v-for="(item, index) in regulationsList" :key="item.uid" @click="onOpenDetail(index)">
                   <img :src="item.vehicleDto.subStoragePath" alt="">
                   <p class="time"><i></i>{{item.vehicleDto.shotTime}}</p>
                   <p class="address"><i></i>{{item.vehicleDto.deviceName}}</p>
-                  <p class="address1" style="color: red; padding-top: 5px"><i></i>{{item.fakeReason}}</p>
+                  <p class="address1" style="color: red; padding-top: 5px"><i></i>
+                    {{item.fakeReason}}</p>
                 </div>
                 <el-pagination
                     class="cum_pagination th-center-pagination"
@@ -328,7 +329,6 @@ export default {
         if(res && res.data) {
           this.regulationsList = res.data.list
           this.pagination.total = res.data.total
-          console.log(this.regulationsList)
           if (this.regulationsList.length === 0) {
             this.nodata = "抱歉，没有相关结果"
             this.showimgnull = false
@@ -377,6 +377,7 @@ export default {
         pageSize: 10,
         total: 0
       }, */
+      console.log(index)
       let params = {
         startDate: formatDate(this.value1),
         endDate: this.value2,
@@ -387,7 +388,7 @@ export default {
         params: params, // 查询参数
         list: this.regulationsList, // 列表
         index: index, // 第几个
-        pageSize: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize,
         total: this.pagination.total,
         pageNum: this.pagination.pageNum
       }

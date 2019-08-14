@@ -653,11 +653,48 @@ export function addVhicleVideoContinue(params) {
  */
 export function selectVideoContinue(params) {
   return request({
-    url: '/select/video/continue',
+    url: '/begin/video/continue',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+/**
+ * 终止或重新开始视频接力
+ * @param {object} params
+ */
+export function updVideoContinue(params) {
+  return request({
+    url: '/end/video/continue',
     method: 'get',
     params: params,
     mode: 'judge'
   })
 }
 
+/**
+ * 搜索视频接力详情
+ * @param {object} params
+ */
+export function getVideoContinue(params) {
+  return request({
+    url: '/query/video/continue',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
+
+/**
+ * 搜索视频接力详情
+ * @param {object} params
+ */
+export function getVideoContinueAllpointss(params) {
+  return request({
+    url: '/allpointss/video/continues',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
 

@@ -7,15 +7,12 @@
       </el-breadcrumb>
     </div>
     <div class="content_box">
-      <ul class="tab_ul">
-        <li :class="[isSelectTab === 1 ? 'is_active' : '']">基本信息</li>
-        <li :class="[isSelectTab === 2 ? 'is_active' : '']">联网信息</li>
-      </ul>
+      <p class="tab_p">{{isSelectTab === 1 ? '基本信息' : '联网信息'}}</p>
       <div class="basic_info" v-show="isSelectTab === 1">
         <vue-scroll>
           <el-form :model="cameraForm" :rules="rules" ref="cameraForm" label-width="100px" class="camera_form">
-            <el-form-item label="摄像头编码:" v-show="editId">
-              <p>{{editId}}</p>
+            <el-form-item label="摄像头编码:" v-show="deivceCodeId" style="margin-bottom:10px">
+              <span>{{deivceCodeId}}</span>
             </el-form-item>
             <el-form-item label="所属机构:" prop="dutyUnitId">
               <el-select
@@ -51,10 +48,10 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="摄像头序列号" prop="deviceSn">
+            <el-form-item label="摄像头序列号:" prop="deviceSn">
               <el-input v-model="cameraForm.deviceSn" placeholder="请输入摄像头序列号"></el-input>
             </el-form-item>
-            <el-form-item label="摄像头类型::" prop="type">
+            <el-form-item label="摄像头类型:" prop="type">
               <el-select v-model="cameraForm.type" placeholder="请选择摄像头类型" style="width: 100%">
                 <el-option
                   v-for="item in cameraTypeList"
@@ -151,7 +148,7 @@
                 </ul>
               </el-form-item>
               <el-form-item label="所在位置:" prop="address">
-                <el-cascader v-model="onlineForm.locationName" :options="options" ref="cascaderAddr" style="width:100%" @change="handleChangeAddress" clearable placeholder="请选择省/市/县/乡"></el-cascader>
+                <el-cascader v-model="onlineForm.locationName" :options="areaDataList" :props="areaProps" ref="cascaderAddr" style="width:100%" @change="handleChangeAddress" clearable placeholder="请选择省/市/县/乡"></el-cascader>
               </el-form-item>
               <el-form-item label="" prop="address">
                 <el-input v-model="onlineForm.address" placeholder="请输入详细地址" @blur="markAddress(onlineForm.address)"></el-input>
@@ -215,6 +212,7 @@ import { getDiciData } from '@/views/index/api/api.js';
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { mapXupuxian } from "@/config/config.js";
 import mapData from '@/config/mapdata.json';
+import { getAreaList } from '@/views/index/api/api.user.js';
 export default {
   components: { vlBreadcrumb },
   data () {
@@ -251,6 +249,7 @@ export default {
         password: null, // 密码
         rtspPort: null, // RTSP端口
         locationName: [],
+        areaId: null, // 区域id
         address: null, // 所在位置
       },
       rules: {
@@ -269,9 +268,9 @@ export default {
         maxPixel: [
           { required: true, message: '该项内容不可为空', trigger: 'blur' }
         ],
-        isActive: [
-          { required: true, message: '该项内容不可为空', trigger: 'blur' }
-        ]
+        // isActive: [
+        //   { required: true, message: '该项内容不可为空', trigger: 'blur' }
+        // ]
       },
       onlineRules: {
         deviceSip: [
@@ -333,11 +332,16 @@ export default {
           value: '朝西南'
         }
       ],
-      editId: null, // 要编辑的id
+      deivceCodeId: null, // 摄像头编码
       map: null, // 地图对象
       organList: [], // 机构单位
       // organList: [],
-      options: mapData,
+      // options: mapData,
+      areaProps: {
+        value: 'uid',
+        label: 'cname',
+        children: 'childList'
+      },
       geolocation: null, // 地图定位对象
       t: 1,
       locationName: null, //省市区
@@ -346,10 +350,12 @@ export default {
       importLevelList: [], // 级别
       manufacturerList: [], // 厂家
       maxPixelList: [], // 最大像素
+      areaDataList: [] // 省市区县数据列表
     }
   },
   created () {
     this.userInfo = this.$store.state.loginUser;
+    this.getAreaDataList();
     this.getDepartList();
     this.getIntelligentCharacList();
     this.getCameraTypeList();
@@ -362,14 +368,36 @@ export default {
     this.dataCameraStr = JSON.stringify(this.cameraForm); // 将初始数据转成字符串
     this.dataOnlineStr = JSON.stringify(this.onlineForm); // 将初始数据转成字符串
 
-    if (this.$route.query.id) {
-      this.cameraForm.uid = this.$route.query.id;
-
-      // this.onlineForm.locationName = [320000, 320200, 320206];
-      this.getDetail();
-    }
   },
   methods: {
+    // 获取省市区县信息
+    getAreaDataList () {
+      const pid = 1;
+      getAreaList(pid)
+        .then(res => {
+          if (res && res.data) {
+            const data = this.handleAreaData(res.data.childList);
+            this.areaDataList = data;
+
+            if (this.$route.query.id) {
+              this.cameraForm.uid = this.$route.query.id;
+              this.getDetail();
+            }
+          }
+        })
+    },
+    // 处理省市区县数据
+    handleAreaData (data) {
+      let _this =this;
+      data.forEach((val, index) => {
+        if (val.childList.length === 0) { // 当childList为[]时,删除childList
+          _this.$delete(val, 'childList');
+        } else {
+          _this.handleAreaData(val.childList);
+        }
+      })
+      return data;
+    },
     // 获取摄像头详情
     getDetail () {
       const id = this.$route.query.id;
@@ -380,7 +408,7 @@ export default {
               let obj = res.data;
               console.log('obj', obj)
 
-              this.editId = obj.uid;
+              this.deivceCodeId = obj.code;
 
               this.cameraForm.dutyUnitId = obj.dutyUnitId;
               this.cameraForm.dutyUserId = obj.dutyUserId;
@@ -402,17 +430,15 @@ export default {
               this.onlineForm.account = obj.account;
               this.onlineForm.password = obj.password;
               this.onlineForm.rtspPort = obj.rtspPort;
-              this.onlineForm.address = obj.address;
+              // this.onlineForm.address = obj.address;
               this.onlineForm.deviceSip = obj.deviceSip;
+              this.onlineForm.areaId = obj.areaId;
 
-              if (obj.location) {
-                let arr = [];
-                let location = obj.location.split(',');
-                location.map(val => {
-                 arr.push(parseInt(val));
-                })
-                this.onlineForm.locationName = arr;
-              }
+
+              const addr = this.getCascaderObj3(obj.areaId, this.areaDataList);
+              this.resAddress = addr && addr.map(m => m.cname).join('');
+              this.onlineForm.locationName = addr && addr.map(m => m.uid);
+              this.onlineForm.address = addr && obj.address.replace(addr.map(m => m.cname).join(''), '');
 
               if (obj.intelligentCharac) {
                 let arr = obj.intelligentCharac.split(',');
@@ -431,11 +457,9 @@ export default {
                 })
               }
               
-              
               if (this.$route.query.id) {
-                this.addMarker([this.onlineForm.longitude, this.onlineForm.latitude]);
+                this.markLocation(obj.address);
               }
-              console.log(this.onlineForm.locationName)
             }
           })
       }
@@ -593,18 +617,27 @@ export default {
     },
     // 所在位置change
     handleChangeAddress (value) {
-      this.$set(this.onlineForm,'address','');
-      let labels = this.$refs['cascaderAddr'].currentLabels;
-      console.log(labels,value)
-      if(labels && labels.length > 0) {
-        this.locationName = labels.join('');
-        this.markLocation(this.locationName);
-      } 
+      this.onlineForm.address = null;
+      const arr = this.getCascaderObj(this.onlineForm.locationName, this.areaDataList);
+      let str = arr.map(m => m.cname).join('');
+      this.resAddress = str;
+      if (this.onlineForm.address) str = str + this.onlineForm.address;
+      this.markLocation(str);
+
+    },
+    // 获得选中的级联对象列表
+    getCascaderObj(val, opt) {
+      return val.map(value => {
+        for (var itm of opt) {
+          if (itm.uid == value) { opt = itm.childList; return itm; }
+        }
+        return null;
+      });
     },
     //详细地址查询
     markAddress(val) {
       if(val) {
-        this.markLocation(this.locationName + val)
+        this.markLocation(this.resAddress + val);
       }
     },
     //根据地址搜索
@@ -729,7 +762,7 @@ export default {
             zoomToAccuracy: true //定位成功后调整地图视野范围使定位位置及精度范围视野内可见，默认：false
         });
         map.addControl(geolocation);
-        geolocation.getCurrentPosition();
+        // geolocation.getCurrentPosition();
         _this.geolocation = geolocation;
         window.AMap.event.addListener(geolocation, "error", onError); //返回定位出错信息
         function onError(data) {
@@ -811,18 +844,85 @@ export default {
       let _this = this;
       let geocoder = new window.AMap.Geocoder({
         city : "全国", //城市，默认：“全国”
-        radius : 1000 //范围，默认：500
       });
       geocoder.getAddress(lnglatXY, function(status, result) {
         if (status === 'complete' && result.info === 'OK') {
            _this.geocoder_CallBack(result);
-        }
+        } else {
+          //获取地址失败
+          _this.$message.error('没有获取到地址');
+        }
       });
     },
     // 地址回调
     geocoder_CallBack(data) {
-      let address = data.regeocode.formattedAddress; //返回地址描述
+      console.log('data', data)
+      const {province, city, district, township} = data.regeocode.addressComponent;
+      const adcode = data.regeocode.addressComponent.adcode;
+      const arr = [province, city, district];
+
+      const obj = this.getCascaderObj2(adcode, this.areaDataList);
+      if (!obj) return this.$message.warning('所选地址在卡口地址下拉列表中无可匹配项'); 
+      if (obj.hasOwnProperty('childList')) { // 若obj还有子级，则将township添加进去
+        arr.push(township);
+      }
+      this.resAddress = arr.join('');
+      const codeList = this.getCascaderObj3(adcode, this.areaDataList, township); // 根据省市区县回填省市区级联
+
+      this.onlineForm.locationName = codeList && codeList.map(m => m.uid);
+
+      let address = data.regeocode.formattedAddress.replace(arr.join(''), ''); //返回地址描述
+
       this.onlineForm.address = address;
+    },
+    // 根据adcode找寻它所属对象
+    getCascaderObj2 (val, list) {
+      let result = null;
+      let fun = (val, list) => {
+        try {
+          list.forEach(a => {
+            if (a.uid == val) {
+              result = a;
+              foreach.break = new Error("找到了就跳出循环");  
+            } else {
+              if (a.hasOwnProperty('childList')) {
+                fun(val, a.childList);
+              }
+            }
+          })
+        } catch(e) {
+
+        }
+      }
+      fun(val, list);
+      console.log('result', result)
+      return result;
+    },
+    // 回填级联时，根据详情返回的areaId，找到其所有的上级和下级
+    getCascaderObj3 (val, list, township) {
+      const obj = this.getCascaderObj2(val, list);
+      if (!obj) return null;
+      let res = [obj];
+      if (obj.hasOwnProperty('childList') && township) {
+        const _obj = obj.childList.find(c => c.cname === township);
+        res.unshift(_obj);
+      }
+      let func = (val, opt) => {
+        opt.forEach(f => {
+          if (f.uid == val) { 
+            res.push(f);
+            if (f.parentUid !== '1') {
+              func(f.parentUid, list);
+            }
+          } else {
+            if (f.hasOwnProperty('childList')) {
+              func(val, f.childList);
+            }
+          }
+        })
+      }
+      func(obj.parentUid, list);
+      return res.reverse();
     },
     // 提交数据
     submitData (form) {
@@ -850,6 +950,9 @@ export default {
           if (!this.$route.query.id) {
             this.$delete(this.cameraForm, 'uid');
           }
+          this.onlineForm.areaId = this.onlineForm.locationName[this.onlineForm.locationName.length - 1];
+           this.onlineForm.address = this.resAddress + this.onlineForm.address;
+          console.log('this.onlineForm.address', this.onlineForm.address)
           const params = {
             ...this.cameraForm,
             ...this.onlineForm,
@@ -899,8 +1002,6 @@ export default {
       this.$refs[form].validate(valid => {
         if (valid) {
           this.isSelectTab = 2;
-          console.log('cameraForm', this.cameraForm)
-          console.log('onlineForm', this.onlineForm)
         }
       })
     },
@@ -920,22 +1021,25 @@ export default {
     height: calc(100% - 80px - 65px);
     background-color: #ffffff;
     margin: 0 20px;
-    .tab_ul {
+    .tab_p {
       width: 100%;
       border-bottom: 1px solid #F2F2F2;
-      display: flex;
       height: 55px;
       line-height: 55px;
-      >li {
-        margin: 0 15px;
-        color: #333333;
-        font-size: 16px;
-        cursor: pointer;
-      }
-      .is_active {
-        color: #0C70F8;
-        border-bottom: 2px solid #0C70F8;
-      }
+      color: #333333;
+      font-size: 16px;
+      font-weight: bold;
+      padding: 0 15px;
+      // >li {
+      //   margin: 0 15px;
+      //   color: #333333;
+      //   font-size: 16px;
+      //   cursor: pointer;
+      // }
+      // .is_active {
+      //   color: #0C70F8;
+      //   border-bottom: 2px solid #0C70F8;
+      // }
     }
     .basic_info {
       height: calc(100% - 55px);

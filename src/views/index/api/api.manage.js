@@ -182,6 +182,18 @@ export function createUser (data) {
   });
 }
 /**
+ * 获取用户详细信息
+ * @param {*} data
+ */
+export function getAuthUserDetail (params) {
+  return request({
+    url: 'authServices/users/userDetailInfo',
+    params,
+    mode: 'auth',
+    method: 'get'
+  });
+}
+/**
  * 获取用户组
  * @param {*} data
  */
@@ -862,6 +874,17 @@ export function vehicleExport (params) {
   });
 }
 /**
+ * 特殊车辆模板下载
+ * @param {*} data
+ */
+export function downloadVehicleModel() {
+  return request({
+    url: '/vehicle-special/template',
+    responseType: 'blob',
+    method: 'get'
+  });
+}
+/**
  * 车辆品牌数据获取
  * @param {*} data
  */
@@ -882,3 +905,4 @@ export function getVehicleModel (brands) {
     method: 'get'
   });
 }
+  

@@ -445,7 +445,6 @@ export default {
     },
     uploadPicFileList (fileList) {
       this.fileList = fileList;
-      console.log(this.fileList, 'fileList')
     },
     // 弹出从库中选择框
     popSel () {
@@ -484,7 +483,6 @@ export default {
           }
         })
         this.fileList = this.fileList.concat(fileList);
-        console.log(this.fileList, 'this.fileList')
       }
       this.createSelDialog = false;
     },
@@ -993,7 +991,6 @@ export default {
     },
     // 地图标记 data:摄像头数据/卡口数据
     mapMark (data, selBayList, type) {
-      console.log(data, 'data')
       let _this = this, _hoverWindow = null, areaName = null, markerList = [];
       // 卡口
       if (data.length > 0 && data[0].type === 2) {
@@ -1028,7 +1025,6 @@ export default {
             }
           }
           let _marker = new window.AMap.Marker({ // 添加自定义点标记
-            map: _this.map,
             position: [_obj.longitude, _obj.latitude],
             offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
             draggable: false, // 是否可拖动
@@ -1214,7 +1210,6 @@ export default {
         _position = [lngLat.lng, lngLat.lat];
       }
       _marker = new window.AMap.Marker({ // 添加自定义点标记
-        map: _this.map,
         position: _position,
         offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
         draggable: false, // 是否可拖动
@@ -1248,7 +1243,6 @@ export default {
           f.tid = index + 1;
           f.address = f.trackPointName = `范围00${index + 1}`;
         })
-        console.log( _this.trackPointList)
         // 把覆盖物内的设备置为未选中
         for (let f of _obj[0].devList) {
           // 如果该设备还存在于其他覆盖物中，跳过此操作
@@ -1418,7 +1412,6 @@ export default {
             result.tips.forEach(f => {
               f.name = `${f.name}(${f.district})`;
             })
-            console.log(result.tips)
             cb(result.tips);
           } else {
             cb([]);
@@ -1432,7 +1425,6 @@ export default {
         this.$message.error('无法获取到经纬度！');
         return;
       }
-      console.log(e, 'eeeee')
       this.markLocation(e.location.lng, e.location.lat, e.address, this.pointIndex);
     },
      // 添加追踪点
@@ -1538,7 +1530,6 @@ export default {
       let offSet = [-20.5, -70], pointId = index + '_' + random14(), marker = null;
       if (lng > 0 && lat > 0) {
         marker = new window.AMap.Marker({ // 添加自定义点标记
-          map: _this.map,
           position: [lng, lat],
           offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
           draggable: false, // 是否可拖动
@@ -1559,7 +1550,6 @@ export default {
           }
         });
         marker.setMap(_this.map);
-        console.log(_this.trackPointData, '_this.trackPointData')
         _this.trackPointData = _this.trackPointData.filter(f => f.marker.getPosition().lng != lng && f.marker.getPosition().lat != lat);// 切换设备特性筛选时，过滤掉相同的追踪点marker
         _this.trackPointData.splice(index, 0, {marker, index, address});
         _this.lnglat = [lng, lat];

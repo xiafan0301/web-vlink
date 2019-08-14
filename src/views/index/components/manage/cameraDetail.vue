@@ -11,26 +11,26 @@
         <div class="top">
           <i class="vl_icon vl_icon_event_4"></i>
           <span class="name">{{detailInfo.deviceName}}</span>
-          <span class="status online-status">在线</span>
+          <span class="status" :class="[detailInfo.deviceStatusStr === '正常' ? 'online-status' : 'offline-status']" v-show="detailInfo.deviceStatusStr">{{detailInfo.deviceStatusStr}}</span>
         </div>
         <p class="create_time">创建于{{detailInfo.createTime}}，最近更新于{{detailInfo.updateTime}}</p>
       </div>
       <div class="basic_info">
         <p class="title_p">基本信息</p>
         <ul class="basic_info_ul">
-          <li>
+          <li :title="detailInfo.code">
             <span>摄像头编码：</span>
-            <span>{{detailInfo.uid ? detailInfo.uid : '无'}}</span>
+            <span>{{detailInfo.code ? detailInfo.code : '无'}}</span>
           </li>
           <li>
             <span>所属机构：</span>
             <span>{{detailInfo.dutyUnitName ? detailInfo.dutyUnitName : '无'}}</span>
           </li>
-          <li>
+          <li :title="detailInfo.deviceSeq">
             <span>摄像头编号：</span>
             <span>{{detailInfo.deviceSeq ? detailInfo.deviceSeq : '无'}}</span>
           </li>
-          <li>
+          <li :title="detailInfo.typeStr">
             <span>摄像头类型：</span>
             <span>{{detailInfo.typeStr ? detailInfo.typeStr : '无'}}</span>
           </li>
@@ -38,7 +38,7 @@
             <span>厂商：</span>
             <span>{{detailInfo.manufacturerStr ? detailInfo.manufacturerStr : '无'}}</span>
           </li>
-          <li>
+          <li :title="detailInfo.deviceSn">
             <span>摄像头序列号：</span>
             <span>{{detailInfo.deviceSn ? detailInfo.deviceSn : '无'}}</span>
           </li>
@@ -46,7 +46,7 @@
             <span>最大像素：</span>
             <span>{{detailInfo.maxPixelStr ? detailInfo.maxPixelStr : '无'}}</span>
           </li>
-          <li>
+          <li :title="detailInfo.intelligentCharac">
             <span>智能特性：</span>
             <span>{{detailInfo.intelligentCharac ? detailInfo.intelligentCharac : '无'}}</span>
           </li>
@@ -63,20 +63,19 @@
       <div class="online_info">
         <p class="title_p">联网信息</p>
         <ul class="online_info_ul">
-          <li>
+          <li :title="detailInfo.deviceSip">
             <span>SIP编号：</span>
             <span>{{detailInfo.deviceSip ? detailInfo.deviceSip : '无'}}</span>
           </li>
-          
-          <li>
-            <span>RTSP端口：</span>
-            <span>{{detailInfo.rtspPort ? detailInfo.rtspPort : '无'}}</span>
+          <li :title="detailInfo.deviceCode">
+            <span>视频接入编码：</span>
+            <span>{{detailInfo.deviceCode ? detailInfo.deviceCode : '无'}}</span>
           </li>
-          <li>
+          <li :title="detailInfo.viewClassCode">
             <span>结构化设备编码：</span>
             <span>{{detailInfo.viewClassCode ? detailInfo.viewClassCode : '无'}}</span>
           </li>
-          <li>
+          <li :title="detailInfo.ipAddress">
             <span>IP：</span>
             <span>{{detailInfo.ipAddress ? detailInfo.ipAddress : '无'}}</span>
           </li>
@@ -84,15 +83,15 @@
             <span>重要级别：</span>
             <span>{{detailInfo.importantLevelStr ? detailInfo.importantLevelStr : '无'}}</span>
           </li>
-           <li>
-            <span>视频接入编码：</span>
-            <span>{{detailInfo.deviceCode ? detailInfo.deviceCode : '无'}}</span>
+          <li>
+            <span>经纬度：</span>
+            <span>{{detailInfo.longitude}},{{detailInfo.latitude}}</span>
           </li>
           <!-- <li>
             <span>经纬度：</span>
             <span>经度{{detailInfo.longitude}},纬度{{detailInfo.latitude}}</span>
           </li> -->
-          <li class="position">
+          <li class="position" :title="detailInfo.address">
             <span>所在位置：</span>
             <span>{{detailInfo.address ? detailInfo.address : '无'}}</span>
           </li>
@@ -104,10 +103,11 @@
             <span>密码：</span>
             <span>{{detailInfo.password ? detailInfo.password : '无'}}</span>
           </li>
-           <li class="position">
-            <span>经纬度：</span>
-            <span>经度{{detailInfo.longitude}},纬度{{detailInfo.latitude}}</span>
+           <li>
+            <span>RTSP端口：</span>
+            <span>{{detailInfo.rtspPort ? detailInfo.rtspPort : '无'}}</span>
           </li>
+          
           <!-- <li class="position">
             <span>视频接入编码：</span>
             <span>{{detailInfo.deviceCode}}</span>
@@ -137,7 +137,7 @@
       </div>
     </el-dialog>
     <div class="video_box" v-if="isShowMonitor">
-      <div  is="flvplayer" class="vl_map_video_box"  @playerClose="playerClose" :oData="oData" :showFullScreen="true"></div>
+      <div is="flvplayer" class="vl_map_video_box" @playerClose="playerClose" :oData="oData" :showFullScreen="true"></div>
     </div>
   </div>
 </template>
@@ -318,6 +318,9 @@ export default {
           width: 25%;
           height: 30px;
           line-height: 30px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
           span:first-child {
             min-width: 100px;
             text-align: right;
@@ -362,10 +365,8 @@ export default {
   z-index: 99999;
 }
 .vl_map_video_box {
-  // position: fixed!important;
   width: 100%;
   height: 100%;
-  // top: 0!important;
 }
 </style>
 <style lang="scss">

@@ -15,12 +15,12 @@
         <i class="el-icon-close" @click="strucDetailDialog = false"></i>
       </div>
       <div class="struc_main">
-        <div v-show="strucCurTab === 1" class="struc_c_detail">
-          <ul>
+        <ul v-show="strucCurTab === 1">
           <!-- <li><span>抓拍设备：{{sturcDetail.deviceName}}</span></li> -->
           <li><span style="line-height: 0.24rem;">抓拍地址：{{sturcDetail.address}}</span></li>
           <li style="color: #999;line-height: 0.24rem;">{{sturcDetail.shotTime}}</li>
         </ul>
+        <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
             <img :src="sturcDetail.subStoragePath" class="bigImg" />
             <span>抓拍图</span>
@@ -135,14 +135,13 @@
                   <span>{{sturcDetail.sex+" "+(sturcDetail.age || "")+ " " + (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+" "+ (sturcDetail.baby || "")+ " " + (sturcDetail.bag || "") + " "+(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")+ " " + (sturcDetail.bottomColor || "") +(sturcDetail.bottomType || "")}}</span>
                 </p>
               </div> -->
-              <div class="struc_cdi_line"></div>
                 </vue-scroll>
               </div>
             </div>
-            <span>抓拍信息</span>
+            <!-- <span>抓拍信息</span> -->
           </div>
-          <div class="operate_btn" @click="spinToRecog()">身份确认</div>
-          <div class="operate_btn margin_btn" @click="spinToGJFX()">轨迹分析</div>
+          <!-- <div class="operate_btn" @click="spinToRecog()">身份确认</div> -->
+          <div class="operate_btn" @click="spinToGJFX()">轨迹分析</div>
           <div class="operate_btn margin_btn" @click="spinToLJD()">落脚点分析</div>
           <div class="operate_btn margin_btn" @click="spinToControl()">新建布控</div>
         </div>
@@ -390,6 +389,12 @@ export default {
 };
 </script>
 <style lang="scss">
+html {font-size: 100px;}
+  @media screen and (min-width: 960px) and (max-width: 1119px) {html {font-size: 60px !important;}}
+  @media screen and (min-width: 1200px) and (max-width: 1439px) {html {font-size: 70px !important;}}
+  @media screen and (min-width: 1440px) and (max-width: 1679px) {html {font-size: 80px !important;}}
+  @media screen and (min-width: 1680px) and (max-width: 1919px) {html {font-size: 90px !important;}}
+  @media screen and (min-width: 1920px) {html {font-size: 100px !important;} }
 .snap_dialog {
   height: 100%;
   .struc_detail_dialog_comp {
@@ -424,7 +429,7 @@ export default {
       }
     }
     .struc_main {
-      width: 11.46rem;
+      width: 12rem;
       height: 4.88rem;
       margin: 0 auto;
       border-bottom: 1px solid #f2f2f2;
@@ -625,11 +630,13 @@ export default {
             float: left;
           }
           .struc_cdi_content {
-            height: 2.65rem;
+            height: 2.75rem;
+            display: flex;
+            flex-wrap: wrap;
           }
           .struc_c_d_info {
             width: calc(100% - 3.6rem);
-            padding-left: 0.24rem;
+            padding-left: 0.2rem;
             color: #333333;
             h2 {
               font-weight: bold;
@@ -677,13 +684,16 @@ export default {
               }
             }
             .struc_cdi_line {
+              flex: none;
+              width: 50%;
+              display: inline-block;
               p {
                 max-width: 100%;
                 overflow: hidden;
                 display: table;
-                min-height: 30px;
+                min-height: .3rem;
                 margin-bottom: 0.08rem;
-                padding-right: 10px;
+                padding-right: .08rem;
                 margin-right: 0.08rem;
                 border: 1px solid #f2f2f2;
                 border-radius: 3px;
@@ -693,8 +703,7 @@ export default {
                   background: #fafafa;
                   color: #999;
                   font-weight: normal;
-                  padding-right: 10px;
-                  padding-left: 10px;
+                  text-align: center;
                   display: table-cell;
                   vertical-align: middle;
                   border-right: 1px solid #f2f2f2;
@@ -702,12 +711,12 @@ export default {
                 >span {
                   display: table-cell;
                   vertical-align: middle;
-                  padding-left: 5px;
+                  padding-left: .08rem;
                 }
               }
             }
           }
-          &:before {
+         /*  &:before {
             display: block;
             content: "";
             position: absolute;
@@ -726,7 +735,7 @@ export default {
             transform: rotate(-45deg);
             border: 0.4rem solid #ffffff;
             border-color: transparent transparent transparent #ffffff;
-          }
+          } */
           > span {
             display: block;
             position: absolute;

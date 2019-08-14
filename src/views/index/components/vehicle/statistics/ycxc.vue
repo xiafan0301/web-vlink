@@ -188,7 +188,7 @@ import { getNightVehicleList, exportNightVehicle } from "@/views/index/api/api.j
 import { getGroupListIsVehicle } from '@/views/index/api/api.control.js';
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
-import { objDeepCopy, formatDate, autoDownloadUrl } from "@/utils/util.js";
+import { objDeepCopy, formatDate, autoDownloadUrl, dateOrigin } from "@/utils/util.js";
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import noResult from '@/components/common/noResult.vue';
 export default {
@@ -398,14 +398,14 @@ export default {
     setDTime() {
       let date = new Date();
       let curDate = date.getTime();
-      let curS = 1 * 24 * 3600 * 1000;
+      // let curS = 1 * 24 * 3600 * 1000;
       
-      let year = new Date(curDate - curS).getFullYear();
+      let year = new Date(curDate).getFullYear();
 
-      let month = new Date(curDate - curS).getMonth() + 1;// 月
+      let month = new Date(curDate).getMonth() + 1;// 月
       if (month < 10) { month = '0' + month; }
       
-      let day = new Date(curDate - curS).getDate();// 日
+      let day = new Date(curDate).getDate();// 日
       if (day < 10) { day = '0' + day; }
       let _s = year + '-' + month + '-' + day;
 
@@ -450,6 +450,8 @@ export default {
       this.queryForm.surveillanceIds = surveillanceIds;
       this.queryForm.vehicleTypes = vehicleTypes;
 
+      this.pagination.pageNum = this.$route.query.pageNum;
+      this.pagination.pageSize = this.$route.query.pageSize;
     },
     // 获取布控车辆
     getControlVehicleList () {
@@ -692,22 +694,13 @@ export default {
       console.log('this.selectCameraArr', this.selectCameraArr)
       console.log('this.selectBayonetArr', this.selectBayonetArr)
       if (this.selectCameraArr && this.selectCameraArr.length > 0) {
-        console.log('mmmmmm')
         let cameraIds = this.selectCameraArr.map(res => res.id);
         this.queryForm.cameraIds = cameraIds.join(",");
       }
       if (this.selectBayonetArr && this.selectBayonetArr.length > 0) {
-        console.log('nnnnnnn')
         let bayonentIds = this.selectBayonetArr.map(res => res.id);
         this.queryForm.bayonetIds = bayonentIds.join(",");
       }
-
-
-      // if (!this.dateChange()) {
-      //   this.searchLoading = false;
-      //   return;
-      // }
-
       if (!this.validatorShotTimes(this.queryForm.minShotTimes)) {
         this.searchLoading = false;
         return false;

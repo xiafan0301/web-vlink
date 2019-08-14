@@ -90,7 +90,13 @@
               <div class="sd-opts">
                 <div class="sd-opts-title">
                   <h4>区域选择</h4>
-                  <i class="vl_icon vl_icon_portrait_02" title="定位当前选中区域" @click="setFitV(index)"></i>
+                  <i
+                    class="vl_icon vl_icon_portrait_02"
+                    v-if="item.canPosition"
+                    title="定位当前选中区域"
+                    @click="setFitV(index)"
+                  ></i>
+                  <i class="vl_icon vl_icon_portrait_02 cannot_click" v-else></i>
                 </div>
                 <ul>
                   <li title="选择矩形范围内的设备">
@@ -151,6 +157,7 @@
                     :clearable="false"
                     value-format="yyyy-MM-dd HH:mm:ss"
                     :picker-options="startDateOptArr[index]"
+                    :time-arrow-control="true"
                     placeholder="开始时间"
                     class="width232 vl_date"
                   ></el-date-picker>
@@ -160,9 +167,9 @@
                     v-model="item.endTime"
                     :clearable="false"
                     :picker-options="endDateOptArr[index]"
+                    :time-arrow-control="true"
                     value-format="yyyy-MM-dd HH:mm:ss"
                     type="datetime"
-                    default-time="23:59:59"
                     placeholder="结束时间"
                     class="width232 vl_date vl_date_end"
                   ></el-date-picker>
@@ -359,10 +366,9 @@
 </template>
 <script>
 import vlBreadcrumb from "@/components/common/breadcrumb.vue";
-
 import swiper from "vue-awesome-swiper";
 import { mapXupuxian } from "@/config/config.js";
-import { formatDate } from "@/utils/util.js";
+import { formatDate, dateOrigin } from "@/utils/util.js";
 import {
   getAllMonitorList,
   getAllBayonetList
@@ -523,13 +529,10 @@ export default {
           polyline: {},
           polygon: {},
           circle10km: {},
-          startTime:
-            formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
-            " 00:00:00",
-          endTime:
-            formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
-            " 23:59:59",
-          drawActiveType: 0 // 当前活跃的选中区域
+          startTime: formatDate(dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000))),
+          endTime: formatDate(new Date().getTime()),
+          drawActiveType: 0, // 当前活跃的选中区域
+          canPosition: false // 是否可以定位
         }
       ],
       zIndex: 50,
@@ -643,13 +646,10 @@ export default {
           polyline: {},
           polygon: {},
           circle10km: {},
-          startTime:
-            formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
-            " 00:00:00",
-          endTime:
-            formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
-            " 23:59:59",
-          drawActiveType: 0 // 当前活跃的选中区域
+          startTime: formatDate(dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000))),
+          endTime: formatDate(new Date().getTime()),
+          drawActiveType: 0, // 当前活跃的选中区域
+          canPosition: false
         }
       ];
       this.startDateOptArr = [
@@ -807,7 +807,12 @@ export default {
           }
         }
         queryParams = {
-          ...this.qyryfxFrom,
+          sex: this.qyryfxFrom.sex,
+          age: this.qyryfxFrom.age !== "" ? this.qyryfxFrom.age.join() : "",
+          personGroupId:
+            this.qyryfxFrom.personGroupId !== ""
+              ? this.qyryfxFrom.personGroupId.join()
+              : "",
           deviceCode: device.viewClassCode,
           startTime: timeArr
             .map(item => {
@@ -821,6 +826,13 @@ export default {
             .join()
         };
       }
+
+      const loading = this.$loading({
+        lock: true,
+        text: "获取摄像头信息中。。。",
+        spinner: "el-icon-loading",
+        background: "rgba(0, 0, 0, 0.7)"
+      });
       getShotNumAreaDetail(queryParams)
         .then(res => {
           if (res && res.data) {
@@ -838,12 +850,15 @@ export default {
                 item.currentIndex = 0;
               }
             }
+            loading.close();
           } else {
             this.cameraPhotoList = [];
+            loading.close();
           }
         })
         .catch(() => {
           this.cameraPhotoList = [];
+          loading.close();
         });
     },
     /*处理删除或者添加一个时间区域*/
@@ -897,13 +912,10 @@ export default {
           polyline: {},
           polygon: {},
           circle10km: {},
-          startTime:
-            formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
-            " 00:00:00",
-          endTime:
-            formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
-            " 23:59:59",
-          drawActiveType: 0 // 当前活跃的选中区域
+          startTime: formatDate(dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000))),
+          endTime: formatDate(new Date().getTime()),
+          drawActiveType: 0, // 当前活跃的选中区域
+          canPosition: false
         }
       ];
     },
@@ -940,7 +952,7 @@ export default {
     // 地图定位
     resetZoom() {
       if (this.amap) {
-        this.amap.setZoomAndCenter(14, this.mapCenter);
+        this.amap.setFitView();
       }
     },
     // 地图缩放
@@ -970,9 +982,9 @@ export default {
         // event.obj 为绘制出来的覆盖物对象
         let _sid = random14();
         this.drawClear(this.currenDrawobj);
-        // console.log('监听鼠标');
         //  return
         let drawActive = this.drawObj[this.currenDrawobj].drawActiveType; // 获取到当前要画的图形
+        this.drawObj[this.currenDrawobj].canPosition = true;
         if (drawActive === 1) {
           this.drawObj[this.currenDrawobj].rectangle[_sid] = {};
           this.drawObj[this.currenDrawobj].rectangle[_sid].obj = event.obj;
@@ -1312,7 +1324,6 @@ export default {
         this.drawObj[index].drawActiveType = drawType; // 当前要画的图形类别
         this.currenDrawobj = index; // 确定当前的时间区域
       }
-      // console.log("点击干掉", this.drawObj[this.currenDrawobj].drawActiveType);
       if (drawType === 1) {
         // 矩形
         this.drawRectangle();
@@ -2242,12 +2253,13 @@ export default {
         // 搜索条件
         .search_condition {
           .condition_title {
-            line-height: 50px;
+            // line-height: 50px;
             color: #666666;
             text-indent: 8px;
+            padding: 20px 0 10px 0;
           }
           .condition {
-            padding-bottom: 12px;
+            padding-bottom: 10px;
           }
         }
       }
@@ -2296,6 +2308,9 @@ export default {
               border-bottom: 1px solid #d3d3d3;
               > i {
                 cursor: pointer;
+              }
+              .cannot_click {
+                cursor: not-allowed;
               }
             }
             > ul {

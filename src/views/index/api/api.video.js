@@ -331,6 +331,18 @@ export const updateVideoRoundState = (data) => {
 }
 
 /**
+ * 判断轮巡名称是否重复接口
+ * @param {Object} data 接口入参
+ */
+export const judgeRoundName = (name) => {
+  return request({
+    url: '/round/check-round-name/' + name,
+    method: 'get',
+    mode: videoModeName
+  })
+}
+
+/**
  * 视频录像开始接口
  * @param {Object} data 接口入参
  */

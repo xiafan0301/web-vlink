@@ -27,7 +27,7 @@
               <i class="vl_icon vl_icon_portrait_rlsjfx_03"></i>
               <div>
                 <p>男性:女性</p>
-                <h1>{{rlsjfxDetail.malePerInSur}}:{{rlsjfxDetail.femalePerInSur}}</h1>
+                <h1>{{rlsjfxDetail.malePerInSur}}&nbsp;:&nbsp;{{rlsjfxDetail.femalePerInSur}}</h1>
               </div>
             </div>
             <div class="item">
@@ -65,7 +65,7 @@
               <i class="vl_icon vl_icon_portrait_rlsjfx_03"></i>
               <div>
                 <p>男性:女性</p>
-                <h1>{{rlsjfxDetail.malePerInBase}}:{{rlsjfxDetail.femalePerInBase}}</h1>
+                <h1>{{rlsjfxDetail.malePerInBase}}&nbsp;:&nbsp;{{rlsjfxDetail.femalePerInBase}}</h1>
               </div>
             </div>
             <div class="item">
@@ -85,13 +85,14 @@
             <span @click="skipPortraitSearch">查看更多></span>
           </div>
           <div class="face_snap_form">
-            <div ref="devSelect" is="devSelect" @sendSelectData="getSelectData" @allSelectLength="allSelectLength"></div>
+            <div ref="devSelect" is="devSelect" :flag="1" @sendSelectData="getSelectData" @allSelectLength="allSelectLength"></div>
+            <!-- @change="validationDate(faceSnapForm)" -->
             <el-date-picker
               class="vl_date"
               :clearable="false"
               v-model="faceSnapForm.queryDate"
-              @change="validationDate(faceSnapForm)"
               type="daterange"
+              :picker-options="pickerOptions"
               range-separator="至"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
@@ -111,9 +112,9 @@
                 popper-class="five_info"
                 trigger="hover">
                 <div>
-                  <h1>抓拍人脸数TOP5</h1>
+                  <h1>抓拍人脸数<span>TOP5</span></h1>
                   <ul>
-                    <li v-for="(item,index) in faceSnapSta.device" :key="index"><span>{{item.name}}</span><span>{{item.total}}张</span></li>
+                    <li v-for="(item,index) in faceSnapSta.device" :key="index"><span :title="item.name">{{item.name | strCutWithLen(15)}}</span><span>{{item.total}}张</span></li>
                   </ul>
                 </div>
                 <span slot="reference" class="five">TOP5</span>
@@ -130,12 +131,13 @@
             <h1>人脸布控告警数据分析</h1>
             <span @click="skipHistoryAlarm">查看更多></span>
           </div>
+          <!-- @change="validationDate(faceControlQueryDate)" -->
           <div class="face_control_form">
             <el-date-picker
               :clearable="false"
               class="vl_date"
+              :picker-options="pickerOptions"
               v-model="faceControlQueryDate"
-              @change="validationDate(faceControlQueryDate)"
               type="daterange"
               range-separator="至"
               start-placeholder="开始日期"
@@ -158,23 +160,27 @@
       <div>
         <div class="box chart_box">
           <h1>各时间段的抓拍人脸数</h1>
-          <p>人脸抓拍数(张)</p>
-          <div id="faceNumContainer"></div>
+          <p v-if="chartData1.length > 0">人脸抓拍数(张)</p>
+          <div id="faceNumContainer">
+            <span v-if="chartData1.length === 0">暂无数据</span>
+          </div>
         </div>
       </div>
       <div>
         <div class="box chart_box">
           <h1>各时间段人脸布控的告警次数</h1>
-          <p>告警次数(次)</p>
-          <div id="alarmNumContainer"> </div>
+          <p v-if="chartData2.length > 0">告警次数(次)</p>
+          <div id="alarmNumContainer">
+            <span v-if="chartData2.length === 0">暂无数据</span>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
 <script>
-let startTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss'); //默认开始时间为当前时间前一天
-let endTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() + (24 * 60 * 60 * 1000 - 1) + 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss');//默认结束时间为开始时间后第三天
+let startTime = formatDate(new Date(new Date(new Date().toLocaleDateString())).getTime() - 24*60*60*1000, 'yyyy-MM-dd HH:mm:ss');
+let endTime = formatDate(new Date(new Date(new Date().toLocaleDateString())).getTime() - 1, 'yyyy-MM-dd HH:mm:ss');
 import vehicleBreadcrumb from './breadcrumb.vue';
 import devSelect from '@/components/common/devSelect.vue';
 import G2 from '@antv/g2';
@@ -228,6 +234,11 @@ export default {
         faceNums: '',
         peakValues: '',
         timeDto: []
+      },
+      pickerOptions: {
+        disabledDate (time) {
+          return time.getTime() > Date.now();
+        }
       },
       loadingBtn1: false,
       loadingBtn2: false,
@@ -311,24 +322,26 @@ export default {
     },
     // 获取人脸抓拍统计
     getFaceSnapSta () {
-      this.chartData1 = [];
       const params = {
         deviceIds: this.faceSnapForm.devIdData.selSelectedData1.map(m => m.id).join(','),
         bayonetIds: this.faceSnapForm.devIdData.selSelectedData2.map(m => m.id).join(','),
         startTime: this.faceSnapForm.queryDate[0],
         endTime: this.faceSnapForm.queryDate[1]
       }
-      console.log(params)
       this.loadingBtn1 = true;
       apiFaceSnap(params).then(res => {
         if (res) {
           this.faceSnapSta = res.data;
           let timeDto = this.faceSnapSta.timeDto
           if(timeDto && timeDto.length > 0) {
-            this.chartData1 = timeDto.map(m => {
-              return { time: m.name, count: m.total };
-            })
+            this.chartData1 = timeDto;
             this.drawChart1();
+          } else {
+            this.chartData1 = [];
+            if (this.charts.chart1) {
+              this.charts.chart1.destroy();
+            }
+            this.charts.chart1 = null;
           }
         }
       }).finally(() => {
@@ -337,7 +350,6 @@ export default {
     },
     // 获取人脸布控告警数据分析
     getFaceControlSta () {
-      this.chartData2 = []
       const params = {
         startTime: this.faceControlQueryDate[0],
         endTime: this.faceControlQueryDate[1],
@@ -348,11 +360,14 @@ export default {
           this.faceControlSta = res.data;
           let timeDto = this.faceControlSta.timeDto
           if(timeDto && timeDto.length > 0) {
-            this.chartData2 = timeDto.map(m => {
-              return { time: m.name, count: m.total };
-            })
-            console.log(this.chartData2, 'this.chartData2')
+            this.chartData2 = timeDto;
             this.drawChart2();
+          } else {
+            this.chartData2 = [];
+            if (this.charts.chart2) {
+              this.charts.chart2.destroy();
+            }
+            this.charts.chart2 = null;
           }
         }
       }).finally(() => {
@@ -366,7 +381,6 @@ export default {
     },
     // 画抓拍人脸数图表
     drawChart1 () {
-      // if (this.chartData1.length === 0) return;
       let chart = null,_this = this;
       if (this.charts.chart1) {
         this.charts.chart1.clear();
@@ -381,40 +395,19 @@ export default {
           height: G2.DomUtil.getHeight(temp)
         });
       }
-      let dv = new View().source(this.chartData1);
-      dv.transform({
-        type: 'fold',
-        fields: ['count'], // 展开字段集
-        key: 'type', // key字段
-        value: 'value', // value字段
-        retains: ['time']
-      });
-
-      chart.source(dv, {
-        'value': {
+      chart.source(this.chartData1, {
+        'total': {
           min: 0
         }
       });
-      // 坐标轴刻度
-      chart.axis('value', {
-        title: null
-      });
-      chart.axis('time', {
+      chart.axis('name', {
         label: {
           textStyle: {
             fill: '#999999',
             fontSize: 12
           }
-        },
-        tickLine: {
-          alignWithLabel: false,
-          length: 0
-        },
-        line: {
-          lineWidth: 0
         }
       });
-      chart.axis('count1', false)
       chart.tooltip({
         useHtml: true,
         htmlContent: function (title, items) {
@@ -426,17 +419,17 @@ export default {
           }
           str += `<span><span>${items[0].value}</span><span>张</span></span></div>`;
           return str;
+          // return`<div class="my_tooltip"><h1>${title}</h1><span><span>${items[0].value}</span><span>张</span></span></div>`;
         }
       });
       chart.legend(false);
-      chart.line().position('time*value').color('type', [ '#00C4FC']).size(2).shape('smooth');
-      chart.area().position('time*value').color([ 'l(270) 0:#ffffff 1:#00C4FC' ]).shape('smooth');
+      chart.line().position('name*total').shape('hv').color('#088BFD').size(2);
+      // chart.area().position('time*value').color([ 'l(270) 0:#ffffff 1:#00C4FC' ]).shape('smooth');
       chart.render();
       this.charts.chart1 = chart;
     },
     // 画布控告警次数图表
     drawChart2 () {
-      // if (this.chartData2.length === 0) return;
       let chart = null,_this = this;
       if (this.charts.chart2) {
         this.charts.chart2.clear();
@@ -451,36 +444,17 @@ export default {
           height: G2.DomUtil.getHeight(temp)
         });
       }
-      let dv = new View().source(this.chartData2);
-      dv.transform({
-        type: 'fold',
-        fields: ['count'], // 展开字段集
-        key: 'type', // key字段
-        value: 'value', // value字段
-        retains: ['time']
-      });
-
-      chart.source(dv, {
-        'value': {
+      chart.source(this.chartData2, {
+        'total': {
           min: 0
         }
       });
-      chart.axis('value', {
-        title: null
-      });
-      chart.axis('time', {
+      chart.axis('name', {
         label: {
           textStyle: {
             fill: '#999999',
             fontSize: 12
           }
-        },
-        tickLine: {
-          alignWithLabel: false,
-          length: 0
-        },
-        line: {
-          lineWidth: 0
         }
       });
       chart.tooltip({
@@ -494,11 +468,12 @@ export default {
           }
           str += `<span><span>${items[0].value}</span><span>次</span></span></div>`;
           return str;
+          // return`<div class="my_tooltip"><h1>${title}</h1><span><span>${items[0].value}</span><span>张</span></span></div>`;
         }
       });
       chart.legend(false);
-      chart.line().position('time*value').color('type', [ '#00C4FC']).size(2).shape('smooth');
-      chart.area().position('time*value').color([ 'l(270) 0:#ffffff 1:#00C4FC' ]).shape('smooth');
+      chart.line().position('name*total').shape('hv').color('#088BFD').size(2);
+      // chart.area().position('time*value').color([ 'l(270) 0:#ffffff 1:#00C4FC' ]).shape('smooth');
       chart.render();
       this.charts.chart2 = chart;
     }
@@ -552,12 +527,12 @@ export default {
             background: #0C70F8;
             display: flex;
             flex-wrap: nowrap;
-            justify-content: space-between;
+            justify-content: space-around;
             padding: 10px;
             > div{
               text-align: center;
-              line-height: 30px;
               > p{
+                margin-top: 16px;
                 color: #FFFFFF;
                 font-size: 12px;
               }
@@ -625,13 +600,14 @@ export default {
             width: 33.33%;
             color: #333333;
             .five{
-              font-size: 12px;
-              color: #fff;
+              padding: 2px 5px;
               display: inline-block;
               line-height: 12px;
               text-align: center;
               margin-left: 10px;
               background: #FA453A;
+              font-size: 12px;
+              color: #fff;
             }
           }
         }
@@ -643,6 +619,12 @@ export default {
           width: 100%;
           height: 350px;
           min-height: 350px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          > span{
+            color: #999;
+          }
         }
       }
       .chart_box {
@@ -688,6 +670,9 @@ export default {
   > div{
     > h1{
       color: #FA453A;
+      >span{
+        font-weight: bold;
+      }
     }
     > ul > li{
       line-height: 25px;

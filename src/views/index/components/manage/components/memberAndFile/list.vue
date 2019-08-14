@@ -174,6 +174,8 @@ export default {
         'where.userName': this.searchUserName,
         'where.organId': organId,
         pageNum: this.pagination.pageNum,
+        order: 'asc',
+        orderBy: 'user_name'
       }
       getUserList(params)
         .then(res => {
@@ -214,7 +216,7 @@ export default {
       } else {
         organObj = this.userInfo.organList[0];
       }
-      this.$router.push({name: 'member_detail', query: { id: obj.uid, organObj: organObj }});
+      this.$router.push({name: 'member_detail', query: { id: obj.uid, organObj: JSON.stringify(organObj) }});
     },
     // 跳至新增成员页面
     skipAddPage () {
@@ -224,7 +226,7 @@ export default {
       } else {
         organObj = this.userInfo.organList[0];
       }
-      this.$router.push({name: 'member_add', query: { organObj: organObj }});
+      this.$router.push({name: 'member_add', query: { organObj: JSON.stringify(organObj) }});
     },
     // 跳至编辑页面
     showEditDialog (obj) {
@@ -234,7 +236,7 @@ export default {
       } else {
         organObj = this.userInfo.organList[0];
       }
-      this.$router.push({name: 'member_edit', query: { id: obj.uid, organObj: organObj }});
+      this.$router.push({name: 'member_edit', query: { id: obj.uid, organObj: JSON.stringify(organObj) }});
     },
     handleCurrentChange (page) {
       this.pagination.pageNum = page;

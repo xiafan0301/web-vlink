@@ -14,7 +14,7 @@
         </ul>
         <div class="search_box">
           <el-form :inline="true" :model="taskForm" class="event_form" ref="taskForm">
-            <el-form-item prop="taskName">
+            <el-form-item prop="taskName" label="任务名称：">
               <el-input
                   style="width: 240px;"
                   type="text"
@@ -22,7 +22,7 @@
                   v-model="taskForm.taskName"
               />
             </el-form-item>
-            <el-form-item prop="reportTime" class="time">
+            <el-form-item prop="reportTime" class="time" label="创建时间：">
               <el-date-picker
                   v-model="taskForm.reportTime"
                   type="datetimerange"
@@ -55,8 +55,9 @@
               <el-table-column label="创建时间" prop="createTime" show-overflow-tooltip></el-table-column>
               <el-table-column label="分析时间范围" prop="taskName" show-overflow-tooltip min-width="150px">
                 <template slot-scope="scope">
-                  {{JSON.parse(scope.row.taskWebParam).startDate}}-
-                  {{JSON.parse(scope.row.taskWebParam).endDate}}
+<!--                  {{scope.row.taskWebParam.startTime}} - {{scope.row.taskWebParam.endTime}}-->
+                  {{JSON.parse(scope.row.taskWebParam).startTime}}-
+                  {{JSON.parse(scope.row.taskWebParam).endTime}}
                 </template>
               </el-table-column>
               <el-table-column label="状态" v-if="selectIndex === 0" show-overflow-tooltip>
@@ -156,12 +157,13 @@
                 :before-upload="befupload"
                 :on-success="uploadPicSuccess"
                 :limit="1"
+                :on-remove="handleRemove"
                 :data="{projectType: 2}"
                 list-type="picture-card">
               <i class="vl_icon vl_icon_control_14"></i>
             </el-upload>
           </div>
-          <div style="color:rgba(153,153,153,1); margin-top: 10px; text-align: center">点击上传全身照，搜索更精准</div>
+          <div style="color:rgba(153,153,153,1); margin-top: 10px; text-align: center">请上传全身照片</div>
           <div style="padding: 20px; padding-bottom: 0">
             <el-form :model="ruleForm" ref="ruleForm" class="demo-ruleForm">
               <el-form-item prop="taskName">
@@ -174,6 +176,7 @@
                   class="full vl_date"
                   range-separator="至"
                   :default-time="['00:00:00', '23:59:59']"
+                  :picker-options="pickerOptions"
                   start-placeholder="开始日期"
                   end-placeholder="结束日期">
               </el-date-picker>
@@ -199,7 +202,7 @@ export default {
   components: {vehicleBreadcrumb},
   data () {
     return {
-      uploadUrl: ajaxCtx.base + '/appendix', // 图片上传地址
+      uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
       tabList: [
         {
           label: "已完成任务",
@@ -213,7 +216,7 @@ export default {
       selectIndex: 1,
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       taskForm: {
-        reportTime: "", // 日期
+        reportTime: [], // 日期
         taskName: "" // 任务名称
       },
       list: [], //已完成列表
@@ -228,7 +231,12 @@ export default {
         taskName: ''
       },
       dialogImageUrl: null,
-      addloading: false
+      addloading: false,
+      pickerOptions: {
+        disabledDate: time => {
+          return time.getTime() > (new Date().getTime());
+        }
+      }
     }
   },
   created() {
@@ -236,10 +244,21 @@ export default {
   },
   mounted () {
     this.selectDataList();
+    this.settime()
   },
   methods: {
-    uploadPicSuccess (file) {
-      this.dialogImageUrl = file.data.sysCommonImageInfo.fileFullPath;
+    settime () {
+      let dataxf = new Date;
+      this.ruleForm.value1 = [formatDate(dataxf.getTime() - 24*60*60*1000), formatDate(dataxf.getTime())]
+    },
+    handleRemove () {
+      this.dialogImageUrl = null
+      this.$nextTick(() => {
+        this.$refs['uploadPic'].clearFiles()
+      })
+    },
+    uploadPicSuccess (res) {
+      this.dialogImageUrl = res.data.fileFullPath
       this.$message.success('上传成功！');
     },
     befupload () {
@@ -266,7 +285,7 @@ export default {
         pageSize: this.pagination.pageSize,
         orderBy: 'create_time',
         order: 'desc',
-        // 'where.taskType': 9,    //任务类型 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
+        'where.taskType': 9,    //任务类型 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
         'where.isFinish': this.selectIndex,   //是否完成 0:未完成(包含处理中、处理失败、处理中断) 1：已完成(处理成功)
       }
       this.taskForm.taskName && (params['where.taskName'] = this.taskForm.taskName);
@@ -301,13 +320,14 @@ export default {
       this.dialogImageUrl = null
       this.$nextTick(() => {
         this.$refs[formName].resetFields();
+        this.$refs['uploadPic'].clearFiles()
       })
-      this.$refs['uploadPic'].clearFiles()
       // $('.el-upload-list').css({"display":"none"})
     },
     // 跳至详情页面
     skipDetailPage(obj) {
-      this.$router.push({ name: "portrait_nr" , query: {uid: obj.uid}});
+      let data = JSON.parse(obj.taskWebParam)
+      this.$router.push({ name: "portrait_nr" , query: {uid: obj.uid, targetUrl: data.targetPicUrl, startTime: data.startTime, endTime: data.endTime}});
     },
     // 新见任务
     addnewtask () {
@@ -321,6 +341,8 @@ export default {
       newTaskInfos(params).then(res => {
         if(res.data){
           console.log(res.data)
+          this.newTaskeDialog = false
+          this.selectDataList();
         }
         this.$nextTick(() => {
           this.addloading = false

@@ -19,7 +19,7 @@
             :picker-options="pickerOptions2">
           </el-date-picker>
         </el-form-item>
-        <el-form-item>
+        <!-- <el-form-item>
           <el-cascader
             expand-trigger="hover"
             :options="options"
@@ -27,7 +27,7 @@
             @change="handleChange"
             placeholder="请选择省 / 市 / 县 / 乡">
           </el-cascader>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item>
           <el-button class="operation_btn blue_btn" :loading="searchLoading" @click="searchData">筛选</el-button>
         </el-form-item>
@@ -140,13 +140,13 @@ export default {
       },
       almAreaList: null,
       colors: [
-        ['#00A2FF', '#50CC62', '#8949F3', '#0080FE', '#0668E6'],
+        ['#33B5FF', '#03E38A', '#F7DA6D', '#0668E4', '#7BF55B', '#6262FF'],
         [
-          [0,162,255],
-          [80,204,98],
-          [137,73,243],
-          [0,128,254],
-          [6,104,230]
+          [51,181,255],
+          [3,227,138],
+          [247,218,109],
+          [6,104,228],
+          [123,245,91]
         ]
       ],
     }
@@ -169,7 +169,7 @@ export default {
       let $list = $('.stat_tt_item');
       if ($list && $list.length > 0) {
         let iw = $list.width();
-        $list.height(iw * 0.4);
+        $list.height(iw * 0.45);
       }
     },
     // 搜索数据
@@ -345,80 +345,89 @@ export default {
         this.charts.chart2.clear();
         chart = this.charts.chart2;
       } else {
+        // 可以通过调整这个数值控制分割空白处的间距，0-1 之间的数值
+        let sliceNumber = 0.001;
+
+        // 自定义 other 的图形，增加两条线
+        G2.Shape.registerShape('interval', 'sliceShape', {
+          draw: function draw(cfg, container) {
+            if (cfg.origin._origin.percent > 0) {
+              let points = cfg.points;
+              console.log("-----======------",points)
+              let path = [];
+              path.push(['M', points[0].x, points[0].y]);
+              path.push(['L', points[1].x, points[1].y - sliceNumber]);
+              path.push(['L', points[2].x, points[2].y - sliceNumber]);
+              path.push(['L', points[3].x, points[3].y]);
+              path.push('Z');
+              path = this.parsePath(path);
+              console.log("123243444444444444444",path)
+              return container.addShape('path', {
+                attrs: {
+                  fill: cfg.color,
+                  path: path
+                }
+              });
+            }
+          }
+        });
+
         let temp = document.getElementById('stat_2');
         chart = new G2.Chart({
           container: 'stat_2',
           forceFit: true,
-          padding: [ 12, 12 * 14, 12, 0 ],
+          padding: [ 3 ],
           width: G2.DomUtil.getWidth(temp),
           height: G2.DomUtil.getHeight(temp)
         });
       }
       let _this = this;
-      chart.source(data, {
-        percent: {
-          formatter: function formatter (val) {
-            val = (val * 100).toFixed(2) + '%';
-            return val;
-          }
-        }
-      });
+      chart.source(data);
       chart.coord('theta', {
-        radius: 0.75,
-        innerRadius: 0.35
+        radius: 0.7,
+        innerRadius: 0.75
       });
       chart.tooltip({
-        showTitle: false,
-        itemTpl: '<li><span style="background-color:{color};" class="g2-tooltip-marker"></span>{name}: {value}</li>'
+        showTitle: false
       });
-      chart.legend({
-        position: 'right',
-        title: null,
-        hoverable: false,
-        textStyle: {
-          fill: '#f1f1f1', // 文本的颜色
-          fontSize: 12
-        },
-        offsetY: 0, // -G2.DomUtil.getHeight(temp005) / 2 + 4 * intRem,
-        offsetX: -11 * 12,
-        itemGap: 20, // 图例项之间的间距
-        useHtml: true,
-        containerTpl: '<div class="g2-legend e_stat_tb_ld1 e_stat_tb_ld_alarm as-trans50-t" style="position:absolute;top:20px;right:60px;width:auto;">' +
-        '<ul class="g2-legend-list" style="list-style-type:none;margin:0;padding:0;"></ul>' +
-        '</div>',
-        itemTpl: (value, color, checked, index) => {
-          if (index > 4) {
-            return value;
-          }
-          return '<li class="g2-legend-list-item item-' + index + ' ' + checked +
-            '" data-value="' + value + '" data-color=' + color + '>' +
-            '<div>' +
-              '<div><i style="background-color: rgba(' + _this.colors[1][index][0] + ', ' + _this.colors[1][index][1] + ', ' + _this.colors[1][index][2] + ', 0.4)">' +
-              '<i style="background-color: rgba(' + _this.colors[1][index][0] + ', ' + _this.colors[1][index][1] + ', ' + _this.colors[1][index][2] + ', 1)"></i></i>' + data[index].count + '</div>' +
-              '<p>' + value + '' + '</p>' +
-            '</div>' +
-          '</li>';
-        }
-      });
+      chart.legend(false); // 不显示图例
       chart.intervalStack().position('percent')
-        .color('item', this.colors[0])
+        .color('item', _this.colors[0])
+        .shape('sliceShape')
         .label('percent', {
-          offset: -10,
-          // autoRotate: false,
-          /* textStyle: {
-            rotate: 0,
-            textAlign: 'center',
-          } */
-        }).tooltip('item*percent', function (item, percent) {
+          offset: 40,
+          htmlTemplate: (text, item, index) => {
+            if (item.point.percent > 0) {
+              let levelName = null;
+              console.log("============",item)
+              if (item.point.item === '一级报警') {
+                levelName = '1级告警';
+              } else if (item.point.item === '二级报警') {
+                levelName = '2级告警';
+              } else if (item.point.item === '三级报警') {
+                levelName = '3级告警';
+              } else if (item.point.item == '四级报警') {
+                levelName = '4级告警';
+              } else if (item.point.item == '五级报警') {
+                levelName = '5级告警';
+              } else {
+                levelName = '其他告警';
+              }
+              return '<div class="tab_one"><div class="icon_number"><i class="parent_i" style="background-color: rgba(' + _this.colors[1][index][0] + ', ' + _this.colors[1][index][1] + ', ' + _this.colors[1][index][2] + ', 0.14)">'+
+                      '<i class="child_i" style="background-color: rgba(' + _this.colors[1][index][0] + ', ' + _this.colors[1][index][1] + ', ' + _this.colors[1][index][2] + ', 1)"></i></i><span>'+ item.point.count +'件</span></div>'+
+                      '<div class="level_percent"><span>'+ levelName +'</span><span>'+ (item.point.percent * 100).toFixed(2) +'%</span></div></div>';
+            } else {
+              return '';
+            }
+          }
+        })
+        .tooltip('item*percent', function (item, percent) {
           percent = (percent * 100).toFixed(2) + '%';
           return {
             name: item,
             value: percent
           };
-        }).style({
-          lineWidth: 1,
-          stroke: '#fff'
-        });
+        })
       chart.render();
       this.charts.chart2 = chart;
     },
@@ -498,6 +507,52 @@ export default {
 .e_stat_tb_ld_alarm {
   left: 83% !important;
   right: auto !important;
+}
+.tab_one {
+  box-shadow: 0px 5px 16px 0px rgba(169,169,169,0.2);
+  background-color: #ffffff;
+  padding: 10px;
+  min-width: 126px;
+  .icon_number {
+    display: flex;
+    align-items: center;
+    .parent_i {
+      position: relative;
+      display: inline-block;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      .child_i {
+        position: absolute;
+        left: 5px;
+        top: 5px;
+        display: inline-block;
+        border-radius: 50%;
+        width: 10px;
+        height: 10px;
+      }
+    }
+    >span {
+      margin-left: 5px;
+      font-weight: bold;
+      color: #333333;
+      font-size: 22px;
+    }
+  }
+  .level_percent {
+    color: #666666;
+    span:first-child {
+      margin-right: 5px;
+    }
+  }
+}
+#stat_2 {
+  .g-label {
+    &:hover {
+      z-index: 999;
+      cursor: pointer;
+    }
+  }
 }
 </style>
 

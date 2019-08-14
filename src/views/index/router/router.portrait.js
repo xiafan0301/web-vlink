@@ -80,9 +80,9 @@ export default {
       component: () => import('@/views/index/components/portrait/ytsr.vue')
     },
     {
-      path: 'ytsr_list', // 以图搜人-离线任务列表
-      name: 'portrait_ytsr_list',
-      component: () => import('@/views/index/components/portrait/ytsr-list.vue')
+      path: 'ytsr_shot', // 以图搜人-抓拍库搜索的结果
+      name: 'portrait_ytsr_shot',
+      component: () => import('@/views/index/components/portrait/ytsr-shot.vue')
     },
     {
       path: 'ytsr_moment', // 以图搜人-实时

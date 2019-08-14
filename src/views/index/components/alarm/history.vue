@@ -166,18 +166,20 @@
               </div>
             </div>
             <div class="list_con_info">
-              <div>{{item.surveillanceName}}</div>
+              <div>布控名：{{item.surveillanceName}}</div>
               <div>
-                <span>{{item.devName}}</span>&nbsp;
-                <span>{{item.snapTime}}</span>
+                <span class="small_text">抓拍设备：{{item.devName}}</span>
+              </div>
+              <div>
+                <span class="small_text">抓拍时间：{{item.snapTime}}</span>
               </div>
             </div>
             <div v-if="item.isSeen" @click="toAlarmDetail(item.uid, item.objType)">
               <div class="hover_info">
                 <p class="name_info" v-if="item.objType == 1">
                   <span>{{item.name}}</span>
-                  <span>{{item.sex}}</span>
-                  <span>{{item.nation}}</span>
+                  <span v-if="item.sex && item.sex != '未知'">{{item.sex}}</span>
+                  <span v-if="item.nation && item.nation != '未知'">{{item.nation}}</span>
                 </p>
                 <p class="name_info" v-if="item.objType == 2">
                   <span>{{item.vehicleNumber}}</span>
@@ -340,6 +342,10 @@ export default {
     },
   },
   mounted () {
+    if(this.$route.query.startTime && this.$route.query.endTime) {
+      this.startTime = this.$route.query.startTime;
+      this.endTime = this.$route.query.endTime;
+    }
     this.getDeviceList()
     this.getGroups()
     this.getAlarm();
@@ -365,6 +371,10 @@ export default {
     },
     changeTab (type) {
       this.tabType = type;
+      this.selectDevice = []
+      this.selectControl = []
+      this.$refs.tree.setCheckedKeys([]);
+      this.$refs.gTree.setCheckedKeys([]);
     },
     //切换排序方式
     changeSort(type) {
@@ -528,7 +538,7 @@ export default {
           this.alarmList = [...res.data.list]
           for(let i=0; i< this.alarmList.length; i++) {
             let item = this.alarmList[i]
-            item['semblance'] = (item.semblance).toFixed(2)
+            item['semblance'] = +(item.semblance).toFixed(2)
             let alarmTimeD = formatDate(item.alarmTime, 'yyyy-MM-dd')
             item['alarmTimeD'] = new Date(alarmTimeD).getTime()
             let alarmTime = formatDate(item.alarmTime, 'yyyy-MM-dd HH:mm:ss')
@@ -572,9 +582,21 @@ export default {
         }else {
           this.alarmList.sort(this.compareUp("semblance"))
         }
-        for(let i = 0 ; i < 10; i++) {
-          params = { lSemblance: (10-i-1)*10, rSemblance: 10*(10-i) }
-          this.filterList(params)  
+        let newArr = [
+          {lSemblance: 90, rSemblance: 100},
+          {lSemblance: 80, rSemblance: 90},
+          {lSemblance: 70, rSemblance: 80},
+          {lSemblance: 60, rSemblance: 70},
+          {lSemblance: 50, rSemblance: 60},
+          {lSemblance: 40, rSemblance: 50},
+          {lSemblance: 30, rSemblance: 40},
+          {lSemblance: 20, rSemblance: 30},
+          {lSemblance: 10, rSemblance: 20},
+          {lSemblance: 0, rSemblance: 10}]
+        for(let key of newArr) {
+          /* params = { lSemblance: (10-i-1)*10, rSemblance: 10*(10-i) } */
+          console.log(key)
+          this.filterList(key)  
         }
       }else if(this.sortType === 2 ) {
         let arr = [{ upTime: 0,time: 7, label: '' }, 
@@ -644,6 +666,9 @@ export default {
         }
       }
       this.allAlarmList = this.getNAlarmList(this.mAlarmList)
+      if(this.allAlarmList && this.allAlarmList.length > 0) {
+        this.$set(this.allAlarmList[0],"isExpand", true)
+      }
     },
     getNAlarmList(arr) {
       console.log("------------",arr)
@@ -836,7 +861,7 @@ export default {
           margin-right: 1%;
           max-width: 342px;
           width: 32%;
-          height: 266px;
+          height: 286px;
           padding: 30px 20px 0;
           margin-bottom: 20px;
           background:rgba(255,255,255,1);
@@ -889,11 +914,12 @@ export default {
             justify-content: space-between;
             line-height: 50px; */
             padding-top: 16px;
+            padding-bottom: 16px;
             > div:nth-child(1){
               color: #333;
               margin-bottom: 6px;
             }
-            > div:nth-child(2) > span{
+            .small_text {
               color: #999;
               font-size: 12px;
             }
@@ -1007,6 +1033,9 @@ export default {
         width: 62px;
       }
     }
+  }
+  .__rail-is-horizontal {
+    position: static!important;
   }
 }
 

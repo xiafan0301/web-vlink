@@ -32,19 +32,21 @@
               <el-date-picker style="width: 236px;"
                 class="vl_date"
                 v-model="searchTime2[0]"
-                type="date"
+                type="datetime" time-arrow-control
                 align="left"
                 :editable="false"
                 :clearable="false"
+                placeholder="请选择开始时间"
                 :picker-options="pickerOptions">
               </el-date-picker>
               <el-date-picker style="width: 236px; margin-top: 10px"
                 class="vl_date vl_date_end"
                 v-model="searchTime2[1]"
-                type="date"
+                type="datetime" time-arrow-control
                 align="left"
                 :editable="false"
                 :clearable="false"
+                placeholder="请选择结束时间"
                 :picker-options="pickerOptions">
               </el-date-picker>
               <el-input
@@ -188,11 +190,10 @@ import dbTree from '@/components/common/dbTree.vue';
 import {getDeviceByBayonetUid, getDeviceDetailById} from '../../../api/api.base.js';
 import {MapGETmonitorList} from '../../../api/api.map.js';
 import {getDeviceSnapImagesSum, getDeviceSnapImagesPage} from '../../../api/api.judge.js';
-import {formatDate} from '@/utils/util.js';
+import {formatDate, dateOrigin} from '@/utils/util.js';
 export default {
   components: {vlBreadcrumb, flvplayer, dbTree, vehicleDetail},
   data () {
-    let nDate = new Date();
     return {
       detailData: null,
       showType: 1, // 1实时过车  2历史过车
@@ -202,7 +203,7 @@ export default {
       searchVal2: '',
       doSearch1: {},
       doSearch2: {},
-      searchTime2: [new Date(nDate.getTime() - 1 * 24 * 60 * 60 * 1000), new Date(nDate.getTime() - 1 * 24 * 60 * 60 * 1000)],
+      searchTime2: [dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)), new Date()],
       treeList1: [],
       treeList2: [],
       bResize: {},

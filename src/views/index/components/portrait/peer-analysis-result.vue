@@ -28,8 +28,8 @@
           <li>
             <span>分析时间：</span>
             <span>
-              <p>{{taskDetail.taskWebParam && taskDetail.taskWebParam.startTime ? taskDetail.taskWebParam.startTime : '无'}}</p>
-              <p>{{taskDetail.taskWebParam && taskDetail.taskWebParam.endTime ? taskDetail.taskWebParam.endTime : '无'}}</p>
+              <p>从{{taskDetail.taskWebParam && taskDetail.taskWebParam.startTime ? taskDetail.taskWebParam.startTime : '无'}}</p>
+              <p>至{{taskDetail.taskWebParam && taskDetail.taskWebParam.endTime ? taskDetail.taskWebParam.endTime : '无'}}</p>
             </span>
           </li>
           <li>
@@ -56,13 +56,13 @@
                       <img class="bigImg" :src="item.subStoragePath" alt="">
                       <div>
                         <h4>检索资料</h4>
-                        <div><i class="vl_icon rlcx_sj"></i>{{item.shotTime.substr(2, item.shotTime.length)}}</div>
+                        <div><i class="vl_icon rlcx_sj"></i>{{item.shotTime}}</div>
                         <p>
                           <span v-if="item.sex" style="height: 30px;line-height: 30px;padding: 0 10px;display: inline-block;background: #fafafa;border: 1px solid #f2f2f2;border-radius: 3px;">{{item.sex}}性</span>
                           <span v-else style="height: 30px;line-height: 30px;padding: 0 10px;display: inline-block;background: #fafafa;border: 1px solid #f2f2f2;border-radius: 3px;">无</span>
                           <span style="height: 30px;line-height: 30px;padding: 0 10px;display: inline-block;background: #fafafa;border: 1px solid #f2f2f2;border-radius: 3px;margin-left: 8px;">{{item.age ? item.age : '无'}}</span>
                         </p>
-                        <p><img src="../../../../assets/img/txfx_pao.png" alt=""><b style="color: #0C70F8;font-size: 34px;padding-left: 8px;">{{item.peerNumber}}</b><span style="color: #0C70F8;"> 同行次</span></p>
+                        <p><img src="../../../../assets/img/txfx_pao.png" alt=""><b style="color: #0C70F8;font-size: 34px;padding-left: 8px;">{{item.peerNumber}}</b><span style="color: #0C70F8;"> 次同行次</span></p>
                         <div style="margin-top: 15px; cursor: pointer;border:1px solid #D3D3D3;border-radius:4px;background:rgba(246,248,249,1);color: #666;" @click="goRecord(item)">查看同行记录</div>
                       </div>
                     </div>
@@ -154,6 +154,7 @@ export default {
               // res.data.taskResult.push(...res.data.taskResult)
               this.pagination.total = res.data.taskResult.length
               this.boxList = [...res.data.taskResult.slice(0, 12)]
+              this.boxList.sort((a, b) => {return a.peerNumber - b.peerNumber})
               this.taskDetail = res.data
             }
           })
@@ -188,6 +189,7 @@ export default {
     onPageChange (page) {
       this.boxList.splice(0, this.boxList.length)
       this.boxList = [...this.taskDetail.taskResult.slice((page - 1) * 12, 12 + (page - 1) * 12)]
+      this.boxList.sort((a, b) => {return a.peerNumber - b.peerNumber})
       // console.log(this.boxList)
     },
   }
@@ -262,7 +264,7 @@ export default {
               float: left;
               > div {
                 position: relative;
-                width: 380px; height: 210px;
+                width: 395px; height: 210px;
                 padding: 10px;
                 background-color: #fff;
                 box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);

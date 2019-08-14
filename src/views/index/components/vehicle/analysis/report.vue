@@ -4,21 +4,22 @@
     <div class="vc_rep">
       <div class="vc_rep_t">
         <div class="vc_rep_sc">
-          <el-input style="width: 200px;" v-model="searchForm.plateNo" placeholder="请输入车牌信息" size="small"></el-input>&nbsp;&nbsp;&nbsp;&nbsp;
-          <el-date-picker style="width: 280px;" size="small" 
+          <el-date-picker style="width: 420px;" size="small" 
             class="vl_date"
             v-model="searchForm.time"
-            type="daterange"
+            type="datetimerange"
             align="left"
             unlink-panels
             :editable="false"
             :clearable="false"
+            time-arrow-control
             range-separator="至"
             start-placeholder="开始日期"
             @change="pickerChanged"
             :picker-options="pickerOptions"
             end-placeholder="结束日期">
           </el-date-picker>&nbsp;&nbsp;&nbsp;&nbsp;
+          <el-input style="width: 200px;" v-model="searchForm.plateNo" placeholder="请输入车牌信息" size="small"></el-input>&nbsp;&nbsp;&nbsp;&nbsp;
           <el-button size="small" :disabled="!searchForm.plateNo" :loading="searchLoading" type="primary" @click="searchSubmit">查询</el-button>
           <!-- <el-button style="float: right;" size="small" :disabled="!clInfo || searchLoading" type="primary" @click="vehicleExport">导出为PDF</el-button> -->
           
@@ -242,7 +243,7 @@
                           <div class="com_width_to_height" style="margin-bottom: 5px;">
                             <div>
                               <div>
-                                <img :src="item.vehicleDto.subStoragePath" :alt="item.vehicleDto.plateNo" :title="item.vehicleDto.plateNo">
+                                <img class="bigImg" :src="item.vehicleDto.subStoragePath" :alt="item.vehicleDto.plateNo" :title="item.vehicleDto.plateNo">
                               </div>
                             </div>
                           </div>
@@ -302,7 +303,7 @@
 </template>
 <script>
 import vehicleBreadcrumb from '../breadcrumb.vue';
-import {getDate, formatDate} from '@/utils/util.js';
+import {getDate, formatDate, dateOrigin} from '@/utils/util.js';
 import {mapXupuxian} from '@/config/config.js';
 import {getVehicleInvestigationReport} from '@/views/index/api/api.judge.js';
 export default {
@@ -312,8 +313,8 @@ export default {
       mapPicShow: false,
       mapPicShow2: false,
       searchForm: {
-        plateNo: '', // 沪D008CP 沪A009CP 湘AN8888
-        time: [new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000), new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000)]
+        plateNo: '', // 湘A757BW
+        time: [dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)), new Date()]
         // time: [new Date(new Date().getTime() - 5 * 24 * 60 * 60 * 1000), new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000)]
       },
       timeStr: ['', ''],
@@ -372,8 +373,8 @@ export default {
     // 湘AN8888 2019-07-01 00:00:00 2019-07-04 00:00:00
     searchSubmit () {
       this.searchLoading = true;
-      this.timeStr = [formatDate(this.searchForm.time[0], 'yyyy-MM-dd 00:00:00'),
-        formatDate(this.searchForm.time[1], 'yyyy-MM-dd 23:59:59')];
+      this.timeStr = [formatDate(this.searchForm.time[0]),
+        formatDate(this.searchForm.time[1])];
       getVehicleInvestigationReport({
         plateNo: this.searchForm.plateNo,
         startTime: this.timeStr[0],
@@ -457,23 +458,36 @@ export default {
     setMapMarkerForClgj () {
       this.clgjMap.clearMap();
       let gjPath = [];
+      let ism = this.clgjList.length > 1;
       for (let i = 0; i < this.clgjList.length; i++) {
         // console.log('doMark', obj);
         let obj = this.clgjList[i];
+        let offset = [-20, -48];
+        let sClass = 'cl_report_gj';
         if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
+          // 起点
+          if (ism && i === 0) {
+            offset = [-40, -40];
+            sClass += ' cl_report_gj_qz cl_report_gj_q';
+          }
+          // 终点
+          if (ism && i === (this.clgjList.length - 1)) {
+            offset = [-40, -40];
+            sClass += ' cl_report_gj_qz cl_report_gj_z';
+          }
           let  sVideo = '';
           if (obj.storagePath) {
-            sVideo = '<div><img src="' + obj.storagePath + '" controls></img></div>' +
+            sVideo = '<div><img class="bigImg" src="' + obj.storagePath + '" controls></img></div>' +
               '<p>' + obj.shotTime + '</p>';
           }
           new window.AMap.Marker({ // 添加自定义点标记
             map: this.clgjMap,
             position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-            offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
+            offset: new window.AMap.Pixel(offset[0], offset[1]), // 相对于基点的偏移位置
             draggable: false, // 是否可拖动
             // extData: obj,
             // 自定义点标记覆盖物内容
-            content: '<div title="' + obj.deviceName + '" class="cl_report_gj">' +
+            content: '<div title="' + obj.deviceName + '" class="' + sClass + '">' +
               sVideo +
               '</div>'
           });
@@ -854,6 +868,21 @@ export default {
     color: #fff; font-size: 12px;
     text-align: center;
     &:hover { z-index: 2; }
+  }
+  &.cl_report_gj_qz {
+    width: 80px; height: 80px;
+    > div {
+      bottom: -25px; left: 100%;
+    }
+    > p {
+      bottom: 27px; left: 100%;
+    }
+  }
+  &.cl_report_gj_q {
+    background: url(../../../../../assets/img/icons/icons_qd.png) center center no-repeat;
+  }
+  &.cl_report_gj_z {
+    background: url(../../../../../assets/img/icons/icons_zd.png) center center no-repeat;
   }
 }
 .cl_report_cm {

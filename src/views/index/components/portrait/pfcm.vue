@@ -23,7 +23,7 @@
         </ul>
         <div class="search_box">
           <el-form :inline="true" :model="taskForm" class="event_form" ref="taskForm">
-            <el-form-item prop="taskName">
+            <el-form-item prop="taskName" label="任务名称：">
               <el-input
                 style="width: 240px;"
                 type="text"
@@ -31,7 +31,7 @@
                 v-model="taskForm.taskName"
               />
             </el-form-item>
-            <el-form-item prop="reportTime" class="time">
+            <el-form-item prop="reportTime" class="time" label="创建时间：">
               <el-date-picker
                 class="vl_date"
                 v-model="taskForm.reportTime"

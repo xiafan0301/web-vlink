@@ -5,7 +5,7 @@
         <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
           <el-form-item prop="dateTime">
             <el-date-picker
-              style="width: 380px"
+              style="width: 250px"
               class="vl_date"
               type="daterange"
               align="right"
@@ -21,7 +21,7 @@
             </el-date-picker>
           </el-form-item>
           <el-form-item prop="dutyUnitId">
-            <el-select v-model="searchForm.dutyUnitId" placeholder="请选择">
+            <el-select v-model="searchForm.dutyUnitId" placeholder="请选择" style="width: 250px">
               <el-option value="全部机构"></el-option>
               <el-option
                 v-for="item in departmentList"
@@ -32,7 +32,7 @@
             </el-select>
           </el-form-item>
           <el-form-item prop="type">
-            <el-select v-model="searchForm.type" placeholder="请选择">
+            <el-select v-model="searchForm.type" placeholder="请选择" style="width: 250px">
               <el-option value="全部类型"></el-option>
               <el-option
                 v-for="item in cameraTypeList"
@@ -43,7 +43,7 @@
             </el-select>
           </el-form-item>
           <el-form-item prop="deviceStatus">
-            <el-select v-model="searchForm.deviceStatus" placeholder="请选择">
+            <el-select v-model="searchForm.deviceStatus" placeholder="请选择" style="width: 250px">
               <el-option value="全部状态"></el-option>
               <el-option
                 v-for="item in deviceStatusList"
@@ -54,7 +54,7 @@
             </el-select>
           </el-form-item>
           <el-form-item prop="intelligentCharac">
-            <el-select v-model="searchForm.intelligentCharac" placeholder="请选择">
+            <el-select v-model="searchForm.intelligentCharac" placeholder="请选择" style="width: 250px">
               <el-option value="全部特性"></el-option>
               <el-option
                 v-for="item in intelligentCharacList"
@@ -65,7 +65,7 @@
             </el-select>
           </el-form-item>
           <el-form-item prop="importantLevel">
-            <el-select v-model="searchForm.importantLevel" placeholder="请选择">
+            <el-select v-model="searchForm.importantLevel" placeholder="请选择" style="width: 250px">
               <el-option value="全部级别"></el-option>
               <el-option
                 v-for="item in importLevelList"
@@ -76,7 +76,7 @@
             </el-select>
           </el-form-item>
           <el-form-item prop="manufacturer">
-            <el-select v-model="searchForm.manufacturer" placeholder="请选择">
+            <el-select v-model="searchForm.manufacturer" placeholder="请选择" style="width: 250px">
               <el-option value="全部厂家"></el-option>
               <el-option
                 v-for="item in manufacturerList"
@@ -87,7 +87,7 @@
             </el-select>
           </el-form-item>
           <el-form-item prop="keyword">
-            <el-input placeholder="请输入摄像头名称/IP搜索" style="width: 240px" v-model="searchForm.keyword"></el-input>
+            <el-input placeholder="请输入摄像头名称/IP搜索" style="width: 250px" v-model="searchForm.keyword"></el-input>
           </el-form-item>
           <el-form-item>
             <el-button class="select_btn" type="primary" :loading="isSearchLoading" @click="selectDataList">查询</el-button>
@@ -105,6 +105,7 @@
         <el-table
           class="data_table"
           :data="dataList"
+          @sort-change="sortDeviceSeq"
           >
           <el-table-column
             label="摄像头名称"
@@ -117,13 +118,13 @@
           </el-table-column>
           <el-table-column
             label="摄像头编号"
-            prop="deviceCode"
+            prop="deviceSeq"
             width="150"
-            sortable
+            sortable="custom"
             show-overflow-tooltip
             >
             <template slot-scope="scope">
-              <span>{{scope.row.deviceCode ? scope.row.deviceCode : '-'}}</span>
+              <span>{{scope.row.deviceSeq ? scope.row.deviceSeq : '-'}}</span>
             </template>
           </el-table-column>
           <el-table-column
@@ -186,7 +187,7 @@
             show-overflow-tooltip
             >
             <template slot-scope="scope">
-              <span>{{scope.row.deviceStatusStr ? scope.row.deviceStatusStr : '-'}}</span>
+              <span>{{scope.row.deviceStatusStr ? scope.row.deviceStatusStr : '--'}}</span>
             </template>
           </el-table-column>
           <el-table-column label="操作" fixed="right" width="160">
@@ -289,7 +290,7 @@
 <script>
 import { autoDownloadUrl } from '@/utils/util.js';
 import { getDepartmentList, vehicleExport } from '@/views/index/api/api.manage.js';
-import { getDeviceList, delDevice } from '@/views/index/api/api.base.js';
+import { getDeviceList, delDevice, downloadCameraModel } from '@/views/index/api/api.base.js';
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import { ajaxCtx } from '@/config/config.js';
@@ -298,7 +299,7 @@ export default {
     return {
       pickerOptions: {
         disabledDate(time) {
-          return time.getTime() > Date.now();
+          return time.getTime() > new Date().getTime();
         },
         shortcuts: [{
           text: '今天',
@@ -326,7 +327,7 @@ export default {
           }
         }]
       },
-      pagination: { total: 0, pageSize: 10, pageNum: 1 },
+      pagination: { total: 0, pageSize: 10, pageNum: 1, order: 'desc', orderBy: 'create_time' },
       searchForm: {
         dateTime: [], // 日期
         dutyUnitId: '全部机构', // 机构单位
@@ -375,6 +376,23 @@ export default {
     }, 1000)
   },
   methods: {
+    // 监听摄像头编号的排序
+    sortDeviceSeq (column) {
+      if (column.order) {
+        if (column.order === 'ascending') {
+          this.pagination.order = 'asc';
+        }
+        if (column.order === 'descending') {
+          this.pagination.order = 'desc';
+        }
+        this.pagination.orderBy = 'device_seq';
+      } else {
+        this.pagination.order = 'desc';
+        this.pagination.orderBy = 'create_time';
+      }
+
+      this.selectDataList();
+    },
     // 导出文件
     exportFile () {
       let dutyUnitId, deviceStatus, intelligentCharac, importantLevel, manufacturer, type;
@@ -411,15 +429,18 @@ export default {
       const params = {
         viewType: 2, // 设备导出
         deviceBasicParamPageDto: {
-          onlineStartDate: this.searchForm.dateTime[0],
-          onlineEndDate: this.searchForm.dateTime[1],
+          onlineStartDate: this.searchForm.dateTime[0] && (this.searchForm.dateTime[0] + ' 00:00:00'),
+          onlineEndDate: this.searchForm.dateTime[1] && (this.searchForm.dateTime[1] + ' 23:59:59'),
           dutyUnitId: dutyUnitId,
           intelligentCharac: intelligentCharac,
           deviceStatus: deviceStatus,
           importantLevel: importantLevel,
           type: type,
+          isBayonet: false,
           manufacturer: manufacturer,
           keyword: this.searchForm.keyword,
+          order: this.pagination.order,
+          orderBy: this.pagination.orderBy
         }
       };
       vehicleExport(params)
@@ -487,8 +508,26 @@ export default {
     },
     // 下载模板
     downloadModel () {
-      // const file = 'http://file.aorise.org/vlink/file/8dc4e25f-5f7b-4021-9a19-a58f8708b4fd.xls';
-      // autoDownloadUrl(file);
+      downloadCameraModel()
+        .then((res) => {
+          if (res) {
+            const content = res;
+            const blob = new Blob([content]);
+            const fileName = '摄像头导入模板.xlsx';
+            if ('download' in document.createElement('a')) { // 非IE下载
+              const elink = document.createElement('a');
+              elink.download = fileName;
+              elink.style.display = 'none';
+              elink.href = URL.createObjectURL(blob);
+              document.body.appendChild(elink);
+              elink.click();
+              URL.revokeObjectURL(elink.href); // 释放URL 对象
+              document.body.removeChild(elink);
+            } else { // IE10+下载
+              navigator.msSaveBlob(blob, fileName);
+            }
+          }
+        })
     },
     // 获取所有的机构单位
     getDepartList () {
@@ -586,9 +625,11 @@ export default {
       } else {
         manufacturer = this.searchForm.manufacturer;
       }
+      console.log(this.searchForm.dateTime)
+
       const params = {
-        'where.onlineStartDate': this.searchForm.dateTime[0],
-        'where.onlineEndDate': this.searchForm.dateTime[1],
+        'where.onlineStartDate': this.searchForm.dateTime[0] && (this.searchForm.dateTime[0] + ' 00:00:00'),
+        'where.onlineEndDate': this.searchForm.dateTime[1] && (this.searchForm.dateTime[1] + ' 23:59:59'),
         'where.dutyUnitId': dutyUnitId,
         'where.intelligentCharac': intelligentCharac,
         'where.deviceStatus': deviceStatus,
@@ -596,10 +637,11 @@ export default {
         'where.type': type,
         'where.manufacturer': manufacturer,
         'where.keyword': this.searchForm.keyword,
+        'where.isBayonet': false, // 是否是卡口
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
-        order: 'desc',
-        orderBy: 'create_time'
+        order: this.pagination.order,
+        orderBy: this.pagination.orderBy
       };
       console.log('params', params)
       this.isSearchLoading = true;
@@ -617,31 +659,6 @@ export default {
                   val.dutyUnitName = item.organName;
                 }
               });
-              // this.cameraTypeList.map(item => {
-              //   if (item.enumField == val.type) {
-              //     val.cameraTypeName = item.enumValue;
-              //   }
-              // });
-              // this.intelligentCharacList.map(item => {
-              //   if (item.enumField == val.intelligentCharac) {
-              //     val.intelligentCharacName = item.enumValue;
-              //   }
-              // });
-              // this.importLevelList.map(item => {
-              //   if (item.enumField == val.importantLevel) {
-              //     val.importantLevelName = item.enumValue;
-              //   }
-              // });
-              // this.manufacturerList.map(item => {
-              //   if (item.enumField == val.manufacturer) {
-              //     val.manufacturerName = item.enumValue;
-              //   }
-              // });
-              // this.deviceStatusList.map(item => {
-              //   if (item.enumField == val.deviceStatus) {
-              //     val.deviceStatusName = item.enumValue;
-              //   }
-              // });
             })
           } else {
             this.isSearchLoading = false;

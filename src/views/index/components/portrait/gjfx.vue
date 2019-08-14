@@ -8,36 +8,14 @@
     </div>
 
     <div :class="['left',{hide:hideleft}]">
-      <div class="plane">
+      <div class="plane" style="padding-top: 20px;">
         <el-form
           :model="ruleForm"
           status-icon
           ref="ruleForm"
           label-width="0px"
           class="demo-ruleForm"
-        >
-          <el-form-item>
-            <el-upload
-                class="vl_jtc_upload_gjfx gjfx_upload"
-                multiple
-                :show-file-list="false"
-                accept="image/*"
-                :action="uploadAcion"
-                list-type="picture-card"
-                :before-upload="beforeAvatarUpload"
-                :on-success="uploadSucess"
-                :on-error="handleError">
-              <i v-if="uploading" class="el-icon-loading"></i>
-              <img v-else-if="ruleForm.input3" :src="ruleForm.input3">
-              <div v-else>
-                <i
-                        style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
-                        class="vl_icon vl_icon_vehicle_01"
-                ></i>
-                <span>点击上传图片</span>
-              </div>
-            </el-upload>
-          </el-form-item>
+          >
           <el-form-item class="" prop="data1">
             <el-date-picker
                     v-model="ruleForm.data1"
@@ -61,39 +39,33 @@
                     placeholder="选择日期时间">
             </el-date-picker>
           </el-form-item>
-          <!--<el-form-item label="抓拍区域：" class="quyu" label-width="90px"  prop="input5">-->
-            <!--<el-radio-group v-model="ruleForm.input5">-->
-              <!--<el-row :gutter="10">-->
-                <!--&lt;!&ndash;<el-col :span="12">&ndash;&gt;-->
-                  <!--&lt;!&ndash;<el-radio label="1">列表选择</el-radio>&ndash;&gt;-->
-                <!--&lt;!&ndash;</el-col>&ndash;&gt;-->
-                <!--<el-col :span="12">-->
-                  <!--<div @click="clickTabCh">-->
-                    <!--<el-radio label="2">地图选择</el-radio>-->
-                  <!--</div>-->
-                <!--</el-col>-->
-              <!--</el-row>-->
-            <!--</el-radio-group>-->
-          <!--</el-form-item>-->
-          <!--<el-form-item v-if="ruleForm.input5=='1'" prop="value1">-->
-            <!--<el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="全部区域" class="full">-->
-              <!--<el-option-group-->
-                <!--v-for="group in options"-->
-                <!--:key="group.areaName"-->
-                <!--:label="group.areaName">-->
-                <!--<el-option-->
-                  <!--v-for="item in group.areaTreeList"-->
-                  <!--:key="item.areaId"-->
-                  <!--:label="item.areaName"-->
-                  <!--:value="item.areaId">-->
-                <!--</el-option>-->
-              <!--</el-option-group>-->
-            <!--</el-select>-->
-          <!--</el-form-item>-->
-          <!--<el-form-item>-->
-            <!--<el-input  v-model="curChooseNum" :disabled="true">-->
-            <!--</el-input>-->
-          <!--</el-form-item>-->
+          <el-form-item>
+            <div class="upload_warp">
+              <el-upload
+                      class="vl_jtc_upload_gjfx gjfx_upload"
+                      multiple
+                      :show-file-list="false"
+                      accept="image/*"
+                      :action="uploadAcion"
+                      list-type="picture-card"
+                      :before-upload="beforeAvatarUpload"
+                      :on-success="uploadSucess"
+                      :on-error="handleError">
+                <i v-if="uploading" class="el-icon-loading"></i>
+                <img v-else-if="ruleForm.input3" :src="ruleForm.input3">
+                <div v-else>
+                  <i
+                          style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
+                          class="vl_icon vl_icon_vehicle_01"
+                  ></i>
+                  <span>点击上传图片</span>
+                </div>
+              </el-upload>
+              <div v-show="ruleForm.input3" class="del_icon">
+                <i class="el-icon-delete" @click="delPic()"></i>
+              </div>
+            </div>
+          </el-form-item>
           <el-form-item>
             <el-row :gutter="10">
               <el-col :span="12">
@@ -105,10 +77,10 @@
             </el-row>
           </el-form-item>
         </el-form>
-        <div class="insetLeft" @click="hideLeft"></div>
+        <div class="insetLeft vl_icon vl_icon_vehicle_02" :class="{'vl_icon_vehicle_03': hideleft}" @click="hideLeft"></div>
       </div>
     </div>
-    <div :class="['right',{hide:!hideleft}, {'clgj_map_show_pic': mapPicShow}]" id="rightMap"></div>
+    <div :class="['right',{hide:!hideleft}]" id="rightMap"></div>
     <div class="reselt" v-if="reselt && showLeft">
       <div class="plane insetPadding">
         <h3 class="title">分析结果<p>共经过{{totalAddressNum}}个地方，出现{{totalMapNum}}次</p></h3>
@@ -146,12 +118,11 @@
             </div>
           <!--</vue-scroll>-->
         </div>
-        <div class="insetLeft2" @click="hideResult"></div>
+        <div class="insetLeft2 vl_icon vl_icon_vehicle_02" :class="{'vl_icon_vehicle_03': hideleft}" @click="hideResult"></div>
       </div>
     </div>
     <!--地图操作按钮-->
     <ul class="map_rrt_u2">
-      <li @click="mapPicShow = !mapPicShow" style="font-size: 14px;" :style="{'color': mapPicShow ? '#0C70F8' : '#999'}">显示图片</li>
       <li @click="resetZoom"><i class="el-icon-aim"></i></li>
       <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
       <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
@@ -169,54 +140,138 @@
         <i class="el-icon-close" @click="strucDetailDialog = false"></i>
       </div>
       <div class="struc_main">
+        <ul v-show="strucCurTab === 1">
+          <!-- <li><span>抓拍设备：{{sturcDetail.deviceName}}</span></li> -->
+          <li><span style="line-height: 0.24rem;">抓拍地址：{{sturcDetail.address}}</span></li>
+          <li style="color: #999;line-height: 0.24rem;">{{sturcDetail.shotTime}}</li>
+        </ul>
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt="">
+            <img class="bigImg" :src="sturcDetail.subStoragePath" alt="">
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img">
-              <img :src="sturcDetail.storagePath" alt="">
+              <img class="bigImg" :src="sturcDetail.storagePath" alt="">
               <span>全景图</span>
             </div>
             <div class="struc_c_d_info">
-              <h2>对比信息</h2>
-              <div class="struc_cdi_line">
-                <span><font>抓拍时间</font>{{sturcDetail.shotTime}}</span>
+              <h2>分析结果</h2>
+              <!--<div class="struc_cdi_line">-->
+                <!--<span><font>抓拍时间</font>{{sturcDetail.shotTime}}</span>-->
+              <!--</div>-->
+              <!--<div class="struc_cdi_line">-->
+                <!--<span><font>抓拍设备</font>{{sturcDetail.deviceName}}</span>-->
+              <!--</div>-->
+              <!--<div class="struc_cdi_line">-->
+                <!--<span><font>抓拍地址</font>{{sturcDetail.address}}</span>-->
+              <!--</div>-->
+              <!--<div class="struc_cdi_line">-->
+                <!--<span class="tz"><font>特征</font><p>{{sturcDetail.sex+" "+(sturcDetail.age || "")+ " "+ (sturcDetail.baby || "")+ " " + (sturcDetail.bag || "")+ " " + (sturcDetail.bottomColor || "") +(sturcDetail.bottomType || "")+ " " + (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+ " "+(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")}}</p></span>-->
+              <!--</div>-->
+              <div class="struc_cd_info_main">
+                <vue-scroll>
+                  <div class="struc_cdi_line" v-if="sturcDetail.sex">
+                    <p>
+                      <b>性别</b>
+                      <span>{{sturcDetail.sex}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.age">
+                    <p>
+                      <b>年龄段</b>
+                      <span>{{sturcDetail.age}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.glasses">
+                    <p>
+                      <b>眼镜</b>
+                      <span>{{sturcDetail.glasses}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.hat">
+                    <p>
+                      <b>帽子</b>
+                      <span>{{sturcDetail.hat}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.mask">
+                    <p>
+                      <b>口罩</b>
+                      <span>{{sturcDetail.mask}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.hair">
+                    <p>
+                      <b>发型</b>
+                      <span>{{sturcDetail.hair}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.upperType">
+                    <p>
+                      <b>上身款式</b>
+                      <span>{{sturcDetail.upperType}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.upperColor">
+                    <p>
+                      <b>上身颜色</b>
+                      <span>{{sturcDetail.upperColor}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.bottomType">
+                    <p>
+                      <b>下身款式</b>
+                      <span>{{sturcDetail.bottomType}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.bottomColor">
+                    <p>
+                      <b>下身颜色</b>
+                      <span>{{sturcDetail.bottomColor}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.baby">
+                    <p>
+                      <b>抱小孩</b>
+                      <span>{{sturcDetail.baby}}</span>
+                    </p>
+                  </div>
+                  <div class="struc_cdi_line" v-if="sturcDetail.bag">
+                    <p>
+                      <b>拎东西</b>
+                      <span>{{sturcDetail.bag}}</span>
+                    </p>
+                  </div>
+                </vue-scroll>
               </div>
-              <div class="struc_cdi_line">
-                <span><font>抓拍设备</font>{{sturcDetail.deviceName}}</span>
-              </div>
-              <div class="struc_cdi_line">
-                <span><font>抓拍地址</font>{{sturcDetail.address}}</span>
-              </div>
-              <div class="struc_cdi_line">
-                <span class="tz"><font>特征</font><p>{{sturcDetail.sex+" "+(sturcDetail.age || "")+ " "+ (sturcDetail.baby || "")+ " " + (sturcDetail.bag || "")+ " " + (sturcDetail.bottomColor || "") +(sturcDetail.bottomType || "")+ " " + (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+ " "+(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")}}</p></span>
-              </div>
-              <div class="struc_cdi_line"></div>
             </div>
-            <span>抓拍信息</span>
+            <!--<span>抓拍信息</span>-->
           </div>
           <!--跳转按钮-->
           <div class="struc_t_btn">
             <a @click="gotoControl(sturcDetail.subStoragePath)">新建布控</a>
-            <a @click="gotoLjd(sturcDetail.subStoragePath)">落脚地分析</a>
+            <a @click="gotoLjd(sturcDetail.subStoragePath)">落脚点分析</a>
           </div>
         </div>
         <div v-show="strucCurTab === 2" class="struc_c_address"></div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt="">
+            <img class="bigImg" :src="sturcDetail.subStoragePath" alt="">
             <span>抓拍图</span>
           </div>
-          <div class="struc_c_d_box">
-            <video id="capVideo" :src="sturcDetail.videoPath"></video>
-            <div class="play_btn" @click="videoTap" v-show="!playing">
-              <i class="vl_icon vl_icon_judge_01" v-if="playing"></i>
-              <i class="vl_icon vl_icon_control_09" v-else></i>
+          <div class="struc_c_d_box" style="float: left;" v-if="playerData">
+            <div is="flvplayer" :oData="playerData"
+                 :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
             </div>
           </div>
-          <div class="download_btn"><a download="视频" :href="videoUrl"></a>下载视频</div>
+          <div class="struc_c_d_box struc_vid_empty" style="float: left;" v-else>
+            <div class="struc_vid_empty_c com_trans50_lt">
+              <div></div>
+              <p>暂无视频</p>
+            </div>
+          </div>
+          <p class="download_tips" v-show="sturcDetail.videoPath">下载提示：右键点击视频选择“另存视频为”即可下载视频。</p>
         </div>
       </div>
       <div class="struc-list">
@@ -233,8 +288,6 @@
         </swiper>
       </div>
     </el-dialog>
-    <!-- D设备 B卡口  这里是设备和卡口 -->
-    <!--<div is="mapSelector" :open="dialogVisible" :clear="selectMapClear" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div>-->
     <div id="capMap"></div>
     <!--人工筛选-->
     <el-dialog
@@ -280,7 +333,7 @@
 </template>
 <script>
   import vlBreadcrumb from '@/components/common/breadcrumb.vue';
-//  import mapSelector from '@/components/common/mapSelector.vue';
+  import flvplayer from '@/components/common/flvplayer.vue';
   import { mapXupuxian,ajaxCtx } from "@/config/config.js";
   import { objDeepCopy, random14, formatDate } from "@/utils/util.js";
   import { cityCode } from "@/utils/data.js";
@@ -288,10 +341,10 @@
   import { MapGETmonitorList } from "@/views/index/api/api.map.js";
   import { getAllBayonetList } from "@/views/index/api/api.base.js";
   export default {
-    components: {vlBreadcrumb},
+    components: {vlBreadcrumb, flvplayer},
     data() {
       return {
-        mapPicShow: false, // 地图图片显示开关
+        playerData: null,
         filterDialog: false,
         showLeft: false,
         selectMapClear: '',
@@ -378,7 +431,6 @@
       }
     },
     mounted() {
-      this.getMapGETmonitorList()//查询行政区域
       this.renderMap();
       this.setDTime();
       if (this.$route.query.imgurl) {
@@ -386,6 +438,24 @@
       }
     },
     methods: {
+      // 设置视频数据
+      setPlayerData () {
+        if (this.sturcDetail.videoPath) {
+          this.playerData = {
+            type: 3,
+            title: this.sturcDetail.deviceName,
+            video: {
+              uid: new Date().getTime() + '',
+              downUrl: this.sturcDetail.videoPath
+            }
+          }
+        } else {
+          this.playerData = null;
+        }
+      },
+      delPic () {
+        this.ruleForm.input3 = '';
+      },
       chooseEndTime (e) {
         if (e < this.ruleForm.data1) {
           this.$message.info('结束时间必须大于开始时间才会有结果')
@@ -452,74 +522,6 @@
           this.reselt = true;
         }
       },
-      clickTabCh() {
-        this.dialogVisible = !this.dialogVisible;
-      },
-      clickTab(val){
-        this.hover = this.hover==val?'':val
-        if(!this.hover){
-          this.map.setDefaultCursor();
-          this.mouseTool.close(false);
-        }else{
-          this.selArea(val)
-        }
-
-      },
-      selArea (v) {
-        this.map.setDefaultCursor('crosshair');
-        switch (v){
-          case 'cut1' :
-            this.mouseTool.rectangle({
-              strokeColor:'#FA453A',
-              strokeWeight: 1,
-              fillColor:'#FA453A',
-              fillOpacity:0.2,
-              strokeStyle: 'solid',
-            })
-            break ;
-          case 'cut2' :
-            this.mouseTool.circle({
-              strokeColor: "#FA453A",
-              strokeWeight: 1,
-              strokeOpacity: 0.2,
-              fillColor: '#FA453A',
-              fillOpacity: 0.2,
-              strokeStyle: 'solid',
-              // 线样式还支持 'dashed'
-              // strokeDasharray: [30,10],
-            })
-            break ;
-          case 'cut3' :
-            this.mouseTool.polyline({
-              strokeColor: "#FA453A",
-              strokeOpacity: 1,
-              strokeWeight: 2,
-              // 线样式还支持 'dashed'
-              strokeStyle: "solid",
-              // strokeStyle是dashed时有效
-              // strokeDasharray: [10, 5],
-            })
-
-            break ;
-          case 'cut4' :
-            this.mouseTool.polygon({
-              zIndex: 13,
-              strokeColor: '#FA453A',
-              strokeOpacity: 1,
-              bubble: true,
-              strokeWeight: 1,
-              fillColor: '#FA453A',
-              fillOpacity: 0.2,
-              isRing: false
-            });
-            break ;
-          case 'cut5' :
-            break ;
-        }
-      },
-      hideMap(){
-        this.dialogVisible=false
-      },
       submitForm(v) {
         if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data2 && this.ruleForm.input3){
           let pg = {
@@ -557,17 +559,6 @@
         this.curChooseNum = '已选择0个设备';
         this.setDTime ();
       },
-      //查询行政区域
-      getMapGETmonitorList(){
-        let d={
-          areaUid:mapXupuxian.adcode
-        }
-        MapGETmonitorList(d).then(res=>{
-          if(res && res.data){
-            this.options.push(res.data)
-          }
-        })
-      },
       renderMap() {
         let map = new window.AMap.Map("rightMap", {
           zoom: 10,
@@ -582,12 +573,6 @@
         });
         supMap.setMapStyle('amap://styles/whitesmoke');
         this.map = supMap;
-      },
-      mapPoint (data) {
-        console.log(data);
-        let num = data.deviceList.length + data.bayonetList.length;
-        this.curChooseNum = '已选择' + num + '个设备';
-        this.pointData = data;
       },
       compare  (prop, bool) {
         return function (obj1, obj2) {
@@ -690,6 +675,7 @@
       },
       delSitem (item, sItem, index) {
         item.list.splice(index, 1);
+        item.times--;
         this.evData.splice(this.evData.findIndex(x => x === sItem), 1);
       },
       chooseOk () {
@@ -733,31 +719,19 @@
         }
         return str;
       },
-      drawMapMarker (data) {
+      drawMapMarker (oData) {
+        let data = this.fitlerSXT(oData);
         let path = [];
         for (let  i = 0; i < data.length; i++) {
           let obj = data[i];
-          let _path = [obj.shotPlaceLongitude, obj.shotPlaceLatitude];
           if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
-            let _sContent = `
-            <div class="vl_jtc_mk">
-              <img src="${obj.subStoragePath}"/>
-              <p>${obj.shotTime}</p>
-            </div>`;
-            // 窗体
-            let winInfo = new AMap.Marker({ // 添加自定义点标记
-              map: this.amap,
-              position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-              offset: new AMap.Pixel(20, -80), // 相对于基点的偏移位置
-              draggable: false, // 是否可拖动
-              extData: obj,
-              content: _sContent
-            });
-            winInfo.on('click', () => {
-              this.showStrucInfo(obj, i)
+            let _time = '';
+            _time = '<p class="vl_map_mark_time">';
+            obj.shotTime.split(',').forEach(j => {
+              _time += `<span>${j}</span>`
             })
-            path.push(_path);
-            let _content = `<div class="vl_icon vl_icon_sxt"><p>${obj.shotTime}</p></div>`
+            _time += '</p>';
+            let _content = `<div class="vl_icon vl_icon_sxt">` + _time + `</div>`
             let point = new AMap.Marker({ // 添加自定义点标记
               map: this.amap,
               position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
@@ -766,13 +740,37 @@
               // 自定义点标记覆盖物内容
               content: _content
             });
-            this.markerPoint[i] = [point,winInfo];
+            point.on('click', () => {
+              let newObj = objDeepCopy(obj);
+              newObj.shotTime = newObj.shotTime.split(',')[0];
+              this.showStrucInfo(newObj, i)
+            })
+            this.markerPoint[i] = [point];
           }
         }
         this.amap.setFitView()
-        this.drawLine(path);
+        this.drawLine(oData);
       }, // 覆盖物（窗体和checkbox
-      drawLine (path) {
+      fitlerSXT (oData) {
+        let data = objDeepCopy(oData), _arr = [];
+        data.forEach(x => {
+          let _i = _arr.findIndex(y => y.deviceID === x.deviceID);
+          if (_i === -1) {
+            _arr.push(x)
+          } else {
+            _arr[_i]['shotTime'] += ',' + x.shotTime;
+          }
+        })
+        return _arr;
+      },
+      drawLine (oData) {
+        let path = [];
+        oData.forEach(obj => {
+          let _path = [obj.shotPlaceLongitude, obj.shotPlaceLatitude];
+          if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
+            path.push(_path);
+          }
+        })
         var polyline = new AMap.Polyline({
           path: path,
           showDir: true,
@@ -791,19 +789,6 @@
         this.operData();
         this.drawMapMarker(this.evData)
       }, // 更新画线
-      videoTap () {
-        let vDom = document.getElementById('capVideo')
-        if (this.playing) {
-          vDom.pause();
-        } else {
-          vDom.play();
-        }
-        vDom.addEventListener('ended', (e) => {
-          e.target.currentTime = 0;
-          this.playing = false;
-        })
-        this.playing = !this.playing;
-      },
       showStrucInfo (data, index) {
         this.amap.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude])
         this.curImgIndex = index;
@@ -811,6 +796,7 @@
         this.sturcDetail = data;
         this.strucCurTab = 1;
         this.drawPoint(data);
+        this.setPlayerData();
       },
       drawPoint (data) {
         this.$nextTick(() => {
@@ -843,6 +829,7 @@
         this.curImgIndex = index;
         this.sturcDetail = data;
         this.drawPoint(data);
+        this.setPlayerData();
       },
       mapZoomSet (val) {
         if (this.amap) {
@@ -858,6 +845,29 @@
   };
 </script>
 <style lang="scss" scoped>
+  .upload_warp {
+    position: relative;
+    .del_icon {
+      display: none;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 24px;
+      height: 24px;
+      line-height: 24px;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.4);
+      -webkit-border-radius: 4px;
+      -moz-border-radius: 4px;
+      border-radius: 4px;
+      color: #ffffff;
+    }
+    &:hover {
+      .del_icon {
+        display: block;
+      }
+    }
+  }
   .map_rrt_u2 {
     position: absolute; right: 30px;
     bottom: 30px;
@@ -1005,17 +1015,9 @@
     top: 50%;
     margin-top: -89px;
     display: inline-block;
-    background-repeat: no-repeat;
-    transform: rotate(180deg);
-    background-image: url(../../../../assets/img/icons.png);
-    background-position: -380px -1269px;
     cursor: pointer;
   }
   .hide {
-    .insetLeft {
-      transform: rotate(180deg);
-      background-position: -504px -1269px;
-    }
   }
   .insetLeft2 {
     position: absolute;
@@ -1025,10 +1027,6 @@
     top: 50%;
     margin-top: -89px;
     display: inline-block;
-    background-repeat: no-repeat;
-    transform: rotate(180deg);
-    background-image: url(../../../../assets/img/icons.png);
-    background-position: -318px -1269px;
     cursor: pointer;
   }
   .select_btn {
@@ -1274,16 +1272,20 @@
 </style>
 <style lang="scss">
   #rightMap {
-    .vl_icon.vl_icon_sxt {
+    .vl_icon {
+      width: 47px;
       position: relative;
-      > p {
+      > .vl_map_mark_time {
         position: absolute; top: 10px; left: 98%;
-        width: auto;
-        word-break:keep-all; white-space:nowrap;
+        width: 130px;
+        word-break:keep-all;
         font-size: 12px; color: #fff;
         background-color: rgba(0, 0, 0, 0.4);
         border-radius: 2px;
         padding: 2px 5px;
+        span{
+          display: block;
+        }
       }
     }
   }
@@ -1333,6 +1335,20 @@
         border-radius: 6px;
       }
     }
+    span {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      margin-top: 126px;
+      color: #999;
+    }
+    &:hover {
+      span {
+        color: #FFFFFF;
+      }
+    }
   }
   .gjfx_upload {
     &:hover {
@@ -1350,6 +1366,10 @@
     .el-dialog {
       max-width: 13.06rem;
       width: 100%!important;
+      /* 祖先元素设置了transform属性则会导致固定定位属性position: fixed失效。 */
+      transform: none !important;
+      top: calc(100% - 8.8rem);
+      left: calc((100% - 13.06rem)/2);
     }
     .el-dialog__header {
       display: none;
@@ -1379,7 +1399,7 @@
     }
     .struc_main {
       width: 11.46rem;
-      height: 4.4rem;
+      height: 5rem;
       margin: 0 auto;
       border-bottom: 1px solid #F2F2F2;
       .struc_c_detail {
@@ -1486,70 +1506,46 @@
                 }
               }
             }
+            .struc_cd_info_main {
+              height: 2.75rem;
+            }
             .struc_cdi_line {
-              >span {
-                /*position: relative;*/
-                max-width: 100%;
-                display: inline-block;
-                height: .3rem;
-                line-height: .3rem;
-                margin-bottom: .08rem;
-                border: 1px solid #F2F2F2;
-                color: #333333;
-                white-space: nowrap;
-                text-overflow: ellipsis;
-                border-radius:3px;
-                font-size: 12px;
-                overflow: hidden;
-                padding-right: .1rem;
-                margin-right: .08rem;
-                > i {
-                  vertical-align: middle;
-                  margin-left: .1rem;
-                }
-                > font {
-                  width: 75px;
-                  text-align: center;
-                  border-right: 1px solid #F2F2F2;
-                  color: #999999;
-                  background: #FAFAFA;
-                  display: inline-block;
-                  margin-right: .1rem;
-                }
-              }
-              .tz {
-                display: flex;
-                white-space: normal;
-                overflow: visible;
-                height: auto;
-                border: none;
-                font {
-                  flex-shrink: 0;
-                  width: 75px;
-                  border: 1px solid #F2F2F2;
-                  -webkit-border-radius: 3px 0 0 3px;
-                  -moz-border-radius: 3px 0 0 3px;
-                  border-radius: 3px 0 0 3px;
-                  margin-right: 0px;
-                  border-right: none;
-                }
-                >p{
-                  color: #333333;
-                  border: 1px solid #F2F2F2;
-                  -webkit-border-radius: 0 3px 3px 0;
-                  -moz-border-radius: 0 3px 3px 0;
-                  border-radius: 0 3px 3px 0;
-                  padding-left: .1rem;
-                }
-              }
+              flex: none;
+              width: 50%;
+              display: inline-block;
               p {
-                color: #999999;
+                max-width: 100%;
+                overflow: hidden;
+                display: table;
+                min-height: 30px;
+                margin-bottom: 0.08rem;
+                padding-right: 10px;
+                margin-right: 0.08rem;
+                border: 1px solid #f2f2f2;
+                border-radius: 3px;
+                font-size: 12px;
+                > b {
+                  width: 70px;
+                  background: #fafafa;
+                  color: #999;
+                  font-weight: normal;
+                  padding-right: 10px;
+                  padding-left: 10px;
+                  display: table-cell;
+                  vertical-align: middle;
+                  border-right: 1px solid #f2f2f2;
+                }
+                >span {
+                  display: table-cell;
+                  vertical-align: middle;
+                  padding-left: 5px;
+                }
               }
             }
           }
           &:before {
             display: block;
-            content: '';
+            content: none;
             position: absolute;
             top: -.7rem;
             right: -.7rem;
@@ -1559,7 +1555,7 @@
           }
           &:after {
             display: block;
-            content: '';
+            content: none;
             position: absolute;
             top: -.4rem;
             right: -.4rem;
@@ -1617,6 +1613,12 @@
         }
       }
       .struc_c_video {
+        .download_tips {
+          float: left;
+          width: 100%;
+          text-align: right;
+          padding-right: 40px; padding-top: 10px;
+        }
         .struc_c_d_box {
           background: #E9E7E8;
           height: 100%;

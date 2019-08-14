@@ -370,8 +370,8 @@
         class="dialog_comp"
         >
         <el-form :model="addGroupForm" ref="addGroupForm" :rules="rules">
-          <el-form-item label=" " prop="userGroupName" label-width="20px" class="group_name">
-            <el-input placeholder="请输入组名" style="width: 90%;" v-model="addGroupForm.userGroupName" maxlength="6"></el-input>
+          <el-form-item label=" " prop="userGroupName" label-width="20px" :class="{'group_name': isShowError}">
+            <el-input placeholder="请输入组名" style="width: 90%;" v-model="addGroupForm.userGroupName" maxlength="6"  @blur="blurGroupName"></el-input>
             <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
           </el-form-item>
         </el-form>
@@ -392,8 +392,8 @@
         <div class="content_body">
           <span>您已选择{{multipleSelection.length}}个对象，输入组名后已选对象将自动加入。</span>
           <el-form :model="addGroupForm" ref="addGroupForm" :rules="rules">
-            <el-form-item label=" " prop="userGroupName" label-width="20px" class="group_name">
-              <el-input placeholder="请输入组名" style="width: 90%;" v-model="addGroupForm.userGroupName" maxlength="6"></el-input>
+            <el-form-item label=" " prop="userGroupName" label-width="20px" :class="{'group_name': isShowError}">
+              <el-input placeholder="请输入组名" style="width: 90%;" v-model="addGroupForm.userGroupName" maxlength="6" @blur="blurGroupName"></el-input>
               <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
             </el-form-item>
           </el-form>
@@ -492,6 +492,25 @@ export default {
     this.getBottomBankList();
   },
   methods: {
+    // 分组名名称blur
+    blurGroupName () {
+      if (this.addGroupForm.userGroupName) {
+        const params = {
+          name: this.addGroupForm.userGroupName
+        };
+        judgePerson(params)
+          .then(res => {
+            if (res && res.data) {
+              this.isShowError = true;
+            } else {
+              this.isShowError = false;
+            }
+          })
+          .catch(() => {})
+      } else {
+        this.isShowError = false;
+      }
+    },
     // 获取分组列表
     getGroupList () {
       const params = {
@@ -618,21 +637,24 @@ export default {
     // 复制或新增复制到组
     addCopyGroupInfo (form) {
       this.$refs[form].validate(valid => {
-        this.isShowError= false;
         if (valid) {
-          const params = {
-            name: this.addGroupForm.userGroupName
-          };
-          judgePerson(params)  // --判断组名是否重复
-            .then(res => {
-              if (res.data) {
-                this.isShowError = true;
-              } else {
-                this.isShowError= false;
-                this.handleAddCopyGroupInfo();
-              }
-            })
-            .catch(() => {})
+          if (this.isShowError) {
+            return;
+          }
+          this.handleAddCopyGroupInfo();
+          // const params = {
+          //   name: this.addGroupForm.userGroupName
+          // };
+          // judgePerson(params)  // --判断组名是否重复
+          //   .then(res => {
+          //     if (res.data) {
+          //       this.isShowError = true;
+          //     } else {
+          //       this.isShowError= false;
+          //       this.handleAddCopyGroupInfo();
+          //     }
+          //   })
+          //   .catch(() => {})
         }
       })
     },
@@ -744,22 +766,27 @@ export default {
     },
     // 新增分组
     addGroupInfo (form) {
+      // this.isShowError= false;
       this.$refs[form].validate(valid => {
-        this.isShowError = false;
+        // this.isShowError = false;
         if (valid) {
-          const params = {
-            name: this.addGroupForm.userGroupName
-          };
-          judgePerson(params)
-            .then(res => {
-              if (res.data) {
-                this.isShowError = true;
-              } else {
-                this.isShowError= false;
-                this.handleAddGroupInfo();
-              }
-            })
-            .catch(() => {})
+          if (this.isShowError) {
+            return;
+          }
+          this.handleAddGroupInfo();
+          // const params = {
+          //   name: this.addGroupForm.userGroupName
+          // };
+          // judgePerson(params)
+          //   .then(res => {
+          //     if (res.data) {
+          //       this.isShowError = true;
+          //     } else {
+          //       this.isShowError= false;
+          //       this.handleAddGroupInfo();
+          //     }
+          //   })
+          //   .catch(() => {})
         }
       })
     },
@@ -1043,6 +1070,9 @@ export default {
     }
     .group_name {
       position: relative;
+      /deep/ .el-input__inner {
+        border-color: #f56c6c;
+      }
       .group_error_tip {
         position: absolute;
         height: 10px;

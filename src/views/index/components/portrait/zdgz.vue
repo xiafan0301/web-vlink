@@ -10,6 +10,24 @@
     
     <div :class="['vl_j_left',{hideleft:hideleft}]">
       <div class="vl_jtc_search" style="padding-top: 0;">
+        <el-date-picker
+          v-model="searchData.time1"
+          type="datetime"
+          time-arrow-control
+          placeholder="开始时间"
+          :picker-options="pickerOptions"
+          class="full vl_date"
+          :clearable="false"
+        ></el-date-picker>
+        <el-date-picker
+            v-model="searchData.time2"
+            type="datetime"
+            time-arrow-control
+            :clearable="false"
+            :picker-options="pickerOptions"
+            placeholder="结束时间"
+            class="full vl_date vl_date_end"
+        ></el-date-picker>
           <el-select class="full" v-model="searchData.portraitGroupId" placeholder="关注人群">
             <el-option
               v-for="item in portraitGroupList"
@@ -18,7 +36,7 @@
               :value="item.uid">
             </el-option>
           </el-select>
-          <el-select class="full" v-model="searchData.sex" placeholder="选择性别">
+          <el-select class="full" v-model="searchData.sex" placeholder="请选择性别" clearable>
             <el-option
               v-for="item in sexList"
               :key="item.value"
@@ -26,7 +44,7 @@
               :value="item.value">
             </el-option>
           </el-select>
-          <el-select class="full" v-model="searchData.ageGroup" placeholder="选择年龄段">
+          <el-select class="full" v-model="searchData.ageGroup" placeholder="请选择年龄段" clearable>
             <el-option
               v-for="item in ageGroupList"
               :key="item.value"
@@ -34,107 +52,81 @@
               :value="item.value">
             </el-option>
           </el-select>
-       
-
-       <!-- <el-date-picker
-         v-model="searchData.time"
-          type="daterange"
-          :clearable="false"
-          class="full vl_date"
-          value-format="yyyy-MM-dd"
-          :picker-options="pickerOptions"
-          range-separator="至"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期">
-        </el-date-picker> -->
-            <el-date-picker
-              v-model="searchData.time1"
-              type="date"
-              placeholder="开始时间"
-              :picker-options="pickerOptions"
-              class="full vl_date"
-              :clearable="false"
-              value-format="yyyy-MM-dd"
-            ></el-date-picker>
-            <el-date-picker
-              v-model="searchData.time2"
-              type="date"
-              :clearable="false"
-              :picker-options="pickerOptions"
-              placeholder="结束时间"
-              class="full vl_date vl_date_end"
-              value-format="yyyy-MM-dd"
-            ></el-date-picker>
-        <!-- <el-form-item label="区域：" label-width="60px" prop="input5"> -->
-            <!-- <el-radio-group v-model="input5" @change="changeTab"> -->
-            <el-radio-group v-model="input5" @change="changeTab">
-               <el-row :gutter="10">
-                <el-col :span="12">
-                  <el-radio label="1">列表选择</el-radio>
-                </el-col>
-                <el-col :span="12">
-                  <div @click="clickTab">
-                    <el-radio label="2">地图选择</el-radio>
-                  </div>
-                </el-col>
-              </el-row>
-            </el-radio-group>
-          <!-- </el-form-item> -->
+          <el-radio-group v-model="input5" @change="changeTab">
+              <el-row :gutter="10">
+              <el-col :span="12">
+                <el-radio label="1">列表选择</el-radio>
+              </el-col>
+              <el-col :span="12">
+                <div @click="clickTab">
+                  <el-radio label="2">地图选择</el-radio>
+                </div>
+              </el-col>
+            </el-row>
+          </el-radio-group>
           <div v-if="input5==2" >
             <el-input  v-model="selectValue" :disabled="true">
             </el-input>
           </div>
-        <el-select 
-          v-model="areaIds"
-          class="camera-select full"
-          multiple
-          collapse-tags
-          placeholder="关注范围" v-if="input5==1">
-          <el-option
-            v-for="item in eventAreas"
-            :key="item.id"
-            :label="item.areaName"
-            :value="item.areaId">
-          </el-option>
-        </el-select>
-        <div>
+          <el-select 
+            v-model="areaIds"
+            class="camera-select full"
+            multiple
+            collapse-tags
+            placeholder="关注范围" v-if="input5==1">
+            <el-option
+              v-for="item in eventAreas"
+              :key="item.id"
+              :label="item.areaName"
+              :value="item.areaId">
+            </el-option>
+          </el-select>
+          <div>
           <el-row :gutter="10">
-              <el-col :span="12">
-                <el-button  @click="resetSearch" class="full">重置</el-button>
-              </el-col>
-              <el-col :span="12">
-                <el-button  :loading="searching" type="primary" @click="beginSearch"
-                  class="select_btn full"
-                >搜索</el-button>
-              </el-col>
-            </el-row>
+            <el-col :span="12">
+              <el-button  @click="resetSearch" class="full">重置</el-button>
+            </el-col>
+            <el-col :span="12">
+              <el-button  :loading="searching" type="primary" @click="beginSearch"
+                class="select_btn full"
+              >搜索</el-button>
+            </el-col>
+          </el-row>
         </div>
       </div>
       <span class="insetLeft2" @click="hideResult"></span>
     </div>
     <div :class="['vl_j_right',{hideleft:hideleft}]">
       <div id="tcMap"></div>
+      <ul class="map_rrt_u2">
+        <li  @click="resemt"><i class="el-icon-aim"></i></li>
+        <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
+        <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
+      </ul>
       <div class="vl_jfo_switch">
         <div><span :class="{'active': switchType === 0}" @click="switchType = 0">抓拍结果</span></div>
         <div><span :class="{'active': switchType === 1}" @click="switchType = 1;">关联事件</span></div>
       </div>
       <div class="vl_jfo_right" v-show="showVideoList">
         <div class="vl_jig_right_title">
-          <span>{{curSXT.deviceName}}</span>
-          <span>抓拍{{curSXT.shotNum}}次</span>
+          <p><i class="vl_icon vl_icon_v11"></i><span :title="curSXT.deviceName">{{curSXT.deviceName}}</span></p>
+          <p><i class="vl_icon vl_icon_position_1"></i><span :title="curSXT.address">{{curSXT.address}}</span></p>
+          <!-- < span>抓拍{{curSXT.shotNum}}次</span> -->
         </div>
-        <vue-scroll>
-          <div class="vl_jtc_mk" v-for="(item, index) in curVideo.videoList" :key="item.id">
-            <p>{{item.shotTime}}</p>
-            <video :id="'vlJigVideo' + index" :src="item.videoPath"></video>
-            <p>{{item.shotTime}}</p>
-            <div class="vl_jig_right_btn">
-              <span class="vl_icon vl_icon_judge_01" @click="playVideo(index)" v-if="item.playing"></span>
-              <span class="vl_icon vl_icon_control_09" @click="playVideo(index)" v-else></span>
-              <span class="vl_icon vl_icon_control_08" @click="largeVideo(index)"></span>
+        <div class="video_container">
+          <vue-scroll>
+            <div class="vl_jtc_mk" v-for="(item, index) in curVideo.videoList" :key="item.id">
+              <p>{{item.shotTime}}</p>
+              <video :id="'vlJigVideo' + index" :src="item.videoPath"></video>
+              <p>{{item.shotTime}}</p>
+              <div class="vl_jig_right_btn">
+                <span class="vl_icon vl_icon_judge_01" @click="playVideo(index)" v-if="item.playing"></span>
+                <span class="vl_icon vl_icon_control_09" @click="playVideo(index)" v-else></span>
+                <span class="vl_icon vl_icon_control_08" @click="largeVideo(index)"></span>
+              </div>
             </div>
-          </div>
-        </vue-scroll>
+          </vue-scroll>
+        </div>
         <div class="vl_jig_right_close"><i class="el-icon-error" @click="hideVideoList"></i></div>
       </div>
       <div class="vl_jig_event" v-show="switchType === 1">
@@ -217,7 +209,7 @@
       </div>
     </div>
     <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
-      <video id="vlJfoLargeV" :src="curVideoUrl"></video>
+      <video id="vlJfoLargeV" :src="curVideoUrl" crossOrigin="anonymous"></video>
       <div @click="closeVideo" class="close_btn el-icon-error"></div>
       <div class="control_bottom">
         <div>{{curSXT.deviceName}}</div>
@@ -229,16 +221,26 @@
         </div>
       </div>
     </div>
-    <div style="width: 0; height: 0;" v-show="showCut"  :class="{vl_j_cutscreen: showCut}">
+    <!-- <div style="width: 0; height: 0;" v-show="showCut"  :class="{vl_j_cutscreen: showCut}">
       <img :src="demoImg" alt="">
       <i @click="showCut = false" class="close_btn el-icon-error"></i>
       <a download="截图" :href="demoImg" id="vlJidDownloadImg" ></a>
-    </div>
+    </div> -->
   </div>
-
+  <!-- 截屏 dialog -->
+    <el-dialog title="截屏" :visible.sync="cutDialogVisible" :center="false" :append-to-body="true" width="1000px" style="z-index: 11111;">
+      <div style="text-align: center; padding-top: 30px;">
+        <canvas :id="flvplayerId + '_cut_canvas'"></canvas>
+      </div>
+      <div slot="footer" class="dialog-footer" style="padding: 0 0 20px 0;">
+        <el-button  @click="cutDialogVisible = false">取 消</el-button>&nbsp;&nbsp;&nbsp;&nbsp;
+        <el-button  type="priamry" @click="playerCutSave">保 存</el-button>
+        <a :id="flvplayerId + '_cut_a'" style="display: none;">保存</a>
+      </div>
+    </el-dialog>
   <!-- 地图选择 -->
    <!-- D设备 B卡口  这里是设备和卡口 -->
-    <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" :clear="clearMapSelect" @mapSelectorEmit="mapPoint"></div>
   </div>
 </template>
 <script>
@@ -248,6 +250,8 @@ import {getFocusList, newGETAlarmSnapList, JfoGETEventList,getAllDevice } from "
 import {MapGETmonitorList} from '../../api/api.map.js';
 import {getGroupListIsPortrait, getGroupListIsVehicle} from '../../api/api.control.js';
 import mapSelector from '@/components/common/mapSelector.vue';
+import { random14, dateOrigin, formatDate } from '@/utils/util.js';
+import { mapXupuxian } from "@/config/config.js";
 export default {
    components: {
     mapSelector,
@@ -255,6 +259,9 @@ export default {
   },
   data() {
     return {
+      flvplayerId: 'flv_' + random14(),
+      cutDialogVisible: false, // 截图弹出框
+      clearMapSelect: null, // 清除地图选择
       input5:"1",
       areaIds: [],
       eventAreas: [],
@@ -266,26 +273,26 @@ export default {
       evData: [],
       searchData: {
         type: 1, // 1：人， 2： 车,0 无限
-        portraitGroupId: '',  // 人员组
+        portraitGroupId: null,  // 人员组
         sex: null, // 1男，2女
         ageGroup: null, // 年龄段
-        time1: null,
-        time2: null
+        time1: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)),
+        time2: new Date()
       },
       sexList: [
-        {value: null, label: '不限'},
+        // {value: null, label: '不限'},
         {value: '男', label: '男'},
         {value: '女', label: '女'}
       ],
       portraitGroupList: [],
       vehicleGroupList: [],
-      focusType: [
-        {value: null, label: '不限'},
-        {value: 1, label: '布控人员'},
-        {value: 2, label: '布控车辆'}
-      ],
+      // focusType: [
+      //   {value: null, label: '不限'},
+      //   {value: 1, label: '布控人员'},
+      //   {value: 2, label: '布控车辆'}
+      // ],
       ageGroupList: [
-        {value: null, label: '不限'},
+        // {value: null, label: '不限'},
         {value: '儿童', label: '儿童'},
         {value: '少年', label: '少年'},
         {value: '青年', label: '青年'},
@@ -297,17 +304,17 @@ export default {
       
       pickerOptions: {
         disabledDate (time) {
-          let date = new Date();
-          let curDate = date.getTime();
-          let curS = 3 * 24 * 3600 * 1000;
-            let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
-          let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
-          let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
-          let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
-          let start = new Date(curDate - curS).getFullYear() +
-        "-" + _sm + "-" +_sd;
+        //   let date = new Date();
+        //   let curDate = date.getTime();
+        //   let curS = 3 * 24 * 3600 * 1000;
+        //     let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
+        //   let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
+        //   let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
+        //   let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
+        //   let start = new Date(curDate - curS).getFullYear() +
+        // "-" + _sm + "-" +_sd;
           
-          let threeMonths = new Date(start).getTime();
+        //   let threeMonths = new Date(start).getTime();
           //return time.getTime() > Date.now() || time.getTime() < threeMonths;
           return time.getTime() > Date.now();
         }
@@ -343,7 +350,7 @@ export default {
     }
   },
   mounted () {
-    this.setDTime();
+    // this.setDTime();
     let map = new AMap.Map('tcMap', {
       center: [112.974691, 28.093846],
       zoom: 16
@@ -356,6 +363,11 @@ export default {
     getGroupListIsPortrait().then(res => {
       if (res) {
         this.portraitGroupList = res.data;
+        this.portraitGroupList.map(item => {
+          if (!item.uid) {
+            this.searchData.portraitGroupId = item.uid;
+          }
+        })
       }
     })
     getGroupListIsVehicle().then(res => {
@@ -365,6 +377,16 @@ export default {
     })
   },
   methods: {
+    mapZoomSet(val) {
+      if (this.amap) {
+        this.amap.setZoom(this.amap.getZoom() + val);
+      }
+    },
+    resemt(){
+      if (this.amap) {
+        this.amap.setZoomAndCenter(14, mapXupuxian.center);
+      }
+    },
     hideResult(){
       this.hideleft = !this.hideleft;
     },
@@ -414,6 +436,9 @@ export default {
           .then(res => {
             if (res) {
               this.eventAreas = res.data.areaTreeList;
+              this.eventAreas.map(item => {
+                this.areaIds.push(item.areaId);
+              })
             }
           })
     },
@@ -429,7 +454,7 @@ export default {
       }
     },
     setDTime () {
-      let date = new Date();
+      /* let date = new Date();
       let curDate = date.getTime();
       let curS = 1 * 24 * 3600 * 1000;
         let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
@@ -441,18 +466,30 @@ export default {
         "-" + _sm + "-" +_sd;
       let _e = date.getFullYear() + "-" + _em + "-" + _ed;
       this.searchData.time1 = _s
-      this.searchData.time2 = _s
+      this.searchData.time2 = _s */
     },
     resetSearch () {
-      this.setDTime()
+      // this.setDTime()
       this.searchData.type = null;
-      this.searchData.portraitGroupId = '';
+      this.searchData.portraitGroupId = null;
       this.searchData.sex = null;
       this.searchData.vehicleColor = null;
       this.searchData.ageGroup = null;
       this.searchData.vehicleGroupId = '';
       this.searchData.plateType = null;
+      this.searchData.time1 = dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000));
+      this.searchData.time2 = new Date();
+      this.selectDevice = [];
+      this.selectBayonet = [];
+      this.selectValue = "已选设备0个";
+      
       this.areaIds = [];
+      this.eventAreas.map(item => {
+        this.areaIds.push(item.areaId);
+      });
+
+      this.clearMapSelect = !this.clearMapSelect; // 清除地图选择
+
     },
     beginSearch () {
       let _todo = false;
@@ -471,8 +508,8 @@ export default {
         target: '.se_hi_box'
       })
       let params = {
-        startTime: this.searchData.time1 + " 00:00:00",
-        endTime: this.searchData.time2 + " 23:59:59" ,
+        startTime: formatDate(this.searchData.time1),
+        endTime: formatDate(this.searchData.time2),
         personGroupId: this.searchData.portraitGroupId || "" ,
         // sex: this.searchData.sex || "",
         // age: this.searchData.ageGroup || "" ,
@@ -606,8 +643,8 @@ export default {
         personGroupId:this.searchData.portraitGroupId,
         deviceCode:data.groupName,
         sex:this.searchData.sex,
-        startTime :this.searchData.time1?(this.searchData.time1 + " 00:00:00"):null,
-        endTime :this.searchData.time2?(this.searchData.time2 + " 23:59:59"):null,
+        startTime :this.searchData.time1 ? formatDate(this.searchData.time1):null,
+        endTime :this.searchData.time2 ? formatDate(this.searchData.time2):null,
         age:this.searchData.ageGroup,
         // surveillanceId: this.curSXT.surveillanceId ? this.curSXT.surveillanceId : '',
         // deviceId: this.curSXT.deviceId,
@@ -622,7 +659,7 @@ export default {
                 x.playing = false;
                 return x;
               });
-              console.log(this.curVideo);
+              console.log('curVideo', this.curVideo);
               
               this.$_hideLoading();
             }
@@ -651,10 +688,11 @@ export default {
       this.curVideo.videoList[_i].playing = !this.curVideo.videoList[_i].playing;
     },
     largeVideo (_i) {
+      this.curVideo.playing = false;
       let vDom = document.getElementById('vlJigVideo' + _i);
       vDom.pause();
       this.curVideo.id = 'vlJigVideo' + _i;
-      this.curVideo.playing = this.curVideo.videoList[_i].playing;
+      // this.curVideo.playing = this.curVideo.videoList[_i].playing;
       this.curVideo.playNum = _i;
       this.showLarge = true;
       if (this.curVideo.videoList[_i].playing) {
@@ -669,6 +707,8 @@ export default {
       })
       document.getElementById('vlJfoLargeV').currentTime = vDom.currentTime;
       this.curVideoUrl = vDom.src;
+
+      console.log('curVideoUrl', this.curVideoUrl)
     },
     closeVideo () {
       let vDom = document.getElementById(this.curVideo.id);
@@ -690,16 +730,61 @@ export default {
       document.getElementById('vlJfoLargeV').play();
     },
     cutScreen () {
-      this.showCut = true;
-      let _canvas = document.createElement('canvas');
-      _canvas.setAttribute('width', document.documentElement.clientWidth);
-      _canvas.setAttribute('height', document.documentElement.clientHeight);
-      let cxt = _canvas.getContext('2d');
-      cxt.drawImage(document.getElementById('vlJfoLargeV'), 0, 0, _canvas.width, _canvas.height);
-      this.demoImg = _canvas.toDataURL();
-      setTimeout(() => {
-        document.getElementById('vlJidDownloadImg').click();
-      }, 200)
+      console.log('mmmmmm')
+      this.cutDialogVisible = true;
+      console.log('vvvvv')
+      this.$nextTick(() => {
+        let $video = $('#vlJfoLargeV');
+        let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
+        // console.log($video.width(), $video.height());
+        if ($canvas && $canvas.length > 0) {
+          // let w = 920, h = 540;
+          let w = $video.width(), h = $video.height();
+          if (w > 920) {
+            h = Math.floor(920 / w * h);
+            w = 920;
+          }
+          $canvas.attr({
+            width: w,
+            height: h,
+          });
+          // $video[0].crossOrigin = 'anonymous';
+          // video canvas 必须为原生对象
+          let ctx = $canvas[0].getContext('2d');
+          this.cutTime = new Date().getTime();
+          ctx.drawImage($video[0], 0, 0, w, h);
+        }
+      });
+    },
+    // 截屏保存
+    playerCutSave () {
+      let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
+      if ($canvas && $canvas.length > 0) {
+        console.log('$canvas[0]', $canvas[0])
+        let img = $canvas[0].toDataURL('image/png');
+        // img.crossOrigin  = '';
+        let filename = 'image_' + this.cutTime + '.png';
+        if('msSaveOrOpenBlob' in navigator){
+          // 兼容EDGE
+          let arr = img.split(',');
+          let mime = arr[0].match(/:(.*?);/)[1];
+          let bstr = atob(arr[1]);
+          let n = bstr.length;
+          let u8arr = new Uint8Array(n);
+          while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+          }
+          let blob = new Blob([u8arr], {type:mime});
+          window.navigator.msSaveOrOpenBlob(blob, filename);
+          return;
+        }
+        img.replace('image/png', 'image/octet-stream');
+        let saveLink = $('#' + this.flvplayerId + '_cut_a')[0];
+        saveLink.href = img;
+        saveLink.download = filename;
+        saveLink.click();
+        // console.log(base64);
+      }
     },
     showEventList () {
       if (!this.$_loading) {
@@ -811,11 +896,11 @@ export default {
   }
   .vl_jfo_right {
     position: absolute;
-    right: .2rem;
+    right: 0;
     top: 0;
     width: 2.6rem;
     height: 100%;
-    padding: .3rem .2rem .2rem .2rem;
+    padding: 0.08rem .2rem .2rem .2rem;
     box-shadow: 0px 10px 12px 0px rgba(4,24,54,0.2);
     background: #ffffff;
     &:hover {
@@ -823,39 +908,42 @@ export default {
         display: block;
       }
     }
+    .video_container {
+      height: calc(100% - 30px);
+      .vl_jtc_mk {
+        margin-top: .2rem;
+        .vl_jig_right_btn {
+          position: absolute;
+          bottom: 0;
+          right: 0;
+          height: 28px;
+          padding-top: 2px;
+          span {
+            cursor: pointer;
+          }
+        }
+      }
+    }
     .vl_jig_right_title {
-      position: absolute;
-      top: 0;
       width: 2.2rem;
-      height: .3rem;
-      padding-top: .1rem;
-      text-align: left;
-      span {
-        display: inline-block;
-        width: 50%;
-        font-size: .14rem;
-        color: #333333;
-        white-space: nowrap;
-        overflow: hidden;
-        &:last-child {
-          text-align: right;
-          color: #999999;
+      color: #333333;
+      >p {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        i {
+          margin-right: 5px;
         }
-      }
-    }
-    .vl_jtc_mk {
-      margin-top: .2rem;
-      .vl_jig_right_btn {
-        position: absolute;
-        bottom: 0;
-        right: 0;
-        height: 28px;
-        padding-top: 2px;
         span {
-          cursor: pointer;
+          width: calc(100% - 17px);
+          display: inline-block;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
       }
     }
+    
     .vl_jig_right_close {
       display: none;
       position: absolute;
@@ -1116,7 +1204,7 @@ export default {
       left: 0;
       bottom: 0;
       background: #000000;
-      z-index: 9999;
+      z-index: 99;
       -webkit-transition: all .4s;
       -moz-transition: all .4s;
       -ms-transition: all .4s;
@@ -1340,6 +1428,29 @@ export default {
 }
 </style>
 <style lang="scss" scoped="scoped">
+.map_rrt_u2 {
+  position: absolute; right: 30px;
+  bottom: 30px;
+  margin-top: .2rem;
+  font-size: 26px;
+  background: #ffffff;
+  width: 78px;
+  padding: 0 10px;
+  > li {
+    line-height: 70px;
+    text-align: center;
+    cursor: pointer;
+    border-bottom: 1px solid #F2F2F2;
+    > i {
+      margin-top: 0;
+      display: inline-block;
+    }
+    color: #999999;
+    &:hover {
+      color: #0C70F8;
+    }
+  }
+}
  .vl_judge_tc{
     padding-top: 50px;
   }

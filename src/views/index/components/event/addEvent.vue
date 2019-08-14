@@ -52,6 +52,7 @@
                     </div>
                   </template>
                   <el-upload
+                    v-show="isShowUpload"
                     :action="uploadUrl"
                     list-type="picture-card"
                     accept=".png,.jpg,.jpeg,.mp4,.bmp"
@@ -66,8 +67,8 @@
                   </el-upload>
                 </div>
                 <el-form-item label-width="85px" class="upload_tip">
-                  <div style="color: #999999;">（只能上传视频或图片，视频最多1个，图片最多9张）</div>
-                  <p class="error_tip" v-show="isShowErrorTip">{{errorText}}</p>
+                  <div style="color: #999999;">（请添加mp4格式的视频或者JPEG/PNG/BMP格式的图片）</div>
+                  <!-- <p class="error_tip" v-show="isShowErrorTip">{{errorText}}</p> -->
                 </el-form-item>
                 <el-form-item  label="处理单位:" prop="dealOrgId" label-width="85px">
                   <el-select v-model="addEventForm.dealOrgId" style='width: 95%'>
@@ -121,7 +122,13 @@
       </div>
       <div class="content_right" v-show="isShowMap">
         <div id="mapBox"></div>
-        <div class="right-flag">
+        <!--地图操作按钮-->
+        <ul class="map_rrt_u2">
+          <li @click="resetMap"><i class="el-icon-aim"></i></li>
+          <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
+          <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
+        </ul>
+        <!-- <div class="right-flag">
           <ul class="map-rrt">
             <li><i class="vl_icon vl_icon_control_23" @click="resetMap"></i></li>
           </ul>
@@ -129,7 +136,7 @@
             <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
             <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
           </ul>
-        </div>
+        </div> -->
         <i class="vl_icon vl_icon_event_23 close_btn" @click="closeMap"></i>
       </div>
     </div>
@@ -234,37 +241,42 @@ export default {
       uploadImgList: [], // 要上传的图片列表
       uplaodVideoList: [], // 要上传的视频列表
       imgList1: [], // 要放大的图片
-      isShowErrorTip: false, // 是否显示图片上传错误提示
+      isShowUpload: true, // 是否显示上传组件
+      isShowErrorTip: false,
       errorText: null, // 图片上传错误提示
       autoInput: null, // 自动输入对象
     }
   },
   watch: {
     uplaodVideoList (val) {
-      if (this.uploadImgList.length > 0 && val.length > 0) {
-        this.isShowErrorTip = true;
-        this.errorText = '图片和视频只能上传一种';
-      } else if (this.uploadImgList.length > 9 || val.length > 1) {
-        this.isShowErrorTip = true;
-        this.errorText = '最多上传1个视频或9张图片';
-      } 
-      else {
-        this.isShowErrorTip = false;
-        this.errorText = null;
+      console.log('val', val)
+      if (val && val.length > 0) {
+        this.isShowUpload = false;
+      } else {
+        this.isShowUpload = true;
       }
+
+      if (val.length > 0 && this.uploadImgList.length > 0) {
+        this.$message({
+          type: 'info',
+          message: '图片和视频只能上传一种'
+        });
+        return;
+      } 
     },
     uploadImgList (val) {
-      if (this.uplaodVideoList.length > 0 && val.length > 0) {
-        this.isShowErrorTip = true;
-        this.errorText = '图片和视频只能上传一种';
-      } else if (this.uplaodVideoList.length > 1 || val.length > 9) {
-        this.isShowErrorTip = true;
-        this.errorText = '最多上传1个视频或9张图片';
-      } 
-      else {
-        this.isShowErrorTip = false;
-        this.errorText = null;
+      if ((val && val.length === 9)) {
+        this.isShowUpload = false;
+      } else {
+        this.isShowUpload = true;
       }
+      if (this.uplaodVideoList.length > 0 && val.length > 0) {
+        this.$message({
+          type: 'info',
+          message: '图片和视频只能上传一种'
+        });
+        return;
+      } 
     }
   },
   created () {
@@ -403,7 +415,11 @@ export default {
     },
     // 重置地图
     resetMap () {
-      this.initMap();
+      if (this.map) {
+        this.map.setZoomAndCenter(16, [110.596015, 27.907662]);
+        this.map.setFitView();
+      }
+      // this.initMap();
     },
     // 事件地址change
     changeAddress () {
@@ -453,9 +469,17 @@ export default {
           customClass: 'upload_file_tip'
         });
       }
-      if (this.isShowErrorTip) {
-        return;
-      }
+      //  if (this.uplaodVideoList.length > 0 && this.uploadImgList.length > 0) {
+      //   this.$message({
+      //     type: 'warning',
+      //     message: '图片和视频只能上传一种',
+      //     customClass: 'upload_file_tip'
+      //   });
+      //   return;
+      // } 
+      // if (this.isShowErrorTip) {
+      //   return;
+      // }
       return isPng && isLtTenM;
     },
     // 移除图片
@@ -737,16 +761,16 @@ export default {
               }
             }
             .upload_tip {
-            margin-left: 85px;
-            // /deep/ .el-form-item__content {
-              // line-height: 20px;
-              .error_tip {
-                padding-left: 5px;
-                color: #F56C6C;
-                font-size: 12px;
+              margin-left: 85px;
+              /deep/ .el-form-item__content {
+                /deep/ .error_tip {
+                  padding-left: 5px;
+                  color: #F56C6C;
+                  font-size: 12px;
+                  line-height: 0;
+                }
               }
-            // }
-          }
+            }
           }
           .limit_parent {
             position: relative;
@@ -783,31 +807,54 @@ export default {
         right: 20px;
         top: 20px;
       }
-      .right-flag {
-        position: absolute; right: 20px; bottom: 0;
-        height: 220px;
-        transition: right .3s ease-out;
-        animation: fadeInRight .4s ease-out .4s both;
-        .map-rrt {
-          padding: 0 10px;
-          background-color: #fff;
-          box-shadow: 0 0 10px rgba(148,148,148,0.24);
-          >li {
-            padding: 10px 0;
-            cursor: pointer;
-            border-bottom: 1px solid #eee;
-            text-align: center;
-            >i {
-              font-size: 20px;
-              color: #0B6FF7;
-            }
-            &:last-child { border-bottom: 0; }
+      .map_rrt_u2 {
+        position: absolute; right: 30px;
+        bottom: 20px;
+        margin-top: .2rem;
+        font-size: 26px;
+        background: #ffffff;
+        width: 78px;
+        padding: 0 10px;
+        > li {
+          line-height: 70px;
+          text-align: center;
+          cursor: pointer;
+          border-bottom: 1px solid #F2F2F2;
+          > i {
+            margin-top: 0;
+            display: inline-block;
+          }
+          color: #999999;
+          &:hover {
+            color: #0C70F8;
           }
         }
-        .map_rrt_u2 {
-          margin-top: 20px;
-        }
       }
+      // .right-flag {
+      //   position: absolute; right: 20px; bottom: 0;
+      //   height: 220px;
+      //   transition: right .3s ease-out;
+      //   animation: fadeInRight .4s ease-out .4s both;
+      //   .map-rrt {
+      //     padding: 0 10px;
+      //     background-color: #fff;
+      //     box-shadow: 0 0 10px rgba(148,148,148,0.24);
+      //     >li {
+      //       padding: 10px 0;
+      //       cursor: pointer;
+      //       border-bottom: 1px solid #eee;
+      //       text-align: center;
+      //       >i {
+      //         font-size: 20px;
+      //         color: #0B6FF7;
+      //       }
+      //       &:last-child { border-bottom: 0; }
+      //     }
+      //   }
+      //   .map_rrt_u2 {
+      //     margin-top: 20px;
+      //   }
+      // }
     }
   }
     

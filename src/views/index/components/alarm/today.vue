@@ -132,18 +132,20 @@
             </div>
           </div>
           <div class="list_con_info">
-            <div>{{item.surveillanceName}}</div>
+            <div>布控名：{{item.surveillanceName}}</div>
             <div>
-              <span>{{item.devName}}</span>&nbsp;
-              <span>{{item.snapTime}}</span>
+              <span class="small_text">抓拍设备：{{item.devName}}</span>
+            </div>
+             <div>
+              <span class="small_text">抓拍时间：{{item.snapTime}}</span>
             </div>
           </div>
           <div v-if="item.isSeen" @click="toAlarmDetail(item.uid, item.objType)">
             <div class="hover_info">
               <p class="name_info" v-if="item.objType == 1">
                 <span>{{item.name}}</span>
-                <span>{{item.sex}}</span>
-                <span>{{item.nation}}</span>
+                <span v-if="item.sex && item.sex != '未知'">{{item.sex}}</span>
+                <span v-if="item.nation && item.nation != '未知'">{{item.nation}}</span>
               </p>
               <p class="name_info" v-if="item.objType == 2">
                 <span>{{item.vehicleNumber}}</span>
@@ -266,7 +268,7 @@ export default {
       alarmObj: {},
       isLoading: false,
       pageNum: 1,
-      pageSize: 10,
+      pageSize: 12,
       total: 0,
     }
   },
@@ -304,6 +306,10 @@ export default {
     },
     changeTab (type) {
       this.tabType = type;
+      this.selectDevice = []
+      this.selectControl = []
+      this.$refs.tree.setCheckedKeys([]);
+      this.$refs.gTree.setCheckedKeys([]);
     },
     getCheckedKeys() {
       this.selectDevice = this.$refs.tree.getCheckedKeys(true);
@@ -542,7 +548,7 @@ export default {
         margin: 0 0.5%;
         max-width: 342px;
         width: 32%;
-        height: 266px;
+        height: 286px;
         padding: 30px 20px 0;
         margin-bottom: 20px;
         background:rgba(255,255,255,1);
@@ -595,11 +601,12 @@ export default {
           justify-content: space-between; */
           /* line-height: 50px; */
           padding-top: 16px;
+          padding-bottom: 16px;
           > div:nth-child(1){
             color: #333;
             margin-bottom: 6px;
           }
-          > div:nth-child(2) > span{
+          .small_text {
             color: #999;
             font-size: 12px;
           }
@@ -712,6 +719,9 @@ export default {
         width: 62px;
       }
     }
+  }
+  .__rail-is-horizontal {
+    position: static!important;
   }
 }
 

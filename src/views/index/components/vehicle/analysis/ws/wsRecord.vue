@@ -7,6 +7,7 @@
           {name: '尾随分析', routerName: 'vehicle_search_ws', query: {
             plateNo: $route.query.plateNo,
             dateStart: $route.query.dateStart,
+            searchStartTime: $route.query.searchStartTime,
             dateEnd: $route.query.dateEnd,
             vehicleClass: $route.query.vehicleClass,
             interval: $route.query.interval,
@@ -98,7 +99,7 @@
           <p @click="skipFootholdPage">落脚点分析</p>
           <!-- <p>以车搜车</p> -->
         </div>
-        <div id="rightMap"></div>
+        <div id="rightContainerMap"></div>
         <!--地图操作按钮-->
         <ul class="map_rrt_u2">
           <li @click="resetZoom"><i class="el-icon-aim"></i></li>
@@ -109,7 +110,7 @@
     </div>
     <!-- 视频全屏放大 -->
     <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
-      <video id="controlVideo" :src="videoDetail.videoPath" ></video>
+      <video id="controlVideo" :src="videoDetail.videoPath" crossOrigin="anonymous"></video>
       <div @click="closeVideo" class="vl_icon vl_icon_event_23 close_icon"></div>
       <div class="control_bottom">
         <div>{{videoDetail.deviceName}}</div>
@@ -185,7 +186,7 @@ export default {
           { name: '新建布控' }
         ]
       });
-      this.$router.push({name: 'control_create', query: { plateNo: this.$route.query.plateNo, modelName: '车辆追踪' }});
+      this.$router.push({name: 'control_create', query: { plateNo: this.resultList[0].struVehicleDto.plateNo, imgurl: this.resultList[0].struVehicleDto.storagePath, modelName: '车辆追踪' }});
     },
     // 跳至轨迹分析页面
     skipTrajectoryPage () {
@@ -197,7 +198,7 @@ export default {
           { name: '车辆轨迹' }
         ]
       });
-      this.$router.push({name: 'vehicle_analysis_clgj', query: { plateNo: this.$route.query.plateNo }});
+      this.$router.push({name: 'vehicle_analysis_clgj', query: { plateNo: this.resultList[0].struVehicleDto.plateNo }});
     },
     // 跳至落脚点分析页面
     skipFootholdPage () {
@@ -209,7 +210,7 @@ export default {
           { name: '落脚点分析' }
         ]
       });
-      this.$router.push({name: 'vehicle_search_ljd', query: { plateNo: this.$route.query.plateNo }});
+      this.$router.push({name: 'vehicle_search_ljd', query: { plateNo: this.resultList[0].struVehicleDto.plateNo }});
     },
     // 获取尾随车辆详情
     getDetail () {
@@ -238,7 +239,7 @@ export default {
     // 初始化地图
     initMap () {
       let _this = this;
-      let map = new window.AMap.Map('rightMap', {
+      let map = new window.AMap.Map('rightContainerMap', {
         zoom: 14, // 级别
         center: mapXupuxian.center, // 中心点坐标[110.596015, 27.907662]
       });
@@ -290,7 +291,9 @@ export default {
             path.push(new window.AMap.LngLat(obj.shotPlaceLongitude, obj.shotPlaceLatitude));
 
             marker.on('mouseover', function () {
-              $('#vehicle' + obj.deviceID).addClass('vl_icon_map_hover_mark0');
+              if(i !== 0 && i !== (data.length - 1)) {
+                $('#vehicle' + obj.deviceID).addClass('vl_icon_map_hover_mark0');
+              }
 
               let sContent = "<div class='tip_box'><div class='select_target'><p class='select_p'>查询目标</p>"
                     +"<img src="+ obj.storagePath +" /><div class='mongolia'>"
@@ -313,7 +316,9 @@ export default {
                 }, 500);
             });
             marker.on('mouseout', function () {
-              $('#vehicle' + obj.deviceID).removeClass('vl_icon_map_hover_mark0');
+              if(i !== 0 && i !== (data.length - 1)) {
+                $('#vehicle' + obj.deviceID).removeClass('vl_icon_map_hover_mark0');
+              }
             });
             // _this.map.setZoom(13)
             // marker.setPosition([obj.shotPlaceLongitude, obj.shotPlaceLatitude]);
@@ -352,6 +357,7 @@ export default {
     },
     // 关闭视频
     closeVideo () {
+      this.isPlaying = false;
       this.showLarge = false;
       document.getElementById('controlVideo').pause();
     },
@@ -438,14 +444,14 @@ export default {
 <style lang="scss">
 .tip_box {
   width: 258px;
-  height: 361px;
-  padding: 20px;
+  // height: 341px;
+  padding: 20px 20px 14px 20px;
   background:rgba(255,255,255,1);
   box-shadow:0px 12px 14px 0px rgba(148,148,148,0.4);
   .select_target, .tail_vehicle {
-    width:218px;
-    height:122px;
-    margin-bottom: 15px;
+    width: 218px;
+    height: 122px;
+    margin-bottom: 10px;
     position: relative;
     >p {
       left: 0;
@@ -493,7 +499,7 @@ export default {
   }
   .divide {
     height:1px;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     border-bottom: 1px solid #F2F2F2;
     box-shadow:0px 12px 14px 0px rgba(148,148,148,0.4);
   }
@@ -574,7 +580,7 @@ export default {
           border:1px solid rgba(211,211,211,1);
           border-radius:4px;
           color: #666666;
-          font-size: 16px;
+          // font-size: 16px;
           text-align: center;
           &:hover {
             background:linear-gradient(90deg,rgba(8,106,234,1) 0%,rgba(4,102,222,1) 100%);
@@ -582,7 +588,7 @@ export default {
           }
         }
       }
-      #rightMap {
+      #rightContainerMap {
         // z-index: 1000;
         width: 100%;
         height: 100%;

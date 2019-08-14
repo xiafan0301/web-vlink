@@ -57,7 +57,7 @@
                           :picker-options="pickerOptions"
                           type="datetime"
                           value-format="timestamp"
-                          placeholder="选择日期时间">
+                          placeholder="请选择开始时间">
                   </el-date-picker>
                 </div>
                 <!--<p class="red_star"></p>-->
@@ -71,7 +71,7 @@
                           type="datetime"
                           @change="chooseEndTime"
                           value-format="timestamp"
-                          placeholder="选择日期时间">
+                          placeholder="请选择结束时间">
                   </el-date-picker>
                 </div>
                 <div class="search_line">
@@ -85,7 +85,7 @@
               </div>
             </div>
           </div>
-          <div class="insetLeft" @click="hideLeft"></div>
+          <div class="insetLeft vl_icon vl_icon_vehicle_02"  :class="{'vl_icon_vehicle_03': hideleft}" @click="hideLeft"></div>
         </div>
       </div>
       <!--地图操作按钮-->
@@ -486,8 +486,9 @@
         let date = new Date();
         let curDate = date.getTime();
         let curS = 1 * 24 * 3600 * 1000;
-        this.searchData.startTime = curDate - curS;
-        this.searchData.endTime = curDate;
+        let yDate = new Date(curDate - curS);
+        this.searchData.startTime = new Date(yDate.getFullYear() + '-' + (yDate.getMonth() + 1) + '-' + yDate.getDate() + ' 00:00:00').getTime();
+        this.searchData.endTime =  new Date(yDate.getFullYear() + '-' + (yDate.getMonth() + 1) + '-' + yDate.getDate() + ' 23:59:59').getTime();
       },
       // 选择区域
       selArea (v) {
@@ -640,16 +641,10 @@
     top: 50%;
     margin-top: -89px;
     display: inline-block;
-    background-repeat: no-repeat;
-    transform: rotate(180deg);
-    background-image: url(../../../../../assets/img/icons.png);
-    background-position: -380px -1269px;
     cursor: pointer;
   }
   .hide {
     .insetLeft {
-      transform: rotate(180deg);
-      background-position: -504px -1269px;
     }
   }
   .map_rrt_u2 {

@@ -1,6 +1,7 @@
 <template>
 <vue-scroll>
   <div class="stat-box">
+    
     <!-- 查询条件 -->
     <div class="e_stat_s search-box">
       <el-form :inline="true" :model="searchForm">
@@ -37,57 +38,57 @@
     <div class="e_stat_content" v-loading="searchLoading">
       <!-- 综合统计 -->
       <ul class="stat-zt">
-          <li>
-            <div class="stat-zt-box" style="background: #0C70F8">
-              <div class="left-icon-number">
-                <i class="vl_icon vl_icon_statistics_8"></i>
-              </div>
-              <!-- <div class="stat-zt-value"> -->
-              <p class="event_num_title">事件数量(件)</p>
-              <h3 class="event_number">{{generalData.totalCount}}</h3>
-              <!-- </div> -->
-              <!-- <div class="right-icon">
-                <i class="vl_icon vl_icon_statistics_4"></i>
-              </div> -->
+        <li>
+          <div class="stat-zt-box" style="background: #0C70F8">
+            <div class="left-icon-number">
+              <i class="vl_icon vl_icon_statistics_8"></i>
             </div>
-          </li>
-          <li>
-            <div class="stat-zt-box" style="background: #0D9DF4">
-              <div class="left-icon-finish">
-                <i class="vl_icon vl_icon_statistics_7"></i>
-              </div>
-              <!-- <div class="stat-zt-value"> -->
-              <p class="event_num_title">处理完成(件)</p>
-              <h3 class="event_number">{{generalData.finishCount}}</h3>
-              <!-- </div> -->
-              <!-- <div class="right-icon"><i class="vl_icon vl_icon_statistics_3"></i></div> -->
+            <!-- <div class="stat-zt-value"> -->
+            <p class="event_num_title">事件数量(件)</p>
+            <h3 class="event_number">{{generalData.totalCount}}</h3>
+            <!-- </div> -->
+            <!-- <div class="right-icon">
+              <i class="vl_icon vl_icon_statistics_4"></i>
+            </div> -->
+          </div>
+        </li>
+        <li>
+          <div class="stat-zt-box" style="background: #0D9DF4">
+            <div class="left-icon-finish">
+              <i class="vl_icon vl_icon_statistics_7"></i>
             </div>
-          </li>
-          <li>
-            <div class="stat-zt-box" style="background: #6262FF">
-              <div class="left-icon-ing">
-                <i class="vl_icon vl_icon_statistics_6"></i>
-              </div>
-              <!-- <div class="stat-zt-value"> -->
-              <p class="event_num_title">处理中(件)</p>
-              <h3 class="event_number">{{generalData.processingCount}}</h3>
-              <!-- </div> -->
-              <!-- <div class="right-icon"><i class="vl_icon vl_icon_statistics_2"></i></div> -->
+            <!-- <div class="stat-zt-value"> -->
+            <p class="event_num_title">处理完成(件)</p>
+            <h3 class="event_number">{{generalData.finishCount}}</h3>
+            <!-- </div> -->
+            <!-- <div class="right-icon"><i class="vl_icon vl_icon_statistics_3"></i></div> -->
+          </div>
+        </li>
+        <li>
+          <div class="stat-zt-box" style="background: #6262FF">
+            <div class="left-icon-ing">
+              <i class="vl_icon vl_icon_statistics_6"></i>
             </div>
-          </li>
-          <li>
-            <div class="stat-zt-box" style="background: #8949F3">
-              <div class="left-icon-unhandle">
-                <i class="vl_icon vl_icon_statistics_5"></i>
-              </div>
-              <!-- <div class="stat-zt-value"> -->
-              <p class="event_num_title">待处理(件)</p>
-              <h3 class="event_number">{{generalData.pendingCount}}</h3>
-              <!-- </div> -->
-              <!-- <div class="right-icon"><i class="vl_icon vl_icon_statistics_1"></i></div> -->
+            <!-- <div class="stat-zt-value"> -->
+            <p class="event_num_title">处理中(件)</p>
+            <h3 class="event_number">{{generalData.processingCount}}</h3>
+            <!-- </div> -->
+            <!-- <div class="right-icon"><i class="vl_icon vl_icon_statistics_2"></i></div> -->
+          </div>
+        </li>
+        <li>
+          <div class="stat-zt-box" style="background: #1DD98E">
+            <div class="left-icon-unhandle">
+              <i class="vl_icon vl_icon_statistics_5"></i>
             </div>
-          </li>
-        </ul>
+            <!-- <div class="stat-zt-value"> -->
+            <p class="event_num_title">待处理(件)</p>
+            <h3 class="event_number">{{generalData.pendingCount}}</h3>
+            <!-- </div> -->
+            <!-- <div class="right-icon"><i class="vl_icon vl_icon_statistics_1"></i></div> -->
+          </div>
+        </li>
+      </ul>
       <!-- 统计图表 -->
       <ul class="e_stat_tt">
         <li>
@@ -155,7 +156,13 @@
             </ul>
           </div>
           <div class="stat_map_cr" id="drawEdge"></div>
-          <div class="de-close-btn">
+          <!--地图操作按钮-->
+          <ul class="map_rrt_u2">
+            <li @click="resetZoom"><i class="el-icon-aim"></i></li>
+            <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
+            <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
+          </ul>
+          <!-- <div class="de-close-btn">
             <ul class="first_ul">
               <li>
                 <i class="vl_icon vl_icon_control_23" @click="setMapStatus('1')"></i>
@@ -170,7 +177,7 @@
                 <i class="el-icon-minus" @click="setMapStatus('3')" :class="{'de-btn-dis': mapScale.sx}"></i>
               </li>
             </ul>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
@@ -249,13 +256,13 @@ export default {
       chart3Data: [],
       chart4Data: [],
       colors: [
-        ['#115BFA', '#50CC62', '#0D9DF4', '#6262FF', '#8949F3'],
+        ['#33B5FF', '#03E38A', '#8DF771', '#F7DA6D', '#0C70F8'],
         [
-          [17, 91, 250],
-          [80, 204, 98],
-          [13, 157, 244],
-          [98, 98, 255],
-          [137, 73, 243]
+          [51,181,255],
+          [3,227,138],
+          [141,247,113],
+          [247,218,109],
+          [12,112,248]
         ]
       ],
        // 事件总体情况统计数据
@@ -306,6 +313,18 @@ export default {
     }
   },
   methods: {
+
+    mapZoomSet (val) {
+      if (this.amap) {
+        this.amap.setZoom(this.amap.getZoom() + val);
+      }
+    },
+    resetZoom () {
+      if (this.amap) {
+        this.amap.setZoomAndCenter(this.zoom, mapXupuxian.center);
+        this.amap.setFitView();
+      }
+    },
     // 地图
     initMap () {
       // let _this = this;
@@ -406,78 +425,84 @@ export default {
         this.charts.chart1.clear();
         chart = this.charts.chart1;
       } else {
+        // 可以通过调整这个数值控制分割空白处的间距，0-1 之间的数值
+        let sliceNumber = 0.001;
+
+        // 自定义 other 的图形，增加两条线
+        G2.Shape.registerShape('interval', 'sliceShape', {
+          draw: function draw(cfg, container) {
+            if (cfg.origin._origin.percent > 0) {
+              let points = cfg.points;
+              let path = [];
+              path.push(['M', points[0].x, points[0].y]);
+              path.push(['L', points[1].x, points[1].y - sliceNumber]);
+              path.push(['L', points[2].x, points[2].y - sliceNumber]);
+              path.push(['L', points[3].x, points[3].y]);
+              path.push('Z');
+              path = this.parsePath(path);
+              return container.addShape('path', {
+                attrs: {
+                  fill: cfg.color,
+                  path: path
+                }
+              });
+            }
+          }
+        });
+
         let temp = document.getElementById('stat_1');
         chart = new G2.Chart({
           container: 'stat_1',
           forceFit: true,
-          padding: [ 12, 12 * 14, 12, 0 ],
+          padding: [3],
           width: G2.DomUtil.getWidth(temp),
           height: G2.DomUtil.getHeight(temp)
         });
       }
       let _this = this;
-      chart.source(data, {
-        percent: {
-          formatter: function formatter (val) {
-            val = (val * 100).toFixed(2) + '%';
-            return val;
-          }
-        }
+      chart.source(data);
+      chart.coord('theta', {
+        innerRadius: 0.75
       });
-      chart.coord('theta');
       chart.tooltip({
         showTitle: false
       });
-      chart.legend({
-        position: 'right',
-        title: null,
-        textStyle: {
-          fill: '#f1f1f1', // 文本的颜色
-          fontSize: 12
-        },
-        offsetY: 0, // -G2.DomUtil.getHeight(temp005) / 2 + 4 * intRem,
-        offsetX: -11 * 12,
-        hoverable: false,
-        // itemGap: 20, // 图例项之间的间距
-        useHtml: true,
-        containerTpl: '<div class="g2-legend e_stat_tb_ld1 as-trans50-t" style="position:absolute;top:20px;right:60px;width:auto;">' +
-        '<ul class="g2-legend-list" style="list-style-type:none;margin:0;padding:0;"></ul>' +
-        '</div>',
-        itemTpl: (value, color, checked, index) => {
-          if (index > 4) {
-            return value;
-          }
-          return '<li class="g2-legend-list-item item-' + index + ' ' + checked +
-            '" data-value="' + value + '" data-color=' + color + '>' +
-            '<div>' +
-              '<div><i style="background-color: rgba(' + _this.colors[1][index][0] + ', ' + _this.colors[1][index][1] + ', ' + _this.colors[1][index][2] + ', 0.14)">' +
-              '<i style="background-color: rgba(' + _this.colors[1][index][0] + ', ' + _this.colors[1][index][1] + ', ' + _this.colors[1][index][2] + ', 1)"></i></i>' + data[index].count + '</div>' +
-              '<p>' + value + '' + '</p>' +
-            '</div>' +
-          '</li>';
-        }
-      });
+      chart.legend(false); // 不显示图例
       chart.intervalStack().position('percent')
         .color('item', _this.colors[0])
+        .shape('sliceShape')
         .label('percent', {
-          offset: -40,
-          // autoRotate: false,
-          textStyle: {
-            rotate: 0,
-            textAlign: 'center',
-            shadowBlur: 2,
-            shadowColor: 'rgba(0, 0, 0, .45)'
+          offset: 20,
+          textBaseline: 'bottom',
+          htmlTemplate: (text, item, index) => {
+            if (item.point.percent > 0) {
+              let levelName = null;
+              if (item.point.item === 'Ⅰ级') {
+                levelName = '1级';
+              } else if (item.point.item === 'Ⅱ级') {
+                levelName = '2级';
+              } else if (item.point.item === 'Ⅲ级') {
+                levelName = '3级';
+              } else if (item.point.item == 'Ⅳ级') {
+                levelName = '4级';
+              } else {
+                levelName = '其他';
+              }
+              return '<div class="tab_one"><div class="icon_number"><i class="parent_i" style="background-color: rgba(' + _this.colors[1][index][0] + ', ' + _this.colors[1][index][1] + ', ' + _this.colors[1][index][2] + ', 0.14)">'+
+                      '<i class="child_i" style="background-color: rgba(' + _this.colors[1][index][0] + ', ' + _this.colors[1][index][1] + ', ' + _this.colors[1][index][2] + ', 1)"></i></i><span>'+ item.point.count +'件</span></div>'+
+                      '<div class="level_percent"><span>'+ levelName +'事件</span><span>'+ (item.point.percent * 100).toFixed(2) +'%</span></div></div>';
+            } else {
+              return '';
+            }
           }
-        }).tooltip('item*percent', function (item, percent) {
+        })
+        .tooltip('item*percent', function (item, percent) {
           percent = (percent * 100).toFixed(2) + '%';
           return {
             name: item,
             value: percent
           };
-        }).style({
-          lineWidth: 1,
-          stroke: '#fff'
-        });
+        })
       chart.render();
       this.charts.chart1 = chart;
     },
@@ -953,6 +978,7 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+  
   .stat-box {
     padding: 10px 0 0 ;
   }
@@ -1009,15 +1035,8 @@ export default {
           background-color: #6262FF;
         }
         .left-icon-unhandle {
-          background-color: #8949F3;
+          background-color: #1DD98E;
         }
-        // .stat-zt-value {
-        //   width: 40%;
-        //   display: flex;
-        //   padding-top: 25px;
-        //   padding-left: 15px;
-        //   flex-direction: column;
-        //   color: #666666;
           .event_num_title {
             width: calc(100% - 110px);
             color: #ffffff;
@@ -1058,6 +1077,29 @@ export default {
       position: relative;
       width: 100%; height: 1000px;
       background-color: #fff;
+      .map_rrt_u2 {
+        position: absolute; right: 30px;
+        bottom: 20px;
+        margin-top: .2rem;
+        font-size: 26px;
+        background: #ffffff;
+        width: 78px;
+        padding: 0 10px;
+        > li {
+          line-height: 70px;
+          text-align: center;
+          cursor: pointer;
+          border-bottom: 1px solid #F2F2F2;
+          > i {
+            margin-top: 0;
+            display: inline-block;
+          }
+          color: #999999;
+          &:hover {
+            color: #0C70F8;
+          }
+        }
+      }
       > .stat_map_cl {
         width: 300px; height: 100%;
         background-color: #fff;
@@ -1080,6 +1122,7 @@ export default {
   }
   .stat_map_cl_ul {
     padding-top: 20px;
+    
     > li {
       position: relative;
       border-top: 1px solid #E9F7FF;
@@ -1179,3 +1222,49 @@ export default {
     }
   }
 </style>
+<style lang="scss">
+// @media screen and (max-width: 1440px) {.tab_one { max-width: 150px; width: auto; }}
+// @media screen and (min-width: 1441px) {.tab_one { min-width: 150px;}}
+.tab_one {
+  box-shadow: 0px 5px 16px 0px rgba(169,169,169,0.2);
+  background-color: #ffffff;
+  padding: 10px;
+  min-width: 150px;
+  &:hover {
+    z-index: 111;
+  }
+  .icon_number {
+    display: flex;
+    align-items: center;
+    .parent_i {
+      position: relative;
+      display: inline-block;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      .child_i {
+        position: absolute;
+        left: 5px;
+        top: 5px;
+        display: inline-block;
+        border-radius: 50%;
+        width: 10px;
+        height: 10px;
+      }
+    }
+    >span {
+      margin-left: 5px;
+      font-weight: bold;
+      color: #333333;
+      font-size: 22px;
+    }
+  }
+  .level_percent {
+    color: #666666;
+    span:first-child {
+      margin-right: 5px;
+    }
+  }
+}
+</style>
+

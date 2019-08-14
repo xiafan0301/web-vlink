@@ -77,7 +77,7 @@
           <ul class="bottom">
             <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
             <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
-          </ul>
+          </ul> 
         </div>
       </div>
       <div class="add_footer">
@@ -253,7 +253,6 @@ export default {
       let offSet = [-20.5, -48], _hoverWindow = null;
       if (lng > 0 && lat > 0) {
         _this.marker = new window.AMap.Marker({ // 添加自定义点标记
-          map: _this.map,
           position: [lng, lat],
           offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
           draggable: false, // 是否可拖动

@@ -16,28 +16,16 @@
       <div class="info-left">
         <vue-scroll>
           <!-- 时间 -->
-          <div class="time-search date-comp">
+          <!-- <div class="time-search date-comp">
             <el-date-picker
                 class="vl_date"
                 v-model="searchData.startTime"
                 type="date"
                 :picker-options="startDateOpt"
-                placeholder="开始时间"
+                placeholder="请选择开始时间"
                 :clearable="false"
                 format="yyyy-MM-dd HH:mm:ss">
             </el-date-picker>
-            <!-- <el-date-picker
-              class="vl_date"
-              v-model="searchData.time"
-              type="daterange"
-              range-separator="至"
-              value-format="yyyy-MM-dd"
-              format="yyyy-MM-dd"
-              :picker-options="pickerOptions"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              :clearable="false"
-            ></el-date-picker> -->
           </div>
           <div class="time-search date-comp">
             <el-date-picker
@@ -45,15 +33,16 @@
                 v-model="searchData.endTime"
                 type="date"
                 :picker-options="endDateOpt"
-                placeholder="结束时间"
+                placeholder="请选择结束时间"
                 :clearable="false"
                 format="yyyy-MM-dd HH:mm:ss"
                 @change="dateChange">
             </el-date-picker>
-          </div>
+          </div> -->
           <!-- 车牌号搜索 -->
           <div class="license-plate-search">
-            <el-input v-model="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" clearable></el-input>
+            <el-input v-model="searchData.licensePlateNum" placeholder="请输入车牌号" @blur="blurJudge" @clear="blurJudge" clearable></el-input>
+            <p class="error-tip" :class="{'is-show': isTrue}">{{messageTip}}</p>
           </div>
           <div class="search-btn">
             <el-button @click="resetSearch">重置</el-button>
@@ -71,63 +60,63 @@
               <div class="card-row">
                 <div class="card-item">
                   <label class="title">车牌号牌：</label>
-                  <span>{{vehicleArch.plateno}}</span>
+                  <span>{{vehicleArch.plateno || '—'}}</span>
                 </div>
                 <div class="card-item">
                   <label class="title">车辆所有人：</label>
-                  <span>{{vehicleArch.owner}}</span>
+                  <span>{{vehicleArch.owner || '—'}}</span>
                 </div>
                 <div class="card-item">
                   <label class="title">中文品牌：</label>
-                  <span>{{vehicleArch.brand}}</span>
+                  <span>{{vehicleArch.brand || '—'}}</span>
                 </div>
                 <div class="card-item">
                   <label class="title">车身颜色：</label>
-                  <span>{{vehicleArch.color}}</span>
+                  <span>{{vehicleArch.color || '—'}}</span>
                 </div>
                 <div class="card-item">
                   <label class="title">车身形式：</label>
-                  <span>{{vehicleArch.bodyform}}</span>
+                  <span>{{vehicleArch.bodyform || '—'}}</span>
                 </div>
                 <div class="card-item">
                   <label class="title">车门数：</label>
-                  <span>{{vehicleArch.doornumber}}</span>
+                  <span>{{vehicleArch.doornumber || '—'}}</span>
                 </div>
                 <div class="card-item">
                   <label class="title">发动机号：</label>
-                  <span>{{vehicleArch.engineno}}</span>
+                  <span>{{vehicleArch.engineno || '—'}}</span>
                 </div>
                 <div class="card-item">
                   <label class="title">车辆类型：</label>
-                  <span>{{vehicleArch.platetype}}</span>
+                  <span>{{vehicleArch.platetype || '—'}}</span>
                 </div>
                 <div class="card-item">
                   <label class="title">年款：</label>
-                  <span>{{vehicleArch.model}}</span>
+                  <span>{{vehicleArch.model || '—'}}</span>
                 </div>
                 <div class="card-item">
                   <label class="title">座位数：</label>
-                  <span>{{vehicleArch.seatnumber}}</span>
+                  <span>{{vehicleArch.seatnumber || '—'}}</span>
                 </div>
                 <div class="card-item">
                   <label class="title">车辆状态：</label>
-                  <span>{{vehicleArch.status}}</span>
+                  <span>{{vehicleArch.status || '—'}}</span>
                 </div>
                 <div class="card-item">
                   <label class="title">使用性质：</label>
-                  <span>{{vehicleArch.usecharacter}}</span>
+                  <span>{{vehicleArch.usecharacter || '—'}}</span>
                 </div>
                 <div class="card-item">
                   <label class="title">车型：</label>
-                  <span>{{vehicleArch.vehicletype}}</span>
+                  <span>{{vehicleArch.vehicletype || '—'}}</span>
                 </div>
                 <div class="card-item">
                   <label class="title">厂商名称：</label>
-                  <span>{{vehicleArch.vendor}}</span>
+                  <span>{{vehicleArch.vendor || '—'}}</span>
                 </div>
                 <div class="card-item">
                   <label class="title">有效期止：</label>
-                  <span>{{vehicleArch.validuntil}}</span>
+                  <span>{{vehicleArch.validuntil || '—'}}</span>
                 </div>
               </div>
             </div>
@@ -137,14 +126,41 @@
               <div class="table_box">
                 <el-table :data="regulationsList">
                   <el-table-column label="序号" type="index" width="100"></el-table-column>
-                  <el-table-column label="违法时间" prop="vioDate" show-overflow-tooltip></el-table-column>
-                  <el-table-column label="违法地点" prop="address" show-overflow-tooltip></el-table-column>
-                  <!-- <el-table-column label="城市名称" prop="city" show-overflow-tooltip></el-table-column> -->
-                  <el-table-column label="罚款金额" prop="fine" show-overflow-tooltip></el-table-column>
-                  <el-table-column label="违章归属地" prop="vioAsPlace" show-overflow-tooltip></el-table-column>
-                  <el-table-column label="违法行为" prop="vioName" show-overflow-tooltip></el-table-column>
-                  <el-table-column label="分类类型" prop="vioCategory" show-overflow-tooltip></el-table-column>
-                  <el-table-column label="采集机关" prop="vioCollectionOffice" show-overflow-tooltip></el-table-column>
+                  <el-table-column label="违章时间" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                      {{scope.row.vioDate || "—"}}
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="违章地点" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                      {{scope.row.address || "—"}}
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="罚款金额" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                      {{scope.row.fine || "—"}}
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="违章归属地" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                      {{scope.row.vioAsPlace || "—"}}
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="违章行为" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                      {{scope.row.vioName || "—"}}
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="分类类型" show-overflow-tooltip>
+                     <template slot-scope="scope">
+                      {{scope.row.vioCategory || "—"}}
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="采集机关" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                      {{scope.row.vioCollectionOffice || "—"}}
+                    </template>
+                  </el-table-column>
                 </el-table>
               </div>
             </div>
@@ -197,7 +213,9 @@ export default {
       },
       searching: false,
       regulationsList: [], //违章信息列表
-      vehicleArch: {} //车辆档案
+      vehicleArch: {}, //车辆档案
+      isTrue: false,
+      messageTip: "",
     };
   },
   computed: {},
@@ -205,27 +223,36 @@ export default {
     if (this.$route.query.plateNo) {
       this.searchData.licensePlateNum = this.$route.query.plateNo;
     }
-    this.setDTime();
+    /* this.setDTime(); */
     this.getSearchData();
   },
   methods: {
+    blurJudge() {
+      if (this.checkPlateNumber(this.searchData.licensePlateNum)) {
+        this.isTrue = false;
+      }else {
+        this.isTrue = true;
+      }
+    },
     // 验证车牌号方法
     checkPlateNumber(value) {
-      let reg = /^([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})$/;
+      let reg = /^([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})$/;
       if (value) {
-        /* if (!reg.test(value)) {
-          if (!document.querySelector(".el-message")) {
+        if (!reg.test(value)) {
+          
+          this.messageTip = "请正确输入车牌号码"
+          /* if (!document.querySelector(".el-message")) {
             this.$message.info("请正确输入车牌号码");
-          }
-          return true;
+          } */
+          return false;
         } else {
           return true;
-        } */
-        return true;
-      } else {
-        if (!document.querySelector(".el-message")) {
-          this.$message.info("请输入车牌号码");
         }
+      } else {
+        this.messageTip = "请输入车牌号码"
+        /* if (!document.querySelector(".el-message")) {
+          this.$message.info("请输入车牌号码");
+        } */
         return false;
       }
     },
@@ -246,18 +273,21 @@ export default {
       this.searchData.licensePlateNum = null;
       this.vehicleArch = {};
       this.regulationsList = [];
-      this.setDTime();
+      /* this.setDTime(); */
     },
     //查询
     search() {
       if (this.checkPlateNumber(this.searchData.licensePlateNum)) {
         this.getSearchData();
+        this.isTrue = false;
+      }else {
+        this.isTrue = true;
       }
     },
     getSearchData() {
       let params = {
-        dateStart: formatDate(this.searchData.startTime, "yyyy-MM-dd HH:mm:ss"),
-        dateEnd: formatDate(this.searchData.endTime, "yyyy-MM-dd HH:mm:ss"),
+        /* dateStart: formatDate(this.searchData.startTime, "yyyy-MM-dd HH:mm:ss"),
+        dateEnd: formatDate(this.searchData.endTime, "yyyy-MM-dd HH:mm:ss"), */
       };
       if (this.searchData.licensePlateNum) {
         params["plateNo"] = this.searchData.licensePlateNum;
@@ -320,14 +350,21 @@ export default {
   .vehicle-info-content {
     height: 100%;
     display: flex;
-    border-top: 1px solid #d3d3d3;
     .info-left {
       width: 272px;
       padding: 20px 0 20px 20px;
       color: #999;
       background: #fff;
-      box-shadow: 5px 0px 16px 0px rgba(169, 169, 169, 0.2);
+      box-shadow: 2px 3px 10px 0px rgba(131, 131, 131, 0.28);
       animation: fadeInLeft 0.4s ease-out 0.3s both;
+      .error-tip {
+        display: none;
+        color: #ef5555;
+        font-size: 12px;
+      }
+      .is-show {
+        display: block;
+      }
       .tip {
         margin-bottom: 36px;
       }
@@ -335,6 +372,10 @@ export default {
       .license-plate-search {
         width: 232px;
         margin-bottom: 10px;
+        .error-tip {
+          line-height: 20px;
+          margin-bottom: -10px;
+        }
       }
     }
     .info-right {
@@ -446,11 +487,14 @@ export default {
     text-align: center;
     padding-top: 10px;
     .el-button {
-      width: 45%;
+      width: 110px;
     }
     .el-button--primary {
       background-color: #0c70f8;
       border-color: #0c70f8;
+    }
+    .el-button+.el-button {
+      margin-left: 12px;
     }
   }
   //弹窗

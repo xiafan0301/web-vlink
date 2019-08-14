@@ -15,6 +15,7 @@
               style="width: 100%"
               :picker-options="pickerStart"
               v-model="searchForm.startTime"
+              :time-arrow-control="true"
               type="datetime"
               @blur="judgeBaseVehicle"
               placeholder="选择日期"
@@ -26,6 +27,7 @@
               class="vl_date vl_date_end"
               v-model="searchForm.endTime"
               :clearable="false"
+              :time-arrow-control="true"
               value-format="yyyy-MM-dd HH:mm:ss"
               format="yyyy-MM-dd HH:mm:ss"
               style="width: 100%"
@@ -60,7 +62,7 @@
               <i class="remove_vehicle el-icon-remove" @click="removeVehicle(index)"></i>
             </li>
           </ul>
-          <el-form-item>
+          <el-form-item class="operation_button">
             <el-button class="reset_btn" @click="resetData">重置</el-button>
             <el-button class="select_btn" type="primary" :loading="isSearchLoading" @click="searchData">查询</el-button>
           </el-form-item>
@@ -133,9 +135,9 @@
           </ul>
           <div class="peer_and_basic_vehicle">
             <div class="vehicle_box">
-              <span class="vehicle_span" :class="[isCheckedVehicle === mapPeerVehicleNumber ? 'is_checked' : '']" @click="handleChangeVeNumber(mapPeerVehicleNumber)">{{mapPeerVehicleNumber}}</span>
+              <span class="vehicle_span" :class="{'is_checked': isCheckedVehicle === 0}" @click="handleChangeVeNumber(0)">{{mapLocationList.length > 0 && mapLocationList[0].number}}</span>
               与
-              <span class="vehicle_span" :class="[isCheckedVehicle === (resultList && resultList.baseNumber) ? 'is_checked' : '']" @click="handleChangeVeNumber(resultList.baseNumber)">{{resultList && resultList.baseNumber}}</span>
+              <span class="vehicle_span" :class="{'is_checked': isCheckedVehicle === 1}" @click="handleChangeVeNumber(1)">{{mapLocationList.length > 0 && mapLocationList[1].number}}</span>
             </div>
             <div class="peer_possiable">
               <span>{{mapPeerPercent * 100}}%</span>同行
@@ -144,18 +146,17 @@
         </div>
       </div>
     </el-dialog>
-    
   </div>
 </template>
 <script>
 import noResult from '@/components/common/noResult.vue';
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { mapXupuxian } from "@/config/config.js";
-import { formatDate } from "@/utils/util.js";
+import { formatDate, objDeepCopy, dateOrigin } from "@/utils/util.js";
 import { checkPlateNumber } from '@/utils/validator.js';
 import { getMultiVehicleList, getBaseVehicleList } from '@/views/index/api/api.judge.js';
 const overStartTime = new Date() - 24 * 60 * 60 * 1000;
-// const reg = /^(([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z](([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z][A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳使领]))$/;
+let reg = /^([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})$/;
 export default {
   components: { vlBreadcrumb, noResult },
   data () {
@@ -190,7 +191,7 @@ export default {
       resultList: null,
       map: null, // 地图对象
       searchForm: {
-        startTime: new Date(overStartTime),
+        startTime: dateOrigin(false, new Date(overStartTime)),
         endTime: new Date(),
         basicVehicleNumber: null,
         peerVehicleNumber: null,
@@ -201,15 +202,19 @@ export default {
           return time.getTime() > (new Date().getTime());
         }
       },
-      isCheckedVehicle: -1, //选中的车牌号
+      isCheckedVehicle: 0, //选中的车牌号
       vehicleNumberList: [], // 添加的同行车列表
       polylineObj: {}, // 所有的折线对象
       mapPeerPercent: 0, // 地图上显示的同行比例
       mapPeerVehicleNumber: null, // 地图上显示的同行车牌号
-      shotTimesObj: {} // 抓拍时间对象
+      shotTimesObj: {}, // 抓拍时间对象
+      mapLocationList: [], /// 地图上要显示轨迹路线数据
+      peerVehicleList: [], // 同行车辆轨迹数据
+      baseVehicleList: [], // 基准车辆的轨迹数据
     }
   },
   mounted () {
+    // this.initMap();
   },
   methods: {
     // 基准车辆失焦
@@ -224,9 +229,6 @@ export default {
         startTime: formatDate(this.searchForm.startTime),
         endTime: formatDate(this.searchForm.endTime),
         baseNumber: this.searchForm.basicVehicleNumber,
-        // startTime: '2019-07-13 00:54:29',
-        // endTime: '2019-07-13 23:54:59',
-        // baseNumber: '湘LYV366',
       };
       getBaseVehicleList(params)
         .then(res => {
@@ -250,11 +252,11 @@ export default {
     // 添加同行车辆
     onAddVehicleNumber () {
       const vehicleNumber = this.searchForm.peerVehicleNumber;
-      // if (!reg.test(vehicleNumber)) {
-      //   if (!document.querySelector('.el-message--info')) {
-      //     this.$message.info('请输入正确的车牌号码');
-      //   }
-      // } else {
+      if (!reg.test(vehicleNumber)) {
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('请输入正确的车牌号码');
+        }
+      } else {
         if (vehicleNumber) {
           this.searchForm.peerVehicleNumber = null;
           this.vehicleNumberList.push(vehicleNumber);
@@ -265,7 +267,7 @@ export default {
             this.isDisabled = false;
           }
         }
-      // }
+      }
     },
     // 删除添加的同行车辆
     removeVehicle (index) {
@@ -274,10 +276,32 @@ export default {
     },
     // 显示轨迹地图弹出框
     showMapDialog (obj) {
+      this.mapLocationList = [];
+
       this.mapDialog = true;
+
+      this.mapPeerVehicleNumber = obj.peerNumber;
+      this.mapPeerPercent = obj.peerPercent;
+      // this.isCheckedVehicle = obj.peerNumber; // 默认选中同行车辆车牌号
+
+      const peerObj = {
+        number: obj.peerNumber,
+        pathRecords: obj.pathRecords && obj.pathRecords.length > 0 ?  obj.pathRecords : []
+      };
+      this.mapLocationList.push(peerObj);
+
+      const baseObj = {
+        number: this.resultList.baseNumber,
+        pathRecords: this.resultList.basePathRecords && this.resultList.basePathRecords.length > 0 ? this.resultList.basePathRecords : []
+      };
+      this.mapLocationList.push(baseObj);
+
+      this.mapLocationList = objDeepCopy(this.mapLocationList);
+
       this.$nextTick(() => {
-        this.initMap(obj);
-      })
+        this.initMap();
+      });
+
     },
     mapZoomSet (val) {
       if (this.map) {
@@ -290,7 +314,7 @@ export default {
         this.map.setFitView();
       }
     },
-    initMap (obj) {
+    initMap () {
       let map = new window.AMap.Map('mapContainer', {
         zoom: 18, // 级别
         center: mapXupuxian.center, // 中心点坐标
@@ -298,74 +322,129 @@ export default {
       map.setMapStyle('amap://styles/whitesmoke');
       this.map = map;
 
-      this.$nextTick(() => {
-        this.mapPeerVehicleNumber = obj.peerNumber;
-        this.mapPeerPercent = obj.peerPercent;
-        this.isCheckedVehicle = obj.peerNumber; // 默认选中同行车辆车牌号
-        if (obj.pathRecords && obj.pathRecords.length > 0) {
-          this.drawPoint(obj.pathRecords, obj.peerNumber);
-        }
-        if (this.resultList.basePathRecords && this.resultList.basePathRecords.length > 0) {
-          this.drawPoint(this.resultList.basePathRecords, this.resultList.baseNumber);
-        }
-      })
+      this.filterData();
+
+    },
+    filterData () {
+      let _arr = [];
+      let deviceList = objDeepCopy(this.mapLocationList);
+      if (deviceList.length > 0) {
+        // console.log('mapLocationList', this.mapLocationList)
+        deviceList.forEach((item, index) => {
+          if (item.pathRecords && item.pathRecords.length > 0) {
+            item.pathRecords.forEach(a => {
+              // 是否显示抓拍时间
+              if (index === this.isCheckedVehicle) {
+                a['showTime'] = true;
+              } else {
+                a['showTime'] = false;
+              }
+  
+              if (a.isPeer) { // 全部车辆经过该设备
+                a['deviceType'] = 17;
+              } else {
+                if (a.bayonetId) { // 设备为卡口
+                  a['deviceType'] = 8;
+                } else {
+                  a['deviceType'] = 0;
+                }
+              }
+  
+              if (a.bayonetId) { // 设备为卡口
+  
+                a['detailDeviceName'] = a.bayonetName;
+                a['detailShotAddress'] = a.bayonetAddress;
+  
+              } else { // 设备为摄像头
+  
+                a['detailDeviceName'] = a.deviceName;
+                a['detailShotAddress'] = a.address;
+  
+              }
+  
+              let _i = _arr.findIndex(y => y.deviceID === a.deviceID);
+              if (_i === -1) {
+                _arr.push(a);
+              } else {
+                if (this.isCheckedVehicle === index) { // 选中的轨迹
+                  // 判断是否重复出现在同一个设备点
+                  if (a.peerNumber === _arr[_i].plateNo) {
+                    _arr[_i]['shotTime'] += ',' + a.shotTime;
+                  } else {
+                    a['simLength'] += 1;
+                    _arr.splice(_i, 1, a);
+                  }
+                } else {
+                  if (a.plateNo === _arr[_i].plateNo) {
+                    _arr[_i]['shotTime'] += ',' + a.shotTime;
+                  } else {
+                    _arr[_i]['simLength'] += 1;
+                  }
+                }
+              }
+            });
+          }
+        });
+        let currArr = _arr;
+        this.drawPoint(currArr);
+        
+      }
     },
     /**
      * 地图描点
      */
-    drawPoint (data, number) {
+    drawPoint (data) {
+      // console.log('data', data)
       if (data && data.length > 0) {
-        let _this = this, hoverWindow = null, path= [], shotTime = [], idName;
+
+        let _this = this, hoverWindow = null;
 
         for (let i = 0; i < data.length; i++) {
-
           let obj = data[i];
 
           if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
 
-            let offSet = [-20.5, -55], deviceType;
+            let offSet = [-20.5, -50];
 
-            let longitude = null, latitude = null, detailDeviceName, detailShotAddress;
+            let $id = 'mapMark' + obj.deviceType + obj.uid;
+            let _time = '', isStartEnd = false;
+            if (obj.showTime) {
+              _time = '<p class="shot_time_p">';
+              obj.shotTime.split(',').forEach(j => {
+                _time += `<span>抓拍时间:${j}</span>`
+              })
+              _time += '</p>';
+            }
 
-            if (obj.isAllPassed) { // 全部车辆经过该设备
-              deviceType = 17;
-            } else {
-              if (obj.bayonetId) { // 设备为卡口
-                deviceType = 8;
-              } else {
-                deviceType = 0;
+
+            let  content = `<div id="${$id}" class="icon_box vl_icon vl_icon_map_mark`+ obj.deviceType + `">`+
+                `<div class="device_box"><p>设备名称：`+ obj.detailDeviceName +`</p>`+
+                `<p>设备地址：`+ obj.detailShotAddress +`</p></div>`+ _time +`</div>`;
+
+            // 判断是不是起止点
+
+            let curList = _this.mapLocationList[_this.isCheckedVehicle].pathRecords;
+            if (curList.length > 0) {
+              if (obj.deviceID === curList[curList.length - 1].deviceID) {
+  
+                 content = '<div id="'+ $id +'" class="icon_box vl_icon vl_icon_map_mark_start">'+
+                    '<div class="device_box"><p>设备名称：'+ obj.detailDeviceName +'</p>'+
+                    '<p>设备地址：'+ obj.detailShotAddress +'</p></div>'+ _time +'</div>';
+  
+                isStartEnd = true;
+              }
+              if (obj.deviceID === curList[0].deviceID) {
+  
+                content = '<div id="'+ $id +'" class="icon_box vl_icon mark_span vl_icon_map_mark_end">'+
+                    '<div class="device_box"><p>设备名称：'+ obj.detailDeviceName +'</p>'+
+                    '<p>设备地址：'+ obj.detailShotAddress +'</p></div>'+ _time +'</div>';
+                    
+                isStartEnd = true;
               }
             }
-
-            if (obj.bayonetId) { // 设备为卡口
-              longitude = obj.bayonetLongitude;
-              latitude = obj.bayonetLatitude;
-
-              detailDeviceName = obj.bayonetName;
-              detailShotAddress = obj.bayonetAddress;
-
-            } else { // 设备为摄像头
-              longitude = obj.shotPlaceLongitude;
-              latitude = obj.shotPlaceLatitude;
-
-              detailDeviceName = obj.deviceName;
-              detailShotAddress = obj.address;
-
-            }
-            
-            let idName = obj.deviceID + '_' + number;
-            let content;
-
-            if (_this.isCheckedVehicle === number) {
-              content = '<div id="'+ idName +'" class="icon_box"><span class="vl_icon mark_span vl_icon_map_mark'+ deviceType +'"></span><span class="vl_icon mark_hover_span vl_icon_map_hover_mark'+ deviceType +'"></span><div class="device_box"><p>设备名称：'+ detailDeviceName +'</p><p>设备地址：'+ detailShotAddress +'</p></div><div class="shot_time_p shot_time_p_'+ number +'"><p>抓拍时间：'+ obj.shotTime +'</p></div></div>';
-
-            } else {
-              content = '<div id="'+ idName +'" class="icon_box"><span class="vl_icon mark_span vl_icon_map_mark'+ deviceType +'"></span><span class="vl_icon mark_hover_span vl_icon_map_hover_mark'+ deviceType +'"></span><div class="device_box"><p>设备名称：'+ detailDeviceName +'</p><p>设备地址：'+ detailShotAddress +'</p></div><div class="shot_time_p is_show_time shot_time_p_'+ number +'"><p>抓拍时间：'+ obj.shotTime +'</p></div></div>';
-            }
-       
             let marker = new window.AMap.Marker({
               map: _this.map,
-              position: [longitude, latitude],
+              position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude],
               zIndex: obj.isAllPassed ? 100 : 50,
               offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
               draggable: false, // 是否可拖动
@@ -373,68 +452,65 @@ export default {
               // 自定义点标记覆盖物内容
               content: content
             });
-
-            path.push([longitude, latitude]);
+            marker.on('mouseover', function () {
+              if (!isStartEnd) {
+                $('#' + $id).addClass('vl_icon_map_hover_mark' + obj.deviceType);
+              }
+              $('#' + $id).addClass('is_hover');
+            })
+            marker.on('mouseout', function () {
+              if (!isStartEnd) {
+                $('#' + $id).removeClass('vl_icon_map_hover_mark' + obj.deviceType);
+              }
+              $('#' + $id).removeClass('is_hover');
+            })
 
           }
-
         }
-        // 绘制线条
-        let polyline = new window.AMap.Polyline({
-          map: _this.map,
-          path: path,
-          zIndex: 50,
-          showDir: true,
-          strokeWeight: 4,
-          strokeColor: '#9CC5E7',
-          strokeStyle: 'dashed'
-        });
 
-        _this.polylineObj[number] = polyline; // 将折线都存储起来
-
-        _this.polylineObj[_this.isCheckedVehicle].setOptions({ //默认高亮显示同行车辆轨迹
-          zIndex: 999,
-          strokeWeight: 10,
-          showDir: true,
-          strokeColor: '#41D459',
-          strokeStyle: 'solid'
-        })
-
+        _this.drawLine();
 
         _this.map.setFitView();
       }
     },
+    drawLine () {
+      this.mapLocationList.forEach((x, index)  => {
+        let path = [];
+        if (x.pathRecords.length > 0) {
+          x.pathRecords.forEach(y => {
+            let _path = [y.shotPlaceLongitude, y.shotPlaceLatitude];
+            path.push(_path);
+          })
+          var polyline = new window.AMap.Polyline({
+            map: this.map,
+            path: path,
+            zIndex: this.isCheckedVehicle === index ? 999 : 50,
+            showDir: true,
+            strokeWeight: this.isCheckedVehicle === index ? 10 : 4,
+            strokeColor: this.isCheckedVehicle === index ? '#41D459' : '#9CC5E7',
+            strokeStyle: this.isCheckedVehicle === index ? 'solid' : 'dashed',
+            extData: index
+          });
+  
+          this.map.add([polyline]);
+          }
+        })
+       
+    }, // 画线
     // 关闭地图
     closeMap () {
       this.mapDialog = false;
       this.map.clearMap();
     },
     // 点击车牌号码高亮显示相对应的轨迹
-    handleChangeVeNumber (number) {
-      this.isCheckedVehicle = number;
-      for(let i in this.polylineObj) {
-        if (i === number) {
-          $('.shot_time_p_'+ number).css('display', 'block !important');
-          $('.shot_time_p_'+ number).removeClass('is_show_time');
-          this.polylineObj[i].setOptions({
-            zIndex: 999,
-            strokeWeight: 10,
-            showDir: true,
-            strokeColor: '#41D459',
-            strokeStyle: 'solid'
-          })
-        } else {
-          $('.shot_time_p_'+ i).css('display', 'none !important');
-          $('.shot_time_p_'+ i).addClass('is_show_time');
-          this.polylineObj[i].setOptions({
-            strokeWeight: 4,
-            zIndex: 50,
-            strokeColor: '#9CC5E7',
-            strokeStyle: 'dashed'
-          })
-        }
-      }
-      // }
+    handleChangeVeNumber (index) {
+      this.map.clearMap();
+
+      this.isCheckedVehicle = index;
+
+      this.filterData();
+      this.drawLine();
+
     },
     // 查询数据
     searchData () {
@@ -463,14 +539,12 @@ export default {
       }
 
       const params = {
-        // startTime: '2019-07-13 00:54:29',
-        // endTime: '2019-07-13 23:54:59',
-        // baseNumber: '湘LYV366',
-        // peerNumbers: '湘NF8988,湘NJM910',
         startTime: formatDate(this.searchForm.startTime),
         endTime: formatDate(this.searchForm.endTime),
         baseNumber: this.searchForm.basicVehicleNumber,
         peerNumbers: vehicleNumberList.join(','),
+        //  baseNumber: '湘A5Y79T',
+        // peerNumbers: '湘A754MY, 粤TQE512',
         timeSlot: this.searchForm.timeSlot
       };
       this.isSearchLoading = true;
@@ -479,6 +553,7 @@ export default {
           if (res && res.data) {
             this.resultList = res.data;
             this.isSearchLoading = false;
+
           } else {
             this.resultList = null;
             this.isSearchLoading = false;
@@ -555,6 +630,12 @@ export default {
 </style>
 <style lang="scss">
 .search_dctx_form {
+  .el-form-item {
+    // margin-bottom: 10px;
+  }
+  .operation_button {
+    margin-top: 10px;
+  }
   .device_code {
     .el-form-item__content {
       .span_tips {
@@ -659,7 +740,16 @@ export default {
       #mapContainer {
         width: 100%;
         height: 100%;
+        .is_hover {
+          .device_box {
+            display: block !important;
+          }
+          .shot_time_p {
+            display: none !important;
+          }
+        }
         .icon_box {
+          // width: 47px;
           position: relative;
           .device_box {
             background-color: #ffffff;
@@ -668,7 +758,7 @@ export default {
             position: absolute;
             min-width: 200px;
             top: 0;
-            left: 55px;
+            left: 70px;
             display: none;
             &:before {
               content: '';
@@ -686,62 +776,20 @@ export default {
             }
           }
           .shot_time_p {
-            background-color: rgba(0, 0, 0, 0.4);
-            // color: #666666;
-            padding: 3px 0 3px 3px;
-            top: 15px;
-            left: 55px;
-            // display: none;
+            position: absolute;
+            top: 10px;
+            left: 98%;
+            width: 190px;
+            word-break: keep-all;
+            font-size: 12px;
             color: #fff;
-            position: absolute;
-            min-width: 230px;
-            border-radius: 4px;
-            // &:before {
-            //   content: '';
-            //   position: absolute;
-            //   right: 100%;
-            //   bottom: 25%;
-            //   width: 0;
-            //   height: 0;
-            //   /* border-radius: 2%; */
-            //   border-width: 7px;
-            //   border-style: solid;
-            //   border-color: transparent;
-            //   border-right-width: 10px;
-            //   background-color: rgba(0, 0, 0, 0.4);
-            //   background-color: rgba(0, 0, 0, 0.4);
-            // }
+            background-color: rgba(0, 0, 0, 0.4);
+            border-radius: 2px;
+            padding: 5px;
           }
-          .is_show_time {
-            display: none;
-          }
-          .mark_hover_span {
-            position: absolute;
-            left: 0px;
-            top: 0;
-            display: none;
-          }
-          &:hover {
-            .mark_span {
-              display: none;
-            }
-            .mark_hover_span, .device_box {
-              display: block;
-            }
-            .shot_time_p {
-              display: none;
-            }
-          }
-        }
-        .is_vehicle_checked {
-          .shot_time_p {
-            display: block;
-          }
-        }
-        .not_vehicle_checked {
-          .shot_time_p {
-            display: none;
-          }
+          // .is_show_time {
+          //   display: none;
+          // }
         }
       }
       .map_rrt_u2 {

@@ -103,21 +103,22 @@
       <div class="snap_box" v-if="!isShowFullScreen && isShowSnapList && snapTotal > 0">
         <div class="snap_box_one">
           <el-card shadow="hover" class="more">
-            <p>今日抓拍</p>
             <div>{{snapTotal}}</div>
+            <p>今日抓拍</p>
             <el-button size="small" @click="sikpISalarmToday">查看更多</el-button>
           </el-card>
         </div>
         <div class="snap_box_two" v-for="item in snapList" :key="item.deviceId">
-          <el-card class="pic" shadow="hover">
+          <el-card class="pic" shadow="hover" @click.native="skipIsalarmDel(item)">
+            <div class="obj_name">疑似目标：{{item.objName}}</div>
             <div class="img">
               <img :src="item.snapPhoto" alt="" width="130" height="130">
             </div>
             <ul>
-              <li>
+              <!-- <li>
                 <i class="vl_icon vl_icon_control_26"></i>
                 <span>{{item.objName}}</span>
-              </li>
+              </li> -->
               <li>
                 <i class="vl_icon vl_icon_control_27"></i>
                 <span>{{item.snapTime}}</span>
@@ -276,7 +277,7 @@ export default {
       }),
       // 地图参数
       map: null,
-      devicesList: null, // 布控数据列表
+      devicesList: [], // 布控数据列表
       markerAlarmList: [],//告警列表
       timer: null,
       videoObj: null,
@@ -307,8 +308,13 @@ export default {
     });
     map.setMapStyle('amap://styles/whitesmoke');
     this.map = map;
+    this.getAlarmListByDev();
   },
   methods: {
+    // 跳转到告警详情页
+    skipIsalarmDel (item) {
+      this.$router.push({name: 'alarm_default', query: {uid: item.uid, objType: item.objType, type: 'today'}});
+    },
     hideLeft() {
       this.hideleft = !this.hideleft;
     },
@@ -385,16 +391,19 @@ export default {
       let devList = this.devicesList.map(m => m.uid);
       devList = Array.from(new Set(devList));
       let surveillanceList = this.devicesList.map(m => m.surveillanceIds);
-      surveillanceList = surveillanceList.join(',').split(',');
+      surveillanceList = surveillanceList.length > 0 ? surveillanceList.join(',').split(',') : [];
       surveillanceList = Array.from(new Set(surveillanceList));
-      const params = {
-        deviceIds: devList.join(','),
-        surveillanceIds: surveillanceList.join(','),
-        interval: 60
+      let params = {
+        interval: 30
       } 
+      devList.length > 0 && (params.deviceIds = devList.join(','));
+      surveillanceList.length > 0 && (params.surveillanceIds = surveillanceList.join(','));
       getAlarmListByDev(params).then(res => {
         if (res && res.data) {
           this.markerAlarmList = res.data;
+          if (this.markerAlarmList.length > 0 && this.devicesList.length > 0) {
+            this.getAllAlarmSnapListByDev();
+          }
           this.markerAlarmList.forEach(dev => {
             const childDiv = '<div class="vl_icon_warning">发现可疑目标</div>';
             // 给有警情的点标记追加class
@@ -402,16 +411,15 @@ export default {
               $('#mapBox #' + dev.deviceId).append(childDiv);
               $('#mapBox #' + dev.deviceId).addClass("vl_icon_alarm");
               $('#mapBox #' + dev.deviceId).addClass("vl_icon_control_02");
-              $('#mapBox #' + dev.deviceId).removeClass("vl_icon_control_01");
             })
-            // 让有警情的点标记的class 10s后移除
-            setTimeout(() => {
-              $('#mapBox .vl_icon_control_02').removeClass("vl_icon_alarm");
-              $('#mapBox .vl_icon_warning').remove();
-              $('#mapBox #' + dev.deviceId).removeClass("vl_icon_control_02");
-              $('#mapBox #' + dev.deviceId).addClass("vl_icon_control_01");
-            }, 10000);
           })
+          this.timer = setTimeout(() => {
+            // 让有警情的点标记的class 12s后移除  
+            $('#mapBox .vl_icon_control_02').removeClass("vl_icon_alarm");
+            $('#mapBox .vl_icon_control_02').removeClass("vl_icon_control_02");
+            $('#mapBox .vl_icon_warning').remove();
+            this.getAlarmListByDev();
+          }, 12000)
         }
       })
     },
@@ -466,7 +474,7 @@ export default {
       }).then(() => {
         // 没有获取到布控设备时，清除之前保存的定时器，并return
         if (this.devicesList.length === 0) {
-          clearInterval(this.timer);
+          clearTimeout(this.timer);
           return;
         }
         this.mapMark();
@@ -668,6 +676,7 @@ export default {
           $('#mapBox').on('click', '.vl_map_close', function () {
             // 关闭弹窗
             if (clickWindow) {$('.control_map').append($('#controlVideo'));_this.isShowVideo = false; _this.isShowV = false; clickWindow.close(); }
+            $('#' + obj.uid).removeClass("vl_icon_control_03");
           })
           this.clickWindow = clickWindow;
           // 跳转至布控详情页
@@ -815,22 +824,21 @@ export default {
           _this.markerList.push(marker);
         }
       }
-      _this.map.add(_this.markerList);
       _this.map.setFitView();// 自动适配到合适视野范围
       // 当布控状态不是进行中时，清除之前保存的定时器，并return
-      clearInterval(_this.timer);
-      if (this.mapForm.state !== 1) {
-        return;
-      }
-      _this.getAlarmListByDev();
-      // 10s重新加载一次
-      _this.timer = setInterval(() => {
-        _this.getAlarmListByDev();
-      }, 11000);
-      // 通过$once来监听定时器，在beforeDestroy钩子可以被清除。
-      _this.$once('hook:beforeDestroy', () => {
-        clearInterval(_this.timer);
-      })
+      // clearInterval(_this.timer);
+      // if (this.mapForm.state !== 1) {
+      //   return;
+      // }
+      // _this.getAlarmListByDev();
+      // // 10s重新加载一次
+      // _this.timer = setInterval(() => {
+      //   _this.getAlarmListByDev();
+      // }, 11000);
+      // // 通过$once来监听定时器，在beforeDestroy钩子可以被清除。
+      // _this.$once('hook:beforeDestroy', () => {
+      //   clearInterval(_this.timer);
+      // })
     },
     // 跳转至视频回放页面
     skipIsVideo (uid, deviceName) {
@@ -846,9 +854,12 @@ export default {
       this.$refs['mapForm'].resetFields();
     }
   },
-  destroyed () {
+  beforeDestroy () {
     if (this.map) {
       this.map.destroy();
+    }
+    if(this.timer) { //如果定时器还在运行 或者直接关闭，不用判断
+      clearTimeout(this.timer); //关闭
     }
   }
 }
@@ -924,19 +935,24 @@ export default {
             width: 100%;
             height: 100%;
             text-align: center;
-            padding: 78px 0 87px 0;
+            padding: 70px 0;
             box-shadow:0px -4px 10px 0px rgba(131,131,131,0.28);
+            background:linear-gradient(180deg,rgba(55,181,253,1),rgba(12,112,248,1));
             p{
+              margin-bottom: 10px;
               line-height: 24px;
+              color: #fff;
             }
             div{
-              font-size: 24px;
+              font-size: 38px;
               line-height: 24px;
-              margin-bottom: 5px;
-              color: #0769E7;
+              margin-bottom: 6px;
+              color: #fff;
+              font-family:Arial-BoldMT;
+              font-weight:bold;
             }
             .el-button{
-              width: 90px;
+              width: 120px;
               height: 30px;
             }
           }
@@ -948,16 +964,26 @@ export default {
           .pic.el-card{
             width: 100%;
             height: 100%;
-            padding: 15px 0;
+            padding-bottom: 15px;
             box-shadow:0px -4px 10px 0px rgba(131,131,131,0.28);
+            cursor: pointer;
+            .obj_name{
+              width: 100%;
+              height:32px;
+              line-height: 32px;
+              text-align: center;
+              background:rgba(12,112,248,1);
+              box-shadow:0px -4px 10px 0px rgba(131,131,131,0.28);
+              color: #fff;
+            }
             ul{
-              padding: 16px 0 0 16px;
+              padding: 6px 0 0 16px;
               li i{
                 vertical-align: middle;
-                margin-bottom: 2px;
               }
               li:nth-child(1) span{
                 color: #333333;
+                font-size: 12px;
               }
               li:not(:nth-child(1)) span{
                 color: #999999;
@@ -966,6 +992,7 @@ export default {
             } 
             .img{
               width: 100%;
+              margin-top: 15px;
               text-align: center;
             }          
           }          

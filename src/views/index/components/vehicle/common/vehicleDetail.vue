@@ -33,21 +33,23 @@
           <div class="struc_c_d_info">
             <h2>分析结果</h2>
             <ul>
-              <li v-if="sturcDetail.plateNo"><span>{{sturcDetail.plateNo}}</span></li>
-              <li v-if="type === 3 && sturcDetail.shotTime"><span><span>入城时间：</span>{{sturcDetail.shotTime}}</span></li>
-              <li v-if="type === 3 && sturcDetail.bayonetName"><span><span>入城卡口：</span>{{sturcDetail.bayonetName}}</span></li>
-              <li v-if="type === 3 && sturcDetail.firstEnterFlag"><span><span>初次入城：</span>{{sturcDetail.firstEnterFlag}}</span></li>
-              <li v-if="sturcDetail.plateColor"><span><span>车牌颜色：</span>{{sturcDetail.plateColor}}</span></li>
-              <li v-if="sturcDetail.vehicleModel"><span><span>车辆型号：</span>{{sturcDetail.vehicleModel}}</span></li>
-              <li v-if="sturcDetail.vehicleColor"><span><span>车辆颜色：</span>{{sturcDetail.vehicleColor}}</span></li>
-              <li v-if="sturcDetail.vehicleClass"><span><span>车辆类型：</span>{{sturcDetail.vehicleClass}}</span></li>
-              <li v-if="type === 3 && sturcDetail.vehicleStyles"><span><span>车辆分组：</span>{{sturcDetail.vehicleStyles}}</span></li>
-              <li v-if="sturcDetail.plateClass || sturcDetail.plateClass === 0">
-                <span><span>车牌类型：</span>
-                {{dicFormater(45, sturcDetail.plateClass)}}</span>
+              <li v-if="sturcDetail.plateNo"><span>车牌号码</span><span :title="sturcDetail.plateNo">{{sturcDetail.plateNo}}</span></li>
+              <li v-if="type === 3 && sturcDetail.vehicleType"><span>车辆分组</span><span :title="sturcDetail.vehicleType">{{(sturcDetail.vehicleType && sturcDetail.vehicleType.length > 0) ? sturcDetail.vehicleType.join(',') : '--'}}</span></li>
+              <!-- <li v-if="type === 3 && sturcDetail.shotTime"><span>入城时间</span><span :title="sturcDetail.shotTime">{{sturcDetail.shotTime}}</span></li>
+              <li v-if="type === 3 && sturcDetail.bayonetName"><span>入城卡口</span><span :title="sturcDetail.bayonetName">{{sturcDetail.bayonetName}}</span></li> -->
+              <li v-if="type === 3 && sturcDetail.firstEnterFlag"><span>初次入城</span><span>是</span></li>
+              <li v-if="sturcDetail.plateColor"><span>车牌颜色</span><span :title="sturcDetail.plateColor">{{sturcDetail.plateColor}}</span></li>
+              <li v-if="sturcDetail.vehicleModel"><span>车辆型号</span><span :title="sturcDetail.vehicleModel">{{sturcDetail.vehicleModel}}</span></li>
+              <li v-if="sturcDetail.vehicleColor"><span>车辆颜色</span><span :title="sturcDetail.vehicleColor">{{sturcDetail.vehicleColor}}</span></li>
+              <li v-if="sturcDetail.vehicleClass"><span>车辆类型</span><span :title="sturcDetail.vehicleClass">{{sturcDetail.vehicleClass}}</span></li>
+              <li v-if="sturcDetail.plateNo && (sturcDetail.plateClass || sturcDetail.plateClass === 0 || sturcDetail.plateClass === '0')">
+                <span>车牌类型</span>
+                <span :title="sturcDetail.plateClass">{{dicFormater(45, sturcDetail.plateClass)}}</span>
               </li>
+              <!-- <li v-if="type === 3 && sturcDetail.vehicleType"><span>车辆分组</span><span :title="sturcDetail.vehicleType">{{(sturcDetail.vehicleType && sturcDetail.vehicleType.length > 0) ? sturcDetail.vehicleType.join(',') : '--'}}</span></li> -->
               <!-- 套牌依据 -->
-              <li v-if="type === 5"><span><span>套牌依据：</span>{{sturcDetail.fakeReason}}</span></li>
+              <!-- li v-if="type === 5"><span>号牌颜色：</span><span>{{sturcDetail.plateColor}}</span></<!-->
+              <li v-if="type === 5"><span>套牌依据</span><span :title="sturcDetail.fakeReason">{{sturcDetail.fakeReason}}</span></li>
             </ul>
              <!--  <span class='tz' v-if="sturcDetail.features"><b>特征码：</b>{{sturcDetail.features}}</span> -->
           </div>
@@ -57,21 +59,25 @@
         <div id="vehicleDetail_capMap"></div>
       </div>
       <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video clearfix">
-        <div class="struc_c_d_qj struc_c_d_img">
+        <div class="struc_c_d_qj struc_c_d_img" style="float: left;">
           <img class="bigImg" title="点击放大图片" :src="sturcDetail.subStoragePath" alt />
           <span>抓拍图</span>
         </div>
-        <div class="struc_c_d_box" v-if="playerData">
+        <div class="struc_c_d_box" v-if="playerData" style="float: left;">
           <div is="flvplayer" :oData="playerData"
             :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
           </div>
         </div>
-        <div class="struc_c_d_box" style="padding: 10px 0 0 0; color: #666;" v-else>
-          暂无视频
+        <div class="struc_c_d_box struc_vid_empty" style="float: left;" v-else>
+          <div class="struc_vid_empty_c com_trans50_lt">
+            <div></div>
+            <p>暂无视频</p>
+          </div>
         </div>
-        <div class="download_btn" v-show="sturcDetail.videoPath">
+        <p class="download_tips" v-show="sturcDetail.videoPath">下载提示：右键点击视频选择“另存视频为”即可下载视频。</p>
+        <!-- <div class="download_btn" v-show="sturcDetail.videoPath">
           <a download="视频" :href="sturcDetail.videoPath">下载视频</a>
-        </div>
+        </div> -->
       </div>
     </div>
   </el-dialog>
@@ -79,12 +85,12 @@
 <script>
 import { mapXupuxian } from "@/config/config.js";
 import flvplayer from '@/components/common/flvplayer.vue';
-import {getDeviceSnapImagesPage, JtcPOSTAppendtpInfo} from '../../../api/api.judge.js';
+import {getDeviceSnapImagesPage, JtcPOSTAppendtpInfo, getNightVehicleRecordList} from '../../../api/api.judge.js';
 import {getFeatureSearch, getPhotoSearch} from "../../../api/api.analysis.js"; // 车辆特征检索接口
 export default {
   /* 
     oData
-      type: 1, // 1过车查看 2特征搜车 3入城统计 4出城统计 5套牌车 7以图搜车
+      type: 1, // 1过车查看 2特征搜车 3入城统计 4出城统计 5套牌车 7以图搜车 8 夜间行车 11车辆查询
       params: {}, // 查询参数  列表查询的参数，结果需保持一致
       list: [], // 列表
       index: 0, // 当前页的第几个（点击的人像所在的页的序号）
@@ -126,22 +132,13 @@ export default {
         this.strucIndex = val.index;
         this.strucInfoList = val.list;
         this.type = val.type;
-        if (this.type === 5) {
-          this.sturcDetail = Object.assign(
-            this.strucInfoList[this.strucIndex].vehicleDto, {
-              fakeReason: this.strucInfoList[this.strucIndex].fakeReason
-            }
-          );
-        } else {
-          this.sturcDetail = this.strucInfoList[this.strucIndex];
-        }
+        this.setDetailObj(this.strucInfoList[this.strucIndex]);
         this.pagination = {
           total: val.total,
           pageSize: val.pageSize,
           pageNum: val.pageNum
         }
         this.params = val.params;
-        console.log('this.sturcDetail', this.sturcDetail);
       }
     },
     // 监听人像详细信息
@@ -166,6 +163,27 @@ export default {
     }
   },
   methods: {
+    setDetailObj (item) {
+      if (this.type === 5) {
+        // 套牌车
+        this.sturcDetail = Object.assign(item.vehicleDto, {
+          fakeReason: item.fakeReason
+        });
+        // if (item && item.struVehicle) {
+        //   let _ots = {
+        //     '1': '同号车身颜色不同',
+        //     '2': '同号车辆类型不同',
+        //     '3': '同号车辆品牌不同',
+        //     '4': '同号短时异地出没'
+        //   };
+        //   this.sturcDetail = Object.assign(JSON.parse(item.struVehicle), {
+        //     fakeReason: _ots[item.fakePlateType + '']
+        //   });
+        // }
+      } else {
+        this.sturcDetail = item;
+      }
+    },
     // 设置视频数据
     setPlayerData () {
       if (this.sturcDetail.videoPath) {
@@ -197,19 +215,11 @@ export default {
         if (this.strucIndex < (this.strucInfoList.length - 1)) {
           // 序号小于LIST长度-1
           this.strucIndex = this.strucIndex + 1;
-          if (this.type === 5) {
-            this.sturcDetail = Object.assign(
-              this.strucInfoList[this.strucIndex].vehicleDto, {
-                fakeReason: this.strucInfoList[this.strucIndex].fakeReason
-              }
-            );
-          } else {
-            this.sturcDetail = this.strucInfoList[this.strucIndex];
-          }
+          this.setDetailObj(this.strucInfoList[this.strucIndex]);
         } else {
           // 序号超出
           if (this.pagination.total > 
-            (this.pagination.pageSize * (this.pagination.pageNum - 1) + this.strucIndex)) {
+            (this.pagination.pageSize * (this.pagination.pageNum - 1) + this.strucIndex + 1)) {
             // 需要分页
             this.pagination.pageNum = this.pagination.pageNum + 1;
             this.strucIndex = 0;
@@ -219,15 +229,7 @@ export default {
       } else {
         if (this.strucIndex > 0) {
           this.strucIndex = this.strucIndex - 1;
-          if (this.type === 5) {
-            this.sturcDetail = Object.assign(
-              this.strucInfoList[this.strucIndex].vehicleDto, {
-                fakeReason: this.strucInfoList[this.strucIndex].fakeReason
-              }
-            );
-          } else {
-            this.sturcDetail = this.strucInfoList[this.strucIndex];
-          }
+          this.setDetailObj(this.strucInfoList[this.strucIndex]);
         } else {
           if (this.pagination.pageNum > 1) {
             this.pagination.pageNum = this.pagination.pageNum - 1;
@@ -252,7 +254,7 @@ export default {
             this.pagination.total = res.data.total;
             this.strucInfoList = res.data.list;
             // this.sturcDetail = res.data.list[this.strucIndex];
-            this.sturcDetail = this.strucInfoList[this.strucIndex];
+            this.setDetailObj(this.strucInfoList[this.strucIndex]);
            
           }
         }).catch(() => {
@@ -266,8 +268,8 @@ export default {
         getFeatureSearch(params).then(res => {
           if (res && res.data) {
             this.pagination.total = res.data.total;
-            this.sturcDetail = res.data.list[this.strucIndex];
             this.strucInfoList = res.data.list;
+            this.setDetailObj(this.strucInfoList[this.strucIndex]);
           }
         }).catch(() => {
         });
@@ -281,11 +283,7 @@ export default {
           if (res && res.data) {
             this.pagination.total = res.data.total;
             this.strucInfoList = res.data.list;
-            this.sturcDetail = Object.assign(
-              this.strucInfoList[this.strucIndex].vehicleDto, {
-                fakeReason: this.strucInfoList[this.strucIndex].fakeReason
-              }
-            );
+            this.setDetailObj(this.strucInfoList[this.strucIndex]);
           }
         }).catch(() => {
         });
@@ -299,7 +297,21 @@ export default {
           if (res && res.data) {
             this.pagination.total = res.data.total;
             this.strucInfoList = res.data.list;
-            this.sturcDetail = res.data.list[this.strucIndex];
+            this.setDetailObj(this.strucInfoList[this.strucIndex]);
+          }
+        }).catch(() => {
+        });
+      } else if (this.type === 8) {
+        // getFeatureSearch
+        let params = Object.assign(this.params, {
+          pageSize: this.pagination.pageSize,
+          pageNum: this.pagination.pageNum
+        });
+        getNightVehicleRecordList(params).then(res => {
+          if (res && res.data) {
+            this.pagination.total = res.data.total;
+            this.strucInfoList = res.data.list;
+            this.setDetailObj(this.strucInfoList[this.strucIndex]);
           }
         }).catch(() => {
         });
@@ -357,8 +369,8 @@ export default {
 // 抓拍详情弹窗
 .cl_detail_dialog {
   .el-dialog {
-    width: 1100px;
-    margin-left: -550px !important; margin-top: -276px !important;
+    width: 1130px;
+    margin-left: -565px !important; margin-top: -276px !important;
     /* 祖先元素设置了transform属性则会导致固定定位属性position: fixed失效。 */
     transform: none !important;
   }
@@ -502,7 +514,7 @@ export default {
           float: left;
         }
         .struc_c_d_info {
-          width: 318px; height: 400px;
+          width: 348px; height: 400px;
           padding: 0 10px 0 20px;
           color: #333333;
           overflow: auto;
@@ -513,31 +525,45 @@ export default {
           > ul {
             overflow: hidden;
             > li {
-              float: left;
               margin-bottom: 10px; margin-right: 10px;
+              overflow: hidden;
               > span {
-                display: inline-block;
-                line-height: 26px;
+                line-height: 26px; height: 28px;
                 border: 1px solid #ddd;
-                padding: 0 20px 0 20px;
                 border-radius: 4px;
-                > span { color: #999; }
-                /* background-color: #0C70F8; 
-                color: #fff; */
-                /* &:first-child {
-                  width: 80px;
-                  background-color: #f2f2f2;
+                float: left;
+                &:first-child {
+                  width: 85px;
+                  background-color: #FAFAFA;
                   text-align: center;
-                  border: 1px solid #eee;
+                  border: 1px solid #f2f2f2;
                   border-radius: 4px 0 0 4px;
+                  color: #999;
                 }
                 &:last-child {
-                  border: 1px solid #eee;
+                  max-width: 220px;
+                  border: 1px solid #f2f2f2;
                   border-left: 0;
-                  padding: 0 20px 0 16px;
+                  background-color: #fff;
+                  padding: 0 15px 0 15px;
                   border-radius: 0 4px 4px 0;
-                } */
+                  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; word-break: break-all;
+                }
               }
+            }
+          }
+        }
+        &.struc_vid_empty {
+          position: relative;
+          > .struc_vid_empty_c {
+            > div {
+              width: 134px; height: 89px;
+              background: url(../../../../../assets/img/video/video_empty.png) center center no-repeat;
+            }
+            > p {
+              padding-top: 10px;
+              text-align: center;
+              color: #666;
             }
           }
         }
@@ -561,6 +587,12 @@ export default {
         -webkit-box-shadow: 0 0 0 !important;
         -moz-box-shadow: 0 0 0 !important;
         box-shadow: 0 0 0 !important;
+      }
+      .download_tips {
+        float: left;
+        width: 100%;
+        text-align: right;
+        padding-right: 40px; padding-top: 10px;
       }
       .download_btn {
         position: absolute; top: 415px; right: 30px;

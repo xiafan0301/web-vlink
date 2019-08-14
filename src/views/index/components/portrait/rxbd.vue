@@ -29,11 +29,13 @@
                   :on-error="handleError">
             <i v-if="uploading" class="el-icon-loading"></i>
             <img v-else-if="curImageUrl" :src="curImageUrl">
-            <i
-              style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
-              class="vl_icon vl_icon_vehicle_01"
-              v-else
-            ></i>
+            <div  v-else>
+              <i
+                      style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
+                      class="vl_icon vl_icon_vehicle_01"
+              ></i>
+              <span>点击上传图片</span>
+            </div>
           </el-upload>
           <p @click="showHistoryPic(1)">从上传记录中选择</p>
           <div v-show="curImageUrl" class="del_icon">
@@ -52,11 +54,13 @@
                   :on-error="handleError2">
             <i v-if="uploading2" class="el-icon-loading"></i>
             <img v-else-if="curImageUrl2" :src="curImageUrl2">
-            <i
-                    style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
-                    class="vl_icon vl_icon_vehicle_01"
-                    v-else
-            ></i>
+            <div  v-else>
+              <i
+                      style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
+                      class="vl_icon vl_icon_vehicle_01"
+              ></i>
+              <span>点击上传图片</span>
+            </div>
           </el-upload>
           <!--<div class="vl_jtc_ic_input" v-show="!curImageUrl2">-->
             <!--<el-form :model="numberValidateForm" ref="vlJtcIdCard"  class="demo-ruleForm">-->
@@ -424,10 +428,11 @@
     height: 100%;
     border: .2rem solid #fafafa;
     background: #FFFFFF;
+    padding-bottom: .2rem;
     .vl_judge_tc_h {
       width: 100%;
       text-align: center;
-      padding-top: .77rem;
+      padding-top: .27rem;
       .judge_title {
         color: #333333;
         font-size: .5rem;
@@ -458,7 +463,7 @@
     .vl_judge_tc_c {
       height: 4.3rem;
       text-align: center;
-      margin-bottom: .9rem;
+      margin-bottom: .6rem;
       padding-top: .9rem;
       position: relative;
       .vl_judge_tc_c_item {
@@ -477,8 +482,21 @@
         &:last-child {
           margin-left: .15rem;
         }
+        span {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          margin-top: 1.7rem;
+          line-height: 1.7rem;
+          color: #999;
+        }
         &:hover {
           background: #2981F8;
+          span {
+            color: #fff;
+          }
           >p {
             display: block;
           }
@@ -497,7 +515,7 @@
             width: 100%;
             height: 100%;
             background: none;
-            line-height: 3.4rem;
+            /*line-height: 3.4rem;*/
             img {
               width: 100%;
               height: 100%;

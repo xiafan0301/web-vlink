@@ -128,7 +128,7 @@ export default {
     return {
       backDialog: false, // 返回提示弹出框
       isSelected: 0, // 查询--重置
-      tabState: 2, // 地图选择
+      tabState: 1, // 地图选择
       isShowError: false,
       errorText: null,
       searchForm: {

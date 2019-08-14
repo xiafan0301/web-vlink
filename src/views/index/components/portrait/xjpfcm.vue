@@ -120,6 +120,8 @@
                   :picker-options="startDateOpt"
                   placeholder="开始时间"
                   :clearable="false"
+                  :time-arrow-control="true"
+                  default-time="00:00:00"
                 ></el-date-picker>
               </div>
             </el-form-item>
@@ -134,6 +136,7 @@
                   type="datetime"
                   default-time="23:59:59"
                   placeholder="结束时间"
+                  :time-arrow-control="true"
                   :clearable="false"
                 ></el-date-picker>
               </div>
@@ -234,7 +237,7 @@ import {
 } from "@/views/index/api/api.base.js";
 import { validateSimilarity, validateFrequency } from "@/utils/validator.js";
 import { postTaskAnalysis } from "../../api/api.analysis.js";
-import { formatDate, random14 } from "@/utils/util.js";
+import { formatDate, random14, dateOrigin } from "@/utils/util.js";
 import vlBreadcrumb from "@/components/common/breadcrumb.vue";
 export default {
   components: { vlBreadcrumb },
@@ -248,7 +251,7 @@ export default {
         endTime: "",
         similarityName: "相似度",
         similarity: "85", // 相似度
-        frequency: "", //频次
+        frequency: "3", //频次
         frequencyName: "频次不少于"
       },
       rules: {
@@ -275,12 +278,12 @@ export default {
         disabledDate: time => {
           if (this.searchData.endTime) {
             return (
-              time.getTime() > new Date(this.searchData.endTime).getTime() ||
-              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 30
+              time.getTime() > new Date(this.searchData.endTime).getTime()
+              /*  || time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 30 */
             );
           } else {
             return (
-              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 30 ||
+              /* time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 30 || */
               time.getTime() > new Date().getTime()
             );
           }
@@ -295,7 +298,7 @@ export default {
             );
           } else {
             return (
-              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 30 ||
+              /* time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 30 || */
               time.getTime() > new Date().getTime()
             );
           }
@@ -321,7 +324,7 @@ export default {
       },
       zIndex: 50,
       amap: null, // 地图对象
-      mapCenter: [110.594419, 27.908869], //地图中心位
+      mapCenter: mapXupuxian.center, //地图中心位
       videoMenuStatus: true, // 菜单状态
       cameraMapMarkers: [], // 地图标记
       selAreaPolygon: null,
@@ -341,19 +344,23 @@ export default {
     this.getTreeList();
     //加载地图
     this.initMap();
+    this.resetZoom();
     // this.mapEvents();
   },
   methods: {
     //设置时间
     setDate() {
-      let curDate = new Date(new Date().toLocaleDateString()).getTime()
+      /* let curDate = new Date(new Date().toLocaleDateString()).getTime()
       let curS = 1 * 24 * 3600 * 1000;
       let startTime = curDate - curS;
       let endTime = curDate - 1
-      /* let startTime = new Date() - 3600 * 1000 * 24 * 1;
-      let endTime = new Date(); */
       this.searchData.startTime = formatDate(startTime);
-      this.searchData.endTime = formatDate(endTime);
+      this.searchData.endTime = formatDate(endTime); */
+      let _s = dateOrigin(false, new Date(new Date().getTime() - 3600 * 1000 * 24 * 1));
+      /* let _e = new Date(dateOrigin(true).getTime() - 3600 * 1000 * 24 * 1); */
+      let _e = new Date();
+      this.searchData.startTime = _s;
+      this.searchData.endTime = _e;
     },
     //重置
     resetSearch(formName) {
@@ -1371,7 +1378,7 @@ export default {
           this.doMark(this.listBayonet[i], "vl_icon vl_icon_kk");
         }
       }
-      this.amap.setFitView();
+      /* this.amap.setFitView(); */
     },
     // 地图标记
     doMark(obj, sClass) {
@@ -1404,7 +1411,6 @@ export default {
   .new-a-t-content {
     height: 100%;
     display: flex;
-    border-top: 1px solid #d3d3d3;
     // 关闭展开菜单按钮
     @mixin close_menu {
       position: absolute;
@@ -1419,7 +1425,7 @@ export default {
       padding: 20px 0 20px 20px;
       color: #999;
       background: #fff;
-      box-shadow: 5px 0px 16px 0px rgba(169, 169, 169, 0.2);
+      box-shadow: 2px 3px 10px 0px rgba(131, 131, 131, 0.28);
       animation: fadeInLeft 0.4s ease-out 0.3s both;
       .time-search {
         display: flex;
@@ -1795,12 +1801,16 @@ export default {
   .search-btn {
     width: 232px;
     text-align: center;
+    margin-top: 10px;
     .el-button {
-      width: 45%;
+      width: 110px;
     }
     .el-button--primary {
       background-color: #0c70f8;
       border-color: #0c70f8;
+    }
+    .el-button+.el-button {
+      margin-left: 12px;
     }
   }
   .info-left {
@@ -1881,6 +1891,16 @@ export default {
       left: -10px;
       top: -10px;
     }
+  }
+  .el-form-item {
+    margin-bottom: 10px;
+  }
+  /* 表单错误提示 */
+  .el-form-item__error {
+    position: static;
+    padding-top: 0;
+    margin-bottom: -10px;
+    line-height: 20px;
   }
 }
 </style>

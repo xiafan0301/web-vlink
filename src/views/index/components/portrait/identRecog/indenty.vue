@@ -8,26 +8,9 @@
       </div>
     </div>
     <div class="content_box">
-      <div class="left">
-        <div :class="['upload_box', {'hidden': curImageUrl}]">
-          <el-upload
-            :disabled="isAddImgDisabled"
-            ref="uploadPic"
-            accept="image/*"
-            :limit="1"
-            :action="uploadUrl"
-            list-type="picture-card"
-            :on-remove="handleRemove"
-            :on-success="uploadPicSuccess"
-            :on-exceed="uploadPicExceed"
-            :before-upload="beforeAvatarUpload"
-            :file-list="fileList"
-            >
-            <i v-if="uploading" class="el-icon-loading"></i>
-            <i v-else class="vl_icon vl_icon_vehicle_01"></i>
-            <p class="upload_text" v-show="!curImageUrl">点击上传图片</p>
-            <p class="history" @click="showHistoryPic($event)" v-show="!curImageUrl">从上传记录中选择</p>
-          </el-upload>
+      <div class="left_search">
+        <div style="padding: 0 15px; height: 210px; text-align:center">
+          <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit" :imgData="imgData"></div>
         </div>
         <div class="divide"></div>
         <el-form class="left_form" :model="searchForm" ref="searchForm" :rules="searchRules">
@@ -108,26 +91,6 @@
         </template>
       </div>
     </div>
-    <!--历史记录弹窗-->
-    <el-dialog
-      :visible.sync="historyPicDialog"
-      class="history-pic-dialog dialog_comp"
-      width="1000px"
-      :close-on-click-modal="false"
-      title="最近上传的图片">
-      <div style="text-align: center;font-size: 20px;" v-if="loadingHis"><i class="el-icon-loading"></i></div>
-      <vue-scroll class="his-pic-box" v-else-if="historyPicList.length">
-        <div class="his-pic-item" :class="{'active':isImgChecked === index}" v-for="(item, index) in historyPicList" :key="item.id" @click="chooseHisPic(item, index)">
-          <img :src="item.path" alt="">
-        </div>
-        <div style="clear: both;"></div>
-      </vue-scroll>
-      <p v-else>暂无历史记录</p>
-      <div slot="footer" v-show="historyPicList.length">
-        <el-button @click="historyPicDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="addHisToImg" :disabled="choosedHisPicList.length === 0">确认</el-button>
-      </div>
-    </el-dialog>
   </div>
 </template>
 <script>  
@@ -135,21 +98,16 @@ import { ajaxCtx } from '@/config/config.js';
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import noResult from '@/components/common/noResult.vue';
 import { checkIdCard } from '@/utils/validator.js';
+import vlUpload from '@/components/common/upload.vue';
 import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcPUTAppendixsOrder, getIdNoList} from '@/views/index/api/api.judge.js';
 export default {
-  components: { vlBreadcrumb, noResult },
+  components: { vlBreadcrumb, noResult, vlUpload },
   data () {
     return {
       isInitPage: true, // 是否是初始化页面
-      identyDetailDialog: false, // 身份核实详情弹出框
-      strucDetailDialog: false,
-      loadingHis: false, // 获取历史图片加载中
-      historyPicDialog: false, // 历史图片弹出框
-      uploading: false, // 是否正在上传
+      uploadImgId: null, // 上传的图片id
       curImageUrl: null, // 正在上传的照片
       fileList: [],
-      uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
-      isAddImgDisabled: false,
       searchForm: {
         idNo: null // 身份证
       },
@@ -158,156 +116,41 @@ export default {
           { validator: checkIdCard, trigger: 'blur' }
         ],
       },
-      historyPicList: [], // 历史图片列表
-      choosedHisPicList: [], // 选择了的图片
-      // curImgNum: 0, // 图片数量
-      // curImgIndex: 0,
-      // sturcDetail: {}, // 身份核实详情
       dataDetail: null, //结果详情
       queryImgPath: null, // 从其他模块传过来的图片
       isSearchLoading: false, // 搜索条件加载中
-      isImgChecked: -1, // 是否选中历史图片
+      uploadClear: {},
+      imgData: null,
     }
   },
   created () {
     const imgPath = this.$route.query.path;
     if (imgPath) {
+      this.imgData = Object.assign({}, {path: imgPath});
+
       this.queryImgPath = imgPath;
-      this.fileList.push({path: imgPath});
-      this.curImageUrl = imgPath;
     }
   },
   methods: {
-    // 显示上传图片历史弹框
-    showHistoryPic (e) {
-      e.stopPropagation();
-      this.historyPicDialog = true;
-      this.isImgChecked = -1;
-
-      let params = {
-        userId: this.$store.state.loginUser.uid,
-        fileType: 1
-      }
-      JtcGETAppendixInfoList(params).then(res => {
-        if (res) {
-          this.loadingHis = false;
-          res.data.forEach(x => x.checked = false);
-          this.historyPicList = res.data;
-        }
-      }).catch(() => {
-        this.historyPicDialog = false;
-      })
-    },
-    // 选择历史图片
-    chooseHisPic (item, index) {
-      if (this.isImgChecked === index) {
-        this.isImgChecked = -1;
+    uploadEmit (data) {
+      console.log('uploadEmit data', data);
+      if (data && data.path) {
+        setTimeout(() => {
+          this.uploadImgId = data.uid;
+        }, 500)
       } else {
-        this.isImgChecked = index;
-        this.choosedHisPicList.push(item);
-      }
-     
-    },
-    // 确定选择历史图片
-    addHisToImg () {
-      this.fileList = [];
-      this.historyPicDialog = false;
-      let _ids = [];
-      this.choosedHisPicList.forEach(x => {
-        _ids.push(x.uid);
-
-        this.curImageUrl = x.path;
-        const params = {
-          uid: x.uid,
-          url: x.path
-        }
-        this.fileList.push(params);
-
-      })
-      let _obj = {
-        appendixInfoIds: _ids.join(',')
-      }
-      JtcPUTAppendixsOrder(_obj);
-
-      console.log('fileList', this.fileList)
-      console.log('fileList', this.curImageUrl)
-    },
-    handleRemove () {
-      this.curImageUrl = null;
-      this.fileList = [];
-    },
-    // 上传图片
-    uploadPicExceed () {
-      if (!document.querySelector('.el-message--info')) {
-        this.$message.info('最多可同时对比1张图片');
+        this.uploadImgId = null;
       }
     },
-    uploadPicSuccess (res) {
-      this.uploading = true;
-      this.fileList = [];
-      if (res && res.data) {
-        let oRes = res.data;
-        this.uploading = false;
-
-        this.curImageUrl = oRes.fileFullPath;
-
-        if (oRes) {
-          let x = {
-            cname: oRes.fileName, // 附件名称 ,
-            contentUid: this.$store.state.loginUser.uid,
-            // desci: '', // 备注 ,
-            filePathName: oRes.fileName, // 附件保存名称 ,
-            fileType: 1, // 文件类型 ,
-            imgHeight: oRes.fileHeight, // 图片高存储的单位位px ,
-            imgSize: oRes.fileSize, // 图片大小存储的单位位byte ,
-            imgWidth: oRes.fileWidth, //  图片宽存储的单位位px ,
-            // otherFlag: '', // 其他标识 ,
-            path: oRes.fileFullPath, // 附件路径 ,
-            // path: oRes.path,
-            thumbnailName: oRes.thumbnailFileName, // 缩略图名称 ,
-            thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
-            // uid: '' //  附件标识
-          };
-          JtcPOSTAppendixInfo(x).then(jRes => {
-            if (jRes) {
-              x['uid'] = jRes.data;
-              const params = {
-                uid: jRes.data,
-                url: x.path
-              };
-              this.fileList.push(params);
-            }
-          })
-
-
-          console.log('fileList', this.fileList)
-        }
-      }
-    },
-    beforeAvatarUpload (file) {
-      const isJPG = file.type === 'image/jpeg' || file.type === 'image/jpg' || file.type === 'image/png';
-      const isLt4M = file.size / 1024 / 1024 < 4;
-
-      if (!isJPG) {
-        if (!document.querySelector('.el-message--info')) {
-          this.$message.info('上传图片只能是 jpeg、jpg、png 格式!');
-        }
-      }
-      if (!isLt4M) {
-        if (!document.querySelector('.el-message--info')) {
-          this.$message.info('上传图片大小不能超过 4MB!');
-        }
-      }
-      return isJPG && isLt4M;
-    },
+   
     // 重置查询条件
     resetData (form) {
       this.isInitPage = false;
 
-      this.curImageUrl = null;
-      this.fileList = [];
+      this.uploadImgId = null;
       this.dataDetail = null;
-      this.$refs.uploadPic.clearFiles();
+      this.uploadClear = {};
+
       this.$refs[form].resetFields();
     },
     // 根据搜索条件进行查询
@@ -315,7 +158,8 @@ export default {
       this.$refs[form].validate(valid => {
         if (valid) {
           this.dataDetail = null;
-          if (!this.curImageUrl || !this.searchForm.idNo) {
+
+          if (!this.uploadImgId || !this.searchForm.idNo) {
             if (!document.querySelector('.el-message--info')) {
               this.$message.info('请输入图片和证件号');
             }
@@ -326,16 +170,9 @@ export default {
             uploadImgUrls: this.queryImgPath
           };
 
-          let _ids = [];
-          this.fileList.forEach(x => {
-            if (x) {
-              _ids.push(x.uid);
-            }
-          })
-          if (_ids.length) {
-            params['appendixIds'] = _ids.join(',');
+          if (this.uploadImgId) {
+            params['appendixIds'] = this.uploadImgId;
           }
-          // params['appendixIds'] = '01tBEd6hSUblR8X9C5KElA'
           this.isSearchLoading = true;
           getIdNoList(params).then(res => {
             if (res && res.data) {
@@ -364,7 +201,7 @@ export default {
     display: flex;
     height: 100%;
     padding-top: 50px;
-    .left {
+    .left_search {
       width: 265px;
       height: 100%;
       box-shadow: 2px 0px 5px 0px rgba(131,131,131,0.28);
@@ -374,58 +211,6 @@ export default {
         height: 1px;
         border-bottom: 1px solid #D3D3D3;
         margin: 20px 0;
-      }
-      .upload_box {
-        text-align: center;
-        width: 225px;
-        height: 225px;
-        overflow: hidden;
-        &.hidden /deep/ .el-upload--picture-card {
-          display: none!important;
-        }
-        /deep/ .el-upload-list__item {
-          width: 225px;
-          height: 225px;
-        }
-        /deep/ .el-upload {
-          width: 225px;
-          height: 225px;
-          position: relative;
-          .upload_text {
-            line-height: 0;
-            color: #999999;
-            margin-top: -60px;
-          }
-          
-          .history {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 30px;
-            line-height: 30px;
-            width: 100%;
-            color: #FFFFFF;
-            font-size: 12px;
-            background:rgba(12,112,248,1);
-            border-radius:0px 0px 5px 5px;
-            display: none;
-          }
-          i {
-            margin-top: 40px;
-            margin-left: 15px;
-            width: 120px;
-            height: 120px;
-          }
-          &:hover {
-            background: #2981F8;
-            .upload_text {
-              color: #ffffff;
-            }
-            .history {
-              display: block;
-            }
-          }
-        }
       }
       .left_form {
         width: 100%;
@@ -553,28 +338,6 @@ export default {
   }
   .reset_btn, .select_btn {
     width: 100px;
-  }
-}
-.history-pic-dialog {
-  .his-pic-box {
-    width: 100%;
-    height: 500px !important;
-    .his-pic-item {
-      float: left;
-      width: 142px;
-      height: 142px;
-      border: 2px solid #FFFFFF;
-      margin-right: 10px;
-      margin-bottom: 10px;
-      cursor: pointer;
-      img {
-        width: 100%;
-        height: 100%;
-      }
-    }
-    .active {
-      border-color: #0C70F8;
-    }
   }
 }
 

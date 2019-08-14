@@ -14,6 +14,7 @@
               :clearable="false"
               value-format="yyyy-MM-dd HH:mm:ss"
               format="yyyy-MM-dd HH:mm:ss"
+              :time-arrow-control="true"
               style="width: 100%"
               @blur="blurStartTime"
               :picker-options="pickerStart"
@@ -29,6 +30,7 @@
               @blur="blurEndTime"
               @focus="handleEndTime"
               :picker-options="pickerEnd"
+              :time-arrow-control="true"
               value-format="yyyy-MM-dd HH:mm:ss"
               format="yyyy-MM-dd HH:mm:ss"
               type="datetime"
@@ -123,7 +125,7 @@ import { checkPlateNumber } from '@/utils/validator.js';
 import { getShotDevice, getTailBehindList } from '@/views/index/api/api.judge.js'
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
-import { formatDate } from '@/utils/util.js';
+import { formatDate, dateOrigin } from '@/utils/util.js';
 export default {
   components: { vlBreadcrumb, noResult },
   data () {
@@ -136,7 +138,7 @@ export default {
       searchForm: {
         plateNo: null, // 车牌号码
         deviceCode: null, // 起点设备编号
-        shotTime: new Date(startTime), // 开始时间
+        shotTime: dateOrigin(false, new Date(startTime)), // 开始时间
         dateEnd: new Date(), // 结束时间
         vehicleClass: [], // 车辆类型
         interval: 3 // 尾随间隔
@@ -151,7 +153,7 @@ export default {
       rules: {
         plateNo: [
           { required: true, message: '请输入正确的车牌号码', trigger: 'blur' },
-          // { validator: checkPlateNumber, trigger: 'blur' }
+          { validator: checkPlateNumber, trigger: 'blur' }
         ]
       },
       pickerStart: {
@@ -180,7 +182,7 @@ export default {
   mounted () {
     this.getVehicleTypeList();
     const plateNo = this.$route.query.plateNo;
-    const dateStart = this.$route.query.dateStart;
+    const dateStart = this.$route.query.searchStartTime;
     const dateEnd = this.$route.query.dateEnd;
     if (plateNo) { // 从其他模块跳转过来的
       this.searchForm.plateNo = plateNo;
@@ -189,7 +191,7 @@ export default {
       this.searchForm.plateNo = plateNo;
       this.searchForm.shotTime = dateStart;
       this.searchForm.dateEnd = dateEnd;
-      this.searchForm.interval = this.$route.query.interval;
+      this.searchForm.interval = parseInt(this.$route.query.interval);
       this.searchForm.deviceCode = this.$route.query.deviceCode;
       if (this.$route.query.vehicleClass) {
         this.searchForm.vehicleClass = this.$route.query.vehicleClass.join(',');
@@ -253,6 +255,8 @@ export default {
     // 获取抓拍设备列表
     getDeviceList () {
       this.deviceList = [];
+      this.searchForm.deviceCode = null;
+      this.deviceStartTime = null;
       const params = {
         plateNo: this.searchForm.plateNo,
         startTime: formatDate(this.searchForm.shotTime),
@@ -300,6 +304,7 @@ export default {
         plateNo: this.searchForm.plateNo,
         dateStart: formatDate(this.deviceStartTime),
         dateEnd: formatDate(this.searchForm.dateEnd),
+        searchStartTime: formatDate(this.searchForm.shotTime),
         plateNoTb: obj.plateNo,
         vehicleClass: this.searchForm.vehicleClass.join(',') || null,
         interval: this.searchForm.interval,
@@ -333,8 +338,6 @@ export default {
           };
           let deviceCode, vehicleType;
           this.deviceList.map(item => {
-            console.log('asdasdd')
-            console.log(this.searchForm.deviceCode)
             if (item.deviceName === this.searchForm.deviceCode) {
               deviceCode = item.deviceID;
             }

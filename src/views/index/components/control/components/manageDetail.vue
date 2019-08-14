@@ -284,7 +284,7 @@
                   </div>
                 </div>
                 <div>
-                  <p><i class="vl_icon vl_icon_control_26" style="margin-top: -4px;"></i><span class="vl_f_333">{{item.objName}}</span></p>
+                  <p><i class="vl_icon vl_icon_control_26" style="margin-top: -4px;"></i><span class="vl_f_333">疑似目标：{{item.objName}}</span></p>
                   <p><i class="vl_icon vl_icon_control_27" style="margin-top: -4px;"></i><span class="vl_f_999">{{item.snapTime}}</span></p>
                 </div>
               </div>
@@ -869,7 +869,6 @@ export default {
             // }
           }
           let marker = new window.AMap.Marker({ // 添加自定义点标记
-            map: _this.map,
             position: [obj.longitude, obj.latitude],
             offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
             draggable: false, // 是否可拖动
@@ -944,7 +943,7 @@ export default {
       _this.controlArea(1);
     }
   },
-  destroyed () {
+  beforeDestroy () {
     if (this.map) {
       this.map.destroy();
     }

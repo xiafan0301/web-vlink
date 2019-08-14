@@ -76,7 +76,7 @@
 .vl_icon_sxt { width: 41px; height: 70px; background-position: -280px -170px; }
 .vl_icon_sxt_dis { width: 41px; height: 48px; background-position: -344px -188px; }
 .qyryfx_vl_icon_wrap { width: 125px; height: 50px; }
-.qyryfx_vl_icon_wrap .people_counts_l1 { width:76px; height:30px; line-height: 30px; color: #fff; font-size: 14px; text-align: center; float: left; border-radius:15px; margin: 3px 0 0 3px; }
+.qyryfx_vl_icon_wrap .people_counts_l1 { width:76px; height:30px; line-height: 30px; color: #fff; font-size: 14px; text-align: center; float: left; border-radius:15px; margin: 18px 0 0 3px; }
 .qyryfx_vl_icon_wrap .vl_icon { float: left; }
 
 .qyryfx_vl_icon_wrap .level1 { background: #fa453a; }
@@ -170,7 +170,7 @@
 /* 研判 */
 .vl_icon_judge_01{width: 22px; height: 28px; background-position: -62px -134px;} /* 暂停*/
 .vl_icon_judge_03{width: 56px;  height: 68px;  background-position: -300px -1150px;} /* 次数1*/
-.vl_icon_judge_04{width: 56px;  height: 68px;  background-position: -417px -1150px;} /* 次数2*/
+.vl_icon_judge_04{width: 56px;  height: 68px;  background-position: -417px -1160px;} /* 次数2*/
 .vl_icon_judge_05{width: 56px;  height: 68px;  background-position: -377px -1150px;} /* 次数3*/
 .vl_icon_judge_06{width: 56px;  height: 68px;  background-position: -224px -1150px;} /* 次数4*/
 .vl_icon_judge_02{width: 56px;  height: 68px;  background-position: -604px -1160px;} /* 选中状态摄像头*/
@@ -226,11 +226,16 @@
 .vl_icon_message_7{width: 50px; height: 70px; background-position: -320px -260px;}
 /**告警图标***/
 .vl_icon_alarm_1{width: 114px; height: 32px; background-position: -548px -882px;}
-.vl_icon_alarm_2{width: 26px; height: 25px; background-position: -695px -888px;}
+.vl_icon_alarm_2{width: 86px; height: 24px; background-position: -1078px -534px;}
+.vl_icon_alarm_3{width: 86px; height: 24px; background-position: -1078px -496px;}
+.vl_icon_alarm_4{width: 86px; height: 24px; background-position: -1078px -456px;}
+.vl_icon_alarm_5{width: 86px; height: 24px; background-position: -1078px -420px;}
+.vl_icon_alarm_6{width: 86px; height: 24px; background-position: -1078px -380px;}
+/* .vl_icon_alarm_2{width: 26px; height: 25px; background-position: -695px -888px;}
 .vl_icon_alarm_3{width: 26px; height: 25px; background-position: -741px -888px;}
 .vl_icon_alarm_4{width: 26px; height: 25px; background-position: -787px -888px;}
 .vl_icon_alarm_5{width: 26px; height: 25px; background-position: -832px -888px;}
-.vl_icon_alarm_6{width: 26px; height: 25px; background-position: -877px -888px;}
+.vl_icon_alarm_6{width: 26px; height: 25px; background-position: -877px -888px;} */
 /**事件图标***/
 .vl_icon_event_1{width: 72px; height: 72px; background-position: -572px -426px;}
 .vl_icon_event_2{width: 16px; height: 16px; background-position: -754px -375px;}
@@ -289,6 +294,7 @@
 .vl_icon_manage_16{width: 16px; height: 16px; background-position: -482px -671px;} /*视频设置--临时授权--终止*/
 .vl_icon_manage_17{width: 16px; height: 16px; background-position: -713px -585px;} /* 文件下载 */
 .vl_icon_manage_18{width: 16px; height: 16px; background-position: -744px -585px;} /* 文件上传 */
+.vl_icon_manage_19{width: 32px; height: 32px; background-position: -911px -468px;} /* 卡口管理-查看详细 */
 /**告警图标***/
 .vl_icon_task_1{width: 46px; height: 46px; background-position: -592px -1522px;}
 .vl_icon_task_2{width: 46px; height: 46px; background-position: -662px -1522px;}
@@ -428,12 +434,12 @@
 .vl_icon_vehicle_gcsj_04{width: 83px;height: 83px;background-position: -1274px -931px;}
 
 /* 人脸检索  --人脸数据分析 */
-.vl_icon_portrait_rlsjfx_01{width: 70px;height: 70px;background-position: -924px -1039px;}
-.vl_icon_portrait_rlsjfx_02{width: 70px;height: 70px;background-position: -1026px -1039px;}
-.vl_icon_portrait_rlsjfx_03{width: 70px;height: 70px;background-position: -1131px -1039px;}
-.vl_icon_portrait_rlsjfx_04{width: 70px;height: 70px;background-position: -1235px -1039px;}
-.vl_icon_portrait_rlsjfx_05{width: 70px;height: 70px;background-position: -1338px -1039px;}
-.vl_icon_portrait_rlsjfx_06{width: 70px;height: 70px;background-position: -1442px -1039px;}
+.vl_icon_portrait_rlsjfx_01{width: 70px;height: 70px;background-position: -924px -1036px;}
+.vl_icon_portrait_rlsjfx_02{width: 70px;height: 70px;background-position: -1026px -1036px;}
+.vl_icon_portrait_rlsjfx_03{width: 70px;height: 70px;background-position: -1131px -1036px;}
+.vl_icon_portrait_rlsjfx_04{width: 70px;height: 70px;background-position: -1235px -1036px;}
+.vl_icon_portrait_rlsjfx_05{width: 70px;height: 70px;background-position: -1338px -1036px;}
+.vl_icon_portrait_rlsjfx_06{width: 70px;height: 70px;background-position: -1442px -1036px;}
 
 /* 人像检索 */
 .vl_icon_portrait_01 {width: 62px; height: 56px; background-position: -982px -1168px;}
@@ -480,7 +486,7 @@
 /* 左侧二级菜单样式 */
 .vl_smenu {
   background-color: #ffffff;
-  position: absolute; top: 0; left: 0; z-index: 19;
+  position: absolute; top: 0; left: 0; z-index: 250;
   width: 200px; height: 100%;
   padding-bottom: 10px;
   box-shadow:4px 0px 10px 0px #838383;
@@ -1178,4 +1184,10 @@ html {
 }
 .vl_date .el-range-separator {
   color: #999 !important;
+}
+
+.el-button.is-disabled, .el-button.is-disabled:focus, .el-button.is-disabled:hover {
+  background-color: #f2f2f2;
+  color: #b2b2b2;
+  border-color: #DCDFE6;
 }
