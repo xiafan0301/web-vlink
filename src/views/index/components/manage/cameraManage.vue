@@ -509,7 +509,7 @@ export default {
     // 下载模板
     downloadModel () {
       downloadCameraModel()
-        .then((res, result) => {
+        .then((res) => {
           if (res) {
             const content = res;
             const blob = new Blob([content]);
