@@ -109,8 +109,10 @@
       </div>
     </div>
     <!-- 视频全屏放大 -->
-    <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
-      <video id="controlVideo" :src="videoDetail.videoPath" crossOrigin="anonymous"></video>
+    <div style="width: 0; height: 0;" v-if="showLarge" :class="{vl_j_fullscreen: showLarge}">
+      <div is="flvplayer" :oData="playerData" @playerClose="playerClose"  :oConfig="{sign: false, close: true, pause: true}" ></div>
+
+      <!-- <video id="controlVideo" :src="videoDetail.videoPath" crossOrigin="anonymous"></video>
       <div @click="closeVideo" class="vl_icon vl_icon_event_23 close_icon"></div>
       <div class="control_bottom">
         <div>{{videoDetail.deviceName}}</div>
@@ -120,10 +122,10 @@
           <span @click="playerCut" class="vl_icon vl_icon_control_07"></span>
           <span><a download="视频" :href="videoDetail.videoPath" target="_blank" class="vl_icon vl_icon_event_26"></a></span>
         </div>
-      </div>
+      </div> -->
     </div>
     <!-- 截屏 dialog -->
-    <el-dialog title="截屏" :visible.sync="cutDialogVisible" :center="false" :append-to-body="true" width="1000px">
+    <!-- <el-dialog title="截屏" :visible.sync="cutDialogVisible" :center="false" :append-to-body="true" width="1000px">
       <div style="text-align: center; padding-top: 30px;">
         <canvas :id="flvplayerId + '_cut_canvas'"></canvas>
       </div>
@@ -132,7 +134,7 @@
         <el-button  type="priamry" @click="playerCutSave">保 存</el-button>
         <a :id="flvplayerId + '_cut_a'" style="display: none;">保存</a>
       </div>
-    </el-dialog>
+    </el-dialog> -->
   </div>
 </template>
 <script>
@@ -140,19 +142,21 @@ import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { mapXupuxian } from "@/config/config.js";
 import { getTailBehindDetail, getVehicleArchives } from '@/views/index/api/api.judge.js'
 import { random14 } from '@/utils/util.js';
+import flvplayer from '@/components/common/flvplayer.vue';
 export default {
-  components: { vlBreadcrumb },
+  components: { vlBreadcrumb, flvplayer },
   data () {
     return {
-      cutDialogVisible: false, // 截屏弹出框
+      // cutDialogVisible: false, // 截屏弹出框
       showLarge: false, // 全屏显示
-      videoDetail: {}, // 播放视频的信息
-      isPlaying: false, // 是否播放视频
+      // videoDetail: {}, // 播放视频的信息
+      // isPlaying: false, // 是否播放视频
       map: null,
       resultList: [],
       vehicleDetail: {}, // 尾随车辆详细信息
       marker: {},
-      flvplayerId: 'flv_' + random14(),
+      // flvplayerId: 'flv_' + random14(),
+      playerData: null,
       queryObj: {}
     }
   },
@@ -342,6 +346,21 @@ export default {
         }
       }
     },
+    // 设置视频数据
+    setPlayData () {
+      if (this.videoDetail.videoPath) {
+        this.playerData = {
+          type: 3,
+          title: this.videoDetail.deviceName,
+          video: {
+            uid: new Date().getTime() + '',
+            downUrl: this.videoDetail.videoPath
+          }
+        }
+      } else {
+        this.playerData = null;
+      }
+    },
     // 视频播放点击事件
     addListen (id, obj) {
       let _Dom = document.getElementById(id);
@@ -353,91 +372,95 @@ export default {
     // 点击视频播放按钮全屏播放视频
     openVideo (obj) {
       this.videoDetail = obj;
+      this.setPlayData();
       this.showLarge = true;
     },
-    // 关闭视频
-    closeVideo () {
-      this.isPlaying = false;
+    playerClose () {
       this.showLarge = false;
-      document.getElementById('controlVideo').pause();
     },
-    // 播放视频
-    playLargeVideo (val) {
-       if (val) {
-        this.isPlaying = true;
-        document.getElementById('controlVideo').play();
-        this.handleVideoEnd();
-      } else {
-        this.isPlaying = false;
-        document.getElementById('controlVideo').pause();
-      }
-    },
-    // 监听视频是否已经播放结束
-    handleVideoEnd () {
-      let _this = this;
-      const obj = document.getElementById('controlVideo');
-      if (obj) {
-        obj.addEventListener('ended', () => { // 当视频播放结束后触发
-          _this.isPlaying = false;
-        });
-      }
-    },
-    // 截屏
-    playerCut () {
-      this.cutDialogVisible = true;
-      this.$nextTick(() => {
-        let $video = $('#controlVideo');
-        let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
-        // console.log($video.width(), $video.height());
-        if ($canvas && $canvas.length > 0) {
-          // let w = 920, h = 540;
-          let w = $video.width(), h = $video.height();
-          if (w > 920) {
-            h = Math.floor(920 / w * h);
-            w = 920;
-          }
-          $canvas.attr({
-            width: w,
-            height: h,
-          });
-          // $video[0].crossOrigin = 'anonymous';
-          // video canvas 必须为原生对象
-          let ctx = $canvas[0].getContext('2d');
-          this.cutTime = new Date().getTime();
-          ctx.drawImage($video[0], 0, 0, w, h);
-        }
-      });
-    },
-    // 截屏保存
-    playerCutSave () {
-      let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
-      if ($canvas && $canvas.length > 0) {
-        console.log('$canvas[0]', $canvas[0])
-        let img = $canvas[0].toDataURL('image/png');
-        // img.crossOrigin  = '';
-        let filename = 'image_' + this.cutTime + '.png';
-        if('msSaveOrOpenBlob' in navigator){
-          // 兼容EDGE
-          let arr = img.split(',');
-          let mime = arr[0].match(/:(.*?);/)[1];
-          let bstr = atob(arr[1]);
-          let n = bstr.length;
-          let u8arr = new Uint8Array(n);
-          while (n--) {
-            u8arr[n] = bstr.charCodeAt(n);
-          }
-          let blob = new Blob([u8arr], {type:mime});
-          window.navigator.msSaveOrOpenBlob(blob, filename);
-          return;
-        }
-        img.replace('image/png', 'image/octet-stream');
-        let saveLink = $('#' + this.flvplayerId + '_cut_a')[0];
-        saveLink.href = img;
-        saveLink.download = filename;
-        saveLink.click();
-        // console.log(base64);
-      }
-    }
+    // 关闭视频
+    // closeVideo () {
+    //   this.isPlaying = false;
+    //   this.showLarge = false;
+    //   document.getElementById('controlVideo').pause();
+    // },
+    // // 播放视频
+    // playLargeVideo (val) {
+    //    if (val) {
+    //     this.isPlaying = true;
+    //     document.getElementById('controlVideo').play();
+    //     this.handleVideoEnd();
+    //   } else {
+    //     this.isPlaying = false;
+    //     document.getElementById('controlVideo').pause();
+    //   }
+    // },
+    // // 监听视频是否已经播放结束
+    // handleVideoEnd () {
+    //   let _this = this;
+    //   const obj = document.getElementById('controlVideo');
+    //   if (obj) {
+    //     obj.addEventListener('ended', () => { // 当视频播放结束后触发
+    //       _this.isPlaying = false;
+    //     });
+    //   }
+    // },
+    // // 截屏
+    // playerCut () {
+    //   this.cutDialogVisible = true;
+    //   this.$nextTick(() => {
+    //     let $video = $('#controlVideo');
+    //     let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
+    //     // console.log($video.width(), $video.height());
+    //     if ($canvas && $canvas.length > 0) {
+    //       // let w = 920, h = 540;
+    //       let w = $video.width(), h = $video.height();
+    //       if (w > 920) {
+    //         h = Math.floor(920 / w * h);
+    //         w = 920;
+    //       }
+    //       $canvas.attr({
+    //         width: w,
+    //         height: h,
+    //       });
+    //       // $video[0].crossOrigin = 'anonymous';
+    //       // video canvas 必须为原生对象
+    //       let ctx = $canvas[0].getContext('2d');
+    //       this.cutTime = new Date().getTime();
+    //       ctx.drawImage($video[0], 0, 0, w, h);
+    //     }
+    //   });
+    // },
+    // // 截屏保存
+    // playerCutSave () {
+    //   let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
+    //   if ($canvas && $canvas.length > 0) {
+    //     console.log('$canvas[0]', $canvas[0])
+    //     let img = $canvas[0].toDataURL('image/png');
+    //     // img.crossOrigin  = '';
+    //     let filename = 'image_' + this.cutTime + '.png';
+    //     if('msSaveOrOpenBlob' in navigator){
+    //       // 兼容EDGE
+    //       let arr = img.split(',');
+    //       let mime = arr[0].match(/:(.*?);/)[1];
+    //       let bstr = atob(arr[1]);
+    //       let n = bstr.length;
+    //       let u8arr = new Uint8Array(n);
+    //       while (n--) {
+    //         u8arr[n] = bstr.charCodeAt(n);
+    //       }
+    //       let blob = new Blob([u8arr], {type:mime});
+    //       window.navigator.msSaveOrOpenBlob(blob, filename);
+    //       return;
+    //     }
+    //     img.replace('image/png', 'image/octet-stream');
+    //     let saveLink = $('#' + this.flvplayerId + '_cut_a')[0];
+    //     saveLink.href = img;
+    //     saveLink.download = filename;
+    //     saveLink.click();
+    //     // console.log(base64);
+    //   }
+    // }
   }
 }
 </script>
