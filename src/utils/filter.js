@@ -12,9 +12,10 @@ Vue.filter('fnPercent', function (val, total) {
  * 时间戳处理
  * */
 Vue.filter('transMinute', function (seconds) {
+  if (seconds < 0) { seconds = 0; }
   let iH = Math.floor(seconds / 60);
   let iS = seconds % 60;
-  return ((iH > 0) ? iH : '') + '小时' + 
+  return (((iH === 0 && iS > 0) || (iH === 0 && iS === 0)) ? '' : (iH + '小时')) +
     ((iH > 0 && iS === 0) ? '' : (iS + '分钟'));
 });
 /*
