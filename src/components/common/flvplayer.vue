@@ -235,7 +235,8 @@
 import {random14, formatDate, getDate} from '@/utils/util.js';
 import { apiSignContentList, apiVideoSignContent, apiVideoSign, apiVideoRecord,
   apiVideoPlay, apiVideoPlayBack, getVideoPlayRecordStart, getVideoPlayRecordEnd,
-  getVideoFileDownProgressBatch, videoFileDownStartTime, addVideoDownload, ptzControl } from "@/views/index/api/api.video.js";
+  getVideoFileDownProgressBatch, videoFileDownStartTime, addVideoDownload,
+  ptzControl, getVideoLinkLogin } from "@/views/index/api/api.video.js";
 // import { getTestLive } from "@/views/index/api/api.js";
 export default {
   /** 
@@ -516,7 +517,19 @@ export default {
         if (sUrl) {
           if (sUrl.endsWith('.flv') || sUrl.endsWith('.FLV')) {
             /* sUrl 需要 替换token 适用抓拍视频*/
-            this.initPlayerDo(sUrl); 
+            // getVideoLinkLogin
+            getVideoLinkLogin().then(res => {
+              if (res && res.data && res.data.length > 0) {
+                sUrl = sUrl.replace(/{token}/, res.data);
+                this.initPlayerDo(sUrl); 
+              } else {
+                // 未获取到视频
+                console.log('未获取到TOKEN');
+                this.videoLoadingFailed = true;
+              }
+            }).catch(error => {
+              console.log("getVideoLinkLogin error：", error);
+            });
           } else {
             // 录像 普通视频播放（mp4）
             this.initPlayerDoForNormal(this.oData.video.downUrl);
