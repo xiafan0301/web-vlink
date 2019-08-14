@@ -522,16 +522,15 @@ export default {
         // console.log('视频接力');
         if (relayD) {
           obj.deviceId = relayD.deviceID;
-          let st = null, et = new Date(), showt = null;
+          let et = new Date();
           // 回放
           if (relayD.showTime) {
-            showt = getDate(relayD.showTime);
-            st = new Date(showt.getTime() - 60 * 1000);
+            et = getDate(relayD.showTime);
           }
-          if (!st) { st = new Date(new Date().getTime() - 60 * 1000); }
-          if (showt.getTime() > et.getTime()) {
+          let st = new Date(et.getTime() - 60 * 1000);
+          /* if (showt.getTime() > et.getTime()) {
             et = showt;
-          }
+          } */
           obj.startTime = formatDate(st, 'yyyy-MM-dd HH:mm:ss');
           obj.endTime = formatDate(et, 'yyyy-MM-dd HH:mm:ss');
           apiVideoPlayBack(obj).then(res => {
