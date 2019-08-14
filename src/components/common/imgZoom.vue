@@ -17,6 +17,10 @@ export default {
   },
   mounted () {
     let _this = this;
+    let nbMask = $('body').children('#' + _this.maskId),
+        nbClose = $('body').children('#' + _this.imgCloseId);
+    if (nbMask && nbMask.length > 0) { nbMask.remove(); }
+    if (nbClose && nbClose.length > 0) { nbClose.remove(); }
     let nMask = $('#' + _this.maskId), nClose = $('#' + _this.imgCloseId);
     nMask.appendTo($('body'));
     nClose.appendTo($('body'));

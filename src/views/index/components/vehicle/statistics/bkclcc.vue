@@ -160,8 +160,8 @@ export default {
     return {
       isInitPage: false,
       queryForm: {
-        startTime: formatDate(dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)), 'yyyy-MM-dd HH:mm:ss'),
-        endTime: formatDate(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+        startTime: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)),
+        endTime: new Date(),
         bayonet: '',
         carType: '',
         province: '湘',
@@ -279,8 +279,8 @@ export default {
     resetQueryForm () {
       this.currentPage = 1;
       this.queryForm = {
-        startTime: formatDate(dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)), 'yyyy-MM-dd HH:mm:ss'),
-        endTime: formatDate(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+        startTime: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)),
+        endTime: new Date(),
         bayonet: '',
         carType: '',
         province: '湘',
@@ -293,8 +293,8 @@ export default {
     getControlCarSta () {
       this.currentPage = 1;
       const data = {
-        'startTime': this.queryForm.startTime,
-        'endTime': this.queryForm.endTime,
+        'startTime': formatDate(this.queryForm.startTime),
+        'endTime': formatDate(this.queryForm.endTime),
         'vehicleNumber': this.queryForm.province + this.queryForm.provinceName,
         'unvehicleFlag': this.queryForm.radio
       }

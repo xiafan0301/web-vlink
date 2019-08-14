@@ -298,14 +298,20 @@ export default {
       }
       getEventList(params).then(res => {
         if (res && res.data) {
-          // 过滤掉事件状态为已结束的关联事件
-          this.eventList = res.data.list.filter(f => f.eventStatus !== 3 && f.eventCode).map(m => {
-            return {
-              label: m.eventCode,
-              value: m.uid,
-              eventStatus: m.eventStatus
+          // 过滤掉事件状态为已结束的关联事件和eventCode为null的
+          this.eventList = res.data.list.reduce((arr, item) => {
+            if (item.eventStatus !== 3 && item.eventCode) {
+              const _item = {
+                label: item.eventCode,
+                value: item.uid,
+                eventStatus: item.eventStatus
+              }
+              arr = [...arr, _item];
+              return arr;
+            } else {
+              return arr;
             }
-          });
+          }, [])
         }
       })
     },
