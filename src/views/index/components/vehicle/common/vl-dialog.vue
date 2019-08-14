@@ -195,7 +195,7 @@
       setPlayerData () {
         if (this.sturcDetail.videoPath) {
           this.playerData = {
-            type: 6,
+            type: 3,
             title: this.sturcDetail.deviceName,
             video: {
               uid: new Date().getTime() + '',
