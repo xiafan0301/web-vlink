@@ -135,8 +135,8 @@ export default {
   data () {
     return {
       queryForm: {
-        startTime: formatDate(dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)), 'yyyy-MM-dd HH:mm:ss'),
-        endTime: formatDate(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+        startTime: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)),
+        endTime: new Date(),
         devIdData: {
           selSelectedData1: [],
           selSelectedData2: []
@@ -421,8 +421,8 @@ export default {
     },
     // 重置表单
     resetQueryForm () {
-      this.queryForm.startTime = formatDate(dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)), 'yyyy-MM-dd HH:mm:ss');
-      this.queryForm.endTime = formatDate(new Date(), 'yyyy-MM-dd HH:mm:ss');
+      this.queryForm.startTime = dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000));
+      this.queryForm.endTime = new Date();
       // 设备全选
       this.$refs['devSelect'].checkedAll();
     },
@@ -436,8 +436,8 @@ export default {
       const params = {  
         deviceIds: this.queryForm.devIdData.selSelectedData1.map(m => m.id).join(','),
         bayonetIds: this.queryForm.devIdData.selSelectedData2.map(m => m.id).join(','),
-        startTime: this.queryForm.startTime,
-        endTime: this.queryForm.endTime
+        startTime: formatDate(this.queryForm.startTime),
+        endTime: formatDate(this.queryForm.endTime)
       }
       apiPassingCarSta(params).then(res => {
         if (res) {

@@ -1,25 +1,27 @@
 <template>
-  <div id="vehicle_report_save_c">
-    <div class="vehicle_content_nr" v-loading="dataloading">
+  <div id="vehicle_report_save_c" v-loading="dataloading">
+    <div class="vehicle_content_nr">
       <div class="vehicle_content_nr_box">
         <div class="vehicle_content_nr_box_left">
           <div class="img">
-            <img :src="taskWebParam.targetPicUrl" height="232" width="232" class="bigImg" title="点击放大图片" />
+            <img :src="taskWebParam.targetPicUrl" height="232" width="232" class="bigImg" crossorigin = anonymous title="点击放大图片" />
           </div>
           <div style="color: #333333; font-size: 18px; font-weight: bold; padding: 16px 0">{{taskWebParam.taskName}}</div>
           <div style="color: #333333; padding-bottom: 8px"><span style="color: #999999">从</span> {{taskWebParam.startTime}}</div>
           <div style="color: #333333"><span style="color: #999999">至</span> {{taskWebParam.endTime}}</div>
         </div>
         <div class="vehicle_content_nr_box_right">
-          <div class="vehicle_content_nr_box_right_bot" id="report_content">
-            <div class="cont" id="report_showtype_1">
+          <div class="vehicle_content_nr_box_right_bot">
+            <div class="cont">
               <div class="top">
                 最相似人员档案
               </div>
               <div class="message">
                 <div class="text">1：基本信息</div>
                 <div class="message_cont">
-                  <img :src="portrailInfoDto.photoUrl" height="200" width="200" class="bigImg" title="点击放大图片"/>
+<!--                  <img src="../../../../../public/static/img/vis-eg.png" height="155"-->
+<!--                                               width="255"/>-->
+                  <img :src="portrailInfoDto.photoUrl" height="200" width="200" class="bigImg" crossorigin = anonymous title="点击放大图片"/>
                   <div style="padding-left: 20px; width: 320px">
                     <div class="subdata">
                       <i class="vl_icon vl_icon_retrieval_03" style="height: 24px"></i>
@@ -49,7 +51,7 @@
                   }).join(',')}}</p>
               </div>
             </div>
-            <div class="cont1" id="report_showtype_2">
+            <div class="cont1">
               <div style="background-color: white; color: #333333;
               font-weight: bold;
               padding: 20px;
@@ -78,7 +80,7 @@
               </div>
 
             </div>
-            <div class="cont2" id="report_showtype_3">
+            <div class="cont2">
               <div style="background-color: white; color: #333333;
               font-weight: bold;
               padding: 20px;
@@ -109,9 +111,9 @@
                   </div>
                 </vue-scroll>
               </div>
-              <div id="container"></div>
+              <div id="container1"></div>
             </div>
-            <div class="cont3 cont2" id="report_showtype_4">
+            <div class="cont3 cont2">
               <div style="background-color: white; color: #333333;
               font-weight: bold;
               padding: 20px;
@@ -144,7 +146,7 @@
                   </div>
                 </vue-scroll>
               </div>
-              <div id="rightMap"></div>
+              <div id="rightMap1"></div>
             </div>
           </div>
         </div>
@@ -246,23 +248,69 @@
       this.time = [this.$route.query.startTime, this.$route.query.endTime];
     },
     methods: {
+      getBase64 (img){
+        function getBase64Image(img,width,height) {//width、height调用时传入具体像素值，控制大小 ,不传则默认图像大小
+          var canvas = document.createElement("canvas");
+          canvas.width = width ? width : img.width;
+          canvas.height = height ? height : img.height;
+
+          var ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          var dataURL = canvas.toDataURL();
+          return dataURL;
+        }
+        var image = new Image();
+        image.crossOrigin = '';
+        image.src = img;
+        var deferred=$.Deferred();
+        if(img){
+          image.onload =function (){
+            deferred.resolve(getBase64Image(image));//将base64传给done上传处理
+          }
+          return deferred.promise();//问题要让onload完成后再return sessionStorage['imgTest']
+        }
+      },
       getdetailbgg () {
         let params = {
           uid: this.$route.query.uid,
           startTime: this.$route.query.startTime,
           endTime: this.$route.query.endTime,
           targetUrl: this.$route.query.targetUrl
-        }
+        },_this = this;
         this.dataloading = true
         getdetailbg(params).then(res => {
           if(res.data){
             console.log(res.data)
-            this.portrailInfoDto = res.data.portrailInfoDto
-            this.repertoryGroupDto = res.data.repertoryGroupDto
+            if (res.data.portrailInfoDto) {
+              this.portrailInfoDto = res.data.portrailInfoDto
+            }
+            if (res.data.repertoryGroupDto) {
+              this.repertoryGroupDto = res.data.repertoryGroupDto
+            }
             this.analysisTaskInfoWithBLOBsList = res.data.analysisTaskInfoWithBLOBsList
             this.taskResult = JSON.parse(res.data.analysisTaskInfoWithBLOBsList[0].taskResult)
             this.struGroupResultDtoList = res.data.struGroupResultDtoList
             this.taskWebParam =JSON.parse(res.data.analysisTaskInfoWithBLOBsList[0].taskWebParam)
+            this.getBase64(this.taskWebParam.targetPicUrl)
+              .then((base64) => {
+                _this.taskWebParam.targetPicUrl = base64
+              },function(err){
+                console.log(err);//打印异常信息
+              });
+            this.getBase64(this.portrailInfoDto.photoUrl)
+              .then((base64) => {
+                _this.portrailInfoDto.photoUrl = base64
+              },function(err){
+                console.log(err);//打印异常信息
+              });
+            this.taskResult.forEach((item, index) => {
+              this.getBase64(item.subStoragePath)
+                .then((base64) => {
+                  _this.taskResult[index].subStoragePath = base64
+                },function(err){
+                  console.log(err);//打印异常信息
+                });
+            })
             let list = []
             res.data.struPersonDtoList.forEach((item)=>{
               list.push(item.shotTime.substring(0,10))
@@ -290,42 +338,44 @@
             this.dataloading = false
             this.initMap()
             this.renderMap()
-            this.$nextTick(() => {
-              this.$msgbox({
-                title: '确认',
-                message: '确认导出吗？',
-                showCancelButton: true,
-                confirmButtonText: ' 确定 ',
-                cancelButtonText: ' 取消 ',
-                beforeClose: (action, instance, done) => {
-                  if (action === 'confirm') {
-                    instance.confirmButtonLoading = true;
-                    instance.confirmButtonText = '正在生成文件...';
-                    let _this = this;
-                    let pdf = new jsPDF('p','pt','a3');
-                    // 设置打印比例 越大打印越小
-                    pdf.internal.scaleFactor = 2;
-                    let options = {
-                      pagesplit: true, //设置是否自动分页
-                      background: '#FFFFFF'   //如果导出的pdf为黑色背景，需要将导出的html模块内容背景 设置成白色。
-                    };
-                    pdf.addHTML($('#vehicle_report_save_c')[0], 0, 0, options, function () {
-                      pdf.save('人员侦察报告_' + _this.pn + '_' +
-                        formatDate(params.startTime, 'yyyyMMdd') + '-'  + formatDate(params.endTime, 'yyyyMMdd') + '.pdf');
-                    });
-                    setTimeout(() => {
-                      done();
+            setTimeout(()=>{
+              this.$nextTick(() => {
+                this.$msgbox({
+                  title: '确认',
+                  message: '确认导出吗？',
+                  showCancelButton: true,
+                  confirmButtonText: ' 确定 ',
+                  cancelButtonText: ' 取消 ',
+                  beforeClose: (action, instance, done) => {
+                    if (action === 'confirm') {
+                      instance.confirmButtonLoading = true;
+                      instance.confirmButtonText = '正在生成文件...';
+                      let _this = this;
+                      let pdf = new jsPDF('p','pt','a3');
+                      // 设置打印比例 越大打印越小
+                      pdf.internal.scaleFactor = 2;
+                      let options = {
+                        pagesplit: true, //设置是否自动分页
+                        background: '#FFFFFF'   //如果导出的pdf为黑色背景，需要将导出的html模块内容背景 设置成白色。
+                      };
+                      pdf.addHTML($('#vehicle_report_save_c')[0], 0, 0, options, function () {
+                        pdf.save('人员侦察报告_' + _this.pn + '_' +
+                          formatDate(params.startTime, 'yyyyMMdd') + '-'  + formatDate(params.endTime, 'yyyyMMdd') + '.pdf');
+                      });
                       setTimeout(() => {
-                        instance.confirmButtonLoading = false;
-                      }, 300);
-                    }, 1000);
-                  } else {
-                    done();
+                        done();
+                        setTimeout(() => {
+                          instance.confirmButtonLoading = false;
+                        }, 300);
+                      }, 1000);
+                    } else {
+                      done();
+                    }
                   }
-                }
-              }).then(() => {
+                }).then(() => {
+                });
               });
-            });
+            },200)
           }
           this.$nextTick(() => {
             this.dataloading = false
@@ -334,17 +384,6 @@
           console.log(error)
           this.dataloading = false
         })
-      },
-      //tab切换
-      selectTab(val) {
-        this.selectIndex = val;
-        let $tar = $('#report_showtype_' + val);
-        if ($tar && $tar.length > 0) {
-          let osTop = $tar.offset().top -250;
-          let sTop = $('#report_content').scrollTop();
-          // $('#report_content').scrollTop(osTop + sTop);
-          $('#report_content').animate({scrollTop: (osTop + sTop) + 'px'}, 500);
-        }
       },
       goRecord (obj) {
         // console.log(obj)
@@ -356,7 +395,7 @@
        */
       initMap () {
         // this.map.setZoomAndCenter(iZoom, aCenter);
-        let map = new window.AMap.Map('container', {
+        let map = new window.AMap.Map('container1', {
           zoom: 14, // 级别
           center: [110.597638, 27.910355,], // 中心点坐标
         });
@@ -527,20 +566,13 @@
         this.amap.add([polyline]);
       }, // 画线
       renderMap() {
-        let map = new window.AMap.Map("rightMap", {
+        let map = new window.AMap.Map("rightMap1", {
           zoom: 10,
           center: mapXupuxian.center
         });
         map.setMapStyle("amap://styles/whitesmoke");
         this.amap = map;
         this.drawMapMarker(this.data)
-        // 弹窗地图
-        let supMap = new AMap.Map('capMap', {
-          center: mapXupuxian.center,
-          zoom: 16
-        });
-        supMap.setMapStyle('amap://styles/whitesmoke');
-        this.map1 = supMap;
       },
     }
   }
@@ -718,7 +750,7 @@
             position: relative;
             margin-top: 20px;
             box-shadow:2px 3px 10px 0px rgba(131,131,131,0.28);
-            #container{
+            #container1{
               height: 500px;
               width: 100%;
             }
@@ -802,7 +834,7 @@
             }
             height: 100%;
             position: relative;
-            #rightMap{
+            #rightMap1{
               height: 500px;
               width: 100%;
             }
@@ -872,7 +904,7 @@
       }
     }
   }
-  #rightMap {
+  #rightMap1 {
     .vl_icon {
       width: 47px;
       position: relative;
