@@ -511,8 +511,17 @@ export default {
           console.log("apiVideoPlayBack error：", error);
         });
       } else if (this.oData.type === 3) {
-        // 录像
-        this.initPlayerDoForNormal(this.oData.video.downUrl);
+        // 普通视频(mp4)、 抓拍视频(flv)
+        let sUrl = this.oData.video.downUrl;
+        if (sUrl) {
+          if (sUrl.endsWith('.flv') || sUrl.endsWith('.FLV')) {
+            /* sUrl 需要 替换token 适用抓拍视频*/
+            this.initPlayerDo(sUrl); 
+          } else {
+            // 录像 普通视频播放（mp4）
+            this.initPlayerDoForNormal(this.oData.video.downUrl);
+          }
+        }
       } else if (this.oData.type === 5) {
         // 视频接力
         let relayD = null;
