@@ -162,7 +162,7 @@ export default {
     setPlayerData () {
       if (this.sturcDetail.videoPath) {
         this.playerData = {
-          type: 3,
+          type: 6,
           title: this.sturcDetail.deviceName,
           video: {
             uid: new Date().getTime() + '',
@@ -185,9 +185,9 @@ export default {
     },
     // flag false 上一个， true 下一个
     doSliderDetail (flag) {
-      console.log(this.strucIndex);
-      console.log(this.strucInfoList.length);
-      console.log(this.pagination);
+      // console.log(this.strucIndex);
+      // console.log(this.strucInfoList.length);
+      // console.log(this.pagination);
       if (flag) {
         // 下一个
         if (this.strucIndex < (this.strucInfoList.length - 1)) {
