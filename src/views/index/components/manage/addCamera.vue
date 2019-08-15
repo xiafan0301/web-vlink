@@ -355,23 +355,19 @@ export default {
   },
   created () {
     this.userInfo = this.$store.state.loginUser;
+    this.getAreaDataList();
     this.getDepartList();
     this.getIntelligentCharacList();
     this.getCameraTypeList();
     this.getImportLevelList();
     this.getManufacturerList();
     this.getMaxPixelList();
-    this.getAreaDataList();
   },
   mounted () {
     this.initMap();
     this.dataCameraStr = JSON.stringify(this.cameraForm); // 将初始数据转成字符串
     this.dataOnlineStr = JSON.stringify(this.onlineForm); // 将初始数据转成字符串
 
-    if (this.$route.query.id) {
-      this.cameraForm.uid = this.$route.query.id;
-      this.getDetail();
-    }
   },
   methods: {
     // 获取省市区县信息
@@ -382,6 +378,11 @@ export default {
           if (res && res.data) {
             const data = this.handleAreaData(res.data.childList);
             this.areaDataList = data;
+
+            if (this.$route.query.id) {
+              this.cameraForm.uid = this.$route.query.id;
+              this.getDetail();
+            }
           }
         })
     },
@@ -435,20 +436,9 @@ export default {
 
 
               const addr = this.getCascaderObj3(obj.areaId, this.areaDataList);
-              console.log('arr', addr)
               this.resAddress = addr && addr.map(m => m.cname).join('');
               this.onlineForm.locationName = addr && addr.map(m => m.uid);
-              console.log(this.onlineForm.locationName)
               this.onlineForm.address = addr && obj.address.replace(addr.map(m => m.cname).join(''), '');
-              console.log('this.onlineForm.address', this.onlineForm.address)
-              // if (obj.location) {
-              //   let arr = [];
-              //   let location = obj.location.split(',');
-              //   location.map(val => {
-              //    arr.push(parseInt(val));
-              //   })
-              //   this.onlineForm.locationName = arr;
-              // }
 
               if (obj.intelligentCharac) {
                 let arr = obj.intelligentCharac.split(',');
@@ -800,7 +790,6 @@ export default {
 
       //为地图注册click事件获取鼠标点击出的经纬度坐标
       _this.map.on('click', function(e) {
-        console.log('asdasdasd', e)
           _this.onlineForm.longitude = e.lnglat.getLng();
           _this.onlineForm.latitude = e.lnglat.getLat();
 

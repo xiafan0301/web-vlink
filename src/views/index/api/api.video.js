@@ -471,3 +471,14 @@ export const ptzControl = (data) => {
     mode: videoModeName
   })
 }
+
+/**
+ * 获取视频TOKEN
+ */
+export const getVideoLinkLogin = () => {
+  return request({
+    url: '/video-link-service/login.do',
+    method: 'get',
+    mode: 'live'
+  })
+}
