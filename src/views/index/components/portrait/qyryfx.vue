@@ -551,6 +551,7 @@ export default {
     });
   },
   methods: {
+    
     // 切换照片
     prev(val) {
       const ind = this.cameraPhotoList[val].detailList.length - 1;
