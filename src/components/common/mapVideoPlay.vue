@@ -9,7 +9,7 @@
     :show-close="true">
     <div class="relay_video">
       <div v-if="playerData" is="flvplayer" :oData="playerData" @playerClose="playerClose"
-        :oConfig="{fit: false, sign: false, pause: false, close: true, tape: false, download: false}">
+        :oConfig="{fit: false, sign: false, pause: false, close: false, tape: false, download: false}">
       </div>
     </div>
     <i class="relay_video_close el-icon-circle-close" @click="videoPlayDialog = false"></i>
@@ -81,7 +81,7 @@ export default {
     width: 1000px; height: 600px;
   }
   .relay_video_close {
-    position: absolute; top: 10px; right: 10px;
+    position: absolute; top: 10px; right: 10px; z-index: 400;
     color: #fff; font-size: 24px;
     cursor: pointer;
   }
