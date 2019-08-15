@@ -493,24 +493,7 @@ export default {
         if (this.oData.endTime) {
           obj.endTime = formatDate(this.oData.endTime, 'yyyy-MM-dd HH:mm:ss');
         }
-        apiVideoPlayBack(obj).then(res => {
-          if (res && res.data && res.data.length > 0) {
-            // 为一个LIST
-            if (res.data.length >= (this.playBackIndex + 1)) {
-              console.log('回放第' + (this.playBackIndex + 1) + '段视频，URL：', res.data[this.playBackIndex].liveFlvUrl);
-              this.initPlayerDo(res.data[this.playBackIndex].liveFlvUrl);
-              this.playBackList = res.data;
-            } else {
-              // 播放结束处理
-            }
-          } else {
-            // 未获取到视频
-            console.log('未获取到视频');
-            this.videoLoadingFailed = true;
-          }
-        }).catch(error => {
-          console.log("apiVideoPlayBack error：", error);
-        });
+        this.playPlayBack(obj);
       } else if (this.oData.type === 3) {
         // 普通视频(mp4)、 抓拍视频(flv)
         let sUrl = this.oData.video.downUrl;
@@ -521,7 +504,11 @@ export default {
             getVideoLinkLogin().then(res => {
               if (res && res.data && res.data.length > 0) {
                 sUrl = sUrl.replace(/{token}/, res.data);
-                this.initPlayerDo(sUrl); 
+                console.log('sUrl', sUrl);
+                // this.initPlayerDo(sUrl);
+                this.playPlayBack(null, [{
+                  liveFlvUrl: sUrl
+                }]);
               } else {
                 // 未获取到视频
                 console.log('未获取到TOKEN');
@@ -555,33 +542,13 @@ export default {
           } */
           obj.startTime = formatDate(st, 'yyyy-MM-dd HH:mm:ss');
           obj.endTime = formatDate(et, 'yyyy-MM-dd HH:mm:ss');
-          apiVideoPlayBack(obj).then(res => {
-            if (res && res.data && res.data.length > 0) {
-              // 为一个LIST
-              if (res.data.length >= (this.playBackIndex + 1)) {
-                console.log('回放第' + (this.playBackIndex + 1) + '段视频，URL：', res.data[this.playBackIndex].liveFlvUrl);
-                this.initPlayerDo(res.data[this.playBackIndex].liveFlvUrl);
-                this.playBackList = res.data;
-              } else {
-                // 播放结束处理
-              }
-            } else {
-              // 未获取到视频
-              console.log('未获取到视频');
-              this.videoLoadingFailed = true;
-            }
-            this.videoRelayEmpty = false;
-          }).catch(error => {
-            this.videoRelayEmpty = false;
-            console.log("apiVideoPlayBack error：", error);
-          });
+          this.playPlayBack(obj);
           // this.initPlayerDoForNormal(this.oData.video.videoPath);
         } else {
           this.videoLoading = false;
           this.videoRelayEmpty = true;
         }
       }
-      
     },
     // 直播播放（播放/回放）
     initPlayerDo (surl) {
@@ -678,7 +645,7 @@ export default {
         }
       }
     },
-    // 普通播放（录像）
+    // 普通播放（mp4、录像）
     initPlayerDoForNormal (url) {
       this.videoLoading = true;
       var videoElement = document.getElementById(this.flvplayerId);
@@ -708,6 +675,32 @@ export default {
         console.log('player video error: ', videoElement.error);
       };
       this.video = videoElement;
+    },
+    // 回放
+    playPlayBack (params, playBackList) {
+      if (playBackList) {
+        this.playBackList = playBackList;
+        this.initPlayerDo(this.playBackList[0].liveFlvUrl);
+      } else if (params) {
+        apiVideoPlayBack(params).then(res => {
+          if (res && res.data && res.data.length > 0) {
+            // 为一个LIST
+            if (res.data.length >= (this.playBackIndex + 1)) {
+              console.log('回放第' + (this.playBackIndex + 1) + '段视频，URL：', res.data[this.playBackIndex].liveFlvUrl);
+              this.playBackList = res.data;
+              this.initPlayerDo(this.playBackList[this.playBackIndex].liveFlvUrl);
+            }
+          } else {
+            // 未获取到视频
+            console.log('未获取到视频');
+            this.videoLoadingFailed = true;
+          }
+          this.videoRelayEmpty = false;
+        }).catch(error => {
+          this.videoRelayEmpty = false;
+          console.log("apiVideoPlayBack error：", error);
+        });
+      }
     },
     // 回放/录像 播放下一个视频
     playNext () {
