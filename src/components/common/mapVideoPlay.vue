@@ -9,10 +9,10 @@
     :show-close="true">
     <div class="relay_video">
       <div v-if="playerData" is="flvplayer" :oData="playerData" @playerClose="playerClose"
-        :oConfig="{fit: false, sign: false, pause: false, close: false, tape: false, download: false}">
+        :oConfig="{fit: false, sign: false, pause: false, close: true, tape: false, download: false}">
       </div>
     </div>
-    <i class="relay_video_close el-icon-circle-close" @click="videoPlayDialog = false"></i>
+    <!-- <i class="relay_video_close el-icon-circle-close" @click="videoPlayDialog = false"></i> -->
   </el-dialog>
 </template>
 <script>
