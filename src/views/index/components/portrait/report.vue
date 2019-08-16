@@ -2,6 +2,54 @@
   <div class="vehicle_content">
     <div class="vc_rep_bd" is="vehicleBreadcrumb" :oData="[{name: '人员侦察报告'}]"></div>
     <div style="height: 50px"></div>
+    <div class="vehicle_content_box_left">
+      <div :class="['upload_pic',{'hidden': dialogImageUrl}]">
+        <el-upload
+            ref="uploadPic"
+            accept="image/*"
+            :action="uploadUrl"
+            :before-upload="befupload"
+            :on-success="uploadPicSuccess"
+            :limit="1"
+            :on-remove="handleRemove"
+            :data="{projectType: 2}"
+            list-type="picture-card">
+          <i class="vl_icon vl_icon_control_14"></i>
+        </el-upload>
+      </div>
+      <div style="color:rgba(153,153,153,1); margin-top: 10px; text-align: center">请上传全身照片</div>
+      <div style="padding: 20px; padding-bottom: 0">
+        <el-form :model="ruleForm" ref="ruleForm" class="demo-ruleForm" :rules="rules">
+          <el-form-item prop="taskName">
+            <el-input v-model="ruleForm.taskName"  placeholder="请输入任务名称"></el-input>
+          </el-form-item>
+          <el-form-item prop="value1">
+            <el-date-picker
+                v-model="ruleForm.value1"
+                type="datetime"
+                class="full vl_date"
+                style="width: 100%"
+                :picker-options="pickerOptions"
+                placeholder="开始时间">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item prop="value2">
+            <el-date-picker
+                v-model="ruleForm.value2"
+                type="datetime"
+                style="width: 100%"
+                class="vl_date vl_date_end"
+                :picker-options="pickerOptions"
+                placeholder="结束时间">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item>
+            <el-button class="reset_btn" style="width: 110px" @click="skipAddTaskPage('ruleForm')">重置</el-button>
+            <el-button type="primary" style="width: 110px" @click="addnewtask('ruleForm')" :loading="addloading">确认</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </div>
     <div class="vehicle_content_box">
       <div class="vehicle_content_out">
         <ul class="tab-menu">
@@ -26,6 +74,7 @@
               <el-date-picker
                   v-model="taskForm.reportTime"
                   type="datetimerange"
+                  style="width: 374px"
                   value-format="yyyy-MM-dd HH:mm:ss"
                   format="yyyy-MM-dd HH:mm:ss"
                   range-separator="-"
@@ -42,12 +91,12 @@
           <div class="divide"></div>
         </div>
         <div class="content-box">
-          <div class="button_box">
-            <div class="add_event_btn" @click="skipAddTaskPage('ruleForm')">
-              <span>+</span>
-              <span>新增分析任务</span>
-            </div>
-          </div>
+<!--          <div class="button_box">-->
+<!--            <div class="add_event_btn" @click="skipAddTaskPage('ruleForm')">-->
+<!--              <span>+</span>-->
+<!--              <span>新增分析任务</span>-->
+<!--            </div>-->
+<!--          </div>-->
           <div class="table_box" v-loading="isLoading">
             <el-table :data="list">
               <el-table-column label="序号" type="index" width="100"></el-table-column>
@@ -165,7 +214,7 @@
           </div>
           <div style="color:rgba(153,153,153,1); margin-top: 10px; text-align: center">请上传全身照片</div>
           <div style="padding: 20px; padding-bottom: 0">
-            <el-form :model="ruleForm" ref="ruleForm" class="demo-ruleForm">
+            <el-form :model="ruleForm" ref="ruleForm" class="demo-ruleForm" >
               <el-form-item prop="taskName">
                 <el-input v-model="ruleForm.taskName"  placeholder="请输入任务名称"></el-input>
               </el-form-item>
@@ -195,13 +244,25 @@
 <script>
 import vehicleBreadcrumb from './breadcrumb.vue';
 import { postTaskInfosPage, putAnalysisTask, putTaskInfosResume, newTaskInfos} from "../../api/api.analysis.js";
-import { formatDate} from '@/utils/util.js';
+import { formatDate, dateOrigin} from '@/utils/util.js';
 import { ajaxCtx } from '@/config/config.js';
 // import {mapXupuxian} from '@/config/config.js';
 export default {
   components: {vehicleBreadcrumb},
   data () {
     return {
+      rules: {
+        taskName: [
+          { required: true, message: "任务名称不能为空", trigger: "blur" },
+          { min: 0, max: 20, message: "最大长度为20个字符", trigger: "blur" }
+        ],
+        startTime: [
+          { required: true, message: "开始时间不能为空", trigger: "blur" }
+        ],
+        endTime: [
+          { required: true, message: "结束时间不能为空", trigger: "blur" }
+        ]
+      },
       uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
       tabList: [
         {
@@ -227,8 +288,9 @@ export default {
       isLoading: false,
       taskObj: '',     //单个列表任务
       ruleForm: {
-        value1: [],
-        taskName: ''
+        value1: '',
+        taskName: '',
+        value2: ''
       },
       dialogImageUrl: null,
       addloading: false,
@@ -248,8 +310,11 @@ export default {
   },
   methods: {
     settime () {
-      let dataxf = new Date;
-      this.ruleForm.value1 = [formatDate(dataxf.getTime() - 24*60*60*1000), formatDate(dataxf.getTime())]
+      let _s = dateOrigin(false, new Date(new Date().getTime() - 3600 * 1000 * 24 * 1));
+      /* let _e = new Date(dateOrigin(true).getTime() - 3600 * 1000 * 24 * 1); */
+      let _e = new Date();
+      this.ruleForm.value1 = _s;
+      this.ruleForm.value2 = _e;
     },
     handleRemove () {
       this.dialogImageUrl = null
@@ -315,11 +380,10 @@ export default {
       this.$refs[form].resetFields();
       this.selectDataList();
     },
-    skipAddTaskPage(formName) {
-      this.newTaskeDialog = true
+    skipAddTaskPage() {
       this.dialogImageUrl = null
+      this.settime()
       this.$nextTick(() => {
-        this.$refs[formName].resetFields();
         this.$refs['uploadPic'].clearFiles()
       })
       // $('.el-upload-list').css({"display":"none"})
@@ -330,27 +394,31 @@ export default {
       this.$router.push({ name: "portrait_nr" , query: {uid: obj.uid, targetUrl: data.targetPicUrl, startTime: data.startTime, endTime: data.endTime}});
     },
     // 新见任务
-    addnewtask () {
-      let params = {
-        taskName: this.ruleForm.taskName,
-        startTime: formatDate(this.ruleForm.value1[0]),
-        endTime: formatDate(this.ruleForm.value1[1]),
-        targetPicUrl: this.dialogImageUrl
-      }
-      this.addloading = true
-      newTaskInfos(params).then(res => {
-        if(res.data){
-          console.log(res.data)
-          this.newTaskeDialog = false
-          this.selectDataList();
+    addnewtask (formName) {
+      this.$refs[formName].validate(valid => {
+        if (valid) {
+          let params = {
+            taskName: this.ruleForm.taskName,
+            startTime: formatDate(this.ruleForm.value1),
+            endTime: formatDate(this.ruleForm.value2),
+            targetPicUrl: this.dialogImageUrl
+          }
+          this.addloading = true
+          newTaskInfos(params).then(res => {
+            if(res.data){
+              console.log(res.data)
+              this.newTaskeDialog = false
+              this.selectDataList();
+            }
+            this.$nextTick(() => {
+              this.addloading = false
+            })
+          }).catch(error => {
+            console.log(error)
+            this.addloading = false
+          })
         }
-        this.$nextTick(() => {
-          this.addloading = false
-        })
-      }).catch(error => {
-        console.log(error)
-        this.addloading = false
-      })
+      });
     },
     //中断
     interrupt(obj) {
@@ -400,6 +468,30 @@ export default {
 <style lang="scss" scoped>
   .vehicle_content{
     height: 100%;
+    .vehicle_content_box_left{
+      width: 272px;
+      height: calc(100% - 50px);
+      float: left;
+      padding-top: 20px;
+      background-color: white;
+      box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);
+      .el-form-item{
+        margin-bottom: 18px;
+      }
+      .select_btn,
+      .reset_btn {
+        width: 80px;
+      }
+      .select_btn {
+        background-color: #0c70f8;
+        color: #ffffff;
+      }
+      .reset_btn {
+        background-color: #ffffff;
+        color: #666666;
+        border-color: #dddddd;
+      }
+    }
     .vehicle_content_box{
       height: calc(100% - 50px);
       overflow: auto;

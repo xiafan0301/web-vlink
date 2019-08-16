@@ -452,7 +452,7 @@ export default {
       this.searchLoading = true;
       const params = {
         startTime: this.value1,
-        endTime: this.value2,
+        endTime: formatDate(this.value2),
         unvehicleFlag: this.unvehicleFlag,
         onlyFirstEnterCity: this.onlySurveillance,
         vehicleNumber: this.v
