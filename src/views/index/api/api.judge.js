@@ -698,3 +698,29 @@ export function getVideoContinueAllpointss(params) {
   })
 }
 
+
+/**************************** 区域人员分析接口 ******************************** */
+/**
+ * 区域人员在线查询实时接口
+ * @param {object} params
+ */
+export function getAreaRealTimeData(params) {
+  return request({
+    url: '/portrait/shot-num/area/real-time/web',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+/**
+ * 区域人员新建离线任务接口
+ * @param {object} params
+ */
+export function addAreaPersonTask(params) {
+  return request({
+    url: '/portrait/shot-num/area/task/web',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}

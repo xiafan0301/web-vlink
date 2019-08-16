@@ -6,32 +6,23 @@
       :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
           {name: '区域人员分析'}]"
     ></div>
-    <!-- <div class="link_bread">
-      <el-breadcrumb separator=">" class="bread_common">
-        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像检索</el-breadcrumb-item>
-        <el-breadcrumb-item :to="{ path: '/portrait/pfcm' }">区域人员分析</el-breadcrumb-item>
-      </el-breadcrumb>
-    </div>-->
     <div class="qyryfx_content">
       <!-- 页面的左边 -->
       <div class="info_left" v-show="videoMenuStatus">
         <vue-scroll>
           <div class="left_top">
-            <!-- 搜索 -->
-            <!-- <div class="search_wrap">
-              <el-input
-                class="width232"
-                v-model="searchPlace"
-                suffix-icon="el-icon-search"
-                placeholder="搜索地点名称"
-                @focus="isSearchResult = true;"
-                id="map-sd-search-input"
-              ></el-input>
-            </div>-->
-            <!-- 搜索条件 -->
-            <div class="search_condition">
-              <div class="condition_title">设定分析条件</div>
-              <div class="condition">
+            <el-form :model="qyryfxFrom" ref="qyryfxFrom" class="qyryfx_from">
+              <el-form-item class="select_type">
+                <span>查询方式:</span>
+                <el-radio-group v-model="selectType" class="select_radio">
+                  <el-radio :label="1">在线查询</el-radio>
+                  <el-radio :label="2">离线任务</el-radio>
+                </el-radio-group>
+              </el-form-item>
+              <el-form-item prop="taskName" v-if="selectType === 2" :rules="[{ required: true, message: '该项内容不能为空', trigger: 'blur' }]">
+                <el-input placeholder="请设置任务名称" maxlength="20" v-model="qyryfxFrom.taskName"></el-input>
+              </el-form-item>
+              <el-form-item prop="personGroupId">
                 <el-select
                   class="width232"
                   v-model="qyryfxFrom.personGroupId"
@@ -46,8 +37,8 @@
                     :value="item.uid"
                   ></el-option>
                 </el-select>
-              </div>
-              <div class="condition">
+              </el-form-item>
+              <el-form-item prop="sex">
                 <el-select class="width232" v-model="qyryfxFrom.sex" placeholder="选择性别">
                   <el-option
                     v-for="item in peopleSexOptions"
@@ -56,131 +47,83 @@
                     :value="item.enumField"
                   ></el-option>
                 </el-select>
-              </div>
-            </div>
-            <div class="condition">
-              <el-select
-                class="width232"
-                v-model="qyryfxFrom.age"
-                placeholder="选择年龄段"
-                multiple
-                collapse-tags
-              >
-                <el-option
-                  v-for="item in peopleAgeOptions"
-                  :key="item.enumField"
-                  :label="item.enumValue"
-                  :value="item.enumField"
-                ></el-option>
-              </el-select>
-            </div>
-          </div>
-          <div class="left_bottom">
-            <!-- 增加时间区域 -->
-            <div class="add_area_title" @click="addArea">
-              <span>+&nbsp;增加时间区域</span>
-              <i></i>
-            </div>
-            <!-- 多个时间区域 -->
-            <div class="area_item" v-for="(item, index) in drawObj" :key="'area_item' + index">
-              <!-- 删除的图标 -->
-              <div class="del_icon" v-show="index !== 0">
-                <i class="icon" @click="delArea(index, false)" title="删除"></i>
-              </div>
-              <div class="sd-opts">
-                <div class="sd-opts-title">
-                  <h4>区域选择</h4>
-                  <i
-                    class="vl_icon vl_icon_portrait_02"
-                    v-if="item.canPosition"
-                    title="定位当前选中区域"
-                    @click="setFitV(index)"
-                  ></i>
-                  <i class="vl_icon vl_icon_portrait_02 cannot_click" v-else></i>
-                </div>
+              </el-form-item>
+              <el-form-item prop="age">
+                <el-select
+                  class="width232"
+                  v-model="qyryfxFrom.age"
+                  placeholder="选择年龄段"
+                  multiple
+                  collapse-tags
+                >
+                  <el-option
+                    v-for="item in peopleAgeOptions"
+                    :key="item.enumField"
+                    :label="item.enumValue"
+                    :value="item.enumField"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item class="area_time" prop="startTime">
+                <span>抓拍时间:</span>
+                <el-date-picker
+                  v-model="qyryfxFrom.startTime"
+                  type="datetime"
+                  :clearable="false"
+                  format="yyyy-MM-dd HH:mm:ss"
+                  value-format="yyyy-MM-dd HH:mm:ss"
+                  :picker-options="startDateOptArr"
+                  :time-arrow-control="true"
+                  placeholder="开始时间"
+                  class="width232 vl_date"
+                ></el-date-picker>
+                <el-date-picker
+                  v-model="qyryfxFrom.endTime"
+                  :clearable="false"
+                  :picker-options="endDateOptArr"
+                  :time-arrow-control="true"
+                  format="yyyy-MM-dd HH:mm:ss"
+                  value-format="yyyy-MM-dd HH:mm:ss"
+                  type="datetime"
+                  placeholder="结束时间"
+                  class="width232 vl_date vl_date_end"
+                ></el-date-picker>
+              </el-form-item>
+              <el-form-item class="area_select">
+                <span class="area_title">抓拍区域:</span>
+                <span class="area_map_select" @click="showMapDialog">地图区域选择</span>
+                <div class="divide"></div>
+              </el-form-item>
+              <div class="area_list">
                 <ul>
-                  <li title="选择矩形范围内的设备">
-                    <div
-                      :class="{'sd-opts-sed': item.drawActiveType === 1 }"
-                      @click="selDrawType(1, index)"
-                    >
-                      <span class="sd-opts-icon sd-opts-icon1"></span>
+                  <li v-for="(item, index) in selectAreaDataList" :key="index">
+                    <div class="area_list_title">
+                      <span>区域{{index + 1}}</span>
+                      <div class="area_list_btn">
+                        <i class="vl_icon vl_icon_position_1" @click="showCurrentMapArea(index)"></i>
+                        <i class="vl_icon vl_icon_manage_8" @click="deleteSelectArea(index)"></i>
+                      </div>
                     </div>
-                  </li>
-                  <li title="选择圆形范围内的设备">
-                    <div
-                      :class="{'sd-opts-sed': item.drawActiveType === 2 }"
-                      @click="selDrawType(2, index)"
-                    >
-                      <span class="sd-opts-icon sd-opts-icon2"></span>
+                    <div class="area_list_time">
+                      <span>时间：</span>
+                      <div>
+                        <p>{{item.startTime}}</p>
+                        <p>{{item.endTime}}</p>
+                      </div>
                     </div>
-                  </li>
-                  <li title="选择折线100米范围内的设备">
-                    <div
-                      :class="{'sd-opts-sed': item.drawActiveType === 3 }"
-                      @click="selDrawType(3, index)"
-                    >
-                      <span class="sd-opts-icon sd-opts-icon3"></span>
+                    <div class="area_list_device">
+                      <span>设备：</span>
+                      <div>{{item.allDeviceNameList && item.allDeviceNameList.join('、') }}</div>
                     </div>
-                  </li>
-                  <li title="选择多边形范围内的设备">
-                    <div
-                      :class="{'sd-opts-sed': item.drawActiveType === 4 }"
-                      @click="selDrawType(4, index)"
-                    >
-                      <span class="sd-opts-icon sd-opts-icon4"></span>
-                    </div>
-                  </li>
-                  <li title="选择10公里圆形范围内的设备">
-                    <div
-                      :class="{'sd-opts-sed': item.drawActiveType === 5 }"
-                      @click="selDrawType(5, index)"
-                    >
-                      <span class="sd-opts-icon sd-opts-icon5"></span>
-                    </div>
+                    <div class="divide"></div>
                   </li>
                 </ul>
-                <p class="tips">
-                  <span v-if="item.drawActiveType === 1">在地图上按住鼠标左键拖动鼠标框选，松开鼠标完成选择</span>
-                  <span v-else-if="item.drawActiveType === 2">在地图上按住鼠标左键选择圆心，拖动鼠标作为半径，松开鼠标完成选择</span>
-                  <span v-else-if="item.drawActiveType === 3">在地图上鼠标左键选择两个或两个以上点形成折线，双击或右键完成选择</span>
-                  <span v-else-if="item.drawActiveType === 4">在地图上鼠标左键选择三个或三个以上点形成封闭区域，双击或右键完成选择</span>
-                  <span v-else-if="item.drawActiveType === 5">在地图上鼠标左键选择圆心，形成10公里大小的圆形区域</span>
-                </p>
               </div>
-              <!-- 选择时间 -->
-              <div class="select_date">
-                <div class="time-search">
-                  <el-date-picker
-                    v-model="item.startTime"
-                    type="datetime"
-                    :clearable="false"
-                    value-format="yyyy-MM-dd HH:mm:ss"
-                    :picker-options="startDateOptArr[index]"
-                    :time-arrow-control="true"
-                    placeholder="开始时间"
-                    class="width232 vl_date"
-                  ></el-date-picker>
-                </div>
-                <div class="time-search">
-                  <el-date-picker
-                    v-model="item.endTime"
-                    :clearable="false"
-                    :picker-options="endDateOptArr[index]"
-                    :time-arrow-control="true"
-                    value-format="yyyy-MM-dd HH:mm:ss"
-                    type="datetime"
-                    placeholder="结束时间"
-                    class="width232 vl_date vl_date_end"
-                  ></el-date-picker>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- 按钮 -->
-          <div class="search_btn">
-            <el-button @click="resetLeftMenu">重置</el-button>
-            <el-button type="primary" :loading="submitLoading" @click="submitData">确定</el-button>
+              <el-form-item>
+                <el-button style="width: 110px;" @click="resetLeftMenu('qyryfxFrom')">重置</el-button>
+                <el-button type="primary" style="width: 110px;" :loading="submitLoading" @click="submitData('qyryfxFrom')">确定</el-button>
+              </el-form-item>
+            </el-form>
           </div>
         </vue-scroll>
       </div>
@@ -190,74 +133,170 @@
       </div>
       <!-- 页面的中部 -->
       <div class="info_center">
-        <!-- 关闭按钮 -->
-        <div class="close-menu-c" title="关闭菜单" v-show="videoMenuStatus" @click="closeMenu">
-          <i class="vl_icon vl_icon_vehicle_02"></i>
-        </div>
-        <!-- 地图信息 -->
-        <div class="gis_content" id="gis_content">
-          <div class="map_rm" id="mapMap"></div>
-          <div class="sd_search">
-            <input
-              type="text"
-              placeholder="请输入地名，快速定位地址"
-              autocomplete="off"
-              class="sd_search_input"
-              id="map-sd-search-input"
-            />
-            <!-- <el-input
-              v-model="searchPlace"
-              placeholder="请输入地名，快速定位地址"
-              class="sd_search_input"
-              autocomplete="off"
-              id="map-sd-search-input"
-            ></el-input>-->
-            <span @click="selectArea(searchPlace)">
-              <i class="el-icon-search"></i>
-            </span>
-          </div>
-          <!-- 地图控制按钮（放大，缩小，定位） -->
-          <div class="map_control">
-            <!-- 摄像头拍摄数量 -->
-            <div class="photo_count_level">
-              <div class="colors">
-                <div></div>
-                <p>&gt;500</p>
-              </div>
-              <div class="colors">
-                <div></div>
-                <p>201-500</p>
-              </div>
-              <div class="colors">
-                <div></div>
-                <p>101-200</p>
-              </div>
-              <div class="colors">
-                <div></div>
-                <p>51-100</p>
-              </div>
-              <div class="colors">
-                <div></div>
-                <p>20-50</p>
-              </div>
-              <div class="colors">
-                <div></div>
-                <p>&lt;20</p>
+        <ul class="tab-menu">
+          <li
+            v-for="(item,index) in tabList"
+            :key="index"
+            :class="{'is-active': selectIndex === item.value}"
+            @click="selectTab(item.value)"
+          >{{item.label}}</li>
+        </ul>
+        <template  v-if="selectIndex === 2">
+          <div class="map_center_container">
+            <div class="close-menu-c" title="关闭菜单" v-show="videoMenuStatus" @click="closeMenu">
+              <i class="vl_icon vl_icon_vehicle_02"></i>
+            </div>
+            <div class="gis_content" id="gis_content">
+              <div class="map_rm" id="mapMap"></div>
+              <div class="map_control">
+                <div class="photo_count_level">
+                  <div class="colors">
+                    <div></div>
+                    <p>&gt;500</p>
+                  </div>
+                  <div class="colors">
+                    <div></div>
+                    <p>201-500</p>
+                  </div>
+                  <div class="colors">
+                    <div></div>
+                    <p>101-200</p>
+                  </div>
+                  <div class="colors">
+                    <div></div>
+                    <p>51-100</p>
+                  </div>
+                  <div class="colors">
+                    <div></div>
+                    <p>20-50</p>
+                  </div>
+                  <div class="colors">
+                    <div></div>
+                    <p>&lt;20</p>
+                  </div>
+                </div>
+                <ul class="map_rrt_u2">
+                  <li @click="resetZoom">
+                    <i class="el-icon-aim"></i>
+                  </li>
+                  <li>
+                    <i class="el-icon-plus" @click="mapZoomSet(1)"></i>
+                  </li>
+                  <li>
+                    <i class="el-icon-minus" @click="mapZoomSet(-1)"></i>
+                  </li>
+                </ul>
               </div>
             </div>
-            <ul class="map_rrt_u2">
-              <li @click="resetZoom">
-                <i class="el-icon-aim"></i>
-              </li>
-              <li>
-                <i class="el-icon-plus" @click="mapZoomSet(1)"></i>
-              </li>
-              <li>
-                <i class="el-icon-minus" @click="mapZoomSet(-1)"></i>
-              </li>
-            </ul>
           </div>
-        </div>
+          <!-- <div is="noResult" :isInitPage="isInitPage"></div> -->
+        </template>
+        <template v-else>
+          <div class="search_box">
+            <el-form :inline="true" :model="searchForm" class="event_form" ref="searchForm">
+              <el-form-item label="任务名称:" prop="taskName">
+                <el-input
+                  style="width: 230px;"
+                  type="text"
+                  placeholder="请输入任务名称"
+                  v-model="searchForm.taskName"
+                />
+              </el-form-item>
+              <el-form-item label="创建时间:" prop="reportTime">
+                <el-date-picker
+                  class="vl_date"
+                  v-model="searchForm.reportTime"
+                  type="datetimerange"
+                  :time-arrow-control="true"
+                  value-format="yyyy-MM-dd HH:mm:ss"
+                  format="yyyy-MM-dd HH:mm:ss"
+                  range-separator="至"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  :default-time="['00:00:00', '23:59:59']"
+                ></el-date-picker>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="selectDataList">查询</el-button>
+                <el-button @click="resetForm('searchForm')">重置</el-button>
+              </el-form-item>
+            </el-form>
+          <div class="divide"></div>
+          </div>
+          <div class="table_box">
+            <el-table :data="taskList">
+              <el-table-column label="序号" type="index" width="100"></el-table-column>
+              <el-table-column label="任务名称" prop="taskName" show-overflow-tooltip></el-table-column>
+              <el-table-column label="创建时间" prop="createTime" show-overflow-tooltip></el-table-column>
+              <el-table-column label="区域数量" prop="taskWebParam" show-overflow-tooltip>
+                <template slot-scope="scope">
+                  <span>{{scope.row.taskWebParam.startTime}} - {{scope.row.taskWebParam.endTime}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="人群" prop="personGroupId" show-overflow-tooltip>
+                <template slot-scope="scope">
+                  <span>{{scope.row.taskWebParam.personGroupId ? scope.row.taskWebParam.personGroupId : '-'}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="性别" prop="sex" show-overflow-tooltip>
+                <template slot-scope="scope">
+                  <span>{{scope.row.taskWebParam.sex ? scope.row.taskWebParam.sex : '-'}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="年龄段" prop="age" show-overflow-tooltip>
+                <template slot-scope="scope">
+                  <span>{{scope.row.taskWebParam.age ? scope.row.taskWebParam.age : '-'}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="状态" v-if="selectIndex === 0" prop="taskStatus" show-overflow-tooltip>
+                <template slot-scope="scope">
+                  <span>{{scope.row.taskStatus && scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 3 ? '失败' : '已中断'}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="操作" fixed="right" width="200px">
+                <template slot-scope="scope">
+                  <span
+                    class="operation_btn"
+                    @click="skipResultPage(scope.row)"
+                    v-if="selectIndex === 1"
+                  >查看</span>
+                  <span
+                    class="operation_btn"
+                    @click="showInterruptDialog(scope.row)"
+                    v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 1"
+                  >中断任务</span>
+                  <span
+                    class="operation_btn"
+                    @click="recoveryTask(scope.row)"
+                    v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 4"
+                  >恢复任务</span>
+                  <span
+                    class="operation_btn"
+                    @click="recoveryTask(scope.row)"  
+                    v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 3"
+                  >重启任务</span>
+                  <span
+                    class="operation_btn"
+                    @click="showDeleteDialog(scope.row)"
+                    v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus !== 4"
+                  >删除任务</span>
+                </template>
+              </el-table-column>
+            </el-table>
+            <template v-if="pagination.total > 0">
+              <el-pagination
+                class="cum_pagination"
+                @current-change="handleCurrentChange"
+                :current-page.sync="pagination.pageNum"
+                :page-sizes="[100, 200, 300, 400]"
+                :page-size="pagination.pageSize"
+                layout="total, prev, pager, next, jumper"
+                :total="pagination.total"
+              ></el-pagination>
+            </template>
+          </div>
+        </template>
+        <!-- 关闭按钮 -->
       </div>
       <!-- 页面的右边 -->
       <div class="info_right" v-show="infoRightShow">
@@ -313,48 +352,6 @@
                 </div>
                 <div @click="prev(index)" class="swiper-button-prev change_img"></div>
                 <div @click="next(index)" class="swiper-button-next change_img"></div>
-                <!-- <swiper :options="swiperOption" :ref="'mySwiper' + index" :id="'mySwiper' + index">
-                  <swiper-slide
-                    v-for="(sItem, sIndex) in item.detailList"
-                    :key="index + 'my_swiper' + sIndex"
-                  >
-                    <div class="swiper_contents">
-                      <div class="img_warp">
-                        <img :src="sItem.upPhotoUrl" alt />
-                      </div>
-                      <div class="similarity">
-                        <p class="similarity_count">{{sItem.semblance}}</p>
-                        <p class="similarity_title">相似度</p>
-                        <div class="select_time">
-                          <el-select
-                            v-model="searchPlace"
-                            @change="slideToIndex(index, searchPlace)"
-                            placeholder="请选择"
-                          >
-                            <el-option
-                              v-for="(gItem, gIndex) in item.detailList"
-                              :key="gIndex"
-                              :label="gIndex + 1"
-                              :value="gIndex"
-                            ></el-option>
-                          </el-select>
-                        </div>
-                      </div>
-                      <div class="img_warp">
-                        <img :src="sItem.subStoragePath" alt />
-                      </div>
-                      <div class="people_message">
-                        <h2 class="name">{{item.name}}</h2>
-                        <div class="tips_wrap">
-                          <p class="tip">{{item.sex}}</p>
-                          <p class="tip">{{item.age}}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </swiper-slide>
-                  <div class="swiper-button-prev change_img" slot="button-prev"></div>
-                  <div class="swiper-button-next change_img" slot="button-next"></div>
-                </swiper>-->
               </div>
             </div>
           </vue-scroll>
@@ -362,111 +359,129 @@
         <div class="right_black"></div>
       </div>
     </div>
+    <!--删除任务弹出框-->
+    <el-dialog
+      title="删除任务确认"
+      :visible.sync="deleteDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <span style="color: #999999;">任务删除，任务的数据处理进程将被清除，任务不再可以恢复</span>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="deleteDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="sureDeleteTask">确认</el-button>
+      </div>
+    </el-dialog>
+    <!--中断任务弹出框-->
+    <el-dialog
+      title="中断任务确认"
+      :visible.sync="interruptDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <span style="color: #999999;">任务中断，任务的数据处理进程将中止，可以在列表中恢复任务的数据处理</span>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="interruptDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" :loading="isInterruptLoading" @click="sureInterruptTask">确认</el-button>
+      </div>
+    </el-dialog>
+    <div is="mapSelector" v-show="selectMapType === 1" :open="mapDialogVisible1" :showTypes="'DB'" :clear="clearMapSelect1" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" v-show="selectMapType === 2" :open="mapDialogVisible2" :showTypes="'DB'" :clear="clearMapSelect2" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" v-show="selectMapType === 3" :open="mapDialogVisible3" :showTypes="'DB'" :clear="clearMapSelect3" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" v-show="selectMapType === 4" :open="mapDialogVisible4" :showTypes="'DB'" :clear="clearMapSelect4" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" v-show="selectMapType === 5" :open="mapDialogVisible5" :showTypes="'DB'" :clear="clearMapSelect5" @mapSelectorEmit="mapPoint"></div>
   </div>
 </template>
 <script>
 import vlBreadcrumb from "@/components/common/breadcrumb.vue";
+import mapSelector from '@/components/common/mapSelector.vue';
+import noResult from '@/components/common/noResult.vue';
 import swiper from "vue-awesome-swiper";
 import { mapXupuxian } from "@/config/config.js";
 import { formatDate, dateOrigin } from "@/utils/util.js";
+// import {
+//   getAllMonitorList,
+//   getAllBayonetList
+// } from "@/views/index/api/api.base.js";
 import {
-  getAllMonitorList,
-  getAllBayonetList
-} from "@/views/index/api/api.base.js";
-import {
-  postShotNumArea,
-  getShotNumAreaDetail
-} from "@/views/index/api/api.analysis.js";
+  getAreaRealTimeData,
+  addAreaPersonTask
+} from "@/views/index/api/api.judge.js";
+import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
 import { getGroupAllList } from "@/views/index/api/api.control.js";
 import { validatePersonNum, validateInteger } from "@/utils/validator.js";
 import { random14, objDeepCopy } from "@/utils/util.js";
 import { constants } from "crypto";
 
 export default {
+  components: { vlBreadcrumb, mapSelector, noResult },
   data() {
     return {
-      swiperOption: {
-        loop: false,
-        navigation: {
-          nextEl: ".swiper-button-next",
-          prevEl: ".swiper-button-prev"
+      deleteDialog: false, // 删除任务弹出框
+      interruptDialog: false, // 中断任务弹出框
+      isDeleteLoading: false, // 删除任务弹出框
+      isInterruptLoading: false, // 中断任务弹出框
+      selectMapType: 1, // 选择的第几个地图区域
+      isInitPage: true,
+      isShowMapAreaDialog: true, // 是否显示地图弹出框
+      mapDialogVisible1: false, // 地图选择弹出框
+      mapDialogVisible2: false, // 地图选择弹出框
+      mapDialogVisible3: false, // 地图选择弹出框
+      mapDialogVisible4: false, // 地图选择弹出框
+      mapDialogVisible5: false, // 地图选择弹出框
+      clearMapSelect1: null, // 清除地图选择
+      clearMapSelect2: null, // 清除地图选择
+      clearMapSelect3: null, // 清除地图选择
+      clearMapSelect4: null, // 清除地图选择
+      clearMapSelect5: null, // 清除地图选择
+      selectType: 1, // 左侧查询方式
+      selectIndex: 2, // 右侧tab默认选中
+      tabList: [
+        {
+          label: "查询结果",
+          value: 2
+        },
+        {
+          label: "已完成任务",
+          value: 1
+        },
+        {
+          label: "未完成任务",
+          value: 0
         }
+      ],
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
+      searchForm: {
+        reportTime: [], // 日期
+        taskName: null // 任务名称
       },
       /*左边搜索表单变量 */
       searchPlace: "",
       qyryfxFrom: {
-        personGroupId: "",
-        sex: null,
-        age: ""
+        taskName: null, // 任务名称
+        personGroupId: "", //分析人群
+        sex: null, // 性别
+        age: "", // 年龄段
+        startTime: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)), // 开始时间
+        endTime: new Date(), // 结束时间
       },
       submitLoading: false, // 提交loading
       getDetailLoading: false,
       cameraPhotoList: [],
-      startDateOptArr: [
-        {
-          disabledDate: time => {
-            if (this.drawObj[0].endTime) {
-              return (
-                time.getTime() > new Date(this.drawObj[0].endTime).getTime()
-              );
-            } else {
-              return time.getTime() > new Date().getTime();
-            }
-          }
+      startDateOptArr: {
+        disabledDate (time) {
+          return time.getTime() > Date.now();
         }
-      ],
-      endDateOptArr: [
-        {
-          disabledDate: time => {
-            if (this.drawObj[0].startTime) {
-              return (
-                time.getTime() <
-                  new Date(this.drawObj[0].startTime).getTime() ||
-                time.getTime() > new Date().getTime()
-              );
-            } else {
-              return (
-                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3 ||
-                time.getTime() > new Date().getTime()
-              );
-            }
-          }
+      },
+      endDateOptArr: {
+        disabledDate (time) {
+          return time.getTime() > Date.now();
         }
-      ],
-      // searchData: {
-      //   endTime: "",
-      //   startTime: ""
-      // },
-      // startDateOpt: {
-      //   disabledDate: time => {
-      //     if (this.searchData.endTime) {
-      //       return (
-      //         time.getTime() > new Date(this.searchData.endTime).getTime() ||
-      //         time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90
-      //       );
-      //     } else {
-      //       return (
-      //         time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90 ||
-      //         time.getTime() > new Date().getTime()
-      //       );
-      //     }
-      //   }
-      // },
-      // endDateOpt: {
-      //   disabledDate: time => {
-      //     if (this.searchData.startTime) {
-      //       return (
-      //         time.getTime() < new Date(this.searchData.startTime).getTime() ||
-      //         time.getTime() > new Date().getTime()
-      //       );
-      //     } else {
-      //       return (
-      //         time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90 ||
-      //         time.getTime() > new Date().getTime()
-      //       );
-      //     }
-      //   }
-      // },
+      },
       peopleGroupOptions: [], // 分析人群下拉
       peopleSexOptions: [
         {
@@ -505,54 +520,35 @@ export default {
         }
       ], // 年龄段下拉
       isSearchResult: false, // 搜索框是否打开
-      searchResultList: [1, 2, 3, 4, 5, 6, 7, 8], // 搜索结果的列表
+      // searchResultList: [1, 2, 3, 4, 5, 6, 7, 8], // 搜索结果的列表
       infoRightShow: false, // 右边菜单状态
       videoMenuStatus: true, // 左边菜单状态
-      // 选择地图
-      drawType: 0,
       amap: null, // 地图对象
-      markerList: [], // 设备卡口标记的数组
-      areaList: [], // 点击定位的数组
-      mouseTool: null,
-      drawType: 0,
-      currenDrawobj: 0, // 当前的时间区域
-      drawObj: [
-        {
-          rectangle: {
-            /* 'id': {
-            marker: null, // 标记对象 (编辑、完成、删除等)
-            obj: null // 矩形图层对象
-            edtor: null // 编辑对象
-          } */
-          },
-          circle: {},
-          polyline: {},
-          polygon: {},
-          circle10km: {},
-          startTime: formatDate(dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000))),
-          endTime: formatDate(new Date().getTime()),
-          drawActiveType: 0, // 当前活跃的选中区域
-          canPosition: false // 是否可以定位
-        }
-      ],
-      zIndex: 50,
       mapCenter: [110.594419, 27.908869], //地图中心位
       videoMenuStatus: true, // 菜单状态
-      cameraMapMarkers: [], // 地图标记
-      selAreaPolygon: null,
-      listDevice: [], // 设备
-      listBayonet: [], // 卡口
       showTypes: "DB", //设备类型
       totalData: [],
       selectedDevice: {}, // 当前选中的设备信息
       currentClickDevice: {},
-      swiper: null
+      swiper: null,
+      selectAreaDataList: [], // 左侧选中的区域信息
+      selectMapList: [], // 选中的设备数据
+      taskList: [], // 任务列表
+      taskId: null, // 要操作的任务id
     };
   },
-  components: { vlBreadcrumb },
+  watch: {
+    cameraPhotoList: {
+      handler(newName, oldName) {
+        // console.log("obj.a changed");
+      },
+      immediate: true,
+      deep: true
+    }
+  },
   mounted() {
     //获取数据
-    this.getTreeList();
+    // this.getTaskList();
     // this.mapEvents();
     //加载地图
     this.initMap();
@@ -566,10 +562,225 @@ export default {
     });
   },
   methods: {
-    // searchPlaceClick() {
-    //   // 地图搜索
-    //   console.log("this.searchPlace", this.searchPlace);
-    // },
+    // 获取离线任务列表
+    getTaskList () {
+      const params = {
+        'where.taskName': this.searchForm.taskName,
+        'where.taskType': 7, // 7：区域人员分析
+        'where.startTime': this.searchForm.reportTime[0],
+        'where.endTime': this.searchForm.reportTime[1],
+        'where.isFinish': this.selectIndex,   //是否完成 0:未完成(包含处理中、处理失败、处理中断) 1：已完成(处理成功)
+        pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize,
+        order: 'desc',
+        orderBy: 'create_time'
+      };
+      getTaskInfosPage(params)
+        .then(res => {
+          if (res && res.data) {
+            this.taskList = res.data.list;
+            this.pagination.total = res.data.total;
+            this.taskList.map(item => {
+              item.taskWebParam = JSON.parse(item.taskWebParam);
+            })
+          }
+        })
+        .catch(() => {})
+    },
+    // 显示中断任务弹出框
+    showInterruptDialog (obj) {
+      this.interruptDialog = true;
+      this.taskId = obj.uid;
+    },
+    // 显示删除任务弹出框
+    showDeleteDialog (obj) {
+      this.deleteDialog = true;
+      this.taskId = obj.uid;
+    },
+    // 确认中断任务
+    sureInterruptTask () {
+      if (this.taskId) {
+        const params = {
+          uid: this.taskId,
+          taskType: 7, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析 7：区域人员分析
+          taskStatus: 4 // 1：处理中 2：处理成功 3：处理失败 4：处理中断
+        };
+        this.isInterruptLoading = true;
+        putAnalysisTask(params)
+          .then(res => {
+            if (res) {
+              this.$message({
+                type: 'success',
+                message: '中断任务成功',
+                customClass: 'request_tip'
+              });
+              this.interruptDialog = false;
+              this.isInterruptLoading = false;
+              this.getTaskList();
+            } else {
+              this.isInterruptLoading = false;
+            }
+          })
+          .catch(() => {this.isInterruptLoading = false;})
+      }
+    },
+    // 确认删除任务
+    sureDeleteTask () {
+      if (this.taskId) {
+        const params = {
+          uid: this.taskId,
+          taskType: 7, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析 7：区域人员分析
+          delFlag: true
+        };
+        this.isDeleteLoading = true;
+        putAnalysisTask(params)
+          .then(res => {
+            if (res) {
+              this.$message({
+                type: 'success',
+                message: '删除任务成功',
+                customClass: 'request_tip'
+              });
+              this.deleteDialog = false;
+              this.isDeleteLoading = false;
+              this.getTaskList();
+            } else {
+              this.isDeleteLoading = false;
+            }
+          })
+          .catch(() => {this.isDeleteLoading = false;})
+      }
+    },
+    // 恢复任务 --- 重启任务
+    recoveryTask (obj) {
+      if (obj.uid) {
+        putTaskInfosResume(obj.uid)
+          .then(res => {
+            if (res) {
+              this.getTaskList();
+            }
+          })
+      }
+    },
+    // 跳至分析结果页面
+    skipResultPage (obj) {
+      this.$router.push({name: 'portrait_qyryfx_result', query: { result: obj.taskResult, param: obj.taskWebParam }});
+    },
+    // 显示地图区域选择弹出框
+    showMapDialog () {
+      if (this.selectAreaDataList.length === this.selectMapType ) {
+        if (this.selectMapType < 5) {
+          this.selectMapType ++;
+        }
+      }
+      this.handleSelectType(this.selectMapType);
+    },
+    // 显示相对应的地图框选区域
+    showCurrentMapArea (index) {
+      console.log(index)
+      console.log('kkkkkkkkkkkkkkkkkkkkkk')
+      this.isShowMapAreaDialog = true;
+      if (this.isShowMapAreaDialog) {
+        console.log('asdasdasdasdasd')
+        switch ((index + 1)) {
+          case 1:
+            console.log('asdasdasd')
+            this.selectMapType = 1;
+            this.mapDialogVisible1 = !this.mapDialogVisible1;
+            break;
+          case 2:
+            this.selectMapType = 2;
+            this.mapDialogVisible2 = !this.mapDialogVisible2;
+            break;
+          case 3:
+            this.selectMapType = 3;
+            this.mapDialogVisible3 = !this.mapDialogVisible3;
+            break;
+          case 4:
+            this.selectMapType = 4;
+            this.mapDialogVisible4 = !this.mapDialogVisible4;
+            break;
+          case 5:
+            this.selectMapType = 5;
+            this.mapDialogVisible5 = !this.mapDialogVisible5;
+            break;
+          default:
+            this.selectMapType = 0;
+            break;
+        }
+      }
+    },
+    handleSelectType (index) {
+      switch (index) {
+        case 1:
+          this.mapDialogVisible1 = !this.mapDialogVisible1;
+          break;
+        case 2:
+          this.mapDialogVisible2 = !this.mapDialogVisible2;
+          break;
+        case 3:
+          this.mapDialogVisible3 = !this.mapDialogVisible3;
+          break;
+        case 4:
+          this.mapDialogVisible4 = !this.mapDialogVisible4;
+          break;
+        case 5:
+          this.mapDialogVisible5 = !this.mapDialogVisible5;
+          break;
+        default:
+          break;
+      }
+    },
+    // 删除某个选中的区域
+    deleteSelectArea (index) {
+      console.log('mmmmmmmmmmmmmmmmmmm')
+      this.selectAreaDataList.splice(index, 1);
+      this.isShowMapAreaDialog = false;
+      this.selectMapType--;
+    },
+    // 获取地图选择的数据
+    mapPoint (data) {
+      if (data) {
+        let allDeviceNameList = [];
+        if (data.deviceList.length > 0) {
+          data.deviceList.map(item => {
+            allDeviceNameList.push(item.deviceName);
+          })
+        }
+        if (data.bayonetList.length > 0) {
+          data.bayonetList.map(item => {
+            allDeviceNameList.push(item.bayonetName);
+          })
+        }
+        const obj = { 
+          startTime: formatDate(this.qyryfxFrom.startTime),
+          endTime: formatDate(this.qyryfxFrom.endTime),
+          deviceList: data.deviceList,
+          bayonetList: data.bayonetList,
+          allDeviceNameList: allDeviceNameList.length > 0 ? allDeviceNameList : null
+        }
+        this.selectAreaDataList.push(obj);
+      }
+    },
+    //tab切换
+    selectTab(val) {
+      this.selectIndex = val;
+      this.getTaskList();
+    },
+    // 查询任务列表数据
+    selectDataList () {
+      this.getTaskList();
+    },
+    // 重置查询条件
+    resetForm (form) {
+      this.$refs[form].resetFields();
+      this.getTaskList();
+    },
+    // 分页
+    handleCurrentChange (page) {
+      this.pagination.pageNum = page;
+      this.getTaskList();
+    },
     // 日期控制
     timeChange(ind, type = "start") {
       this.$nextTick(() => {
@@ -626,72 +837,10 @@ export default {
       this.$set(this.cameraPhotoList, ind, obj);
     },
     /**重置左边菜单的方法 */
-    resetLeftMenu() {
-      this.searchPlace = "";
-      // 清空表单
-      this.qyryfxFrom = {
-        personGroupId: "",
-        sex: null,
-        age: ""
-      };
-      // 清空选中的区域
-      for (let i = 0; i < this.drawObj.length; i++) {
-        this.delArea(i, true);
-      }
-      // 初始化时间区域数组
-      this.drawObj = [
-        {
-          rectangle: {},
-          circle: {},
-          polyline: {},
-          polygon: {},
-          circle10km: {},
-          startTime: formatDate(dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000))),
-          endTime: formatDate(new Date().getTime()),
-          drawActiveType: 0, // 当前活跃的选中区域
-          canPosition: false
-        }
-      ];
-      this.startDateOptArr = [
-        {
-          disabledDate: time => {
-            if (this.drawObj[0].endTime) {
-              return (
-                time.getTime() > new Date(this.drawObj[0].endTime).getTime()
-                // ||
-                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
-              );
-            } else {
-              return (
-                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
-                // ||
-                time.getTime() > new Date().getTime()
-              );
-            }
-          }
-        }
-      ];
-      this.endDateOptArr = [
-        {
-          disabledDate: time => {
-            if (this.drawObj[0].startTime) {
-              return (
-                time.getTime() <
-                  new Date(this.drawObj[0].startTime).getTime() ||
-                time.getTime() > new Date().getTime()
-              );
-            } else {
-              return (
-                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3 ||
-                time.getTime() > new Date().getTime()
-              );
-            }
-          }
-        }
-      ];
-      this.totalData = [];
-      this.clearMarkList(); // 清除地图标记
-      this.setMarks();
+    resetLeftMenu(form) {
+      this.$refs[form].resetFields();
+      this.selectAreaDataList = [];
+      this.selectMapType = 0;
       this.infoRightShow = false; // 关闭右边的菜单数据
     },
     /** 操作左边菜单方法 */
@@ -702,68 +851,67 @@ export default {
       this.videoMenuStatus = false;
     },
     /** 提交搜索摄像头抓拍记录 */
-    submitData() {
-      this.totalData = []; // 先清空数据
-      this.mouseTool.close(false);
-      this.amap.setDefaultCursor();
-      for (let i = 0; i < this.drawObj.length; i++) {
-        this.selSubmit(i);
-      }
-      let deviceAndTimeList = [];
-      // 校验每一个时间区域中是否都有设备存在
-      for (let j = 0; j < this.totalData.length; j++) {
-        const area = this.totalData[j];
-        if (area.ab.length <= 0 && area.ad.length <= 0) {
-          this.$message.warning(
-            `您在第${j + 1}个选择区域未选中设备，请您重新选择`
-          );
-          return;
-        } else {
-          deviceAndTimeList = [
-            ...deviceAndTimeList,
-            {
-              deviceIds: area.ad.map(item => item.uid).join(),
-              bayonetIds: area.ab.map(item => item.uid).join(),
-              startTime: this.drawObj[j].startTime,
-              endTime: this.drawObj[j].endTime
-            }
-          ];
-        }
-      }
-      const queryParams = {
-        sex: this.qyryfxFrom.sex,
-        age: this.qyryfxFrom.age !== "" ? this.qyryfxFrom.age.join() : "",
-        personGroupId:
-          this.qyryfxFrom.personGroupId !== ""
-            ? this.qyryfxFrom.personGroupId.join()
-            : "",
-        deviceAndTimeList: deviceAndTimeList
-      };
-      this.submitLoading = true; // 打开加载效果
-      postShotNumArea(queryParams)
-        .then(res => {
-          if (res && res.data) {
-            this.submitLoading = false; // 关闭加载效果
-            if (res.data.length) {
-              this.clearMarkList(); // 清除地图标记
-              this.setMarks(res.data, false);
+    submitData(form) {
+      this.$refs[form].validate(valid => {
+        if (valid) {
+          let deviceAndTimeList = [];
+          this.selectAreaDataList.map((item, index) => {
+            if (item.deviceList.length <= 0 && item.bayonetList.length <= 0) {
+               this.$message.warning(
+                `您在第${index + 1}个选择区域未选中设备，请您重新选择`
+              );
+              return;
             } else {
+              deviceAndTimeList = [
+                ...deviceAndTimeList,
+                {
+                  deviceIds: item.deviceList.map(item => item.uid).join(),
+                  bayonetIds: item.bayonetList.map(item => item.uid).join(),
+                  deviceNames: item.allDeviceNameList.join('、'),
+                  startTime: item.startTime,
+                  endTime: item.endTime
+                }
+              ];
+            }
+          });
+          const queryParams = {
+            sex: this.qyryfxFrom.sex,
+            age: this.qyryfxFrom.age !== "" ? this.qyryfxFrom.age.join() : "",
+            personGroupId:
+              this.qyryfxFrom.personGroupId !== ""
+                ? this.qyryfxFrom.personGroupId.join()
+                : "",
+            deviceAndTimeList: deviceAndTimeList
+          };
+          console.log('queryParams', queryParams)
+
+          this.submitLoading = true; // 打开加载效果
+          getAreaRealTimeData(queryParams)
+            .then(res => {
+              if (res && res.data) {
+                this.submitLoading = false; // 关闭加载效果
+                if (res.data.length) {
+                  this.clearMarkList(); // 清除地图标记
+                  this.setMarks(res.data, false);
+                } else {
+                  this.clearMarkList(); // 清除地图标记
+                  this.setMarks();
+                  this.$message.warning("您选择的设备没有数据");
+                }
+              } else {
+                this.submitLoading = false; // 关闭加载效果
+                this.clearMarkList(); // 清除地图标记
+                this.setMarks();
+                this.$message.warning("您选择的设备没有数据");
+              }
+            })
+            .catch(() => {
               this.clearMarkList(); // 清除地图标记
               this.setMarks();
-              this.$message.warning("您选择的设备没有数据");
-            }
-          } else {
-            this.submitLoading = false; // 关闭加载效果
-            this.clearMarkList(); // 清除地图标记
-            this.setMarks();
-            this.$message.warning("您选择的设备没有数据");
-          }
-        })
-        .catch(() => {
-          this.clearMarkList(); // 清除地图标记
-          this.setMarks();
-          this.submitLoading = false; // 关闭加载效果
-        });
+              this.submitLoading = false; // 关闭加载效果
+            });
+        }
+      })
     },
     /** 点击摄像头查看此摄像头抓拍详情信息 */
     clickGetCameraData(device) {
@@ -861,94 +1009,7 @@ export default {
           loading.close();
         });
     },
-    /*处理删除或者添加一个时间区域*/
-    addArea() {
-      if (this.drawObj.length === 5) {
-        this.$message.warning("监控时间区域不能超过5个");
-        return;
-      }
-      const index = this.drawObj.length - 1;
-      this.startDateOptArr = [
-        ...this.startDateOptArr,
-        {
-          disabledDate: time => {
-            if (this.drawObj[index].endTime) {
-              return (
-                time.getTime() > new Date(this.drawObj[index].endTime).getTime()
-              );
-            } else {
-              return time.getTime() > new Date().getTime();
-            }
-          }
-        }
-      ];
-      this.endDateOptArr = [
-        ...this.endDateOptArr,
-        {
-          disabledDate: time => {
-            if (this.drawObj[index].startTime) {
-              return (
-                time.getTime() <
-                  new Date(this.drawObj[index].startTime).getTime() ||
-                time.getTime() > new Date().getTime()
-              );
-            } else {
-              return time.getTime() > new Date().getTime();
-            }
-          }
-        }
-      ];
-      this.drawObj = [
-        ...this.drawObj,
-        {
-          rectangle: {
-            /* 'id': {
-            marker: null, // 标记对象 (编辑、完成、删除等)
-            obj: null // 矩形图层对象
-            edtor: null // 编辑对象
-          } */
-          },
-          circle: {},
-          polyline: {},
-          polygon: {},
-          circle10km: {},
-          startTime: formatDate(dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000))),
-          endTime: formatDate(new Date().getTime()),
-          drawActiveType: 0, // 当前活跃的选中区域
-          canPosition: false
-        }
-      ];
-    },
-    delArea(val, clearAll) {
-      for (let item in this.drawObj[val]) {
-        switch (item) {
-          case "rectangle":
-            this.removeMarkers(1, this.drawObj[val][item].sid);
-            break;
-          case "circle":
-            this.removeMarkers(2, this.drawObj[val][item].sid);
-            break;
-          case "polyline":
-            this.removeMarkers(3, this.drawObj[val][item].sid);
-            break;
-          case "polygon":
-            this.removeMarkers(4, this.drawObj[val][item].sid);
-            break;
-          case "circle10km":
-            this.removeMarkers(5, this.drawObj[val][item].sid);
-            break;
-          default:
-            break;
-        }
-      }
-      if (!clearAll) {
-        // 是否全部清除地图标记
-        this.drawObj.splice(val, 1);
-        this.endDateOptArr.splice(val, 1);
-        this.startDateOptArr.splice(val, 1);
-      }
-    },
-    /** 选择地图的方法 */
+    
     // 地图定位
     resetZoom() {
       if (this.amap) {
@@ -971,997 +1032,7 @@ export default {
       });
       map.setMapStyle("amap://styles/whitesmoke");
       this.amap = map;
-      // 注册监听，当选中某条记录时会触发
-      let auto = new window.AMap.Autocomplete({
-        input: "map-sd-search-input"
-      });
-      window.AMap.event.addListener(auto, "select", _this.selectArea);
-      // 在地图中添加MouseTool插件
-      this.mouseTool = new window.AMap.MouseTool(map);
-      this.mouseTool.on("draw", event => {
-        // event.obj 为绘制出来的覆盖物对象
-        let _sid = random14();
-        this.drawClear(this.currenDrawobj);
-        //  return
-        let drawActive = this.drawObj[this.currenDrawobj].drawActiveType; // 获取到当前要画的图形
-        this.drawObj[this.currenDrawobj].canPosition = true;
-        if (drawActive === 1) {
-          this.drawObj[this.currenDrawobj].rectangle[_sid] = {};
-          this.drawObj[this.currenDrawobj].rectangle[_sid].obj = event.obj;
-          this.drawObj[this.currenDrawobj].rectangle["sid"] = _sid;
-          // this.drawRectangleMark(_sid, event.obj);
-        } else if (drawActive === 2) {
-          this.drawObj[this.currenDrawobj].circle[_sid] = {};
-          this.drawObj[this.currenDrawobj].circle[_sid].obj = event.obj;
-          this.drawObj[this.currenDrawobj].circle["sid"] = _sid;
-          // this.drawCircleMark(_sid, event.obj);
-        } else if (drawActive === 3) {
-          this.drawObj[this.currenDrawobj].polyline[_sid] = {};
-          this.drawObj[this.currenDrawobj].polyline[_sid].obj = event.obj;
-          this.drawObj[this.currenDrawobj].polyline["sid"] = _sid;
-          // this.drawPolylineMark(_sid, event.obj);
-        } else if (drawActive === 4) {
-          this.drawObj[this.currenDrawobj].polygon[_sid] = {};
-          this.drawObj[this.currenDrawobj].polygon[_sid].obj = event.obj;
-          this.drawObj[this.currenDrawobj].polygon["sid"] = _sid;
-          // this.drawPolygonMark(_sid, event.obj);
-        } else if (drawActive === 5) {
-          // this.drawObj[this.currenDrawobj].circle10km[_sid] = {};
-          // this.drawObj[this.currenDrawobj].circle10km[_sid].obj = event.obj;
-          // this.drawObj[this.currenDrawobj].circle10km["sid"] = _sid;
-        }
-        // this.mouseTool.close(false);
-        // this.amap.setDefaultCursor();
-      });
-    },
-    drawClear(ind) {
-      // 矩形
-      if (this.drawObj[ind].rectangle) {
-        for (let k in this.drawObj[ind].rectangle) {
-          this.drawClearDo(this.drawObj[ind].rectangle[k]);
-        }
-        this.drawObj[ind].rectangle = {};
-      }
-      // 圆形
-      if (this.drawObj[ind].circle) {
-        for (let k in this.drawObj[ind].circle) {
-          this.drawClearDo(this.drawObj[ind].circle[k]);
-        }
-        this.drawObj[ind].circle = {};
-      }
-      // 线
-      if (this.drawObj[ind].polyline) {
-        for (let k in this.drawObj[ind].polyline) {
-          this.drawClearDo(this.drawObj[ind].polyline[k]);
-        }
-        this.drawObj[ind].polyline = {};
-      }
-      // 多边形
-      if (this.drawObj[ind].polygon) {
-        for (let k in this.drawObj[ind].polygon) {
-          this.drawClearDo(this.drawObj[ind].polygon[k]);
-        }
-        this.drawObj[ind].polygon = {};
-      }
-      if (this.drawObj[ind].circle10km) {
-        for (let k in this.drawObj[ind].circle10km) {
-          this.drawClearDo(this.drawObj[ind].circle10km[k]);
-        }
-        this.drawObj[ind].circle10km = {};
-      }
-    },
-    drawClearDo(obj) {
-      if (obj.obj) {
-        this.amap.remove(obj.obj);
-        obj.obj = null;
-      }
-      if (obj.marker) {
-        this.amap.remove(obj.marker);
-        obj.marker = null;
-      }
-      if (obj.editor) {
-        obj.editor.close();
-        this.amap.remove(obj.editor);
-        obj.editor = null;
-      }
-      obj = null;
-    },
-    setFitV(ind) {
-      this.getArea(ind);
-      this.$nextTick(() => {
-        this.amap.setFitView(this.areaList[ind]);
-      });
-    },
-    getArea(ind) {
-      // 矩形
-      const curInd = this.drawObj[ind].drawActiveType;
-      if (curInd === 1) {
-        if (this.areaList.length < ind + 1) {
-          this.areaList[ind] = this.drawObj[ind].rectangle[
-            this.drawObj[ind].rectangle.sid
-          ].obj;
-        } else {
-          this.areaList.splice(
-            ind,
-            1,
-            this.drawObj[ind].rectangle[this.drawObj[ind].rectangle.sid].obj
-          );
-        }
-      }
-      // 圆形
-      if (curInd === 2) {
-        if (this.areaList.length < ind + 1) {
-          this.areaList[ind] = this.drawObj[ind].circle[
-            this.drawObj[ind].circle.sid
-          ].obj;
-        } else {
-          this.areaList.splice(
-            ind,
-            1,
-            this.drawObj[ind].circle[this.drawObj[ind].circle.sid].obj
-          );
-        }
-      }
-      // 线
-      if (curInd === 3) {
-        if (this.areaList.length < ind + 1) {
-          this.areaList[ind] = this.drawObj[ind].polyline[
-            this.drawObj[ind].polyline.sid
-          ].obj;
-        } else {
-          this.areaList.splice(
-            ind,
-            1,
-            this.drawObj[ind].polyline[this.drawObj[ind].polyline.sid].obj
-          );
-        }
-      }
-      // 多边形
-      if (curInd === 4) {
-        if (this.areaList.length < ind + 1) {
-          this.areaList[ind] = this.drawObj[ind].polygon[
-            this.drawObj[ind].polygon.sid
-          ].obj;
-        } else {
-          this.areaList.splice(
-            ind,
-            1,
-            this.drawObj[ind].polygon[this.drawObj[ind].polygon.sid].obj
-          );
-        }
-      }
-      if (curInd === 5) {
-        if (this.areaList.length < ind + 1) {
-          this.areaList[ind] = this.drawObj[ind].circle10km[
-            this.drawObj[ind].circle10km.sid
-          ].obj;
-        } else {
-          this.areaList.splice(
-            ind,
-            1,
-            this.drawObj[ind].circle10km[this.drawObj[ind].circle10km.sid].obj
-          );
-        }
-      }
-    },
-    mapEvents() {
-      let _this = this,
-        nContent = $("body");
-      // el-icon-edit el-icon-close el-icon-check
-      nContent
-        .on("click", ".el-icon-close", function() {
-          // 删除
-          let nOpt = $(this).closest(".ms_marker_opt");
-          let _sid = nOpt.attr("_sid"),
-            _type = Number(nOpt.attr("_type"));
-          _this.removeMarkers(_type, _sid);
-        })
-        .on("click", ".el-icon-edit", function() {
-          // 编辑
-          let nOpt = $(this).closest(".ms_marker_opt");
-          let _sid = nOpt.attr("_sid"),
-            _type = Number(nOpt.attr("_type"));
-          nOpt.find(".el-icon-edit").hide();
-          nOpt.find(".el-icon-check").show();
-          _this.editMarkers(_type, _sid);
-        })
-        .on("click", ".el-icon-check", function() {
-          // 完成
-          let nOpt = $(this).closest(".ms_marker_opt");
-          let _sid = nOpt.attr("_sid"),
-            _type = Number(nOpt.attr("_type"));
-          nOpt.find(".el-icon-check").hide();
-          nOpt.find(".el-icon-edit").show();
-          _this.checkMarkers(_type, _sid);
-        });
-    },
-    removeMarkers(drawType, sid) {
-      let obj = null;
-      if (drawType === 1) {
-        // 矩形
-        for (let i = 0; i < this.drawObj.length; i++) {
-          if (this.drawObj[i].rectangle.hasOwnProperty(sid)) {
-            obj = this.drawObj[i].rectangle[sid];
-            break;
-          }
-        }
-      } else if (drawType === 2) {
-        // 圆形
-        for (let i = 0; i < this.drawObj.length; i++) {
-          if (this.drawObj[i].circle.hasOwnProperty(sid)) {
-            obj = this.drawObj[i].circle[sid];
-            break;
-          }
-        }
-      } else if (drawType === 3) {
-        // 折线
-        for (let i = 0; i < this.drawObj.length; i++) {
-          if (this.drawObj[i].polyline.hasOwnProperty(sid)) {
-            obj = this.drawObj[i].polyline[sid];
-            break;
-          }
-        }
-      } else if (drawType === 4) {
-        // 多边形
-        for (let i = 0; i < this.drawObj.length; i++) {
-          if (this.drawObj[i].polygon.hasOwnProperty(sid)) {
-            obj = this.drawObj[i].polygon[sid];
-            break;
-          }
-        }
-      } else if (drawType === 5) {
-        for (let i = 0; i < this.drawObj.length; i++) {
-          if (this.drawObj[i].circle10km.hasOwnProperty(sid)) {
-            obj = this.drawObj[i].circle10km[sid];
-            break;
-          }
-        }
-      }
-      if (obj) {
-        if (obj.obj) {
-          this.amap.remove(obj.obj);
-          obj.obj = null;
-        }
-        if (obj.marker) {
-          this.amap.remove(obj.marker);
-          obj.marker = null;
-        }
-        if (obj.editor) {
-          obj.editor.close();
-          this.amap.remove(obj.editor);
-          obj.editor = null;
-        }
-        obj = null;
-      }
-    },
-    editMarkers(drawType, sid) {
-      if (drawType === 1) {
-        // 矩形
-        this.drawRectangleEditor(sid);
-      } else if (drawType === 2) {
-        this.drawCircleEditor(sid);
-      } else if (drawType === 3) {
-        this.drawPolylineEditor(sid);
-      } else if (drawType === 4) {
-        this.drawPolygonEditor(sid);
-      } else if (drawType === 5) {
-        this.drawCircle10kmEditor(sid);
-      }
-    },
-    checkMarkers(drawType, sid) {
-      if (drawType === 1) {
-        // 矩形
-        for (let i = 0; i < this.drawObj.length; i++) {
-          if (
-            this.drawObj[i].rectangle[sid] &&
-            this.drawObj[i].rectangle[sid].editor
-          ) {
-            this.drawObj[i].rectangle[sid].editor.close();
-            return;
-          }
-        }
-      } else if (drawType === 2) {
-        // 圆形
-        for (let i = 0; i < this.drawObj.length; i++) {
-          if (
-            this.drawObj[i].circle[sid] &&
-            this.drawObj[i].circle[sid].editor
-          ) {
-            this.drawObj[i].circle[sid].editor.close();
-            return;
-          }
-        }
-      } else if (drawType === 3) {
-        // 折线
-        for (let i = 0; i < this.drawObj.length; i++) {
-          if (
-            this.drawObj[i].polyline[sid] &&
-            this.drawObj[i].polyline[sid].editor
-          ) {
-            this.drawObj[i].polyline[sid].editor.close();
-            return;
-          }
-        }
-      } else if (drawType === 4) {
-        for (let i = 0; i < this.drawObj.length; i++) {
-          if (
-            this.drawObj[i].polygon[sid] &&
-            this.drawObj[i].polygon[sid].editor
-          ) {
-            this.drawObj[i].polygon[sid].editor.close();
-            return;
-          }
-        }
-      } else if (drawType === 5) {
-        for (let i = 0; i < this.drawObj.length; i++) {
-          if (
-            this.drawObj[i].circle10km[sid] &&
-            this.drawObj[i].circle10km[sid].editor
-          ) {
-            this.drawObj[i].circle10km[sid].editor.close();
-            return;
-          }
-        }
-      }
-    },
-    selectArea(e) {
-      // if (this.searchPlace) {
-      this.searchPlace = e;
-      // }
-      if (e.poi && e.poi.location) {
-        this.amap.setZoom(15);
-        this.amap.setCenter(e.poi.location);
-      }
-    },
-    selDrawType(drawType, index) {
-      // const old = this.drawObj[index].drawActiveType;
-      if (this.drawObj[index].drawActiveType === drawType) {
-        this.drawObj[index].drawActiveType = 0;
-        this.mouseTool.close(false);
-        this.amap.setDefaultCursor();
-        return;
-      } else {
-        this.drawObj[index].drawActiveType = drawType; // 当前要画的图形类别
-        this.currenDrawobj = index; // 确定当前的时间区域
-      }
-      if (drawType === 1) {
-        // 矩形
-        this.drawRectangle();
-      } else if (drawType === 2) {
-        // 圆形
-        this.drawCircle();
-      } else if (drawType === 3) {
-        // 折线
-        this.drawPolyline();
-      } else if (drawType === 4) {
-        // 多边形
-        this.drawPolygon();
-      } else if (drawType === 5) {
-        // 多边形
-        // if (old === 3) {
-        //   console.log("点击干掉", 123);
-        // }
-        this.drawCircle10km();
-      }
-    },
-    // 矩形
-    drawRectangle() {
-      this.amap.setDefaultCursor("crosshair");
-      this.mouseTool.rectangle({
-        strokeColor: "#FA453A",
-        strokeOpacity: 1,
-        strokeWeight: 1,
-        fillOpacity: 0.2,
-        fillColor: "#FA453A",
-        cursor: "pointer",
-        strokeStyle: "solid",
-        zIndex: this.zIndex
-      });
-      this.zIndex += 1;
-    },
-    drawRectangleEditor(sid) {
-      for (let i = 0; i < this.drawObj.length; i++) {
-        if (this.drawObj[i].rectangle[sid]) {
-          let _this = this,
-            obj = this.drawObj[i].rectangle[sid];
-          if (obj.editor) {
-            obj.editor.open();
-          } else {
-            let ps = obj.obj.getPath();
-            let southWest = ps[3];
-            let northEast = ps[1];
-            let bounds = new window.AMap.Bounds(southWest, northEast);
-            // 删除原来的矩形
-            this.amap.remove(obj.obj);
-            // 新建可编辑的矩形
-            let rectangle = new window.AMap.Rectangle({
-              bounds: bounds,
-              strokeColor: "#FA453A",
-              strokeOpacity: 1,
-              strokeWeight: 1,
-              fillOpacity: 0.2,
-              fillColor: "#FA453A",
-              cursor: "pointer",
-              zIndex: this.zIndex
-            });
-            this.zIndex += 1;
-            rectangle.setMap(this.amap);
-            obj.obj = rectangle;
-            let rectangleEditor = new window.AMap.RectangleEditor(
-              this.amap,
-              rectangle
-            );
-            /* rectangleEditor.on('end', function(event) {
-            // event.target 即为编辑后的矩形对象
-          }); */
-            rectangleEditor.on("adjust", function(event) {
-              // event.target 即为编辑后的矩形对象
-              // console.log('event.target.getPath()', event.target.getPath());
-              // 需要重新定位marker
-              if (obj.marker) {
-                obj.marker.setPosition(event.target.getPath()[3]);
-              }
-            });
-            obj.editor = rectangleEditor;
-            rectangleEditor.open();
-          }
-          break;
-        }
-      }
-    },
-    drawRectangleMark(sid, obj) {
-      // console.log('drawRectangleMark getRadius', obj.getBounds());
-      let ap = [obj.getBounds().southwest.Q, obj.getBounds().northeast.P];
-      let marker = new window.AMap.Marker({
-        // 添加自定义点标记
-        map: this.amap,
-        // position: obj.B.path[0], // 基点位置 矩形的右上点
-        position: ap, // 基点位置 矩形的右上点
-        offset: new window.AMap.Pixel(-1, -23), // 相对于基点的偏移位置
-        draggable: false, // 是否可拖动
-        zIndex: this.zIndex,
-        // extData: obj,
-        // 自定义点标记覆盖物内容
-        content:
-          '<div _sid="' +
-          sid +
-          '" _type="1" class="ms_marker_opt ms_marker_rectang"><div>' +
-          '<i class="el-icon-close" title="删除"></i>' +
-          '<i class="el-icon-edit" title="编辑"></i>' +
-          '<i class="el-icon-check" title="完成"></i>' +
-          "</div></div>"
-      });
-      this.zIndex += 1;
-      for (let i = 0; i < this.drawObj.length; i++) {
-        if (this.drawObj[i].rectangle[sid]) {
-          this.drawObj[i].rectangle[sid].marker = marker;
-          break;
-        }
-      }
-    },
-    // 圆形
-    drawCircle() {
-      this.amap.setDefaultCursor("crosshair");
-      this.mouseTool.circle({
-        borderWeight: 3,
-        strokeColor: "#FA453A",
-        strokeOpacity: 1,
-        strokeWeight: 1,
-        // strokeOpacity: 0.2,
-        fillOpacity: 0.2,
-        // strokeStyle: 'dashed',
-        // strokeDasharray: [10, 10],
-        // 线样式还支持 'dashed'
-        fillColor: "#FA453A",
-        zIndex: this.zIndex
-      });
-      this.zIndex += 1;
-    },
-    drawCircleEditor(sid) {
-      for (let i = 0; i < this.drawObj.length; i++) {
-        if (this.drawObj[i].circle[sid]) {
-          let _this = this,
-            obj = this.drawObj[i].circle[sid];
-          if (obj.editor) {
-            obj.editor.open();
-          } else {
-            // 新建可编辑的矩形
-            let circle = new AMap.Circle({
-              center: obj.obj.getCenter(),
-              radius: obj.obj.getRadius(), //半径
-              borderWeight: 3,
-              strokeColor: "#FA453A",
-              strokeOpacity: 1,
-              strokeWeight: 1,
-              // strokeOpacity: 0.2,
-              fillOpacity: 0.2,
-              // strokeStyle: 'dashed',
-              // strokeDasharray: [10, 10],
-              // 线样式还支持 'dashed'
-              fillColor: "#FA453A",
-              zIndex: this.zIndex
-            });
-            this.zIndex += 1;
-            // 删除原来的矩形
-            this.amap.remove(obj.obj);
-            circle.setMap(this.amap);
-            obj.obj = circle;
-            let circleEditor = new window.AMap.CircleEditor(_this.amap, circle);
-            circleEditor.on("adjust", function(event) {
-              // event.target 即为编辑后的矩形对象
-              // console.log('event.target.getPath()', event.target.getBounds().getSouthWest());
-              // 需要重新定位marker
-              if (obj.marker) {
-                let ne = event.target.getBounds().getSouthWest();
-                let c = event.target.getCenter();
-                let _q = c.Q + (ne.Q - c.Q) * 0.705;
-                let _p = c.P + (ne.P - c.P) * 0.705;
-                obj.marker.setPosition([_q, _p]);
-              }
-            });
-            circleEditor.on("move", function(event) {
-              // 拖拽圆心调整圆形位置时触发此事件
-              // event.target 即为编辑后的矩形对象
-              // console.log('event.target.getPath()', event.target.getBounds().getSouthWest());
-              // 需要重新定位marker
-              if (obj.marker) {
-                let ne = event.target.getBounds().getSouthWest();
-                let c = event.target.getCenter();
-                let _q = c.Q + (ne.Q - c.Q) * 0.705;
-                let _p = c.P + (ne.P - c.P) * 0.705;
-                obj.marker.setPosition([_q, _p]);
-              }
-            });
-            obj.editor = circleEditor;
-            circleEditor.open();
-          }
-          break;
-        }
-      }
-    },
-    drawCircleMark(sid, obj) {
-      let ne = obj.getBounds().getSouthWest();
-      let c = obj.getCenter();
-      let _q = c.Q + (ne.Q - c.Q) * 0.705;
-      let _p = c.P + (ne.P - c.P) * 0.705;
-      let marker = new window.AMap.Marker({
-        // 添加自定义点标记
-        map: this.amap,
-        position: [_q, _p], // 基点位置 矩形的右上点
-        offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-        draggable: false, // 是否可拖动
-        zIndex: this.zIndex,
-        // extData: obj,
-        // 自定义点标记覆盖物内容
-        content:
-          '<div _sid="' +
-          sid +
-          '" _type="2" class="ms_marker_opt ms_marker_circle"><div>' +
-          '<i class="el-icon-close" title="删除"></i>' +
-          '<i class="el-icon-edit" title="编辑"></i>' +
-          '<i class="el-icon-check" title="完成"></i>' +
-          "</div></div>"
-      });
-      this.zIndex += 1;
-      for (let i = 0; i < this.drawObj.length; i++) {
-        if (this.drawObj[i].circle[sid]) {
-          this.drawObj[i].circle[sid].marker = marker;
-        }
-      }
-    },
-    // 折线
-    drawPolyline() {
-      this.amap.setDefaultCursor("crosshair");
-      this.mouseTool.polyline({
-        strokeColor: "#FA453A",
-        strokeOpacity: 1,
-        strokeWeight: 2,
-        // 线样式还支持 'dashed'
-        strokeStyle: "solid",
-        zIndex: this.zIndex
-        // strokeStyle是dashed时有效
-        // strokeDasharray: [10, 5],
-      });
-      this.zIndex += 1;
-    },
-    drawPolylineEditor(sid) {
-      for (let i = 0; i < this.drawObj.length; i++) {
-        if (this.drawObj[i].polyline[sid]) {
-          let _this = this,
-            obj = this.drawObj[i].polyline[sid];
-          if (obj.editor) {
-            obj.editor.open();
-          } else {
-            let polyEditor = new window.AMap.PolyEditor(this.amap, obj.obj);
-            polyEditor.on("adjust", function(event) {
-              // event.target 即为编辑后的对象
-              // 需要重新定位marker
-              if (obj.marker) {
-                obj.marker.setPosition(
-                  event.target.getPath()[event.target.getPath().length - 1]
-                );
-              }
-            });
-            obj.editor = polyEditor;
-            polyEditor.open();
-          }
-          break;
-        }
-      }
-    },
-    drawPolylineMark(sid, obj) {
-      // console.log('drawRectangleMark getRadius', obj.getBounds());
-      let p = obj.getPath()[obj.getPath().length - 1];
-      let marker = new window.AMap.Marker({
-        // 添加自定义点标记
-        map: this.amap,
-        // position: obj.B.path[0], // 基点位置 矩形的右上点
-        position: p, // 基点位置 矩形的右上点
-        offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-        draggable: false, // 是否可拖动
-        zIndex: this.zIndex,
-        // extData: obj,
-        // 自定义点标记覆盖物内容
-        content:
-          '<div _sid="' +
-          sid +
-          '" _type="3" class="ms_marker_opt ms_marker_polyline"><div>' +
-          '<i class="el-icon-close" title="删除"></i>' +
-          '<i class="el-icon-edit" title="编辑"></i>' +
-          '<i class="el-icon-check" title="完成"></i>' +
-          "</div></div>"
-      });
-      this.zIndex += 1;
-      for (let i = 0; i < this.drawObj.length; i++) {
-        if (this.drawObj[i].polyline[sid]) {
-          this.drawObj[i].polyline[sid].marker = marker;
-          break;
-        }
-      }
-    },
-    // 多边形
-    drawPolygon() {
-      this.amap.setDefaultCursor("crosshair");
-      this.mouseTool.polygon({
-        strokeColor: "#FA453A",
-        strokeOpacity: 1,
-        bubble: true,
-        strokeWeight: 1,
-        fillColor: "#FA453A",
-        fillOpacity: 0.2,
-        isRing: false,
-        zIndex: this.zIndex
-      });
-      this.zIndex += 1;
-    },
-    drawPolygonEditor(sid) {
-      for (let i = 0; i < this.drawObj.length; i++) {
-        if (this.drawObj[i].polygon[sid]) {
-          let _this = this,
-            obj = this.drawObj[i].polygon[sid];
-          if (obj.editor) {
-            obj.editor.open();
-          } else {
-            var polyEditor = new window.AMap.PolyEditor(this.amap, obj.obj);
-            polyEditor.on("adjust", function(event) {
-              // event.target 即为编辑后的对象
-              // 需要重新定位marker
-              if (obj.marker) {
-                obj.marker.setPosition(
-                  event.target.getPath()[event.target.getPath().length - 1]
-                );
-              }
-            });
-            obj.editor = polyEditor;
-            polyEditor.open();
-          }
-          break;
-        }
-      }
-    },
-    drawPolygonMark(sid, obj) {
-      let p = obj.getPath()[obj.getPath().length - 1];
-      let marker = new window.AMap.Marker({
-        // 添加自定义点标记
-        map: this.amap,
-        // position: obj.B.path[0], // 基点位置 矩形的右上点
-        position: p, // 基点位置 矩形的右上点
-        offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-        draggable: false, // 是否可拖动
-        zIndex: this.zIndex,
-        // extData: obj,
-        // 自定义点标记覆盖物内容
-        content:
-          '<div _sid="' +
-          sid +
-          '" _type="4" class="ms_marker_opt ms_marker_polygon"><div>' +
-          '<i class="el-icon-close" title="删除"></i>' +
-          '<i class="el-icon-edit" title="编辑"></i>' +
-          '<i class="el-icon-check" title="完成"></i>' +
-          "</div></div>"
-      });
-      this.zIndex += 1;
-      for (let i = 0; i < this.drawObj.length; i++) {
-        if (this.drawObj[i].polygon[sid]) {
-          this.drawObj[i].polygon[sid].marker = marker;
-        }
-      }
-    },
-    drawCircle10km() {
-      this.amap.setDefaultCursor("crosshair");
-      this.amap.on("click", this.drawCircle10kmClick);
-    },
-    drawCircle10kmClick(e) {
-      this.drawClear(this.currenDrawobj);
-      this.mouseTool.close(false);
-      let circle = new AMap.Circle({
-        center: e.lnglat,
-        radius: 1000 * 10, //半径
-        borderWeight: 3,
-        strokeColor: "#FA453A",
-        strokeOpacity: 1,
-        strokeWeight: 1,
-        // strokeOpacity: 0.2,
-        fillOpacity: 0.2,
-        fillColor: "#FA453A",
-        zIndex: this.zIndex
-      });
-      this.zIndex += 1;
-      circle.setMap(this.amap);
-      // 缩放地图到合适的视野级别
-      this.amap.setFitView([circle]);
-      let _sid = random14();
-      this.drawObj[this.currenDrawobj].circle10km[_sid] = {};
-      this.drawObj[this.currenDrawobj].circle10km[_sid].obj = circle;
-      this.drawObj[this.currenDrawobj].circle10km["sid"] = _sid;
-      this.amap.off("click", this.drawCircle10kmClick);
-    },
-    drawCircle10kmEditor(sid) {
-      if (this.drawObj.circle10km[sid]) {
-        let _this = this,
-          obj = this.drawObj.circle10km[sid];
-        if (obj.editor) {
-          obj.editor.open();
-        } else {
-          let circleEditor = new window.AMap.CircleEditor(this.amap, obj.obj);
-          circleEditor.on("adjust", function(event) {
-            // event.target 即为编辑后的矩形对象
-            // console.log('event.target.getPath()', event.target.getBounds().getSouthWest());
-            // 需要重新定位marker
-            if (obj.marker) {
-              let ne = event.target.getBounds().getSouthWest();
-              let c = event.target.getCenter();
-              let _q = c.Q + (ne.Q - c.Q) * 0.705;
-              let _p = c.P + (ne.P - c.P) * 0.705;
-              obj.marker.setPosition([_q, _p]);
-            }
-          });
-          circleEditor.on("move", function(event) {
-            // 拖拽圆心调整圆形位置时触发此事件
-            // event.target 即为编辑后的矩形对象
-            // console.log('event.target.getPath()', event.target.getBounds().getSouthWest());
-            // 需要重新定位marker
-            if (obj.marker) {
-              let ne = event.target.getBounds().getSouthWest();
-              let c = event.target.getCenter();
-              let _q = c.Q + (ne.Q - c.Q) * 0.705;
-              let _p = c.P + (ne.P - c.P) * 0.705;
-              obj.marker.setPosition([_q, _p]);
-            }
-          });
-          obj.editor = circleEditor;
-          circleEditor.open();
-        }
-      }
-    },
-    drawCircle10kmMark(sid, obj) {
-      let ne = obj.getBounds().getSouthWest();
-      let c = obj.getCenter();
-      let _q = c.Q + (ne.Q - c.Q) * 0.705;
-      let _p = c.P + (ne.P - c.P) * 0.705;
-      let marker = new window.AMap.Marker({
-        // 添加自定义点标记
-        map: this.amap,
-        position: [_q, _p], // 基点位置 矩形的右上点
-        offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-        draggable: false, // 是否可拖动
-        zIndex: this.zIndex,
-        // extData: obj,
-        // 自定义点标记覆盖物内容
-        content:
-          '<div _sid="' +
-          sid +
-          '" _type="5" class="ms_marker_opt ms_marker_circle"><div>' +
-          '<i class="el-icon-close" title="删除"></i>' +
-          '<i class="el-icon-edit" title="编辑"></i>' +
-          '<i class="el-icon-check" title="完成"></i>' +
-          "</div></div>"
-      });
-      this.zIndex += 1;
-      for (let i = 0; i < this.drawObj.length; i++) {
-        if (this.drawObj[i].circle10km[sid]) {
-          this.drawObj[i].circle10km[sid].marker = marker;
-        }
-      }
-    },
-    selSubmit(index) {
-      this.getDetailLoading = true;
-      let dObj = {},
-        bObj = {};
-      if (this.listDevice && this.listDevice.length > 0) {
-        for (let i = 0; i < this.listDevice.length; i++) {
-          let o = this.listDevice[i];
-          // 矩形
-          if (this.drawObj[index].rectangle) {
-            for (let k in this.drawObj[index].rectangle) {
-              if (k === "sid") {
-                continue;
-              }
-              let so = this.drawObj[index].rectangle[k];
-              if (
-                so.obj &&
-                so.obj.contains(new window.AMap.LngLat(o.longitude, o.latitude))
-              ) {
-                dObj[o.uid] = o;
-              }
-            }
-          }
-          // 圆形
-          if (this.drawObj[index].circle) {
-            for (let k in this.drawObj[index].circle) {
-              if (k === "sid") {
-                continue;
-              }
-              let so = this.drawObj[index].circle[k];
-              if (
-                so.obj &&
-                so.obj.contains(new window.AMap.LngLat(o.longitude, o.latitude))
-              ) {
-                dObj[o.uid] = o;
-              }
-            }
-          }
-          // 线
-          if (this.drawObj[index].polyline) {
-            for (let k in this.drawObj[index].polyline) {
-              if (k === "sid") {
-                continue;
-              }
-              let so = this.drawObj[index].polyline[k];
-              if (
-                window.AMap.GeometryUtil.distanceToLine(
-                  new window.AMap.LngLat(o.longitude, o.latitude),
-                  so.obj.getPath()
-                ) < 200
-              ) {
-                dObj[o.uid] = o;
-              }
-            }
-          }
-          // 多边形
-          if (this.drawObj[index].polygon) {
-            for (let k in this.drawObj[index].polygon) {
-              if (k === "sid") {
-                continue;
-              }
-              let so = this.drawObj[index].polygon[k];
-              if (
-                so.obj &&
-                so.obj.contains(new window.AMap.LngLat(o.longitude, o.latitude))
-              ) {
-                dObj[o.uid] = o;
-              }
-            }
-          }
-          if (this.drawObj[index].circle10km) {
-            for (let k in this.drawObj[index].circle10km) {
-              if (k === "sid") {
-                continue;
-              }
-              let so = this.drawObj[index].circle10km[k];
-              if (
-                so.obj &&
-                so.obj.contains(new window.AMap.LngLat(o.longitude, o.latitude))
-              ) {
-                dObj[o.uid] = o;
-              }
-            }
-          }
-        }
-      }
-      if (this.listBayonet && this.listBayonet.length > 0) {
-        for (let i = 0; i < this.listBayonet.length; i++) {
-          let o = this.listBayonet[i];
-          // 矩形
-          if (this.drawObj[index].rectangle) {
-            for (let k in this.drawObj[index].rectangle) {
-              if (k === "sid") {
-                continue;
-              }
-              let so = this.drawObj[index].rectangle[k];
-              if (
-                so.obj &&
-                so.obj.contains(new window.AMap.LngLat(o.longitude, o.latitude))
-              ) {
-                bObj[o.uid] = o;
-              }
-            }
-          }
-          // 圆形
-          if (this.drawObj[index].circle) {
-            for (let k in this.drawObj[index].circle) {
-              if (k === "sid") {
-                continue;
-              }
-              let so = this.drawObj[index].circle[k];
-              if (
-                so.obj &&
-                so.obj.contains(new window.AMap.LngLat(o.longitude, o.latitude))
-              ) {
-                bObj[o.uid] = o;
-              }
-            }
-          }
-          // 线
-          if (this.drawObj[index].polyline) {
-            for (let k in this.drawObj[index].polyline) {
-              if (k === "sid") {
-                continue;
-              }
-              let so = this.drawObj[index].polyline[k];
-              if (
-                window.AMap.GeometryUtil.distanceToLine(
-                  new window.AMap.LngLat(o.longitude, o.latitude),
-                  so.obj.getPath()
-                ) < 200
-              ) {
-                bObj[o.uid] = o;
-              }
-            }
-          }
-          // 多边形
-          if (this.drawObj[index].polygon) {
-            for (let k in this.drawObj[index].polygon) {
-              if (k === "sid") {
-                continue;
-              }
-              let so = this.drawObj[index].polygon[k];
-              if (
-                so.obj &&
-                so.obj.contains(new window.AMap.LngLat(o.longitude, o.latitude))
-              ) {
-                bObj[o.uid] = o;
-              }
-            }
-          }
-          if (this.drawObj[index].circle10km) {
-            for (let k in this.drawObj[index].circle10km) {
-              if (k === "sid") {
-                continue;
-              }
-              let so = this.drawObj[index].circle10km[k];
-              if (
-                so.obj &&
-                so.obj.contains(new window.AMap.LngLat(o.longitude, o.latitude))
-              ) {
-                bObj[o.uid] = o;
-              }
-            }
-          }
-        }
-      }
-      let ad = [],
-        ab = [];
-      for (let k in dObj) {
-        ad.push(dObj[k]);
-      }
-      for (let k in bObj) {
-        ab.push(bObj[k]);
-      }
-      this.totalData.push({
-        ad: ad,
-        ab: ab
-      });
+     
     },
     getTreeList() {
       if (this.showTypes.indexOf("D") >= 0) {
@@ -2096,15 +1167,7 @@ export default {
       this.amap.destroy();
     }
   },
-  watch: {
-    cameraPhotoList: {
-      handler(newName, oldName) {
-        // console.log("obj.a changed");
-      },
-      immediate: true,
-      deep: true
-    }
-  }
+  
 };
 </script>
 <style lang="scss" scoped>
@@ -2121,14 +1184,6 @@ export default {
   position: relative;
   height: calc(100% - 49px);
   font-size: 14px;
-  // 面包屑样式
-  // .link_bread {
-  //   height: 60px;
-  //   background: #fff;
-  //   .bread_common {
-  //     padding: 23px 0 0 20px;
-  //   }
-  // }
   // 搜索结果展示
   .search_result {
     position: absolute;
@@ -2241,25 +1296,143 @@ export default {
       animation: fadeInLeft 0.4s ease-out 0.3s both;
       z-index: 100;
       .left_top {
-        width: 232px;
-        margin: 0 20px;
+        width: 252px;
+        margin: 0 10px;
         padding-bottom: 20px;
-        // 搜索框
-        .search_wrap {
-          position: relative;
-          padding-bottom: 28px;
-          border-bottom: 1px solid #d3d3d3;
-        }
-        // 搜索条件
-        .search_condition {
-          .condition_title {
-            // line-height: 50px;
-            color: #666666;
-            text-indent: 8px;
-            padding: 20px 0 10px 0;
+        .qyryfx_from {
+          .area_list {
+            >ul {
+              margin-bottom: 20px;
+              >li {
+                margin-top: 20px;
+                // &:last-child {
+                //   .divide {
+                //     display: none;
+                //   }
+                // }
+                .divide {
+                  width: 100%;
+                  height: 1px;
+                  border: 1px solid #f2f2f2;
+                }
+                .area_list_title, .area_list_time, .area_list_device {
+                  margin-bottom: 10px;
+                  display: flex;
+                  // align-items: center;
+                }
+                .area_list_title {
+                  justify-content: space-between;
+                  >span {
+                    color: #333333;
+                  }
+                  >div {
+                    display: flex;
+                    align-items: center;
+                    i {
+                      margin: 0 5px;
+                      cursor: pointer;
+                      // &:last-child {
+                      //   &:hover {
+                      //     color: #FA453A;
+                      //   }
+                      // }
+                    }
+                  }
+                }
+                .area_list_time, .area_list_device {
+                  >span {
+                    width: 45px;
+                  }
+                  >div {
+                    width: calc(100% - 45px);
+                    color: #333333;
+                  }
+                }
+              }
+            }
           }
-          .condition {
-            padding-bottom: 10px;
+          // .add_area {
+          //   width: 100%;
+          //   margin: -10px 0 10px 0;
+          //   .divide {
+          //     width: 100%;
+          //     height: 1px;
+          //     margin-top: 10px;
+          //     border: 1px dashed #F2F2F2;
+          //   }
+          //   .operation_area {
+          //     margin-left: 25%;
+          //     width: 100px;
+          //     justify-content: center;
+          //     display: flex;
+          //     align-items: center;
+          //     color: #0B6FF8;
+          //     >i {
+          //       font-size: 20px;
+          //       cursor: pointer;
+          //     }
+          //     >span {
+          //       margin-left:5px;
+          //       cursor: pointer;
+          //     }
+          //   }
+          //   // line-height: 20px;
+          // }
+          /deep/ .el-form-item {
+            margin-bottom: 10px;
+          }
+          .select_type {
+            margin-bottom: 0 !important;
+            /deep/.el-form-item__content {
+              display: flex;
+              align-items: center;
+              /deep/ .el-radio {
+                margin-right: 20px;
+              }
+            }
+            >span {
+              width: 60px;
+              display: inline-block;
+            }
+            .select_radio {
+              margin-left: 5px;
+              width: 160px;
+              display: flex;
+              align-items: center;
+            }
+          }
+          .area_select {
+            // margin-bottom: 0;
+            /deep/ .el-form-item__content {
+              line-height: 20px !important;
+            }
+            .area_map_select {
+              color: #0C70F8;
+              margin-left: 5px;
+              cursor: pointer;
+            }
+            .divide {
+              width: 100%;
+              height: 1px;
+              margin-top: 10px;
+              border: 1px dashed #F2F2F2;
+            }
+          }
+        }
+        .area_time {
+          margin-top: -10px;
+          /deep/ .el-form-item__content {
+            display: flex;
+            flex-wrap: wrap;
+            // >span {
+            //   margin-bottom: 5px;
+            // }
+            .width232 {
+              margin-bottom: 10px;
+              &:last-child {
+                margin-bottom: 0;
+              }
+            }
           }
         }
       }
@@ -2402,148 +1575,182 @@ export default {
         }
       }
       .width232 {
-        width: 232px;
+        width: 100%;
       }
     }
     // 页面中部
     .info_center {
-      position: relative;
-      overflow: hidden;
-      -webkit-box-flex: 1;
-      -ms-flex: 1;
-      flex: 1;
       height: 100%;
-      //关闭按钮
-      .close-menu-c {
-        @include close_menu;
-        left: 0px;
+      width: 100%;
+      background-color: #ffffff;
+      .tab-menu {
+        background-color: #fff;
+        padding-top: 8px;
+        overflow: hidden;
+        border-bottom: 1px solid #f2f2f2;
+        li {
+          float: left;
+          width: auto;
+          font-size: 16px;
+          margin: 0 20px;
+          height: 44px;
+          line-height: 44px;
+          text-align: center;
+          color: #333;
+          cursor: pointer;
+        }
+        .is-active {
+          color: #0c70f8;
+          border-bottom: 2px solid #0c70f8;
+        }
       }
-      //地图样式
-      .gis_content {
-        height: 100%;
+      .map_center_container {
         position: relative;
         overflow: hidden;
-        .map_rm {
-          width: 100%;
+        -webkit-box-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+        height: 100%;
+        //关闭按钮
+        .close-menu-c {
+          @include close_menu;
+          left: 0px;
+        }
+        //地图样式
+        .gis_content {
           height: 100%;
-        }
-        // 地图搜索
-        .sd_search {
-          position: absolute;
-          top: 0.3rem;
-          left: 0.3rem;
-          z-index: 1000;
-          background-color: #fff;
+          position: relative;
           overflow: hidden;
-
-          > .sd_search_input {
-            float: left;
-            width: 360px;
-            height: 36px;
-            line-height: 36px;
-            background: rgba(255, 255, 255, 1);
-            box-shadow: 0px 3px 10px 0px rgba(99, 99, 99, 0.39);
-            border: 0;
-            padding: 0 15px;
-            border: none;
+          .map_rm {
+            width: 100%;
+            height: 100%;
           }
-          > span {
-            float: left;
-            width: 60px;
-            height: 36px;
-            line-height: 36px;
-            background-color: #0c70f8;
-            cursor: pointer;
-            text-align: center;
-            > i {
-              position: relative;
-              top: 2px;
-              color: #fff;
-              font-size: 20px;
+          // 地图搜索
+          .sd_search {
+            position: absolute;
+            top: 0.3rem;
+            left: 0.3rem;
+            z-index: 1000;
+            background-color: #fff;
+            overflow: hidden;
+  
+            > .sd_search_input {
+              float: left;
+              width: 360px;
+              height: 36px;
+              line-height: 36px;
+              background: rgba(255, 255, 255, 1);
+              box-shadow: 0px 3px 10px 0px rgba(99, 99, 99, 0.39);
+              border: 0;
+              padding: 0 15px;
+              border: none;
+            }
+            > span {
+              float: left;
+              width: 60px;
+              height: 36px;
+              line-height: 36px;
+              background-color: #0c70f8;
+              cursor: pointer;
+              text-align: center;
+              > i {
+                position: relative;
+                top: 2px;
+                color: #fff;
+                font-size: 20px;
+              }
+            }
+          }
+          //定位
+          .map_control {
+            position: absolute;
+            bottom: 0.3rem;
+            right: 0.2rem;
+            transition: right 0.3s ease-out;
+            animation: fadeInRight 0.4s ease-out 0.4s both;
+            .photo_count_level {
+              background: #fff;
+              width: 0.68rem;
+              padding: 0.1rem;
+              font-size: 12px;
+              text-align: center;
+              margin-bottom: 0.2rem;
+              .colors {
+                padding-bottom: 0.1rem;
+                > p {
+                  color: #999999;
+                }
+                > div {
+                  width: 0.48rem;
+                  height: 0.1rem;
+                  border-radius: 0.05rem;
+                }
+              }
+              .colors:nth-of-type(1) > div {
+                background: #fa453a;
+              }
+              .colors:nth-of-type(2) > div {
+                background: #f4ba18;
+              }
+              .colors:nth-of-type(3) > div {
+                background: #8949f3;
+              }
+              .colors:nth-of-type(4) > div {
+                background: #6262ff;
+              }
+              .colors:nth-of-type(5) > div {
+                background: #0c70f8;
+              }
+              .colors:nth-of-type(6) > div {
+                background: #0d9df4;
+              }
+            }
+            // 地图控制按钮
+            .map_rrt_u2 {
+              width: 0.68rem;
+              text-align: center;
+              padding: 0 0.1rem;
+              font-size: 0.2rem;
+              color: #1264f8;
+              background-color: #fff;
+              > li {
+                line-height: 0.5rem;
+                border-bottom: 1px solid #eee;
+                padding: 0.1rem 0;
+                cursor: pointer;
+                &:last-child {
+                  border-bottom: none;
+                }
+                > i {
+                  margin-top: 0;
+                  display: inline-block;
+                }
+              }
             }
           }
         }
-        //定位
-        .map_control {
-          position: absolute;
-          bottom: 0.3rem;
-          right: 0.2rem;
-          transition: right 0.3s ease-out;
-          animation: fadeInRight 0.4s ease-out 0.4s both;
-          .photo_count_level {
-            background: #fff;
-            width: 0.68rem;
-            padding: 0.1rem;
-            font-size: 12px;
-            text-align: center;
-            margin-bottom: 0.2rem;
-            .colors {
-              padding-bottom: 0.1rem;
-              > p {
-                color: #999999;
-              }
-              > div {
-                width: 0.48rem;
-                height: 0.1rem;
-                border-radius: 0.05rem;
-              }
-            }
-            .colors:nth-of-type(1) > div {
-              background: #fa453a;
-            }
-            .colors:nth-of-type(2) > div {
-              background: #f4ba18;
-            }
-            .colors:nth-of-type(3) > div {
-              background: #8949f3;
-            }
-            .colors:nth-of-type(4) > div {
-              background: #6262ff;
-            }
-            .colors:nth-of-type(5) > div {
-              background: #0c70f8;
-            }
-            .colors:nth-of-type(6) > div {
-              background: #0d9df4;
-            }
-          }
-          // 地图控制按钮
-          .map_rrt_u2 {
-            width: 0.68rem;
-            text-align: center;
-            padding: 0 0.1rem;
-            font-size: 0.2rem;
-            color: #1264f8;
-            background-color: #fff;
-            > li {
-              line-height: 0.5rem;
-              border-bottom: 1px solid #eee;
-              padding: 0.1rem 0;
-              cursor: pointer;
-              &:last-child {
-                border-bottom: none;
-              }
-              > i {
-                margin-top: 0;
-                display: inline-block;
-              }
-            }
+      }
+      .search_box {
+        margin: 20px;
+        .divide {
+          border: 1px dashed #fafafa;
+        }
+      }
+      .table_box {
+        margin: 0 20px;
+        .add_btn {
+          margin-bottom: 10px;
+        }
+        .operation_btn {
+          display: inline-block;
+          padding: 0 10px;
+          border-right: 1px solid #f2f2f2;
+          &:last-child {
+            border-right: none;
           }
         }
       }
     }
-    // .right_show {
-    //   width: calc(100% - 496px);
-    // }
-    // .both_show {
-    //   width: calc(100% - 768px);
-    // }
-    // .none_show {
-    //   width: 100%;
-    // }
-    // .left_show {
-    //   width: calc(100% - 272px);
-    // }
     .info_right {
       // 页面右边
       width: 496px;
