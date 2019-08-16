@@ -22,7 +22,7 @@
               v-model="ruleForm.data1"
               style="width: 100%;"
               class="vl_date"
-              :picker-options="pickerOptions"
+              :time-arrow-control="true"
               type="datetime"
               value-format="timestamp"
               placeholder="请选择开始时间">
@@ -32,7 +32,7 @@
             <el-date-picker
               style="width: 100%;"
               class="vl_date vl_date_end"
-              :picker-options="pickerOptions"
+              :time-arrow-control="true"
               v-model="ruleForm.data2"
               @change="chooseEndTime"
               value-format="timestamp"
@@ -185,9 +185,10 @@
         let date = new Date();
         let curDate = date.getTime();
         let curS = 1 * 24 * 3600 * 1000;
-        let yDate = new Date(curDate - curS);
-        this.ruleForm.data1 = new Date(yDate.getFullYear() + '-' + (yDate.getMonth() + 1) + '-' + yDate.getDate() + ' 00:00:00').getTime();
-        this.ruleForm.data2 =  new Date(yDate.getFullYear() + '-' + (yDate.getMonth() + 1) + '-' + yDate.getDate() + ' 23:59:59').getTime();
+        let _sDate = new Date(curDate - curS);
+        let _s = _sDate.getFullYear()+ '-' + (_sDate.getMonth() + 1) + '-' + _sDate.getDate() + ' 00:00:00' ;
+        this.ruleForm.data1 = new Date(_s).getTime();
+        this.ruleForm.data2 = curDate;
       },
       hideLeft() {
         this.hideleft = !this.hideleft;

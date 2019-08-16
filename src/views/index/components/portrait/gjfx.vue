@@ -31,8 +31,8 @@
             <el-date-picker
                     style="width: 100%;"
                     class="vl_date vl_date_end"
-                    :picker-options="pickerOptions"
                     v-model="ruleForm.data2"
+                    :time-arrow-control="true"
                     @change="chooseEndTime"
                     type="datetime"
                     time-arrow-control
