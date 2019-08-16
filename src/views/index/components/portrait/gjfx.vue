@@ -21,8 +21,8 @@
                     v-model="ruleForm.data1"
                     style="width: 100%;"
                     class="vl_date"
-                    :picker-options="pickerOptions"
-                    type="date"
+                    :time-arrow-control="true"
+                    type="datetime"
                     value-format="timestamp"
                     placeholder="选择日期时间">
             </el-date-picker>
@@ -31,11 +31,11 @@
             <el-date-picker
                     style="width: 100%;"
                     class="vl_date vl_date_end"
-                    :picker-options="pickerOptions"
                     v-model="ruleForm.data2"
+                    :time-arrow-control="true"
                     @change="chooseEndTime"
                     value-format="timestamp"
-                    type="date"
+                    type="datetime"
                     placeholder="选择日期时间">
             </el-date-picker>
           </el-form-item>
@@ -509,7 +509,9 @@
         let date = new Date();
         let curDate = date.getTime();
         let curS = 1 * 24 * 3600 * 1000;
-        this.ruleForm.data1 = curDate - curS;
+        let _sDate = new Date(curDate - curS);
+        let _s = _sDate.getFullYear()+ '-' + (_sDate.getMonth() + 1) + '-' + _sDate.getDate() + ' 00:00:00' ;
+        this.ruleForm.data1 = new Date(_s).getTime();
         this.ruleForm.data2 = curDate;
       },
       hideResult() {
@@ -530,8 +532,8 @@
 //            this.$message.info('选择的区域没有设备，请重新选择区域');
 //            return false;
 //          }
-          pg['startTime'] = formatDate(this.ruleForm.data1, 'yyyy-MM-dd') + ' 00:00:00';
-          pg['endTime'] = formatDate(this.ruleForm.data2, 'yyyy-MM-dd') + ' 23:59:59';
+          pg['startTime'] = formatDate(this.ruleForm.data1, 'yyyy-MM-dd HH:mm:ss');
+          pg['endTime'] = formatDate(this.ruleForm.data2, 'yyyy-MM-dd HH:mm:ss');
 //          pg['imageUrl'] = 'http://file.aorise.org/vlink/image/18c70cc3-424a-43fc-92ee-a6c6de4248f2.jpg';
           pg['imageUrl'] = this.ruleForm.input3;
 //          if(this.ruleForm.input5 == "1"){

@@ -63,7 +63,6 @@
                         v-model="item.startTime"
                         style="width: 100%;"
                         class="vl_date"
-                        :picker-options="pickerOptions"
                         type="datetime"
                         value-format="timestamp"
                         placeholder="请选择开始时间">
@@ -75,7 +74,6 @@
                       <el-date-picker
                               style="width: 100%;"
                               class="vl_date vl_date_end"
-                              :picker-options="pickerOptions1"
                               v-model="item.endTime"
                               value-format="timestamp"
                               type="datetime"
