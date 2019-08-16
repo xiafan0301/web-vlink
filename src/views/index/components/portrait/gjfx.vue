@@ -21,9 +21,9 @@
                     v-model="ruleForm.data1"
                     style="width: 100%;"
                     class="vl_date"
-                    :time-arrow-control="true"
+                    :picker-options="pickerOptions"
                     type="datetime"
-                    value-format="timestamp"
+                     time-arrow-control
                     placeholder="选择日期时间">
             </el-date-picker>
           </el-form-item>
@@ -34,8 +34,8 @@
                     v-model="ruleForm.data2"
                     :time-arrow-control="true"
                     @change="chooseEndTime"
-                    value-format="timestamp"
                     type="datetime"
+                    time-arrow-control
                     placeholder="选择日期时间">
             </el-date-picker>
           </el-form-item>
@@ -335,7 +335,7 @@
   import vlBreadcrumb from '@/components/common/breadcrumb.vue';
   import flvplayer from '@/components/common/flvplayer.vue';
   import { mapXupuxian,ajaxCtx } from "@/config/config.js";
-  import { objDeepCopy, random14, formatDate } from "@/utils/util.js";
+  import { objDeepCopy, random14, formatDate, dateOrigin } from "@/utils/util.js";
   import { cityCode } from "@/utils/data.js";
   import {PortraitPostPersonTrace} from "@/views/index/api/api.portrait.js";
   import { MapGETmonitorList } from "@/views/index/api/api.map.js";
@@ -383,8 +383,8 @@
         hideleft: false,
         timeOrder: false,
         ruleForm: {
-          data1:null,
-          data2: null,
+          data1: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)),
+          data2: new Date(),
           input3: '',
           input5: "1",
           value1: null,
@@ -394,19 +394,7 @@
         options: [],
         pickerOptions: {
           disabledDate (time) {
-            let date = new Date();
-            let y = date.getFullYear();
-            let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
-            let d = date.getDate();
-            let threeMonths = '';
-            let start = '';
-            if (parseFloat(m) >= 4) {
-              start = y + '-' + (m - 1) + '-' + d;
-            } else {
-              start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
-            }
-            threeMonths = new Date(start).getTime();
-            return time.getTime() > Date.now() || time.getTime() < threeMonths;
+            return time > new Date();
           }
         },
         evData: [],
@@ -506,13 +494,11 @@
         this.$message.error('上传失败')
       },
       setDTime () {
-        let date = new Date();
+        /* let date = new Date();
         let curDate = date.getTime();
         let curS = 1 * 24 * 3600 * 1000;
-        let _sDate = new Date(curDate - curS);
-        let _s = _sDate.getFullYear()+ '-' + (_sDate.getMonth() + 1) + '-' + _sDate.getDate() + ' 00:00:00' ;
-        this.ruleForm.data1 = new Date(_s).getTime();
-        this.ruleForm.data2 = curDate;
+        this.ruleForm.data1 = curDate - curS;
+        this.ruleForm.data2 = curDate; */
       },
       hideResult() {
         this.reselt = false;
@@ -532,8 +518,8 @@
 //            this.$message.info('选择的区域没有设备，请重新选择区域');
 //            return false;
 //          }
-          pg['startTime'] = formatDate(this.ruleForm.data1, 'yyyy-MM-dd HH:mm:ss');
-          pg['endTime'] = formatDate(this.ruleForm.data2, 'yyyy-MM-dd HH:mm:ss');
+          pg['startTime'] = formatDate(this.ruleForm.data1);
+          pg['endTime'] = formatDate(this.ruleForm.data2);
 //          pg['imageUrl'] = 'http://file.aorise.org/vlink/image/18c70cc3-424a-43fc-92ee-a6c6de4248f2.jpg';
           pg['imageUrl'] = this.ruleForm.input3;
 //          if(this.ruleForm.input5 == "1"){
