@@ -8,80 +8,93 @@
       </div>
     </div>
     
-    <div :class="['vl_j_left',{hideleft:hideleft}]">
+    <div :class="['vl_j_left']">
       <div class="vl_jtc_search" style="padding-top: 0;">
+        <div class="ytsr_left_radio">
+          <span>查询方式：</span>
+          <span>
+          <el-radio v-model="taskType" label="1">在线查询</el-radio>
+          <el-radio v-model="taskType" label="2">离线任务</el-radio>
+        </span>
+        </div>
+        <div v-show="taskType === '2'" class="ytsr_left_radio">
+          <span>任务名称：</span>
+          <span>
+          <el-input v-model="taskName" placeholder="请输入任务名称" maxlength="20"></el-input>
+        </span>
+        </div>
         <el-date-picker
           v-model="searchData.time1"
           type="datetime"
-          time-arrow-control
           placeholder="开始时间"
-          :picker-options="pickerOptions"
+          :time-arrow-control="true"
           class="full vl_date"
           :clearable="false"
+          value-format="timestamp"
         ></el-date-picker>
         <el-date-picker
-            v-model="searchData.time2"
-            type="datetime"
-            time-arrow-control
-            :clearable="false"
-            :picker-options="pickerOptions"
-            placeholder="结束时间"
-            class="full vl_date vl_date_end"
+          v-model="searchData.time2"
+          type="datetime"
+          :clearable="false"
+          :time-arrow-control="true"
+          placeholder="结束时间"
+          class="full vl_date vl_date_end"
+          value-format="timestamp"
         ></el-date-picker>
-          <el-select class="full" v-model="searchData.portraitGroupId" placeholder="关注人群">
-            <el-option
-              v-for="item in portraitGroupList"
-              :key="item.id"
-              :label="item.groupName"
-              :value="item.uid">
-            </el-option>
-          </el-select>
-          <el-select class="full" v-model="searchData.sex" placeholder="请选择性别" clearable>
-            <el-option
-              v-for="item in sexList"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
-            </el-option>
-          </el-select>
-          <el-select class="full" v-model="searchData.ageGroup" placeholder="请选择年龄段" clearable>
-            <el-option
-              v-for="item in ageGroupList"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
-            </el-option>
-          </el-select>
-          <el-radio-group v-model="input5" @change="changeTab">
-              <el-row :gutter="10">
-              <el-col :span="12">
-                <el-radio label="1">列表选择</el-radio>
-              </el-col>
-              <el-col :span="12">
-                <div @click="clickTab">
-                  <el-radio label="2">地图选择</el-radio>
-                </div>
-              </el-col>
-            </el-row>
-          </el-radio-group>
-          <div v-if="input5==2" >
-            <el-input  v-model="selectValue" :disabled="true">
-            </el-input>
-          </div>
-          <el-select 
-            v-model="areaIds"
-            class="camera-select full"
-            multiple
-            collapse-tags
-            placeholder="关注范围" v-if="input5==1">
-            <el-option
-              v-for="item in eventAreas"
-              :key="item.id"
-              :label="item.areaName"
-              :value="item.areaId">
-            </el-option>
-          </el-select>
-          <div>
+        <el-select class="full" v-model="searchData.portraitGroupId" placeholder="关注人群">
+          <el-option
+            v-for="item in portraitGroupList"
+            :key="item.id"
+            :label="item.groupName"
+            :value="item.uid">
+          </el-option>
+        </el-select>
+        <el-select class="full" v-model="searchData.sex" placeholder="请选择性别" clearable>
+          <el-option
+            v-for="item in sexList"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+        <el-select class="full" v-model="searchData.ageGroup" placeholder="请选择年龄段" clearable>
+          <el-option
+            v-for="item in ageGroupList"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+        <el-radio-group v-model="input5" @change="changeTab">
+            <el-row :gutter="10">
+            <el-col :span="12">
+              <el-radio label="1">列表选择</el-radio>
+            </el-col>
+            <el-col :span="12">
+              <div @click="clickTab">
+                <el-radio label="2">地图选择</el-radio>
+              </div>
+            </el-col>
+          </el-row>
+        </el-radio-group>
+        <div v-if="input5==2" >
+          <el-input  v-model="selectValue" :disabled="true">
+          </el-input>
+        </div>
+        <el-select
+          v-model="areaIds"
+          class="camera-select full"
+          multiple
+          collapse-tags
+          placeholder="关注范围" v-if="input5==1">
+          <el-option
+            v-for="item in eventAreas"
+            :key="item.id"
+            :label="item.areaName"
+            :value="item.areaId">
+          </el-option>
+        </el-select>
+        <div>
           <el-row :gutter="10">
             <el-col :span="12">
               <el-button  @click="resetSearch" class="full">重置</el-button>
@@ -94,19 +107,14 @@
           </el-row>
         </div>
       </div>
-      <span class="insetLeft2" @click="hideResult"></span>
     </div>
-    <div :class="['vl_j_right',{hideleft:hideleft}]">
+    <div :class="['vl_j_right']">
       <div id="tcMap"></div>
       <ul class="map_rrt_u2">
         <li  @click="resemt"><i class="el-icon-aim"></i></li>
         <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
         <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
       </ul>
-      <div class="vl_jfo_switch">
-        <div><span :class="{'active': switchType === 0}" @click="switchType = 0">抓拍结果</span></div>
-        <div><span :class="{'active': switchType === 1}" @click="switchType = 1;">关联事件</span></div>
-      </div>
       <div class="vl_jfo_right" v-show="showVideoList">
         <div class="vl_jig_right_title">
           <p><i class="vl_icon vl_icon_v11"></i><span :title="curSXT.deviceName">{{curSXT.deviceName}}</span></p>
@@ -129,115 +137,8 @@
         </div>
         <div class="vl_jig_right_close"><i class="el-icon-error" @click="hideVideoList"></i></div>
       </div>
-      <div class="vl_jig_event" v-show="switchType === 1">
-        <div class="vl_jfo_event_box se_hi_box">
-          <vue-scroll>
-            <el-table
-              :data="eventList"
-              style="width: 100%">
-              <el-table-column
-                label="布控图片"
-                align="center"
-                min-width="120">
-                <template slot-scope="scope">
-                  <div class="tt_img">
-                    <img :src="scope.row.surveillancePhoto" alt="" >
-                    <span>{{scope.row.surveillancePhotoNum}}</span>
-                  </div>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="eventNumber"
-                label="事件编号"
-                align="left"
-                min-width="140">
-              </el-table-column>
-              <el-table-column
-                min-width="150"
-                label="事件内容">
-                <template slot-scope="scope">
-                  {{scope.row.describe.length > 28 ? (scope.row.describe.slice(0, 28) + '...') : scope.row.describe}}
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="departmentName"
-                label="处理单位"
-                min-width="80">
-              </el-table-column>
-              <el-table-column
-                label="上报时间"
-                min-width="120">
-                <template slot-scope="scope">
-                  {{scope.row.reportTime.split(' ')[0]}}
-                </template>
-              </el-table-column>
-              <el-table-column
-                min-width="150"
-                label="发生地点">
-                <template slot-scope="scope">
-                  {{scope.row.address.length > 28 ? (scope.row.address.slice(0, 28) + '...') : scope.row.address}}
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="processStatus"
-                label="处理状态"
-                min-width="100">
-                <template slot-scope="scope">
-                  <span class="event_status" :class="[scope.row.processStatus === 1 ? 'untreated_event' : scope.row.processStatus === 2 ? 'treating_event' : 'end_event']">{{scope.row.processStatusName}}</span>
-                </template>
-              </el-table-column>
-              <el-table-column
-                label="操作"
-                min-width="100">
-                <template slot-scope="scope">
-                  <el-button type="text" @click="checkIt(scope.row)">查看</el-button>
-                </template>
-              </el-table-column>
-            </el-table>
-            <el-pagination
-              v-show="pagination.total > 6"
-              class="se_hi_pa"
-              background
-              layout="prev, pager, next"
-              @current-change="handleCurrentChange"
-              :current-page="pagination.currentPage"
-              :page-size="pagination.pageSize"
-              :total="pagination.total">
-            </el-pagination>
-          </vue-scroll>
-        </div>
-      </div>
     </div>
-    <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
-      <video id="vlJfoLargeV" :src="curVideoUrl" crossOrigin="anonymous"></video>
-      <div @click="closeVideo" class="close_btn el-icon-error"></div>
-      <div class="control_bottom">
-        <div>{{curSXT.deviceName}}</div>
-        <div>
-          <span @click="pauseLargeVideo" class="vl_icon vl_icon_judge_01" v-if="curVideo.playing"></span>
-          <span @click="playLargeVideo" class="vl_icon vl_icon_control_09" v-else></span>
-          <span><a download="视频" :href="curVideoUrl" class="el-icon-download"></a></span>
-          <span @click="cutScreen" class="vl_icon vl_icon_control_07"></span>
-        </div>
-      </div>
-    </div>
-    <!-- <div style="width: 0; height: 0;" v-show="showCut"  :class="{vl_j_cutscreen: showCut}">
-      <img :src="demoImg" alt="">
-      <i @click="showCut = false" class="close_btn el-icon-error"></i>
-      <a download="截图" :href="demoImg" id="vlJidDownloadImg" ></a>
-    </div> -->
   </div>
-  <!-- 截屏 dialog -->
-    <el-dialog title="截屏" :visible.sync="cutDialogVisible" :center="false" :append-to-body="true" width="1000px" style="z-index: 11111;">
-      <div style="text-align: center; padding-top: 30px;">
-        <canvas :id="flvplayerId + '_cut_canvas'"></canvas>
-      </div>
-      <div slot="footer" class="dialog-footer" style="padding: 0 0 20px 0;">
-        <el-button  @click="cutDialogVisible = false">取 消</el-button>&nbsp;&nbsp;&nbsp;&nbsp;
-        <el-button  type="priamry" @click="playerCutSave">保 存</el-button>
-        <a :id="flvplayerId + '_cut_a'" style="display: none;">保存</a>
-      </div>
-    </el-dialog>
   <!-- 地图选择 -->
    <!-- D设备 B卡口  这里是设备和卡口 -->
     <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" :clear="clearMapSelect" @mapSelectorEmit="mapPoint"></div>
@@ -250,7 +151,7 @@ import {getFocusList, newGETAlarmSnapList, JfoGETEventList,getAllDevice } from "
 import {MapGETmonitorList} from '../../api/api.map.js';
 import {getGroupListIsPortrait, getGroupListIsVehicle} from '../../api/api.control.js';
 import mapSelector from '@/components/common/mapSelector.vue';
-import { random14, dateOrigin, formatDate } from '@/utils/util.js';
+import { random14, formatDate } from '@/utils/util.js';
 import { mapXupuxian } from "@/config/config.js";
 export default {
    components: {
@@ -259,8 +160,9 @@ export default {
   },
   data() {
     return {
+      taskName: '', // 左侧输入任务名称
+      taskType: "1", // 左侧任务类型，1 实时，2离线
       flvplayerId: 'flv_' + random14(),
-      cutDialogVisible: false, // 截图弹出框
       clearMapSelect: null, // 清除地图选择
       input5:"1",
       areaIds: [],
@@ -276,21 +178,15 @@ export default {
         portraitGroupId: null,  // 人员组
         sex: null, // 1男，2女
         ageGroup: null, // 年龄段
-        time1: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)),
-        time2: new Date()
+        time1: null,
+        time2: null
       },
       sexList: [
-        // {value: null, label: '不限'},
         {value: '男', label: '男'},
         {value: '女', label: '女'}
       ],
       portraitGroupList: [],
       vehicleGroupList: [],
-      // focusType: [
-      //   {value: null, label: '不限'},
-      //   {value: 1, label: '布控人员'},
-      //   {value: 2, label: '布控车辆'}
-      // ],
       ageGroupList: [
         // {value: null, label: '不限'},
         {value: '儿童', label: '儿童'},
@@ -304,22 +200,21 @@ export default {
       
       pickerOptions: {
         disabledDate (time) {
-        //   let date = new Date();
-        //   let curDate = date.getTime();
-        //   let curS = 3 * 24 * 3600 * 1000;
-        //     let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
-        //   let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
-        //   let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
-        //   let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
-        //   let start = new Date(curDate - curS).getFullYear() +
-        // "-" + _sm + "-" +_sd;
+          let date = new Date();
+          let curDate = date.getTime();
+          let curS = 3 * 24 * 3600 * 1000;
+            let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
+          let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
+          let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
+          let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
+          let start = new Date(curDate - curS).getFullYear() +
+        "-" + _sm + "-" +_sd;
           
-        //   let threeMonths = new Date(start).getTime();
+          let threeMonths = new Date(start).getTime();
           //return time.getTime() > Date.now() || time.getTime() < threeMonths;
           return time.getTime() > Date.now();
         }
       },
-      switchType: 0, // 0活动范围，1关联事件
       amap: null, // 地图实例
       searching: false,
       curVideo: {
@@ -335,9 +230,6 @@ export default {
         shotNum: '',
         // snapTime: ''
       }, // 显示的摄像头数据
-      showLarge: false,
-      showCut: false,
-      curVideoUrl: '',
       demoImg: '',
       surveillanceIds: [], // 布控ids.
       eventList: [],
@@ -345,12 +237,11 @@ export default {
       allDevice:[],
       selectDevice:[],
       selectBayonet:[],
-      selectValue:"已选设备0个",
-      hideleft:false,
+      selectValue:"已选设备0个"
     }
   },
   mounted () {
-    // this.setDTime();
+    this.setDTime();
     let map = new AMap.Map('tcMap', {
       center: [112.974691, 28.093846],
       zoom: 16
@@ -386,9 +277,6 @@ export default {
       if (this.amap) {
         this.amap.setZoomAndCenter(14, mapXupuxian.center);
       }
-    },
-    hideResult(){
-      this.hideleft = !this.hideleft;
     },
     changeTab(v) {
      
@@ -454,22 +342,16 @@ export default {
       }
     },
     setDTime () {
-      /* let date = new Date();
+      let date = new Date();
       let curDate = date.getTime();
       let curS = 1 * 24 * 3600 * 1000;
-        let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
-      let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
-      let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
-      let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
-      
-      let _s = new Date(curDate - curS).getFullYear() +
-        "-" + _sm + "-" +_sd;
-      let _e = date.getFullYear() + "-" + _em + "-" + _ed;
-      this.searchData.time1 = _s
-      this.searchData.time2 = _s */
+      let _sDate = new Date(curDate - curS);
+      let _s = _sDate.getFullYear()+ '-' + (_sDate.getMonth() + 1) + '-' + _sDate.getDate() + ' 00:00:00' ;
+      this.searchData.time1 = new Date(_s).getTime();
+      this.searchData.time2 = curDate;
     },
     resetSearch () {
-      // this.setDTime()
+      this.setDTime()
       this.searchData.type = null;
       this.searchData.portraitGroupId = null;
       this.searchData.sex = null;
@@ -477,8 +359,6 @@ export default {
       this.searchData.ageGroup = null;
       this.searchData.vehicleGroupId = '';
       this.searchData.plateType = null;
-      this.searchData.time1 = dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000));
-      this.searchData.time2 = new Date();
       this.selectDevice = [];
       this.selectBayonet = [];
       this.selectValue = "已选设备0个";
@@ -508,8 +388,8 @@ export default {
         target: '.se_hi_box'
       })
       let params = {
-        startTime: formatDate(this.searchData.time1),
-        endTime: formatDate(this.searchData.time2),
+        startTime: formatDate(this.searchData.time1, 'yyyy-MM-dd HH:mm:ss'),
+        endTime: formatDate(this.searchData.time2, 'yyyy-MM-dd HH:mm:ss'),
         personGroupId: this.searchData.portraitGroupId || "" ,
         // sex: this.searchData.sex || "",
         // age: this.searchData.ageGroup || "" ,
@@ -546,19 +426,12 @@ export default {
               return false;
             }
             console.log(res);
-            
-            //  res.data.forEach(z => {
-            //   if (z.surveillanceId) {
-            //     this.surveillanceIds.push(z.surveillanceId)
-            //   }
-            // });
             this.evData = res.data.map(x => {
               x.checked = false;
               return x;
             })
             this.amap.clearMap();
             this.drawMarkers(this.evData);
-            this.showEventList();
           }
           this.searching = false;
         })
@@ -643,8 +516,8 @@ export default {
         personGroupId:this.searchData.portraitGroupId,
         deviceCode:data.groupName,
         sex:this.searchData.sex,
-        startTime :this.searchData.time1 ? formatDate(this.searchData.time1):null,
-        endTime :this.searchData.time2 ? formatDate(this.searchData.time2):null,
+        startTime :this.searchData.time1?(this.searchData.time1 + " 00:00:00"):null,
+        endTime :this.searchData.time2?(this.searchData.time2 + " 23:59:59"):null,
         age:this.searchData.ageGroup,
         // surveillanceId: this.curSXT.surveillanceId ? this.curSXT.surveillanceId : '',
         // deviceId: this.curSXT.deviceId,
@@ -672,228 +545,12 @@ export default {
       $('#vlJfoSxt' + _key).removeClass('vl_icon_judge_02')
       this.curVideo.indexNum = null;
       this.showVideoList = false;
-    },
-    playVideo (_i) {
-      let vDom = document.getElementById('vlJigVideo' + _i);
-      if (this.curVideo.videoList[_i].playing) {
-        vDom.pause();
-      } else {
-        vDom.play();
-        vDom.addEventListener('ended', (e) => {
-          e.target.currentTime = 0;
-          vDom.pause();
-          this.curVideo.videoList[_i].playing = false;
-        })
-      }
-      this.curVideo.videoList[_i].playing = !this.curVideo.videoList[_i].playing;
-    },
-    largeVideo (_i) {
-      this.curVideo.playing = false;
-      let vDom = document.getElementById('vlJigVideo' + _i);
-      vDom.pause();
-      this.curVideo.id = 'vlJigVideo' + _i;
-      // this.curVideo.playing = this.curVideo.videoList[_i].playing;
-      this.curVideo.playNum = _i;
-      this.showLarge = true;
-      if (this.curVideo.videoList[_i].playing) {
-        document.getElementById('vlJfoLargeV').play();
-      }
-      document.getElementById('vlJfoLargeV').addEventListener('ended', (e) => {
-        e.target.currentTime = 0;
-        vDom.currentTime = 0;
-        document.getElementById('vlJfoLargeV').pause();
-        this.curVideo.videoList[_i].playing = false;
-        this.showLarge = false;
-      })
-      document.getElementById('vlJfoLargeV').currentTime = vDom.currentTime;
-      this.curVideoUrl = vDom.src;
-
-      console.log('curVideoUrl', this.curVideoUrl)
-    },
-    closeVideo () {
-      let vDom = document.getElementById(this.curVideo.id);
-      document.getElementById('vlJfoLargeV').pause();
-      vDom.currentTime = document.getElementById('vlJfoLargeV').currentTime;
-      this.showLarge = false;
-      if (this.curVideo.playing) {
-        this.curVideo.videoList[this.curVideo.playNum].playing = true;
-        vDom.play();
-      }
-    },
-    pauseLargeVideo () {
-      this.curVideo.playing = false;
-      this.curVideo.videoList[this.curVideo.playNum].playing = false;
-      document.getElementById('vlJfoLargeV').pause();
-    } ,
-    playLargeVideo () {
-      this.curVideo.playing = true;
-      document.getElementById('vlJfoLargeV').play();
-    },
-    cutScreen () {
-      console.log('mmmmmm')
-      this.cutDialogVisible = true;
-      console.log('vvvvv')
-      this.$nextTick(() => {
-        let $video = $('#vlJfoLargeV');
-        let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
-        // console.log($video.width(), $video.height());
-        if ($canvas && $canvas.length > 0) {
-          // let w = 920, h = 540;
-          let w = $video.width(), h = $video.height();
-          if (w > 920) {
-            h = Math.floor(920 / w * h);
-            w = 920;
-          }
-          $canvas.attr({
-            width: w,
-            height: h,
-          });
-          // $video[0].crossOrigin = 'anonymous';
-          // video canvas 必须为原生对象
-          let ctx = $canvas[0].getContext('2d');
-          this.cutTime = new Date().getTime();
-          ctx.drawImage($video[0], 0, 0, w, h);
-        }
-      });
-    },
-    // 截屏保存
-    playerCutSave () {
-      let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
-      if ($canvas && $canvas.length > 0) {
-        console.log('$canvas[0]', $canvas[0])
-        let img = $canvas[0].toDataURL('image/png');
-        // img.crossOrigin  = '';
-        let filename = 'image_' + this.cutTime + '.png';
-        if('msSaveOrOpenBlob' in navigator){
-          // 兼容EDGE
-          let arr = img.split(',');
-          let mime = arr[0].match(/:(.*?);/)[1];
-          let bstr = atob(arr[1]);
-          let n = bstr.length;
-          let u8arr = new Uint8Array(n);
-          while (n--) {
-            u8arr[n] = bstr.charCodeAt(n);
-          }
-          let blob = new Blob([u8arr], {type:mime});
-          window.navigator.msSaveOrOpenBlob(blob, filename);
-          return;
-        }
-        img.replace('image/png', 'image/octet-stream');
-        let saveLink = $('#' + this.flvplayerId + '_cut_a')[0];
-        saveLink.href = img;
-        saveLink.download = filename;
-        saveLink.click();
-        // console.log(base64);
-      }
-    },
-    showEventList () {
-      if (!this.$_loading) {
-        this.$_showLoading({
-          target: '.se_hi_box'
-        })
-      }
-      let params = {
-        pageNum: this.pagination.currentPage,
-        pageSize: this.pagination.pageSize
-        // surveillanceIds: '23, 11'
-      }
-      if (this.surveillanceIds.length) {
-        params['where.surveillanceIds'] = [...new Set(this.surveillanceIds.join(',').split(','))].join(',')
-      } else {
-        params['where.surveillanceIds'] = "";
-      }
-      console.log(params)
-      JfoGETEventList(params)
-        .then(res => {
-          this.$_hideLoading();
-          if (res) {
-            this.eventList = res.data.list;
-            this.pagination.total = res.data.total;
-          }
-        }).catch(() => {
-        this.$_hideLoading();
-      })
-    },
-    handleCurrentChange (val) {
-      this.pagination.currentPage = val;
-      this.showEventList();
-    },
-    checkIt (obj) {
-      if (obj.processStatus === '1') {
-        this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle', eventId: obj.eventId}});
-      }
-      if (obj.processStatus === '2') {
-        this.$router.push({name: 'treating_event_detail', query: {status: 'handling', eventId: obj.eventId}});
-      }
-      if (obj.processStatus === '3') {
-        this.$router.push({name: 'treating_event_detail', query: {status: 'ending', eventId: obj.eventId}});
-      }
     }
   },
   watch: {}
 }
 </script>
 <style lang="scss">
-  .vl_jfo_switch {
-    width: 2.34rem;
-    height: .5rem;
-    background: #FFFFFF;
-    box-shadow:0px 3px 10px 0px rgba(99,99,99,0.39);
-    position: absolute;
-    top: .2rem;
-    left: calc(50% - 1.17rem);
-    z-index: 99;
-    &:after {
-      display: block;
-      content: ' ';
-      position: absolute;
-      left: 50%;
-      top: 0;
-      width: 1px;
-      background: #f2f2f2;
-      height: .3rem;
-      margin-top: .1rem;
-    }
-    > div {
-      display: inline-block;
-      width: 50%;
-      height: 100%;
-      text-align: center;
-      span {
-        display: inline-block;
-        font-size: 14px;
-        color: #666666;
-        height: .46rem;
-        line-height: .46rem;
-        cursor: pointer;
-        &:hover {
-          color: #1264F8;
-          border-bottom: .02rem solid #1264F8;
-        }
-      }
-    }
-    .active {
-      color: #1264F8;
-      border-bottom: .02rem solid #1264F8;
-    }
-  }
-  .vl_jig_event {
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: #fafafa;
-    animation: fadeInRight .1s ease-out .1s both;
-    z-index: 9;
-    padding: 0 .2rem .4rem .2rem;
-    .vl_jfo_event_box {
-      width: 100%;
-      height: 100%;
-      background: #FFFFFF;
-      padding-top: .9rem;
-    }
-  }
   .vl_jfo_right {
     position: absolute;
     right: 0;
@@ -1025,14 +682,12 @@ export default {
         }
       }
     }
-    .hideleft.vl_j_left{
-      margin-left: -272px;
-    }
     .vl_j_left {
       position: relative;
       z-index: 11;
       float: left;
       width: 272px;
+      min-height: 547px;
       padding-top: 24px;
       height: 100%;
       // margin-left: 0.2rem;
@@ -1144,29 +799,21 @@ export default {
         height: auto;
         padding: 0 20px;
         padding-top: .4rem;
-        // .el-input__inner {
-        //   height: .4rem!important;
-        //   line-height: .4rem!important;
-        // }
-        // .el-input__icon {
-        //   height: .4rem!important;
-        //   line-height: .4rem!important;
-        // }
+        .ytsr_left_radio {
+          display: flex;
+          height: 40px;
+          >span {
+            display: block;
+            &:first-child {
+              width: 90px;
+              line-height: 40px;
+            }
+          }
+        }
         .el-range-editor {
-          // width: 100%;
-          // padding: 0;
-          // > i {
-          //   display: none;
-          // }
           > input {
             width: 50%;
           }
-          // .el-range-separator {
-          //   height: .4rem;
-          //   line-height: .4rem;
-          //   width: 10px;
-          //   padding: 0;
-          // }
         }
         button {
           height: .5rem;
@@ -1182,90 +829,12 @@ export default {
         }
       }
     }
-    .vl_j_right.hideleft{
-      width: 100%;
-    }
     .vl_j_right {
       display: inline-block;
       width: calc(100% - 272px);
       height: calc(100% - 5px);
       position: relative;
       #tcMap {
-        width: 100%;
-        height: 100%;
-      }
-    }
-    .vl_j_fullscreen {
-      position: fixed;
-      width: 100%!important;
-      height: 100%!important;
-      top: 0;
-      right: 0;
-      left: 0;
-      bottom: 0;
-      background: #000000;
-      z-index: 99;
-      -webkit-transition: all .4s;
-      -moz-transition: all .4s;
-      -ms-transition: all .4s;
-      -o-transition: all .4s;
-      transition: all .4s;
-      > video {
-        width: 100%;
-        height: 100%;
-      }
-      > .control_bottom {
-        position: absolute;
-        bottom: 0;
-        width: 100%;
-        height: 48px;
-        background: rgba(0, 0, 0, .65);
-        > div {
-          float: left;
-          width: 50%;
-          height: 100%;
-          line-height: 48px;
-          text-align: right;
-          padding-right: 20px;
-          color: #FFFFFF;
-          &:first-child {
-            text-align: left;
-            padding-left: 20px;
-          }
-          > span {
-            display: inline-block;
-            height: 22px;
-            margin-left: 10px;
-            vertical-align: middle;
-            cursor: pointer;
-            a {
-              font-size: 25px;
-              text-decoration: none;
-              color: #ffffff;
-              vertical-align: top;
-            }
-          }
-        }
-      }
-    }
-    .vl_j_cutscreen {
-      position: fixed;
-      width: 90%!important;
-      height: 90%!important;
-      top: 0;
-      right: 0;
-      left: 0;
-      bottom: 0;
-      background: #FFFFFF;
-      z-index: 9999;
-      -webkit-transition: all .4s;
-      -moz-transition: all .4s;
-      -ms-transition: all .4s;
-      -o-transition: all .4s;
-      transition: all .4s;
-      padding: 20px;
-      margin: auto;
-      img {
         width: 100%;
         height: 100%;
       }
@@ -1454,44 +1023,6 @@ export default {
  .vl_judge_tc{
     padding-top: 50px;
   }
-.hideleft {
-  .insetLeft2 {
-    transform: rotate(180deg);
-    background-position: -504px -1269px;
-  }
-  .insetLeft2:hover{
-    transform: rotate(180deg);
-    background-position: -440px -1269px;
-  }
-}
-.insetLeft2{
-  position: absolute;
-  right: -28px;
-  width: 25px;
-  height: 178px;
-  top: 50%;
-  margin-top: -89px;
-  display: inline-block;
-  background-repeat: no-repeat;
-  transform: rotate(180deg);
-  background-image: url(../../../../assets/img/icons.png);
-  background-position: -380px -1269px;
-  cursor: pointer;
-}
-.insetLeft2:hover{
-  position: absolute;
-  right: -28px;
-  width: 28px;
-  height: 178px;
-  top: 50%;
-  margin-top: -89px;
-  display: inline-block;
-  background-repeat: no-repeat;
-  transform: rotate(180deg);
-  background-image: url(../../../../assets/img/icons.png);
-  background-position: -318px -1269px;
-  cursor: pointer;
-}
 .full {
   width: 100%;
 }
