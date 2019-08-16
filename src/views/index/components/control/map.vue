@@ -394,14 +394,14 @@ export default {
       surveillanceList = surveillanceList.length > 0 ? surveillanceList.join(',').split(',') : [];
       surveillanceList = Array.from(new Set(surveillanceList));
       let params = {
-        interval: 60
+        interval: 30
       } 
       devList.length > 0 && (params.deviceIds = devList.join(','));
       surveillanceList.length > 0 && (params.surveillanceIds = surveillanceList.join(','));
       getAlarmListByDev(params).then(res => {
         if (res && res.data) {
           this.markerAlarmList = res.data;
-          if (this.markerAlarmList.length > 0) {
+          if (this.markerAlarmList.length > 0 && this.devicesList.length > 0) {
             this.getAllAlarmSnapListByDev();
           }
           this.markerAlarmList.forEach(dev => {
@@ -411,21 +411,13 @@ export default {
               $('#mapBox #' + dev.deviceId).append(childDiv);
               $('#mapBox #' + dev.deviceId).addClass("vl_icon_alarm");
               $('#mapBox #' + dev.deviceId).addClass("vl_icon_control_02");
-              $('#mapBox #' + dev.deviceId).removeClass("vl_icon_control_01");
             })
-            // 让有警情的点标记的class 10s后移除  
-            setTimeout(() => {
-              $('#mapBox .vl_icon_control_02').removeClass("vl_icon_alarm");
-              $('#mapBox .vl_icon_warning').remove();
-              $('#mapBox #' + dev.deviceId).removeClass("vl_icon_control_02");
-              $('#mapBox #' + dev.deviceId).addClass("vl_icon_control_01");
-            }, 11000);
           })
           this.timer = setTimeout(() => {
-            // this.$once('hook:beforeDestroy', () => {
-            //   clearTimeout(this.timer);
-            //   return false; 
-            // })
+            // 让有警情的点标记的class 12s后移除  
+            $('#mapBox .vl_icon_control_02').removeClass("vl_icon_alarm");
+            $('#mapBox .vl_icon_control_02').removeClass("vl_icon_control_02");
+            $('#mapBox .vl_icon_warning').remove();
             this.getAlarmListByDev();
           }, 12000)
         }
@@ -684,6 +676,7 @@ export default {
           $('#mapBox').on('click', '.vl_map_close', function () {
             // 关闭弹窗
             if (clickWindow) {$('.control_map').append($('#controlVideo'));_this.isShowVideo = false; _this.isShowV = false; clickWindow.close(); }
+            $('#' + obj.uid).removeClass("vl_icon_control_03");
           })
           this.clickWindow = clickWindow;
           // 跳转至布控详情页

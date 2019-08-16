@@ -54,7 +54,7 @@
             :picker-options="pickerOptions"
             v-model="queryForm.startTime"
             type="datetime"
-            value-format="yyyy-MM-dd HH:mm:ss"
+            :time-arrow-control="true"
             placeholder="请选择开始时间"
             class="vl_date">
           </el-date-picker>
@@ -66,7 +66,7 @@
             :picker-options="pickerOptions1"
             v-model="queryForm.endTime"
             type="datetime"
-            value-format="yyyy-MM-dd HH:mm:ss"
+            :time-arrow-control="true"
             placeholder="请选择结束时间"
             class="vl_date vl_date_end">
           </el-date-picker>
@@ -115,13 +115,13 @@
   </div>
 </template>
 <script>
-let startTime = formatDate(new Date(new Date(new Date().toLocaleDateString('zh-Hans-CN').replace(/日/g, '').replace(/\/|年|月/g, '/').replace(/[^\d/]/g,''))).getTime() - 24*60*60*1000, 'yyyy-MM-dd HH:mm:ss');
-let endTime = formatDate(new Date(new Date(new Date().toLocaleDateString('zh-Hans-CN').replace(/日/g, '').replace(/\/|年|月/g, '/').replace(/[^\d/]/g,''))).getTime() - 1, 'yyyy-MM-dd HH:mm:ss');
+// let startTime = formatDate(new Date(new Date(new Date().toLocaleDateString('zh-Hans-CN').replace(/日/g, '').replace(/\/|年|月/g, '/').replace(/[^\d/]/g,''))).getTime() - 24*60*60*1000, 'yyyy-MM-dd HH:mm:ss');
+// let endTime = formatDate(new Date(new Date(new Date().toLocaleDateString('zh-Hans-CN').replace(/日/g, '').replace(/\/|年|月/g, '/').replace(/[^\d/]/g,''))).getTime() - 1, 'yyyy-MM-dd HH:mm:ss');
 import G2 from '@antv/g2';
 import { View } from '@antv/data-set';
 import {apiCarFlow, exportExcel} from '@/views/index/api/api.vehicle.js';
 import {getAllBayonetListByName} from '@/views/index/api/api.vehicle.js';
-import {formatDate} from '@/utils/util.js';
+import {formatDate, dateOrigin} from '@/utils/util.js';
 import {dataList} from '@/utils/data.js';
 import noResult from '@/components/common/noResult.vue';
 export default {
@@ -136,8 +136,8 @@ export default {
         // lane: null,
         statementType: 1,
         warningNum: '',
-        startTime: startTime,
-        endTime: endTime
+        startTime: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)),
+        endTime: new Date(),
       },
       pickerOptions: {
         disabledDate: time => {
@@ -461,8 +461,8 @@ export default {
         // lane: null,
         statementType: 1,
         warningNum: '',
-        startTime: startTime,
-        endTime: endTime
+        startTime: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)),
+        endTime: new Date(),
       };
       this.charts = {
         chart1: null,
@@ -486,8 +486,8 @@ export default {
       if (this.queryForm.statementType !== 5) {
         params.reportType = this.queryForm.statementType
       } else {
-        params.startTime = this.queryForm.startTime;
-        params.endTime = this.queryForm.endTime;
+        params.startTime = formatDate(this.queryForm.startTime);
+        params.endTime = formatDate(this.queryForm.endTime);
       }
       this.loadingBtn = true;
       apiCarFlow(params).then(res => {

@@ -1,16 +1,10 @@
 <template>
   <div class="new-analysis-task">
     <div class>
-      <!-- <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">检索</el-breadcrumb-item>
-        <el-breadcrumb-item :to="{ path: '/portrait/pfcm' }">频繁出没</el-breadcrumb-item>
-        <el-breadcrumb-item>新建分析任务</el-breadcrumb-item>
-      </el-breadcrumb>-->
       <div
         is="vlBreadcrumb"
         :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
-            {name: '频繁出没', routerName: 'portrait_pfcm'},
-            {name: '新建分析任务'}]"
+            {name: '频繁出没'}]"
       ></div>
     </div>
     <div class="new-a-t-content">
@@ -23,89 +17,10 @@
             :rules="rules"
             :hide-required-asterisk="true"
           >
-            <!-- 搜索 -->
-            <!-- <el-form-item prop="address">
-              <div class="search-wrap">
-                <el-input
-                  class="width232"
-                  v-model="searchData.address"
-                  suffix-icon="el-icon-search"
-                  placeholder="搜索地点"
-                  id="map-sd-search-input"
-                ></el-input>
-              </div>
-            </el-form-item> -->
-            <!-- 下划线 -->
-            <!-- <el-form-item class="under-line">
-              <div class="line"></div>
-            </el-form-item> -->
             <!-- 任务名称 -->
             <el-form-item prop="taskName">
               <div class="task-name">
                 <el-input v-model="searchData.taskName" placeholder="请输入任务名称"></el-input>
-              </div>
-            </el-form-item>
-            <!-- 区域选择 -->
-            <el-form-item>
-              <div class="sd-opts">
-                <div class="sd-opts-title">
-                  <h4>区域选择</h4>
-                  <span class="location-btn el-icon-location-outline" @click="setFitV"></span>
-                </div>
-                <ul>
-                  <li>
-                    <div
-                      title="选择矩形范围内的设备"
-                      :class="{'sd-opts-sed': drawActiveType === 1 }"
-                      @click="selDrawType(1)"
-                    >
-                      <span class="sd-opts-icon sd-opts-icon1"></span>
-                    </div>
-                  </li>
-                  <li>
-                    <div
-                      title="选择圆形范围内的设备"
-                      :class="{'sd-opts-sed': drawActiveType === 2 }"
-                      @click="selDrawType(2)"
-                    >
-                      <span class="sd-opts-icon sd-opts-icon2"></span>
-                    </div>
-                  </li>
-                  <li>
-                    <div
-                      title="选择折线200米范围内的设备"
-                      :class="{'sd-opts-sed': drawActiveType === 3 }"
-                      @click="selDrawType(3)"
-                    >
-                      <span class="sd-opts-icon sd-opts-icon3"></span>
-                    </div>
-                  </li>
-                  <li>
-                    <div
-                      title="选择多边形范围内的设备"
-                      :class="{'sd-opts-sed': drawActiveType === 4 }"
-                      @click="selDrawType(4)"
-                    >
-                      <span class="sd-opts-icon sd-opts-icon4"></span>
-                    </div>
-                  </li>
-                  <li>
-                    <div
-                      title="选择10公里圆形范围内的设备"
-                      :class="{'sd-opts-sed': drawActiveType === 5 }"
-                      @click="selDrawType(5)"
-                    >
-                      <span class="sd-opts-icon sd-opts-icon5"></span>
-                    </div>
-                  </li>
-                </ul>
-                <p v-if="drawActiveType > 0">
-                  <span v-if="drawActiveType === 1">在地图上按住鼠标左键拖动鼠标框选，松开鼠标完成选择</span>
-                  <span v-else-if="drawActiveType === 2">在地图上按住鼠标左键选择圆心，拖动鼠标作为半径，松开鼠标完成选择</span>
-                  <span v-else-if="drawActiveType === 3">在地图上鼠标左键选择两个或两个以上点形成折线，双击或右键完成选择</span>
-                  <span v-else-if="drawActiveType === 4">在地图上鼠标左键选择三个或三个以上点形成封闭区域，双击或右键完成选择</span>
-                  <span v-else-if="drawActiveType === 5">在地图上鼠标左键选择圆心，形成10公里大小的圆形区域</span>
-                </p>
               </div>
             </el-form-item>
             <!-- 时间 -->
@@ -141,6 +56,11 @@
                 ></el-date-picker>
               </div>
             </el-form-item>
+            <!-- 区域选择 -->
+            <el-form-item>
+                <div class="select_map"><span>区域：</span><span @click="selectMap" class="select_map_color">地图框选区域</span></div>
+            </el-form-item>
+            
             <!-- 相似度搜索 -->
             <el-form-item prop="similarity">
               <div class="similarity">
@@ -177,56 +97,205 @@
                   type="primary"
                   @click="submitForm('searchForm')"
                   :loading="searching"
-                >新建任务</el-button>
+                >确定</el-button>
               </div>
             </el-form-item>
           </el-form>
         </vue-scroll>
       </div>
-      <!-- 关闭按钮 -->
-      <div
-        class="close-menu-c"
-        title="关闭菜单"
-        @click="videoMenuStatus = false;"
-        v-show="videoMenuStatus"
-      >
-        <i class="vl_icon vl_icon_vehicle_02"></i>
-      </div>
-      <!-- 展开按钮 -->
-      <div
-        v-show="!videoMenuStatus"
-        class="close-menu-o"
-        title="展开菜单"
-        @click="videoMenuStatus = true;"
-      >
-        <i class="vl_icon vl_icon_vehicle_03"></i>
-      </div>
-      <!-- 地图信息 -->
-      <div class="info-right" :class="{ 'video-menu-close': !videoMenuStatus }">
-        <!-- 地图信息 -->
-        <div class="gis_content" id="gis_content">
-          <div class="map_rm" id="mapMap"></div>
-          <div class="sd_search">
-            <input type="text" placeholder="请输入地名，快速定位地址" autocomplete="off" class="sd_search_input" id="map-sd-search-input">
-            <span @click="searchBtn"><i class="el-icon-search"></i></span>
-          </div>
-          <!-- 地图控制按钮（放大，缩小，定位） -->
-          <div class="map_control">
-            <ul class="map_rrt_u2">
-              <li @click="resetZoom">
-                <i class="el-icon-aim"></i>
-              </li>
-              <li>
-                <i class="el-icon-plus" @click="mapZoomSet(1)"></i>
-              </li>
-              <li>
-                <i class="el-icon-minus" @click="mapZoomSet(-1)"></i>
-              </li>
-            </ul>
+      <!-- tab列表信息 -->
+      <div class="info-right">
+          <div class="frequent-a-content">
+        <ul class="tab-menu">
+          <li
+            v-for="(item,index) in tabList"
+            :key="index"
+            :class="{'is-active': selectIndex === item.value}"
+            @click="selectTab(item.value)"
+          >{{item.label}}</li>
+        </ul>
+        <div class="search_box">
+          <el-form :inline="true" :model="taskForm" class="event_form" ref="taskForm">
+            <el-form-item prop="taskName" label="任务名称：">
+              <el-input
+                style="width: 232px;"
+                type="text"
+                placeholder="请输入任务名称"
+                v-model="taskForm.taskName"
+              />
+            </el-form-item>
+            <el-form-item prop="reportTime" label="创建时间：">
+              <el-date-picker
+                class="vl_date time"
+                v-model="taskForm.reportTime"
+                type="datetimerange"
+                value-format="yyyy-MM-dd HH:mm:ss"
+                format="yyyy-MM-dd HH:mm:ss"
+                range-separator="至"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+                :default-time="['00:00:00', '23:59:59']"
+              ></el-date-picker>
+            </el-form-item>
+            <el-form-item>
+              <el-button class="select_btn" @click="selectDataList">查询</el-button>
+              <el-button class="reset_btn" @click="resetForm('taskForm')">重置</el-button>
+            </el-form-item>
+          </el-form>
+          <div class="divide"></div>
+        </div>
+        <div class="content-box">
+          <div class="table_box" v-loading="isLoading">
+            <el-table :data="list">
+              <el-table-column label="序号" type="index" width="100"></el-table-column>
+              <el-table-column label="任务名称" prop="taskName" show-overflow-tooltip></el-table-column>
+              <el-table-column label="创建时间" prop="createTime" show-overflow-tooltip></el-table-column>
+              <el-table-column label="相似度" show-overflow-tooltip>
+                <template  slot-scope="scope">
+                  {{scope.row.taskWebParamObj.semblance}}
+                </template>
+              </el-table-column>
+              <el-table-column label="频次阈值" show-overflow-tooltip>
+                <template  slot-scope="scope">
+                  {{scope.row.taskWebParamObj.frequency}}
+                </template>
+              </el-table-column>
+              <el-table-column label="状态" v-if="selectIndex === 0" show-overflow-tooltip>
+                  <template slot-scope="scope">
+                      {{scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 2 ? '成功' : scope.row.taskStatus === 3 ? '失败' : scope.row.taskStatus === 4 ? '已中断' : ''}}
+                  </template>
+              </el-table-column>
+              <el-table-column label="操作" fixed="right">
+                <template slot-scope="scope">
+                  <span
+                    class="operation_btn"
+                    @click="skipDetailPage(scope.row)"
+                    v-if="selectIndex === 1"
+                  >查看</span>
+                  <span
+                    class="operation_btn"
+                    @click="interrupt(scope.row)"
+                    v-if="selectIndex === 0 && scope.row.taskStatus === 1"
+                  >中断任务</span>
+                  <span
+                    class="operation_btn"
+                    @click="recoveryOrRestart(scope.row,'recovery')"
+                    v-if="selectIndex === 0 && scope.row.taskStatus === 4"
+                  >恢复任务</span>
+                  <span
+                    class="operation_btn"
+                    @click="recoveryOrRestart(scope.row,'restart')"
+                    v-if="selectIndex === 0 && scope.row.taskStatus === 3"
+                  >重启任务</span>
+                  <span
+                    class="operation_btn"
+                    @click="cancel(scope.row)"
+                    v-if="selectIndex === 0 && (scope.row.taskStatus === 3 || scope.row.taskStatus === 4)"
+                  >删除任务</span>
+                </template>
+              </el-table-column>
+            </el-table>
           </div>
         </div>
+        <template v-if="pagination.total > 0">
+          <el-pagination
+            class="cum_pagination"
+            @current-change="handleCurrentChange"
+            :current-page.sync="pagination.pageNum"
+            :page-sizes="[100, 200, 300, 400]"
+            :page-size="pagination.pageSize"
+            layout="total, prev, pager, next, jumper"
+            :total="pagination.total"
+          ></el-pagination>
+        </template>
+      </div>
+
+      <!--中断任务弹出框-->
+      <el-dialog
+        title="中断任务确认?"
+        :visible.sync="interruptDialog"
+        width="482px"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        class="dialog_comp"
+      >
+        <span style="color: #999999;">任务中断，任务的数据处理进程将中止，可以在列表中恢复任务的数据处理</span>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="interruptDialog = false">取消</el-button>
+          <el-button class="operation_btn function_btn" @click="interruptConfirm(1)">确认</el-button>
+        </div>
+      </el-dialog>
+
+      <!--删除任务弹出框-->
+      <el-dialog
+        title="删除任务确认"
+        :visible.sync="deleteDialog"
+        width="482px"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        class="dialog_comp"
+      >
+        <span style="color: #999999;">任务删除，任务的数据处理进程将被清理，任务不再可以恢复</span>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="deleteDialog = false">取消</el-button>
+          <el-button class="operation_btn function_btn" @click="interruptConfirm(2)">确认</el-button>
+        </div>
+      </el-dialog>
       </div>
     </div>
+
+    <!-- 地图框选 -->
+    <el-dialog
+        :visible.sync="dialogVisible"
+        :append-to-body="true"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        :show-close="false"
+        width="1180px"
+        class="map_selector_dialog">
+        <div class="map_sd_content" id="mapMap">
+        <div class="sd_search">
+            <input type="text" placeholder="请输入地名，快速定位地址" autocomplete="off" class="sd_search_input" id="map_sd_search_input">
+            <span @click="searchBtn"><i class="el-icon-search"></i></span>
+        </div>
+        <div class="sd_opts">
+            <h4>请选择框选图形</h4>
+            <ul>
+            <li>
+                <div title="选择矩形范围内的设备" :class="{'sd_opts_sed': drawActiveType === 1 }" @click="selDrawType(1)"><span class="sd_opts_icon sd_opts_icon1"></span></div>
+            </li>
+            <li>
+                <div title="选择圆形范围内的设备" :class="{'sd_opts_sed': drawActiveType === 2 }" @click="selDrawType(2)"><span class="sd_opts_icon sd_opts_icon2"></span></div>
+            </li>
+            <li>
+                <div title="选择折线200米范围内的设备" :class="{'sd_opts_sed': drawActiveType === 3 }" @click="selDrawType(3)"><span class="sd_opts_icon sd_opts_icon3"></span></div>
+            </li>
+            <li>
+                <div title="选择多边形范围内的设备" :class="{'sd_opts_sed': drawActiveType === 4 }" @click="selDrawType(4)"><span class="sd_opts_icon sd_opts_icon4"></span></div>
+            </li>
+            <li>
+                <div title="选择10公里圆形范围内的设备" :class="{'sd_opts_sed': drawActiveType === 5 }" @click="selDrawType(5)"><span class="sd_opts_icon sd_opts_icon5"></span></div>
+            </li>
+            </ul>
+            <p>
+            <span v-if="drawActiveType === 1">在地图上按住鼠标左键拖动鼠标框选，松开鼠标完成选择</span>
+            <span v-else-if="drawActiveType === 2">在地图上按住鼠标左键选择圆心，拖动鼠标作为半径，松开鼠标完成选择</span>
+            <span v-else-if="drawActiveType === 3">在地图上鼠标左键选择两个或两个以上点形成折线，双击或右键完成选择</span>
+            <span v-else-if="drawActiveType === 4">在地图上鼠标左键选择三个或三个以上点形成封闭区域，双击或右键完成选择</span>
+            <span v-else-if="drawActiveType === 5">在地图上鼠标左键选择圆心，形成10公里大小的圆形区域</span>
+            </p>
+        </div>
+        <ul class="sd_fs">
+            <li @click="resetZoom"><i class="el-icon-aim"></i></li>
+            <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
+            <li @click="mapZoomSet(2)"><i class="el-icon-minus"></i></li>
+        </ul>
+        </div>
+        <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false" size="small">取 消</el-button>
+        <el-button :loading="submitLoading" type="primary" @click="selSubmit" size="small">确 定</el-button>
+        </span>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -236,7 +305,7 @@ import {
   getAllBayonetList
 } from "@/views/index/api/api.base.js";
 import { validateSimilarity, validateFrequency } from "@/utils/validator.js";
-import { postTaskAnalysis } from "../../api/api.analysis.js";
+import { postTaskAnalysis, getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from "../../api/api.analysis.js";
 import { formatDate, random14, dateOrigin } from "@/utils/util.js";
 import vlBreadcrumb from "@/components/common/breadcrumb.vue";
 export default {
@@ -335,19 +404,170 @@ export default {
       bayonetIds: [], //卡口
       area: [],
       searchTip: {},      //地图搜索选择数据
+      dialogVisible: false,
+      submitLoading: false,
+      /* 列表 */
+      tabList: [
+        {
+          label: "已完成任务",
+          value: 1
+        },
+        {
+          label: "未完成任务",
+          value: 0
+        }
+      ],
+      selectIndex: 1,
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
+      taskForm: {
+        reportTime: "", // 日期
+        taskName: "" // 任务名称
+      },
+      list: [], //已完成列表
+      userInfo: {}, // 存储的用户信息
+      deleteDialog: false,
+      interruptDialog: false,    //中断任务
+      isLoading: false,
+      taskObj: '',     //单个列表任务
     };
   },
   computed: {},
+  created() {
+    this.userInfo = this.$store.state.loginUser;
+  },
   mounted() {
     //获取数据
     this.setDate();
-    this.getTreeList();
-    //加载地图
-    this.initMap();
-    this.resetZoom();
+    this.selectDataList();
     // this.mapEvents();
   },
   methods: {
+    /* 列表start */
+    //tab切换
+    selectTab(val) {
+      this.selectIndex = val;
+      this.pagination.pageNum = 1;
+      this.taskForm.taskName = "";
+      this.taskForm.reportTime = "";
+      this.selectDataList();
+    },
+    handleCurrentChange(page) {
+      this.pagination.pageNum = page;
+      this.selectDataList();
+    },
+    // 根据搜索条件查询
+    selectDataList() {
+        this.list = [];
+        this.pagination.total = 0;
+        let params = {
+            pageNum: this.pagination.pageNum,
+            pageSize: this.pagination.pageSize,
+            orderBy: 'create_time',
+            order: 'desc',
+            'where.taskType': 1,    //任务类型 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
+            'where.isFinish': this.selectIndex,   //是否完成 0:未完成(包含处理中、处理失败、处理中断) 1：已完成(处理成功)
+        }
+        this.taskForm.taskName && (params['where.taskName'] = this.taskForm.taskName);
+        if(this.taskForm.reportTime && this.taskForm.reportTime.length > 0) {
+            params["where.startTime"] = formatDate(this.taskForm.reportTime[0]);
+            params["where.endTime"] = formatDate(this.taskForm.reportTime[1]);
+        }
+        console.log("---------params-----------",JSON.stringify(params))
+        this.isLoading = true;
+        getTaskInfosPage(params).then(res => {
+            console.log("--------getTaskInfosPage--------",res)
+            if(res.data) {
+                this.list = res.data.list;
+                this.pagination.total = res.data.total;
+                for(let item of this.list) {
+                  item['taskWebParamObj'] = JSON.parse(item.taskWebParam)
+                }
+            }
+            this.$nextTick(() => {
+                this.isLoading = false;
+            })
+        }).catch(error => {
+            console.log(error);
+            this.isLoading = false;
+        })
+    },
+    // 重置查询条件
+    resetForm(form) {
+      this.$refs[form].resetFields();
+      this.selectDataList();
+    },
+    skipAddTaskPage() {
+      // 跳到新增任务页面
+      this.$router.push({ name: "portrait_xjpfcm" });
+    },
+    // 跳至详情页面
+    skipDetailPage(obj) {
+      this.$router.push({ name: "portrait_fxjg" , query: {uid: obj.uid}});
+    },
+    //中断
+    interrupt(obj) {
+        this.taskObj = obj;
+        this.interruptDialog = true;
+    },
+    //删除
+    cancel(obj) {
+        this.taskObj = obj;
+        this.deleteDialog = true;
+    },
+    //确认中断或者删除
+    interruptConfirm(val) {
+        let params = {};
+        if(val === 1) {    //中断
+            this.interruptDialog = false;
+            params = {
+                taskStatus: 4,
+                uid: this.taskObj.uid,
+            }
+        }else if(val === 2) {     //删除
+            this.deleteDialog = false;
+            params = {
+                delFlag: true,
+                uid: this.taskObj.uid,
+            }
+        }
+        putAnalysisTask(params).then(res => {
+            console.log(res);
+            if(res) {
+                if(val === 1) {
+                    this.$MyMessage("中断任务成功", "success")
+                }else if(val === 2) {
+                    this.$MyMessage("删除任务成功", "success")
+                }
+                this.selectDataList();
+            }
+        }).catch(() => {})
+    },
+    //恢复任务,重启任务
+    recoveryOrRestart(obj,type) {
+        putTaskInfosResume(obj.uid).then(res => {
+            console.log(res)
+            if(res) {
+                if(type === 'recovery') {
+                    this.$MyMessage("恢复任务成功","success")
+                }else if(type === 'restart') {
+                    this.$MyMessage("重启任务成功","success")
+                }
+                this.selectDataList();
+            }
+        }).catch(() => {})
+    },
+    /* 列表end */
+    //选择区域
+    selectMap() {
+        this.dialogVisible = true
+        this.$nextTick(() => {
+            //加载地图
+            this.initMap();
+            this.getTreeList();
+            //定位
+            this.setFitV()
+        })
+    },
     //设置时间
     setDate() {
       /* let curDate = new Date(new Date().toLocaleDateString()).getTime()
@@ -371,7 +591,6 @@ export default {
     },
     //新建
     submitForm(formName) {
-      this.selSubmit();
       this.$refs[formName].validate(valid => {
         if (valid) {
           let params = {
@@ -404,8 +623,15 @@ export default {
             .then(res => {
               console.log(res);
               if (res && res.data) {
-                this.$router.push({
+                /* this.$router.push({
                   name: "portrait_pfcm"
+                }); */
+                this.$MyMessage("新建离线分析任务成功！", 'success');
+                this.selectDataList()
+                this.$nextTick(() => {
+                    this.$refs[formName].resetFields();
+                    this.setDate();
+                    this.drawClear();
                 });
               }
               this.$nextTick(() => {
@@ -425,7 +651,11 @@ export default {
     setFitV() {
       this.getArea();
       console.log(this.area);
-      this.amap.setFitView(this.area);
+      if(this.area && this.area.length > 0) {
+          this.amap.setFitView(this.area);
+      }else {
+          this.resetZoom()
+      }
     },
     getArea() {
       this.area = [];
@@ -530,6 +760,7 @@ export default {
         return;
       }
       let _this = this;
+      console.log(_this.mapCenter)
       let map = new window.AMap.Map("mapMap", {
         zoom: 14, // 级别
         resizeEnable: true,
@@ -542,7 +773,7 @@ export default {
 
       // 注册监听，当选中某条记录时会触发
       let auto = new window.AMap.Autocomplete({
-        input: "map-sd-search-input"
+        input: "map_sd_search_input"
       });
       window.AMap.event.addListener(auto, "select", _this.selectArea);
 
@@ -1092,11 +1323,11 @@ export default {
       let _sid = random14();
       this.drawObj.circle10km[_sid] = {};
       this.drawObj.circle10km[_sid].obj = circle;
-      this.map.setDefaultCursor();
+      /* this.map.setDefaultCursor(); */
       /* this.drawActiveType = 0; */
       this.amap.off("click", this.drawCircle10kmClick);
       // this.drawCircle10kmMark(_sid, circle);
-      this.checkout(_this.circle,'AMap.circle')
+      /* this.checkout(this.circle,'AMap.circle') */
     },
     drawCircle10kmEditor(sid) {
       if (this.drawObj.circle10km[sid]) {
@@ -1339,6 +1570,11 @@ export default {
       console.log("卡口 ab", ab);
       this.cameraIds = ad;
       this.bayonetIds = ab;
+      if((this.cameraIds && this.cameraIds.length > 0 ) || (this.bayonetIds && this.bayonetIds.length > 0)) {
+          this.dialogVisible = false
+      }else {
+          this.$MyMessage("请选择区域", 'info');
+      }
     },
     getTreeList() {
       if (this.showTypes.indexOf("D") >= 0) {
@@ -1426,12 +1662,18 @@ export default {
       color: #999;
       background: #fff;
       box-shadow: 2px 3px 10px 0px rgba(131, 131, 131, 0.28);
-      animation: fadeInLeft 0.4s ease-out 0.3s both;
+      /* animation: fadeInLeft 0.4s ease-out 0.3s both; */
       .time-search {
         display: flex;
         p {
           width: 20px;
         }
+      }
+      .select_map {
+          .select_map_color {
+              color: #0C70F8;
+              cursor: pointer;
+          }
       }
       .vl_judge_tc_c_item {
         width: 232px;
@@ -1554,96 +1796,6 @@ export default {
           margin-left: 8px;
         }
       }
-      .sd-opts {
-        width: 232px;
-        border: 1px solid #d3d3d3;
-        .sd-opts-title {
-          display: flex;
-          justify-content: space-between;
-          padding: 10px;
-          color: #333;
-          background-color: #fafafa;
-          border-bottom: 1px solid #d3d3d3;
-          .location-btn {
-            cursor: pointer;
-            font-size: 20px;
-            color: #999;
-            &:hover {
-              color: #0c70f8;
-            }
-          }
-        }
-        > ul {
-          padding: 22px 0 18px 0;
-          overflow: hidden;
-          > li {
-            padding: 5px 0 5px 5px;
-            float: left;
-            > div {
-              &.sd-opts-sed {
-                background-color: #f2f9ff;
-                > .sd-opts-icon1 {
-                  background-image: url(../../../../assets/img/vehicle/cut1m.png);
-                }
-                > .sd-opts-icon2 {
-                  background-image: url(../../../../assets/img/vehicle/cut2m.png);
-                }
-                > .sd-opts-icon3 {
-                  background-image: url(../../../../assets/img/vehicle/cut3m.png);
-                }
-                > .sd-opts-icon4 {
-                  background-image: url(../../../../assets/img/vehicle/cut4m.png);
-                }
-                > .sd-opts-icon5 {
-                  background-image: url(../../../../assets/img/vehicle/cut5m.png);
-                }
-              }
-            }
-          }
-        }
-        > p {
-          margin: -18px 5px 18px 5px;
-        }
-      }
-      .sd-opts-icon {
-        display: inline-block;
-        width: 40px;
-        height: 40px;
-        background-repeat: no-repeat;
-        background-position: center center;
-        background-size: 100% 100%;
-        cursor: pointer;
-        &.sd-opts-icon1 {
-          background-image: url(../../../../assets/img/vehicle/cut1.png);
-          &:hover {
-            background-image: url(../../../../assets/img/vehicle/cut1m.png);
-          }
-        }
-        &.sd-opts-icon2 {
-          background-image: url(../../../../assets/img/vehicle/cut2.png);
-          &:hover {
-            background-image: url(../../../../assets/img/vehicle/cut2m.png);
-          }
-        }
-        &.sd-opts-icon3 {
-          background-image: url(../../../../assets/img/vehicle/cut3.png);
-          &:hover {
-            background-image: url(../../../../assets/img/vehicle/cut3m.png);
-          }
-        }
-        &.sd-opts-icon4 {
-          background-image: url(../../../../assets/img/vehicle/cut4.png);
-          &:hover {
-            background-image: url(../../../../assets/img/vehicle/cut4m.png);
-          }
-        }
-        &.sd-opts-icon5 {
-          background-image: url(../../../../assets/img/vehicle/cut5.png);
-          &:hover {
-            background-image: url(../../../../assets/img/vehicle/cut5m.png);
-          }
-        }
-      }
       .width232 {
         width: 232px;
       }
@@ -1652,108 +1804,190 @@ export default {
       position: relative;
       width: calc(100% - 272px);
       height: 100%;
-      //行车记录
-      .driving-record {
-        width: 480px;
-        height: 100%;
-        position: absolute;
-        left: 0;
-        top: 0;
-        background: #fff;
-        padding-left: 20px;
-        z-index: 999;
-        box-shadow: 2px 3px 10px 0px rgba(131, 131, 131, 0.28);
-        animation: fadeInLeft 0.6s ease-out 0.3s both;
-        .title {
-          display: flex;
-          justify-content: space-between;
-          padding-right: 20px;
-          height: 78px;
-          line-height: 78px;
-          color: #333;
-          font-weight: 600;
-          font-size: 16px;
-        }
-      }
-
-      //地图样式
-      .gis_content {
-        height: 100%;
-        position: relative;
-        .map_rm {
-          width: 100%;
-          height: 100%;
-        }
-        //定位
-        .map_control {
-          position: absolute;
-          bottom: 0.3rem;
-          right: 0.2rem;
-          transition: right 0.3s ease-out;
-          animation: fadeInRight 0.4s ease-out 0.4s both;
-          .map_rrt_u2 {
-            width: 0.68rem;
-            text-align: center;
-            padding: 0 0.1rem;
-            font-size: 0.2rem;
-            color: #1264f8;
-            background-color: #fff;
-            > li {
-              line-height: 0.5rem;
-              border-bottom: 1px solid #eee;
-              padding: 0.1rem 0;
-              cursor: pointer;
-              &:last-child {
-                border-bottom: none;
-              }
-              > i {
-                margin-top: 0;
-                display: inline-block;
-              }
-            }
-          }
-        }
-        .sd_search {
-        position: absolute; top: 0.3rem; left: 0.3rem; z-index: 1000;
+      padding: 20px;
+      //列表
+      .frequent-a-content {
+        background: #ffffff;
+        box-shadow: 0px 5px 16px 0px rgba(169,169,169,0.2);
+        .tab-menu {
         background-color: #fff;
+        padding-top: 8px;
         overflow: hidden;
-        > .sd_search_input {
-          float: left;
-          width: 360px; height: 36px; line-height: 36px;
-          background:rgba(255,255,255,1);
-          box-shadow:0px 3px 10px 0px rgba(99,99,99,0.39);
-          border: 0;
-          padding: 0 15px;
+        border-bottom: 1px solid #f2f2f2;
+        li {
+            float: left;
+            width: auto;
+            font-size: 16px;
+            margin: 0 20px;
+            height: 44px;
+            line-height: 44px;
+            text-align: center;
+            color: #333;
+            cursor: pointer;
         }
-        > span {
-          float: left;
-          width: 60px; height: 36px; line-height: 36px;
-          background-color: #0C70F8;
-          cursor: pointer;
-          text-align: center;
-          > i {
-            position: relative; top: 2px;
-            color: #fff; font-size: 20px;
-          }
+        .is-active {
+            color: #0c70f8;
+            border-bottom: 1px solid #0c70f8;
         }
-      }
-      }
+        }
+        .search_box {
+        width: 100%;
+        padding: 20px;
+        .event_form {
+            width: 100%;
+            .select_btn,
+            .reset_btn {
+            width: 80px;
+            }
+            .select_btn {
+            background-color: #0c70f8;
+            color: #ffffff;
+            }
+            .reset_btn {
+            background-color: #ffffff;
+            color: #666666;
+            border-color: #dddddd;
+            }
+            .time {
+                width: 374px;
+            }
+        }
+        .divide {
+            border: 1px dashed #fafafa;
+        }
+        }
+        .content-box {
+        padding: 0 20px;
+        .button_box {
+            display: flex;
+            justify-content: space-between;
+            .add_event_btn {
+            height: 40px;
+            background-color: #0c70f8;
+            color: #ffffff;
+            font-size: 14px;
+            line-height: 40px;
+            text-align: center;
+            border-radius: 3px;
+            padding: 0 16px;
+            cursor: pointer;
+            span:nth-child(1) {
+                font-size: 16px;
+            }
+            span:nth-child(2) {
+                margin-left: 5px;
+            }
+            }
+        }
+        .table_box {
+            .operation_btn {
+            display: inline-block;
+            padding: 0 10px;
+            border-right: 1px solid #f2f2f2;
+            &:first-child {
+                padding: 0 10px 0 0;
+            }
+            &:last-child {
+                border-right: none;
+            }
+            }
+        }
+        }
     }
-    //关闭按钮
-    .close-menu-c {
-      @include close_menu;
-      left: 272px;
-      animation: fadeInLeft 0.4s ease-out 0.3s both;
-    }
-    .close-menu-o {
-      @include close_menu;
-      left: 0;
-    }
-    .video-menu-close {
-      width: 100%;
+
     }
   }
 }
+ .map_selector_dialog {
+     .sd_opts {
+        > h4 {
+            padding: 10px 0 0 10px;
+            color: #333;
+        }
+        > ul {
+            padding: 0 5px 0 5px;
+            overflow: hidden;
+            > li {
+            padding: 5px;
+            float: left;
+            > div {
+                padding: 5px;
+                &.sd_opts_sed {
+                background-color: #F2F9FF;
+                > .sd_opts_icon1 { background-image: url(../../../../assets/img/vehicle/cut1m.png); }
+                > .sd_opts_icon2 { background-image: url(../../../../assets/img/vehicle/cut2m.png); }
+                > .sd_opts_icon3 { background-image: url(../../../../assets/img/vehicle/cut3m.png); }
+                > .sd_opts_icon4 { background-image: url(../../../../assets/img/vehicle/cut4m.png); }
+                > .sd_opts_icon5 { background-image: url(../../../../assets/img/vehicle/cut5m.png); }
+                }
+            }
+            }
+        }
+        > p {
+            max-width: 320px;
+            padding: 0 10px 10px 10px;
+            margin: 0 auto;
+            > span {
+            color: #999; font-size: 12px;
+            }
+        }
+        }
+        .sd_opts_icon {
+            display: inline-block;
+            width: 44px; height: 44px;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: 100% 100%;
+            &.sd_opts_icon1 { 
+                background-image: url(../../../../assets/img/vehicle/cut1.png);
+                &:hover { background-image: url(../../../../assets/img/vehicle/cut1m.png); }
+            }
+            &.sd_opts_icon2 {
+                background-image: url(../../../../assets/img/vehicle/cut2.png);
+                &:hover { background-image: url(../../../../assets/img/vehicle/cut2m.png); }
+            }
+            &.sd_opts_icon3 {
+                background-image: url(../../../../assets/img/vehicle/cut3.png);
+                &:hover { background-image: url(../../../../assets/img/vehicle/cut3m.png); }
+            }
+            &.sd_opts_icon4 {
+                background-image: url(../../../../assets/img/vehicle/cut4.png);
+                &:hover { background-image: url(../../../../assets/img/vehicle/cut4m.png); }
+            }
+            &.sd_opts_icon5 {
+                background-image: url(../../../../assets/img/vehicle/cut5.png);
+                &:hover { background-image: url(../../../../assets/img/vehicle/cut5m.png); }
+            }
+        }
+        .ms_marker_opt {
+            > div {
+                word-break:keep-all; white-space:nowrap;
+                background-color: #fff;
+                border: 1px solid #ddd;
+                padding: 0 2px;
+                > span { display: inline-block; }
+                > i {
+                display: inline-block;
+                padding: 0 2px;
+                font-size: 18px;
+                }
+                > .el-icon-check {
+                display: none;
+                color: #67C23A;
+                }
+                > .el-icon-close {
+                color: #FA453A;
+                }
+                > .el-icon-edit {
+                color: #E6A23C; font-size: 18px;
+                }
+            }
+            &.ms_marker_rectang { left: 0px; bottom: 0px; }
+            &.ms_marker_circle { left: 0; top: -10px; }
+            &.ms_marker_polyline { left: -10px; top: -10px; }
+            &.ms_marker_polygon { left: -10px; top: -10px; }
+        }
+ }
 </style>
 
 <style lang="scss">
@@ -1765,6 +1999,11 @@ export default {
       border-width: 0;
       border-radius: 20px;
     }
+  }
+  .search_box {
+      .el-form-item {
+          margin-bottom: 20px;
+      }
   }
   //相似度搜索
   .similarity,.frequency {
@@ -1815,6 +2054,7 @@ export default {
   }
   .info-left {
     .el-form-item {
+      margin-bottom: 10px;
       &:last-child {
         margin-bottom: 0;
       }
@@ -1848,53 +2088,9 @@ export default {
       }
     }
   }
-  .ms_marker_opt {
-    > div {
-      word-break: keep-all;
-      white-space: nowrap;
-      background-color: #fff;
-      border: 1px solid #ddd;
-      padding: 0 2px;
-      > span {
-        display: inline-block;
-      }
-      > i {
-        display: inline-block;
-        padding: 0 2px;
-        font-size: 18px;
-      }
-      > .el-icon-check {
-        display: none;
-        color: #67c23a;
-      }
-      > .el-icon-close {
-        color: #fa453a;
-      }
-      > .el-icon-edit {
-        color: #e6a23c;
-        font-size: 18px;
-      }
-    }
-    &.ms_marker_rectang {
-      left: 0px;
-      bottom: 0px;
-    }
-    &.ms_marker_circle {
-      left: 0;
-      top: -10px;
-    }
-    &.ms_marker_polyline {
-      left: -10px;
-      top: -10px;
-    }
-    &.ms_marker_polygon {
-      left: -10px;
-      top: -10px;
-    }
-  }
-  .el-form-item {
+  /* .el-form-item {
     margin-bottom: 10px;
-  }
+  } */
   /* 表单错误提示 */
   .el-form-item__error {
     position: static;
@@ -1903,4 +2099,60 @@ export default {
     line-height: 20px;
   }
 }
+.map_selector_dialog {
+    .el-dialog__header { display: none; }
+    .el-dialog__body { padding: 0; }
+    .map_sd_content {
+      position: relative;
+      width: 100%; height: 600px;
+      > .sd_search {
+        position: absolute; top: 10px; left: 10px; z-index: 1000;
+        background-color: #fff;
+        overflow: hidden;
+        > .sd_search_input {
+          float: left;
+          width: 270px; height: 36px; line-height: 36px;
+          background:rgba(255,255,255,1);
+          box-shadow:0px 3px 10px 0px rgba(99,99,99,0.39);
+          border: 0;
+          padding: 0 15px;
+        }
+        > span {
+          float: left;
+          width: 60px; height: 36px; line-height: 36px;
+          background-color: #0C70F8;
+          cursor: pointer;
+          text-align: center;
+          > i {
+            position: relative; top: 2px;
+            color: #fff; font-size: 20px;
+          }
+        }
+      }
+      > .sd_opts {
+        position: absolute; top: 55px; left: 10px; z-index: 1000;
+        background-color: #fff;
+      }
+      > .sd_fs {
+        position: absolute; bottom: 20px; right: 20px; z-index: 1000;
+        background-color: #fff;
+        padding: 10px 5px;
+        box-shadow:-12px 0px 14px 0px rgba(148,148,148,0.24);
+        > li {
+          padding: 10px;
+          cursor: pointer;
+          > i { font-size: 20px; color: #0C70F8; }
+        }
+      }
+    }
+    .el-dialog__footer { 
+        padding: 10px 0; 
+        .el-button--primary:focus, .el-button--primary:hover {
+            background: #0C70F8;
+            border-color: #0C70F8;
+            color: #FFF;
+        }
+    }
+  }
+  .amap-sug-result { z-index: 3000; display: none; }
 </style>

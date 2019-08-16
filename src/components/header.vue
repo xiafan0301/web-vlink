@@ -77,7 +77,7 @@
               <div class="hd_alarm_t">
                 <div class="uesr_info">
                   <h1>布控名：{{item.surveillanceName}}</h1>
-                  <p>设备名：{{item.devName}}</p>
+                  <p>抓拍设备：{{item.devName}}</p>
                   <p>{{item.snapTime}}</p>
                 </div>
                 <div class="img_info"><img :src="item.snapPhoto" alt="抓拍照片"></div>

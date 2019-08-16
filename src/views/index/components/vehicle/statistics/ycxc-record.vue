@@ -123,7 +123,9 @@ export default {
       minShotTimes: this.$route.query.minShotTimes,
       vehicleTypes: this.$route.query.vehicleTypes,
       surveillanceIds: this.$route.query.surveillanceIds,
-      isNextDay: this.$route.query.isNextDay
+      isNextDay: this.$route.query.isNextDay,
+      pageSize: this.$route.query.pageSize,
+      pageNum: this.$route.query.pageNum,
     }
   },
   mounted () {

@@ -17,23 +17,23 @@
           <el-form-item  prop="dateStart">
             <el-date-picker
               v-model="ruleForm.dateStart"
-              type="date"
+              type="datetime"
+              time-arrow-control
               :clearable="false"
               placeholder="开始时间"
               :picker-options="pickerOptions"
               class="full vl_date"
-              value-format="yyyy-MM-dd"
             ></el-date-picker>
           </el-form-item>
           <el-form-item  prop="dateEnd">
             <el-date-picker
               v-model="ruleForm.dateEnd"
-              type="date"
+              type="datetime"
+              time-arrow-control
               :clearable="false"
               :picker-options="pickerOptions"
               placeholder="结束时间"
               class="full vl_date vl_date_end"
-              value-format="yyyy-MM-dd"
             ></el-date-picker>
           </el-form-item>
           <el-form-item prop="_vehicleGroup" >
@@ -95,12 +95,28 @@
           </el-form-item>
           <el-form-item prop="plateNo" class="plate_no">
             <p class="carCold">车牌：<el-checkbox style="float: right;" v-model="ruleForm._include">排除</el-checkbox></p>
-            <el-input placeholder="请输入车牌号" v-model="ruleForm.plateNo" class="input-with-select">
-              <el-select v-model="select" slot="prepend" placeholder="">
-               <!-- <el-option v-for="item in pricecode" :label="item" :value="item"></el-option> -->
-               <el-option v-for="(item, index) in pricecode" :label="item" :value="item" :key="'cph_' + index"></el-option>
+
+            <el-input
+              placeholder
+              v-model="ruleForm.plateNo"
+              class="input-with-select width232"
+            >
+              <el-select
+                clearable
+                v-model="select"
+                style="width: 70px;"
+                slot="prepend"
+                placeholder
+              >
+                <el-option
+                  v-for="item in pricecode"
+                  :key="item.enumField"
+                  :label="item.enumValue"
+                  :value="item.enumValue"
+                ></el-option>
               </el-select>
             </el-input>
+      
           </el-form-item>
           <el-form-item>
             <el-row :gutter="10">
@@ -186,12 +202,12 @@
 <script>
 import vehicleDetail from '../common/vl-dialog.vue';
 import { mapXupuxian } from "@/config/config.js";
-import { cityCode } from "@/utils/data.js";
+import { cityCode, dataList } from "@/utils/data.js";
 import { getVehicleShot,getAllDevice,getGroups,getSnapList,exportNightVehicle,getSnapDetail} from "@/views/index/api/api.judge.js";
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 // import mapselect from "@/views/index/components/common/mapSelect";
 import mapSelector from '@/components/common/mapSelector.vue';
-import { dataList } from '@/utils/data.js';
+import {formatDate, dateOrigin} from '@/utils/util.js';
 export default {
   components: { mapSelector, vehicleDetail },
   data () {
@@ -219,17 +235,17 @@ export default {
         },
         isNull:true,
         isDao:false,
-      pricecode:cityCode,
+      pricecode: this.dicFormater(dataList.ownership)[0].dictList,
       input5: "1",
       dialogVisible: false,
       strucDetailDialog: false,
       isload: false,
       value1: null,
-      select: "湘",
+      select: '',
       selectValue:"已选设备0个",
       ruleForm: {
-        dateStart:'',
-        dateEnd:'',
+        dateStart: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)),
+        dateEnd: new Date(),
         _vehicleGroup:'',
         vehicleClass:null,
         include:1,
@@ -356,8 +372,8 @@ export default {
         this.ruleForm.bayonetIds = this.selectBayonet?this.selectBayonet.join(","):''
       }
       this.ruleForm.vehicleGroup = this.ruleForm._vehicleGroup?this.ruleForm._vehicleGroup.join(","):''
-      this.ruleForm.dateStart = this.ruleForm.dateStart.indexOf(":")>0?(this.ruleForm.dateStart):(this.ruleForm.dateStart +" 00:00:00")
-      this.ruleForm.dateEnd = this.ruleForm.dateEnd.indexOf(":")>0?(this.ruleForm.dateEnd):(this.ruleForm.dateEnd+" 23:59:59")
+      this.ruleForm.dateStart = formatDate(this.ruleForm.dateStart);
+      this.ruleForm.dateEnd = formatDate(this.ruleForm.dateEnd);
       this.ruleForm.vehicleClass = this.ruleForm.vehicleClass?this.ruleForm.vehicleClass:''
       this.ruleForm.pageNum =this.pagination.pageNum
       let d = JSON.stringify(this.ruleForm)
@@ -397,20 +413,6 @@ export default {
     },
     //设置默认时间
     setDTime() {
-      let date = new Date();
-      let curDate = date.getTime();
-      let curS = 1 * 24 * 3600 * 1000;
-      let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
-      let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
-      let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
-      let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
-      
-      let _s = new Date(curDate - curS).getFullYear() +
-        "-" + _sm + "-" +_sd;
-      let _e = date.getFullYear() + "-" + _em + "-" + _ed;
-      // this.data1 = [_e, _e];
-      this.ruleForm.dateStart=_s
-      this.ruleForm.dateEnd=_s
     },
     //查询行政区域
     getMapGETmonitorList(){
@@ -466,13 +468,13 @@ export default {
         this.ruleForm.bayonetIds = this.selectBayonet?this.selectBayonet.join(","):''
       }
       this.ruleForm.vehicleGroup = this.ruleForm._vehicleGroup?this.ruleForm._vehicleGroup.join(","):''
-      this.ruleForm.dateStart = this.ruleForm.dateStart.indexOf(":")>0?(this.ruleForm.dateStart):(this.ruleForm.dateStart +" 00:00:00")
-      this.ruleForm.dateEnd = this.ruleForm.dateEnd.indexOf(":")>0?(this.ruleForm.dateEnd):(this.ruleForm.dateEnd+" 23:59:59")
+      this.ruleForm.dateStart = formatDate(this.ruleForm.dateStart);
+      this.ruleForm.dateEnd = formatDate(this.ruleForm.dateEnd);
       this.ruleForm.vehicleClass = this.ruleForm.vehicleClass?this.ruleForm.vehicleClass:''
       this.ruleForm.pageNum =this.pagination.pageNum
       let d = JSON.stringify(this.ruleForm)
       d = JSON.parse(d)
-      this.ruleForm.plateNo && (d.plateNo = this.select + this.ruleForm.plateNo);
+      d.plateNo = this.select + this.ruleForm.plateNo;
       d.pageNum = this.pagination.pageNum;
       d.pageSize = this.pagination.pageSize;
       if(!d.plateNo){
@@ -553,12 +555,12 @@ export default {
         this.sturcDetail={}
         this.strucInfoList = [];
       // console.log(v);
-      v.dateStart = this.ruleForm.dateStart
-      v.dateEnd = this.ruleForm.dateEnd
+      v.dateStart = formatDate(this.ruleForm.dateStart)
+      v.dateEnd = formatDate(this.ruleForm.dateEnd)
       //this.strucDetailDialog = true 
       let d={
-        dateStart:this.ruleForm.dateStart,
-        dateEnd:this.ruleForm.dateEnd ,
+        dateStart:formatDate(this.ruleForm.dateStart),
+        dateEnd:formatDate(this.ruleForm.dateEnd),
         devIds:'',
         plateNo:v.plateNo,
         hasPlate:v.plateNo?'1':'0'
@@ -583,7 +585,8 @@ export default {
       this.ruleForm.include="" 
       this.ruleForm._include="" 
       this.ruleForm.plateNo="" 
-      this.setDTime();
+      this.ruleForm.dateStart = dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000));
+      this.ruleForm.dateEnd = new Date();
       this.pagination.pageNum = 1;
       this.pagination.total = 0;
       this.tableData = [];
@@ -728,5 +731,6 @@ export default {
 .plate_no .el-input-group__prepend{
   padding: 0px 15px!important;
   width: 56px!important;
+  background: #fff;
 }
 </style>

@@ -5,17 +5,19 @@
             uid: this.$route.query.uid,
             startTime: this.$route.query.startTime,
             endTime: this.$route.query.endTime,
-            targetUrl: this.$route.query.targetUrl
+            targetUrl: this.$route.query.targetUrl,
             }}">导出报告</router-link>
     <div style="height: 50px"></div>
     <div class="vehicle_content_nr_box" v-loading="dataloading">
-      <div class="vehicle_content_nr_box_left">
-        <div class="img">
-          <img :src="taskWebParam.targetPicUrl" height="232" width="232" class="bigImg" title="点击放大图片" />
+      <div style="height: 100%; overflow: hidden" >
+        <div class="vehicle_content_nr_box_left">
+          <div class="img">
+            <img :src="taskWebParam.targetPicUrl" height="232" width="232" class="bigImg" title="点击放大图片" />
+          </div>
+          <div style="color: #333333; font-size: 18px; font-weight: bold; padding: 16px 0">{{taskWebParam.taskName}}</div>
+          <div style="color: #333333; padding-bottom: 8px"><span style="color: #999999">从</span> {{taskWebParam.startTime}}</div>
+          <div style="color: #333333"><span style="color: #999999">至</span> {{taskWebParam.endTime}}</div>
         </div>
-        <div style="color: #333333; font-size: 18px; font-weight: bold; padding: 16px 0">{{taskWebParam.taskName}}</div>
-        <div style="color: #333333; padding-bottom: 8px"><span style="color: #999999">从</span> {{taskWebParam.startTime}}</div>
-        <div style="color: #333333"><span style="color: #999999">至</span> {{taskWebParam.endTime}}</div>
       </div>
       <div class="vehicle_content_nr_box_right">
         <div class="vehicle_content_nr_box_right_top">
@@ -33,38 +35,41 @@
             <div class="top">
               最相似人员档案
             </div>
-            <div class="message">
-              <div class="text">1：基本信息</div>
-              <div class="message_cont">
-                <img :src="portrailInfoDto.photoUrl" height="200" width="200" class="bigImg" title="点击放大图片"/>
-                <div style="padding-left: 20px; width: 320px">
-                  <div class="subdata">
-                    <i class="vl_icon vl_icon_retrieval_03" style="height: 24px"></i>
-                    <b>{{portrailInfoDto.semblance}}</b>%
+            <div v-if="portrailInfoDto">
+              <div class="message">
+                <div class="text">1：基本信息</div>
+                <div class="message_cont">
+                  <img :src="portrailInfoDto.photoUrl" height="200" width="200" class="bigImg" title="点击放大图片"/>
+                  <div style="padding-left: 20px; width: 320px">
+                    <div class="subdata">
+                      <i class="vl_icon vl_icon_retrieval_03" style="height: 24px"></i>
+                      <b>{{portrailInfoDto.semblance}}</b>%
+                    </div>
+                    <ul class="mes_cot">
+                      <li class="clearfix"><span>姓名：</span><p>{{portrailInfoDto.name}}</p></li>
+                      <li class="clearfix"><span>证件类型：</span><p></p></li>
+                      <li class="clearfix"><span>证件号码：</span><p>{{portrailInfoDto.idNo}}</p></li>
+                      <li class="clearfix"><span>性别：</span><p>{{portrailInfoDto.sex}}</p></li>
+                      <li class="clearfix"><span>民族：</span><p>{{portrailInfoDto.nation}}</p></li>
+                    </ul>
                   </div>
-                  <ul class="mes_cot">
-                    <li class="clearfix"><span>姓名：</span><p>{{portrailInfoDto.name}}</p></li>
-                    <li class="clearfix"><span>证件类型：</span><p></p></li>
-                    <li class="clearfix"><span>证件号码：</span><p>{{portrailInfoDto.idNo}}</p></li>
-                    <li class="clearfix"><span>性别：</span><p>{{portrailInfoDto.sex}}</p></li>
-                    <li class="clearfix"><span>民族：</span><p>{{portrailInfoDto.nation}}</p></li>
-                  </ul>
-                </div>
-                <div class="mes_cot_1">
-                  <p>备注：</p>
-                  <div>
-                    {{portrailInfoDto.remarks}}
+                  <div class="mes_cot_1">
+                    <p>备注：</p>
+                    <div>
+                      {{portrailInfoDto.remarks}}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div class="message_1 message">
-              <div class="text">1：分组信息</div>
-              <p>底库信息：{{repertoryGroupDto.repertories.join(',')}}</p>
-              <p>分组信息：{{repertoryGroupDto.groups.map((item)=>{
+              <div class="message_1 message">
+                <div class="text">1：分组信息</div>
+                <p>底库信息：{{repertoryGroupDto.repertories.join(',')}}</p>
+                <p>分组信息：{{repertoryGroupDto.groups.map((item)=>{
                   return item.groupName
-                }).join(',')}}</p>
+                  }).join(',')}}</p>
+              </div>
             </div>
+            <div v-else>暂无数据</div>
           </div>
           <div class="cont1" id="report_showtype_2">
             <div style="background-color: white; color: #333333;
@@ -332,12 +337,13 @@
 </template>
 <script>
 import vehicleBreadcrumb from './breadcrumb.vue';
+import reportnrsave from './reportnrsave.vue';
 import { mapXupuxian,ajaxCtx } from "@/config/config.js";
 import { objDeepCopy } from "@/utils/util.js";
 import { getdetailbg } from "../../api/api.analysis.js";
 import flvplayer from '@/components/common/flvplayer.vue';
 export default {
-  components: {vehicleBreadcrumb, flvplayer},
+  components: {vehicleBreadcrumb, flvplayer,reportnrsave},
   data () {
     return {
       evData: [],
@@ -408,8 +414,7 @@ export default {
       struGroupResultDtoList: [{personDetailList: [{shotPlaceLongitude: 1,shotPlaceLatitude: 2 }]}],
       struPersonDtoList: [],
       data: [],
-      taskWebParam: {}
-
+      taskWebParam: {},
     }
   },
   created() {
@@ -431,12 +436,24 @@ export default {
       getdetailbg(params).then(res => {
         if(res.data){
           console.log(res.data)
-          this.portrailInfoDto = res.data.portrailInfoDto
-          this.repertoryGroupDto = res.data.repertoryGroupDto
-          this.analysisTaskInfoWithBLOBsList = res.data.analysisTaskInfoWithBLOBsList
-          this.taskResult = JSON.parse(res.data.analysisTaskInfoWithBLOBsList[0].taskResult)
-          this.struGroupResultDtoList = res.data.struGroupResultDtoList
-          this.taskWebParam =JSON.parse(res.data.analysisTaskInfoWithBLOBsList[0].taskWebParam)
+          if (res.data.portrailInfoDto) {
+            this.portrailInfoDto = res.data.portrailInfoDto
+          }
+          if (res.data.repertoryGroupDto) {
+            this.repertoryGroupDto = res.data.repertoryGroupDto
+          }
+          if (res.data.analysisTaskInfoWithBLOBsList) {
+            this.analysisTaskInfoWithBLOBsList = res.data.analysisTaskInfoWithBLOBsList
+          }
+          if (res.data.analysisTaskInfoWithBLOBsList[0].taskResult) {
+            this.taskResult = JSON.parse(res.data.analysisTaskInfoWithBLOBsList[0].taskResult)
+          }
+          if (res.data.struGroupResultDtoList) {
+            this.struGroupResultDtoList = res.data.struGroupResultDtoList
+          }
+          if (res.data.analysisTaskInfoWithBLOBsList[0].taskWebParam) {
+            this.taskWebParam =JSON.parse(res.data.analysisTaskInfoWithBLOBsList[0].taskWebParam)
+          }
           let list = []
           res.data.struPersonDtoList.forEach((item)=>{
             list.push(item.shotTime.substring(0,10))
@@ -496,7 +513,7 @@ export default {
       // this.map.setZoomAndCenter(iZoom, aCenter);
       let map = new window.AMap.Map('container', {
         zoom: 14, // 级别
-        center: [110.597638, 27.910355,], // 中心点坐标
+        center: mapXupuxian.center, // 中心点坐标
       });
       map.setMapStyle('amap://styles/whitesmoke');
       this.map = map;
@@ -547,7 +564,6 @@ export default {
     }, // 更新画线
     drawMapMarker (oData) {
       let data = this.fitlerSXT(oData);
-      console.log('hllkkjlhlkjhkljhlkhkljhkjhkkjhkjhkjhkjhkjlhjkhkjhkjh',data)
       let path = [];
       for (let  i = 0; i < data.length; i++) {
         let obj = data[i];

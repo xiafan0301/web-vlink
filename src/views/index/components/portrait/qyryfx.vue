@@ -6,28 +6,11 @@
       :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
           {name: '区域人员分析'}]"
     ></div>
-    <!-- <div class="link_bread">
-      <el-breadcrumb separator=">" class="bread_common">
-        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像检索</el-breadcrumb-item>
-        <el-breadcrumb-item :to="{ path: '/portrait/pfcm' }">区域人员分析</el-breadcrumb-item>
-      </el-breadcrumb>
-    </div>-->
     <div class="qyryfx_content">
       <!-- 页面的左边 -->
       <div class="info_left" v-show="videoMenuStatus">
         <vue-scroll>
           <div class="left_top">
-            <!-- 搜索 -->
-            <!-- <div class="search_wrap">
-              <el-input
-                class="width232"
-                v-model="searchPlace"
-                suffix-icon="el-icon-search"
-                placeholder="搜索地点名称"
-                @focus="isSearchResult = true;"
-                id="map-sd-search-input"
-              ></el-input>
-            </div>-->
             <!-- 搜索条件 -->
             <div class="search_condition">
               <div class="condition_title">设定分析条件</div>
@@ -157,6 +140,7 @@
                     :clearable="false"
                     value-format="yyyy-MM-dd HH:mm:ss"
                     :picker-options="startDateOptArr[index]"
+                    :time-arrow-control="true"
                     placeholder="开始时间"
                     class="width232 vl_date"
                   ></el-date-picker>
@@ -166,9 +150,9 @@
                     v-model="item.endTime"
                     :clearable="false"
                     :picker-options="endDateOptArr[index]"
+                    :time-arrow-control="true"
                     value-format="yyyy-MM-dd HH:mm:ss"
                     type="datetime"
-                    default-time="23:59:59"
                     placeholder="结束时间"
                     class="width232 vl_date vl_date_end"
                   ></el-date-picker>
@@ -365,10 +349,9 @@
 </template>
 <script>
 import vlBreadcrumb from "@/components/common/breadcrumb.vue";
-
 import swiper from "vue-awesome-swiper";
 import { mapXupuxian } from "@/config/config.js";
-import { formatDate } from "@/utils/util.js";
+import { formatDate, dateOrigin } from "@/utils/util.js";
 import {
   getAllMonitorList,
   getAllBayonetList
@@ -529,12 +512,10 @@ export default {
           polyline: {},
           polygon: {},
           circle10km: {},
-          startTime:
-            formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
-            " 00:00:00",
-          endTime:
-            formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
-            " 23:59:59",
+          startTime: formatDate(
+            dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000))
+          ),
+          endTime: formatDate(new Date().getTime()),
           drawActiveType: 0, // 当前活跃的选中区域
           canPosition: false // 是否可以定位
         }
@@ -570,35 +551,6 @@ export default {
     });
   },
   methods: {
-    // searchPlaceClick() {
-    //   // 地图搜索
-    //   console.log("this.searchPlace", this.searchPlace);
-    // },
-    // 日期控制
-    timeChange(ind, type = "start") {
-      this.$nextTick(() => {
-        if (this.drawObj[ind].startTime && this.drawObj[ind].endTime) {
-          if (
-            new Date(this.drawObj[ind].endTime).getTime() -
-              new Date(this.drawObj[ind].startTime).getTime() >
-            3 * 24 * 3600 * 1000
-          ) {
-            this.$message.warning("最大选择时间段为三天");
-            if (type === "start") {
-              this.drawObj[ind].endTime = formatDate(
-                new Date(this.drawObj[ind].startTime).getTime() +
-                  3600 * 1000 * 24 * 3
-              );
-            } else {
-              this.drawObj[ind].startTime = formatDate(
-                new Date(this.drawObj[ind].endTime).getTime() -
-                  3600 * 1000 * 24 * 3
-              );
-            }
-          }
-        }
-      });
-    },
     // 切换照片
     prev(val) {
       const ind = this.cameraPhotoList[val].detailList.length - 1;
@@ -650,12 +602,10 @@ export default {
           polyline: {},
           polygon: {},
           circle10km: {},
-          startTime:
-            formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
-            " 00:00:00",
-          endTime:
-            formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
-            " 23:59:59",
+          startTime: formatDate(
+            dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000))
+          ),
+          endTime: formatDate(new Date().getTime()),
           drawActiveType: 0, // 当前活跃的选中区域
           canPosition: false
         }
@@ -920,12 +870,10 @@ export default {
           polyline: {},
           polygon: {},
           circle10km: {},
-          startTime:
-            formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
-            " 00:00:00",
-          endTime:
-            formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
-            " 23:59:59",
+          startTime: formatDate(
+            dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000))
+          ),
+          endTime: formatDate(new Date().getTime()),
           drawActiveType: 0, // 当前活跃的选中区域
           canPosition: false
         }

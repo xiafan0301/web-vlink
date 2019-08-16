@@ -151,15 +151,24 @@
             <img class="bigImg" :src="sturcDetail.subStoragePath" alt />
             <span>抓拍图</span>
           </div>
-          <div class="struc_c_d_box">
-            <video id="capVideo" :src="sturcDetail.videoPath"></video>
+          <div class="struc_c_d_box" v-if="playerData">
+            <!-- <video id="capVideo" :src="sturcDetail.videoPath"></video>
             <div class="play_btn" @click="videoTap" v-show="!playing">
               <i class="vl_icon vl_icon_judge_01" v-if="playing"></i>
               <i class="vl_icon vl_icon_control_09" v-else></i>
-            </div>
+            </div> -->
+            <div is="flvplayer" :oData="playerData"
+            :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
           </div>
+          </div>
+          <div class="struc_c_d_box struc_vid_empty" style="float: left;" v-else>
+          <div class="struc_vid_empty_c com_trans50_lt">
+            <div></div>
+            <p>暂无视频</p>
+          </div>
+        </div>
           <div class="download_btn">
-            <a download="视频" :href="videoUrl"></a>下载视频
+            <a download="视频" :href="sturcDetail.videoPath"></a>下载视频
           </div>
         </div>
       </div>
@@ -193,7 +202,11 @@
 </template>
 <script>
 let AMap = window.AMap;
+import flvplayer from '@/components/common/flvplayer.vue';
 export default {
+  components: {
+    flvplayer
+  },
   props: {
     snapObj: {
       type: Object,
@@ -224,7 +237,8 @@ export default {
       markerPoint: null, // 地图点集合
       InfoWindow: null,
       strucInfoList: [],
-      videoUrl: "" // 弹窗视频回放里的视频
+      videoUrl: "", // 弹窗视频回放里的视频
+      playerData: null,
     };
   },
   watch: {
@@ -240,6 +254,7 @@ export default {
             this.initMap();
           }, 200);
         }
+
       }
     },
     strucCurTab(e) {
@@ -251,13 +266,30 @@ export default {
             this.initMap();
           }, 200);
         }
-      } else if (e === 3) {
-        this.videoUrl = document.getElementById("capVideo").src;
+      } else if (e === 3) {   // 更新视频
+        /* this.videoUrl = document.getElementById("capVideo").src; */
+        this.setPlayerData();
       }
     }
   },
   mounted() {},
   methods: {
+    // 设置视频数据
+    setPlayerData () {
+      console.log("666666666666666",this.sturcDetail.videoUrl)
+      if (this.sturcDetail.videoPath) {
+        this.playerData = {
+          type: 3,
+          title: this.sturcDetail.deviceName,
+          video: {
+            uid: new Date().getTime() + '',
+            downUrl: this.sturcDetail.videoPath
+          }
+        }
+      } else {
+        this.playerData = null;
+      }
+    },
     toogleVisiable(f) {
       this.strucDetailDialog = f;
       if (
@@ -288,6 +320,11 @@ export default {
         setTimeout(() => {
           this.initMap();
         }, 200);
+      }
+
+      // 更新视频
+      if (this.strucCurTab === 3) {
+        this.setPlayerData();
       }
     },
     initMap() {
@@ -396,7 +433,7 @@ html {font-size: 100px;}
   @media screen and (min-width: 1680px) and (max-width: 1919px) {html {font-size: 90px !important;}}
   @media screen and (min-width: 1920px) {html {font-size: 100px !important;} }
 .snap_dialog {
-  height: 100%;
+  /* height: 100%; */
   .struc_detail_dialog_comp {
     .el-dialog {
       max-width: 13.06rem;
@@ -716,6 +753,20 @@ html {font-size: 100px;}
               }
             }
           }
+          &.struc_vid_empty {
+          position: relative;
+          > .struc_vid_empty_c {
+            > div {
+              width: 134px; height: 89px;
+              background: url(../../../../../assets/img/video/video_empty.png) center center no-repeat;
+            }
+            > p {
+              padding-top: 10px;
+              text-align: center;
+              color: #666;
+            }
+          }
+        }
          /*  &:before {
             display: block;
             content: "";

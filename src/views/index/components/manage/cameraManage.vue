@@ -290,7 +290,7 @@
 <script>
 import { autoDownloadUrl } from '@/utils/util.js';
 import { getDepartmentList, vehicleExport } from '@/views/index/api/api.manage.js';
-import { getDeviceList, delDevice } from '@/views/index/api/api.base.js';
+import { getDeviceList, delDevice, downloadCameraModel } from '@/views/index/api/api.base.js';
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import { ajaxCtx } from '@/config/config.js';
@@ -508,8 +508,26 @@ export default {
     },
     // 下载模板
     downloadModel () {
-      // const file = 'http://file.aorise.org/vlink/file/8dc4e25f-5f7b-4021-9a19-a58f8708b4fd.xls';
-      // autoDownloadUrl(file);
+      downloadCameraModel()
+        .then((res) => {
+          if (res) {
+            const content = res;
+            const blob = new Blob([content]);
+            const fileName = '摄像头导入模板.xlsx';
+            if ('download' in document.createElement('a')) { // 非IE下载
+              const elink = document.createElement('a');
+              elink.download = fileName;
+              elink.style.display = 'none';
+              elink.href = URL.createObjectURL(blob);
+              document.body.appendChild(elink);
+              elink.click();
+              URL.revokeObjectURL(elink.href); // 释放URL 对象
+              document.body.removeChild(elink);
+            } else { // IE10+下载
+              navigator.msSaveBlob(blob, fileName);
+            }
+          }
+        })
     },
     // 获取所有的机构单位
     getDepartList () {
