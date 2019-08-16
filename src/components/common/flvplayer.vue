@@ -536,6 +536,7 @@ export default {
           if (relayD.showTime) {
             et = getDate(relayD.showTime);
           }
+          et = new Date(et.getTime() + 60 * 1000);
           let st = new Date(et.getTime() - 60 * 1000);
           /* if (showt.getTime() > et.getTime()) {
             et = showt;
