@@ -259,33 +259,13 @@ export default {
 
       pickerOptions: {
         disabledDate: time => {
-          if (this.value2) {
-            return (
-              time.getTime() > new Date(this.value2).getTime() ||
-              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90
-            );
-          } else {
-            return (
-              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90 ||
-              time.getTime() > new Date().getTime()
-            );
-          }
+          return time > new Date();
         }
           // return  time.getTime() < new Date(new Date().getTime() - 90*86400000) || time.getTime() > new Date(new Date().getTime())
       },
       pickerOptions1: {
         disabledDate: time => {
-          if (this.value1) {
-            return (
-              time.getTime() < new Date(this.value1).getTime() ||
-              time.getTime() > new Date().getTime()
-            );
-          } else {
-            return (
-              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 30 ||
-              time.getTime() > new Date().getTime()
-            );
-          }
+          return time > new Date();
         }
       },
       searchLoading: false,
