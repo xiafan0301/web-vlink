@@ -543,8 +543,30 @@ export function getFocusList(params) {
     mode: 'judge'
   })
 }
-
-
+/**
+ * 重点关注实时接口
+ * @param {object} params
+ */
+export function PortraitPostFocusRealTime(data) {
+  return request({
+    url: '/portrait/shot-num/focus/real-time',
+    method: 'post',
+    data,
+    mode: 'judge'
+  })
+}
+/**
+ * 重点关注离线任务接口
+ * @param {object} params
+ */
+export function PortraitPostFocusTask(data) {
+  return request({
+    url: '/portrait/shot-num/focus/task',
+    method: 'post',
+    data,
+    mode: 'judge'
+  })
+}
 /*--------------------------  导入导出  ---------------------------------*/
 /**
  * 夜间行车分析导出接口
