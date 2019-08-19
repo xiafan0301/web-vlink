@@ -318,3 +318,42 @@ export const transMinute = (seconds) => {
   return (((iH === 0 && iS > 0) || (iH === 0 && iS === 0)) ? '' : (iH + '小时')) +
     ((iH > 0 && iS === 0) ? '' : (iS + '分钟'));
 };
+
+/*
+* 高德地图点聚合
+* mapObj 地图对象，markers所有的地图marker;
+* */
+export const addCluster = (mapObj, markers) => {
+  mapObj.plugin(["AMap.MarkerClusterer"], () => {
+    var count = markers.length;
+    let renderClusterMarker = function (context) {
+      var factor = Math.pow(context.count / count, 1 / 18);
+      var div = document.createElement('div');
+      var Hue = 180 - factor * 180;
+      var bgColor = 'hsla(' + Hue + ',100%,50%,0.7)';
+      var fontColor = 'hsla(' + Hue + ',100%,20%,1)';
+      var borderColor = 'hsla(' + Hue + ',100%,40%,1)';
+      var shadowColor = 'hsla(' + Hue + ',100%,50%,1)';
+      div.style.backgroundColor = bgColor;
+      var size = Math.round(30 + Math.pow(context.count / count, 1 / 5) * 20);
+      div.style.width = div.style.height = size + 'px';
+      div.style.border = 'solid 1px ' + borderColor;
+      div.style.borderRadius = size / 2 + 'px';
+      div.style.boxShadow = '0 0 1px ' + shadowColor;
+      div.innerHTML = context.count;
+      div.style.lineHeight = size + 'px';
+      div.style.color = fontColor;
+      div.style.fontSize = '14px';
+      div.style.textAlign = 'center';
+      context.marker.setOffset(new window.AMap.Pixel(-size / 2, -size / 2));
+      context.marker.setContent(div)
+    };
+    if (mapObj.cluster) {
+      mapObj.cluster.setMap(null);
+    }
+    mapObj.cluster = new window.AMap.MarkerClusterer(mapObj, markers, {
+      gridSize: 80,
+      renderClusterMarker: renderClusterMarker
+    });
+  })
+}
