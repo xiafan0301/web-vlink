@@ -91,7 +91,7 @@
               </el-form-item>
               <el-form-item class="area_select">
                 <span class="area_title">抓拍区域:</span>
-                <span class="area_map_select" @click="showMapDialog">地图区域选择</span>
+                <span class="area_map_select" @click="showMapDialog" >地图区域选择</span>
                 <div class="divide"></div>
               </el-form-item>
               <div class="area_list">
@@ -141,55 +141,59 @@
             @click="selectTab(item.value)"
           >{{item.label}}</li>
         </ul>
-        <template  v-if="selectIndex === 2">
-          <div class="map_center_container">
-            <div class="close-menu-c" title="关闭菜单" v-show="videoMenuStatus" @click="closeMenu">
-              <i class="vl_icon vl_icon_vehicle_02"></i>
-            </div>
-            <div class="gis_content" id="gis_content">
-              <div class="map_rm" id="mapMap"></div>
-              <div class="map_control">
-                <div class="photo_count_level">
-                  <div class="colors">
-                    <div></div>
-                    <p>&gt;500</p>
+        <template v-if="selectIndex === 2">
+          <template v-if="resultDataList.length > 0">
+            <div class="map_center_container">
+              <div class="close-menu-c" title="关闭菜单" v-show="videoMenuStatus" @click="closeMenu">
+                <i class="vl_icon vl_icon_vehicle_02"></i>
+              </div>
+              <div class="gis_content" id="gis_content">
+                <div class="map_rm" id="mapMap"></div>
+                <div class="map_control">
+                  <div class="photo_count_level">
+                    <div class="colors">
+                      <div></div>
+                      <p>&gt;500</p>
+                    </div>
+                    <div class="colors">
+                      <div></div>
+                      <p>201-500</p>
+                    </div>
+                    <div class="colors">
+                      <div></div>
+                      <p>101-200</p>
+                    </div>
+                    <div class="colors">
+                      <div></div>
+                      <p>51-100</p>
+                    </div>
+                    <div class="colors">
+                      <div></div>
+                      <p>20-50</p>
+                    </div>
+                    <div class="colors">
+                      <div></div>
+                      <p>&lt;20</p>
+                    </div>
                   </div>
-                  <div class="colors">
-                    <div></div>
-                    <p>201-500</p>
-                  </div>
-                  <div class="colors">
-                    <div></div>
-                    <p>101-200</p>
-                  </div>
-                  <div class="colors">
-                    <div></div>
-                    <p>51-100</p>
-                  </div>
-                  <div class="colors">
-                    <div></div>
-                    <p>20-50</p>
-                  </div>
-                  <div class="colors">
-                    <div></div>
-                    <p>&lt;20</p>
-                  </div>
+                  <ul class="map_rrt_u2">
+                    <li @click="resetZoom">
+                      <i class="el-icon-aim"></i>
+                    </li>
+                    <li>
+                      <i class="el-icon-plus" @click="mapZoomSet(1)"></i>
+                    </li>
+                    <li>
+                      <i class="el-icon-minus" @click="mapZoomSet(-1)"></i>
+                    </li>
+                  </ul>
                 </div>
-                <ul class="map_rrt_u2">
-                  <li @click="resetZoom">
-                    <i class="el-icon-aim"></i>
-                  </li>
-                  <li>
-                    <i class="el-icon-plus" @click="mapZoomSet(1)"></i>
-                  </li>
-                  <li>
-                    <i class="el-icon-minus" @click="mapZoomSet(-1)"></i>
-                  </li>
-                </ul>
               </div>
             </div>
-          </div>
-          <!-- <div is="noResult" :isInitPage="isInitPage"></div> -->
+          </template>
+          <template v-else>
+            <div is="noResult" :isInitPage="isInitPage"></div>
+          </template>
         </template>
         <template v-else>
           <div class="search_box">
@@ -305,13 +309,13 @@
             <h3 class="camera_name">
               <span>{{ selectedDevice.deviceName }}</span>
               &nbsp;
-              <span>{{'(' + currentClickDevice.shotNum + '次)'}}</span>
+              <span>{{'(' + selectedDevice.shotNum + '次)'}}</span>
               <i class="el-icon-close" @click="infoRightShow = false;" title="关闭"></i>
             </h3>
             <div class="danger_people_list">
               <div
                 class="people_item"
-                v-for="(item, index) in cameraPhotoList"
+                v-for="(item, index) in currentClickDevice"
                 :key="'people_item' + index"
               >
                 <div v-for="(sItem, sIndex) in item.detailList" :key="'my_swiper' + sIndex">
@@ -389,11 +393,11 @@
         <el-button class="operation_btn function_btn" :loading="isInterruptLoading" @click="sureInterruptTask">确认</el-button>
       </div>
     </el-dialog>
-    <div is="mapSelector" v-show="selectMapType === 1" :open="mapDialogVisible1" :showTypes="'DB'" :clear="clearMapSelect1" @mapSelectorEmit="mapPoint"></div>
-    <div is="mapSelector" v-show="selectMapType === 2" :open="mapDialogVisible2" :showTypes="'DB'" :clear="clearMapSelect2" @mapSelectorEmit="mapPoint"></div>
-    <div is="mapSelector" v-show="selectMapType === 3" :open="mapDialogVisible3" :showTypes="'DB'" :clear="clearMapSelect3" @mapSelectorEmit="mapPoint"></div>
-    <div is="mapSelector" v-show="selectMapType === 4" :open="mapDialogVisible4" :showTypes="'DB'" :clear="clearMapSelect4" @mapSelectorEmit="mapPoint"></div>
-    <div is="mapSelector" v-show="selectMapType === 5" :open="mapDialogVisible5" :showTypes="'DB'" :clear="clearMapSelect5" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" v-show="selectMapType === 1 && (isShowMapAreaDialog === true)" :open="mapDialogVisible1" :showTypes="'DB'" :clear="clearMapSelect1" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" v-show="selectMapType === 2 && (isShowMapAreaDialog === true)" :open="mapDialogVisible2" :showTypes="'DB'" :clear="clearMapSelect2" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" v-show="selectMapType === 3 && (isShowMapAreaDialog === true)" :open="mapDialogVisible3" :showTypes="'DB'" :clear="clearMapSelect3" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" v-show="selectMapType === 4 && (isShowMapAreaDialog === true)" :open="mapDialogVisible4" :showTypes="'DB'" :clear="clearMapSelect4" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" v-show="selectMapType === 5 && (isShowMapAreaDialog === true)" :open="mapDialogVisible5" :showTypes="'DB'" :clear="clearMapSelect5" @mapSelectorEmit="mapPoint"></div>
   </div>
 </template>
 <script>
@@ -403,10 +407,10 @@ import noResult from '@/components/common/noResult.vue';
 import swiper from "vue-awesome-swiper";
 import { mapXupuxian } from "@/config/config.js";
 import { formatDate, dateOrigin } from "@/utils/util.js";
-// import {
-//   getAllMonitorList,
-//   getAllBayonetList
-// } from "@/views/index/api/api.base.js";
+import {
+  getAllMonitorList,
+  getAllBayonetList
+} from "@/views/index/api/api.base.js";
 import {
   getAreaRealTimeData,
   addAreaPersonTask
@@ -460,7 +464,7 @@ export default {
         taskName: null // 任务名称
       },
       /*左边搜索表单变量 */
-      searchPlace: "",
+      // searchPlace: "",
       qyryfxFrom: {
         taskName: null, // 任务名称
         personGroupId: "", //分析人群
@@ -470,8 +474,8 @@ export default {
         endTime: new Date(), // 结束时间
       },
       submitLoading: false, // 提交loading
-      getDetailLoading: false,
-      cameraPhotoList: [],
+      // getDetailLoading: false,
+      // cameraPhotoList: [],
       startDateOptArr: {
         disabledDate (time) {
           return time.getTime() > Date.now();
@@ -519,39 +523,38 @@ export default {
           enumValue: "老年"
         }
       ], // 年龄段下拉
-      isSearchResult: false, // 搜索框是否打开
+      // isSearchResult: false, // 搜索框是否打开
       // searchResultList: [1, 2, 3, 4, 5, 6, 7, 8], // 搜索结果的列表
       infoRightShow: false, // 右边菜单状态
       videoMenuStatus: true, // 左边菜单状态
       amap: null, // 地图对象
       mapCenter: [110.594419, 27.908869], //地图中心位
-      videoMenuStatus: true, // 菜单状态
+      // videoMenuStatus: true, // 菜单状态
+      listDevice: [], // 设备
+      listBayonet: [], // 卡口
       showTypes: "DB", //设备类型
-      totalData: [],
       selectedDevice: {}, // 当前选中的设备信息
-      currentClickDevice: {},
+      currentClickDevice: [],
+      resultDataList: [],
       swiper: null,
       selectAreaDataList: [], // 左侧选中的区域信息
-      selectMapList: [], // 选中的设备数据
       taskList: [], // 任务列表
       taskId: null, // 要操作的任务id
+      markerList: []
     };
   },
   watch: {
-    cameraPhotoList: {
-      handler(newName, oldName) {
-        // console.log("obj.a changed");
-      },
-      immediate: true,
-      deep: true
+    selectAreaDataList (val) {
+      if (val.length === 5) {
+
+      }
     }
   },
   mounted() {
     //获取数据
-    // this.getTaskList();
+    this.getTreeList();
     // this.mapEvents();
     //加载地图
-    this.initMap();
     // 获取到监控人群分组
     getGroupAllList().then(res => {
       if (res) {
@@ -581,8 +584,21 @@ export default {
             this.taskList = res.data.list;
             this.pagination.total = res.data.total;
             this.taskList.map(item => {
+              let personGroupIdName = [];
               item.taskWebParam = JSON.parse(item.taskWebParam);
+              let personGroupId = item.taskWebParam.personGroupId.split();
+              this.peopleGroupOptions.map(val => {
+                personGroupId && personGroupId.forEach(value => {
+                  if (value === val.uid) {
+                    personGroupIdName.push(val.groupName);
+                  }
+                })
+              })
+              if (personGroupIdName.length > 0) {
+                item.taskWebParam.personGroupId = personGroupIdName;
+              }
             })
+
           }
         })
         .catch(() => {})
@@ -664,7 +680,7 @@ export default {
     },
     // 跳至分析结果页面
     skipResultPage (obj) {
-      this.$router.push({name: 'portrait_qyryfx_result', query: { result: obj.taskResult, param: obj.taskWebParam }});
+      this.$router.push({name: 'portrait_qyryfx_result', query: { result: obj.taskResult, param: JSON.stringify(obj.taskWebParam) }});
     },
     // 显示地图区域选择弹出框
     showMapDialog () {
@@ -711,6 +727,7 @@ export default {
       }
     },
     handleSelectType (index) {
+      console.log('nnnmajsadwqewe')
       switch (index) {
         case 1:
           this.mapDialogVisible1 = !this.mapDialogVisible1;
@@ -733,10 +750,9 @@ export default {
     },
     // 删除某个选中的区域
     deleteSelectArea (index) {
-      console.log('mmmmmmmmmmmmmmmmmmm')
       this.selectAreaDataList.splice(index, 1);
       this.isShowMapAreaDialog = false;
-      this.selectMapType--;
+      // this.selectMapType--;
     },
     // 获取地图选择的数据
     mapPoint (data) {
@@ -753,6 +769,7 @@ export default {
           })
         }
         const obj = { 
+          // index: 
           startTime: formatDate(this.qyryfxFrom.startTime),
           endTime: formatDate(this.qyryfxFrom.endTime),
           deviceList: data.deviceList,
@@ -808,33 +825,33 @@ export default {
     },
     // 切换照片
     prev(val) {
-      const ind = this.cameraPhotoList[val].detailList.length - 1;
-      if (this.cameraPhotoList[val].currentIndex === 0) {
-        const obj = objDeepCopy(this.cameraPhotoList[val]);
+      const ind = this.currentClickDevice[val].detailList.length - 1;
+      if (this.currentClickDevice[val].currentIndex === 0) {
+        const obj = objDeepCopy(this.currentClickDevice[val]);
         obj.currentIndex = ind;
-        this.$set(this.cameraPhotoList, val, obj);
+        this.$set(this.currentClickDevice, val, obj);
       } else {
-        const obj = objDeepCopy(this.cameraPhotoList[val]);
+        const obj = objDeepCopy(this.currentClickDevice[val]);
         obj.currentIndex = obj.currentIndex - 1;
-        this.$set(this.cameraPhotoList, val, obj);
+        this.$set(this.currentClickDevice, val, obj);
       }
     },
     next(val) {
-      const ind = this.cameraPhotoList[val].detailList.length - 1;
-      if (this.cameraPhotoList[val].currentIndex === ind) {
-        const obj = objDeepCopy(this.cameraPhotoList[val]);
+      const ind = this.currentClickDevice[val].detailList.length - 1;
+      if (this.currentClickDevice[val].currentIndex === ind) {
+        const obj = objDeepCopy(this.currentClickDevice[val]);
         obj.currentIndex = 0;
-        this.$set(this.cameraPhotoList, val, obj);
+        this.$set(this.currentClickDevice, val, obj);
       } else {
-        const obj = objDeepCopy(this.cameraPhotoList[val]);
+        const obj = objDeepCopy(this.currentClickDevice[val]);
         obj.currentIndex = obj.currentIndex + 1;
-        this.$set(this.cameraPhotoList, val, obj);
+        this.$set(this.currentClickDevice, val, obj);
       }
     },
     slideToIndex(val, ind) {
-      const obj = objDeepCopy(this.cameraPhotoList[ind]);
+      const obj = objDeepCopy(this.currentClickDevice[ind]);
       obj.currentIndex = val;
-      this.$set(this.cameraPhotoList, ind, obj);
+      this.$set(this.currentClickDevice, ind, obj);
     },
     /**重置左边菜单的方法 */
     resetLeftMenu(form) {
@@ -854,6 +871,7 @@ export default {
     submitData(form) {
       this.$refs[form].validate(valid => {
         if (valid) {
+          this.resultDataList = [];
           let deviceAndTimeList = [];
           this.selectAreaDataList.map((item, index) => {
             if (item.deviceList.length <= 0 && item.bayonetList.length <= 0) {
@@ -874,140 +892,104 @@ export default {
               ];
             }
           });
-          const queryParams = {
-            sex: this.qyryfxFrom.sex,
-            age: this.qyryfxFrom.age !== "" ? this.qyryfxFrom.age.join() : "",
-            personGroupId:
-              this.qyryfxFrom.personGroupId !== ""
-                ? this.qyryfxFrom.personGroupId.join()
-                : "",
-            deviceAndTimeList: deviceAndTimeList
+          // const queryParams = {
+          //   sex: this.qyryfxFrom.sex,
+          //   age: this.qyryfxFrom.age !== "" ? this.qyryfxFrom.age.join() : "",
+          //   personGroupId:
+          //     this.qyryfxFrom.personGroupId !== ""
+          //       ? this.qyryfxFrom.personGroupId.join()
+          //       : "",
+          //   deviceAndTimeList: deviceAndTimeList,
+          //   taskName: this.qyryfxFrom.taskName
+          // };
+           const queryParams = {
+            deviceAndTimeList: [
+              {
+                deviceIds: "27",
+                startTime: "2019-08-12 12:00:00",
+                endTime: "2019-08-12 23:00:00"
+              }
+            ],
+            personGroupId: "1lwx3mJIbdF4c4vEgpyLk0",
+            // taskName: "webTest222222"
           };
           console.log('queryParams', queryParams)
 
           this.submitLoading = true; // 打开加载效果
-          getAreaRealTimeData(queryParams)
-            .then(res => {
-              if (res && res.data) {
-                this.submitLoading = false; // 关闭加载效果
-                if (res.data.length) {
-                  this.clearMarkList(); // 清除地图标记
-                  this.setMarks(res.data, false);
+          if (this.selectType === 1) {
+            getAreaRealTimeData(queryParams)
+              .then(res => {
+                let _this = this;
+                if (res && res.data) {
+                  this.submitLoading = false; // 关闭加载效果
+                  if (JSON.parse(res.data.taskResult).length) {
+
+                    this.resultDataList = JSON.parse(res.data.taskResult);
+                    this.clearMarkList(); // 清除地图标记
+                    if (this.resultDataList.length > 0) {
+                      setTimeout(() => {
+                        _this.initMap(JSON.parse(res.data.taskResult));
+                      }, 500)
+                    }
+                    
+                  } else {
+                    this.clearMarkList(); // 清除地图标记
+                    // this.setMarks();
+                    this.isInitPage = false;
+                    this.$message.warning("您选择的设备没有数据");
+                  }
                 } else {
                   this.clearMarkList(); // 清除地图标记
-                  this.setMarks();
-                  this.$message.warning("您选择的设备没有数据");
+                  // this.setMarks();
+                  this.isInitPage = false;
+                  this.submitLoading = false; // 关闭加载效果
                 }
-              } else {
-                this.submitLoading = false; // 关闭加载效果
+              })
+              .catch(() => {
                 this.clearMarkList(); // 清除地图标记
-                this.setMarks();
-                this.$message.warning("您选择的设备没有数据");
-              }
-            })
-            .catch(() => {
-              this.clearMarkList(); // 清除地图标记
-              this.setMarks();
-              this.submitLoading = false; // 关闭加载效果
-            });
+                // this.setMarks();
+                this.submitLoading = false; // 关闭加载效果
+              });
+          } else {
+            addAreaPersonTask(queryParams)
+              .then(res => {
+                if (res.data) {
+                  this.$message({
+                    type: 'success',
+                    message: '新建成功',
+                    customClass: 'request_tip'
+                  });
+                  this.submitLoading = false;
+                  this.selectIndex = 1;
+                  this.getTaskList();
+                } else {
+                  this.submitLoading = false;
+                }
+                console.log('uuuuuuu', res)
+              })
+              .catch(() => {
+                 this.submitLoading = false;
+              })
+          }
         }
       })
     },
     /** 点击摄像头查看此摄像头抓拍详情信息 */
     clickGetCameraData(device) {
-      // 点击设备获取到人员的信息
-      let queryParams;
-      if (this.drawObj.length === 1) {
-        // 只有一个时间区域
-        queryParams = {
-          sex: this.qyryfxFrom.sex,
-          age: this.qyryfxFrom.age !== "" ? this.qyryfxFrom.age.join() : "",
-          personGroupId:
-            this.qyryfxFrom.personGroupId !== ""
-              ? this.qyryfxFrom.personGroupId.join()
-              : "",
-          deviceCode: device.viewClassCode,
-          startTime: this.drawObj[0].startTime,
-          endTime: this.drawObj[0].endTime
-        };
-      } else {
-        // 根据设备的不同来查找时间段
-        const timeArr = [];
-        for (let i = 0; i < this.totalData.length; i++) {
-          const dataItem = this.totalData[i];
-          let isAd = false;
-          if (dataItem.ad.length > 0) {
-            for (let j = 0; j < dataItem.ad.length; j++) {
-              if (dataItem.ad[j].viewClassCode === device.viewClassCode) {
-                timeArr.push(i);
-                isAd = true;
-                break;
-              }
-            }
-          }
-          if (!isAd) {
-            for (let j = 0; j < dataItem.ab.length; j++) {
-              if (dataItem.ab[j].viewClassCode === device.viewClassCode) {
-                timeArr.push(i);
-                break;
-              }
-            }
-          }
+      this.infoRightShow = true;
+      this.currentClickDevice = device;
+      for (let i = 0; i < this.currentClickDevice.length; i++) {
+        const item = this.currentClickDevice[i];
+        if (item.detailList.length) {
+          item.currentIndex = item.detailList.length - 1;
+          item.detailList = item.detailList.map(item => {
+            item.semblance = Number(item.semblance).toFixed(2); // 保留2位小数点
+            return item;
+          });
+        } else {
+          item.currentIndex = 0;
         }
-        queryParams = {
-          sex: this.qyryfxFrom.sex,
-          age: this.qyryfxFrom.age !== "" ? this.qyryfxFrom.age.join() : "",
-          personGroupId:
-            this.qyryfxFrom.personGroupId !== ""
-              ? this.qyryfxFrom.personGroupId.join()
-              : "",
-          deviceCode: device.viewClassCode,
-          startTime: timeArr
-            .map(item => {
-              return this.drawObj[item].startTime;
-            })
-            .join(),
-          endTime: timeArr
-            .map(item => {
-              return this.drawObj[item].endTime;
-            })
-            .join()
-        };
       }
-
-      const loading = this.$loading({
-        lock: true,
-        text: "获取摄像头信息中。。。",
-        spinner: "el-icon-loading",
-        background: "rgba(0, 0, 0, 0.7)"
-      });
-      getShotNumAreaDetail(queryParams)
-        .then(res => {
-          if (res && res.data) {
-            this.infoRightShow = true;
-            this.cameraPhotoList = res.data;
-            for (let i = 0; i < this.cameraPhotoList.length; i++) {
-              const item = this.cameraPhotoList[i];
-              if (item.detailList.length) {
-                item.currentIndex = item.detailList.length - 1;
-                item.detailList = item.detailList.map(item => {
-                  item.semblance = Number(item.semblance).toFixed(2); // 保留2位小数点
-                  return item;
-                });
-              } else {
-                item.currentIndex = 0;
-              }
-            }
-            loading.close();
-          } else {
-            this.cameraPhotoList = [];
-            loading.close();
-          }
-        })
-        .catch(() => {
-          this.cameraPhotoList = [];
-          loading.close();
-        });
     },
     
     // 地图定位
@@ -1023,7 +1005,7 @@ export default {
       }
     },
     // 初始化地图
-    initMap() {
+    initMap(data) {
       let _this = this;
       let map = new window.AMap.Map("mapMap", {
         zoom: 14, // 级别
@@ -1031,8 +1013,9 @@ export default {
         center: _this.mapCenter // 中心点坐标
       });
       map.setMapStyle("amap://styles/whitesmoke");
-      this.amap = map;
-     
+      _this.amap = map;
+
+      _this.setMarks(data);
     },
     getTreeList() {
       if (this.showTypes.indexOf("D") >= 0) {
@@ -1042,12 +1025,12 @@ export default {
         this.getListBayonet();
       }
     },
-    // 获取到设备数据
+    // // 获取到设备数据
     getListDevice() {
       getAllMonitorList({ ccode: mapXupuxian.adcode }).then(res => {
         if (res) {
           this.listDevice = res.data;
-          this.setMarks(); // 初始化设备
+          // this.setMarks(); // 初始化设备
         }
       });
     },
@@ -1056,35 +1039,38 @@ export default {
       getAllBayonetList({ areaId: mapXupuxian.adcode }).then(res => {
         if (res) {
           this.listBayonet = res.data;
-          this.setMarks(); // 初始化卡口
+          // this.setMarks(); // 初始化卡口
         }
       });
     },
     // D设备 B卡口
-    setMarks(deviceList = null, init = true) {
+    setMarks(deviceList = null) {
+      console.log('deviceList', deviceList)
       // 展示设备和卡口
-      if (init) {
-        // 初始化的时候展示所有的设备
-        for (let i = 0; i < this.listDevice.length; i++) {
-          this.doMark(this.listDevice[i], deviceList, "vl_icon vl_icon_sxt");
-        }
-        for (let i = 0; i < this.listBayonet.length; i++) {
-          this.doMark(this.listBayonet[i], deviceList, "vl_icon vl_icon_kk");
-        }
-        this.amap.setFitView();
-      } else {
+      // if (init) {
+      //   // 初始化的时候展示所有的设备
+      //   for (let i = 0; i < this.listDevice.length; i++) {
+      //     this.doMark(this.listDevice[i], deviceList, "vl_icon vl_icon_sxt");
+      //   }
+      //   for (let i = 0; i < this.listBayonet.length; i++) {
+      //     this.doMark(this.listBayonet[i], deviceList, "vl_icon vl_icon_kk");
+      //   }
+      //   this.amap.setFitView();
+      // } else {
         for (let i = 0; i < this.listDevice.length; i++) {
           const listItem = this.listDevice[i];
           let flag = false;
           for (let j = 0; j < deviceList.length; j++) {
             const deviceItem = deviceList[j];
             if (deviceItem.groupName === listItem.viewClassCode) {
-              this.doMark(listItem, deviceItem, "vl_icon vl_icon_sxt", false);
+              console.log('1')
               flag = true;
+              this.doMark(listItem, deviceItem, "vl_icon vl_icon_sxt", false);
               break;
             }
           }
           if (!flag) {
+            console.log('2')
             this.doMark(this.listDevice[i], null, "vl_icon vl_icon_sxt");
           }
         }
@@ -1094,21 +1080,25 @@ export default {
           for (let j = 0; j < deviceList.length; j++) {
             const deviceItem = deviceList[j];
             if (deviceItem.groupName === listItem.viewClassCode) {
+              console.log('3')
               this.doMark(listItem, deviceItem, "vl_icon vl_icon_kk", false);
               flag = true;
               break;
             }
           }
           if (!flag) {
+            console.log('4')
             this.doMark(this.listBayonet[i], null, "vl_icon vl_icon_kk");
           }
         }
-      }
+      // }
     },
     // 地图标记
-    doMark(obj, device, sClass, init = true) {
+    doMark(obj, device, sClass) {
+      console.log('obj', obj)
+      console.log('obj', device)
       let marker;
-      if (!init && device.shotNum > 0) {
+      if (device.shotNum > 0) {
         // 非初始化的状态
         let level;
         if (device.shotNum < 20) {
@@ -1137,24 +1127,25 @@ export default {
         let _this = this;
         // 给标记绑定一个点击事件
         marker.on("click", function() {
-          _this.currentClickDevice = device;
-          _this.selectedDevice = obj;
-          _this.clickGetCameraData(obj);
+          // _this.currentClickDevice = device.areaListWeb;
+          _this.selectedDevice = device;
+          _this.clickGetCameraData(device.areaListWeb);
         });
         this.markerList = [...this.markerList, marker];
       } else {
-        marker = new window.AMap.Marker({
-          // 添加自定义点标记
-          map: this.amap,
-          position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
-          offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
-          draggable: false, // 是否可拖动
-          // extData: obj,
-          // 自定义点标记覆盖物内容
-          content: `<div style="cursor:not-allowed;" class="map_icons ${sClass}"></div>`
-        });
-        this.markerList = [...this.markerList, marker];
+        // marker = new window.AMap.Marker({
+        //   // 添加自定义点标记
+        //   map: this.amap,
+        //   position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+        //   offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
+        //   draggable: false, // 是否可拖动
+        //   // extData: obj,
+        //   // 自定义点标记覆盖物内容
+        //   content: `<div style="cursor:not-allowed;" class="map_icons ${sClass}"></div>`
+        // });
+        // this.markerList = [...this.markerList, marker];
       }
+      this.amap.setFitView();
     },
     clearMarkList() {
       for (let i = 0; i < this.markerList.length; i++) {
@@ -1166,8 +1157,7 @@ export default {
     if (this.amap) {
       this.amap.destroy();
     }
-  },
-  
+  }
 };
 </script>
 <style lang="scss" scoped>
@@ -1664,7 +1654,7 @@ export default {
           //定位
           .map_control {
             position: absolute;
-            bottom: 0.3rem;
+            bottom: 1rem;
             right: 0.2rem;
             transition: right 0.3s ease-out;
             animation: fadeInRight 0.4s ease-out 0.4s both;
