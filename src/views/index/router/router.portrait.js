@@ -107,6 +107,11 @@ export default {
       path: 'zdgz', // 重点关注
       name: 'portrait_zdgz',
       component: () => import('@/views/index/components/portrait/zdgz.vue')
+    },{
+
+      path: 'zdgz_jg', // 重点关注结果页
+      name: 'portrait_zdgz_jg',
+      component: () => import('@/views/index/components/portrait/zdgz-jg.vue')
     },
     {
 

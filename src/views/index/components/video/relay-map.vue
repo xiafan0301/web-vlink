@@ -45,13 +45,13 @@
           <div class="relay_list_fst_b">抓拍图片&nbsp;<span>{{listData.length | fmTenThousand}}</span></div>
         </div>
       </li>
-      <li v-for="(item, index) in listData" :key="'zp_li_' + index">
+      <li v-for="(item, index) in listData2" :key="'zp_li_' + index">
         <div class="relay_list_li" v-if="index < 10">
           <div class="relay_list_li_i">
             <img :src="item.subStoragePath" class="bigImg" alt="">
           </div>
           <div class="relay_list_li_d"><i class="vl_icon vl_icon_sm_sj"></i>{{item.showTime}}</div>
-          <div class="relay_list_li_d"><i class="vl_icon vl_icon_sm_sxt"></i>{{item.spotName}}</div>
+          <div class="relay_list_li_d com_ellipsis" :title="item.spotName"><i class="vl_icon vl_icon_sm_sxt"></i>{{item.spotName}}</div>
         </div>
       </li>
     </ul>
@@ -78,6 +78,7 @@ export default {
       showMenuActive: true,
       sedData: {},
       listData: [],
+      listData2: [],
 
       uid: '',
       type: null,
@@ -121,7 +122,8 @@ export default {
               uid: random14()
             }));
           }
-          this.listData = ld;
+          this.listData2 = ld;
+          this.listData = ld.concat([]).reverse();
           this.$nextTick(() => {
             if (this.amap) {
               this.amap.clearMap();
@@ -327,6 +329,7 @@ export default {
           > img  { width: 100%; height: 100%; }
         }
         > .relay_list_li_d {
+          overflow: hidden;
           font-size: 12px; color: #999;
           padding-left: 10px; margin-top: 7px;
           height: 20px; line-height: 20px;

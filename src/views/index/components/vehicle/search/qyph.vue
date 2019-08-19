@@ -54,7 +54,7 @@
                           v-model="searchData.startTime"
                           style="width: 100%;"
                           class="vl_date"
-                          :picker-options="pickerOptions"
+                          :time-arrow-control="true"
                           type="datetime"
                           value-format="timestamp"
                           placeholder="请选择开始时间">
@@ -66,7 +66,7 @@
                   <el-date-picker
                           style="width: 100%;"
                           class="vl_date vl_date_end"
-                          :picker-options="pickerOptions1"
+                          :time-arrow-control="true"
                           v-model="searchData.endTime"
                           type="datetime"
                           @change="chooseEndTime"
@@ -112,7 +112,7 @@
   import { mapXupuxian } from "@/config/config.js";
   import {getAllDevice} from '../../../api/api.judge.js';
   import {getAllBayonetList} from '../../../api/api.base.js';
-  import { objDeepCopy, formatDate} from '../../../../../utils/util.js';
+  import { objDeepCopy, formatDate, addCluster} from '../../../../../utils/util.js';
   export default {
     components: {vlBreadcrumb},
     data() {
@@ -134,36 +134,12 @@
         },
         pickerOptions: {
           disabledDate (time) {
-            let date = new Date();
-            let y = date.getFullYear();
-            let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
-            let d = date.getDate();
-            let threeMonths = '';
-            let start = '';
-            if (parseFloat(m) >= 4) {
-              start = y + '-' + (m - 1) + '-' + d;
-            } else {
-              start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
-            }
-            threeMonths = new Date(start).getTime();
-            return time.getTime() > Date.now() || time.getTime() < threeMonths;
+            return time > new Date();
           }
         },
         pickerOptions1: {
           disabledDate (time) {
-            let date = new Date();
-            let y = date.getFullYear();
-            let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
-            let d = date.getDate();
-            let threeMonths = '';
-            let start = '';
-            if (parseFloat(m) >= 4) {
-              start = y + '-' + (m - 1) + '-' + d;
-            } else {
-              start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
-            }
-            threeMonths = new Date(start).getTime();
-            return time.getTime() > Date.now() || time.getTime() < threeMonths;
+            return time > new Date();
           }
         },
         mapTreeData: [],
@@ -310,7 +286,7 @@
                   uContent = '<div id="' + obj.markSid + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + ' '+ _this.hideClass +'"></div>'
                 }
                 let marker = new window.AMap.Marker({ // 添加自定义点标记
-                  map: _this.map,
+//                  map: _this.map,
                   position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
                   offset: new window.AMap.Pixel(offSet[obj.dataType][0], offSet[obj.dataType][1]), // 相对于基点的偏移位置
                   draggable: false, // 是否可拖动
@@ -340,6 +316,8 @@
                 })
               }
             })
+          let allMark = _this.marks[0].concat(_this.marks[1])
+          addCluster(_this.map, allMark)
         }
       },
       renderMap() {
@@ -486,9 +464,10 @@
         let date = new Date();
         let curDate = date.getTime();
         let curS = 1 * 24 * 3600 * 1000;
-        let yDate = new Date(curDate - curS);
-        this.searchData.startTime = new Date(yDate.getFullYear() + '-' + (yDate.getMonth() + 1) + '-' + yDate.getDate() + ' 00:00:00').getTime();
-        this.searchData.endTime =  new Date(yDate.getFullYear() + '-' + (yDate.getMonth() + 1) + '-' + yDate.getDate() + ' 23:59:59').getTime();
+        let _sDate = new Date(curDate - curS);
+        let _s = _sDate.getFullYear()+ '-' + (_sDate.getMonth() + 1) + '-' + _sDate.getDate() + ' 00:00:00' ;
+        this.searchData.startTime = new Date(_s).getTime();
+        this.searchData.endTime = curDate;
       },
       // 选择区域
       selArea (v) {

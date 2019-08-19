@@ -22,7 +22,7 @@
               v-model="ruleForm.data1"
               style="width: 100%;"
               class="vl_date"
-              :picker-options="pickerOptions"
+              :time-arrow-control="true"
               type="datetime"
               value-format="timestamp"
               placeholder="请选择开始时间">
@@ -32,7 +32,7 @@
             <el-date-picker
               style="width: 100%;"
               class="vl_date vl_date_end"
-              :picker-options="pickerOptions"
+              :time-arrow-control="true"
               v-model="ruleForm.data2"
               @change="chooseEndTime"
               value-format="timestamp"
@@ -114,19 +114,7 @@
         pricecode:cityCode,
         pickerOptions: {
           disabledDate (time) {
-            let date = new Date();
-            let y = date.getFullYear();
-            let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
-            let d = date.getDate();
-            let threeMonths = '';
-            let start = '';
-            if (parseFloat(m) >= 4) {
-              start = y + '-' + (m - 1) + '-' + d;
-            } else {
-              start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
-            }
-            threeMonths = new Date(start).getTime();
-            return time.getTime() > Date.now() || time.getTime() < threeMonths;
+            return time > new Date();
           }
         },
         evData: [],
@@ -197,9 +185,10 @@
         let date = new Date();
         let curDate = date.getTime();
         let curS = 1 * 24 * 3600 * 1000;
-        let yDate = new Date(curDate - curS);
-        this.ruleForm.data1 = new Date(yDate.getFullYear() + '-' + (yDate.getMonth() + 1) + '-' + yDate.getDate() + ' 00:00:00').getTime();
-        this.ruleForm.data2 =  new Date(yDate.getFullYear() + '-' + (yDate.getMonth() + 1) + '-' + yDate.getDate() + ' 23:59:59').getTime();
+        let _sDate = new Date(curDate - curS);
+        let _s = _sDate.getFullYear()+ '-' + (_sDate.getMonth() + 1) + '-' + _sDate.getDate() + ' 00:00:00' ;
+        this.ruleForm.data1 = new Date(_s).getTime();
+        this.ruleForm.data2 = curDate;
       },
       hideLeft() {
         this.hideleft = !this.hideleft;
@@ -404,8 +393,10 @@
         this.evData.forEach((x, index)  => {
           let path = [];
           x.traceList.forEach(y => {
-            let _path = [y.shotPlaceLongitude, y.shotPlaceLatitude];
-            path.push(_path);
+            if (y.shotPlaceLatitude && y.shotPlaceLongitude) {
+              let _path = [y.shotPlaceLongitude, y.shotPlaceLatitude];
+              path.push(_path);
+            }
           })
           var polyline = new window.AMap.Polyline({
             path: path,
