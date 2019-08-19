@@ -233,7 +233,7 @@
                 <el-table-column label="设备名称" prop="deviceName" show-overflow-tooltip></el-table-column>
                 <el-table-column label="过车时间" prop="shotTime" show-overflow-tooltip></el-table-column>
                 <el-table-column label="时间间隔" prop="timeSlot" show-overflow-tooltip></el-table-column>
-                <el-table-column label="常规行驶时间" prop="refTime" show-overflow-tooltip></el-table-column>
+                <!-- <el-table-column label="常规行驶时间" prop="refTime" show-overflow-tooltip></el-table-column> -->
               </el-table>
             </div>
           </vue-scroll>

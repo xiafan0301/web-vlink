@@ -43,7 +43,7 @@
                   <div style="padding-left: 20px; width: 320px">
                     <div class="subdata">
                       <i class="vl_icon vl_icon_retrieval_03" style="height: 24px"></i>
-                      <b>{{portrailInfoDto.semblance}}</b>%
+                      <b>{{portrailInfoDto.semblance && portrailInfoDto.semblance.toFixed(2)}}</b>%
                     </div>
                     <ul class="mes_cot">
                       <li class="clearfix"><span>姓名：</span><p>{{portrailInfoDto.name}}</p></li>
@@ -112,7 +112,7 @@
                   <el-collapse v-model="activeNames">
                     <el-collapse-item  v-for="(item, index) in struGroupResultDtoList" :key='index'  :title="item.groupName + '(' + item.totalNum + '次)'">
                       <div class="mes_cot">
-                        <div v-for = "(ite, index) in item.personDetailList" :key='index'>
+                        <div v-for = "(ite, index) in item.personDetailList" :key='index' @click="showStrucInfo(ite, data1.findIndex(function (u) {return u === ite}))">
                           <div class="cot_1">
                             <img :src="ite.subStoragePath">
                             <div style="padding-left: 10px">
@@ -145,7 +145,7 @@
                   <el-collapse v-model="activeNames">
                     <el-collapse-item  v-for="(item, index) in struPersonDtoList" :key='index'  :title="item.shotTime + '(' + item.num + '次)'">
                       <div class="mes_cot">
-                        <div v-for = "(ite, index) in item.list" :key='index' style="position: relative">
+                        <div v-for = "(ite, index) in item.list" :key='index' style="position: relative" @click="showStrucInfo(ite, data.findIndex(function (u) {return u === ite}))">
                           <div class="cot_1">
                             <img :src="ite.subStoragePath" >
                             <div style="padding-left: 10px">
@@ -415,6 +415,7 @@ export default {
       struPersonDtoList: [],
       data: [],
       taskWebParam: {},
+      data1:[],
     }
   },
   created() {
@@ -450,6 +451,11 @@ export default {
           }
           if (res.data.struGroupResultDtoList) {
             this.struGroupResultDtoList = res.data.struGroupResultDtoList
+            this.struGroupResultDtoList.forEach((item)=>{
+              item.personDetailList.forEach((ite)=>{
+                this.data1.push(ite)
+              })
+            })
           }
           if (res.data.analysisTaskInfoWithBLOBsList[0].taskWebParam) {
             this.taskWebParam =JSON.parse(res.data.analysisTaskInfoWithBLOBsList[0].taskWebParam)

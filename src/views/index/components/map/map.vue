@@ -1698,7 +1698,7 @@
       // 获得设备报警列表
       getAlarmListByDev () {
         let params = {
-          interval: 12
+          interval: 30
         }
         let _this = this;
         getAlarmListByDev(params).then(res => {
@@ -1723,21 +1723,24 @@
                 }
               })
             })
-            _this.timer = setTimeout(() => {
+          }
+          _this.timer = setTimeout(() => {
+            if(_this.snapMarks.length) {
               _this.map.remove(_this.snapMarks);
               _this.marks[0].forEach(y => {
                 if (document.getElementById('mapMark' + y.getExtData().dataType + y.getExtData().uid).classList.contains('vl_icon_map_sxt_error')) {
                   document.getElementById('mapMark' + y.getExtData().dataType + y.getExtData().uid).classList.remove('vl_icon_map_sxt_error')
                 }
               })
-              _this.snapMarks = [];
-              _this.$once('hook:beforeDestroy', () => {
-                clearTimeout(_this.timer);
-                return false;
-              })
-              _this.getAlarmListByDev();
-            }, 12000)
-          }
+            }
+            _this.snapMarks = [];
+            _this.$once('hook:beforeDestroy', () => {
+              clearTimeout(_this.timer);
+              return false;
+            })
+            console.log('24143')
+            _this.getAlarmListByDev();
+          }, 12000)
         })
       },
 

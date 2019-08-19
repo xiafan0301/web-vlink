@@ -63,7 +63,6 @@
                         v-model="item.startTime"
                         style="width: 100%;"
                         class="vl_date"
-                        :picker-options="pickerOptions"
                         type="datetime"
                         value-format="timestamp"
                         placeholder="请选择开始时间">
@@ -75,7 +74,6 @@
                       <el-date-picker
                               style="width: 100%;"
                               class="vl_date vl_date_end"
-                              :picker-options="pickerOptions1"
                               v-model="item.endTime"
                               value-format="timestamp"
                               type="datetime"
@@ -120,7 +118,7 @@
   import { mapXupuxian } from "@/config/config.js";
   import {getAllDevice} from '../../../api/api.judge.js';
   import {getAllBayonetList} from '../../../api/api.base.js';
-  import { objDeepCopy, formatDate} from '../../../../../utils/util.js';
+  import { objDeepCopy, formatDate, addCluster} from '../../../../../utils/util.js';
   export default {
     components: {vlBreadcrumb},
     data() {
@@ -155,36 +153,12 @@
         ],
         pickerOptions: {
           disabledDate (time) {
-            let date = new Date();
-            let y = date.getFullYear();
-            let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
-            let d = date.getDate();
-            let threeMonths = '';
-            let start = '';
-            if (parseFloat(m) >= 4) {
-              start = y + '-' + (m - 1) + '-' + d;
-            } else {
-              start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
-            }
-            threeMonths = new Date(start).getTime();
-            return time.getTime() > Date.now() || time.getTime() < threeMonths;
+            return time > new Date();
           }
         },
         pickerOptions1: {
           disabledDate (time) {
-            let date = new Date();
-            let y = date.getFullYear();
-            let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
-            let d = date.getDate();
-            let threeMonths = '';
-            let start = '';
-            if (parseFloat(m) >= 4) {
-              start = y + '-' + (m - 1) + '-' + d;
-            } else {
-              start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
-            }
-            threeMonths = new Date(start).getTime();
-            return time.getTime() > Date.now() || time.getTime() < threeMonths;
+            return time > new Date();
           }
         },
         mapTreeData: [],
@@ -195,6 +169,8 @@
         delDialog: false,
         curDrawIndex: 0, // 当前画区域的索引
         clearAll: false,
+        cluster: null,
+        renderClusterMarker: null
       };
     },
     mounted() {
@@ -350,7 +326,7 @@
                 uContent = '<div id="' + obj.markSid + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + ' '+ _this.hideClass +'"></div>'
               }
               let marker = new window.AMap.Marker({ // 添加自定义点标记
-                map: _this.map,
+//                map: _this.map,
                 position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
                 offset: new window.AMap.Pixel(offSet[obj.dataType][0], offSet[obj.dataType][1]), // 相对于基点的偏移位置
                 draggable: false, // 是否可拖动
@@ -380,6 +356,8 @@
               })
             }
           })
+          let allMark = _this.marks[0].concat(_this.marks[1])
+          addCluster(_this.map, allMark)
         }
       },
       renderMap() {

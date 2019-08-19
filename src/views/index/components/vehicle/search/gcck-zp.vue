@@ -28,7 +28,7 @@
               </el-date-picker>
             </el-form-item>
             <el-form-item>
-              <el-select v-model="formInline.lb" placeholder="请选择车辆分组" style="width: 150px;">
+              <el-select v-model="formInline.lb" :clearable="true" placeholder="请选择车辆分组" style="width: 150px;">
                 <el-option :label="'布控车辆'" :value="2"></el-option>
                 <el-option :label="'无牌车'" :value="1"></el-option>
                 <el-option v-for="(item, index) in lbList" :label="item.enumValue" :key="'dept-list-' + index" :value="item.uid"></el-option>
@@ -36,7 +36,7 @@
               </el-select>
             </el-form-item>
             <el-form-item>
-              <el-select v-model="formInline.lx" placeholder="请选择车辆类型" style="width: 150px;">
+              <el-select v-model="formInline.lx" :clearable="true" placeholder="请选择车辆类型" style="width: 150px;">
                 <el-option v-for="(item, index) in lxList" :label="item.enumValue" :key="'user-list-' + index" :value="item.enumValue"></el-option>
               </el-select>
             </el-form-item>
@@ -124,7 +124,7 @@ export default {
       detailData: null,
 
       formInline: {
-        time: [new Date(nDate.getTime() - 24 * 3600000), nDate],
+        time: [nDate, nDate],
         lb: '',
         lx: '',
         no: false,
@@ -143,7 +143,7 @@ export default {
       },
       pickerOptions: {
         disabledDate (d) {
-          return d > new Date() || d < new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000);
+          return d > new Date();
         }
       }
     }

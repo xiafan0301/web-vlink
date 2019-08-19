@@ -7,6 +7,19 @@
       </div>
     </div>
     <div class="vl_j_left">
+      <div class="ytsr_left_radio">
+        <span>查询方式：</span>
+        <span>
+          <el-radio v-model="taskType" label="1">在线查询</el-radio>
+          <el-radio v-model="taskType" label="2">离线任务</el-radio>
+        </span>
+      </div>
+      <div v-show="taskType === '2'" class="ytsr_left_radio">
+        <span>任务名称：</span>
+        <span style="padding-right: 20px">
+          <el-input v-model="taskName" placeholder="请输入任务名称" maxlength="20"></el-input>
+        </span>
+      </div>
       <div class="vl_jtc_img_box">
         <div style="margin-left: 17px;" class="vl_judge_tc_c_item"  @drop="drop($event)" @dragover="allowDrop($event)">
           <el-upload
@@ -47,7 +60,7 @@
       <div class="ytsr_left_search" v-show="radio === '1'">
         <el-select
                 v-model="searchData.portraitGroupId"
-                placeholder="选择人员组"
+                placeholder="全部人像"
                 multiple
                 collapse-tags
         >
@@ -65,7 +78,8 @@
             v-model="searchData.startTime"
             style="width: 100%;margin-bottom: 20px;"
             class="vl_date"
-            type="date"
+            type="datetime"
+            :time-arrow-control="true"
             @change="chooseStartTime"
             value-format="timestamp"
             placeholder="选择日期时间">
@@ -75,8 +89,9 @@
                   class="vl_date vl_date_end"
                   v-model="searchData.endTime"
                   @change="chooseEndTime"
+                  :time-arrow-control="true"
                   value-format="timestamp"
-                  type="date"
+                  type="datetime"
                   placeholder="选择日期时间">
           </el-date-picker>
         </div>
@@ -638,7 +653,8 @@
         interruptDialog: false, //中断任务
         addTaskDialog: false,
         isAddLoading: false,
-        taskName: '', // 新建弹窗里的任务名称
+        taskName: '', // 左侧输入任务名称
+        taskType: "1", // 左侧任务类型，1 实时，2离线
         addParams: {},
         uploading: false,
         uploadAcion: ajaxCtx.base + '/new',
@@ -709,9 +725,10 @@
       getGroups({groupType: 4}).then(res => {
         if (res) {
           this.portraitGroupList = res.data;
-          this.searchData.portraitGroupId = this.portraitGroupList.map(x => {
-            return x.uid
-          })
+          // 去除默认选中
+//          this.searchData.portraitGroupId = this.portraitGroupList.map(x => {
+//            return x.uid
+//          })
         }
       })
       this.getMonitorList();
@@ -750,37 +767,13 @@
         }
       },
       setDTime() {
-        let curDate = new Date(new Date().toLocaleDateString()).getTime()
+        let date = new Date();
+        let curDate = date.getTime();
         let curS = 1 * 24 * 3600 * 1000;
-        let _s = curDate - curS;
-//        let _e = curDate - 1
-        this.searchData.startTime = _s;
-        this.searchData.endTime = _s;
-      },
-      // 获取离线任务
-      getDataList () {
-        const params = {
-          'where.taskName': this.taskForm.taskName,
-          'where.taskType': 4, //  1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析 4:以图搜人 9：人员侦查报告
-          'where.startTime': this.taskForm.reportTime ? this.taskForm.reportTime[0] : null,
-          'where.endTime': this.taskForm.reportTime ? this.taskForm.reportTime[1] : null,
-          'where.isFinish': this.selectIndex,   //是否完成 0:未完成(包含处理中、处理失败、处理中断) 1：已完成(处理成功)
-          pageNum: this.pagination.pageNum,
-          pageSize: this.pagination.pageSize,
-          order: 'desc',
-          orderBy: 'create_time'
-        };
-        getTaskInfosPage(params)
-            .then(res => {
-              if (res) {
-                res.data.list.forEach(item => {
-                  this.$set(item, 'taskWebParam', JSON.parse(item.taskWebParam))
-                })
-                this.list = res.data.list;
-                this.pagination.total = res.data.total;
-              }
-            })
-            .catch(() => {})
+        let _sDate = new Date(curDate - curS);
+        let _s = _sDate.getFullYear()+ '-' + (_sDate.getMonth() + 1) + '-' + _sDate.getDate() + ' 00:00:00' ;
+        this.searchData.startTime = new Date(_s).getTime();
+        this.searchData.endTime = curDate;
       },
       //获取摄像头卡口信息列表
       getMonitorList() {
@@ -981,6 +974,31 @@
         }
         console.log(fileList)
       },
+      // 获取离线任务
+      getDataList () {
+        const params = {
+          'where.taskName': this.taskForm.taskName,
+          'where.taskType': 4, //  1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析 4:以图搜人 9：人员侦查报告
+          'where.startTime': this.taskForm.reportTime ? this.taskForm.reportTime[0] : null,
+          'where.endTime': this.taskForm.reportTime ? this.taskForm.reportTime[1] : null,
+          'where.isFinish': this.selectIndex,   //是否完成 0:未完成(包含处理中、处理失败、处理中断) 1：已完成(处理成功)
+          pageNum: this.pagination.pageNum,
+          pageSize: this.pagination.pageSize,
+          order: 'desc',
+          orderBy: 'create_time'
+        };
+        getTaskInfosPage(params)
+            .then(res => {
+              if (res) {
+                res.data.list.forEach(item => {
+                  this.$set(item, 'taskWebParam', JSON.parse(item.taskWebParam))
+                })
+                this.list = res.data.list;
+                this.pagination.total = res.data.total;
+              }
+            })
+            .catch(() => {})
+      },
       //tab切换
       selectTab (val) {
         this.selectIndex = val;
@@ -1010,7 +1028,7 @@
         if (this.taskId) {
           const params = {
             uid: this.taskId,
-            taskType: 2, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
+            taskType: 4, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
             taskStatus: 4 // 1：处理中 2：处理成功 3：处理失败 4：处理中断
           };
           this.isInterruptLoading = true;
@@ -1037,7 +1055,7 @@
         if (this.taskId) {
           const params = {
             uid: this.taskId,
-            taskType: 2, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
+            taskType: 4, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
             delFlag: true
           };
           this.isDeleteLoading = true;
@@ -1169,45 +1187,89 @@
           params['deviceIds'] = this.selectCameraArr.map(res => res.id).join(',');
           p1['bayonetIds'] = this.selectBayonetArr.map(res => res.id).join(',');
           params['bayonetIds'] = this.selectBayonetArr.map(res => res.id).join(',');
-          p1['startTime'] = formatDate(this.searchData.startTime, 'yyyy-MM-dd');
-          params['startTime'] = formatDate(this.searchData.startTime, 'yyyy-MM-dd');
-          p1['endTime'] = formatDate(this.searchData.endTime, 'yyyy-MM-dd');
-          params['endTime'] = formatDate(this.searchData.endTime, 'yyyy-MM-dd');
+          p1['startTime'] = formatDate(this.searchData.startTime, 'yyyy-MM-dd HH:mm:ss');
+          params['startTime'] = formatDate(this.searchData.startTime, 'yyyy-MM-dd HH:mm:ss');
+          p1['endTime'] = formatDate(this.searchData.endTime, 'yyyy-MM-dd HH:mm:ss');
+          params['endTime'] = formatDate(this.searchData.endTime, 'yyyy-MM-dd HH:mm:ss');
         }
         if (!boolean) {
           this.searching = true;
         }
-        PortraitGetDispatch(p1)
-            .then(res => {
-              if (res) {
-                if (res.data === 1) {
-                  this.searching = false;
-                  this.addParams = params;
-                  this.addTaskDialog = true;
-                } else if (res.data === 2) {
-                  PortraitPostByphotoRealtime(params)
-                      .then(sRes => {
-                        this.searching = false;
-                        if (sRes) {
-                          this.selectIndex = 2;
-                          this.$set(sRes.data, 'taskResult', JSON.parse(sRes.data.taskResult));
-                          this.strucInfoList = sRes.data.taskResult;
-                          if (this.radio === "1") {
-                            this.isBase = 1;
-                          } else {
-                            this.isBase = 2;
-                            this.changeOrder();
-                          }
-                        }
-                      })
+        // 判断选择的是实时还是离线 taskType 1为实时，2为离线.
+        if (this.taskType === "1") {
+          this.searching = true;
+          PortraitPostByphotoRealtime(params)
+              .then(sRes => {
+                this.searching = false;
+                if (sRes) {
+                  this.selectIndex = 2;
+                  this.$set(sRes.data, 'taskResult', JSON.parse(sRes.data.taskResult));
+                  this.strucInfoList = sRes.data.taskResult;
+                  if (this.radio === "1") {
+                    this.isBase = 1;
+                  } else {
+                    this.isBase = 2;
+                    this.changeOrder();
+                  }
                 } else {
-                  this.searching = false;
+                  this.strucInfoList = [];
                   this.$message.info('抱歉，没有找到匹配结果');
                 }
-              } else {
-                this.searching = false;
+              })
+        } else {
+          if (!this.taskName.replace(/\s+|\s+$/g, '')) {
+            if (!document.querySelector('.el-message--info')) {
+              this.$message.info('任务名称不能为空');
+              return false;
+            }
+          } else {
+            this.searching = true;
+            params.taskName = this.taskName;
+            PortraitPostByphotoTask(params).then(res => {
+              this.searching = false;
+              if (res && res.data) {
+                this.$message({
+                  type: 'success',
+                  message: '新建成功',
+                  customClass: 'request_tip'
+                })
+                this.getDataList()
+                console.log(res.data)
               }
             })
+          }
+        }
+//        PortraitGetDispatch(p1)
+//            .then(res => {
+//              if (res) {
+//                if (res.data === 1) {
+//                  this.searching = false;
+//                  this.addParams = params;
+//                  this.addTaskDialog = true;
+//                } else if (res.data === 2) {
+//                  PortraitPostByphotoRealtime(params)
+//                      .then(sRes => {
+//                        this.searching = false;
+//                        if (sRes) {
+//                          this.selectIndex = 2;
+//                          this.$set(sRes.data, 'taskResult', JSON.parse(sRes.data.taskResult));
+//                          this.strucInfoList = sRes.data.taskResult;
+//                          if (this.radio === "1") {
+//                            this.isBase = 1;
+//                          } else {
+//                            this.isBase = 2;
+//                            this.changeOrder();
+//                          }
+//                        }
+//                      })
+//                } else {
+//                  this.searching = false;
+//                  this.$message.info('抱歉，没有找到匹配结果');
+//                }
+//              } else {
+//                this.searching = false;
+//              }
+//            })
       },
       onConfirmAddTask () {
         if (!this.taskName.replace(/\s+|\s+$/g, '')) {
@@ -1451,9 +1513,9 @@
     .vl_j_left {
       float: left;
       width: 272px;
-      padding-top: 20px;
+      /*padding-top: 20px;*/
       height: calc(100% - 50px);
-      min-height: 763px;
+      min-height: 790px;
       background: #ffffff;
       box-shadow: 2px 3px 10px 0px rgba(131, 131, 131, 0.28);
       animation: fadeInLeft .4s ease-out .3s both;
@@ -1700,10 +1762,12 @@
         padding-left: 20px;
         margin: 20px 0;
         display: flex;
+        height: 40px;
         >span {
           display: block;
           &:first-child {
             width: 90px;
+            line-height: 40px;
           }
         }
       }

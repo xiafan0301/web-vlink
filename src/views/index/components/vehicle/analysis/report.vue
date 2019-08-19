@@ -342,7 +342,7 @@ export default {
 
       pickerOptions: {
         disabledDate (d) {
-          return d > new Date() || (d.getTime() < new Date().getTime() - 30 * 24 * 60 * 60 * 1000);
+          return d > new Date();
         }
       }
     }

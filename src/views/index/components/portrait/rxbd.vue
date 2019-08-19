@@ -329,7 +329,7 @@
         let _ids = [];
         this.choosedHisPic.forEach(x => {
           _ids.push(x.uid)
-          if (index === 1) {
+          if (index === 1) {``
             this.curImageUrl = x.path;
             this.imgData.imgOne = x;
           } else {
@@ -357,7 +357,7 @@
               .then(res => {
                 this.compLoading = false;
                 if (res) {
-                  this.compSim = res.data;
+                  this.compSim = res.data.toFixed(2) + ' %';
                   if (res.data < 60) {
                     this.compSimWord = '极不可能是一个人'
                   } else if (res.data < 80) {
