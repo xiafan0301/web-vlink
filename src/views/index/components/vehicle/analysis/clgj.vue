@@ -393,8 +393,10 @@
         this.evData.forEach((x, index)  => {
           let path = [];
           x.traceList.forEach(y => {
-            let _path = [y.shotPlaceLongitude, y.shotPlaceLatitude];
-            path.push(_path);
+            if (y.shotPlaceLatitude && y.shotPlaceLongitude) {
+              let _path = [y.shotPlaceLongitude, y.shotPlaceLatitude];
+              path.push(_path);
+            }
           })
           var polyline = new window.AMap.Polyline({
             path: path,
