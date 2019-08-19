@@ -144,32 +144,12 @@ export default {
       },
       pickerOptions: {
         disabledDate: time => {
-          if (this.queryForm.endTime) {
-            return (
-              time.getTime() > new Date(this.queryForm.endTime).getTime() ||
-              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90
-            );
-          } else {
-            return (
-              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90 ||
-              time.getTime() > new Date().getTime()
-            );
-          }
+          return time > new Date();
         }
       },
       pickerOptions1: {
         disabledDate: time => {
-          if (this.queryForm.startTime) {
-            return (
-              time.getTime() < new Date(this.queryForm.startTime).getTime() ||
-              time.getTime() > new Date().getTime()
-            );
-          } else {
-            return (
-              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 30 ||
-              time.getTime() > new Date().getTime()
-            );
-          }
+          return time > new Date();
         }
       },
       provinceList: [],
