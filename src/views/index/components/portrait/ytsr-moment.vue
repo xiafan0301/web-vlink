@@ -60,7 +60,7 @@
       <div class="ytsr_left_search" v-show="radio === '1'">
         <el-select
                 v-model="searchData.portraitGroupId"
-                placeholder="选择人员组"
+                placeholder="全部人像"
                 multiple
                 collapse-tags
         >
@@ -725,9 +725,10 @@
       getGroups({groupType: 4}).then(res => {
         if (res) {
           this.portraitGroupList = res.data;
-          this.searchData.portraitGroupId = this.portraitGroupList.map(x => {
-            return x.uid
-          })
+          // 去除默认选中
+//          this.searchData.portraitGroupId = this.portraitGroupList.map(x => {
+//            return x.uid
+//          })
         }
       })
       this.getMonitorList();
@@ -773,31 +774,6 @@
         let _s = _sDate.getFullYear()+ '-' + (_sDate.getMonth() + 1) + '-' + _sDate.getDate() + ' 00:00:00' ;
         this.searchData.startTime = new Date(_s).getTime();
         this.searchData.endTime = curDate;
-      },
-      // 获取离线任务
-      getDataList () {
-        const params = {
-          'where.taskName': this.taskForm.taskName,
-          'where.taskType': 4, //  1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析 4:以图搜人 9：人员侦查报告
-          'where.startTime': this.taskForm.reportTime ? this.taskForm.reportTime[0] : null,
-          'where.endTime': this.taskForm.reportTime ? this.taskForm.reportTime[1] : null,
-          'where.isFinish': this.selectIndex,   //是否完成 0:未完成(包含处理中、处理失败、处理中断) 1：已完成(处理成功)
-          pageNum: this.pagination.pageNum,
-          pageSize: this.pagination.pageSize,
-          order: 'desc',
-          orderBy: 'create_time'
-        };
-        getTaskInfosPage(params)
-            .then(res => {
-              if (res) {
-                res.data.list.forEach(item => {
-                  this.$set(item, 'taskWebParam', JSON.parse(item.taskWebParam))
-                })
-                this.list = res.data.list;
-                this.pagination.total = res.data.total;
-              }
-            })
-            .catch(() => {})
       },
       //获取摄像头卡口信息列表
       getMonitorList() {
@@ -998,6 +974,31 @@
         }
         console.log(fileList)
       },
+      // 获取离线任务
+      getDataList () {
+        const params = {
+          'where.taskName': this.taskForm.taskName,
+          'where.taskType': 4, //  1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析 4:以图搜人 9：人员侦查报告
+          'where.startTime': this.taskForm.reportTime ? this.taskForm.reportTime[0] : null,
+          'where.endTime': this.taskForm.reportTime ? this.taskForm.reportTime[1] : null,
+          'where.isFinish': this.selectIndex,   //是否完成 0:未完成(包含处理中、处理失败、处理中断) 1：已完成(处理成功)
+          pageNum: this.pagination.pageNum,
+          pageSize: this.pagination.pageSize,
+          order: 'desc',
+          orderBy: 'create_time'
+        };
+        getTaskInfosPage(params)
+            .then(res => {
+              if (res) {
+                res.data.list.forEach(item => {
+                  this.$set(item, 'taskWebParam', JSON.parse(item.taskWebParam))
+                })
+                this.list = res.data.list;
+                this.pagination.total = res.data.total;
+              }
+            })
+            .catch(() => {})
+      },
       //tab切换
       selectTab (val) {
         this.selectIndex = val;
@@ -1027,7 +1028,7 @@
         if (this.taskId) {
           const params = {
             uid: this.taskId,
-            taskType: 2, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
+            taskType: 4, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
             taskStatus: 4 // 1：处理中 2：处理成功 3：处理失败 4：处理中断
           };
           this.isInterruptLoading = true;
@@ -1054,7 +1055,7 @@
         if (this.taskId) {
           const params = {
             uid: this.taskId,
-            taskType: 2, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
+            taskType: 4, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
             delFlag: true
           };
           this.isDeleteLoading = true;
@@ -1514,7 +1515,7 @@
       width: 272px;
       /*padding-top: 20px;*/
       height: calc(100% - 50px);
-      min-height: 763px;
+      min-height: 790px;
       background: #ffffff;
       box-shadow: 2px 3px 10px 0px rgba(131, 131, 131, 0.28);
       animation: fadeInLeft .4s ease-out .3s both;
