@@ -285,7 +285,7 @@
     }
   }
 </script>
-<style lang="less">
+<style lang="scss">
   .struc_detail_dialog_qypz {
     .el-dialog {
       max-width: 13.06rem;
