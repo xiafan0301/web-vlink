@@ -158,7 +158,7 @@ export default {
   components: {noResult, vehicleDetail},
   data () {
     return {
-      isInitPage: false,
+      isInitPage: true,
       queryForm: {
         startTime: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)),
         endTime: new Date(),
@@ -208,7 +208,7 @@ export default {
   mounted () {
     this.getListBayonet();
     this.getGroupsByType();
-    this.getControlCarSta();
+    // this.getControlCarSta();
   },
   methods: { 
     // 获取到车辆类别
@@ -295,7 +295,8 @@ export default {
             total: res.data.length,
             pageSize: 10,
             pageNum: 1
-          }
+          };
+          this.isInitPage = false;
         }
       }).finally(() => {
         this.loadingBtn = false;
@@ -401,6 +402,9 @@ export default {
         top: -6px;
       }
     }
+  }
+  .not_content > p{
+    font-size: 16px;
   }
 }
 </style>

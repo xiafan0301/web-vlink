@@ -536,6 +536,17 @@ export default {
       return arr;
     }
   },
+  watch: {
+    // 当接口返回省市区数据后才能用详情数据回填卡口地址信息
+    areaDataList (val) {
+      if (val && val.length > 0 && this.pageType === 2) {
+        const addr = this.getCascaderObj3(this.basicInfoForm.areaId, val);
+        this.resAddress = addr && addr.map(m => m.cname).join('');
+        this.basicInfoForm.bayonetAddress = addr && addr.map(m => m.uid);
+        this.basicInfoForm.address = addr && this.bayonetDetail.bayonetAddress.replace(addr.map(m => m.cname).join(''), '');
+      }
+    }
+  },
   created () {
     this.getAreaDataList();
   },
@@ -544,7 +555,10 @@ export default {
     this.pageType = parseInt(this.$route.query.type);
     this.resetMap();
     this.getDepartList();
-    
+    if (this.pageType === 2) {
+      this.bayonetId = this.$route.query.bayonetId;
+      this.getBayonetDetail();
+    }
   },
   methods: {
     // 获取省市区县信息
@@ -555,11 +569,6 @@ export default {
           if (res && res.data) {
             const data = this.handleAreaData(res.data.childList);
             this.areaDataList = data;
-
-            if (this.pageType === 2) {
-              this.bayonetId = this.$route.query.bayonetId;
-              this.getBayonetDetail();
-            }
           }
         })
     },
@@ -753,10 +762,6 @@ export default {
           const data = res.data;
           // 回填卡口基本信息
           this.basicInfoForm.areaId = data.areaId;
-          const addr = this.getCascaderObj3(this.basicInfoForm.areaId, this.areaDataList);
-          this.resAddress = addr && addr.map(m => m.cname).join('');
-          this.basicInfoForm.bayonetAddress = addr && addr.map(m => m.uid);
-          this.basicInfoForm.address = addr && data.bayonetAddress.replace(addr.map(m => m.cname).join(''), '');
           this.basicInfoForm.bayonetName = data.bayonetName;
           this.basicInfoForm.bayonetNum = data.bayonetNo;
           this.basicInfoForm.bayonetCode = data.bayonetCode;
