@@ -558,7 +558,7 @@ export default {
       this.$nextTick(() => {
         this.checkAllTree = true;
         this.handleCheckedAll(true);
-        this.getStrucInfo();
+        // this.getStrucInfo();
       });
     },
     getMonitorList() {

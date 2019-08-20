@@ -122,10 +122,10 @@
                       <span v-else-if="item.vehicleColor">{{ '车辆颜色:' + item.name }}</span>
                       <!-- 车辆类型 -->
                       <span v-else-if="item.vehicleClass">{{ '车辆类型:' + item.name }}</span>
-                      <!-- 号牌类型 -->
+                      <!-- 车牌类型 -->
                       <span
                         v-else-if="item.plateClass || item.plateClass === 0"
-                      >{{ '号牌类型:' + dicFormater(45, item.name) }}</span>
+                      >{{ '车牌类型:' + dicFormater(45, item.name) }}</span>
                       <!-- <span v-else>{{item.name}}</span> -->
                     </div>
                     <!-- 没有特征 -->
@@ -138,7 +138,7 @@
                   <el-select
                     v-model="tzscMenuForm.licenseColor"
                     class="width232"
-                    placeholder="选择号牌颜色"
+                    placeholder="选择车牌颜色"
                     clearable
                   >
                     <el-option
@@ -193,14 +193,14 @@
                   <el-select
                     v-model="tzscMenuForm.licenseType"
                     class="width232"
-                    placeholder="选择号牌类型"
+                    placeholder="选择车牌类型"
                     clearable
                   >
                     <el-option
                       v-for="item in plateClassOptions"
                       :key="'licenseType' + item.enumField"
                       :label="item.enumValue"
-                      :value="item.enumValue"
+                      :value="item.enumField"
                     ></el-option>
                   </el-select>
                 </el-form-item>
@@ -432,8 +432,8 @@ export default {
         }
       },
       /* 自定义特征下拉框数组 */
-      plateClassOptions: [], // 号牌类型
-      plateColorOptions: [], // 号牌颜色
+      plateClassOptions: [], // 车牌类型
+      plateColorOptions: [], // 车牌颜色
       vehicleClassOptions: [], // 车辆类型
       vehicleColorOptions: [], // 车辆颜色
       carModelOptions: [], // 车辆型号
@@ -456,7 +456,7 @@ export default {
         "vehicleModel", // 汽车的型号(vehicleStyles)
         "vehicleColor", // 汽车颜色
         "vehicleClass", // 汽车类型（越野啥的）
-        "plateClass" // 号牌类型
+        "plateClass" // 车牌类型
       ],
       options: [
         {
@@ -556,8 +556,13 @@ export default {
       this.plateColorOptions = this.dicFormater(46)[0].dictList;
       this.vehicleClassOptions = this.dicFormater(44)[0].dictList;
       this.vehicleColorOptions = this.dicFormater(47)[0].dictList;
+
+      // console.log('车牌类别', this.plateClassOptions);
+      // console.log('车牌类别1', this.plateColorOptions);
+      // console.log('车牌类别2', this.vehicleClassOptions);
+      // console.log('车牌类别3', this.vehicleColorOptions);
+
       getVehicleList().then(res => {
-        // console.log("联动数据", res);
         this.carModelOptions = res.data.map(item => {
           item.value = item.brand;
           item.label = item.brand;
@@ -589,8 +594,8 @@ export default {
             endTime: this.tzscMenuForm.endTime, // 结束时间
             deviceUid: deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
             bayonetUid: bayonetUidArr.length > 0 ? bayonetUidArr.join() : null, // 卡口标识
-            plateClass: this.tzscMenuForm.licenseType || null, // 号牌类型
-            plateColor: this.tzscMenuForm.licenseColor || null, // 号牌颜色
+            plateClass: this.tzscMenuForm.licenseType || null, // 车牌类型
+            plateColor: this.tzscMenuForm.licenseColor || null, // 车牌颜色
             vehicleClass: this.tzscMenuForm.carType || null, // 车辆类型
             vehicleColor: this.tzscMenuForm.carColor || null, // 车辆颜色
             // "sunvisor": this.tzscMenuForm.sunVisor || null, // 遮阳板
@@ -617,7 +622,7 @@ export default {
         });
         for (let i = 0; i < selectedArr.length; i++) {
           if (selectedArr[i].plateClass) {
-            // 号牌类型
+            // 车牌类型
             queryParams["where"].plateClass = selectedArr[i].plateClass;
           }
           if (selectedArr[i].plateColor) {

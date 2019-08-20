@@ -240,7 +240,49 @@ export function getShotNumAreaDetail(data) {
   })
 }
 
-/*-------------------------- 区域人员分析start -------------------------------*/
+/**
+ * dispatchRealtime
+ * 区域分析实时/离线判断接口(web)
+ * @param {object} data
+ */
+export function dispatchRealtime(data) {
+  return request({
+    url: '/portrait/shot-num/area/dispatch/web',
+    method: 'post',
+    mode: 'judge',
+    data
+  })
+}
+
+/**
+ * getPortraitRealtime
+ * 区域分析实时查询接口(web)
+ * @param {object} data
+ */
+export function getPortraitRealtime(data) {
+  return request({
+    url: '/portrait/shot-num/area/real-time/web',
+    method: 'post',
+    mode: 'judge',
+    data
+  })
+}
+
+/**
+ * addOffLineTask
+ * 新建区域分析离线分析任务接口(Web)
+ * @param {object} data
+ */
+export function addOffLineTask(data) {
+  return request({
+    url: '/portrait/shot-num/area/task/web',
+    method: 'post',
+    mode: 'judge',
+    data
+  })
+}
+
+/*-------------------------- 区域人员分析end -------------------------------*/
 /**
  * postPeopleTask
  * 新增行人同行分析任务
