@@ -167,13 +167,13 @@ export default {
             thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
             // uid: '' //  附件标识
           };
-          this.picSubmit();
           // this.curImageUrl = x.path;
           if (this.$store.state.loginUser && this.$store.state.loginUser.uid) {
             this.currentImg.contentUid = this.$store.state.loginUser.uid;
             JtcPOSTAppendixInfo(this.currentImg).then(jRes => {
               if (jRes) {
                 this.currentImg['uid'] = jRes.data;
+                this.picSubmit();
               }
             })
           }

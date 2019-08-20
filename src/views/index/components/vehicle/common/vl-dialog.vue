@@ -65,9 +65,9 @@
           </div>
         </div>
         <div class="struc_t_btn" v-show="btnList.length">
-          <template v-for="item in btnList">
-            <a class="is_active" @click="pageJump(sturcDetail, item)" v-if="!item.disabled">{{item.label}}</a>
-            <a class="disabled"  v-else>{{item.label}}</a>
+          <template v-for="(item, index) in btnList">
+            <a class="is_active" @click="pageJump(sturcDetail, item)" v-if="!item.disabled" :key="'btn_list_' + index">{{item.label}}</a>
+            <a class="disabled" :key="'btn_list_' + index"  v-else>{{item.label}}</a>
           </template>
         </div>
 

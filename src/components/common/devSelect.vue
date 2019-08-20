@@ -12,7 +12,7 @@
       placeholder="请选择卡口">
       <el-option :value="devIdData[0]" :label="devIdData[0] && devIdData[0].label"></el-option>
     </el-select>
-    <div class="search_item" :style="{'height': isShowSelectList ? '160px' : '0px'}">
+    <div class="search_item" :style="{'height': isShowSelectList ? '200px' : '0px'}">
       <vue-scroll>
         <el-checkbox style="padding-left: 24px;padding-top: 10px;" v-model="checked" @change="isCheckedAll">全选</el-checkbox>
         <el-tree
@@ -22,7 +22,7 @@
           ref="selectTree"
           @check-change="changeSeletedStatus"
           show-checkbox
-          node-key="label">
+          node-key="id">
         </el-tree>
       </vue-scroll>
     </div>
@@ -81,6 +81,7 @@ export default {
         if (res) {
           this.treeList = [res.data];
           this.treeList = this.transformTreeList(this.treeList);//改造成所需要的树结构
+          console.log(this.treeList)
           this.selectNum = this.getDevTotal(this.treeList);//获取设备和卡口总数
           this.checked = true;
           this.$nextTick(() => {
