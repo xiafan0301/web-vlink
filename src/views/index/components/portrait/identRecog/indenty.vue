@@ -134,10 +134,8 @@ export default {
   methods: {
     uploadEmit (data) {
       console.log('uploadEmit data', data);
-      if (data && data.path) {
-        setTimeout(() => {
-          this.uploadImgId = data.uid;
-        }, 500)
+      if (data) {
+        this.uploadImgId = data.uid;
       } else {
         this.uploadImgId = null;
       }
@@ -158,7 +156,6 @@ export default {
       this.$refs[form].validate(valid => {
         if (valid) {
           this.dataDetail = null;
-
           if (!this.uploadImgId || !this.searchForm.idNo) {
             if (!document.querySelector('.el-message--info')) {
               this.$message.info('请输入图片和证件号');
