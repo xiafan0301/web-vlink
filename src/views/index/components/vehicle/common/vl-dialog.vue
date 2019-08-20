@@ -128,7 +128,7 @@
         *
     * */
     name: 'VlDialog',
-    props: {
+    /* props: {
       detailData: {
         type: Object,
         default: () => {}
@@ -163,7 +163,7 @@
           }
         }
       }
-    },
+    }, */
     components: {flvplayer},
     data() {
       return {
