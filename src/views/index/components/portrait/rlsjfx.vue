@@ -96,8 +96,9 @@
               range-separator="至"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
-              value-format="yyyy-MM-dd HH:mm:ss"
-              :default-time="['00:00:00', '23:59:59']">
+              format="yyyy-MM-dd"
+              value-format="yyyy-MM-dd"
+            >
             </el-date-picker>
             <div>
               <el-button class="reset_btn" @click="resetFaceSnapForm">重置</el-button>
@@ -142,8 +143,8 @@
               range-separator="至"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
-              value-format="yyyy-MM-dd HH:mm:ss"
-              :default-time="['00:00:00', '23:59:59']">
+              format="yyyy-MM-dd"
+              value-format="yyyy-MM-dd">
             </el-date-picker>
             <div>
               <el-button class="reset_btn" @click="resetFaceControlDate">重置</el-button>
@@ -179,14 +180,16 @@
   </div>
 </template>
 <script>
-let startTime = formatDate(new Date(new Date(new Date().toLocaleDateString())).getTime() - 24*60*60*1000, 'yyyy-MM-dd HH:mm:ss');
-let endTime = formatDate(new Date(new Date(new Date().toLocaleDateString())).getTime() - 1, 'yyyy-MM-dd HH:mm:ss');
+import {formatDate, dateOrigin} from '@/utils/util.js';
+// let startTime = formatDate(new Date(new Date(new Date().toLocaleDateString())).getTime() - 24*60*60*1000, 'yyyy-MM-dd HH:mm:ss');
+// let endTime = formatDate(new Date(new Date(new Date().toLocaleDateString())).getTime() - 1, 'yyyy-MM-dd HH:mm:ss');
+let startTime = formatDate(dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)), 'yyyy-MM-dd');
+let endTime = formatDate(dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)), 'yyyy-MM-dd');
 import vehicleBreadcrumb from './breadcrumb.vue';
 import devSelect from '@/components/common/devSelect.vue';
 import G2 from '@antv/g2';
 import { View } from '@antv/data-set';
 import {apiFaceTotal, apiFaceSnap, apiFaceWarning} from '@/views/index/api/api.portrait.js';
-import {formatDate} from '@/utils/util.js';
 export default {
   components: {vehicleBreadcrumb, devSelect},
   data () {
@@ -325,8 +328,8 @@ export default {
       const params = {
         deviceIds: this.faceSnapForm.devIdData.selSelectedData1.map(m => m.id).join(','),
         bayonetIds: this.faceSnapForm.devIdData.selSelectedData2.map(m => m.id).join(','),
-        startTime: this.faceSnapForm.queryDate[0],
-        endTime: this.faceSnapForm.queryDate[1]
+        startTime: this.faceSnapForm.queryDate[0] + ' 00:00:00',
+        endTime: this.faceSnapForm.queryDate[1] + ' 23:59:59'
       }
       this.loadingBtn1 = true;
       apiFaceSnap(params).then(res => {
@@ -351,8 +354,8 @@ export default {
     // 获取人脸布控告警数据分析
     getFaceControlSta () {
       const params = {
-        startTime: this.faceControlQueryDate[0],
-        endTime: this.faceControlQueryDate[1],
+        startTime: this.faceControlQueryDate[0] + ' 00:00:00',
+        endTime: this.faceControlQueryDate[1] + ' 23:59:59',
       }
       this.loadingBtn2 = true;
       apiFaceWarning(params).then(res => {
