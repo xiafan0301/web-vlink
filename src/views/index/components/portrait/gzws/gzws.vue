@@ -613,7 +613,7 @@ export default {
                 });
                 // this.dataList = res.data;
                 this.isAddLoading = false;
-                this.addTaskDialog = false;
+                // this.addTaskDialog = false;
 
                 this.getDataList();
               } else {
