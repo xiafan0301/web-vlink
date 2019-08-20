@@ -65,15 +65,15 @@
           </div>
         </div>
         <div class="struc_t_btn" v-show="btnList.length">
-          <template v-for="item in btnList">
-            <a class="is_active" @click="pageJump(sturcDetail, item)" v-if="!item.disabled">{{item.label}}</a>
-            <a class="disabled"  v-else>{{item.label}}</a>
+          <template v-for="(item, index) in btnList">
+            <a class="is_active" @click="pageJump(sturcDetail, item)" v-if="!item.disabled" :key="'btn_list_' + index">{{item.label}}</a>
+            <a class="disabled" :key="'btn_list_' + index"  v-else>{{item.label}}</a>
           </template>
         </div>
 
       </div>
       <div v-show="strucCurTab === 2" class="struc_c_address">
-        <div id="capMap"></div>
+        <div class="vl_dlg_capMap" :id="capMapId"></div>
       </div>
       <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
         <div class="struc_c_d_qj struc_c_d_img">
@@ -167,6 +167,7 @@
     components: {flvplayer},
     data() {
       return {
+        capMapId: 'capMap_' + new Date().getTime(),
         playerData: null,
         swiperOption: {
           slidesPerView: 10,
@@ -210,7 +211,7 @@
         console.log(data)
         if (!this.amap) {
           // 地图不存在 初始化地图
-          let map = new window.AMap.Map("capMap", {
+          let map = new window.AMap.Map(this.capMapId, {
             center:mapXupuxian.center,
             zoom: 16
           });
@@ -513,7 +514,7 @@
       }
       .struc_c_address {
         height: 100%;
-        #capMap {
+        .vl_dlg_capMap {
           width:  100%;
           height: 100%;
         }
