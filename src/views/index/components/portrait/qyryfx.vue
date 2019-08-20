@@ -26,7 +26,7 @@
                 <el-select
                   class="width232"
                   v-model="qyryfxFrom.personGroupId"
-                  placeholder="选择分析人群"
+                  placeholder="请选择分析人群"
                   multiple
                   collapse-tags
                 >
@@ -39,7 +39,7 @@
                 </el-select>
               </el-form-item>
               <el-form-item prop="sex">
-                <el-select class="width232" v-model="qyryfxFrom.sex" placeholder="选择性别">
+                <el-select class="width232" v-model="qyryfxFrom.sex" placeholder="请选择性别">
                   <el-option
                     v-for="item in peopleSexOptions"
                     :key="item.enumField"
@@ -52,7 +52,7 @@
                 <el-select
                   class="width232"
                   v-model="qyryfxFrom.age"
-                  placeholder="选择年龄段"
+                  placeholder="请选择年龄段"
                   multiple
                   collapse-tags
                 >
@@ -91,17 +91,22 @@
               </el-form-item>
               <el-form-item class="area_select">
                 <span class="area_title">抓拍区域:</span>
-                <span class="area_map_select" @click="showMapDialog" >地图区域选择</span>
+                <template v-if="isDisabledSelect">
+                  <span class="area_map_select area_map_disabled_select">地图区域选择</span>
+                </template>
+                <template v-else>
+                  <span class="area_map_select" @click="showMapDialog" >地图区域选择</span>
+                </template>
                 <div class="divide"></div>
               </el-form-item>
               <div class="area_list">
                 <ul>
                   <li v-for="(item, index) in selectAreaDataList" :key="index">
                     <div class="area_list_title">
-                      <span>区域{{index + 1}}</span>
+                      <span>区域{{item.index}}</span>
                       <div class="area_list_btn">
-                        <i class="vl_icon vl_icon_position_1" @click="showCurrentMapArea(index)"></i>
-                        <i class="vl_icon vl_icon_manage_8" @click="deleteSelectArea(index)"></i>
+                        <i class="vl_icon vl_icon_position_1" @click="showCurrentMapArea(item.index)"></i>
+                        <i class="vl_icon vl_icon_manage_8" @click="deleteSelectArea(item.index)"></i>
                       </div>
                     </div>
                     <div class="area_list_time">
@@ -234,7 +239,7 @@
               <el-table-column label="创建时间" prop="createTime" show-overflow-tooltip></el-table-column>
               <el-table-column label="区域数量" prop="taskWebParam" show-overflow-tooltip>
                 <template slot-scope="scope">
-                  <span>{{scope.row.taskWebParam.startTime}} - {{scope.row.taskWebParam.endTime}}</span>
+                  <span>{{scope.row.taskWebParam.deviceAndTimeList && scope.row.taskWebParam.deviceAndTimeList.length}}</span>
                 </template>
               </el-table-column>
               <el-table-column label="人群" prop="personGroupId" show-overflow-tooltip>
@@ -404,7 +409,7 @@
 import vlBreadcrumb from "@/components/common/breadcrumb.vue";
 import mapSelector from '@/components/common/mapSelector.vue';
 import noResult from '@/components/common/noResult.vue';
-import swiper from "vue-awesome-swiper";
+// import swiper from "vue-awesome-swiper";
 import { mapXupuxian } from "@/config/config.js";
 import { formatDate, dateOrigin } from "@/utils/util.js";
 import {
@@ -417,9 +422,9 @@ import {
 } from "@/views/index/api/api.judge.js";
 import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
 import { getGroupAllList } from "@/views/index/api/api.control.js";
-import { validatePersonNum, validateInteger } from "@/utils/validator.js";
-import { random14, objDeepCopy } from "@/utils/util.js";
-import { constants } from "crypto";
+// import { validatePersonNum, validateInteger } from "@/utils/validator.js";
+import { objDeepCopy } from "@/utils/util.js";
+// import { constants } from "crypto";
 
 export default {
   components: { vlBreadcrumb, mapSelector, noResult },
@@ -488,10 +493,10 @@ export default {
       },
       peopleGroupOptions: [], // 分析人群下拉
       peopleSexOptions: [
-        {
-          enumField: null,
-          enumValue: "全部"
-        },
+        // {
+        //   enumField: null,
+        //   enumValue: "全部"
+        // },
         {
           enumField: "男",
           enumValue: "男"
@@ -540,13 +545,16 @@ export default {
       selectAreaDataList: [], // 左侧选中的区域信息
       taskList: [], // 任务列表
       taskId: null, // 要操作的任务id
-      markerList: []
+      markerList: [],
+      isDisabledSelect: false, // 是否还能区域选择
     };
   },
   watch: {
     selectAreaDataList (val) {
-      if (val.length === 5) {
-
+      if (val.length >= 5) {
+        this.isDisabledSelect = true;
+      } else {
+        this.isDisabledSelect = false;
       }
     }
   },
@@ -595,7 +603,7 @@ export default {
                 })
               })
               if (personGroupIdName.length > 0) {
-                item.taskWebParam.personGroupId = personGroupIdName;
+                item.taskWebParam.personGroupId = personGroupIdName.join('、');
               }
             })
 
@@ -680,7 +688,7 @@ export default {
     },
     // 跳至分析结果页面
     skipResultPage (obj) {
-      this.$router.push({name: 'portrait_qyryfx_result', query: { result: obj.taskResult, param: JSON.stringify(obj.taskWebParam) }});
+      this.$router.push({name: 'portrait_qyryfx_result', query: { taskId: obj.uid, result: obj.taskResult, param: JSON.stringify(obj.taskWebParam) }});
     },
     // 显示地图区域选择弹出框
     showMapDialog () {
@@ -693,14 +701,11 @@ export default {
     },
     // 显示相对应的地图框选区域
     showCurrentMapArea (index) {
-      console.log(index)
-      console.log('kkkkkkkkkkkkkkkkkkkkkk')
+      console.log('index', index)
       this.isShowMapAreaDialog = true;
       if (this.isShowMapAreaDialog) {
-        console.log('asdasdasdasdasd')
-        switch ((index + 1)) {
+        switch (index) {
           case 1:
-            console.log('asdasdasd')
             this.selectMapType = 1;
             this.mapDialogVisible1 = !this.mapDialogVisible1;
             break;
@@ -727,7 +732,6 @@ export default {
       }
     },
     handleSelectType (index) {
-      console.log('nnnmajsadwqewe')
       switch (index) {
         case 1:
           this.mapDialogVisible1 = !this.mapDialogVisible1;
@@ -750,9 +754,11 @@ export default {
     },
     // 删除某个选中的区域
     deleteSelectArea (index) {
-      this.selectAreaDataList.splice(index, 1);
+      console.log('index', index);
+      console.log('selectMapType', this.selectMapType)
+      this.selectAreaDataList.splice((index - 1), 1);
       this.isShowMapAreaDialog = false;
-      // this.selectMapType--;
+      // this.selectMapType = index;
     },
     // 获取地图选择的数据
     mapPoint (data) {
@@ -769,13 +775,14 @@ export default {
           })
         }
         const obj = { 
-          // index: 
+          index: this.selectMapType,
           startTime: formatDate(this.qyryfxFrom.startTime),
           endTime: formatDate(this.qyryfxFrom.endTime),
           deviceList: data.deviceList,
           bayonetList: data.bayonetList,
           allDeviceNameList: allDeviceNameList.length > 0 ? allDeviceNameList : null
         }
+        console.log('obj', obj)
         this.selectAreaDataList.push(obj);
       }
     },
@@ -892,27 +899,29 @@ export default {
               ];
             }
           });
-          // const queryParams = {
-          //   sex: this.qyryfxFrom.sex,
-          //   age: this.qyryfxFrom.age !== "" ? this.qyryfxFrom.age.join() : "",
-          //   personGroupId:
-          //     this.qyryfxFrom.personGroupId !== ""
-          //       ? this.qyryfxFrom.personGroupId.join()
-          //       : "",
-          //   deviceAndTimeList: deviceAndTimeList,
-          //   taskName: this.qyryfxFrom.taskName
-          // };
-           const queryParams = {
-            deviceAndTimeList: [
-              {
-                deviceIds: "27",
-                startTime: "2019-08-12 12:00:00",
-                endTime: "2019-08-12 23:00:00"
-              }
-            ],
-            personGroupId: "1lwx3mJIbdF4c4vEgpyLk0",
-            // taskName: "webTest222222"
+          const queryParams = {
+            sex: this.qyryfxFrom.sex,
+            age: this.qyryfxFrom.age !== "" ? this.qyryfxFrom.age.join() : "",
+            personGroupId:
+              this.qyryfxFrom.personGroupId !== ""
+                ? this.qyryfxFrom.personGroupId.join()
+                : "",
+            deviceAndTimeList: deviceAndTimeList,
+            taskName: this.qyryfxFrom.taskName
           };
+          //  const queryParams = {
+          //   deviceAndTimeList: [
+          //     {
+          //       deviceIds: "27",
+          //       startTime: "2019-08-12 12:00:00",
+          //       endTime: "2019-08-12 23:00:00"
+          //     }
+          //   ],
+          //   age: '青年,少年',
+          //   sex: '男',
+          //   personGroupId: "1lwx3mJIbdF4c4vEgpyLk0",
+          //   taskName: "webTestvvvvv111111"
+          // };
           console.log('queryParams', queryParams)
 
           this.submitLoading = true; // 打开加载效果
@@ -1059,43 +1068,43 @@ export default {
       // } else {
         for (let i = 0; i < this.listDevice.length; i++) {
           const listItem = this.listDevice[i];
-          let flag = false;
+          // let flag = false;
           for (let j = 0; j < deviceList.length; j++) {
             const deviceItem = deviceList[j];
             if (deviceItem.groupName === listItem.viewClassCode) {
               console.log('1')
-              flag = true;
-              this.doMark(listItem, deviceItem, "vl_icon vl_icon_sxt", false);
+              // flag = true;
+              this.doMark( deviceItem, "vl_icon vl_icon_sxt");
               break;
             }
           }
-          if (!flag) {
-            console.log('2')
-            this.doMark(this.listDevice[i], null, "vl_icon vl_icon_sxt");
-          }
+          // if (!flag) {
+          //   console.log('2')
+          //   this.doMark(this.listDevice[i], null, "vl_icon vl_icon_sxt");
+          // }
         }
         for (let i = 0; i < this.listBayonet.length; i++) {
           const listItem = this.listBayonet[i];
-          let flag = false;
+          // let flag = false;
           for (let j = 0; j < deviceList.length; j++) {
             const deviceItem = deviceList[j];
             if (deviceItem.groupName === listItem.viewClassCode) {
               console.log('3')
-              this.doMark(listItem, deviceItem, "vl_icon vl_icon_kk", false);
-              flag = true;
+              this.doMark(deviceItem, "vl_icon vl_icon_kk");
+              // flag = true;
               break;
             }
           }
-          if (!flag) {
-            console.log('4')
-            this.doMark(this.listBayonet[i], null, "vl_icon vl_icon_kk");
-          }
+          // if (!flag) {
+          //   console.log('4')
+          //   this.doMark(this.listBayonet[i], null, "vl_icon vl_icon_kk");
+          // }
         }
       // }
     },
     // 地图标记
-    doMark(obj, device, sClass) {
-      console.log('obj', obj)
+    doMark(device, sClass) {
+      // console.log('obj', obj)
       console.log('obj', device)
       let marker;
       if (device.shotNum > 0) {
@@ -1117,7 +1126,7 @@ export default {
         marker = new window.AMap.Marker({
           // 添加自定义点标记
           map: this.amap,
-          position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+          position: [device.shotPlaceLongitude, device.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
           offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
           draggable: false, // 是否可拖动
           // extData: obj,
@@ -1161,11 +1170,17 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+/deep/ .el-form-item__error {
+  position: static;
+  line-height: 20px;
+  padding-top: 0;
+  margin-bottom: -10px;
+}
 @mixin close_menu {
   position: absolute;
   top: calc(50% - 81px);
   font-size: 24px;
-  box-shadow: 0px 0px 4px 0px rgba (0, 0, 0, 0.1);
+  box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   z-index: 99;
 }
@@ -1341,33 +1356,6 @@ export default {
               }
             }
           }
-          // .add_area {
-          //   width: 100%;
-          //   margin: -10px 0 10px 0;
-          //   .divide {
-          //     width: 100%;
-          //     height: 1px;
-          //     margin-top: 10px;
-          //     border: 1px dashed #F2F2F2;
-          //   }
-          //   .operation_area {
-          //     margin-left: 25%;
-          //     width: 100px;
-          //     justify-content: center;
-          //     display: flex;
-          //     align-items: center;
-          //     color: #0B6FF8;
-          //     >i {
-          //       font-size: 20px;
-          //       cursor: pointer;
-          //     }
-          //     >span {
-          //       margin-left:5px;
-          //       cursor: pointer;
-          //     }
-          //   }
-          //   // line-height: 20px;
-          // }
           /deep/ .el-form-item {
             margin-bottom: 10px;
           }
@@ -1400,6 +1388,10 @@ export default {
               color: #0C70F8;
               margin-left: 5px;
               cursor: pointer;
+            }
+            .area_map_disabled_select {
+              cursor: auto;
+              color: #999999;
             }
             .divide {
               width: 100%;
