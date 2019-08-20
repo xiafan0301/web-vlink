@@ -407,7 +407,7 @@ export default {
       interruptDialog: false,    //中断任务
       isLoading: false,
       taskObj: '',     //单个列表任务
-      portrailInfoDto: {},
+      portrailInfoDto: null,
       repertoryGroupDto: {repertories: [], groups:[{groupName: 'kkk'}]},
       analysisTaskInfoWithBLOBsList: [],
       taskResult: [],
@@ -416,6 +416,7 @@ export default {
       data: [],
       taskWebParam: {},
       data1:[],
+      arr: []
     }
   },
   created() {
@@ -544,6 +545,8 @@ export default {
       this.map.setFitView();
     },
     updateLine (obj, list, index) {
+      this.arr.push(obj)
+      localStorage.setItem("temp",JSON.stringify(this.arr));
       this.amap.clearMap();
       let _i = this.data.indexOf(obj);
       // list.splice(index, 1)
