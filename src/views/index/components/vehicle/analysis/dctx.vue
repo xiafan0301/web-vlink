@@ -153,7 +153,7 @@ import noResult from '@/components/common/noResult.vue';
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { mapXupuxian } from "@/config/config.js";
 import { formatDate, objDeepCopy, dateOrigin } from "@/utils/util.js";
-import { checkPlateNumber } from '@/utils/validator.js';
+// import { checkPlateNumber } from '@/utils/validator.js';
 import { getMultiVehicleList, getBaseVehicleList } from '@/views/index/api/api.judge.js';
 const overStartTime = new Date() - 24 * 60 * 60 * 1000;
 let reg = /^([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})$/;
@@ -397,7 +397,7 @@ export default {
       // console.log('data', data)
       if (data && data.length > 0) {
 
-        let _this = this, hoverWindow = null;
+        let _this = this;
 
         for (let i = 0; i < data.length; i++) {
           let obj = data[i];
@@ -537,7 +537,14 @@ export default {
       if (this.searchForm.peerVehicleNumber) {
         vehicleNumberList.push(this.searchForm.peerVehicleNumber);
       }
-
+      vehicleNumberList.map(item => {
+        if (item === this.searchForm.basicVehicleNumber) {
+          if (!document.querySelector('.el-message--info')) {
+            this.$message.info('同行车辆车牌号不能和基准车辆车牌号一致');
+          }
+          return;
+        }
+      });
       const params = {
         startTime: formatDate(this.searchForm.startTime),
         endTime: formatDate(this.searchForm.endTime),
