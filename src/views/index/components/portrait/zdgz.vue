@@ -631,6 +631,7 @@ export default {
     },
     resetSearch () {
       this.setDTime()
+      this.taskName = '';
       this.searchData.type = null;
       this.searchData.portraitGroupId = null;
       this.searchData.sex = null;
@@ -735,6 +736,7 @@ export default {
           PortraitPostFocusTask(params).then(res => {
             this.searching = false;
             if (res && res.data) {
+              this.resetSearch();
               this.$message({
                 type: 'success',
                 message: '新建成功',

@@ -1129,6 +1129,7 @@
         JtcPUTAppendixsOrder(_obj);
       },
       resetSearch () {
+        this.taskName = '';
         this.searchData.minSemblance = 85;
         this.imgList = '';
         this.curImageUrl = '';
@@ -1227,6 +1228,7 @@
             params.taskName = this.taskName;
             PortraitPostByphotoTask(params).then(res => {
               this.searching = false;
+              this.resetSearch();
               if (res && res.data) {
                 this.$message({
                   type: 'success',
