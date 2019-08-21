@@ -12,9 +12,9 @@
       <div class="left">
         <vue-scroll>
           <ul class="result_ul">
-            <li>
+            <li class="person_list">
               <span>任务名称：</span>
-              <span>{{taskDetail && taskDetail.taskName}}</span>
+              <p>{{taskDetail && taskDetail.taskName}}</p>
             </li>
             <li class="person_list">
               <span>关注人群：</span>
@@ -22,11 +22,11 @@
             </li>
             <li>
               <span>性别：</span>
-              <span>{{taskDetail.taskWebParam && taskDetail.taskWebParam.sex}}</span>
+              <span>{{taskDetail.taskWebParam && taskDetail.taskWebParam.sex ? taskDetail.taskWebParam.sex : '不限'}}</span>
             </li>
             <li>
               <span>年龄段：</span>
-              <span>{{taskDetail.taskWebParam && taskDetail.taskWebParam.age}}</span>
+              <span>{{taskDetail.taskWebParam && taskDetail.taskWebParam.age ? taskDetail.taskWebParam.age : '不限'}}</span>
             </li>
             <li class="area_list" v-for="(item, index) in taskDetail.taskWebParam && taskDetail.taskWebParam.deviceAndTimeList" :key="index">
               <div>
@@ -87,66 +87,68 @@
             </ul>
           </div>
         </div>
-      </div>
-      <!-- 页面的右边 -->
-      <div class="info_right" v-show="infoRightShow">
-        <div class="danger_people_wrap">
-          <vue-scroll>
-            <h3 class="camera_name">
-              <span>{{ selectedDevice.deviceName }}</span>
-              &nbsp;
-              <span>{{'(' + selectedDevice.shotNum + '次)'}}</span>
-              <i class="el-icon-close" @click="infoRightShow = false;" title="关闭"></i>
-            </h3>
-            <div class="danger_people_list">
-              <div
-                class="people_item"
-                v-for="(item, index) in currentClickDevice"
-                :key="'people_item' + index"
-              >
-                <div v-for="(sItem, sIndex) in item.detailList" :key="'my_swiper' + sIndex">
-                  <div class="swiper_contents" v-if="item.currentIndex === sIndex">
-                    <div class="shot_times">{{ item.detailList.length + '次'}}</div>
-                    <div class="img_warp">
-                      <img :src="sItem.upPhotoUrl" title="点击放大图片" class="bigImg" alt />
-                    </div>
-                    <div class="similarity">
-                      <p class="similarity_count">{{sItem.semblance}}</p>
-                      <p class="similarity_title">相似度</p>
-                      <div class="select_time">
-                        <el-select
-                          v-model="item.currentIndex"
-                          @change="slideToIndex(item.currentIndex, index)"
-                          placeholder="请选择"
-                        >
-                          <el-option
-                            v-for="(gItem, gIndex) in item.detailList"
-                            :key="gIndex"
-                            :label="item.shotTimes[gIndex]"
-                            :value="gIndex"
-                          ></el-option>
-                        </el-select>
+        <!-- 页面的右边 -->
+        <div class="info_right" v-show="infoRightShow">
+          <div class="danger_people_wrap">
+            <vue-scroll>
+              <h3 class="camera_name">
+                <span>{{ selectedDevice.deviceName }}</span>
+                &nbsp;
+                <span>{{'(' + selectedDevice.shotNum + '次)'}}</span>
+                <i class="el-icon-close" @click="infoRightShow = false;" title="关闭"></i>
+              </h3>
+              <div class="danger_people_list">
+                <div
+                  class="people_item"
+                  v-for="(item, index) in currentClickDevice"
+                  :key="'people_item' + index"
+                >
+                  <div v-for="(sItem, sIndex) in item.detailList" :key="'my_swiper' + sIndex">
+                    <div class="swiper_contents" v-if="item.currentIndex === sIndex">
+                      <div class="shot_times">
+                        <p>{{ item.detailList.length + '次'}}</p>
+                        <div class="select_time">
+                          <el-select
+                            v-model="item.currentIndex"
+                            @change="slideToIndex(item.currentIndex, index)"
+                            placeholder="请选择"
+                          >
+                            <el-option
+                              v-for="(gItem, gIndex) in item.detailList"
+                              :key="gIndex"
+                              :label="item.shotTimes[gIndex]"
+                              :value="gIndex"
+                            ></el-option>
+                          </el-select>
+                        </div>
+                        </div>
+                      <div class="img_warp">
+                        <img :src="sItem.upPhotoUrl" title="点击放大图片" class="bigImg" alt />
                       </div>
-                    </div>
-                    <div class="img_warp">
-                      <img :src="sItem.subStoragePath" title="点击放大图片" class="bigImg" alt />
-                    </div>
-                    <div class="people_message">
-                      <h2 class="name">{{item.name}}</h2>
-                      <div class="tips_wrap">
-                        <p class="tip">{{item.sex}}</p>
-                        <p class="tip">{{item.age}}</p>
+                      <div class="similarity">
+                        <p class="similarity_count">{{sItem.semblance}}</p>
+                        <p class="similarity_title">相似度</p>
+                      </div>
+                      <div class="img_warp">
+                        <img :src="sItem.subStoragePath" title="点击放大图片" class="bigImg" alt />
+                      </div>
+                      <div class="people_message">
+                        <h2 class="name">{{item.name}}</h2>
+                        <div class="tips_wrap">
+                          <p class="tip" v-show="item.sex">{{item.sex}}</p>
+                          <p class="tip" v-show="item.age">{{item.age}}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
+                  <div @click="prev(index)" class="swiper-button-prev change_img"></div>
+                  <div @click="next(index)" class="swiper-button-next change_img"></div>
                 </div>
-                <div @click="prev(index)" class="swiper-button-prev change_img"></div>
-                <div @click="next(index)" class="swiper-button-next change_img"></div>
               </div>
-            </div>
-          </vue-scroll>
+            </vue-scroll>
+          </div>
+          <!-- <div class="right_black"></div> -->
         </div>
-        <div class="right_black"></div>
       </div>
     </div>
   </div>
@@ -155,10 +157,6 @@
 import vlBreadcrumb from "@/components/common/breadcrumb.vue";
 import { mapXupuxian } from "@/config/config.js";
 import { getGroupAllList } from "@/views/index/api/api.control.js";
-import {
-  getAllMonitorList,
-  getAllBayonetList
-} from "@/views/index/api/api.base.js";
 import { getTaskInfosDetail } from '@/views/index/api/api.analysis.js';
 import { objDeepCopy } from "@/utils/util.js";
 export default {
@@ -169,8 +167,6 @@ export default {
       amap: null, // 地图对象
       peopleGroupOptions: [], // 关注人群数据列表
       infoRightShow: false, // 右边菜单状态
-      listDevice: [], // 设备
-      listBayonet: [], // 卡口
       showTypes: "DB", //设备类型
       selectedDevice: {}, // 当前选中的设备信息
       currentClickDevice: [],
@@ -187,7 +183,6 @@ export default {
         ];
       }
     });
-    this.getTreeList();
   },
   mounted () {
     if (this.$route.query.taskId) {
@@ -206,11 +201,9 @@ export default {
         getTaskInfosDetail(id)
           .then(res => {
             if (res && res.data) {
-              console.log(res)
               this.taskDetail = res.data;
               this.taskDetail.taskResult = JSON.parse(this.taskDetail.taskResult);
               this.taskDetail.taskWebParam = JSON.parse(this.taskDetail.taskWebParam);
-              console.log(this.taskDetail.taskWebParam)
               let personGroupIdName = []; 
               this.taskDetail.taskWebParam.personGroupId && this.taskDetail.taskWebParam.personGroupId.split().map(val => {
                 this.peopleGroupOptions.map(item => {
@@ -220,10 +213,8 @@ export default {
                 });
               });
               if (personGroupIdName.length > 0) {
-                console.log('asdasdasd')
-                this.taskDetail.taskWebParam.personGroupId = personGroupIdName;
+                this.taskDetail.taskWebParam.personGroupId = personGroupIdName.join('、');
               }
-              console.log(this.taskDetail.taskWebParam.personGroupId)
               this.initMap(this.taskDetail.taskResult);
             }
           })
@@ -303,77 +294,23 @@ export default {
         }
       }
     },
-    getTreeList() {
-      if (this.showTypes.indexOf("D") >= 0) {
-        this.getListDevice();
-      }
-      if (this.showTypes.indexOf("B") >= 0) {
-        this.getListBayonet();
-      }
-    },
-    // // 获取到设备数据
-    getListDevice() {
-      getAllMonitorList({ ccode: mapXupuxian.adcode }).then(res => {
-        if (res) {
-          this.listDevice = res.data;
-          // this.setMarks(); // 初始化设备
-        }
-      });
-    },
-    // 获取到卡口数据
-    getListBayonet() {
-      getAllBayonetList({ areaId: mapXupuxian.adcode }).then(res => {
-        if (res) {
-          this.listBayonet = res.data;
-          // this.setMarks(); // 初始化卡口
-        }
-      });
-    },
     // D设备 B卡口
     setMarks(deviceList = null) {
-      // console.log(this.listDevice)
-      for (let i = 0; i < this.listDevice.length; i++) {
-        const listItem = this.listDevice[i];
-        // let flag = false;
-        for (let j = 0; j < deviceList.length; j++) {
-          const deviceItem = deviceList[j];
-          if (deviceItem.groupName === listItem.viewClassCode) {
-            // console.log(listItem)
-            this.doMark(deviceItem, "vl_icon vl_icon_sxt");
-            // this.doMark(listItem, deviceItem, "vl_icon vl_icon_sxt", false);
-            // flag = true;
-            break;
-          }
+      for (let j = 0; j < deviceList.length; j++) {
+        const deviceItem = deviceList[j];
+        if (deviceItem.deviceName.indexOf('Bayonet_') !== -1) {
+          const deviceName = deviceItem.deviceName.split('Bayonet_');
+          deviceItem.deviceName = deviceName[1];
+          this.doMark(deviceItem, "vl_icon vl_icon_kk");
+          break;
+        } else {
+          this.doMark( deviceItem, "vl_icon vl_icon_sxt");
+          break;
         }
-        // if (!flag) {
-        //   console.log('2')
-        //   console.log(this.listDevice[i])
-        //   this.doMark(this.listDevice[i], null, "vl_icon vl_icon_sxt");
-        // }
-      }
-      for (let i = 0; i < this.listBayonet.length; i++) {
-        const listItem = this.listBayonet[i];
-        // let flag = false;
-        for (let j = 0; j < deviceList.length; j++) {
-          const deviceItem = deviceList[j];
-          if (deviceItem.groupName === listItem.viewClassCode) {
-            // console.log(listItem)
-            this.doMark(deviceItem, "vl_icon vl_icon_kk");
-            // this.doMark(listItem, deviceItem, "vl_icon vl_icon_kk", false);
-            // flag = true;
-            break;
-          }
-        }
-        // if (!flag) {
-        //   console.log('4')
-        //   console.log(this.listBayonet[i])
-        //   this.doMark(this.listBayonet[i], null, "vl_icon vl_icon_kk");
-        // }
       }
     },
     // 地图标记
     doMark(device, sClass) {
-      // console.log('obj', obj)
       let marker;
       if (device.shotNum > 0) {
         // 非初始化的状态
@@ -409,19 +346,6 @@ export default {
           _this.selectedDevice = device;
         });
         this.markerList = [...this.markerList, marker];
-      } else {
-        // console.log('hhhhhhhhhhhhhhhhhhh')
-        // marker = new window.AMap.Marker({
-        //   // 添加自定义点标记
-        //   map: this.amap,
-        //   position: [device.shotPlaceLongitude, device.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-        //   offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
-        //   draggable: false, // 是否可拖动
-        //   // extData: obj,
-        //   // 自定义点标记覆盖物内容
-        //   content: `<div style="cursor:not-allowed;" class="map_icons ${sClass}"></div>`
-        // });
-        // this.markerList = [...this.markerList, marker];
       }
       this.amap.setFitView();
     },
@@ -431,20 +355,23 @@ export default {
 <style lang="scss">
 // 右边菜单
 .info_right {
-  .similarity {
-    .select_time {
-      // position: relative;
-      .el-input__inner {
-        position: relative;
-        height: 24px;
-        border-radius: 12px;
-        // width: 98px;
-        // z-index: 10;
-        // left: -5px;
+  .select_time {
+    // position: relative;
+    .el-input__inner {
+      position: relative;
+      height: 24px;
+      border-radius: 12px;
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      // width: 98px;
+      // z-index: 10;
+      // left: -5px;
+      &:hover {
+        border-color: transparent;
       }
-      .el-input__icon {
-        line-height: normal;
-      }
+    }
+    .el-input__icon {
+      line-height: normal;
     }
   }
 }
@@ -518,6 +445,176 @@ export default {
       //  overflow: hidden;
       // display: -webkit-box;
       // display: -ms-flexbox;
+      .info_right {
+        // 页面右边
+        width: 496px;
+        height: 100%;
+        position: absolute;
+        right: 0;
+        top: 0;
+        background: white;
+        box-shadow: 0px 10px 12px 0px rgba(4,24,54,0.2);
+        // opacity:0.8;
+        > div {
+          position: relative;
+          height: 100%;
+          float: left;
+        }
+        // 危险人物列表
+        .danger_people_wrap {
+          width: 100%;
+          // margin-right: 28px;
+          padding: 0 0px 20px 20px;
+          // 摄像头名称
+          .camera_name {
+            font-size: 14px;
+            line-height: 56px;
+            height: 56px;
+            color: #333333;
+            border-bottom: 1px solid #d3d3d3;
+            width: 428px;
+            position: relative;
+            > i {
+              position: absolute;
+              z-index: 10;
+              right: 0;
+              font-size: 16px;
+              top: 20px;
+              color: #999;
+              cursor: pointer;
+            }
+          }
+          .danger_people_list {
+            padding-top: 28px;
+            // 人员记录列表
+            .people_item {
+              width: 428px;
+              position: relative;
+              background: #fff;
+              box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
+              padding: 20px 0 30px 0px;
+              overflow: hidden;
+              margin-bottom: 25px;
+              .swiper_contents {
+                padding-left: 50px;
+                position: relative;
+                .shot_times {
+                  display: flex;
+                  height: 24px;
+                  line-height: 24px;
+                  margin-bottom: 20px;
+                  >p {
+                    width: 86px;
+                    background-color: #E9E9E9;
+                    color: #555555;
+                    font-size: 12px;
+                    border-radius: 12px;
+                    text-align: center;
+                    border-top-right-radius: 0;
+                    border-bottom-right-radius: 0;
+                  }
+                  // position: absolute;
+                  // right: 0;
+                  // top: -30px;
+                  // padding: 0 16px;
+                  // line-height: 20px;
+                  // border-radius: 10px 0px 0px 10px;
+                  // background: #e9e9e9;
+                  // font-size: 12px;
+                  // color: #555;
+                  // text-align: center;
+                }
+              }
+              .change_img {
+                position: absolute;
+                width: 12px;
+                height: 26px;
+                top: 80px;
+                background: url("../../../../assets/img/icons.png") no-repeat;
+                cursor: pointer;
+              }
+              // 点击变成上一张
+              .swiper-button-prev {
+                left: 22px;
+                background-position: -990px -133px;
+                &:hover {
+                  background-position: -972px -133px;
+                }
+              }
+              // 点击下一张
+              .swiper-button-next {
+                right: 18px;
+                background-position: -1038px -133px;
+                &:hover {
+                  background-position: -1019px -133px;
+                }
+              }
+              .img_warp {
+                position: relative;
+                width: 76px;
+                height: 76px;
+                float: left;
+                border-radius: 3px;
+                // background: red;
+                > img {
+                  width: 100%;
+                  height: 100%;
+                  display: block;
+                  border-radius: 3px;
+                }
+              }
+              // 相似度
+              .similarity {
+                width: 88px;
+                float: left;
+                text-align: center;
+                .similarity_count {
+                  font-size: 26px;
+                  line-height: 32px;
+                  font-weight: bold;
+                  // font-family:AuroraBT-BoldCondensed;
+                  color: #0c70f8;
+                }
+                .similarity_title {
+                  color: #333333;
+                  font-size: 12px;
+                  line-height: 18px;
+                  padding-bottom: 2px;
+                }
+              }
+              // 人物信息
+              .people_message {
+                float: left;
+                padding-left: 12px;
+                .name {
+                  font-size: 18px;
+                  font-weight: bold;
+                  color: #333;
+                  line-height: 38px;
+                }
+                .tips_wrap {
+                  overflow: hidden;
+                  .tip {
+                    float: left;
+                    padding: 0 8px;
+                    line-height: 30px;
+                    background: #f2f2f2;
+                    border: 1px solid #f2f2f2;
+                    border-radius: 3px;
+                  }
+                  .tip + .tip {
+                    margin-left: 8px;
+                  }
+                }
+              }
+            }
+          }
+        }
+        // .right_black {
+        //   width: 20px;
+        //   background: #eaebed;
+        // }
+      }
         //地图样式
       .gis_content {
         height: 100%;
@@ -633,157 +730,7 @@ export default {
       }
       
     }
-    .info_right {
-        // 页面右边
-        width: 496px;
-        height: 100%;
-        position: relative;
-        background: white;
-        > div {
-          position: relative;
-          height: 100%;
-          float: left;
-        }
-        // 危险人物列表
-        .danger_people_wrap {
-          width: 476px;
-          // margin-right: 28px;
-          padding: 0 0px 20px 20px;
-          // 摄像头名称
-          .camera_name {
-            font-size: 14px;
-            line-height: 56px;
-            height: 56px;
-            color: #333333;
-            border-bottom: 1px solid #d3d3d3;
-            width: 428px;
-            position: relative;
-            > i {
-              position: absolute;
-              z-index: 10;
-              right: 0;
-              font-size: 16px;
-              top: 20px;
-              color: #999;
-              cursor: pointer;
-            }
-          }
-          .danger_people_list {
-            padding-top: 28px;
-            // 人员记录列表
-            .people_item {
-              width: 428px;
-              position: relative;
-              background: #fff;
-              box-shadow: 0px 5px 16px 0px rgba(169, 169, 169, 0.2);
-              padding: 30px 0 30px 0px;
-              overflow: hidden;
-              margin-bottom: 25px;
-              .swiper_contents {
-                padding-left: 50px;
-                position: relative;
-                .shot_times {
-                  position: absolute;
-                  right: 0;
-                  top: -30px;
-                  padding: 0 16px;
-                  line-height: 20px;
-                  border-radius: 10px 0px 0px 10px;
-                  background: #e9e9e9;
-                  font-size: 12px;
-                  color: #555;
-                  text-align: center;
-                }
-              }
-              .change_img {
-                position: absolute;
-                width: 12px;
-                height: 26px;
-                top: 80px;
-                background: url("../../../../assets/img/icons.png") no-repeat;
-                cursor: pointer;
-              }
-              // 点击变成上一张
-              .swiper-button-prev {
-                left: 22px;
-                background-position: -990px -133px;
-                &:hover {
-                  background-position: -972px -133px;
-                }
-              }
-              // 点击下一张
-              .swiper-button-next {
-                right: 18px;
-                background-position: -1038px -133px;
-                &:hover {
-                  background-position: -1019px -133px;
-                }
-              }
-              .img_warp {
-                position: relative;
-                width: 76px;
-                height: 76px;
-                float: left;
-                border-radius: 3px;
-                // background: red;
-                > img {
-                  width: 100%;
-                  height: 100%;
-                  display: block;
-                  border-radius: 3px;
-                }
-              }
-              // 相似度
-              .similarity {
-                width: 88px;
-                float: left;
-                text-align: center;
-                .similarity_count {
-                  font-size: 26px;
-                  line-height: 32px;
-                  // font-family:AuroraBT-BoldCondensed;
-                  color: #0c70f8;
-                }
-                .similarity_title {
-                  color: #333333;
-                  font-size: 12px;
-                  line-height: 18px;
-                  padding-bottom: 2px;
-                }
-              }
-              // 人物信息
-              .people_message {
-                float: left;
-                padding-left: 12px;
-                .name {
-                  font-size: 18px;
-                  font-weight: bold;
-                  color: #333;
-                  line-height: 38px;
-                }
-                .tips_wrap {
-                  overflow: hidden;
-                  .tip {
-                    float: left;
-                    padding: 0 8px;
-                    line-height: 30px;
-                    background: #f2f2f2;
-                    border: 1px solid #f2f2f2;
-                    border-radius: 3px;
-                  }
-                  .tip + .tip {
-                    margin-left: 8px;
-                  }
-                }
-              }
-            }
-          }
-        }
-        .right_black {
-          width: 20px;
-          background: #eaebed;
-        }
-      }
+    
   }
 }
 </style>
