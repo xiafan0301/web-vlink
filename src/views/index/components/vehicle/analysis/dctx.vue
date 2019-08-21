@@ -638,21 +638,22 @@ export default {
 <style lang="scss">
 .search_dctx_form {
   .el-form-item {
-    // margin-bottom: 10px;
+    margin-bottom: 10px;
   }
   .operation_button {
-    margin-top: 10px;
+    margin-top: 20px;
   }
   .device_code {
-    .el-form-item__content {
+    /deep/.el-form-item__content {
+      line-height: 20px;
       .span_tips {
         color: #F56C6C;
         font-size: 12px;
-        line-height: 1;
-        padding-top: 4px;
-        position: absolute;
-        top: 100%;
-        left: 0;
+        line-height: 10px;
+        // padding-top: 4px;
+        position: static;
+        // top: 100%;
+        // left: 0;
       }
     }
   }
