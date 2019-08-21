@@ -57,7 +57,7 @@
             </div>
             </div>
             
-            <el-badge :value="sums.msg" class="item" :max="99" slot="reference">
+            <el-badge :value="sums.msg" class="item" :max="99" slot="reference" :hidden="sums.msg === 0">
               <i class="vl_icon vl_icon_011" @click="getTaskCountList"></i>
             </el-badge>
           </el-popover>
@@ -108,8 +108,8 @@
             </div>
             </div>
             
-            <el-badge :value="sums.events" class="item" :max="99" slot="reference">
-              <i class="vl_icon vl_icon_012" :class="{'hd_user_is': sums.events > 0}" @click="getAlarm"></i>
+            <el-badge :value="sums.events" class="item" :max="99" slot="reference" :hidden="sums.events === 0">
+              <i class="vl_icon vl_icon_012" :class="{'hd_user_is': (sums.events > 0 && !alarmVisible)}" @click="getAlarmInfo"></i>
             </el-badge>
           </el-popover>
         </li>
@@ -212,7 +212,7 @@
 </template>
 <script>
 import { logout, updatePwd } from '@/views/index/api/api.user.js';
-import { getAlarmList } from "@/views/index/api/api.control.js";
+import { getAlarmList, getACount } from "@/views/index/api/api.control.js";
 import { getTasks, markTask, getCount } from '@/views/index/api/api.event.js';
 import {formatDate} from '@/utils/util';
 import { dataList } from '@/utils/data.js';
@@ -281,15 +281,26 @@ export default {
       alarmPopoverClass: 'alarm_popover',
       taskVisible: false,
       alarmVisible: false,
+      startDate: null,
+      timer: null,
     }
   },
   mounted () {
     this.userInfo = this.$store.state.loginUser;
+    this.startDate = formatDate(this.userInfo.loginTime)
     let taskStatusL = this.dicFormater(dataList.taskStatus)
     this.taskStatusList = taskStatusL[0].dictList
     this.getAlarm()
     this.getTaskCount();
     this.getTaskData();
+    /* if (this.timer) { clearInterval(this.timer); } */
+    let startInfo = JSON.parse(localStorage.getItem('start_Info'))
+    if(startInfo) {
+      this.startDate = startInfo.startDate
+    }
+    this.timer = setInterval(() => {
+      this.getAlarmCount();
+    }, 3000);
   },
   methods: {
     // 将输入框的type改为password
@@ -322,6 +333,8 @@ export default {
         if (res) {
           this.loginoutDialog = false;
           this.$router.push({name: 'login'});
+          if (this.timer) { clearInterval(this.timer); }
+          localStorage.setItem('start_Info', null);
         } else {
           this.$message({
             type: 'error',
@@ -395,6 +408,14 @@ export default {
         }
       }).catch(()=>{})
     },
+    getAlarmInfo() {
+      if(!this.alarmVisible) {
+        this.startDate = formatDate(new Date())
+        let data = {startDate: this.startDate, timer: this.timer}
+        localStorage.setItem('start_Info', JSON.stringify(data));
+        this.getAlarm()
+      }
+    },
     //告警
     getAlarm() {
       this.alarmList = [];
@@ -412,13 +433,26 @@ export default {
             let alarmTimeD = formatDate(item.alarmTime, 'yyyy-MM-dd')
             item['alarmTimeD'] = new Date(alarmTimeD).getTime()
           }
-          this.sums.events = res.data.total;
+          /* this.sums.events = res.data.total; */
           //是否展示告警盒子
           this.$nextTick(()=>{
-            if(this.sums.events <= 0 ) {
+            if(res.data.total <= 0 ) {
               this.alarmPopoverClass = 'alarm_popover show_box'
             }
           })
+        }
+      })
+    },
+    //获取一段时间的告警数量
+    getAlarmCount() {
+      let params = {
+        "startTime": this.startDate,
+        "endTime": formatDate(new Date()),
+      };
+      console.log("--------------",params)
+      getACount(params).then(res => {
+        if(res) {
+          this.sums.events = res.data
         }
       })
     },
