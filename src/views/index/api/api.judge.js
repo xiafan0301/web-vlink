@@ -587,12 +587,13 @@ export function getFaceRetrieval(params) {
  * 人体查询接口
  * @param {object} params
  */
-export function getFaceRetrievalPerson(params) {
+export function getFaceRetrievalPerson(params, extData) {
   return request({
     url: '/face-retrieval/query-person',
     method: 'post',
     data: params,
-    mode: 'judge'
+    mode: 'judge',
+    extData: extData
   })
 }
 

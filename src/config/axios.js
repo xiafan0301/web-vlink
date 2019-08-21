@@ -17,6 +17,7 @@ let service = axios.create({
 })
 // axios添加一个请求拦截器
 service.interceptors.request.use((config) => {
+  // console.log('request config', config)
   // 用户信息
   const userInfo = localStorage.getItem('as_vlink_user_info');
   // console.log(userInfo);
@@ -70,7 +71,12 @@ service.interceptors.response.use(function (response) {
     return null;
   }
 }, function (error) {
+  console.log('response error', error)
   let msg = '网络繁忙，请稍后重试！';
+  // 请求失败、错误处理回调
+  if (error.code == 'ECONNABORTED' && error.message.indexOf('timeout') != -1 && error.config.extData && error.config.extData.timeoutMsg) {
+    msg = error.config.extData.timeoutMsg;
+  }
   ElementUI.Message({ message: msg, type: 'error', customClass: 'request_tip' });
   return Promise.reject(error);
 });
