@@ -814,7 +814,7 @@ export default {
     ptzSliderFm (val) {
       return '速度值：' + val;
     },
-    /* 录像函数 */
+  /* 录像函数 */
     tapeStart () {
       if (this.tape.active) { return; }
       this.tape.active = true;

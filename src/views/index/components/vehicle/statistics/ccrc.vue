@@ -16,6 +16,7 @@
               style="width: 230px; vertical-align: top"
               class="full vl_date"
               type="datetime"
+              :time-arrow-control="true"
               :clearable = 'false'
               placeholder="选择日期时间">
           </el-date-picker>
@@ -30,6 +31,7 @@
               class="full vl_date vl_date_end"
               style="width: 230px; vertical-align: top"
               type="datetime"
+              :time-arrow-control="true"
               placeholder="选择日期时间">
           </el-date-picker>
         </div>

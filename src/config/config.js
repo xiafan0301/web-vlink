@@ -45,11 +45,11 @@ const oDomains = {
     },
     // 研判检索服务
     judge: {
-        // dev: 'http://10.116.64.127:8082',
+        dev: 'http://10.116.64.127:8082',
         // dev: 'http://10.116.64.109:8082',
         // dev: 'http://10.116.64.97:8081',
         // dev: 'http://10.116.64.231:8087',
-        dev: 'https://apidev.aorise.org/vlink-judge/',
+        // dev: 'https://apidev.aorise.org/vlink-judge/',
         // dev: 'https://apirel.aorise.org/vlink-judge/',
         test: 'https://apirel.aorise.org/vlink-judge/',
         // test: 'http://10.116.65.47:8081',
@@ -174,6 +174,8 @@ export const cookieUserName = 'AS.VLINK.USERNAME';
 export const cookiePassword = 'AS.VLINK.PASSWORD';
 // cookie默认有效时间（小时）
 export const cookieTime = 24;
+// 在线查询超时时间
+export const onlineOutTime = 30 * 60 * 1000;
 
 // 高德地图 溆浦县 adcode
 export const mapXupuxian = {

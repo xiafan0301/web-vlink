@@ -40,6 +40,11 @@ export default {
       component: () => import('@/views/index/components/portrait/qyryfx.vue')
     },
     {
+      path: 'qyryfx-result', // 区域人员分析结果页
+      name: 'portrait_qyryfx_result',
+      component: () => import('@/views/index/components/portrait/qyryfx-result.vue')
+    },
+    {
       path: 'pfcm',    //频繁出没
       name: 'portrait_pfcm',
       component: () => import('@/views/index/components/portrait/pfcm.vue')
