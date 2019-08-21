@@ -644,11 +644,8 @@ export default {
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize
       });
-      params.timeoutMsg = '因数据量过大导致查询超时，建议进行离线分析';
       // this.condition=params
-      getFaceRetrievalPerson(params, {
-        timeoutMsg: '因数据量过大导致查询超时，建议进行离线分析'
-      }).then(res => {
+      getFaceRetrievalPerson(params).then(res => {
         this.isInitPage = false;
         if (res && res.data) {
           this.dataList = res.data.list;

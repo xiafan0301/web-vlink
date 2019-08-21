@@ -410,7 +410,7 @@ import vlBreadcrumb from "@/components/common/breadcrumb.vue";
 import mapSelector from '@/components/common/mapSelector.vue';
 import noResult from '@/components/common/noResult.vue';
 // import swiper from "vue-awesome-swiper";
-import { mapXupuxian } from "@/config/config.js";
+import { mapXupuxian, onlineOutTime } from "@/config/config.js";
 import { formatDate, dateOrigin } from "@/utils/util.js";
 import {
   getAllMonitorList,
@@ -926,8 +926,10 @@ export default {
 
           this.submitLoading = true; // 打开加载效果
           if (this.selectType === 1) {
-            getAreaRealTimeData(queryParams)
-              .then(res => {
+            getAreaRealTimeData(queryParams, {
+              errorMsg: '因数据量过大导致查询超时，建议进行离线分析',
+              timeout: onlineOutTime
+            }).then(res => {
                 let _this = this;
                 if (res && res.data) {
                   this.submitLoading = false; // 关闭加载效果
