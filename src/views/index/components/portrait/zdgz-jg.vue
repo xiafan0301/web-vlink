@@ -32,6 +32,12 @@
           </span>
         </div>
         <div class="vl_ytsr_left_line">
+          <span>年龄段：</span>
+          <span>
+            <p>{{taskDetail.age ? taskDetial.age : '不限'}}</p>
+          </span>
+        </div>
+        <div class="vl_ytsr_left_line">
           <span>抓拍设备：</span>
           <span>
            <p v-for="item in taskDetail.deviceNames" :key="item.id">{{item}}</p>
@@ -55,7 +61,7 @@
             <vue-scroll>
               <div class="vl_jtc_mk" v-for="(item, index) in curVideo.videoList" :key="item.id" v-if="item.playerData">
                 <p>{{item.shotTime}}</p>
-                <div is="flvplayer" :oData="playerData"
+                <div is="flvplayer" :oData="item.playerData"
                      :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
                 </div>
               </div>
@@ -229,10 +235,10 @@
         if (obj.videoPath) {
           obj.playerData = {
             type: 3,
-            title: this.sturcDetail.deviceName,
+            title: obj.deviceName,
             video: {
               uid: new Date().getTime() + '',
-              downUrl: this.sturcDetail.videoPath
+              downUrl: obj.videoPath
             }
           }
         } else {

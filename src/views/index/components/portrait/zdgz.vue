@@ -10,14 +10,14 @@
     
     <div :class="['vl_j_left']">
       <div class="vl_jtc_search" style="padding-top: 0;">
-        <div class="ytsr_left_radio">
+        <div class="zdgz_left_radio">
           <span>查询方式：</span>
           <span>
           <el-radio v-model="taskType" label="1">在线查询</el-radio>
           <el-radio v-model="taskType" label="2">离线任务</el-radio>
         </span>
         </div>
-        <div v-show="taskType === '2'" class="ytsr_left_radio">
+        <div v-show="taskType === '2'" class="zdgz_left_radio">
           <span>任务名称：</span>
           <span>
           <el-input v-model="taskName" placeholder="请输入任务名称" maxlength="20"></el-input>
@@ -67,9 +67,9 @@
         </el-select>
         <el-radio-group v-model="input5" @change="changeTab">
             <el-row :gutter="10">
-            <el-col :span="12">
-              <el-radio label="1">列表选择</el-radio>
-            </el-col>
+            <!--<el-col :span="12">-->
+              <!--<el-radio label="1">列表选择</el-radio>-->
+            <!--</el-col>-->
             <el-col :span="12">
               <div @click="clickTab">
                 <el-radio label="2">地图选择</el-radio>
@@ -77,23 +77,23 @@
             </el-col>
           </el-row>
         </el-radio-group>
-        <div v-if="input5==2" >
-          <el-input  v-model="selectValue" :disabled="true">
-          </el-input>
-        </div>
-        <el-select
-          v-model="areaIds"
-          class="camera-select full"
-          multiple
-          collapse-tags
-          placeholder="关注范围" v-if="input5==1">
-          <el-option
-            v-for="item in eventAreas"
-            :key="item.id"
-            :label="item.areaName"
-            :value="item.areaId">
-          </el-option>
-        </el-select>
+        <!--<div v-if="input5==2" >-->
+          <!--<el-input  v-model="selectValue" :disabled="true">-->
+          <!--</el-input>-->
+        <!--</div>-->
+        <!--<el-select-->
+          <!--v-model="areaIds"-->
+          <!--class="camera-select full"-->
+          <!--multiple-->
+          <!--collapse-tags-->
+          <!--placeholder="关注范围" v-if="input5==1">-->
+          <!--<el-option-->
+            <!--v-for="item in eventAreas"-->
+            <!--:key="item.id"-->
+            <!--:label="item.areaName"-->
+            <!--:value="item.areaId">-->
+          <!--</el-option>-->
+        <!--</el-select>-->
         <div>
           <el-row :gutter="10">
             <el-col :span="12">
@@ -135,7 +135,7 @@
                 <vue-scroll>
                   <div class="vl_jtc_mk" v-for="(item, index) in curVideo.videoList" :key="item.id" v-if="item.playerData">
                     <p>{{item.shotTime}}</p>
-                    <div is="flvplayer" :oData="playerData"
+                    <div is="flvplayer" :oData="item.playerData"
                          :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
                     </div>
                   </div>
@@ -189,17 +189,17 @@
                 </el-table-column>
                 <el-table-column label="人群" show-overflow-tooltip>
                   <template slot-scope="scope">
-                    {{scope.row.taskWebParam.age ? scope.row.taskWebParam.age : '无限'}}
+                    {{scope.row.taskWebParam.portraitGroupName ? scope.row.taskWebParam.portraitGroupName : '不限'}}
                   </template>
                 </el-table-column>
                 <el-table-column label="性别" show-overflow-tooltip>
                   <template slot-scope="scope">
-                    {{scope.row.taskWebParam.sex ? scope.row.taskWebParam.sex : '无限'}}
+                    {{scope.row.taskWebParam.sex ? scope.row.taskWebParam.sex : '不限'}}
                   </template>
                 </el-table-column>
                 <el-table-column label="年龄段" show-overflow-tooltip>
                   <template slot-scope="scope">
-                    {{scope.row.taskWebParam.age ? scope.row.taskWebParam.age : '无限'}}
+                    {{scope.row.taskWebParam.age ? scope.row.taskWebParam.age : '不限'}}
                   </template>
                 </el-table-column>
                 <el-table-column label="状态" v-if="selectIndex === 0" prop="taskStatus" show-overflow-tooltip>
@@ -324,7 +324,7 @@ export default {
       },
       evData: [],
       searchData: {
-        type: 1, // 1：人， 2： 车,0 无限
+        type: 1, // 1：人， 2： 车,0 不限
         portraitGroupId: null,  // 人员组
         sex: null, // 1男，2女
         ageGroup: null, // 年龄段
@@ -631,6 +631,7 @@ export default {
     },
     resetSearch () {
       this.setDTime()
+      this.taskName = '';
       this.searchData.type = null;
       this.searchData.portraitGroupId = null;
       this.searchData.sex = null;
@@ -652,6 +653,12 @@ export default {
     },
     beginSearch () {
       let _todo = false;
+      if(this.selectBayonet.length === 0 && this.selectDevice.length === 0) {
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('请至少选择一个设备')
+        }
+        return false;
+      }
       for (let key in this.searchData) {
         if (this.searchData[key] && key !== 'time1') {
           _todo = true;
@@ -691,14 +698,14 @@ export default {
       } else {
         params['deviceNames'] = dNameList.join(',')
       }
-      if (this.input5 === '1' && this.areaIds.length) {
-        params['areaIds'] = this.areaIds.join(',');
+//      if (this.input5 === '1' && this.areaIds.length) {
+//        params['areaIds'] = this.areaIds.join(',');
+//      }
+      if (this.selectBayonet.length) {
+        params['bayonetIds'] = this.selectBayonet.map(res => res.uid).join(',');
       }
-      if (this.input5 === '2' && this.selectBayonet.length) {
-        params['bayonetIds'] = this.selectBayonet.map(res => res.id).join(',');
-      }
-      if (this.input5 === '2' && this.selectDevice.length) {
-        params['deviceIds'] = this.selectDevice.map(res => res.id).join(',');
+      if (this.selectDevice.length) {
+        params['deviceIds'] = this.selectDevice.map(res => res.uid).join(',');
       }
       params['portraitGroupName'] = this.portraitGroupList.find(y => y.uid === this.searchData.portraitGroupId).groupName;
       // 判断选择的是实时还是离线 taskType 1为实时，2为离线.
@@ -729,6 +736,7 @@ export default {
           PortraitPostFocusTask(params).then(res => {
             this.searching = false;
             if (res && res.data) {
+              this.resetSearch();
               this.$message({
                 type: 'success',
                 message: '新建成功',
@@ -825,10 +833,10 @@ export default {
       if (obj.videoPath) {
         obj.playerData = {
           type: 3,
-          title: this.sturcDetail.deviceName,
+          title: obj.deviceName,
           video: {
             uid: new Date().getTime() + '',
-            downUrl: this.sturcDetail.videoPath
+            downUrl: obj.videoPath
           }
         }
       } else {
@@ -915,7 +923,7 @@ export default {
     }
     .vl_j_left {
       position: relative;
-      z-index: 11;
+      /*z-index: 11;*/
       float: left;
       width: 272px;
       min-height: 763px;
@@ -1030,7 +1038,7 @@ export default {
         height: auto;
         padding: 0 20px;
         padding-top: .4rem;
-        .ytsr_left_radio {
+        .zdgz_left_radio {
           display: flex;
           height: 40px;
           >span {

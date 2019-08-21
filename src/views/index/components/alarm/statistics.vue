@@ -436,6 +436,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .statistics_info {
+  width: 100%;
   height: 100%;
   padding: 20px;
   .e_stat_s {
@@ -469,10 +470,10 @@ export default {
       float: left;
       padding: 20px 20px 0 0;
       &:nth-child(1) {
-        width: 60%;
+        width: 50%;
       }
       &:nth-child(2) {
-        width: 40%;
+        width: 50%;
         padding-right: 0;
       }
       > div {
@@ -554,6 +555,12 @@ export default {
     }
   }
 }
+.alarm_content {
+  .__view {
+    width: 100% !important;
+  }
+}
+
 </style>
 
 
