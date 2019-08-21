@@ -135,8 +135,8 @@
                       <div class="people_message">
                         <h2 class="name">{{item.name}}</h2>
                         <div class="tips_wrap">
-                          <p class="tip">{{item.sex}}</p>
-                          <p class="tip">{{item.age}}</p>
+                          <p class="tip" v-show="item.sex">{{item.sex}}</p>
+                          <p class="tip" v-show="item.age">{{item.age}}</p>
                         </div>
                       </div>
                     </div>
@@ -157,10 +157,6 @@
 import vlBreadcrumb from "@/components/common/breadcrumb.vue";
 import { mapXupuxian } from "@/config/config.js";
 import { getGroupAllList } from "@/views/index/api/api.control.js";
-import {
-  getAllMonitorList,
-  getAllBayonetList
-} from "@/views/index/api/api.base.js";
 import { getTaskInfosDetail } from '@/views/index/api/api.analysis.js';
 import { objDeepCopy } from "@/utils/util.js";
 export default {
@@ -171,8 +167,6 @@ export default {
       amap: null, // 地图对象
       peopleGroupOptions: [], // 关注人群数据列表
       infoRightShow: false, // 右边菜单状态
-      listDevice: [], // 设备
-      listBayonet: [], // 卡口
       showTypes: "DB", //设备类型
       selectedDevice: {}, // 当前选中的设备信息
       currentClickDevice: [],
@@ -189,7 +183,6 @@ export default {
         ];
       }
     });
-    this.getTreeList();
   },
   mounted () {
     if (this.$route.query.taskId) {
@@ -208,11 +201,9 @@ export default {
         getTaskInfosDetail(id)
           .then(res => {
             if (res && res.data) {
-              console.log(res)
               this.taskDetail = res.data;
               this.taskDetail.taskResult = JSON.parse(this.taskDetail.taskResult);
               this.taskDetail.taskWebParam = JSON.parse(this.taskDetail.taskWebParam);
-              console.log(this.taskDetail.taskWebParam)
               let personGroupIdName = []; 
               this.taskDetail.taskWebParam.personGroupId && this.taskDetail.taskWebParam.personGroupId.split().map(val => {
                 this.peopleGroupOptions.map(item => {
@@ -222,10 +213,8 @@ export default {
                 });
               });
               if (personGroupIdName.length > 0) {
-                console.log('asdasdasd')
                 this.taskDetail.taskWebParam.personGroupId = personGroupIdName.join('、');
               }
-              console.log(this.taskDetail.taskWebParam.personGroupId)
               this.initMap(this.taskDetail.taskResult);
             }
           })
@@ -290,7 +279,6 @@ export default {
     
     /** 点击摄像头查看此摄像头抓拍详情信息 */
     clickGetCameraData(device) {
-      console.log('deice', device)
       this.infoRightShow = true;
       this.currentClickDevice = device;
       for (let i = 0; i < this.currentClickDevice.length; i++) {
@@ -306,77 +294,23 @@ export default {
         }
       }
     },
-    getTreeList() {
-      if (this.showTypes.indexOf("D") >= 0) {
-        this.getListDevice();
-      }
-      if (this.showTypes.indexOf("B") >= 0) {
-        this.getListBayonet();
-      }
-    },
-    // // 获取到设备数据
-    getListDevice() {
-      getAllMonitorList({ ccode: mapXupuxian.adcode }).then(res => {
-        if (res) {
-          this.listDevice = res.data;
-          // this.setMarks(); // 初始化设备
-        }
-      });
-    },
-    // 获取到卡口数据
-    getListBayonet() {
-      getAllBayonetList({ areaId: mapXupuxian.adcode }).then(res => {
-        if (res) {
-          this.listBayonet = res.data;
-          // this.setMarks(); // 初始化卡口
-        }
-      });
-    },
     // D设备 B卡口
     setMarks(deviceList = null) {
-      // console.log(this.listDevice)
-      for (let i = 0; i < this.listDevice.length; i++) {
-        const listItem = this.listDevice[i];
-        // let flag = false;
-        for (let j = 0; j < deviceList.length; j++) {
-          const deviceItem = deviceList[j];
-          if (deviceItem.groupName === listItem.viewClassCode) {
-            // console.log(listItem)
-            this.doMark(deviceItem, "vl_icon vl_icon_sxt");
-            // this.doMark(listItem, deviceItem, "vl_icon vl_icon_sxt", false);
-            // flag = true;
-            break;
-          }
+      for (let j = 0; j < deviceList.length; j++) {
+        const deviceItem = deviceList[j];
+        if (deviceItem.deviceName.indexOf('Bayonet_') !== -1) {
+          const deviceName = deviceItem.deviceName.split('Bayonet_');
+          deviceItem.deviceName = deviceName[1];
+          this.doMark(deviceItem, "vl_icon vl_icon_kk");
+          break;
+        } else {
+          this.doMark( deviceItem, "vl_icon vl_icon_sxt");
+          break;
         }
-        // if (!flag) {
-        //   console.log('2')
-        //   console.log(this.listDevice[i])
-        //   this.doMark(this.listDevice[i], null, "vl_icon vl_icon_sxt");
-        // }
-      }
-      for (let i = 0; i < this.listBayonet.length; i++) {
-        const listItem = this.listBayonet[i];
-        // let flag = false;
-        for (let j = 0; j < deviceList.length; j++) {
-          const deviceItem = deviceList[j];
-          if (deviceItem.groupName === listItem.viewClassCode) {
-            // console.log(listItem)
-            this.doMark(deviceItem, "vl_icon vl_icon_kk");
-            // this.doMark(listItem, deviceItem, "vl_icon vl_icon_kk", false);
-            // flag = true;
-            break;
-          }
-        }
-        // if (!flag) {
-        //   console.log('4')
-        //   console.log(this.listBayonet[i])
-        //   this.doMark(this.listBayonet[i], null, "vl_icon vl_icon_kk");
-        // }
       }
     },
     // 地图标记
     doMark(device, sClass) {
-      console.log('obj', device)
       let marker;
       if (device.shotNum > 0) {
         // 非初始化的状态
@@ -412,19 +346,6 @@ export default {
           _this.selectedDevice = device;
         });
         this.markerList = [...this.markerList, marker];
-      } else {
-        // console.log('hhhhhhhhhhhhhhhhhhh')
-        // marker = new window.AMap.Marker({
-        //   // 添加自定义点标记
-        //   map: this.amap,
-        //   position: [device.shotPlaceLongitude, device.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-        //   offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
-        //   draggable: false, // 是否可拖动
-        //   // extData: obj,
-        //   // 自定义点标记覆盖物内容
-        //   content: `<div style="cursor:not-allowed;" class="map_icons ${sClass}"></div>`
-        // });
-        // this.markerList = [...this.markerList, marker];
       }
       this.amap.setFitView();
     },

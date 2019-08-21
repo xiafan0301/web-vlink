@@ -34,23 +34,6 @@
                 placeholder="选择日期"
                 >
               </el-date-picker>
-              <!-- <el-date-picker
-                v-model="addForm.dateTime"
-                style="width: 100%"
-                :clearable="false"
-                class="vl_date"
-                @change="handleDateTime"
-                :picker-options="pickerDateTime"
-                :time-arrow-control="true"
-                :default-time="['00:00:00', '23:59:59']"
-                value-format="yyyy-MM-dd HH:mm:ss"
-                format="yyyy-MM-dd HH:mm:ss"
-                range-separator="至"
-                type="datetimerange"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期"
-                >
-              </el-date-picker> -->
             </el-form-item>
             <el-form-item prop="endTime">
               <el-date-picker
@@ -113,7 +96,7 @@
               @click="selectTab(item.value)"
             >{{item.label}}</li>
           </ul>
-          <template v-if="selectIndex === 1 || selectIndex === 0">
+          <!-- <template v-if="selectIndex === 1 || selectIndex === 0"> -->
             <div class="search_box">
               <el-form :inline="true" :model="searchForm" class="event_form" ref="searchForm">
                 <el-form-item label="任务名称:" prop="taskName">
@@ -208,15 +191,11 @@
                 ></el-pagination>
               </template>
             </div>
-          </template>
-          <template v-else>
+          <!-- </template> -->
+          <!-- <template v-else>
             <div class="result_gzws_list">
               <template v-if="isInitPage">
                 <div class="content_top">
-                  <!-- <p>
-                    <span>检索结果</span>
-                    <span>（{{taskDetail.taskResult.length}}）</span>
-                  </p> -->
                   <p>
                     <span>检索结果</span>
                     <span>（777）</span>
@@ -243,25 +222,6 @@
                         <div class="record_btn" @click="skipWsReocrdPage()">查看尾随记录</div>
                       </div>
                     </li>
-                    <!-- <li v-for="(item, index) in taskDetail.taskResult" :key="index">
-                      <div class="de_left">
-                        <img :src="item.subStoragePath" alt="">
-                      </div>
-                      <div class="de_right">
-                        <span class="title">检索资料</span>
-                        <p class="time">
-                          <i class="vl_icon_tail_1 vl_icon"></i>
-                          <span>{{item.shotTime}}</span>
-                        </p>
-                        <p class="detail_info">
-                          <span v-show="item.sex">{{item.sex}}性</span>
-                          <span v-show="item.age">{{item.age}}</span>
-                          <span v-show="item.hat" :title="item.hat">{{item.hat}}</span>
-                          <span v-show="item.mask" :title="item.mask">{{item.mask}}</span>
-                        </p>
-                        <div class="record_btn" @click="skipWsReocrdPage(item)">查看尾随记录</div>
-                      </div>
-                    </li> -->
                   </ul>
                 </div>
               </template>
@@ -269,7 +229,7 @@
                 <div is="noResult" :isInitPage="isInitPage"></div>
               </template>
             </div>
-          </template>
+          </template> -->
         </vue-scroll>
       </div>
     </div>
@@ -303,74 +263,6 @@
         <el-button class="operation_btn function_btn" :loading="isInterruptLoading" @click="sureInterruptTask">确认</el-button>
       </div>
     </el-dialog>
-    <!--新建任务弹出框-->
-    <!-- <el-dialog
-      title="新增分析任务"
-      :visible.sync="addTaskDialog"
-      width="720px"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-      class="dialog_comp dialog_comp_add"
-      >
-      <div class="content_body">
-        <div class="left">
-          <div style="padding: 0 15px; height: 210px; text-align:center;margin-top: 50px;">
-            <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit"></div>
-          </div>
-        </div>
-        <div class="right">
-          <el-form class="left_form" :model="addForm" ref="addForm" :rules="rules">
-            <el-form-item  prop="dateTime">
-              <el-date-picker
-                v-model="addForm.dateTime"
-                style="width: 100%"
-                :clearable="false"
-                class="vl_date"
-                @change="handleDateTime"
-                :picker-options="pickerDateTime"
-                :time-arrow-control="true"
-                :default-time="['00:00:00', '23:59:59']"
-                value-format="yyyy-MM-dd HH:mm:ss"
-                format="yyyy-MM-dd HH:mm:ss"
-                range-separator="至"
-                type="datetimerange"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期"
-                >
-              </el-date-picker>
-            </el-form-item>
-            <el-form-item prop="deviceCode" class="device_code">
-              <el-select placeholder="请选择起点设备" style="width: 100%" v-model="addForm.deviceCode">
-                <el-option
-                  v-for="(item, index) in deviceList"
-                  :key="index"
-                  :label="item.deviceName"
-                  :value="item.deviceName"
-                ></el-option>
-              </el-select>
-              <span class="span_tips" v-show="isShowDeviceTip">该人像在该时间内无抓拍设备</span>
-            </el-form-item>
-            <el-form-item prop="taskName">
-              <el-input placeholder="请输入任务名称，最多20字" maxlength="20" v-model="addForm.taskName"></el-input>
-            </el-form-item>
-            <el-form-item prop="interval">
-              <el-select placeholder="请选择尾随时间间隔" style="width: 100%" v-model="addForm.interval">
-                <el-option
-                  v-for="(item, index) in intervalList"
-                  :key="index"
-                  :label="item.label"
-                  :value="item.value"
-                ></el-option>
-              </el-select>
-            </el-form-item>
-          </el-form>
-        </div>
-      </div>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="cancelAdd('addForm')">取消</el-button>
-        <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="submitData('addForm')">确认</el-button>
-      </div>
-    </el-dialog> -->
   </div>
 </template>
 <script>
@@ -452,9 +344,6 @@ export default {
       deviceList: [], // 抓拍设备列表
       vehicleTypeList: [], // 车辆类型列表
       dataList: [], // 查询的抓拍结果列表
-      // curImgNum: 0, // 图片数量
-      // curImageUrl: null,
-      // uploading: false,
       uploadClear: {}
     }
   },
@@ -507,6 +396,9 @@ export default {
     },
     // 获取离线任务
     getDataList () {
+      if (!this.searchForm.reportTime) {
+        this.searchForm.reportTime = [];
+      }
       const params = {
         'where.taskName': this.searchForm.taskName,
         'where.taskType': 3, // 3：人员跟踪尾随分析

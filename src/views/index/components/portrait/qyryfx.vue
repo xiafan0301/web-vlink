@@ -20,7 +20,6 @@
                   placeholder="请选择分析人群"
                   @change="changePersonGroup"
                   :multiple="isMultiplePerson"
-                  clearable
                   collapse-tags
                 >
                   <el-option
@@ -120,7 +119,7 @@
               </div>
               <el-form-item class="select_type">
                 <span>查询方式:</span>
-                <el-radio-group v-model="selectType" class="select_radio">
+                <el-radio-group v-model="selectType" class="select_radio" @change="handleRadioSelectType">
                   <el-radio :label="1">在线查询</el-radio>
                   <el-radio :label="2">离线任务</el-radio>
                 </el-radio-group>
@@ -198,6 +197,69 @@
                   </ul>
                 </div>
               </div>
+              <!-- 页面的右边 -->
+              <div class="info_right" v-show="infoRightShow">
+                <div class="danger_people_wrap">
+                  <vue-scroll>
+                    <h3 class="camera_name">
+                      <span>{{ selectedDevice.deviceName }}</span>
+                      &nbsp;
+                      <span>{{'(' + selectedDevice.shotNum + '次)'}}</span>
+                      <i class="el-icon-close" @click="infoRightShow = false;" title="关闭"></i>
+                    </h3>
+                    <div class="danger_people_list">
+                      <div
+                        class="people_item"
+                        v-for="(item, index) in currentClickDevice"
+                        :key="'people_item' + index"
+                      >
+                        <div v-for="(sItem, sIndex) in item.detailList" :key="'my_swiper' + sIndex">
+                          <div class="swiper_contents" v-if="item.currentIndex === sIndex">
+                            <div class="shot_times">
+                              <p>{{ item.detailList.length + '次'}}</p>
+                              <div class="select_time">
+                                <el-select
+                                  v-model="item.currentIndex"
+                                  @change="slideToIndex(item.currentIndex, index)"
+                                  placeholder="请选择"
+                                >
+                                  <el-option
+                                    v-for="(gItem, gIndex) in item.detailList"
+                                    :key="gIndex"
+                                    :label="item.shotTimes[gIndex]"
+                                    :value="gIndex"
+                                  ></el-option>
+                                </el-select>
+                              </div>
+                            </div>
+                            <div class="img_warp">
+                              <img :src="sItem.upPhotoUrl" title="点击放大图片" class="bigImg" alt />
+                            </div>
+                            <div class="similarity">
+                              <p class="similarity_count">{{sItem.semblance}}</p>
+                              <p class="similarity_title">相似度</p>
+                              
+                            </div>
+                            <div class="img_warp">
+                              <img :src="sItem.subStoragePath" title="点击放大图片" class="bigImg" alt />
+                            </div>
+                            <div class="people_message">
+                              <h2 class="name">{{item.name}}</h2>
+                              <div class="tips_wrap">
+                                <p class="tip" v-show="item.sex">{{item.sex}}</p>
+                                <p class="tip" v-show="item.age">{{item.age}}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div @click="prev(index)" class="swiper-button-prev change_img"></div>
+                        <div @click="next(index)" class="swiper-button-next change_img"></div>
+                      </div>
+                    </div>
+                  </vue-scroll>
+                </div>
+                <!-- <div class="right_black"></div> -->
+              </div>
             </div>
           </template>
           <template v-else>
@@ -225,6 +287,7 @@
                       :time-arrow-control="true"
                       value-format="yyyy-MM-dd HH:mm:ss"
                       format="yyyy-MM-dd HH:mm:ss"
+                      :clearable="true"
                       range-separator="至"
                       start-placeholder="开始日期"
                       end-placeholder="结束日期"
@@ -315,69 +378,7 @@
         </template>
         <!-- 关闭按钮 -->
       </div>
-      <!-- 页面的右边 -->
-      <div class="info_right" v-show="infoRightShow">
-        <div class="danger_people_wrap">
-          <vue-scroll>
-            <h3 class="camera_name">
-              <span>{{ selectedDevice.deviceName }}</span>
-              &nbsp;
-              <span>{{'(' + selectedDevice.shotNum + '次)'}}</span>
-              <i class="el-icon-close" @click="infoRightShow = false;" title="关闭"></i>
-            </h3>
-            <div class="danger_people_list">
-              <div
-                class="people_item"
-                v-for="(item, index) in currentClickDevice"
-                :key="'people_item' + index"
-              >
-                <div v-for="(sItem, sIndex) in item.detailList" :key="'my_swiper' + sIndex">
-                  <div class="swiper_contents" v-if="item.currentIndex === sIndex">
-                    <div class="shot_times">
-                      <p>{{ item.detailList.length + '次'}}</p>
-                      <div class="select_time">
-                        <el-select
-                          v-model="item.currentIndex"
-                          @change="slideToIndex(item.currentIndex, index)"
-                          placeholder="请选择"
-                        >
-                          <el-option
-                            v-for="(gItem, gIndex) in item.detailList"
-                            :key="gIndex"
-                            :label="item.shotTimes[gIndex]"
-                            :value="gIndex"
-                          ></el-option>
-                        </el-select>
-                      </div>
-                    </div>
-                    <div class="img_warp">
-                      <img :src="sItem.upPhotoUrl" title="点击放大图片" class="bigImg" alt />
-                    </div>
-                    <div class="similarity">
-                      <p class="similarity_count">{{sItem.semblance}}</p>
-                      <p class="similarity_title">相似度</p>
-                      
-                    </div>
-                    <div class="img_warp">
-                      <img :src="sItem.subStoragePath" title="点击放大图片" class="bigImg" alt />
-                    </div>
-                    <div class="people_message">
-                      <h2 class="name">{{item.name}}</h2>
-                      <div class="tips_wrap">
-                        <p class="tip">{{item.sex}}</p>
-                        <p class="tip">{{item.age}}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div @click="prev(index)" class="swiper-button-prev change_img"></div>
-                <div @click="next(index)" class="swiper-button-next change_img"></div>
-              </div>
-            </div>
-          </vue-scroll>
-        </div>
-        <!-- <div class="right_black"></div> -->
-      </div>
+      
     </div>
     <!--删除任务弹出框-->
     <el-dialog
@@ -423,10 +424,6 @@ import noResult from '@/components/common/noResult.vue';
 // import swiper from "vue-awesome-swiper";
 import { mapXupuxian, onlineOutTime } from "@/config/config.js";
 import { formatDate, dateOrigin } from "@/utils/util.js";
-import {
-  getAllMonitorList,
-  getAllBayonetList
-} from "@/views/index/api/api.base.js";
 import {
   getAreaRealTimeData,
   addAreaPersonTask
@@ -484,7 +481,7 @@ export default {
       // searchPlace: "",
       qyryfxFrom: {
         taskName: null, // 任务名称
-        personGroupId: "", //分析人群
+        personGroupId: [], //分析人群
         sex: null, // 性别
         age: "", // 年龄段
         startTime: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)), // 开始时间
@@ -547,8 +544,8 @@ export default {
       amap: null, // 地图对象
       mapCenter: [110.594419, 27.908869], //地图中心位
       // videoMenuStatus: true, // 菜单状态
-      listDevice: [], // 设备
-      listBayonet: [], // 卡口
+      // listDevice: [], // 设备
+      // listBayonet: [], // 卡口
       showTypes: "DB", //设备类型
       selectedDevice: {}, // 当前选中的设备信息
       currentClickDevice: [],
@@ -571,17 +568,17 @@ export default {
     }
   },
   mounted() {
-    //获取数据
-    this.getTreeList();
-    // this.mapEvents();
-    //加载地图
     // 获取到监控人群分组
     getGroupAllList().then(res => {
       if (res) {
-        this.peopleGroupOptions = res.data;
-        // this.peopleGroupOptions = [
-        //   ...res.data.filter(item => item.uid !== null)
-        // ];
+        // this.peopleGroupOptions = res.data;
+
+        this.peopleGroupOptions = [
+          ...res.data.filter(item => item.uid !== null)
+        ];
+        this.peopleGroupOptions.map(item => {
+          this.qyryfxFrom.personGroupId.push(item.uid);
+        })
       }
     });
 
@@ -590,6 +587,14 @@ export default {
     }, 500);
   },
   methods: {
+    // 查询方式change
+    handleRadioSelectType (val) {
+      if (val === 1) {
+        this.selectIndex = 2;
+      } else {
+        this.selectIndex = 1;
+      }
+    },
     // 人群分析change
     changePersonGroup (val) {
       console.log('val', val)
@@ -609,6 +614,9 @@ export default {
     },
     // 获取离线任务列表
     getTaskList () {
+      if (!this.searchForm.reportTime) {
+        this.searchForm.reportTime = [];
+      }
       const params = {
         'where.taskName': this.searchForm.taskName,
         'where.taskType': 7, // 7：区域人员分析
@@ -943,6 +951,22 @@ export default {
             deviceAndTimeList: deviceAndTimeList,
             taskName: this.qyryfxFrom.taskName
           };
+          // const queryParams = {
+          //   sex:null,
+          //   age:"",
+          //   personGroupId:"",
+          //   deviceAndTimeList:
+          //     [
+          //       {
+          //         deviceIds:"11,26",
+          //         bayonetIds:"2,7,9,3UUWvZxRHfsEqDu0D8ZCDp",
+          //         deviceNames:"溆浦县国土资源局153、人脸抓拍设备、卡口2、卡口7、卡口9、人脸抓拍卡口",
+          //         startTime:"2019-08-20 00:00:00",
+          //         endTime:"2019-08-21 15:54:08"
+          //       }
+          //     ],
+          //   taskName:null
+          // }
           //  const queryParams = {
           //   deviceAndTimeList: [
           //     {
@@ -967,7 +991,7 @@ export default {
                 let _this = this;
                 if (res && res.data) {
                   this.submitLoading = false; // 关闭加载效果
-                  if (JSON.parse(res.data.taskResult).length) {
+                  if (res.data.taskResult) {
 
                     this.resultDataList = JSON.parse(res.data.taskResult);
                     this.clearMarkList(); // 清除地图标记
@@ -979,9 +1003,7 @@ export default {
                     
                   } else {
                     this.clearMarkList(); // 清除地图标记
-                    // this.setMarks();
                     this.isInitPage = false;
-                    this.$message.warning("您选择的设备没有数据");
                   }
                 } else {
                   this.clearMarkList(); // 清除地图标记
@@ -992,7 +1014,6 @@ export default {
               })
               .catch(() => {
                 this.clearMarkList(); // 清除地图标记
-                // this.setMarks();
                 this.submitLoading = false; // 关闭加载效果
               });
           } else {
@@ -1010,7 +1031,6 @@ export default {
                 } else {
                   this.submitLoading = false;
                 }
-                console.log('uuuuuuu', res)
               })
               .catch(() => {
                  this.submitLoading = false;
@@ -1062,81 +1082,20 @@ export default {
 
       _this.setMarks(data);
     },
-    getTreeList() {
-      if (this.showTypes.indexOf("D") >= 0) {
-        this.getListDevice();
-      }
-      if (this.showTypes.indexOf("B") >= 0) {
-        this.getListBayonet();
-      }
-    },
-    // // 获取到设备数据
-    getListDevice() {
-      getAllMonitorList({ ccode: mapXupuxian.adcode }).then(res => {
-        if (res) {
-          this.listDevice = res.data;
-          // this.setMarks(); // 初始化设备
-        }
-      });
-    },
-    // 获取到卡口数据
-    getListBayonet() {
-      getAllBayonetList({ areaId: mapXupuxian.adcode }).then(res => {
-        if (res) {
-          this.listBayonet = res.data;
-          // this.setMarks(); // 初始化卡口
-        }
-      });
-    },
-    // D设备 B卡口
     setMarks(deviceList = null) {
-      console.log('deviceList', deviceList)
-      // 展示设备和卡口
-      // if (init) {
-      //   // 初始化的时候展示所有的设备
-      //   for (let i = 0; i < this.listDevice.length; i++) {
-      //     this.doMark(this.listDevice[i], deviceList, "vl_icon vl_icon_sxt");
-      //   }
-      //   for (let i = 0; i < this.listBayonet.length; i++) {
-      //     this.doMark(this.listBayonet[i], deviceList, "vl_icon vl_icon_kk");
-      //   }
-      //   this.amap.setFitView();
-      // } else {
-        for (let i = 0; i < this.listDevice.length; i++) {
-          const listItem = this.listDevice[i];
-          // let flag = false;
-          for (let j = 0; j < deviceList.length; j++) {
-            const deviceItem = deviceList[j];
-            if (deviceItem.groupName === listItem.viewClassCode) {
-              console.log('1')
-              // flag = true;
-              this.doMark( deviceItem, "vl_icon vl_icon_sxt");
-              break;
-            }
-          }
-          // if (!flag) {
-          //   console.log('2')
-          //   this.doMark(this.listDevice[i], null, "vl_icon vl_icon_sxt");
-          // }
+      for (let j = 0; j < deviceList.length; j++) {
+        const deviceItem = deviceList[j];
+        if (deviceItem.deviceName.indexOf('Bayonet_') !== -1) {
+          const deviceName = deviceItem.deviceName.split('Bayonet_');
+          deviceItem.deviceName = deviceName[1];
+          this.doMark(deviceItem, "vl_icon vl_icon_kk");
+          break;
+        } else {
+          this.doMark( deviceItem, "vl_icon vl_icon_sxt");
+          break;
         }
-        for (let i = 0; i < this.listBayonet.length; i++) {
-          const listItem = this.listBayonet[i];
-          // let flag = false;
-          for (let j = 0; j < deviceList.length; j++) {
-            const deviceItem = deviceList[j];
-            if (deviceItem.groupName === listItem.viewClassCode) {
-              console.log('3')
-              this.doMark(deviceItem, "vl_icon vl_icon_kk");
-              // flag = true;
-              break;
-            }
-          }
-          // if (!flag) {
-          //   console.log('4')
-          //   this.doMark(this.listBayonet[i], null, "vl_icon vl_icon_kk");
-          // }
-        }
-      // }
+      
+      }
     },
     // 地图标记
     doMark(device, sClass) {
