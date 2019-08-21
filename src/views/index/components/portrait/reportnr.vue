@@ -47,7 +47,7 @@
                     </div>
                     <ul class="mes_cot">
                       <li class="clearfix"><span>姓名：</span><p>{{portrailInfoDto.name}}</p></li>
-                      <li class="clearfix"><span>证件类型：</span><p></p></li>
+                      <li class="clearfix"><span>证件类型：</span><p>{{portrailInfoDto.idType == 1? '身份证': '护照'}}</p></li>
                       <li class="clearfix"><span>证件号码：</span><p>{{portrailInfoDto.idNo}}</p></li>
                       <li class="clearfix"><span>性别：</span><p>{{portrailInfoDto.sex}}</p></li>
                       <li class="clearfix"><span>民族：</span><p>{{portrailInfoDto.nation}}</p></li>
@@ -69,7 +69,7 @@
                   }).join(',')}}</p>
               </div>
             </div>
-            <div v-else>暂无数据</div>
+            <div v-else style="margin: 0 auto; padding: 20px 0; width: 100px">暂无数据</div>
           </div>
           <div class="cont1" id="report_showtype_2">
             <div style="background-color: white; color: #333333;

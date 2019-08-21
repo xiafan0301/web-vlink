@@ -459,6 +459,10 @@ export default {
       }
       if (this.lll&& this.lll.length > 0) {
         params['bayonetUid'] = this.lll.join(',')
+      }else{
+        params['bayonetUid'] = this.kakou.map((item)=> {
+          return item.uid
+        }).join(',')
       }
       if (this.carType&& this.carType.length > 0) {
         params['vehicleType'] = this.carType.join(',')
