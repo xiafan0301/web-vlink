@@ -908,6 +908,9 @@ export default {
       this.selectAreaDataList = [];
       this.selectMapType = 0;
       this.infoRightShow = false; // 关闭右边的菜单数据
+      this.peopleGroupOptions.map(item => {
+        this.qyryfxFrom.personGroupId.push(item.uid);
+      })
     },
     /** 操作左边菜单方法 */
     openMenu() {
