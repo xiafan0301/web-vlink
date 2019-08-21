@@ -174,6 +174,8 @@ export const cookieUserName = 'AS.VLINK.USERNAME';
 export const cookiePassword = 'AS.VLINK.PASSWORD';
 // cookie默认有效时间（小时）
 export const cookieTime = 24;
+// 在线查询超时时间
+export const onlineOutTime = 30 * 60 * 1000;
 
 // 高德地图 溆浦县 adcode
 export const mapXupuxian = {
