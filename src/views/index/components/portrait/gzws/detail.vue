@@ -234,7 +234,7 @@ export default {
 
               let sContent = "<div class='tip_box'><div class='select_target'><p class='select_p'>查询目标</p>"
                     +"<img src="+ obj.targetStoragePath +" /><div class='mongolia'>"
-                    +"<span>"+ obj.shotTime +"</span><i id="+ _id +" class='vl_icon vl_icon_control_09'></i></div></div>"
+                    +"<span>"+ obj.targetShotTime +"</span><i id="+ _id +" class='vl_icon vl_icon_control_09'></i></div></div>"
                     +"<div class='tail_vehicle'><p class='tail_p'>尾随人员</p><img src="+ obj.peerStoragePath +" />"
                     +"<div class='mongolia'><span>"+ obj.shotTime +"</span><i id="+ _idBtn +" class='vl_icon vl_icon_control_09'></i></div></div>"
                     +"<div class='divide'></div><div class='device_name'>"+ obj.deviceName +"</div></div>";

@@ -26,6 +26,7 @@
                 value-format="yyyy-MM-dd HH:mm:ss"
                 format="yyyy-MM-dd HH:mm:ss"
                 style="width: 100%"
+                @change="handleStartTime"
                 :picker-options="pickerDateTime"
                 v-model="addForm.startTime"
                 :time-arrow-control="true"
@@ -60,6 +61,7 @@
                 value-format="yyyy-MM-dd HH:mm:ss"
                 format="yyyy-MM-dd HH:mm:ss"
                 style="width: 100%"
+                @change="handleEndTime"
                 :picker-options="pickerDateTime"
                 type="datetime" 
                 placeholder="选择日期" 
@@ -81,7 +83,7 @@
               </el-select>
               <span class="span_tips" v-show="isShowDeviceTip">该人像在该时间内无抓拍设备</span>
             </el-form-item>
-            <el-form-item prop="taskName">
+            <el-form-item prop="taskName" :rules="[{ required: true, message: '该项内容不能为空', trigger: 'blur' }]">
               <el-input placeholder="请输入任务名称，最多20字" maxlength="20" v-model="addForm.taskName"></el-input>
             </el-form-item>
             <el-form-item prop="interval">
@@ -472,20 +474,36 @@ export default {
         this.dialogImageUrl = null;
       }
     },
-    // 时间选择change
-    handleDateTime (val) {
-      // if (val) {
-      //   if ( (new Date(val[1]).getTime() - new Date(val[0]).getTime()) >= 3* 24 * 3600 * 1000) {
-      //     if (!document.querySelector('.el-message--info')) {
-      //       this.$message.info('最多选择3天');
-      //     }
-      //     this.addForm.dateTime = [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()];
-      //   } else {
-      //     if (this.dialogImageUrl) {
-      //       this.getDeviceList();
-      //     }
-      //   }
-      // }
+    // 开始时间选择change
+    handleStartTime (val) {
+      console.log(val)
+      if (val) {
+        // if ( (new Date(val[1]).getTime() - new Date(val[0]).getTime()) >= 3* 24 * 3600 * 1000) {
+        //   if (!document.querySelector('.el-message--info')) {
+        //     this.$message.info('最多选择3天');
+        //   }
+        //   this.addForm.dateTime = [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()];
+        // } else {
+          if (this.dialogImageUrl && this.addForm.endTime) {
+            this.getDeviceList();
+          }
+        // }
+      }
+    },
+    // 结束时间change
+    handleEndTime (val) {
+      if (val) {
+        // if ( (new Date(val[1]).getTime() - new Date(val[0]).getTime()) >= 3* 24 * 3600 * 1000) {
+        //   if (!document.querySelector('.el-message--info')) {
+        //     this.$message.info('最多选择3天');
+        //   }
+        //   this.addForm.dateTime = [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()];
+        // } else {
+          if (this.dialogImageUrl && this.addForm.startTime) {
+            this.getDeviceList();
+          }
+        // }
+      }
     },
     // 获取离线任务
     getDataList () {
@@ -737,9 +755,12 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-// /deep/ .__view {
-//   height: 100%;
-// }
+/deep/ .el-form-item__error {
+  position: static;
+  line-height: 20px;
+  padding-top: 0;
+  margin-bottom: -10px;
+}
 .gzws_container {
   height: 100%;
   overflow: hidden;
@@ -772,27 +793,19 @@ export default {
           width: 110px;
         }
         .device_code {
-          .el-form-item__content {
+          /deep/ .el-form-item__content {
+            line-height: 20px;
             .span_tips {
               color: #F56C6C;
               font-size: 12px;
-              line-height: 1;
-              padding-top: 4px;
-              position: absolute;
-              top: 100%;
-              left: 0;
+              // line-height: 1;
+              // padding-top: 4px;
+              position: static;
+              // top: 100%;
+              // left: 0;
             }
           }
         }
-        // /deep/ .el-form-item {
-        //   margin-bottom: 20px;
-        // }
-        // .date_time {
-        //   /deep/ .el-form-item__label {
-        //     line-height: 20px;
-        //     color: #999999;
-        //   }
-        // }
       }
     }
     .content_box {
@@ -941,89 +954,20 @@ export default {
 
   }
 }
-// .dialog_comp_add {
-//   .content_body {
-//     display: flex;
-//     .left {
-//       border-right: 1px dashed #F2F2F2;
-//       width: 400px;
-//       .upload_box {
-//         text-align: center;
-//         margin-left: 10px;
-//         width: 225px;
-//         height: 225px;
-//         overflow: hidden;
-//         margin-top: 30px;
-//         /deep/ .el-upload {
-//           width: 225px;
-//           height: 225px;
-          
-//           i {
-//             width: 120px;
-//             height: 110px;
-//             margin-top: 40px;
-//             margin-left: 15px;
-//           }
-//           .upload_text {
-//             line-height: 0;
-//             color: #999999;
-//             margin-top: -50px;
-//           }
-//           &:hover{
-//             background: #0C70F8;
-//             .upload_text {
-//               color: #ffffff;
-//             }
-//           }
-//         }
-//         &.hidden /deep/ .el-upload--picture-card{
-//           display: none!important;
-//         }
-//         /deep/ .el-upload-list__item {
-//           width: 225px;
-//           height: 225px;
-//         }
-//       }
-//     }
-//     .right {
-//       width: 100%;
-//       .left_form {
-//         width: 100%;
-//         padding: 50px 20px 0;
-//         font-size: 12px !important;
-//         .device_code {
-//           .el-form-item__content {
-//             .span_tips {
-//               color: #F56C6C;
-//               font-size: 12px;
-//               line-height: 1;
-//               padding-top: 4px;
-//               position: absolute;
-//               top: 100%;
-//               left: 0;
-//             }
-//           }
-//         }
-//         /deep/ .el-form-item {
-//           margin-bottom: 20px;
-//         }
-//         .date_time {
-//           /deep/ .el-form-item__label {
-//             line-height: 20px;
-//             color: #999999;
-//           }
-//         }
-//       }
-
-//     }
-//   }
-// }
 </style>
 <style lang="scss">
 .__view {
   height: 100%;
   .result_gzws_list {
     height: calc(100% - 53px);
+  }
+}
+.gzws_container {
+  .el-form-item {
+    margin-bottom: 10px;
+  }
+  .operation_button {
+    margin-top: 20px;
   }
 }
 </style>
