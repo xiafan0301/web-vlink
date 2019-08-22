@@ -13,21 +13,24 @@
           <div class="left_top">
             <el-form :model="qyryfxFrom" ref="qyryfxFrom" class="qyryfx_from">
               <el-form-item class="select_type">
-                <span>查询方式:</span>
-                <el-radio-group v-model="selectType" class="select_radio">
+                <div class="select_type_box">
+                  <span :class="{active_span: selectType === 1}" @click="handleRadioSelectType(1)">在线查询</span>
+                  <span :class="{active_span: selectType === 2}" @click="handleRadioSelectType(2)">离线任务</span>
+                </div>
+                <!-- <span>查询方式:</span>
+                <el-radio-group v-model="selectType" class="select_radio" @change="handleRadioSelectType">
                   <el-radio :label="1">在线查询</el-radio>
                   <el-radio :label="2">离线任务</el-radio>
-                </el-radio-group>
+                </el-radio-group> -->
               </el-form-item>
-              <el-form-item prop="taskName" v-if="selectType === 2" :rules="[{ required: true, message: '该项内容不能为空', trigger: 'blur' }]">
-                <el-input placeholder="请设置任务名称" maxlength="20" v-model="qyryfxFrom.taskName"></el-input>
-              </el-form-item>
-              <el-form-item prop="personGroupId">
+              <el-form-item prop="personGroupId" :rules="[{ required: true, message: '该项内容不能为空', trigger: 'blur' }]">
                 <el-select
+                  ref="personSelect"
                   class="width232"
                   v-model="qyryfxFrom.personGroupId"
                   placeholder="请选择分析人群"
-                  multiple
+                  @change="changePersonGroup"
+                  :multiple="isMultiplePerson"
                   collapse-tags
                 >
                   <el-option
@@ -39,7 +42,7 @@
                 </el-select>
               </el-form-item>
               <el-form-item prop="sex">
-                <el-select class="width232" v-model="qyryfxFrom.sex" placeholder="请选择性别">
+                <el-select class="width232" v-model="qyryfxFrom.sex" placeholder="请选择性别" clearable>
                   <el-option
                     v-for="item in peopleSexOptions"
                     :key="item.enumField"
@@ -53,6 +56,7 @@
                   class="width232"
                   v-model="qyryfxFrom.age"
                   placeholder="请选择年龄段"
+                  clearable
                   multiple
                   collapse-tags
                 >
@@ -124,7 +128,11 @@
                   </li>
                 </ul>
               </div>
-              <el-form-item>
+              
+              <el-form-item prop="taskName" v-if="selectType === 2" :rules="[{ required: true, message: '该项内容不能为空', trigger: 'blur' }]">
+                <el-input placeholder="请设置任务名称" maxlength="20" v-model="qyryfxFrom.taskName"></el-input>
+              </el-form-item>
+              <el-form-item class="function_form_btn">
                 <el-button style="width: 110px;" @click="resetLeftMenu('qyryfxFrom')">重置</el-button>
                 <el-button type="primary" style="width: 110px;" :loading="submitLoading" @click="submitData('qyryfxFrom')">确定</el-button>
               </el-form-item>
@@ -194,6 +202,69 @@
                   </ul>
                 </div>
               </div>
+              <!-- 页面的右边 -->
+              <div class="info_right" v-show="infoRightShow">
+                <div class="danger_people_wrap">
+                  <vue-scroll>
+                    <h3 class="camera_name">
+                      <span>{{ selectedDevice.deviceName }}</span>
+                      &nbsp;
+                      <span>{{'(' + selectedDevice.shotNum + '次)'}}</span>
+                      <i class="el-icon-close" @click="infoRightShow = false;" title="关闭"></i>
+                    </h3>
+                    <div class="danger_people_list">
+                      <div
+                        class="people_item"
+                        v-for="(item, index) in currentClickDevice"
+                        :key="'people_item' + index"
+                      >
+                        <div v-for="(sItem, sIndex) in item.detailList" :key="'my_swiper' + sIndex">
+                          <div class="swiper_contents" v-if="item.currentIndex === sIndex">
+                            <div class="shot_times">
+                              <p>{{ item.detailList.length + '次'}}</p>
+                              <div class="select_time">
+                                <el-select
+                                  v-model="item.currentIndex"
+                                  @change="slideToIndex(item.currentIndex, index)"
+                                  placeholder="请选择"
+                                >
+                                  <el-option
+                                    v-for="(gItem, gIndex) in item.detailList"
+                                    :key="gIndex"
+                                    :label="item.shotTimes[gIndex]"
+                                    :value="gIndex"
+                                  ></el-option>
+                                </el-select>
+                              </div>
+                            </div>
+                            <div class="img_warp">
+                              <img :src="sItem.upPhotoUrl" title="点击放大图片" class="bigImg" alt />
+                            </div>
+                            <div class="similarity">
+                              <p class="similarity_count">{{sItem.semblance}}</p>
+                              <p class="similarity_title">相似度</p>
+                              
+                            </div>
+                            <div class="img_warp">
+                              <img :src="sItem.subStoragePath" title="点击放大图片" class="bigImg" alt />
+                            </div>
+                            <div class="people_message">
+                              <h2 class="name">{{item.name}}</h2>
+                              <div class="tips_wrap">
+                                <p class="tip" v-show="item.sex">{{item.sex}}</p>
+                                <p class="tip" v-show="item.age">{{item.age}}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div @click="prev(index)" class="swiper-button-prev change_img"></div>
+                        <div @click="next(index)" class="swiper-button-next change_img"></div>
+                      </div>
+                    </div>
+                  </vue-scroll>
+                </div>
+                <!-- <div class="right_black"></div> -->
+              </div>
             </div>
           </template>
           <template v-else>
@@ -201,172 +272,118 @@
           </template>
         </template>
         <template v-else>
-          <div class="search_box">
-            <el-form :inline="true" :model="searchForm" class="event_form" ref="searchForm">
-              <el-form-item label="任务名称:" prop="taskName">
-                <el-input
-                  style="width: 230px;"
-                  type="text"
-                  placeholder="请输入任务名称"
-                  v-model="searchForm.taskName"
-                />
-              </el-form-item>
-              <el-form-item label="创建时间:" prop="reportTime">
-                <el-date-picker
-                  class="vl_date"
-                  v-model="searchForm.reportTime"
-                  type="datetimerange"
-                  :time-arrow-control="true"
-                  value-format="yyyy-MM-dd HH:mm:ss"
-                  format="yyyy-MM-dd HH:mm:ss"
-                  range-separator="至"
-                  start-placeholder="开始日期"
-                  end-placeholder="结束日期"
-                  :default-time="['00:00:00', '23:59:59']"
-                ></el-date-picker>
-              </el-form-item>
-              <el-form-item>
-                <el-button type="primary" @click="selectDataList">查询</el-button>
-                <el-button @click="resetForm('searchForm')">重置</el-button>
-              </el-form-item>
-            </el-form>
-          <div class="divide"></div>
-          </div>
-          <div class="table_box">
-            <el-table :data="taskList">
-              <el-table-column label="序号" type="index" width="100"></el-table-column>
-              <el-table-column label="任务名称" prop="taskName" show-overflow-tooltip></el-table-column>
-              <el-table-column label="创建时间" prop="createTime" show-overflow-tooltip></el-table-column>
-              <el-table-column label="区域数量" prop="taskWebParam" show-overflow-tooltip>
-                <template slot-scope="scope">
-                  <span>{{scope.row.taskWebParam.deviceAndTimeList && scope.row.taskWebParam.deviceAndTimeList.length}}</span>
+          <div class="table_container">
+            <vue-scroll>
+              <div class="search_box">
+                <el-form :inline="true" :model="searchForm" class="event_form" ref="searchForm">
+                  <el-form-item label="任务名称:" prop="taskName">
+                    <el-input
+                      style="width: 230px;"
+                      type="text"
+                      placeholder="请输入任务名称"
+                      v-model="searchForm.taskName"
+                    />
+                  </el-form-item>
+                  <el-form-item label="创建时间:" prop="reportTime">
+                    <el-date-picker
+                      class="vl_date"
+                      v-model="searchForm.reportTime"
+                      type="datetimerange"
+                      :time-arrow-control="true"
+                      value-format="yyyy-MM-dd HH:mm:ss"
+                      format="yyyy-MM-dd HH:mm:ss"
+                      :clearable="true"
+                      range-separator="至"
+                      start-placeholder="开始日期"
+                      end-placeholder="结束日期"
+                      :default-time="['00:00:00', '23:59:59']"
+                    ></el-date-picker>
+                  </el-form-item>
+                  <el-form-item>
+                    <el-button type="primary" @click="selectDataList">查询</el-button>
+                    <el-button @click="resetForm('searchForm')">重置</el-button>
+                  </el-form-item>
+                </el-form>
+              <div class="divide"></div>
+              </div>
+              <div class="table_box">
+                <el-table :data="taskList">
+                  <el-table-column label="序号" type="index" width="100"></el-table-column>
+                  <el-table-column label="任务名称" prop="taskName" show-overflow-tooltip></el-table-column>
+                  <el-table-column label="创建时间" prop="createTime" show-overflow-tooltip></el-table-column>
+                  <el-table-column label="区域数量" prop="taskWebParam" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                      <span>{{scope.row.taskWebParam.deviceAndTimeList && scope.row.taskWebParam.deviceAndTimeList.length}}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="人群" prop="personGroupId" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                      <span>{{scope.row.taskWebParam.personGroupId ? scope.row.taskWebParam.personGroupId : '-'}}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="性别" prop="sex" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                      <span>{{scope.row.taskWebParam.sex ? scope.row.taskWebParam.sex : '-'}}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="年龄段" prop="age" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                      <span>{{scope.row.taskWebParam.age ? scope.row.taskWebParam.age : '-'}}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="状态" v-if="selectIndex === 0" prop="taskStatus" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                      <span>{{scope.row.taskStatus && scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 3 ? '失败' : '已中断'}}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="操作" fixed="right" width="200px">
+                    <template slot-scope="scope">
+                      <span
+                        class="operation_btn"
+                        @click="skipResultPage(scope.row)"
+                        v-if="selectIndex === 1"
+                      >查看</span>
+                      <span
+                        class="operation_btn"
+                        @click="showInterruptDialog(scope.row)"
+                        v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 1"
+                      >中断任务</span>
+                      <span
+                        class="operation_btn"
+                        @click="recoveryTask(scope.row)"
+                        v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 4"
+                      >恢复任务</span>
+                      <span
+                        class="operation_btn"
+                        @click="recoveryTask(scope.row)"  
+                        v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 3"
+                      >重启任务</span>
+                      <span
+                        class="operation_btn"
+                        @click="showDeleteDialog(scope.row)"
+                        v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus !== 4"
+                      >删除任务</span>
+                    </template>
+                  </el-table-column>
+                </el-table>
+                <template v-if="pagination.total > 0">
+                  <el-pagination
+                    class="cum_pagination"
+                    @current-change="handleCurrentChange"
+                    :current-page.sync="pagination.pageNum"
+                    :page-sizes="[100, 200, 300, 400]"
+                    :page-size="pagination.pageSize"
+                    layout="total, prev, pager, next, jumper"
+                    :total="pagination.total"
+                  ></el-pagination>
                 </template>
-              </el-table-column>
-              <el-table-column label="人群" prop="personGroupId" show-overflow-tooltip>
-                <template slot-scope="scope">
-                  <span>{{scope.row.taskWebParam.personGroupId ? scope.row.taskWebParam.personGroupId : '-'}}</span>
-                </template>
-              </el-table-column>
-              <el-table-column label="性别" prop="sex" show-overflow-tooltip>
-                <template slot-scope="scope">
-                  <span>{{scope.row.taskWebParam.sex ? scope.row.taskWebParam.sex : '-'}}</span>
-                </template>
-              </el-table-column>
-              <el-table-column label="年龄段" prop="age" show-overflow-tooltip>
-                <template slot-scope="scope">
-                  <span>{{scope.row.taskWebParam.age ? scope.row.taskWebParam.age : '-'}}</span>
-                </template>
-              </el-table-column>
-              <el-table-column label="状态" v-if="selectIndex === 0" prop="taskStatus" show-overflow-tooltip>
-                <template slot-scope="scope">
-                  <span>{{scope.row.taskStatus && scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 3 ? '失败' : '已中断'}}</span>
-                </template>
-              </el-table-column>
-              <el-table-column label="操作" fixed="right" width="200px">
-                <template slot-scope="scope">
-                  <span
-                    class="operation_btn"
-                    @click="skipResultPage(scope.row)"
-                    v-if="selectIndex === 1"
-                  >查看</span>
-                  <span
-                    class="operation_btn"
-                    @click="showInterruptDialog(scope.row)"
-                    v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 1"
-                  >中断任务</span>
-                  <span
-                    class="operation_btn"
-                    @click="recoveryTask(scope.row)"
-                    v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 4"
-                  >恢复任务</span>
-                  <span
-                    class="operation_btn"
-                    @click="recoveryTask(scope.row)"  
-                    v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 3"
-                  >重启任务</span>
-                  <span
-                    class="operation_btn"
-                    @click="showDeleteDialog(scope.row)"
-                    v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus !== 4"
-                  >删除任务</span>
-                </template>
-              </el-table-column>
-            </el-table>
-            <template v-if="pagination.total > 0">
-              <el-pagination
-                class="cum_pagination"
-                @current-change="handleCurrentChange"
-                :current-page.sync="pagination.pageNum"
-                :page-sizes="[100, 200, 300, 400]"
-                :page-size="pagination.pageSize"
-                layout="total, prev, pager, next, jumper"
-                :total="pagination.total"
-              ></el-pagination>
-            </template>
+              </div>
+            </vue-scroll>
           </div>
         </template>
         <!-- 关闭按钮 -->
       </div>
-      <!-- 页面的右边 -->
-      <div class="info_right" v-show="infoRightShow">
-        <div class="danger_people_wrap">
-          <vue-scroll>
-            <h3 class="camera_name">
-              <span>{{ selectedDevice.deviceName }}</span>
-              &nbsp;
-              <span>{{'(' + selectedDevice.shotNum + '次)'}}</span>
-              <i class="el-icon-close" @click="infoRightShow = false;" title="关闭"></i>
-            </h3>
-            <div class="danger_people_list">
-              <div
-                class="people_item"
-                v-for="(item, index) in currentClickDevice"
-                :key="'people_item' + index"
-              >
-                <div v-for="(sItem, sIndex) in item.detailList" :key="'my_swiper' + sIndex">
-                  <div class="swiper_contents" v-if="item.currentIndex === sIndex">
-                    <div class="shot_times">{{ item.detailList.length + '次'}}</div>
-                    <div class="img_warp">
-                      <img :src="sItem.upPhotoUrl" title="点击放大图片" class="bigImg" alt />
-                    </div>
-                    <div class="similarity">
-                      <p class="similarity_count">{{sItem.semblance}}</p>
-                      <p class="similarity_title">相似度</p>
-                      <div class="select_time">
-                        <el-select
-                          v-model="item.currentIndex"
-                          @change="slideToIndex(item.currentIndex, index)"
-                          placeholder="请选择"
-                        >
-                          <el-option
-                            v-for="(gItem, gIndex) in item.detailList"
-                            :key="gIndex"
-                            :label="item.shotTimes[gIndex]"
-                            :value="gIndex"
-                          ></el-option>
-                        </el-select>
-                      </div>
-                    </div>
-                    <div class="img_warp">
-                      <img :src="sItem.subStoragePath" title="点击放大图片" class="bigImg" alt />
-                    </div>
-                    <div class="people_message">
-                      <h2 class="name">{{item.name}}</h2>
-                      <div class="tips_wrap">
-                        <p class="tip">{{item.sex}}</p>
-                        <p class="tip">{{item.age}}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div @click="prev(index)" class="swiper-button-prev change_img"></div>
-                <div @click="next(index)" class="swiper-button-next change_img"></div>
-              </div>
-            </div>
-          </vue-scroll>
-        </div>
-        <div class="right_black"></div>
-      </div>
+      
     </div>
     <!--删除任务弹出框-->
     <el-dialog
@@ -410,12 +427,8 @@ import vlBreadcrumb from "@/components/common/breadcrumb.vue";
 import mapSelector from '@/components/common/mapSelector.vue';
 import noResult from '@/components/common/noResult.vue';
 // import swiper from "vue-awesome-swiper";
-import { mapXupuxian } from "@/config/config.js";
+import { mapXupuxian, onlineOutTime } from "@/config/config.js";
 import { formatDate, dateOrigin } from "@/utils/util.js";
-import {
-  getAllMonitorList,
-  getAllBayonetList
-} from "@/views/index/api/api.base.js";
 import {
   getAreaRealTimeData,
   addAreaPersonTask
@@ -430,6 +443,7 @@ export default {
   components: { vlBreadcrumb, mapSelector, noResult },
   data() {
     return {
+      isMultiplePerson: true, // 全部人像是否多选
       deleteDialog: false, // 删除任务弹出框
       interruptDialog: false, // 中断任务弹出框
       isDeleteLoading: false, // 删除任务弹出框
@@ -447,8 +461,8 @@ export default {
       clearMapSelect3: null, // 清除地图选择
       clearMapSelect4: null, // 清除地图选择
       clearMapSelect5: null, // 清除地图选择
-      selectType: 1, // 左侧查询方式
-      selectIndex: 2, // 右侧tab默认选中
+      selectType: 2, // 左侧查询方式
+      selectIndex: 1, // 右侧tab默认选中
       tabList: [
         {
           label: "查询结果",
@@ -472,7 +486,7 @@ export default {
       // searchPlace: "",
       qyryfxFrom: {
         taskName: null, // 任务名称
-        personGroupId: "", //分析人群
+        personGroupId: [], //分析人群
         sex: null, // 性别
         age: "", // 年龄段
         startTime: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)), // 开始时间
@@ -535,8 +549,8 @@ export default {
       amap: null, // 地图对象
       mapCenter: [110.594419, 27.908869], //地图中心位
       // videoMenuStatus: true, // 菜单状态
-      listDevice: [], // 设备
-      listBayonet: [], // 卡口
+      // listDevice: [], // 设备
+      // listBayonet: [], // 卡口
       showTypes: "DB", //设备类型
       selectedDevice: {}, // 当前选中的设备信息
       currentClickDevice: [],
@@ -559,22 +573,56 @@ export default {
     }
   },
   mounted() {
-    //获取数据
-    this.getTreeList();
-    // this.mapEvents();
-    //加载地图
     // 获取到监控人群分组
     getGroupAllList().then(res => {
       if (res) {
+        // this.peopleGroupOptions = res.data;
+
         this.peopleGroupOptions = [
           ...res.data.filter(item => item.uid !== null)
         ];
+        this.peopleGroupOptions.map(item => {
+          this.qyryfxFrom.personGroupId.push(item.uid);
+        })
       }
     });
+
+    setTimeout(() => {
+      this.getTaskList();
+    }, 500);
   },
   methods: {
+    // 查询方式change
+    handleRadioSelectType (val) {
+      this.selectType = val;
+      if (val === 1) {
+        this.selectIndex = 2;
+      } else {
+        this.selectIndex = 1;
+      }
+    },
+    // 人群分析change
+    changePersonGroup (val) {
+      console.log('val', val)
+      // if (val) {
+      //   console.log('asdasdasd')
+      //   this.isMultiplePerson = true;
+      // } else {
+      //   this.isMultiplePerson = false;
+      // }
+      // if (this.$refs.personSelect.multiple) {
+      //   this.isMultiplePerson = false
+      // } else {
+      //   this.isMultiplePerson = true;
+      // }
+      // this.$refs.personSelect.multiple = false;
+      console.log(this.$refs.personSelect.multiple)
+    },
     // 获取离线任务列表
     getTaskList () {
+      if (!this.searchForm.reportTime) {
+        this.searchForm.reportTime = [];
+      }
       const params = {
         'where.taskName': this.searchForm.taskName,
         'where.taskType': 7, // 7：区域人员分析
@@ -864,8 +912,11 @@ export default {
     resetLeftMenu(form) {
       this.$refs[form].resetFields();
       this.selectAreaDataList = [];
-      this.selectMapType = 0;
+      this.selectMapType = 1;
       this.infoRightShow = false; // 关闭右边的菜单数据
+      this.peopleGroupOptions.map(item => {
+        this.qyryfxFrom.personGroupId.push(item.uid);
+      })
     },
     /** 操作左边菜单方法 */
     openMenu() {
@@ -909,6 +960,22 @@ export default {
             deviceAndTimeList: deviceAndTimeList,
             taskName: this.qyryfxFrom.taskName
           };
+          // const queryParams = {
+          //   sex:null,
+          //   age:"",
+          //   personGroupId:"",
+          //   deviceAndTimeList:
+          //     [
+          //       {
+          //         deviceIds:"11,26",
+          //         bayonetIds:"2,7,9,3UUWvZxRHfsEqDu0D8ZCDp",
+          //         deviceNames:"溆浦县国土资源局153、人脸抓拍设备、卡口2、卡口7、卡口9、人脸抓拍卡口",
+          //         startTime:"2019-08-20 00:00:00",
+          //         endTime:"2019-08-21 15:54:08"
+          //       }
+          //     ],
+          //   taskName:null
+          // }
           //  const queryParams = {
           //   deviceAndTimeList: [
           //     {
@@ -926,12 +993,14 @@ export default {
 
           this.submitLoading = true; // 打开加载效果
           if (this.selectType === 1) {
-            getAreaRealTimeData(queryParams)
-              .then(res => {
+            getAreaRealTimeData(queryParams, {
+              errorMsg: '因数据量过大导致查询超时，建议进行离线分析',
+              timeout: onlineOutTime
+            }).then(res => {
                 let _this = this;
                 if (res && res.data) {
                   this.submitLoading = false; // 关闭加载效果
-                  if (JSON.parse(res.data.taskResult).length) {
+                  if (res.data.taskResult) {
 
                     this.resultDataList = JSON.parse(res.data.taskResult);
                     this.clearMarkList(); // 清除地图标记
@@ -943,9 +1012,7 @@ export default {
                     
                   } else {
                     this.clearMarkList(); // 清除地图标记
-                    // this.setMarks();
                     this.isInitPage = false;
-                    this.$message.warning("您选择的设备没有数据");
                   }
                 } else {
                   this.clearMarkList(); // 清除地图标记
@@ -956,7 +1023,6 @@ export default {
               })
               .catch(() => {
                 this.clearMarkList(); // 清除地图标记
-                // this.setMarks();
                 this.submitLoading = false; // 关闭加载效果
               });
           } else {
@@ -974,7 +1040,6 @@ export default {
                 } else {
                   this.submitLoading = false;
                 }
-                console.log('uuuuuuu', res)
               })
               .catch(() => {
                  this.submitLoading = false;
@@ -1026,81 +1091,30 @@ export default {
 
       _this.setMarks(data);
     },
-    getTreeList() {
-      if (this.showTypes.indexOf("D") >= 0) {
-        this.getListDevice();
-      }
-      if (this.showTypes.indexOf("B") >= 0) {
-        this.getListBayonet();
-      }
-    },
-    // // 获取到设备数据
-    getListDevice() {
-      getAllMonitorList({ ccode: mapXupuxian.adcode }).then(res => {
-        if (res) {
-          this.listDevice = res.data;
-          // this.setMarks(); // 初始化设备
-        }
-      });
-    },
-    // 获取到卡口数据
-    getListBayonet() {
-      getAllBayonetList({ areaId: mapXupuxian.adcode }).then(res => {
-        if (res) {
-          this.listBayonet = res.data;
-          // this.setMarks(); // 初始化卡口
-        }
-      });
-    },
-    // D设备 B卡口
     setMarks(deviceList = null) {
-      console.log('deviceList', deviceList)
-      // 展示设备和卡口
-      // if (init) {
-      //   // 初始化的时候展示所有的设备
-      //   for (let i = 0; i < this.listDevice.length; i++) {
-      //     this.doMark(this.listDevice[i], deviceList, "vl_icon vl_icon_sxt");
-      //   }
-      //   for (let i = 0; i < this.listBayonet.length; i++) {
-      //     this.doMark(this.listBayonet[i], deviceList, "vl_icon vl_icon_kk");
-      //   }
-      //   this.amap.setFitView();
-      // } else {
-        for (let i = 0; i < this.listDevice.length; i++) {
-          const listItem = this.listDevice[i];
-          // let flag = false;
-          for (let j = 0; j < deviceList.length; j++) {
-            const deviceItem = deviceList[j];
-            if (deviceItem.groupName === listItem.viewClassCode) {
-              console.log('1')
-              // flag = true;
-              this.doMark( deviceItem, "vl_icon vl_icon_sxt");
-              break;
-            }
-          }
-          // if (!flag) {
-          //   console.log('2')
-          //   this.doMark(this.listDevice[i], null, "vl_icon vl_icon_sxt");
-          // }
+      for (let j = 0; j < deviceList.length; j++) {
+        const deviceItem = deviceList[j];
+        if (deviceItem.bayonetName) {
+          // const deviceName = deviceItem.deviceName.split('Bayonet_');
+          // deviceItem.deviceName = deviceName[1];
+          this.doMark(deviceItem, "vl_icon vl_icon_kk");
+          break;
+        } else {
+          this.doMark( deviceItem, "vl_icon vl_icon_sxt");
+          break;
         }
-        for (let i = 0; i < this.listBayonet.length; i++) {
-          const listItem = this.listBayonet[i];
-          // let flag = false;
-          for (let j = 0; j < deviceList.length; j++) {
-            const deviceItem = deviceList[j];
-            if (deviceItem.groupName === listItem.viewClassCode) {
-              console.log('3')
-              this.doMark(deviceItem, "vl_icon vl_icon_kk");
-              // flag = true;
-              break;
-            }
-          }
-          // if (!flag) {
-          //   console.log('4')
-          //   this.doMark(this.listBayonet[i], null, "vl_icon vl_icon_kk");
-          // }
-        }
-      // }
+      
+        // if (deviceItem.deviceName.indexOf('Bayonet_') !== -1) {
+        //   const deviceName = deviceItem.deviceName.split('Bayonet_');
+        //   deviceItem.deviceName = deviceName[1];
+        //   this.doMark(deviceItem, "vl_icon vl_icon_kk");
+        //   break;
+        // } else {
+        //   this.doMark( deviceItem, "vl_icon vl_icon_sxt");
+        //   break;
+        // }
+      
+      }
     },
     // 地图标记
     doMark(device, sClass) {
@@ -1302,7 +1316,7 @@ export default {
       z-index: 100;
       .left_top {
         width: 252px;
-        margin: 0 10px;
+        margin: 10px 10px;
         padding-bottom: 20px;
         .qyryfx_from {
           .area_list {
@@ -1359,25 +1373,45 @@ export default {
           /deep/ .el-form-item {
             margin-bottom: 10px;
           }
+          .function_form_btn {
+            margin-top: 20px;
+          }
           .select_type {
-            margin-bottom: 0 !important;
-            /deep/.el-form-item__content {
-              display: flex;
-              align-items: center;
-              /deep/ .el-radio {
-                margin-right: 20px;
+            // margin-bottom: 0 !important;
+            .select_type_box {
+              width: 100%;
+              border-radius: 4px;
+              color: #666666;
+              border: 1px solid #D3D3D3;
+              >span {
+                text-align: center;
+                display: inline-block;
+                width: 50%;
+                cursor: pointer;
+              }
+              .active_span {
+                color: #ffffff;
+                background:rgba(12,112,248,1);
+                // border:1px solid rgba(7,105,232,1);
               }
             }
-            >span {
-              width: 60px;
-              display: inline-block;
-            }
-            .select_radio {
-              margin-left: 5px;
-              width: 160px;
-              display: flex;
-              align-items: center;
-            }
+            // /deep/.el-form-item__content {
+            //   display: flex;
+            //   align-items: center;
+            //   /deep/ .el-radio {
+            //     margin-right: 20px;
+            //   }
+            // }
+            // >span {
+            //   width: 60px;
+            //   display: inline-block;
+            // }
+            // .select_radio {
+            //   margin-left: 5px;
+            //   width: 160px;
+            //   display: flex;
+            //   align-items: center;
+            // }
           }
           .area_select {
             // margin-bottom: 0;
@@ -1586,6 +1620,29 @@ export default {
           border-bottom: 2px solid #0c70f8;
         }
       }
+      .table_container {
+        height: calc(100% - 50px);
+        .search_box {
+          margin: 20px;
+          .divide {
+            border: 1px dashed #fafafa;
+          }
+        }
+        .table_box {
+          margin: 0 20px;
+          .add_btn {
+            margin-bottom: 10px;
+          }
+          .operation_btn {
+            display: inline-block;
+            padding: 0 10px;
+            border-right: 1px solid #f2f2f2;
+            &:last-child {
+              border-right: none;
+            }
+          }
+        }
+      }
       .map_center_container {
         position: relative;
         overflow: hidden;
@@ -1711,179 +1768,164 @@ export default {
             }
           }
         }
-      }
-      .search_box {
-        margin: 20px;
-        .divide {
-          border: 1px dashed #fafafa;
-        }
-      }
-      .table_box {
-        margin: 0 20px;
-        .add_btn {
-          margin-bottom: 10px;
-        }
-        .operation_btn {
-          display: inline-block;
-          padding: 0 10px;
-          border-right: 1px solid #f2f2f2;
-          &:last-child {
-            border-right: none;
-          }
-        }
-      }
-    }
-    .info_right {
-      // 页面右边
-      width: 496px;
-      height: 100%;
-      position: relative;
-      background: white;
-      > div {
-        position: relative;
-        height: 100%;
-        float: left;
-      }
-      // 危险人物列表
-      .danger_people_wrap {
-        width: 476px;
-        // margin-right: 28px;
-        padding: 0 0px 20px 20px;
-        // 摄像头名称
-        .camera_name {
-          font-size: 14px;
-          line-height: 56px;
-          height: 56px;
-          color: #333333;
-          border-bottom: 1px solid #d3d3d3;
-          width: 428px;
-          position: relative;
-          > i {
-            position: absolute;
-            z-index: 10;
-            right: 0;
-            font-size: 16px;
-            top: 20px;
-            color: #999;
-            cursor: pointer;
-          }
-        }
-        .danger_people_list {
-          padding-top: 28px;
-          // 人员记录列表
-          .people_item {
-            width: 428px;
+        .info_right {
+          // 页面右边
+          width: 496px;
+          height: 100%;
+          position: absolute;
+          top: 0;
+          right: 0;
+          background: white;
+          box-shadow:0px 10px 12px 0px rgba(4,24,54,0.2);
+          > div {
             position: relative;
-            background: #fff;
-            box-shadow: 0px 5px 16px 0px rgba(169, 169, 169, 0.2);
-            padding: 30px 0 30px 0px;
-            overflow: hidden;
-            margin-bottom: 25px;
-            .swiper_contents {
-              padding-left: 50px;
+            height: 100%;
+            float: left;
+          }
+          // 危险人物列表
+          .danger_people_wrap {
+            width: 100%;
+            // margin-right: 28px;
+            padding: 0 0px 20px 20px;
+            // 摄像头名称
+            .camera_name {
+              font-size: 14px;
+              line-height: 56px;
+              height: 56px;
+              color: #333333;
+              border-bottom: 1px solid #d3d3d3;
+              width: 428px;
               position: relative;
-              .shot_times {
+              > i {
                 position: absolute;
+                z-index: 10;
                 right: 0;
-                top: -30px;
-                padding: 0 16px;
-                line-height: 20px;
-                border-radius: 10px 0px 0px 10px;
-                background: #e9e9e9;
-                font-size: 12px;
-                color: #555;
-                text-align: center;
+                font-size: 16px;
+                top: 20px;
+                color: #999;
+                cursor: pointer;
               }
             }
-            .change_img {
-              position: absolute;
-              width: 12px;
-              height: 26px;
-              top: 80px;
-              background: url("../../../../assets/img/icons.png") no-repeat;
-              cursor: pointer;
-            }
-            // 点击变成上一张
-            .swiper-button-prev {
-              left: 22px;
-              background-position: -990px -133px;
-              &:hover {
-                background-position: -972px -133px;
-              }
-            }
-            // 点击下一张
-            .swiper-button-next {
-              right: 18px;
-              background-position: -1038px -133px;
-              &:hover {
-                background-position: -1019px -133px;
-              }
-            }
-            .img_warp {
-              position: relative;
-              width: 76px;
-              height: 76px;
-              float: left;
-              border-radius: 3px;
-              background: red;
-              > img {
-                width: 100%;
-                height: 100%;
-                display: block;
-                border-radius: 3px;
-              }
-            }
-            // 相似度
-            .similarity {
-              width: 88px;
-              float: left;
-              text-align: center;
-              .similarity_count {
-                font-size: 26px;
-                line-height: 32px;
-                // font-family:AuroraBT-BoldCondensed;
-                color: #0c70f8;
-              }
-              .similarity_title {
-                color: #333333;
-                font-size: 12px;
-                line-height: 18px;
-                padding-bottom: 2px;
-              }
-            }
-            // 人物信息
-            .people_message {
-              float: left;
-              padding-left: 12px;
-              .name {
-                font-size: 18px;
-                font-weight: bold;
-                color: #333;
-                line-height: 38px;
-              }
-              .tips_wrap {
+            .danger_people_list {
+              padding-top: 28px;
+              // 人员记录列表
+              .people_item {
+                width: 428px;
+                position: relative;
+                background: #fff;
+                box-shadow: 0px 5px 16px 0px rgba(169, 169, 169, 0.2);
+                padding: 20px 0 30px 0px;
                 overflow: hidden;
-                .tip {
-                  float: left;
-                  padding: 0 8px;
-                  line-height: 30px;
-                  background: #f2f2f2;
-                  border: 1px solid #f2f2f2;
-                  border-radius: 3px;
+                margin-bottom: 25px;
+                .swiper_contents {
+                  padding-left: 50px;
+                  position: relative;
+                  .shot_times {
+                    display: flex;
+                    height: 24px;
+                    line-height: 24px;
+                    margin-bottom: 20px;
+                    >p {
+                      width: 86px;
+                      background-color: #E9E9E9;
+                      color: #555555;
+                      font-size: 12px;
+                      border-radius: 12px;
+                      text-align: center;
+                      border-top-right-radius: 0;
+                      border-bottom-right-radius: 0;
+                    }
+                  }
                 }
-                .tip + .tip {
-                  margin-left: 8px;
+                .change_img {
+                  position: absolute;
+                  width: 12px;
+                  height: 26px;
+                  top: 80px;
+                  background: url("../../../../assets/img/icons.png") no-repeat;
+                  cursor: pointer;
+                }
+                // 点击变成上一张
+                .swiper-button-prev {
+                  left: 22px;
+                  background-position: -990px -133px;
+                  &:hover {
+                    background-position: -972px -133px;
+                  }
+                }
+                // 点击下一张
+                .swiper-button-next {
+                  right: 18px;
+                  background-position: -1038px -133px;
+                  &:hover {
+                    background-position: -1019px -133px;
+                  }
+                }
+                .img_warp {
+                  position: relative;
+                  width: 76px;
+                  height: 76px;
+                  float: left;
+                  border-radius: 3px;
+                  background: red;
+                  > img {
+                    width: 100%;
+                    height: 100%;
+                    display: block;
+                    border-radius: 3px;
+                  }
+                }
+                // 相似度
+                .similarity {
+                  width: 88px;
+                  float: left;
+                  text-align: center;
+                  .similarity_count {
+                    font-size: 26px;
+                    line-height: 32px;
+                    font-weight: bold;
+                    // font-family:AuroraBT-BoldCondensed;
+                    color: #0c70f8;
+                  }
+                  .similarity_title {
+                    color: #333333;
+                    font-size: 12px;
+                    line-height: 18px;
+                    padding-bottom: 2px;
+                  }
+                }
+                // 人物信息
+                .people_message {
+                  float: left;
+                  padding-left: 12px;
+                  .name {
+                    font-size: 18px;
+                    font-weight: bold;
+                    color: #333;
+                    line-height: 38px;
+                  }
+                  .tips_wrap {
+                    overflow: hidden;
+                    .tip {
+                      float: left;
+                      padding: 0 8px;
+                      line-height: 30px;
+                      background: #f2f2f2;
+                      border: 1px solid #f2f2f2;
+                      border-radius: 3px;
+                    }
+                    .tip + .tip {
+                      margin-left: 8px;
+                    }
+                  }
                 }
               }
             }
           }
         }
       }
-      .right_black {
-        width: 20px;
-        background: #eaebed;
-      }
     }
+    
     .close-menu-o {
       @include close_menu;
       left: 0;
@@ -1983,20 +2025,20 @@ html {
   }
   // 右边菜单
   .info_right {
-    .similarity {
-      .select_time {
-        // position: relative;
-        .el-input__inner {
-          position: relative;
-          height: 24px;
-          border-radius: 12px;
-          // width: 98px;
-          // z-index: 10;
-          // left: -5px;
+    .select_time {
+      // position: relative;
+      .el-input__inner {
+        position: relative;
+        height: 24px;
+        border-radius: 12px;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        &:hover {
+          border-color: transparent;
         }
-        .el-input__icon {
-          line-height: normal;
-        }
+      }
+      .el-input__icon {
+        line-height: normal;
       }
     }
   }

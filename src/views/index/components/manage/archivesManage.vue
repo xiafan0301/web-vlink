@@ -430,6 +430,7 @@ export default {
             const params = {
               uid: this.userInfo.organList[0].uid,
               organName: this.userInfo.organList[0].organName,
+              chargeUserName: this.userInfo.organList[0].chargeUserName,
               isShow: true,
               children: []
             };

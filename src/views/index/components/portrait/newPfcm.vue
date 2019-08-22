@@ -17,12 +17,6 @@
             :rules="rules"
             :hide-required-asterisk="true"
           >
-            <!-- 任务名称 -->
-            <el-form-item prop="taskName">
-              <div class="task-name">
-                <el-input v-model="searchData.taskName" placeholder="请输入任务名称"></el-input>
-              </div>
-            </el-form-item>
             <!-- 时间 -->
             <el-form-item prop="startTime">
               <div class="time-search">
@@ -88,6 +82,12 @@
                   </li>
                 </ul>
                 <p class="another-value">次</p>
+              </div>
+            </el-form-item>
+            <!-- 任务名称 -->
+            <el-form-item prop="taskName">
+              <div class="task-name">
+                <el-input v-model="searchData.taskName" placeholder="请输入任务名称"></el-input>
               </div>
             </el-form-item>
             <el-form-item>
@@ -989,8 +989,7 @@ export default {
     },
     drawRectangleEditor(sid) {
       if (this.drawObj.rectangle[sid]) {
-        let _this = this,
-          obj = this.drawObj.rectangle[sid];
+        let obj = this.drawObj.rectangle[sid];
         if (obj.editor) {
           obj.editor.open();
         } else {
@@ -1087,7 +1086,7 @@ export default {
           obj.editor.open();
         } else {
           // 新建可编辑的矩形
-          let circle = new AMap.Circle({
+          let circle = new window.AMap.Circle({
             center: obj.obj.getCenter(),
             radius: obj.obj.getRadius(), //半径
             borderWeight: 3,
@@ -1183,8 +1182,7 @@ export default {
     },
     drawPolylineEditor(sid) {
       if (this.drawObj.polyline[sid]) {
-        let _this = this,
-          obj = this.drawObj.polyline[sid];
+        let obj = this.drawObj.polyline[sid];
         if (obj.editor) {
           obj.editor.open();
         } else {
@@ -1247,8 +1245,7 @@ export default {
     },
     drawPolygonEditor(sid) {
       if (this.drawObj.polygon[sid]) {
-        let _this = this,
-          obj = this.drawObj.polygon[sid];
+        let obj = this.drawObj.polygon[sid];
         if (obj.editor) {
           obj.editor.open();
         } else {
@@ -1304,7 +1301,7 @@ export default {
     drawCircle10kmClick(e) {
       // e.lnglat.getLng()+','+e.lnglat.getLat()
       this.amap.setDefaultCursor("crosshair");
-      let circle = new AMap.Circle({
+      let circle = new window.AMap.Circle({
         center: e.lnglat,
         radius: 1000 * 10, //半径
         borderWeight: 3,
@@ -1331,8 +1328,7 @@ export default {
     },
     drawCircle10kmEditor(sid) {
       if (this.drawObj.circle10km[sid]) {
-        let _this = this,
-          obj = this.drawObj.circle10km[sid];
+        let obj = this.drawObj.circle10km[sid];
         if (obj.editor) {
           obj.editor.open();
         } else {

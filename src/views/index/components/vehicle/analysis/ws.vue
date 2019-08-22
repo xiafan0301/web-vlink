@@ -72,7 +72,7 @@
               ></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item>
+          <el-form-item class="operation_button">
             <el-button class="reset_btn" @click="resetData('searchForm')">重置</el-button>
             <el-button class="select_btn" type="primary" :loading="isSearchLoading" @click="searchData('searchForm')">查询</el-button>
           </el-form-item>
@@ -380,6 +380,12 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+/deep/ .el-form-item__error {
+  position: static;
+  line-height: 20px;
+  padding-top: 0;
+  margin-bottom: -10px;
+}
 .vc_gcck_bd {
   position: absolute; top: 0; left: 0;
   width: 100%; height: 50px; line-height: 50px;
@@ -402,26 +408,30 @@ export default {
         padding: 15px 20px;
         font-size: 12px !important;
         .device_code {
-          .el-form-item__content {
+          /deep/ .el-form-item__content {
+            line-height: 20px;
             .span_tips {
               color: #F56C6C;
               font-size: 12px;
-              line-height: 1;
-              padding-top: 4px;
-              position: absolute;
-              top: 100%;
-              left: 0;
+              // line-height: 1;
+              // padding-top: 4px;
+              position: static;
+              // top: 100%;
+              // left: 0;
             }
           }
         }
         /deep/ .el-form-item {
-          margin-bottom: 20px;
+          margin-bottom: 10px;
         }
         .date_time {
           /deep/ .el-form-item__label {
             line-height: 20px;
             color: #999999;
           }
+        }
+        .operation_button {
+          margin-top: 20px;
         }
       }
     }
