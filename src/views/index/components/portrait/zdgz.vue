@@ -755,7 +755,14 @@ export default {
         let obj = data[i];
         let _idWin = 'vlJfoImg' + i;
         if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
-          let _sContent = `<div id="${_idWin}" class="vl_jig_mk_img"><img src="${obj.subStoragePath}"><div><p>${obj.deviceName}</p><p>抓拍${obj.shotNum}次</p></div></div>`;
+          let name = '', className = 'vl_icon_map_mark0';
+          if (obj.bayonetName) {
+            name = obj.bayonetName;
+            className = 'vl_icon_map_mark1'
+          } else {
+            name = obj.deviceName
+          }
+          let _sContent = `<div id="${_idWin}" class="vl_jig_mk_img"><img src="${obj.subStoragePath}"><div><p>${name}</p><p>抓拍${obj.shotNum}次</p></div></div>`;
           // 窗体
           new AMap.Marker({ // 添加自定义点标记
             map: this.amap,
@@ -768,7 +775,7 @@ export default {
           });
           // 摄像头
           let _id = 'vlJfoSxt' + i;
-          let _content = '<div id=' + _id + ' class="vl_icon vl_jfo_sxt vl_icon_judge_04"></div>'
+          let _content = '<div id=' + _id + ' class="vl_icon ' + className + ' "></div>'
           new AMap.Marker({ // 添加自定义点标记
             map: this.amap,
             position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
