@@ -335,6 +335,7 @@ export const addCluster = (mapObj, markers) => {
       var borderColor = 'hsla(' + Hue + ',100%,40%,1)';
       var shadowColor = 'hsla(' + Hue + ',100%,50%,1)';
       div.style.backgroundColor = bgColor;
+      // div.style.backgroundImage =`url("${'static/img/qart.png'}")`
       var size = Math.round(30 + Math.pow(context.count / count, 1 / 5) * 20);
       div.style.width = div.style.height = size + 'px';
       div.style.border = 'solid 1px ' + borderColor;
@@ -353,6 +354,7 @@ export const addCluster = (mapObj, markers) => {
     }
     mapObj.cluster = new window.AMap.MarkerClusterer(mapObj, markers, {
       gridSize: 80,
+      minClusterSize: 8,
       renderClusterMarker: renderClusterMarker
     });
   })

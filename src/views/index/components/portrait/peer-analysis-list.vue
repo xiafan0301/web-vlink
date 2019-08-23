@@ -49,7 +49,7 @@
             <p @click="showHistoryPic">从上传记录中选择</p>
           </div>
         </div>
-        <div class="per_semblance_ytsr"><span>同行次数：</span><el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100" placeholder="填写同行次数" v-model="searchData.minSemblance"></el-input>(2-100)</div>
+        <div class="per_semblance_ytsr"><span>同行次数：</span><el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100; if(value&&value <2)value = 2;" placeholder="填写同行次数" v-model="searchData.minSemblance"></el-input>(2-100)</div>
         <!--查询范围-->
         <div class="ytsr_left_search">
           <div class="left_time">
@@ -658,7 +658,7 @@ export default {
       } else {
         params['number'] = 2;
       }
-      params['deviceIds'] = this.selectCameraArr.map(res => res.id).join(',');
+      params['deviceId'] = this.selectCameraArr.map(res => res.id).join(',');
       params['bayonetIds'] = this.selectBayonetArr.map(res => res.id).join(',');
       params['startTime'] = formatDate(this.searchData.startTime, 'yyyy-MM-dd HH:mm:ss');
       params['endTime'] = formatDate(this.searchData.endTime, 'yyyy-MM-dd HH:mm:ss');
