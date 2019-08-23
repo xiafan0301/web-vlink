@@ -415,11 +415,11 @@
         <el-button class="operation_btn function_btn" :loading="isInterruptLoading" @click="sureInterruptTask">确认</el-button>
       </div>
     </el-dialog>
-    <div is="mapSelector" v-show="selectMapType === 1 && (isShowMapAreaDialog === true)" :open="mapDialogVisible1" :showTypes="'DB'" :clear="clearMapSelect1" @mapSelectorEmit="mapPoint"></div>
-    <div is="mapSelector" v-show="selectMapType === 2 && (isShowMapAreaDialog === true)" :open="mapDialogVisible2" :showTypes="'DB'" :clear="clearMapSelect2" @mapSelectorEmit="mapPoint"></div>
-    <div is="mapSelector" v-show="selectMapType === 3 && (isShowMapAreaDialog === true)" :open="mapDialogVisible3" :showTypes="'DB'" :clear="clearMapSelect3" @mapSelectorEmit="mapPoint"></div>
-    <div is="mapSelector" v-show="selectMapType === 4 && (isShowMapAreaDialog === true)" :open="mapDialogVisible4" :showTypes="'DB'" :clear="clearMapSelect4" @mapSelectorEmit="mapPoint"></div>
-    <div is="mapSelector" v-show="selectMapType === 5 && (isShowMapAreaDialog === true)" :open="mapDialogVisible5" :showTypes="'DB'" :clear="clearMapSelect5" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :editAble="isEditMap" v-show="selectMapType === 1 && (isShowMapAreaDialog === true)" :open="mapDialogVisible1" :showTypes="'DB'" :clear="clearMapSelect1" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :editAble="isEditMap" v-show="selectMapType === 2 && (isShowMapAreaDialog === true)" :open="mapDialogVisible2" :showTypes="'DB'" :clear="clearMapSelect2" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :editAble="isEditMap" v-show="selectMapType === 3 && (isShowMapAreaDialog === true)" :open="mapDialogVisible3" :showTypes="'DB'" :clear="clearMapSelect3" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :editAble="isEditMap" v-show="selectMapType === 4 && (isShowMapAreaDialog === true)" :open="mapDialogVisible4" :showTypes="'DB'" :clear="clearMapSelect4" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :editAble="isEditMap" v-show="selectMapType === 5 && (isShowMapAreaDialog === true)" :open="mapDialogVisible5" :showTypes="'DB'" :clear="clearMapSelect5" @mapSelectorEmit="mapPoint"></div>
   </div>
 </template>
 <script>
@@ -435,14 +435,13 @@ import {
 } from "@/views/index/api/api.judge.js";
 import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
 import { getGroupAllList } from "@/views/index/api/api.control.js";
-// import { validatePersonNum, validateInteger } from "@/utils/validator.js";
 import { objDeepCopy } from "@/utils/util.js";
-// import { constants } from "crypto";
 
 export default {
   components: { vlBreadcrumb, mapSelector, noResult },
   data() {
     return {
+      isEditMap: true, // 地图区域选择是否可以编辑
       isMultiplePerson: true, // 全部人像是否多选
       deleteDialog: false, // 删除任务弹出框
       interruptDialog: false, // 中断任务弹出框
@@ -542,15 +541,10 @@ export default {
           enumValue: "老年"
         }
       ], // 年龄段下拉
-      // isSearchResult: false, // 搜索框是否打开
-      // searchResultList: [1, 2, 3, 4, 5, 6, 7, 8], // 搜索结果的列表
       infoRightShow: false, // 右边菜单状态
       videoMenuStatus: true, // 左边菜单状态
       amap: null, // 地图对象
       mapCenter: [110.594419, 27.908869], //地图中心位
-      // videoMenuStatus: true, // 菜单状态
-      // listDevice: [], // 设备
-      // listBayonet: [], // 卡口
       showTypes: "DB", //设备类型
       selectedDevice: {}, // 当前选中的设备信息
       currentClickDevice: [],
@@ -750,6 +744,7 @@ export default {
     // 显示相对应的地图框选区域
     showCurrentMapArea (index) {
       console.log('index', index)
+      this.isEditMap = false;
       this.isShowMapAreaDialog = true;
       if (this.isShowMapAreaDialog) {
         switch (index) {
@@ -852,31 +847,6 @@ export default {
     handleCurrentChange (page) {
       this.pagination.pageNum = page;
       this.getTaskList();
-    },
-    // 日期控制
-    timeChange(ind, type = "start") {
-      this.$nextTick(() => {
-        if (this.drawObj[ind].startTime && this.drawObj[ind].endTime) {
-          if (
-            new Date(this.drawObj[ind].endTime).getTime() -
-              new Date(this.drawObj[ind].startTime).getTime() >
-            3 * 24 * 3600 * 1000
-          ) {
-            this.$message.warning("最大选择时间段为三天");
-            if (type === "start") {
-              this.drawObj[ind].endTime = formatDate(
-                new Date(this.drawObj[ind].startTime).getTime() +
-                  3600 * 1000 * 24 * 3
-              );
-            } else {
-              this.drawObj[ind].startTime = formatDate(
-                new Date(this.drawObj[ind].endTime).getTime() -
-                  3600 * 1000 * 24 * 3
-              );
-            }
-          }
-        }
-      });
     },
     // 切换照片
     prev(val) {
@@ -1095,24 +1065,12 @@ export default {
       for (let j = 0; j < deviceList.length; j++) {
         const deviceItem = deviceList[j];
         if (deviceItem.bayonetName) {
-          // const deviceName = deviceItem.deviceName.split('Bayonet_');
-          // deviceItem.deviceName = deviceName[1];
           this.doMark(deviceItem, "vl_icon vl_icon_kk");
           break;
         } else {
           this.doMark( deviceItem, "vl_icon vl_icon_sxt");
           break;
         }
-      
-        // if (deviceItem.deviceName.indexOf('Bayonet_') !== -1) {
-        //   const deviceName = deviceItem.deviceName.split('Bayonet_');
-        //   deviceItem.deviceName = deviceName[1];
-        //   this.doMark(deviceItem, "vl_icon vl_icon_kk");
-        //   break;
-        // } else {
-        //   this.doMark( deviceItem, "vl_icon vl_icon_sxt");
-        //   break;
-        // }
       
       }
     },
