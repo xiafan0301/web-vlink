@@ -37,7 +37,7 @@
               <li v-if="type === 3 && sturcDetail.vehicleType"><span>车辆分组</span><span :title="sturcDetail.vehicleType">{{(sturcDetail.vehicleType && sturcDetail.vehicleType.length > 0) ? sturcDetail.vehicleType.join(',') : '--'}}</span></li>
               <!-- <li v-if="type === 3 && sturcDetail.shotTime"><span>入城时间</span><span :title="sturcDetail.shotTime">{{sturcDetail.shotTime}}</span></li>
               <li v-if="type === 3 && sturcDetail.bayonetName"><span>入城卡口</span><span :title="sturcDetail.bayonetName">{{sturcDetail.bayonetName}}</span></li> -->
-              <li v-if="type === 3 && sturcDetail.firstEnterFlag"><span>初次入城</span><span>是</span></li>
+              <li v-if="type === 3"><span>初次入城</span><span>{{sturcDetail.firstEnterFlag? '是': '否'}}</span></li>
               <li v-if="sturcDetail.plateColor && sturcDetail.plateNo"><span>车牌颜色</span><span :title="sturcDetail.plateColor">{{sturcDetail.plateColor}}</span></li>
               <li v-if="sturcDetail.vehicleModel"><span>车辆型号</span><span :title="sturcDetail.vehicleModel">{{sturcDetail.vehicleModel}}</span></li>
               <li v-if="sturcDetail.vehicleColor"><span>车辆颜色</span><span :title="sturcDetail.vehicleColor">{{sturcDetail.vehicleColor}}</span></li>
