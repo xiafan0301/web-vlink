@@ -302,8 +302,11 @@
               <!--可以展开列表-->
               <div class="infinite-list-wrapper">
                 <ul>
-                  <li class="p_main_list" :class="{'is_open': item.isOpen}" v-for="item in allLeftEvData" :key="item.id">
-                    <div class="p_main_head" @click="item.isOpen = !item.isOpen"><i :class="{'el-icon-caret-right': !item.isOpen, 'el-icon-caret-bottom': item.isOpen}"></i>{{item.label}}({{item.times}}次)</div>
+                  <li class="p_main_list" :class="{'is_open': item.isOpen}" v-for="item in curAllLeftEvData" :key="item.id">
+                    <div class="p_main_head" @click="item.isOpen = !item.isOpen">
+                      <i :class="{'el-icon-caret-right': !item.isOpen, 'el-icon-caret-bottom': item.isOpen}"></i>{{item.label}}({{item.times}}次)
+                      <span class="del_icon el-icon-delete" @click.stop="delOneDay(item)"></span>
+                    </div>
                     <div class="p_main_item p_main_dialog_item" v-for="(sItem, sIndex) in item.list" :key="sItem.id">
                       <div class="info">
                         <div class="info_left">
@@ -416,6 +419,10 @@
     computed: {
       noMore () {
         return this.count >= this.totalMapNum;
+      },
+      // 过滤allLeftEvData里面list为空的数据，人工筛选的时候全部删除自动去除一列
+      curAllLeftEvData () {
+        return this.allLeftEvData.filter(x => x.list.length)
       }
     },
     mounted() {
@@ -601,16 +608,7 @@
             this.reselt = true;
             this.evData = res.data.list;
             this.evData.sort(this.compare("shotTime", this.timeOrder ? false : true));
-            this.totalMapNum = res.data.total;
-            // 计算经过多少个地方
-            let dvIds = [];
-            this.totalAddressNum = 0;
-            res.data.list.forEach(x => {
-              if(!dvIds.includes(x.deviceID)) {
-                this.totalAddressNum += 1;
-                dvIds.push(x.deviceID);
-              }
-            })
+            this.shotAddressAndTimes(this.evData)
 
             //  重组数据，给左边列表使用
             this.operData(true);
@@ -624,6 +622,18 @@
         }).catch(() => {
           this.searchLoading = false;
         });
+      },
+      shotAddressAndTimes (data) {
+        this.totalMapNum = data.length;
+        // 计算经过多少个地方
+        let dvIds = [];
+        this.totalAddressNum = 0;
+        data.forEach(x => {
+          if(!dvIds.includes(x.deviceID)) {
+            this.totalAddressNum += 1;
+            dvIds.push(x.deviceID);
+          }
+        })
       },
       operData (isAll) {
         this.leftEvData = [];
@@ -661,10 +671,16 @@
           }
         })
       },
+      delOneDay (item) {
+        item.list.forEach((x, index) => {
+          this.delSitem(item, x, index)
+        })
+      },
       delSitem (item, sItem, index) {
         item.list.splice(index, 1);
         item.times--;
         this.evData.splice(this.evData.findIndex(x => x === sItem), 1);
+        this.shotAddressAndTimes(this.evData);
       },
       chooseOk () {
         this.showLeft = true;
@@ -773,7 +789,7 @@
         let _i = this.evData.indexOf(obj);
         // list.splice(index, 1)
         this.evData.splice(_i, 1);
-        this.totalMapNum = this.evData.length;
+        this.shotAddressAndTimes(this.evData);
         this.operData();
         this.drawMapMarker(this.evData)
       }, // 更新画线
@@ -1049,6 +1065,15 @@
         i{
           color: #999999;
         }
+        span {
+          margin-left: 30px;
+          font-size: 20px;
+          color: #999999;
+          vertical-align: middle;
+          &:hover {
+            color: #0C70F8;
+          }
+        }
       }
       .p_main_item {
         width: 100%;
@@ -1116,7 +1141,7 @@
           overflow: hidden;
           white-space: nowrap;
           text-overflow: ellipsis;
-          border-bottom: 1px solid #F2F2F2;
+          /*border-bottom: 1px solid #F2F2F2;*/
           padding: 0 30px 0 10px;
         }
         .del_icon {
@@ -1134,6 +1159,8 @@
       .p_main_dialog_item {
         width: 33%;
         display: inline-block;
+        border: 1px solid #D3D3D3;
+        margin: 5px;
       }
     }
     .is_open {
