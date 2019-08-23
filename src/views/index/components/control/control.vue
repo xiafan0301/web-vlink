@@ -7,8 +7,13 @@
       <li>
         <router-link :to="{name: 'control_manage'}">布控管理</router-link>
       </li>
-      <li>
+      <!-- 1.0v -->
+      <!-- <li>
         <router-link :to="{name: 'control_create'}">新建布控</router-link>
+      </li> -->
+      <!-- 1.1v -->
+      <li>
+        <router-link :to="{name: 'control_add'}">新建布控</router-link>
       </li>
       <li>
         <router-link :to="{name: 'control_library'}">布控库</router-link>

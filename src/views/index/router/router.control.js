@@ -22,6 +22,11 @@ export default {
       component: () => import('@/views/index/components/control/create.vue')
     },
     {
+      path: 'add',
+      name: 'control_add',
+      component: () => import('@/views/index/components/control/add.vue')
+    },
+    {
       path: 'library',
       name: 'control_library',
       component: () => import('@/views/index/components/control/library.vue'),
