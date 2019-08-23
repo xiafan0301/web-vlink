@@ -746,6 +746,11 @@ export default {
   .__rail-is-horizontal {
     position: static!important;
   }
+  .combination_search {
+    .el-form-item {
+      margin-bottom: 0;
+    }
+  }
 }
 
 </style>
