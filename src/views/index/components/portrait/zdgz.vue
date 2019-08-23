@@ -127,13 +127,13 @@
             </ul>
             <div class="vl_jfo_right" v-show="showVideoList">
               <div class="vl_jig_right_title">
-                <p><i class="vl_icon vl_icon_v11"></i><span :title="curSXT.deviceName">{{curSXT.deviceName}}</span></p>
+                <p><i class="vl_icon vl_icon_v11"></i><span>{{curSXT.bayonetName ? curSXT.bayonetName : curSXT.deviceName}}</span></p>
                 <p><i class="vl_icon vl_icon_position_1"></i><span :title="curSXT.address">{{curSXT.address}}</span></p>
                 <!-- < span>抓拍{{curSXT.shotNum}}次</span> -->
               </div>
               <div class="video_container">
                 <vue-scroll>
-                  <div class="vl_jtc_mk" v-for="(item, index) in curVideo.videoList" :key="item.id" v-if="item.playerData">
+                  <div class="vl_jtc_mk" v-for="(item, index) in curVideo.videoList" :key="item.id">
                     <p>{{item.shotTime}}</p>
                     <div is="flvplayer" :oData="item.playerData"
                          :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
@@ -301,7 +301,7 @@ import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/i
 import mapSelector from '@/components/common/mapSelector.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 import { random14, formatDate } from '@/utils/util.js';
-import { mapXupuxian } from "@/config/config.js";
+import { mapXupuxian, onlineOutTime } from "@/config/config.js";
 export default {
    components: {
     mapSelector,
@@ -710,8 +710,10 @@ export default {
       params['portraitGroupName'] = this.portraitGroupList.find(y => y.uid === this.searchData.portraitGroupId).groupName;
       // 判断选择的是实时还是离线 taskType 1为实时，2为离线.
       if (this.taskType === "1") {
-        PortraitPostFocusRealTime(params)
-            .then(res => {
+        PortraitPostFocusRealTime(params, {
+          errorMsg: '因数据量过大导致查询超时，建议进行离线分析',
+          timeout: onlineOutTime
+        }).then(res => {
               this.searching = false;
               if (res) {
                 this.$set(res.data, 'taskResult', JSON.parse(res.data.taskResult));
@@ -786,7 +788,7 @@ export default {
             content: _content
           });
           setTimeout(() => {
-            this.addListen($('#' + _id), 'mouseover', i);
+            this.addListen($('#' + _id), 'mouseover', i, obj);
             this.addListen($('#' + _id), 'mouseout', i, obj);
             this.addListen($('#' + _id), 'click', i, obj);
           }, 300)
@@ -800,13 +802,21 @@ export default {
       el.bind(evType, function () {
         switch (evType) {
           case 'mouseover':
-            $('#vlJfoImg' + key).addClass('vl_jig_mk_img_hover')
-            $('#vlJfoSxt' + key).addClass('vl_icon_judge_02')
+            $('#vlJfoImg' + key).addClass('vl_jig_mk_img_hover');
+            if (obj.bayonetName) {
+              $('#vlJfoSxt' + key).addClass('vl_icon_map_hover_mark1');
+            } else {
+              $('#vlJfoSxt' + key).addClass('vl_icon_judge_02');
+            }
             break;
           case 'mouseout':
             if (!obj.checked) {
               $('#vlJfoImg' + key).removeClass('vl_jig_mk_img_hover')
-              $('#vlJfoSxt' + key).removeClass('vl_icon_judge_02')
+              if (obj.bayonetName) {
+                $('#vlJfoSxt' + key).removeClass('vl_icon_map_hover_mark1');
+              } else {
+                $('#vlJfoSxt' + key).removeClass('vl_icon_judge_02');
+              }
             }
             break;
           case 'click':
@@ -817,10 +827,18 @@ export default {
             obj.checked = true;
             if (_key !== null) {
               $('#vlJfoImg' + _key).removeClass('vl_jig_mk_img_hover')
-              $('#vlJfoSxt' + _key).removeClass('vl_icon_judge_02')
+              if (obj.bayonetName) {
+                $('#vlJfoSxt' + _key).removeClass('vl_icon_map_hover_mark1');
+              } else {
+                $('#vlJfoSxt' + _key).removeClass('vl_icon_judge_02');
+              }
             }
             $('#vlJfoImg' + key).addClass('vl_jig_mk_img_hover')
-            $('#vlJfoSxt' + key).addClass('vl_icon_judge_02')
+            if (obj.bayonetName) {
+              $('#vlJfoSxt' + key).addClass('vl_icon_map_hover_mark1');
+            } else {
+              $('#vlJfoSxt' + key).addClass('vl_icon_judge_02');
+            }
             self.showVideo(obj);
             break;
         }
@@ -854,7 +872,11 @@ export default {
       this.evData.forEach(x => x.checked = false);
       const _key = this.curVideo.indexNum;
       $('#vlJfoImg' + _key).removeClass('vl_jig_mk_img_hover')
-      $('#vlJfoSxt' + _key).removeClass('vl_icon_judge_02')
+      if (document.getElementById('vlJfoSxt' + _key).classList.contains('vl_icon_map_hover_mark1')) {
+        $('#vlJfoSxt' + _key).removeClass('vl_icon_map_hover_mark1')
+      } else {
+        $('#vlJfoSxt' + _key).removeClass('vl_icon_judge_02')
+      }
       this.curVideo.indexNum = null;
       this.showVideoList = false;
     }
