@@ -94,7 +94,7 @@
               </div>
               <div class="struc_cdi_line"></div>
             </div>
-            <span>布控库信息</span>
+            <span>信息库信息</span>
           </div>
         </div>
       </div>

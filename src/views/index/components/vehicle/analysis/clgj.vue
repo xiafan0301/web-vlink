@@ -254,7 +254,15 @@
               this.$message.info("抱歉，没有找到匹配结果");
               return false;
             }
-            this.evData = res.data;
+//            this.evData = res.data;
+            res.data.forEach(x => {
+              x.traceList.forEach(y => {
+                if (y.bayonetName) {
+                  y.deviceID = y.bayonetName;
+                }
+              })
+            })
+            console.log(res.data)
             this.originEvData = objDeepCopy(res.data);
             this.filterData();
             this.drawLine();
@@ -449,6 +457,7 @@
     .vl_icon.vl_icon_map_mark_start {
       width: 80px;
       height: 80px;
+      right: 20px;
     }
     .vl_icon.vl_icon_map_mark_end {
       width: 80px;
