@@ -12,6 +12,17 @@
         <vue-scroll>
           <div class="left_top">
             <el-form :model="qyryfxFrom" ref="qyryfxFrom" class="qyryfx_from">
+              <el-form-item class="select_type">
+                <div class="select_type_box">
+                  <span :class="{active_span: selectType === 1}" @click="handleRadioSelectType(1)">在线查询</span>
+                  <span :class="{active_span: selectType === 2}" @click="handleRadioSelectType(2)">离线任务</span>
+                </div>
+                <!-- <span>查询方式:</span>
+                <el-radio-group v-model="selectType" class="select_radio" @change="handleRadioSelectType">
+                  <el-radio :label="1">在线查询</el-radio>
+                  <el-radio :label="2">离线任务</el-radio>
+                </el-radio-group> -->
+              </el-form-item>
               <el-form-item prop="personGroupId" :rules="[{ required: true, message: '该项内容不能为空', trigger: 'blur' }]">
                 <el-select
                   ref="personSelect"
@@ -117,13 +128,7 @@
                   </li>
                 </ul>
               </div>
-              <el-form-item class="select_type">
-                <span>查询方式:</span>
-                <el-radio-group v-model="selectType" class="select_radio" @change="handleRadioSelectType">
-                  <el-radio :label="1">在线查询</el-radio>
-                  <el-radio :label="2">离线任务</el-radio>
-                </el-radio-group>
-              </el-form-item>
+              
               <el-form-item prop="taskName" v-if="selectType === 2" :rules="[{ required: true, message: '该项内容不能为空', trigger: 'blur' }]">
                 <el-input placeholder="请设置任务名称" maxlength="20" v-model="qyryfxFrom.taskName"></el-input>
               </el-form-item>
@@ -589,6 +594,7 @@ export default {
   methods: {
     // 查询方式change
     handleRadioSelectType (val) {
+      this.selectType = val;
       if (val === 1) {
         this.selectIndex = 2;
       } else {
@@ -906,7 +912,7 @@ export default {
     resetLeftMenu(form) {
       this.$refs[form].resetFields();
       this.selectAreaDataList = [];
-      this.selectMapType = 0;
+      this.selectMapType = 1;
       this.infoRightShow = false; // 关闭右边的菜单数据
       this.peopleGroupOptions.map(item => {
         this.qyryfxFrom.personGroupId.push(item.uid);
@@ -1088,15 +1094,25 @@ export default {
     setMarks(deviceList = null) {
       for (let j = 0; j < deviceList.length; j++) {
         const deviceItem = deviceList[j];
-        if (deviceItem.deviceName.indexOf('Bayonet_') !== -1) {
-          const deviceName = deviceItem.deviceName.split('Bayonet_');
-          deviceItem.deviceName = deviceName[1];
+        if (deviceItem.bayonetName) {
+          // const deviceName = deviceItem.deviceName.split('Bayonet_');
+          // deviceItem.deviceName = deviceName[1];
           this.doMark(deviceItem, "vl_icon vl_icon_kk");
           break;
         } else {
           this.doMark( deviceItem, "vl_icon vl_icon_sxt");
           break;
         }
+      
+        // if (deviceItem.deviceName.indexOf('Bayonet_') !== -1) {
+        //   const deviceName = deviceItem.deviceName.split('Bayonet_');
+        //   deviceItem.deviceName = deviceName[1];
+        //   this.doMark(deviceItem, "vl_icon vl_icon_kk");
+        //   break;
+        // } else {
+        //   this.doMark( deviceItem, "vl_icon vl_icon_sxt");
+        //   break;
+        // }
       
       }
     },
@@ -1361,24 +1377,41 @@ export default {
             margin-top: 20px;
           }
           .select_type {
-            margin-bottom: 0 !important;
-            /deep/.el-form-item__content {
-              display: flex;
-              align-items: center;
-              /deep/ .el-radio {
-                margin-right: 20px;
+            // margin-bottom: 0 !important;
+            .select_type_box {
+              width: 100%;
+              border-radius: 4px;
+              color: #666666;
+              border: 1px solid #D3D3D3;
+              >span {
+                text-align: center;
+                display: inline-block;
+                width: 50%;
+                cursor: pointer;
+              }
+              .active_span {
+                color: #ffffff;
+                background:rgba(12,112,248,1);
+                // border:1px solid rgba(7,105,232,1);
               }
             }
-            >span {
-              width: 60px;
-              display: inline-block;
-            }
-            .select_radio {
-              margin-left: 5px;
-              width: 160px;
-              display: flex;
-              align-items: center;
-            }
+            // /deep/.el-form-item__content {
+            //   display: flex;
+            //   align-items: center;
+            //   /deep/ .el-radio {
+            //     margin-right: 20px;
+            //   }
+            // }
+            // >span {
+            //   width: 60px;
+            //   display: inline-block;
+            // }
+            // .select_radio {
+            //   margin-left: 5px;
+            //   width: 160px;
+            //   display: flex;
+            //   align-items: center;
+            // }
           }
           .area_select {
             // margin-bottom: 0;

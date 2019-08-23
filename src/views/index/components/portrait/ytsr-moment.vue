@@ -561,7 +561,7 @@
               </div>
               <div class="struc_cdi_line"></div>
             </div>
-            <span>布控库信息</span>
+            <span>信息库信息</span>
           </div>
         </div>
       </div>
@@ -1134,9 +1134,7 @@
         this.imgList = '';
         this.curImageUrl = '';
         this.radio = '1';
-        this.searchData.portraitGroupId = this.portraitGroupList.map(x => {
-          return x.uid
-        })
+        this.searchData.portraitGroupId= [];
         this.$nextTick(() => {
           this.checkAllTree = true;
           this.handleCheckedAll(true);

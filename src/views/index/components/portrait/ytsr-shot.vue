@@ -91,8 +91,9 @@
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img">
-              <img class="bigImg" :src="sturcDetail.subStoragePath" alt="">
-              <span>抓拍图</span>
+              <img class="bigImg" :src="showShotImg ? sturcDetail.subStoragePath : sturcDetail.storagePath" alt="">
+              <i @click="showShotImg = !showShotImg">{{showShotImg ? '全景图' : '抓拍图'}}</i>
+              <span>{{showShotImg ? '抓拍图' : '全景图'}}</span>
             </div>
             <div class="struc_c_d_info">
               <h2>分析结果<div class="vl_jfo_sim" ><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? (sturcDetail.semblance*1).toFixed(2) : '0.00'}}<span style="font-size: 12px;">%</span></div></h2>
@@ -233,6 +234,7 @@
     components: {vlBreadcrumb, noResult, flvplayer},
     data() {
       return {
+        showShotImg: true, // true展示抓拍，false,展示全景
         playerData: null,
         swiperOption: {
           slidesPerView: 5,
@@ -851,6 +853,7 @@
               color: #0C70F8;
               font-size: 12px;
               padding: 0 .1rem;
+              cursor: pointer;
             }
             &:before {
               display: block;
