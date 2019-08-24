@@ -1,6 +1,6 @@
 <template>
   <div class="control_add">
-    新建布控
+    新建布控1.1v待开发
   </div>
 </template>
 <script>
