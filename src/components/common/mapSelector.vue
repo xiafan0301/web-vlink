@@ -1055,7 +1055,7 @@ export default {
 </style>
 <style lang="scss">
   .map_sd_edit_false {
-    .ms_marker_opt.ms_marker_circle {
+    .ms_marker_opt {
       display: none;
     }
     .sd_search { display: none; }
