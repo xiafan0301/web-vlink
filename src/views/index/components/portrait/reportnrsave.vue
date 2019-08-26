@@ -240,6 +240,7 @@
     },
     created() {
       this.userInfo = this.$store.state.loginUser;
+      $('body').css({'position':'fixed',"width":"100%"});
     },
     mounted () {
       this.getdetailbgg()
@@ -335,9 +336,15 @@
                 this.data.push(ite)
               })
             })
-            this.dataloading = false
             this.initMap()
             this.renderMap()
+            if (localStorage.getItem("temp")) {
+              JSON.parse(localStorage.getItem("temp")).forEach((item)=>{
+                this.updateLine(item)
+              })
+              localStorage.removeItem('temp')
+            }
+            this.dataloading = false
             setTimeout(()=>{
               this.$nextTick(() => {
                 this.$msgbox({
@@ -366,6 +373,7 @@
                         done();
                         setTimeout(() => {
                           instance.confirmButtonLoading = false;
+                          // this.$router.push({name: 'portrait_report'})
                         }, 300);
                       }, 1000);
                     } else {
