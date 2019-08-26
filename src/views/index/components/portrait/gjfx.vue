@@ -106,7 +106,7 @@
                           <div><i class="vl_icon vl_icon_retrieval_03"></i>{{sItem.semblance ? (sItem.semblance * 1).toFixed(2) : '0.00'}}%</div>
                         </div>
                       </div>
-                      <div :title="sItem.address" class="address"><i class="el-icon-location-outline"></i>{{sItem.address ? sItem.address : '无'}}</div>
+                      <div class="address"><i class="el-icon-location-outline"></i>{{sItem.bayonetAddress ? sItem.bayonetAddress : sItem.address}}</div>
                       <div class="del_icon el-icon-delete" @click.stop="updateLine(sItem, item.list, sIndex)"></div>
                     </div>
                   </li>
@@ -317,7 +317,7 @@
                           <div><i class="vl_icon vl_icon_retrieval_03"></i>{{sItem.semblance ? (sItem.semblance * 1).toFixed(2) : '0.00'}}%</div>
                         </div>
                       </div>
-                      <div :title="sItem.address" class="address"><i class="el-icon-location-outline"></i>{{sItem.address ? sItem.address : '无'}}</div>
+                      <div class="address"><i class="el-icon-location-outline"></i>{{sItem.bayonetAddress ? sItem.bayonetAddress : sItem.address}}</div>
                       <div class="del_icon el-icon-delete" @click.stop="delSitem(item, sItem, sIndex)"></div>
                     </div>
                   </li>
@@ -607,6 +607,11 @@
             }
             this.reselt = true;
             this.evData = res.data.list;
+            this.evData.forEach(x => {
+              if (x.bayonetName) {
+                x.deviceID = x.bayonetName;
+              }
+            })
             this.evData.sort(this.compare("shotTime", this.timeOrder ? false : true));
             this.shotAddressAndTimes(this.evData)
 
@@ -735,7 +740,11 @@
               _time += `<span>${j}</span>`
             })
             _time += '</p>';
-            let _content = `<div class="vl_icon vl_icon_sxt">` + _time + `</div>`
+            let sClass = 'vl_icon_map_mark0';
+            if (obj.bayonetName) {
+              sClass = 'vl_icon_map_mark1'
+            }
+            let _content = `<div class="vl_icon ` + sClass + `">` + _time + `</div>`
             let point = new AMap.Marker({ // 添加自定义点标记
               map: this.amap,
               position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
@@ -809,7 +818,11 @@
         if (this.supMarkerPoint) {
           this.map.remove(this.supMarkerPoint)
         }
-        let _content = '<div class="vl_icon vl_icon_judge_02"></div>'
+        let sClass = 'vl_icon_map_hover_mark0';
+        if (data.bayonetName) {
+          sClass = 'vl_icon_map_hover_mark1'
+        }
+        let _content = '<div class="vl_icon ' + sClass + '"></div>'
         this.supMarkerPoint = new AMap.Marker({ // 添加自定义点标记
           map: this.map,
           position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
@@ -819,7 +832,7 @@
           content: _content
         });
         this.map.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
-        let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`
+        let sConent = `<div class="cap_info_win"><p>设备名称：${data.bayonetName ? data.bayonetName : data.deviceName}</p><p>抓拍地址：${data.bayonetAddress ? data.bayonetAddress : data.address}</p></div>`
         new AMap.InfoWindow({
           map: this.map,
           isCustom: true,
@@ -849,6 +862,22 @@
   };
 </script>
 <style lang="scss" scoped>
+  .cap_info_win {
+    background: #FFFFFF;
+    padding: .18rem;
+    font-size: .14rem;
+    color: #666666;
+    position: relative;
+    &:after {
+      display: block;
+      content: '';
+      border: .1rem solid #FFFFFF;
+      border-color: #FFFFFF transparent transparent;
+      position: absolute;
+      bottom: -.2rem;
+      left: calc(50% - .05rem);
+    }
+  }
   .upload_warp {
     position: relative;
     .del_icon {
