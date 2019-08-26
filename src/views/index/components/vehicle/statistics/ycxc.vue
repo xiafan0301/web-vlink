@@ -388,10 +388,13 @@ export default {
     this.getControlVehicleList();
     //获取摄像头卡口数据
     this.getMonitorList();
+    
+    if (this.$route.query.startDate) {
+      setTimeout(() => {
+        this.handleSubmitData();
+      }, 2000)
 
-    // setTimeout(() => {
-    //   this.handleSubmitData();
-    // }, 2000)
+    }
   },
   methods: {
     //设置默认时间
@@ -452,6 +455,7 @@ export default {
 
       this.pagination.pageNum = this.$route.query.pageNum;
       this.pagination.pageSize = this.$route.query.pageSize;
+
     },
     // 获取布控车辆
     getControlVehicleList () {
@@ -736,6 +740,9 @@ export default {
       getNightVehicleList(params)
         .then(res => {
           if (res && res.data) {
+            if (res.data.list.length <= 0) {
+              this.isInitPage = false;
+            }
             this.dataList = res.data.list;
             this.pagination.total = res.data.total;
             this.searchLoading = false;

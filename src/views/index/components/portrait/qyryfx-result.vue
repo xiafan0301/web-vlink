@@ -38,7 +38,7 @@
               </div>
               <div>
                 <span>区域1设备：</span>
-                <p>{{item.deviceNames}}</p>
+                <p>{{item.deviceNames && item.deviceNames ? item.deviceNames : '无'}}</p>
               </div>
             </li>
           </ul>
@@ -126,7 +126,7 @@
                         <img :src="sItem.upPhotoUrl" title="点击放大图片" class="bigImg" alt />
                       </div>
                       <div class="similarity">
-                        <p class="similarity_count">{{sItem.semblance}}</p>
+                        <p class="similarity_count">{{sItem.semblance}}<span style="font-size:16px">%</span></p>
                         <p class="similarity_title">相似度</p>
                       </div>
                       <div class="img_warp">
@@ -205,7 +205,7 @@ export default {
               this.taskDetail.taskResult = JSON.parse(this.taskDetail.taskResult);
               this.taskDetail.taskWebParam = JSON.parse(this.taskDetail.taskWebParam);
               let personGroupIdName = []; 
-              this.taskDetail.taskWebParam.personGroupId && this.taskDetail.taskWebParam.personGroupId.split().map(val => {
+              this.taskDetail.taskWebParam.personGroupId && this.taskDetail.taskWebParam.personGroupId.split(',').map(val => {
                 this.peopleGroupOptions.map(item => {
                   if (item.uid === val) {
                     personGroupIdName.push(item.groupName);
@@ -213,7 +213,11 @@ export default {
                 });
               });
               if (personGroupIdName.length > 0) {
-                this.taskDetail.taskWebParam.personGroupId = personGroupIdName.join('、');
+                if (personGroupIdName.length === this.peopleGroupOptions.length) {
+                  this.taskDetail.taskWebParam.personGroupId = '全部人群';
+                } else {
+                  this.taskDetail.taskWebParam.personGroupId = personGroupIdName.join('、');
+                }
               }
               this.initMap(this.taskDetail.taskResult);
             }
@@ -481,7 +485,7 @@ export default {
             height: 56px;
             color: #333333;
             border-bottom: 1px solid #d3d3d3;
-            width: 428px;
+            width: 95%;
             position: relative;
             > i {
               position: absolute;
@@ -497,7 +501,7 @@ export default {
             padding-top: 28px;
             // 人员记录列表
             .people_item {
-              width: 428px;
+              width: 95%;
               position: relative;
               background: #fff;
               box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
@@ -574,7 +578,7 @@ export default {
               }
               // 相似度
               .similarity {
-                width: 88px;
+                width: 110px;
                 float: left;
                 text-align: center;
                 .similarity_count {

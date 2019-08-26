@@ -258,7 +258,7 @@ export default {
       this.searchForm.deviceCode = null;
       this.deviceStartTime = null;
       const params = {
-        plateNo: this.searchForm.plateNo,
+        plateNo: this.searchForm.plateNo.trim(),
         startTime: formatDate(this.searchForm.shotTime),
         endTime: formatDate(this.searchForm.dateEnd)
       };
@@ -349,7 +349,7 @@ export default {
             deviceCode: deviceCode,
             startTime: formatDate(this.searchForm.shotTime),
             shotTime: formatDate(this.deviceStartTime),
-            plateNo: this.searchForm.plateNo,
+            plateNo: this.searchForm.plateNo.trim(),
             endTime: formatDate(this.searchForm.dateEnd),
             vehicleClass: vehicleType,
             interval: this.searchForm.interval

@@ -449,7 +449,6 @@ export default {
         "startTime": this.startDate,
         "endTime": formatDate(new Date()),
       };
-      console.log("--------------",params)
       getACount(params).then(res => {
         if(res) {
           this.sums.events = res.data

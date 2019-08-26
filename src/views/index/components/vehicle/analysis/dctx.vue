@@ -251,7 +251,7 @@ export default {
     },
     // 添加同行车辆
     onAddVehicleNumber () {
-      const vehicleNumber = this.searchForm.peerVehicleNumber;
+      const vehicleNumber = this.searchForm.peerVehicleNumber.trim();
       if (!reg.test(vehicleNumber)) {
         if (!document.querySelector('.el-message--info')) {
           this.$message.info('请输入正确的车牌号码');
@@ -333,6 +333,11 @@ export default {
         deviceList.forEach((item, index) => {
           if (item.pathRecords && item.pathRecords.length > 0) {
             item.pathRecords.forEach(a => {
+              // console.log('aaaa', a)
+              // 判断同一个卡口是否出现多次，，若出现，则只显示一个卡口
+              if (a.bayonetName) {
+                a.deviceID = a.bayonetName;
+              }
               // 是否显示抓拍时间
               if (index === this.isCheckedVehicle) {
                 a['showTime'] = true;
@@ -387,7 +392,6 @@ export default {
         });
         let currArr = _arr;
         this.drawPoint(currArr);
-        
       }
     },
     /**
@@ -535,7 +539,7 @@ export default {
       }
       
       if (this.searchForm.peerVehicleNumber) {
-        vehicleNumberList.push(this.searchForm.peerVehicleNumber);
+        vehicleNumberList.push(this.searchForm.peerVehicleNumber.trim());
       }
       vehicleNumberList.map(item => {
         if (item === this.searchForm.basicVehicleNumber) {
@@ -548,7 +552,7 @@ export default {
       const params = {
         startTime: formatDate(this.searchForm.startTime),
         endTime: formatDate(this.searchForm.endTime),
-        baseNumber: this.searchForm.basicVehicleNumber,
+        baseNumber: this.searchForm.basicVehicleNumber.trim(),
         peerNumbers: vehicleNumberList.join(','),
         //  baseNumber: '湘A5Y79T',
         // peerNumbers: '湘A754MY, 粤TQE512',

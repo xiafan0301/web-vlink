@@ -273,13 +273,21 @@ export default {
             let _idBtn = 'vlJtcPlayBtn' + obj.struVehicleDto.deviceID;
             let _id = 'vlJtcVideo' + obj.deviceID;
 
-            let iconType;
+            let iconType, sContent;
+
             if (i === 0) {
-              iconType = 'vl_icon_04_019';
+              // iconType = 'vl_icon_04_019';
+              sContent = '<div id="vehicle' + obj.deviceID + '"  title="'+ obj.deviceName +'" class="vl_icon vl_icon_04_019"></div>';
             } else if (i === (data.length - 1)) {
-              iconType = 'vl_icon_05_019';
+              // iconType = 'vl_icon_05_019';
+              sContent = '<div id="vehicle' + obj.deviceID + '"  title="'+ obj.deviceName +'" class="vl_icon vl_icon_05_019"></div>';
             } else {
-              iconType = 'vl_icon_sxt';
+              if (!obj.bayonetName) { // 摄像头
+                iconType = 0;
+              } else { // 卡口
+                iconType = 8;
+              }
+              sContent = '<div id="vehicle' + obj.deviceID + '"  title="'+ obj.deviceName +'" class="vl_icon vl_icon_map_mark'+ iconType +'"></div>';
             }
 
             let marker = new window.AMap.Marker({
@@ -289,14 +297,14 @@ export default {
               draggable: false, // 是否可拖动
               extData: '', // 用户自定义属性
               // 自定义点标记覆盖物内容
-              content: '<div id="vehicle' + obj.deviceID + '"  title="'+ obj.deviceName +'" class="vl_icon '+ iconType +'"></div>'
+              content: sContent
             });
   
             path.push(new window.AMap.LngLat(obj.shotPlaceLongitude, obj.shotPlaceLatitude));
 
             marker.on('mouseover', function () {
               if(i !== 0 && i !== (data.length - 1)) {
-                $('#vehicle' + obj.deviceID).addClass('vl_icon_map_hover_mark0');
+                $('#vehicle' + obj.deviceID).addClass('vl_icon_map_hover_mark' + iconType);
               }
 
               let sContent = "<div class='tip_box'><div class='select_target'><p class='select_p'>查询目标</p>"
@@ -321,7 +329,7 @@ export default {
             });
             marker.on('mouseout', function () {
               if(i !== 0 && i !== (data.length - 1)) {
-                $('#vehicle' + obj.deviceID).removeClass('vl_icon_map_hover_mark0');
+                $('#vehicle' + obj.deviceID).removeClass('vl_icon_map_hover_mark' + iconType);
               }
             });
             // _this.map.setZoom(13)

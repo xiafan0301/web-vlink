@@ -107,10 +107,10 @@
                 <ul>
                   <li v-for="(item, index) in selectAreaDataList" :key="index">
                     <div class="area_list_title">
-                      <span>区域{{item.index}}</span>
+                      <span>区域{{index + 1}}</span>
                       <div class="area_list_btn">
                         <i class="vl_icon vl_icon_position_1" @click="showCurrentMapArea(item.index)"></i>
-                        <i class="vl_icon vl_icon_manage_8" @click="deleteSelectArea(item.index)"></i>
+                        <i class="vl_icon vl_icon_manage_8" @click="deleteSelectArea(index, item.index)"></i>
                       </div>
                     </div>
                     <div class="area_list_time">
@@ -241,9 +241,8 @@
                               <img :src="sItem.upPhotoUrl" title="点击放大图片" class="bigImg" alt />
                             </div>
                             <div class="similarity">
-                              <p class="similarity_count">{{sItem.semblance}}</p>
+                              <p class="similarity_count">{{sItem.semblance}}<span style="font-size:16px">%</span></p>
                               <p class="similarity_title">相似度</p>
-                              
                             </div>
                             <div class="img_warp">
                               <img :src="sItem.subStoragePath" title="点击放大图片" class="bigImg" alt />
@@ -323,12 +322,12 @@
                   </el-table-column>
                   <el-table-column label="性别" prop="sex" show-overflow-tooltip>
                     <template slot-scope="scope">
-                      <span>{{scope.row.taskWebParam.sex ? scope.row.taskWebParam.sex : '-'}}</span>
+                      <span>{{scope.row.taskWebParam.sex ? scope.row.taskWebParam.sex : '不限'}}</span>
                     </template>
                   </el-table-column>
                   <el-table-column label="年龄段" prop="age" show-overflow-tooltip>
                     <template slot-scope="scope">
-                      <span>{{scope.row.taskWebParam.age ? scope.row.taskWebParam.age : '-'}}</span>
+                      <span>{{scope.row.taskWebParam.age ? scope.row.taskWebParam.age : '不限'}}</span>
                     </template>
                   </el-table-column>
                   <el-table-column label="状态" v-if="selectIndex === 0" prop="taskStatus" show-overflow-tooltip>
@@ -415,11 +414,11 @@
         <el-button class="operation_btn function_btn" :loading="isInterruptLoading" @click="sureInterruptTask">确认</el-button>
       </div>
     </el-dialog>
-    <div is="mapSelector" v-show="selectMapType === 1 && (isShowMapAreaDialog === true)" :open="mapDialogVisible1" :showTypes="'DB'" :clear="clearMapSelect1" @mapSelectorEmit="mapPoint"></div>
-    <div is="mapSelector" v-show="selectMapType === 2 && (isShowMapAreaDialog === true)" :open="mapDialogVisible2" :showTypes="'DB'" :clear="clearMapSelect2" @mapSelectorEmit="mapPoint"></div>
-    <div is="mapSelector" v-show="selectMapType === 3 && (isShowMapAreaDialog === true)" :open="mapDialogVisible3" :showTypes="'DB'" :clear="clearMapSelect3" @mapSelectorEmit="mapPoint"></div>
-    <div is="mapSelector" v-show="selectMapType === 4 && (isShowMapAreaDialog === true)" :open="mapDialogVisible4" :showTypes="'DB'" :clear="clearMapSelect4" @mapSelectorEmit="mapPoint"></div>
-    <div is="mapSelector" v-show="selectMapType === 5 && (isShowMapAreaDialog === true)" :open="mapDialogVisible5" :showTypes="'DB'" :clear="clearMapSelect5" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :editAble="isEditMap" v-show="selectMapType === 1 && (isShowMapAreaDialog === true)" :open="mapDialogVisible1" :showTypes="'DB'" :clear="clearMapSelect1" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :editAble="isEditMap" v-show="selectMapType === 2 && (isShowMapAreaDialog === true)" :open="mapDialogVisible2" :showTypes="'DB'" :clear="clearMapSelect2" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :editAble="isEditMap" v-show="selectMapType === 3 && (isShowMapAreaDialog === true)" :open="mapDialogVisible3" :showTypes="'DB'" :clear="clearMapSelect3" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :editAble="isEditMap" v-show="selectMapType === 4 && (isShowMapAreaDialog === true)" :open="mapDialogVisible4" :showTypes="'DB'" :clear="clearMapSelect4" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :editAble="isEditMap" v-show="selectMapType === 5 && (isShowMapAreaDialog === true)" :open="mapDialogVisible5" :showTypes="'DB'" :clear="clearMapSelect5" @mapSelectorEmit="mapPoint"></div>
   </div>
 </template>
 <script>
@@ -435,20 +434,20 @@ import {
 } from "@/views/index/api/api.judge.js";
 import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
 import { getGroupAllList } from "@/views/index/api/api.control.js";
-// import { validatePersonNum, validateInteger } from "@/utils/validator.js";
 import { objDeepCopy } from "@/utils/util.js";
-// import { constants } from "crypto";
 
 export default {
   components: { vlBreadcrumb, mapSelector, noResult },
   data() {
     return {
+      isFirstClick: true, // 是否是第一次进行区域选择
+      isEditMap: true, // 地图区域选择是否可以编辑
       isMultiplePerson: true, // 全部人像是否多选
       deleteDialog: false, // 删除任务弹出框
       interruptDialog: false, // 中断任务弹出框
       isDeleteLoading: false, // 删除任务弹出框
       isInterruptLoading: false, // 中断任务弹出框
-      selectMapType: 1, // 选择的第几个地图区域
+      selectMapType: 0, // 选择的第几个地图区域
       isInitPage: true,
       isShowMapAreaDialog: true, // 是否显示地图弹出框
       mapDialogVisible1: false, // 地图选择弹出框
@@ -482,8 +481,6 @@ export default {
         reportTime: [], // 日期
         taskName: null // 任务名称
       },
-      /*左边搜索表单变量 */
-      // searchPlace: "",
       qyryfxFrom: {
         taskName: null, // 任务名称
         personGroupId: [], //分析人群
@@ -493,8 +490,6 @@ export default {
         endTime: new Date(), // 结束时间
       },
       submitLoading: false, // 提交loading
-      // getDetailLoading: false,
-      // cameraPhotoList: [],
       startDateOptArr: {
         disabledDate (time) {
           return time.getTime() > Date.now();
@@ -542,25 +537,48 @@ export default {
           enumValue: "老年"
         }
       ], // 年龄段下拉
-      // isSearchResult: false, // 搜索框是否打开
-      // searchResultList: [1, 2, 3, 4, 5, 6, 7, 8], // 搜索结果的列表
       infoRightShow: false, // 右边菜单状态
       videoMenuStatus: true, // 左边菜单状态
       amap: null, // 地图对象
       mapCenter: [110.594419, 27.908869], //地图中心位
-      // videoMenuStatus: true, // 菜单状态
-      // listDevice: [], // 设备
-      // listBayonet: [], // 卡口
       showTypes: "DB", //设备类型
       selectedDevice: {}, // 当前选中的设备信息
       currentClickDevice: [],
       resultDataList: [],
       swiper: null,
       selectAreaDataList: [], // 左侧选中的区域信息
+      areaDataList: [ // 默认创建一个地图选择弹出框
+        {
+          index: 1,
+          isVisiable: true,
+          isClear: false
+        },
+        {
+          index: 2,
+          isVisiable: true,
+          isClear: false
+        },
+        {
+          index: 3,
+          isVisiable: true,
+          isClear: false
+        },
+        {
+          index: 4,
+          isVisiable: true,
+          isClear: false
+        },
+        {
+          index: 5,
+          isVisiable: true,
+          isClear: false
+        }
+      ],
       taskList: [], // 任务列表
       taskId: null, // 要操作的任务id
       markerList: [],
       isDisabledSelect: false, // 是否还能区域选择
+      deleteIndexArr: [], // 删除了的索引
     };
   },
   watch: {
@@ -642,7 +660,7 @@ export default {
             this.taskList.map(item => {
               let personGroupIdName = [];
               item.taskWebParam = JSON.parse(item.taskWebParam);
-              let personGroupId = item.taskWebParam.personGroupId.split();
+              let personGroupId = item.taskWebParam.personGroupId.split(',');
               this.peopleGroupOptions.map(val => {
                 personGroupId && personGroupId.forEach(value => {
                   if (value === val.uid) {
@@ -740,19 +758,34 @@ export default {
     },
     // 显示地图区域选择弹出框
     showMapDialog () {
-      if (this.selectAreaDataList.length === this.selectMapType ) {
-        if (this.selectMapType < 5) {
-          this.selectMapType ++;
-        }
+      this.isEditMap = true; // 是否可以编辑地图区域
+
+      if (this.deleteIndexArr.length > 0) { // 判断是否删除过区域，，如果删除过，则将删除数组中的一个值赋值给selectMapType
+        // console.log('asdasdasd')
+        // console.log('deleteIndexArr', this.deleteIndexArr)
+        this.selectMapType = this.deleteIndexArr[0];
+      } else {
+        this.selectMapType = this.selectAreaDataList.length + 1;
       }
+
+      // console.log('selectMapType', this.selectMapType)
       this.handleSelectType(this.selectMapType);
     },
     // 显示相对应的地图框选区域
     showCurrentMapArea (index) {
-      console.log('index', index)
+      // console.log('maoasa',this.selectMapType)
+      // console.log('selectAreaDataList', this.selectAreaDataList)
+      // console.log('index111111111111111111111', index)
+      this.isEditMap = false;
       this.isShowMapAreaDialog = true;
+      let zIndex;
+      if (this.selectMapType === index) { // 这个因为删除过区域，所以显示的是之前删除过的区域
+        zIndex = this.selectMapType;
+      } else {
+        zIndex = index;
+      }
       if (this.isShowMapAreaDialog) {
-        switch (index) {
+        switch (zIndex) {
           case 1:
             this.selectMapType = 1;
             this.mapDialogVisible1 = !this.mapDialogVisible1;
@@ -801,16 +834,46 @@ export default {
       }
     },
     // 删除某个选中的区域
-    deleteSelectArea (index) {
-      console.log('index', index);
-      console.log('selectMapType', this.selectMapType)
-      this.selectAreaDataList.splice((index - 1), 1);
+    deleteSelectArea (idx, index) {
+      // console.log('nnnnnnnnnnnn', idx)
+      // console.log('mmmmm', index)
+      this.selectAreaDataList.splice(idx, 1);
+
+      this.deleteIndexArr.push(index);
+
+      this.handleClearMap(index);
+
       this.isShowMapAreaDialog = false;
-      // this.selectMapType = index;
+
+      // console.log('delet', this.deleteIndexArr)
+    },
+    handleClearMap (index) {
+      switch (index) {
+        case 1:
+          this.clearMapSelect1 = !this.clearMapSelect1;
+          break;
+        case 2:
+          this.clearMapSelect2 = !this.clearMapSelect2;
+          break;
+        case 3:
+          this.clearMapSelect3 = !this.clearMapSelect3;
+          break;
+        case 4:
+          this.clearMapSelect4 = !this.clearMapSelect4;
+          break;
+        case 5:
+          this.clearMapSelect5 = !this.clearMapSelect5;
+          break;
+        default:
+          break;
+      }
     },
     // 获取地图选择的数据
     mapPoint (data) {
+      // console.log('data', data)
       if (data) {
+        this.isFirstClick = false;
+
         let allDeviceNameList = [];
         if (data.deviceList.length > 0) {
           data.deviceList.map(item => {
@@ -823,14 +886,18 @@ export default {
           })
         }
         const obj = { 
-          index: this.selectMapType,
+          index: this.deleteIndexArr.length > 0 ? this.selectMapType : this.selectAreaDataList.length + 1,
           startTime: formatDate(this.qyryfxFrom.startTime),
           endTime: formatDate(this.qyryfxFrom.endTime),
           deviceList: data.deviceList,
           bayonetList: data.bayonetList,
           allDeviceNameList: allDeviceNameList.length > 0 ? allDeviceNameList : null
+        };
+
+        if (this.deleteIndexArr.length > 0) { // 如果之前删除过，则将之前删除的值删除
+          this.deleteIndexArr.splice(0, 1);
         }
-        console.log('obj', obj)
+        // console.log('addddd', this.deleteIndexArr)
         this.selectAreaDataList.push(obj);
       }
     },
@@ -852,31 +919,6 @@ export default {
     handleCurrentChange (page) {
       this.pagination.pageNum = page;
       this.getTaskList();
-    },
-    // 日期控制
-    timeChange(ind, type = "start") {
-      this.$nextTick(() => {
-        if (this.drawObj[ind].startTime && this.drawObj[ind].endTime) {
-          if (
-            new Date(this.drawObj[ind].endTime).getTime() -
-              new Date(this.drawObj[ind].startTime).getTime() >
-            3 * 24 * 3600 * 1000
-          ) {
-            this.$message.warning("最大选择时间段为三天");
-            if (type === "start") {
-              this.drawObj[ind].endTime = formatDate(
-                new Date(this.drawObj[ind].startTime).getTime() +
-                  3600 * 1000 * 24 * 3
-              );
-            } else {
-              this.drawObj[ind].startTime = formatDate(
-                new Date(this.drawObj[ind].endTime).getTime() -
-                  3600 * 1000 * 24 * 3
-              );
-            }
-          }
-        }
-      });
     },
     // 切换照片
     prev(val) {
@@ -989,7 +1031,7 @@ export default {
           //   personGroupId: "1lwx3mJIbdF4c4vEgpyLk0",
           //   taskName: "webTestvvvvv111111"
           // };
-          console.log('queryParams', queryParams)
+          // console.log('queryParams', queryParams)
 
           this.submitLoading = true; // 打开加载效果
           if (this.selectType === 1) {
@@ -1095,8 +1137,6 @@ export default {
       for (let j = 0; j < deviceList.length; j++) {
         const deviceItem = deviceList[j];
         if (deviceItem.bayonetName) {
-          // const deviceName = deviceItem.deviceName.split('Bayonet_');
-          // deviceItem.deviceName = deviceName[1];
           this.doMark(deviceItem, "vl_icon vl_icon_kk");
           break;
         } else {
@@ -1104,22 +1144,12 @@ export default {
           break;
         }
       
-        // if (deviceItem.deviceName.indexOf('Bayonet_') !== -1) {
-        //   const deviceName = deviceItem.deviceName.split('Bayonet_');
-        //   deviceItem.deviceName = deviceName[1];
-        //   this.doMark(deviceItem, "vl_icon vl_icon_kk");
-        //   break;
-        // } else {
-        //   this.doMark( deviceItem, "vl_icon vl_icon_sxt");
-        //   break;
-        // }
-      
       }
     },
     // 地图标记
     doMark(device, sClass) {
       // console.log('obj', obj)
-      console.log('obj', device)
+      // console.log('obj', device)
       let marker;
       if (device.shotNum > 0) {
         // 非初始化的状态
@@ -1794,7 +1824,7 @@ export default {
               height: 56px;
               color: #333333;
               border-bottom: 1px solid #d3d3d3;
-              width: 428px;
+              width: 95%;
               position: relative;
               > i {
                 position: absolute;
@@ -1810,7 +1840,7 @@ export default {
               padding-top: 28px;
               // 人员记录列表
               .people_item {
-                width: 428px;
+                width: 95%;
                 position: relative;
                 background: #fff;
                 box-shadow: 0px 5px 16px 0px rgba(169, 169, 169, 0.2);
@@ -1877,7 +1907,7 @@ export default {
                 }
                 // 相似度
                 .similarity {
-                  width: 88px;
+                  width: 110px;
                   float: left;
                   text-align: center;
                   .similarity_count {
