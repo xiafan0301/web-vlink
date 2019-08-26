@@ -220,7 +220,11 @@
         if (this.markerPoint) {
           this.amap.remove(this.markerPoint)
         }
-        let _content = '<div class="vl_icon vl_icon_judge_02"></div>'
+        let sClass = 'vl_icon_map_hover_mark0';
+        if (data.bayonetName) {
+          sClass = 'vl_icon_map_hover_mark1'
+        }
+        let _content = '<div class="vl_icon ' + sClass + '"></div>'
         this.markerPoint = new AMap.Marker({ // 添加自定义点标记
           map: this.amap,
           position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
@@ -230,7 +234,7 @@
           content: _content
         });
         this.amap.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
-        let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`
+        let sConent = `<div class="cap_info_win"><p>设备名称：${data.bayonetName ? data.bayonetName : data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`
         this.infoWindow = new AMap.InfoWindow({
           map: this.amap,
           isCustom: true,
