@@ -10,12 +10,9 @@
     
     <div :class="['vl_j_left']">
       <div class="vl_jtc_search" style="padding-top: 0;">
-        <div class="zdgz_left_radio">
-          <span>查询方式：</span>
-          <span>
-          <el-radio v-model="taskType" label="1">在线查询</el-radio>
-          <el-radio v-model="taskType" label="2">离线任务</el-radio>
-        </span>
+        <div class="zdgz_left_search_type">
+          <span :class="{'active': taskType === '1'}" @click="taskType = '1'">在线查询</span>
+          <span :class="{'active': taskType === '2'}" @click="taskType = '2'">离线任务</span>
         </div>
         <div v-show="taskType === '2'" class="zdgz_left_radio">
           <span>任务名称：</span>
@@ -1078,6 +1075,37 @@ export default {
             }
           }
         }
+        .zdgz_left_search_type {
+          display: flex;
+          color: #666666;
+          margin: 10px 0px;
+          span {
+            display: block;
+            width: 50%;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            border: 1px solid #D3D3D3;
+            cursor: pointer;
+            &:first-child {
+              border-right: none;
+              -webkit-border-radius: 4px 0px 0px 4px;
+              -moz-border-radius: 4px 0px 0px 4px;
+              border-radius: 4px 0px 0px 4px;
+            }
+            &:last-child {
+              border-left: none;
+              -webkit-border-radius: 0px 4px 4px 0px;
+              -moz-border-radius: 0px 4px 4px 0px;
+              border-radius: 0px 4px 4px 0px;
+            }
+          }
+          .active {
+            background: #0C70F8;
+            color: #ffffff;
+            border-color: #0C70F8;
+          }
+        }
         .el-range-editor {
           > input {
             width: 50%;
@@ -1397,15 +1425,15 @@ export default {
     }
   }
   .judge_content {
-  .el-dialog__wrapper .el-dialog__body {
-    padding: 0px;
-  }
-  .el-dialog__header {
-    padding: 0px 20px 3px;
-  }
-  .el-dialog__headerbtn {
-    z-index: 1;
-  }
+  /*.el-dialog__wrapper .el-dialog__body {*/
+    /*padding: 0px;*/
+  /*}*/
+  /*.el-dialog__header {*/
+    /*padding: 0px 20px 3px;*/
+  /*}*/
+  /*.el-dialog__headerbtn {*/
+    /*z-index: 1;*/
+  /*}*/
 }
 </style>
 <style lang="scss" scoped="scoped">
