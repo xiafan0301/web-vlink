@@ -547,12 +547,13 @@ export function getFocusList(params) {
  * 重点关注实时接口
  * @param {object} params
  */
-export function PortraitPostFocusRealTime(data) {
+export function PortraitPostFocusRealTime(data, extData) {
   return request({
     url: '/portrait/shot-num/focus/real-time',
     method: 'post',
     data,
-    mode: 'judge'
+    mode: 'judge',
+    extData: extData
   })
 }
 /**

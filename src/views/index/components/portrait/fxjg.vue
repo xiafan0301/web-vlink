@@ -15,11 +15,12 @@
           <div class="task-info-row"><span class="left-text none-text">所选时间：</span><span class="right-text">{{analysisObj.taskParam.endDate}}</span></div>
           <div class="task-info-row"><span class="left-text">相似度：</span><span class="right-text">{{analysisObj.taskParam.semblance}}%</span></div>
           <div class="task-info-row"><span class="left-text">频次：</span><span class="right-text">{{analysisObj.taskParam.frequency}}</span></div>
-          <div class="task-info-row"><span class="left-text">区域设备：</span>
-          <div class="right-text">
-            <span v-if="analysisObj.taskParam.deviceIdNames">{{analysisObj.taskParam.deviceIdNames}}</span>
-            <span v-if="analysisObj.taskParam.bayonetNames">,{{analysisObj.taskParam.bayonetNames}}</span>
-          </div></div>
+          <template v-if="analysisObj.taskParam.webShowName">
+            <div class="task-info-row" v-for="(item,index) in analysisObj.taskParam.webName" :key="index" :class="{'double-row': index < (analysisObj.taskParam.webName.length - 1)}">
+              <span class="left-text" :class="{'none-text': index > 0}">区域设备：</span>
+              <span class="right-text">{{item}}</span>
+            </div>
+          </template>
           </vue-scroll>
         </div>
       <div v-loading="loading" class="analysis-rc-info">
@@ -144,7 +145,7 @@ export default {
   },
   methods: {
     // 设备
-    getListDevice() {
+    /* getListDevice() {
       getAllMonitorList({ ccode: mapXupuxian.adcode }).then(res => {
         if (res) {
           this.listDevice = res.data;
@@ -159,9 +160,9 @@ export default {
           }
         }
       });
-    },
+    }, */
     // 卡口
-    getListBayonet() {
+    /* getListBayonet() {
       getAllBayonetList({ areaId: mapXupuxian.adcode }).then(res => {
         if (res) {
           this.listBayonet = res.data;
@@ -176,7 +177,7 @@ export default {
           }
         }
       });
-    },
+    }, */
     handleCurrentChange(page) {
       this.pagination.pageNum = page;
     },
@@ -189,6 +190,11 @@ export default {
           let taskResult = JSON.parse(res.data.taskResult)
           let taskWebParam = JSON.parse(res.data.taskWebParam)
           this.analysisObj = res.data
+          let webShowName = taskWebParam.webShowName
+          if(webShowName && webShowName.length > 0 ) {
+            let webName = webShowName.split(",")
+            this.$set(taskWebParam,'webName',webName)
+          }
           this.$set(this.analysisObj,'taskParam',taskWebParam)
         
           this.list = taskResult.resultList
@@ -200,8 +206,8 @@ export default {
               this.isShow = true
             })
           }
-          this.getListDevice();
-          this.getListBayonet();
+          /* this.getListDevice();
+          this.getListBayonet(); */
         }
         this.$nextTick(() => {
           this.loading = false

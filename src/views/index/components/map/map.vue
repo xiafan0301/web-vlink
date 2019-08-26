@@ -242,8 +242,8 @@
         bResize: null,
         timer: null,
         constObj: [
-          {name:'摄像头', _key: 'deviceBasicListNum', supOptions: [{name: '部门范围'},{name: '其他范围'}], isIndeterminate: false, checkAll: true, supTypeList: [0, 1], supTypeListAll: [0, 1]},
-          {name:'卡口', _key: 'bayonetListNum', isIndeterminate: false, checkAll: true},
+          {name:'摄像头', _key: 'deviceBasicListNum', supOptions: [], isIndeterminate: false, checkAll: true, supTypeList: [], supTypeListAll: [0, 1]},
+          {name:'卡口', _key: 'bayonetListNum', supOptions: [], isIndeterminate: false, checkAll: true, supTypeList: [], supTypeListAll: [0, 1]},
           {name: '车辆', _key: 'carListNum', supOptions: [{name: '公交车'},{name: '出租车'}, {name: '客运车'}, {name: '校车'}, {name: '危化车'}], isIndeterminate: false, checkAll: true, supTypeList: [0, 1, 2, 3, 4], supTypeListAll: [0, 1, 2, 3, 4]},
           {name: '人员', _key: 'sysUserExtendListNum', supOptions: [{name: '部门成员'},{name: '普通民众'}], isIndeterminate: false, checkAll: true, supTypeList: [0, 1], supTypeListAll: [0, 1]}
         ],
