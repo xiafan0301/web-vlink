@@ -799,7 +799,8 @@
             obj['endTime'] =  formatDate(x.endTime, 'yyyy-MM-dd HH:mm:ss');
             return obj;
           })
-          this.$router.push({name: 'vehicle_search_qy_jg', query: supQuery})
+          window.sessionStorage.setItem('qyParam', JSON.stringify(supQuery));
+          this.$router.push({name: 'vehicle_search_qy_jg'})
       },
       showInfoMes(mes) {
         if (!document.querySelector('.el-message--info')) {

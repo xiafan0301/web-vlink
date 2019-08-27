@@ -130,7 +130,7 @@
               </div>
               <div class="video_container">
                 <vue-scroll>
-                  <div class="vl_jtc_mk" v-for="(item, index) in curVideo.videoList" :key="item.id">
+                  <div class="vl_jtc_mk" v-for="(item, index) in curVideoList" :key="item.id">
                     <p>{{item.shotTime}}</p>
                     <div is="flvplayer" :oData="item.playerData"
                          :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
@@ -370,6 +370,7 @@ export default {
         playNum: null, // 当前摄像头里正在大屏播放的索引
         videoList: []
       }, // 当前被放大播放的video
+      curVideoList: [],
       showVideoList: false,
       curSXT: {
         deviceName: '',
@@ -846,10 +847,11 @@ export default {
       this.curVideo.indexNum = this.evData.indexOf(data);
       this.curSXT = data;
       this.showVideoList = true;
-      this.curVideo.videoList = data.focusList.map(x => {
+      let arr = data.focusList.map(x => {
         this.setPlayerData(x);
         return x;
       });
+      this.curVideoList = arr;
     },
     setPlayerData (obj) {
       if (obj.videoPath) {

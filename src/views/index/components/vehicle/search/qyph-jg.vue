@@ -50,7 +50,8 @@
         this.$router.push({ name: 'control_library', query: {imgurl: data.subStoragePath, plateNo: data.plateNo} })
       },
       getTheList () {
-        let params = {where: this.$route.query};
+        let query = JSON.parse(window.sessionStorage.getItem('qyphParam'));
+        let params = {where: query};
         params.pageNum = this.pagination.pageNum;
         params.pageSize = this.pagination.pageSize;
         params.firstSetted = true;
@@ -85,7 +86,7 @@
       showStrucInfo (data, index) {
         this.curStrucList = this.strucInfoList[index].vehicleDetailList;
         this.detailData = {
-          index: index,
+          index: 0,
           list: this.curStrucList
         };
         this.btnList = [

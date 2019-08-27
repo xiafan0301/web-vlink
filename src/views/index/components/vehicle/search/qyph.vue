@@ -164,8 +164,10 @@
         if (e.target.classList.contains('vl_area_complete')) {
           // 判断有没有选时间
           if (that.searchData.curPointData.length) {
+            console.log('1')
             that.map.remove(that.confirmIcon);
           } else {
+            console.log('2')
             that.showInfoMes('所选区域没有设备信息')
           }
         }
@@ -668,7 +670,8 @@
         query.frequence = this.searchData.minTimes;
         query['bayonetIds'] = this.searchData.curPointData.filter(x => x.dataType === 1).map(y => {return y.uid}).join(',');
         query['cameraIds'] = this.searchData.curPointData.filter(x => x.dataType === 0).map(y => {return y.uid}).join(',');
-        this.$router.push({name: 'vehicle_search_qyph_jg', query: query})
+        window.sessionStorage.setItem('qyphParam', JSON.stringify(query));
+        this.$router.push({name: 'vehicle_search_qyph_jg'})
       }
     }
   };
