@@ -76,7 +76,7 @@
     methods: {
       getTheList () {
         this.$_showLoading({target: '.vl_jig_right'})
-        let params = this.$route.query;
+        let params = JSON.parse(window.sessionStorage.getItem('qyParam'));
         params.pageNum = this.pagination.pageNum;
         params.pageSize = this.pagination.pageSize;
         params.order = this.stucOrder === 2 ? "desc" : "asc";
