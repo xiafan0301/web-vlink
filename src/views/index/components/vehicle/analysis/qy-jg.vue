@@ -30,7 +30,7 @@
                 <div class="vl_jfo_box_item" v-for="(item, index) in strucInfoList" :key="item.id" @click="showStrucInfo(item, index)">
                   <img :src="item.subStoragePath" alt="">
                   <p class="time"><i></i>{{item.shotTime}}</p>
-                  <p class="address"><i></i>抓拍设备:{{item.deviceName}}</p>
+                  <p class="address"><i></i>抓拍设备:{{item.bayonetName ? item.bayonetName : item.deviceName}}</p>
                 </div>
               </div>
               <el-pagination
@@ -76,7 +76,7 @@
     methods: {
       getTheList () {
         this.$_showLoading({target: '.vl_jig_right'})
-        let params = this.$route.query;
+        let params = JSON.parse(window.sessionStorage.getItem('qyParam'));
         params.pageNum = this.pagination.pageNum;
         params.pageSize = this.pagination.pageSize;
         params.order = this.stucOrder === 2 ? "desc" : "asc";

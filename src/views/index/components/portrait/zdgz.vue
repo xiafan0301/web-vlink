@@ -10,12 +10,9 @@
     
     <div :class="['vl_j_left']">
       <div class="vl_jtc_search" style="padding-top: 0;">
-        <div class="zdgz_left_radio">
-          <span>查询方式：</span>
-          <span>
-          <el-radio v-model="taskType" label="1">在线查询</el-radio>
-          <el-radio v-model="taskType" label="2">离线任务</el-radio>
-        </span>
+        <div class="zdgz_left_search_type">
+          <span :class="{'active': taskType === '1'}" @click="taskType = '1'">在线查询</span>
+          <span :class="{'active': taskType === '2'}" @click="taskType = '2'">离线任务</span>
         </div>
         <div v-show="taskType === '2'" class="zdgz_left_radio">
           <span>任务名称：</span>
@@ -127,13 +124,13 @@
             </ul>
             <div class="vl_jfo_right" v-show="showVideoList">
               <div class="vl_jig_right_title">
-                <p><i class="vl_icon vl_icon_v11"></i><span :title="curSXT.deviceName">{{curSXT.deviceName}}</span></p>
+                <p><i class="vl_icon vl_icon_v11"></i><span>{{curSXT.bayonetName ? curSXT.bayonetName : curSXT.deviceName}}</span></p>
                 <p><i class="vl_icon vl_icon_position_1"></i><span :title="curSXT.address">{{curSXT.address}}</span></p>
                 <!-- < span>抓拍{{curSXT.shotNum}}次</span> -->
               </div>
               <div class="video_container">
                 <vue-scroll>
-                  <div class="vl_jtc_mk" v-for="(item, index) in curVideo.videoList" :key="item.id" v-if="item.playerData">
+                  <div class="vl_jtc_mk" v-for="(item, index) in curVideoList" :key="item.id">
                     <p>{{item.shotTime}}</p>
                     <div is="flvplayer" :oData="item.playerData"
                          :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
@@ -301,7 +298,7 @@ import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/i
 import mapSelector from '@/components/common/mapSelector.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 import { random14, formatDate } from '@/utils/util.js';
-import { mapXupuxian } from "@/config/config.js";
+import { mapXupuxian, onlineOutTime } from "@/config/config.js";
 export default {
    components: {
     mapSelector,
@@ -373,6 +370,7 @@ export default {
         playNum: null, // 当前摄像头里正在大屏播放的索引
         videoList: []
       }, // 当前被放大播放的video
+      curVideoList: [],
       showVideoList: false,
       curSXT: {
         deviceName: '',
@@ -710,8 +708,10 @@ export default {
       params['portraitGroupName'] = this.portraitGroupList.find(y => y.uid === this.searchData.portraitGroupId).groupName;
       // 判断选择的是实时还是离线 taskType 1为实时，2为离线.
       if (this.taskType === "1") {
-        PortraitPostFocusRealTime(params)
-            .then(res => {
+        PortraitPostFocusRealTime(params, {
+          errorMsg: '因数据量过大导致查询超时，建议进行离线分析',
+          timeout: onlineOutTime
+        }).then(res => {
               this.searching = false;
               if (res) {
                 this.$set(res.data, 'taskResult', JSON.parse(res.data.taskResult));
@@ -755,7 +755,14 @@ export default {
         let obj = data[i];
         let _idWin = 'vlJfoImg' + i;
         if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
-          let _sContent = `<div id="${_idWin}" class="vl_jig_mk_img"><img src="${obj.subStoragePath}"><div><p>${obj.deviceName}</p><p>抓拍${obj.shotNum}次</p></div></div>`;
+          let name = '', className = 'vl_icon_map_mark0';
+          if (obj.bayonetName) {
+            name = obj.bayonetName;
+            className = 'vl_icon_map_mark1'
+          } else {
+            name = obj.deviceName
+          }
+          let _sContent = `<div id="${_idWin}" class="vl_jig_mk_img"><img src="${obj.subStoragePath}"><div><p>${name}</p><p>抓拍${obj.shotNum}次</p></div></div>`;
           // 窗体
           new AMap.Marker({ // 添加自定义点标记
             map: this.amap,
@@ -768,7 +775,7 @@ export default {
           });
           // 摄像头
           let _id = 'vlJfoSxt' + i;
-          let _content = '<div id=' + _id + ' class="vl_icon vl_jfo_sxt vl_icon_judge_04"></div>'
+          let _content = '<div id=' + _id + ' class="vl_icon ' + className + ' "></div>'
           new AMap.Marker({ // 添加自定义点标记
             map: this.amap,
             position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
@@ -779,7 +786,7 @@ export default {
             content: _content
           });
           setTimeout(() => {
-            this.addListen($('#' + _id), 'mouseover', i);
+            this.addListen($('#' + _id), 'mouseover', i, obj);
             this.addListen($('#' + _id), 'mouseout', i, obj);
             this.addListen($('#' + _id), 'click', i, obj);
           }, 300)
@@ -793,13 +800,21 @@ export default {
       el.bind(evType, function () {
         switch (evType) {
           case 'mouseover':
-            $('#vlJfoImg' + key).addClass('vl_jig_mk_img_hover')
-            $('#vlJfoSxt' + key).addClass('vl_icon_judge_02')
+            $('#vlJfoImg' + key).addClass('vl_jig_mk_img_hover');
+            if (obj.bayonetName) {
+              $('#vlJfoSxt' + key).addClass('vl_icon_map_hover_mark1');
+            } else {
+              $('#vlJfoSxt' + key).addClass('vl_icon_judge_02');
+            }
             break;
           case 'mouseout':
             if (!obj.checked) {
               $('#vlJfoImg' + key).removeClass('vl_jig_mk_img_hover')
-              $('#vlJfoSxt' + key).removeClass('vl_icon_judge_02')
+              if (obj.bayonetName) {
+                $('#vlJfoSxt' + key).removeClass('vl_icon_map_hover_mark1');
+              } else {
+                $('#vlJfoSxt' + key).removeClass('vl_icon_judge_02');
+              }
             }
             break;
           case 'click':
@@ -810,10 +825,18 @@ export default {
             obj.checked = true;
             if (_key !== null) {
               $('#vlJfoImg' + _key).removeClass('vl_jig_mk_img_hover')
-              $('#vlJfoSxt' + _key).removeClass('vl_icon_judge_02')
+              if (obj.bayonetName) {
+                $('#vlJfoSxt' + _key).removeClass('vl_icon_map_hover_mark1');
+              } else {
+                $('#vlJfoSxt' + _key).removeClass('vl_icon_judge_02');
+              }
             }
             $('#vlJfoImg' + key).addClass('vl_jig_mk_img_hover')
-            $('#vlJfoSxt' + key).addClass('vl_icon_judge_02')
+            if (obj.bayonetName) {
+              $('#vlJfoSxt' + key).addClass('vl_icon_map_hover_mark1');
+            } else {
+              $('#vlJfoSxt' + key).addClass('vl_icon_judge_02');
+            }
             self.showVideo(obj);
             break;
         }
@@ -824,10 +847,11 @@ export default {
       this.curVideo.indexNum = this.evData.indexOf(data);
       this.curSXT = data;
       this.showVideoList = true;
-      this.curVideo.videoList = data.focusList.map(x => {
+      let arr = data.focusList.map(x => {
         this.setPlayerData(x);
         return x;
       });
+      this.curVideoList = arr;
     },
     setPlayerData (obj) {
       if (obj.videoPath) {
@@ -847,7 +871,11 @@ export default {
       this.evData.forEach(x => x.checked = false);
       const _key = this.curVideo.indexNum;
       $('#vlJfoImg' + _key).removeClass('vl_jig_mk_img_hover')
-      $('#vlJfoSxt' + _key).removeClass('vl_icon_judge_02')
+      if (document.getElementById('vlJfoSxt' + _key).classList.contains('vl_icon_map_hover_mark1')) {
+        $('#vlJfoSxt' + _key).removeClass('vl_icon_map_hover_mark1')
+      } else {
+        $('#vlJfoSxt' + _key).removeClass('vl_icon_judge_02')
+      }
       this.curVideo.indexNum = null;
       this.showVideoList = false;
     }
@@ -1047,6 +1075,37 @@ export default {
               width: 90px;
               line-height: 40px;
             }
+          }
+        }
+        .zdgz_left_search_type {
+          display: flex;
+          color: #666666;
+          margin: 10px 0px;
+          span {
+            display: block;
+            width: 50%;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            border: 1px solid #D3D3D3;
+            cursor: pointer;
+            &:first-child {
+              border-right: none;
+              -webkit-border-radius: 4px 0px 0px 4px;
+              -moz-border-radius: 4px 0px 0px 4px;
+              border-radius: 4px 0px 0px 4px;
+            }
+            &:last-child {
+              border-left: none;
+              -webkit-border-radius: 0px 4px 4px 0px;
+              -moz-border-radius: 0px 4px 4px 0px;
+              border-radius: 0px 4px 4px 0px;
+            }
+          }
+          .active {
+            background: #0C70F8;
+            color: #ffffff;
+            border-color: #0C70F8;
           }
         }
         .el-range-editor {
@@ -1368,15 +1427,15 @@ export default {
     }
   }
   .judge_content {
-  .el-dialog__wrapper .el-dialog__body {
-    padding: 0px;
-  }
-  .el-dialog__header {
-    padding: 0px 20px 3px;
-  }
-  .el-dialog__headerbtn {
-    z-index: 1;
-  }
+  /*.el-dialog__wrapper .el-dialog__body {*/
+    /*padding: 0px;*/
+  /*}*/
+  /*.el-dialog__header {*/
+    /*padding: 0px 20px 3px;*/
+  /*}*/
+  /*.el-dialog__headerbtn {*/
+    /*z-index: 1;*/
+  /*}*/
 }
 </style>
 <style lang="scss" scoped="scoped">

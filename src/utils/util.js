@@ -327,25 +327,33 @@ export const addCluster = (mapObj, markers) => {
   mapObj.plugin(["AMap.MarkerClusterer"], () => {
     var count = markers.length;
     let renderClusterMarker = function (context) {
-      var factor = Math.pow(context.count / count, 1 / 18);
       var div = document.createElement('div');
-      var Hue = 180 - factor * 180;
-      var bgColor = 'hsla(' + Hue + ',100%,50%,0.7)';
-      var fontColor = 'hsla(' + Hue + ',100%,20%,1)';
-      var borderColor = 'hsla(' + Hue + ',100%,40%,1)';
-      var shadowColor = 'hsla(' + Hue + ',100%,50%,1)';
-      div.style.backgroundColor = bgColor;
+      var arrow = document.createElement('span');
       var size = Math.round(30 + Math.pow(context.count / count, 1 / 5) * 20);
-      div.style.width = div.style.height = size + 'px';
-      div.style.border = 'solid 1px ' + borderColor;
-      div.style.borderRadius = size / 2 + 'px';
-      div.style.boxShadow = '0 0 1px ' + shadowColor;
+      div.style.backgroundColor = '#1264F8';
+      div.style.backgroundImage =`url("${'static/img/miniSxt.png'}")`
+      div.style.backgroundRepeat = 'no-repeat'
+      div.style.width = size + 14 + 'px';
+      div.style.height = '34px';
+      div.style.border = 'solid 3px #ffffff';
+      div.style.borderRadius = '26px';
+      div.style.backgroundPosition = '5px';
+      div.style.boxShadow = '0 0 1px ';
       div.innerHTML = context.count;
-      div.style.lineHeight = size + 'px';
-      div.style.color = fontColor;
+      div.style.lineHeight = '30px';
+      div.style.color = '#ffffff';
+      div.style.padding = '0 4px 3px 20px';
       div.style.fontSize = '14px';
       div.style.textAlign = 'center';
-      context.marker.setOffset(new window.AMap.Pixel(-size / 2, -size / 2));
+      div.style.position = 'relative';
+      arrow.style.display = 'block'
+      arrow.style.position = 'absolute'
+      arrow.style.width = '24px';
+      arrow.style.height = '16px';
+      arrow.style.right = 'calc(50% - 12px)';
+      arrow.style.backgroundImage =`url("${'static/img/miniArrow.png'}")`
+      div.appendChild(arrow)
+      context.marker.setOffset(new window.AMap.Pixel(-15, -15));
       context.marker.setContent(div)
     };
     if (mapObj.cluster) {
@@ -353,6 +361,7 @@ export const addCluster = (mapObj, markers) => {
     }
     mapObj.cluster = new window.AMap.MarkerClusterer(mapObj, markers, {
       gridSize: 80,
+      minClusterSize: 8,
       renderClusterMarker: renderClusterMarker
     });
   })
