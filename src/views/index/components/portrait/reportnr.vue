@@ -47,7 +47,7 @@
                     </div>
                     <ul class="mes_cot">
                       <li class="clearfix"><span>姓名：</span><p>{{portrailInfoDto.name}}</p></li>
-                      <li class="clearfix"><span>证件类型：</span><p></p></li>
+                      <li class="clearfix"><span>证件类型：</span><p>{{portrailInfoDto.idType == 1? '身份证': '护照'}}</p></li>
                       <li class="clearfix"><span>证件号码：</span><p>{{portrailInfoDto.idNo}}</p></li>
                       <li class="clearfix"><span>性别：</span><p>{{portrailInfoDto.sex}}</p></li>
                       <li class="clearfix"><span>民族：</span><p>{{portrailInfoDto.nation}}</p></li>
@@ -69,7 +69,7 @@
                   }).join(',')}}</p>
               </div>
             </div>
-            <div v-else>暂无数据</div>
+            <div v-else style="margin: 0 auto; padding: 20px 0; width: 100px">暂无数据</div>
           </div>
           <div class="cont1" id="report_showtype_2">
             <div style="background-color: white; color: #333333;
@@ -407,7 +407,7 @@ export default {
       interruptDialog: false,    //中断任务
       isLoading: false,
       taskObj: '',     //单个列表任务
-      portrailInfoDto: {},
+      portrailInfoDto: null,
       repertoryGroupDto: {repertories: [], groups:[{groupName: 'kkk'}]},
       analysisTaskInfoWithBLOBsList: [],
       taskResult: [],
@@ -416,6 +416,7 @@ export default {
       data: [],
       taskWebParam: {},
       data1:[],
+      arr: []
     }
   },
   created() {
@@ -544,6 +545,8 @@ export default {
       this.map.setFitView();
     },
     updateLine (obj, list, index) {
+      this.arr.push(obj)
+      localStorage.setItem("temp",JSON.stringify(this.arr));
       this.amap.clearMap();
       let _i = this.data.indexOf(obj);
       // list.splice(index, 1)

@@ -289,7 +289,7 @@ export default {
       let params = {};
       if(this.value1 && this.value2) {
         params['startDate'] = formatDate(this.value1);
-        params['endDate'] = this.value2;
+        params['endDate'] = formatDate(this.value2);
         params['pageNum'] = this.pagination.pageNum;
         params['pageSize'] =this.pagination.pageSize;
       }
