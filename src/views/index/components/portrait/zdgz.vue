@@ -1,5 +1,5 @@
 <template>
-<div class="judge_content">
+<div class="judge_zdgz_content">
   <div class="vl_judge_tc">
     <div class="Breadc">
       <div is="vlBreadcrumb" 
@@ -1426,17 +1426,6 @@ export default {
       transition: 0s all!important;
     }
   }
-  .judge_content {
-  /*.el-dialog__wrapper .el-dialog__body {*/
-    /*padding: 0px;*/
-  /*}*/
-  /*.el-dialog__header {*/
-    /*padding: 0px 20px 3px;*/
-  /*}*/
-  /*.el-dialog__headerbtn {*/
-    /*z-index: 1;*/
-  /*}*/
-}
 </style>
 <style lang="scss" scoped="scoped">
 .map_rrt_u2 {
@@ -1475,7 +1464,7 @@ export default {
 .select_btn:hover {
    background-color: #0466de;
 }
-.judge_content {
+.judge_zdgz_content {
       height: 100%;
      
     }
