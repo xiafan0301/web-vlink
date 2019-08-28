@@ -1021,15 +1021,20 @@
         }
       },
       skipResultPage (obj) {
-        if (obj.taskResult) {
-          if (obj.taskWebParam.origin === 1) {
-            this.$router.push({name: 'portrait_ytsr', query: {uid: obj.uid}})
-          } else {
-            this.$router.push({name: 'portrait_ytsr_shot', query: {uid: obj.uid}})
-          }
+        if (obj.taskWebParam.origin === 1) {
+          this.$router.push({name: 'portrait_ytsr', query: {uid: obj.uid}})
         } else {
-          this.$message.info('抱歉，没有找到匹配结果');
+          this.$router.push({name: 'portrait_ytsr_shot', query: {uid: obj.uid}})
         }
+//        if (obj.taskResult) {
+//          if (obj.taskWebParam.origin === 1) {
+//            this.$router.push({name: 'portrait_ytsr', query: {uid: obj.uid}})
+//          } else {
+//            this.$router.push({name: 'portrait_ytsr_shot', query: {uid: obj.uid}})
+//          }
+//        } else {
+//          this.$message.info('抱歉，没有找到匹配结果');
+//        }
       },
       // 显示中断任务弹出框
       showInterruptDialog (obj) {
