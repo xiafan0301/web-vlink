@@ -504,7 +504,7 @@
         </el-dialog>
       </div>
       <!-- 新增组 -->
-      <div is="groupDialog" operateType="1" ref="groupDialog" :tabType="tabType" @getGroupList="getGroupList"></div>
+      <div is="groupDialog" operateType="1" ref="groupDialog" :tabType="tabType" @getGroupList="getGroupList()"></div>
       <!-- 确认操作 -->
       <el-dialog
         :visible.sync="toGiveUpDialog"
@@ -522,15 +522,15 @@
     <template v-else>
       <template v-if="tabType === '1'">
         <!-- 全部人像列表 -->
-        <div is="allPortrait" v-if="groupId === null" :tabType="tabType" :protraitMemberList="protraitMemberList" :groupName="groupName" @getPortraitList="handleCurrentChange" :currentPage="currentPage" @changePage="changePage"></div>
+        <div is="allPortrait" v-if="groupId === null" :tabType="tabType" :protraitMemberList="protraitMemberList" :groupName="groupName" @getPortraitList="handleCurrentChange" :currentPage="currentPage" @changePage="changePage" :loading="loading"></div>
         <!-- 自定义人像列表 -->
-        <div is="customPortrait" v-else :tabType="tabType" :protraitMemberList="protraitMemberList" :groupId="groupId" :groupName="groupName" @getPortraitList="handleCurrentChange" :currentPage="currentPage" @changePage="changePage"></div>
+        <div is="customPortrait" v-else :tabType="tabType" :protraitMemberList="protraitMemberList" :groupId="groupId" :groupName="groupName" @getPortraitList="handleCurrentChange" :currentPage="currentPage" @changePage="changePage" :loading="loading"></div>
       </template>
       <template v-else>
         <!-- 全部车像列表 -->
-        <div is="allCar" v-if="groupId === null" :tabType="tabType" :carMemberList="carMemberList" :groupName="groupName" @getVehicleList="handleCurrentChange" :currentPage="currentPage" @changePage="changePage"></div>
+        <div is="allCar" v-if="groupId === null" :tabType="tabType" :carMemberList="carMemberList" :groupName="groupName" @getVehicleList="handleCurrentChange" :currentPage="currentPage" @changePage="changePage" :loading="loading"></div>
         <!-- 自定义车像列表 -->
-        <div is="customCar" v-else :tabType="tabType" :carMemberList="carMemberList" :groupId="groupId" :groupName="groupName" @getVehicleList="handleCurrentChange" :currentPage="currentPage" @changePage="changePage"></div>
+        <div is="customCar" v-else :tabType="tabType" :carMemberList="carMemberList" :groupId="groupId" :groupName="groupName" @getVehicleList="handleCurrentChange" :currentPage="currentPage" @changePage="changePage" :loading="loading"></div>
       </template>
     </template>
   </div>
@@ -545,7 +545,7 @@ import customPortrait from './components/customPortrait.vue';
 import groupDialog from './components/groupDialog.vue';
 import {getPortraitByIdNo, addPortrait, getVehicleByVehicleNumber, addVehicle, getPortraitList, getVehicleList, getPortraitById, putPortrait, getVehicleById, putVehicle, getGroupListIsPortrait, getGroupListIsVehicle} from '@/views/index/api/api.control.js';
 import {objDeepCopy} from '@/utils/util.js';
-import {nationData} from './testData.js';
+import {nationData} from '../control/testData.js';
 export default {
   components: {allCar, allPortrait, customCar, customPortrait, groupDialog},
   data () {
@@ -1384,18 +1384,19 @@ export default {
       line-height: 40px;
     }
     .list_box{
-      height: calc(100% - 100px);
+      max-height: calc(100% - 100px);
       margin: 20px 0.5%;
       display: flex;
       flex-wrap: wrap;
       align-items: flex-start;
+      overflow-y: auto;
       .list_info{
         margin: 0 0.5%;
         width: 32%;
         max-width: 462px;
         height: 240px;
         padding: 20px;
-        margin-bottom: 20px;
+        margin-bottom: 1%;
         background:rgba(255,255,255,1);
         box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
         display: flex;

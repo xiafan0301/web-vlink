@@ -123,6 +123,10 @@ export default {
       name: 'vehicle_search_cll',
       component: () => import('@/views/index/components/vehicle/statistics/cll.vue')
     }, {
+      path: 'clldb', // 车流量对比
+      name: 'vehicle_search_clldb',
+      component: () => import('@/views/index/components/vehicle/statistics/clldb.vue')
+    }, {
       path: 'ccrc', // 初次入城统计
       name: 'vehicle_search_ccrc',
       component: () => import('@/views/index/components/vehicle/statistics/ccrc.vue')

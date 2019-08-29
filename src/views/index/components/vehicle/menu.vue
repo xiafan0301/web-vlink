@@ -105,6 +105,11 @@
             </router-link>
           </li>
           <li>
+            <router-link :to="{name: 'vehicle_search_clldb'}">
+              <i class="vl_icon2 vl_icon2_021"></i><span>车流量对比</span>
+            </router-link>
+          </li>
+          <li>
             <router-link :to="{name: 'vehicle_search_ccrc'}">
               <i class="vl_icon2 vl_icon2_022"></i><span>入城统计</span>
             </router-link>

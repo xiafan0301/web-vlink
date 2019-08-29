@@ -35,6 +35,12 @@ export default {
       name: 'add_user',
       component: () => import('@/views/index/components/manage/addUser.vue')
     },
+    // 布控库管理
+    {
+      path: 'library',
+      name: 'control_library',
+      component: () => import('@/views/index/components/manage/library.vue'),
+    },
     {
       path: 'roleManage',
       name: 'role_manage',
