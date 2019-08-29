@@ -189,8 +189,6 @@
         curDrawIndex: 0, // 当前画区域的索引
         curRightActive: 0, // 右边已选区域当前激活索引
         clearAll: false,
-        cluster: null,
-        renderClusterMarker: null,
         confirmIcon: null, // 选择区域之后的小弹窗
       };
     },
@@ -416,7 +414,8 @@
         }
         uContent = '<div id="' + obj.markSid + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + '"></div>'
         if (type === 'error') {
-          uContent = '<div id="' + obj.markSid + '" class="map_icons vl_icon vl_icon_map_sxt_error"></div>';
+          let sClass = 'vl_icon_map_sxt_in_area' + obj.dataType;
+          uContent = '<div id="' + obj.markSid + '" class="map_icons vl_icon ' + sClass +'"></div>';
         }
         return uContent;
       },
@@ -453,7 +452,26 @@
             })
             circle.setMap(_this.map);
             _this.curAddSearch.area = circle;
-            _this.checkout(circle,'AMap.circle')
+            // 画完区域取消地图工具激活状态
+            _this.map.setDefaultCursor();
+            _this.mouseTool.close(false);
+            _this.hover = '';
+            _this.createConfirmMark(e.lnglat);
+
+            _this.checkout(circle,'AMap.circle');
+            // 判断如果当前curAddSearch.curMarks有数据的话，先加入点聚合
+            if (_this.curAddSearch.curMarks.length) {
+              _this.pointIntoCluster(_this.curAddSearch.curMarks)
+            }
+            _this.curAddSearch.curMarks = [];
+            _this.curAddSearch.curPointData.forEach(j => {
+              _this.marks.forEach(m => {
+                if (m.getExtData() === j) {
+                  _this.curAddSearch.curMarks.push(m);
+                }
+              })
+            })
+            _this.removeSomeCluster(_this.curAddSearch.curMarks)
           }
 
         });
@@ -465,7 +483,7 @@
           _this.map.setDefaultCursor();
           _this.mouseTool.close(false);
           _this.hover = '';
-          _this.createConfirmMark(e);
+          _this.createConfirmMark(e.obj.getPath()[e.obj.getPath().length - 1]);
 
           let a=e.obj;
           let t=e.obj.CLASS_NAME
@@ -504,10 +522,10 @@
         }
       },
       // 创建确定，取消区域的小marker
-      createConfirmMark (e) {
+      createConfirmMark (path) {
         let m = new window.AMap.Marker({
           map: this.map,
-          position: e.obj.getPath()[e.obj.getPath().length - 1],
+          position: path,
           offset: new window.AMap.Pixel(-15, -16),
           draggable: false, // 是否可拖动
           zIndex: 200,
@@ -781,7 +799,8 @@
             obj['endTime'] =  formatDate(x.endTime, 'yyyy-MM-dd HH:mm:ss');
             return obj;
           })
-          this.$router.push({name: 'vehicle_search_qy_jg', query: supQuery})
+          window.sessionStorage.setItem('qyParam', JSON.stringify(supQuery));
+          this.$router.push({name: 'vehicle_search_qy_jg'})
       },
       showInfoMes(mes) {
         if (!document.querySelector('.el-message--info')) {

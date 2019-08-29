@@ -95,16 +95,16 @@
       </div>
     </div>
     <div class="struc-list">
-      <swiper :options="swiperOption" ref="mySwiper">
+      <swiper :options="swiperOption" ref="mySwiper" class="swiper-no-swiping">
         <!-- slides -->
-        <swiper-slide v-for="(item, index) in strucInfoList" :key="item.id">
+        <swiper-slide v-for="(item, index) in curStrucInfoList" :key="item.id">
           <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
             <img style="width: 100%; height: .88rem;" :src="item[detailBottomInfo.imgKey]" alt="">
             <!--<div class="vl_jfo_sim" ><i class="vl_icon vl_icon_retrieval_05" :class="{'vl_icon_retrieval_06':  index === curImgIndex}"></i>{{item.semblance ? item.semblance : 92}}<span style="font-size: 12px;">%</span></div>-->
           </div>
         </swiper-slide>
-        <div class="swiper-button-prev" slot="button-prev"></div>
-        <div class="swiper-button-next" slot="button-next"></div>
+        <div class="swiper-button-prev" slot="button-prev" @click="prevPageData" :class="{'swiper-button-disabled': maxLeft}"></div>
+        <div class="swiper-button-next" slot="button-next" @click="nextPageData" :class="{'swiper-button-disabled': maxRight}"></div>
       </swiper>
     </div>
   </el-dialog>
@@ -175,10 +175,10 @@
           loop: false,
           slideToClickedSlide: true,
           loopFillGroupWithBlank: true,
-          navigation: {
-            nextEl: '.swiper-button-next',
-            prevEl: '.swiper-button-prev',
-          },
+//          navigation: {
+//            nextEl: '.swiper-button-next',
+//            prevEl: '.swiper-button-prev',
+//          },
         },
         amap: null, // 地图实例
         markerPoint: null, // 地图点集合
@@ -188,6 +188,18 @@
         curImgIndex: 0,
         sturcDetail: {},
         strucDetailDialog: false,
+        pagination: { total: 0, pageSize: 10, pageNum: 1 },
+      }
+    },
+    computed: {
+      curStrucInfoList () {
+        return this.strucInfoList.slice((this.pagination.pageNum - 1) * this.pagination.pageSize,  (this.pagination.pageNum) * this.pagination.pageSize)
+      },
+      maxRight () {
+        return this.pagination.pageNum >= Math.ceil(this.pagination.total / this.pagination.pageSize);
+      },
+      maxLeft () {
+        return this.pagination.pageNum <= 1;
       }
     },
     methods: {
@@ -220,7 +232,11 @@
         if (this.markerPoint) {
           this.amap.remove(this.markerPoint)
         }
-        let _content = '<div class="vl_icon vl_icon_judge_02"></div>'
+        let sClass = 'vl_icon_map_hover_mark0';
+        if (data.bayonetName) {
+          sClass = 'vl_icon_map_hover_mark1'
+        }
+        let _content = '<div class="vl_icon ' + sClass + '"></div>'
         this.markerPoint = new AMap.Marker({ // 添加自定义点标记
           map: this.amap,
           position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
@@ -230,7 +246,7 @@
           content: _content
         });
         this.amap.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
-        let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`
+        let sConent = `<div class="cap_info_win"><p>设备名称：${data.bayonetName ? data.bayonetName : data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`
         this.infoWindow = new AMap.InfoWindow({
           map: this.amap,
           isCustom: true,
@@ -248,6 +264,14 @@
       },
       pageJump (data, curBtn) {
         this.$emit(curBtn.cb, data)
+      },
+      prevPageData () {
+        this.pagination.pageNum--;
+        this.curImgIndex = null;
+      },
+      nextPageData () {
+        this.pagination.pageNum++;
+        this.curImgIndex = null;
       }
     },
     watch: {
@@ -255,6 +279,8 @@
         this.strucCurTab = 1;
         this.curImgIndex = val.index;
         this.strucInfoList = val.list;
+        this.pagination.total = val.list.length;
+        this.pagination.pageNum = 1;
         this.sturcDetail = val.list[val.index]
         this.strucDetailDialog = true;
       },

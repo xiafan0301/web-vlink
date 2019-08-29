@@ -106,7 +106,7 @@
                           <div><i class="vl_icon vl_icon_retrieval_03"></i>{{sItem.semblance ? (sItem.semblance * 1).toFixed(2) : '0.00'}}%</div>
                         </div>
                       </div>
-                      <div :title="sItem.address" class="address"><i class="el-icon-location-outline"></i>{{sItem.address ? sItem.address : '无'}}</div>
+                      <div class="address"><i class="el-icon-location-outline"></i>{{sItem.bayonetAddress ? sItem.bayonetAddress : sItem.address}}</div>
                       <div class="del_icon el-icon-delete" @click.stop="updateLine(sItem, item.list, sIndex)"></div>
                     </div>
                   </li>
@@ -302,8 +302,11 @@
               <!--可以展开列表-->
               <div class="infinite-list-wrapper">
                 <ul>
-                  <li class="p_main_list" :class="{'is_open': item.isOpen}" v-for="item in allLeftEvData" :key="item.id">
-                    <div class="p_main_head" @click="item.isOpen = !item.isOpen"><i :class="{'el-icon-caret-right': !item.isOpen, 'el-icon-caret-bottom': item.isOpen}"></i>{{item.label}}({{item.times}}次)</div>
+                  <li class="p_main_list" :class="{'is_open': item.isOpen}" v-for="item in curAllLeftEvData" :key="item.id">
+                    <div class="p_main_head" @click="item.isOpen = !item.isOpen">
+                      <i :class="{'el-icon-caret-right': !item.isOpen, 'el-icon-caret-bottom': item.isOpen}"></i>{{item.label}}({{item.times}}次)
+                      <span class="del_icon el-icon-delete" @click.stop="delOneDay(item)"></span>
+                    </div>
                     <div class="p_main_item p_main_dialog_item" v-for="(sItem, sIndex) in item.list" :key="sItem.id">
                       <div class="info">
                         <div class="info_left">
@@ -314,7 +317,7 @@
                           <div><i class="vl_icon vl_icon_retrieval_03"></i>{{sItem.semblance ? (sItem.semblance * 1).toFixed(2) : '0.00'}}%</div>
                         </div>
                       </div>
-                      <div :title="sItem.address" class="address"><i class="el-icon-location-outline"></i>{{sItem.address ? sItem.address : '无'}}</div>
+                      <div class="address"><i class="el-icon-location-outline"></i>{{sItem.bayonetAddress ? sItem.bayonetAddress : sItem.address}}</div>
                       <div class="del_icon el-icon-delete" @click.stop="delSitem(item, sItem, sIndex)"></div>
                     </div>
                   </li>
@@ -416,6 +419,10 @@
     computed: {
       noMore () {
         return this.count >= this.totalMapNum;
+      },
+      // 过滤allLeftEvData里面list为空的数据，人工筛选的时候全部删除自动去除一列
+      curAllLeftEvData () {
+        return this.allLeftEvData.filter(x => x.list.length)
       }
     },
     mounted() {
@@ -600,17 +607,13 @@
             }
             this.reselt = true;
             this.evData = res.data.list;
-            this.evData.sort(this.compare("shotTime", this.timeOrder ? false : true));
-            this.totalMapNum = res.data.total;
-            // 计算经过多少个地方
-            let dvIds = [];
-            this.totalAddressNum = 0;
-            res.data.list.forEach(x => {
-              if(!dvIds.includes(x.deviceID)) {
-                this.totalAddressNum += 1;
-                dvIds.push(x.deviceID);
+            this.evData.forEach(x => {
+              if (x.bayonetName) {
+                x.deviceID = x.bayonetName;
               }
             })
+            this.evData.sort(this.compare("shotTime", this.timeOrder ? false : true));
+            this.shotAddressAndTimes(this.evData)
 
             //  重组数据，给左边列表使用
             this.operData(true);
@@ -624,6 +627,18 @@
         }).catch(() => {
           this.searchLoading = false;
         });
+      },
+      shotAddressAndTimes (data) {
+        this.totalMapNum = data.length;
+        // 计算经过多少个地方
+        let dvIds = [];
+        this.totalAddressNum = 0;
+        data.forEach(x => {
+          if(!dvIds.includes(x.deviceID)) {
+            this.totalAddressNum += 1;
+            dvIds.push(x.deviceID);
+          }
+        })
       },
       operData (isAll) {
         this.leftEvData = [];
@@ -661,10 +676,16 @@
           }
         })
       },
+      delOneDay (item) {
+        item.list.forEach((x, index) => {
+          this.delSitem(item, x, index)
+        })
+      },
       delSitem (item, sItem, index) {
         item.list.splice(index, 1);
         item.times--;
         this.evData.splice(this.evData.findIndex(x => x === sItem), 1);
+        this.shotAddressAndTimes(this.evData);
       },
       chooseOk () {
         this.showLeft = true;
@@ -719,7 +740,11 @@
               _time += `<span>${j}</span>`
             })
             _time += '</p>';
-            let _content = `<div class="vl_icon vl_icon_sxt">` + _time + `</div>`
+            let sClass = 'vl_icon_map_mark0';
+            if (obj.bayonetName) {
+              sClass = 'vl_icon_map_mark1'
+            }
+            let _content = `<div class="vl_icon ` + sClass + `">` + _time + `</div>`
             let point = new AMap.Marker({ // 添加自定义点标记
               map: this.amap,
               position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
@@ -773,7 +798,7 @@
         let _i = this.evData.indexOf(obj);
         // list.splice(index, 1)
         this.evData.splice(_i, 1);
-        this.totalMapNum = this.evData.length;
+        this.shotAddressAndTimes(this.evData);
         this.operData();
         this.drawMapMarker(this.evData)
       }, // 更新画线
@@ -793,7 +818,11 @@
         if (this.supMarkerPoint) {
           this.map.remove(this.supMarkerPoint)
         }
-        let _content = '<div class="vl_icon vl_icon_judge_02"></div>'
+        let sClass = 'vl_icon_map_hover_mark0';
+        if (data.bayonetName) {
+          sClass = 'vl_icon_map_hover_mark1'
+        }
+        let _content = '<div class="vl_icon ' + sClass + '"></div>'
         this.supMarkerPoint = new AMap.Marker({ // 添加自定义点标记
           map: this.map,
           position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
@@ -803,7 +832,7 @@
           content: _content
         });
         this.map.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
-        let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`
+        let sConent = `<div class="cap_info_win"><p>设备名称：${data.bayonetName ? data.bayonetName : data.deviceName}</p><p>抓拍地址：${data.bayonetAddress ? data.bayonetAddress : data.address}</p></div>`
         new AMap.InfoWindow({
           map: this.map,
           isCustom: true,
@@ -833,6 +862,22 @@
   };
 </script>
 <style lang="scss" scoped>
+  .cap_info_win {
+    background: #FFFFFF;
+    padding: .18rem;
+    font-size: .14rem;
+    color: #666666;
+    position: relative;
+    &:after {
+      display: block;
+      content: '';
+      border: .1rem solid #FFFFFF;
+      border-color: #FFFFFF transparent transparent;
+      position: absolute;
+      bottom: -.2rem;
+      left: calc(50% - .05rem);
+    }
+  }
   .upload_warp {
     position: relative;
     .del_icon {
@@ -1049,6 +1094,15 @@
         i{
           color: #999999;
         }
+        span {
+          margin-left: 30px;
+          font-size: 20px;
+          color: #999999;
+          vertical-align: middle;
+          &:hover {
+            color: #0C70F8;
+          }
+        }
       }
       .p_main_item {
         width: 100%;
@@ -1116,7 +1170,7 @@
           overflow: hidden;
           white-space: nowrap;
           text-overflow: ellipsis;
-          border-bottom: 1px solid #F2F2F2;
+          /*border-bottom: 1px solid #F2F2F2;*/
           padding: 0 30px 0 10px;
         }
         .del_icon {
@@ -1134,6 +1188,8 @@
       .p_main_dialog_item {
         width: 33%;
         display: inline-block;
+        border: 1px solid #D3D3D3;
+        margin: 5px;
       }
     }
     .is_open {

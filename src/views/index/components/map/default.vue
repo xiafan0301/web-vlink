@@ -244,6 +244,18 @@ export default {
             }
           }
         }
+        > .el-dropdown {
+          &:first-child {
+            .el-dropdown__caret-button {
+              .el-icon-arrow-down {
+                display: none;
+              }
+            }
+          }
+          .el-checkbox {
+            margin-right: 0px;
+          }
+        }
       }
     }
     > .map_rrt {

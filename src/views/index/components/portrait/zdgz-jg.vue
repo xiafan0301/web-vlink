@@ -59,7 +59,7 @@
           </div>
           <div class="video_container">
             <vue-scroll>
-              <div class="vl_jtc_mk" v-for="(item, index) in curVideo.videoList" :key="item.id" v-if="item.playerData">
+              <div class="vl_jtc_mk" v-for="(item, index) in curVideo.videoList" :key="item.id">
                 <p>{{item.shotTime}}</p>
                 <div is="flvplayer" :oData="item.playerData"
                      :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
@@ -157,7 +157,14 @@
           let obj = data[i];
           let _idWin = 'vlJfoImg' + i;
           if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
-            let _sContent = `<div id="${_idWin}" class="vl_jig_mk_img"><img src="${obj.subStoragePath}"><div><p>${obj.deviceName}</p><p>抓拍${obj.shotNum}次</p></div></div>`;
+            let name = '', className = 'vl_icon_map_mark0';
+            if (obj.bayonetName) {
+              name = obj.bayonetName;
+              className = 'vl_icon_map_mark1'
+            } else {
+              name = obj.deviceName
+            }
+            let _sContent = `<div id="${_idWin}" class="vl_jig_mk_img"><img src="${obj.subStoragePath}"><div><p>${name}</p><p>抓拍${obj.shotNum}次</p></div></div>`;
             // 窗体
             new AMap.Marker({ // 添加自定义点标记
               map: this.amap,
@@ -170,7 +177,7 @@
             });
             // 摄像头
             let _id = 'vlJfoSxt' + i;
-            let _content = '<div id=' + _id + ' class="vl_icon vl_jfo_sxt vl_icon_judge_04"></div>'
+            let _content = '<div id=' + _id + ' class="vl_icon ' + className + ' "></div>'
             new AMap.Marker({ // 添加自定义点标记
               map: this.amap,
               position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
@@ -181,7 +188,7 @@
               content: _content
             });
             setTimeout(() => {
-              this.addListen($('#' + _id), 'mouseover', i);
+              this.addListen($('#' + _id), 'mouseover', i, obj);
               this.addListen($('#' + _id), 'mouseout', i, obj);
               this.addListen($('#' + _id), 'click', i, obj);
             }, 300)
@@ -195,13 +202,21 @@
         el.bind(evType, function () {
           switch (evType) {
             case 'mouseover':
-              $('#vlJfoImg' + key).addClass('vl_jig_mk_img_hover')
-              $('#vlJfoSxt' + key).addClass('vl_icon_judge_02')
+              $('#vlJfoImg' + key).addClass('vl_jig_mk_img_hover');
+              if (obj.bayonetName) {
+                $('#vlJfoSxt' + key).addClass('vl_icon_map_hover_mark1');
+              } else {
+                $('#vlJfoSxt' + key).addClass('vl_icon_judge_02');
+              }
               break;
             case 'mouseout':
               if (!obj.checked) {
                 $('#vlJfoImg' + key).removeClass('vl_jig_mk_img_hover')
-                $('#vlJfoSxt' + key).removeClass('vl_icon_judge_02')
+                if (obj.bayonetName) {
+                  $('#vlJfoSxt' + key).removeClass('vl_icon_map_hover_mark1');
+                } else {
+                  $('#vlJfoSxt' + key).removeClass('vl_icon_judge_02');
+                }
               }
               break;
             case 'click':
@@ -212,10 +227,18 @@
               obj.checked = true;
               if (_key !== null) {
                 $('#vlJfoImg' + _key).removeClass('vl_jig_mk_img_hover')
-                $('#vlJfoSxt' + _key).removeClass('vl_icon_judge_02')
+                if (obj.bayonetName) {
+                  $('#vlJfoSxt' + _key).removeClass('vl_icon_map_hover_mark1');
+                } else {
+                  $('#vlJfoSxt' + _key).removeClass('vl_icon_judge_02');
+                }
               }
               $('#vlJfoImg' + key).addClass('vl_jig_mk_img_hover')
-              $('#vlJfoSxt' + key).addClass('vl_icon_judge_02')
+              if (obj.bayonetName) {
+                $('#vlJfoSxt' + key).addClass('vl_icon_map_hover_mark1');
+              } else {
+                $('#vlJfoSxt' + key).addClass('vl_icon_judge_02');
+              }
               self.showVideo(obj);
               break;
           }
@@ -249,7 +272,11 @@
         this.evData.forEach(x => x.checked = false);
         const _key = this.curVideo.indexNum;
         $('#vlJfoImg' + _key).removeClass('vl_jig_mk_img_hover')
-        $('#vlJfoSxt' + _key).removeClass('vl_icon_judge_02')
+        if (document.getElementById('vlJfoSxt' + _key).classList.contains('vl_icon_map_hover_mark1')) {
+          $('#vlJfoSxt' + _key).removeClass('vl_icon_map_hover_mark1')
+        } else {
+          $('#vlJfoSxt' + _key).removeClass('vl_icon_judge_02')
+        }
         this.curVideo.indexNum = null;
         this.showVideoList = false;
       }
