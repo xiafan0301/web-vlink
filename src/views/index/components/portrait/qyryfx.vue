@@ -440,7 +440,6 @@ export default {
   components: { vlBreadcrumb, mapSelector, noResult },
   data() {
     return {
-      isFirstClick: true, // 是否是第一次进行区域选择
       isEditMap: true, // 地图区域选择是否可以编辑
       isMultiplePerson: true, // 全部人像是否多选
       deleteDialog: false, // 删除任务弹出框
@@ -547,33 +546,6 @@ export default {
       resultDataList: [],
       swiper: null,
       selectAreaDataList: [], // 左侧选中的区域信息
-      areaDataList: [ // 默认创建一个地图选择弹出框
-        {
-          index: 1,
-          isVisiable: true,
-          isClear: false
-        },
-        {
-          index: 2,
-          isVisiable: true,
-          isClear: false
-        },
-        {
-          index: 3,
-          isVisiable: true,
-          isClear: false
-        },
-        {
-          index: 4,
-          isVisiable: true,
-          isClear: false
-        },
-        {
-          index: 5,
-          isVisiable: true,
-          isClear: false
-        }
-      ],
       taskList: [], // 任务列表
       taskId: null, // 要操作的任务id
       markerList: [],
