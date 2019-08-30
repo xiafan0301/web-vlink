@@ -1,5 +1,5 @@
 <template>
-<vue-scroll>
+<!-- <vue-scroll> -->
   <div class="alarm_today">
     <!-- 侧边栏搜索框 -->
     <div class="search_box">
@@ -13,7 +13,7 @@
         </div>
       </div>
       <!-- 监控列表 -->
-      <div v-show="tabType === '1'">
+      <div v-show="tabType === '1'" class="device_list">
       <div class="group_input">
         <el-input v-model="groupName" size="small" placeholder="请输入设备名称查找">
           <i slot="suffix" class="el-input__icon el-icon-search"></i>
@@ -36,7 +36,7 @@
       </vue-scroll>
       </div>
       <!-- 布防库 -->
-      <div v-show="tabType === '2'">
+      <div v-show="tabType === '2'" class="device_list">
       <div class="group_input">
         <el-input v-model="controlName" size="small" placeholder="请输入组名查找">
           <i slot="suffix" class="el-input__icon el-icon-search"></i>
@@ -58,11 +58,17 @@
         </div>
       </vue-scroll>
       </div>
+      <div style="width: 192px;text-align: center;position: absolute;bottom: 20px;margin-left: 20px;">
+          <el-button style="width: 45%;" type="primary" @click="getCheckedKeys">确定</el-button>
+          <el-button style="width: 45%;" @click="resetDevice()">重置</el-button>
+      </div>
+    </div>
+    <div class="alarm_list" v-loading="isLoading">
       <!-- 组合搜索 -->
-      <el-form :model="todayAlarmForm" class="lib_form" ref="todayAlarmForm">
-        <el-form-item style="width: 192px;" prop="targetType">
-          <label>告警类型:</label>
-          <el-select v-model="todayAlarmForm.targetType" placeholder="选择告警类型" clearable >
+      <div class="combination_search">
+      <el-form :model="todayAlarmForm" ref="todayAlarmForm" :inline="true">
+        <el-form-item prop="targetType" label="告警类型:">
+          <el-select v-model="todayAlarmForm.targetType" placeholder="选择告警类型" clearable style="width: 112px;">
             <el-option
               v-for="item in targetTypeList"
               :key="item.value"
@@ -75,7 +81,7 @@
         <el-form-item style="width: 192px;" prop="name">
           <el-input v-model="todayAlarmForm.name" placeholder="输入姓名" clearable></el-input>
         </el-form-item>
-        <el-form-item style="width: 192px;" prop="sex">
+        <el-form-item style="width: 112px;" prop="sex">
           <el-select v-model="todayAlarmForm.sex" placeholder="选择性别" clearable >
             <el-option
               v-for="item in sexList"
@@ -85,7 +91,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item style="width: 192px;" prop="age">
+        <el-form-item style="width: 112px;" prop="age">
           <el-select v-model="todayAlarmForm.age" placeholder="选择年龄" clearable >
             <el-option
               v-for="item in ageList"
@@ -101,13 +107,12 @@
           <el-input v-model="todayAlarmForm.vehicleNumber" placeholder="输入车牌号码" clearable></el-input>
         </el-form-item>
         </template>
-        <el-form-item style="width: 192px;">
-          <el-button style="width: 45%;" type="primary" @click="getCheckedKeys">确定</el-button>
-          <el-button style="width: 45%;" @click="resetForm('todayAlarmForm')">重置</el-button>
+        <el-form-item>
+          <el-button style="width: 80px;" type="primary" @click="getCheckedKeys">确定</el-button>
+          <el-button style="width: 80px;" @click="resetForm('todayAlarmForm')">重置</el-button>
         </el-form-item>
       </el-form>
-    </div>
-    <div class="alarm_list" v-loading="isLoading">
+      </div>
       <div class="list_top">今日告警<span v-if="alarmList">({{total}})</span></div>
       <div class="alarm_grade">
         <div class="alarm_grade_info" v-if="isSeen">
@@ -118,7 +123,7 @@
           <i class="vl_icon vl_icon_alarm_6"></i> -->
         </div>
       </div>
-      <!-- <vue-scroll> -->
+      <vue-scroll>
       <div class="list_content">
         <div class="list_box" v-for="(item,index) in alarmList" :key="index" @mouseenter="onMouseOver(item)" @mouseleave="onMouseOut(item)">
           <div class="list_img">
@@ -191,11 +196,11 @@
         class="cum_pagination">
       </el-pagination>
       </template>
-      <!-- </vue-scroll> -->
+      </vue-scroll>
     </div>
     <!-- <alarmDialog ref="alarmDialogComp" :strucInfoList="alarmList" :alarmObj="alarmObj" @isLoading="showLoading"></alarmDialog> -->
   </div>
-  </vue-scroll>
+  <!-- </vue-scroll> -->
 </template>
 <script>
 import { getGroupsByType } from '@/views/index/api/api'
@@ -316,13 +321,21 @@ export default {
       this.selectControl = this.$refs.gTree.getCheckedKeys(true);
       this.getAlarm()
     },
-    // 重置查询条件
-    resetForm (form) {
-      this.$refs[form].resetFields();
+    // 重置设备列表
+    resetDevice() {
       this.selectDevice = []
       this.selectControl = []
       this.$refs.tree.setCheckedKeys([]);
       this.$refs.gTree.setCheckedKeys([]);
+      this.getAlarm();
+    },
+    // 重置查询条件
+    resetForm (form) {
+      this.$refs[form].resetFields();
+      /* this.selectDevice = []
+      this.selectControl = []
+      this.$refs.tree.setCheckedKeys([]);
+      this.$refs.gTree.setCheckedKeys([]); */
       this.getAlarm();
     },
     onMouseOver (data) {
@@ -467,6 +480,7 @@ export default {
   display: flex;
   flex-wrap: nowrap;
   .search_box{
+    height: 100%;
     position: absolute;
     left: 20px;
     top: 0;
@@ -508,9 +522,12 @@ export default {
         }
       }
     }
+    .device_list {
+      height: calc(100% - 182px);
+      padding-bottom: 20px;
+    }
     .add_group{
       padding: 0 10px 10px;
-      max-height: 400px;
     }
     .lib_form{
       margin-top: 30px;
@@ -523,7 +540,13 @@ export default {
     width: calc(100% - 252px);
     margin-left: 252px;
     position: relative;
-    padding: 20px 0 20px 20px;
+    padding: 0 0 20px 20px;
+    .combination_search {
+      background-color: #fff;
+      padding: 15px 20px;
+      box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
+      margin-bottom: 24px;
+    }
     .list_top{
       color: #333;
       > span{
@@ -722,6 +745,11 @@ export default {
   }
   .__rail-is-horizontal {
     position: static!important;
+  }
+  .combination_search {
+    .el-form-item {
+      margin-bottom: 0;
+    }
   }
 }
 

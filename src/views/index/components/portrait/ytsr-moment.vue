@@ -7,12 +7,9 @@
       </div>
     </div>
     <div class="vl_j_left">
-      <div class="ytsr_left_radio">
-        <span>查询方式：</span>
-        <span>
-          <el-radio v-model="taskType" label="1">在线查询</el-radio>
-          <el-radio v-model="taskType" label="2">离线任务</el-radio>
-        </span>
+      <div class="ytsr_left_search_type">
+        <span :class="{'active': taskType === '1'}" @click="taskType = '1'">在线查询</span>
+        <span :class="{'active': taskType === '2'}" @click="taskType = '2'">离线任务</span>
       </div>
       <div v-show="taskType === '2'" class="ytsr_left_radio">
         <span>任务名称：</span>
@@ -166,7 +163,7 @@
         <!--基础信息库-->
         <template v-if="selectIndex === 2 && isBase === 1">
           <div class="vl_jig_right">
-            <template v-if="strucInfoList && strucInfoList.length > 0">
+            <template v-if="curStrucInfoList && curStrucInfoList.length > 0">
               <div class="vl_jig_right_title">
                 <div class="vl_jr_t_item">
                   <span><span style="color: #333333">检索结果 </span> ({{strucInfoList.length}})</span>
@@ -175,7 +172,7 @@
               <div class="vl_jfo_event">
                 <vue-scroll>
                   <div class="vl_jfo_event_box clearfix">
-                    <div class="vl_jfo_box_item" v-for="(item, index) in strucInfoList" :key="item.id" @click="showStrucInfo(item, index)">
+                    <div class="vl_jfo_box_item" v-for="(item, index) in curStrucInfoList" :key="item.id" @click="showStrucInfo(item, index)">
                       <div class="vl_jfo_i_left"><img :src="item.photoUrl" alt=""></div>
                       <div class="vl_jfo_i_right">
                         <p>检索资料</p>
@@ -197,7 +194,7 @@
         <!--抓拍视图库-->
         <template v-else-if="selectIndex === 2 && isBase === 2">
           <div class="vl_jig_right">
-            <template v-if="strucInfoList && strucInfoList.length > 0">
+            <template v-if="curStrucInfoList && curStrucInfoList.length > 0">
               <div class="vl_jig_right_title">
                 <div class="vl_jr_t_item">
                   <span><span style="color: #333333">检索结果 </span> ({{strucInfoList.length}})</span>
@@ -211,7 +208,7 @@
               <div class="vl_jfo_event">
                 <vue-scroll>
                   <div class="vl_jfo_event_box clearfix">
-                    <div class="vl_jfo_box_item" v-for="(item, index) in strucInfoList" :key="item.id" @click="showStrucInfo(item, index)">
+                    <div class="vl_jfo_box_item" v-for="(item, index) in curStrucInfoList" :key="item.id" @click="showStrucInfo(item, index)">
                       <div class="vl_jfo_i_left"><img :src="item.subStoragePath" alt=""></div>
                       <div class="vl_jfo_i_right">
                         <p>检索资料</p>
@@ -321,6 +318,17 @@
             ></el-pagination>
           </template>
         </template>
+        <template v-if="selectIndex === 2 && pagination1.total > 0">
+          <el-pagination
+              class="cum_pagination"
+              @current-change="handleCurrentChange1"
+              :current-page.sync="pagination1.pageNum"
+              :page-sizes="[100, 200, 300, 400]"
+              :page-size="pagination1.pageSize"
+              layout="total, prev, pager, next, jumper"
+              :total="pagination1.total"
+          ></el-pagination>
+        </template>
       </div>
     </div>
     <!--历史记录弹窗-->
@@ -422,8 +430,9 @@
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img">
-              <img class="bigImg" :src="sturcDetail.subStoragePath" alt="">
-              <span>抓拍图</span>
+              <img class="bigImg" :src="showShotImg ? sturcDetail.subStoragePath : sturcDetail.storagePath" alt="">
+              <i @click="showShotImg = !showShotImg">{{showShotImg ? '全景图' : '抓拍图'}}</i>
+              <span>{{showShotImg ? '抓拍图' : '全景图'}}</span>
             </div>
             <div class="struc_c_d_info">
               <h2>分析结果<div class="vl_jfo_sim" ><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? (sturcDetail.semblance*1).toFixed(2) : '0.00'}}<span style="font-size: 12px;">%</span></div></h2>
@@ -568,7 +577,7 @@
       <div class="struc-list">
         <swiper :options="swiperOption" ref="mySwiper">
           <!-- slides -->
-          <swiper-slide v-for="(item, index) in strucInfoList" :key="item.id">
+          <swiper-slide v-for="(item, index) in curStrucInfoList" :key="item.id">
             <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
               <template v-if="isBase === 2">
                 <img style="height: .88rem;width: 50%;padding-right: .02rem;" :src="item.personStoragePath" alt="">
@@ -605,6 +614,7 @@
     components: {vlBreadcrumb, noResult, flvplayer},
     data() {
       return {
+        showShotImg: true, // true展示抓拍，false,展示全景
         map: null,
         playerData: null,
         isBase: 1,
@@ -641,6 +651,7 @@
         ],
         selectIndex: 1, // 默认已完成的任务
         pagination: { total: 0, pageSize: 10, pageNum: 1 },
+        pagination1: { total: 0, pageSize: 12, pageNum: 1 },
         taskForm: {
           startTime: '',
           endTime: '',
@@ -695,6 +706,9 @@
     computed: {
       choosedHisPic () {
         return this.historyPicList.filter(x => x.checked)
+      },
+      curStrucInfoList () {
+        return this.strucInfoList.slice((this.pagination1.pageNum - 1) * this.pagination1.pageSize,  (this.pagination1.pageNum) * this.pagination1.pageSize)
       }
     },
     mounted () {
@@ -1012,6 +1026,15 @@
         } else {
           this.$router.push({name: 'portrait_ytsr_shot', query: {uid: obj.uid}})
         }
+//        if (obj.taskResult) {
+//          if (obj.taskWebParam.origin === 1) {
+//            this.$router.push({name: 'portrait_ytsr', query: {uid: obj.uid}})
+//          } else {
+//            this.$router.push({name: 'portrait_ytsr_shot', query: {uid: obj.uid}})
+//          }
+//        } else {
+//          this.$message.info('抱歉，没有找到匹配结果');
+//        }
       },
       // 显示中断任务弹出框
       showInterruptDialog (obj) {
@@ -1200,10 +1223,13 @@
           PortraitPostByphotoRealtime(params)
               .then(sRes => {
                 this.searching = false;
+                this.pagination1.total = 0;
+                this.pagination1.pageNum = 1;
                 if (sRes) {
                   this.selectIndex = 2;
                   this.$set(sRes.data, 'taskResult', JSON.parse(sRes.data.taskResult));
                   this.strucInfoList = sRes.data.taskResult;
+                  this.pagination1.total = this.strucInfoList.length;
                   if (this.radio === "1") {
                     this.isBase = 1;
                   } else {
@@ -1217,6 +1243,7 @@
               })
         } else {
           if (!this.taskName.replace(/\s+|\s+$/g, '')) {
+            this.searching = false;
             if (!document.querySelector('.el-message--info')) {
               this.$message.info('任务名称不能为空');
               return false;
@@ -1239,37 +1266,6 @@
             })
           }
         }
-//        PortraitGetDispatch(p1)
-//            .then(res => {
-//              if (res) {
-//                if (res.data === 1) {
-//                  this.searching = false;
-//                  this.addParams = params;
-//                  this.addTaskDialog = true;
-//                } else if (res.data === 2) {
-//                  PortraitPostByphotoRealtime(params)
-//                      .then(sRes => {
-//                        this.searching = false;
-//                        if (sRes) {
-//                          this.selectIndex = 2;
-//                          this.$set(sRes.data, 'taskResult', JSON.parse(sRes.data.taskResult));
-//                          this.strucInfoList = sRes.data.taskResult;
-//                          if (this.radio === "1") {
-//                            this.isBase = 1;
-//                          } else {
-//                            this.isBase = 2;
-//                            this.changeOrder();
-//                          }
-//                        }
-//                      })
-//                } else {
-//                  this.searching = false;
-//                  this.$message.info('抱歉，没有找到匹配结果');
-//                }
-//              } else {
-//                this.searching = false;
-//              }
-//            })
       },
       onConfirmAddTask () {
         if (!this.taskName.replace(/\s+|\s+$/g, '')) {
@@ -1300,6 +1296,10 @@
         this.pagination.pageNum = e;
         this.getDataList();
       },
+      handleCurrentChange1 (e) {
+        this.pagination1.pageNum = e;
+
+      },
       delPic () {
         this.curImageUrl = '';
       },
@@ -1314,28 +1314,29 @@
         console.log(this.stucOrder);
         switch (this.stucOrder) {
           case 1:
-            this.strucInfoList.sort((a, b) => {
+            this.curStrucInfoList.sort((a, b) => {
               return new Date(b.shotTime).getTime() - new Date(a.shotTime).getTime();
             })
             break;
           case 2:
-            this.strucInfoList.sort((a, b) => {
+            this.curStrucInfoList.sort((a, b) => {
               return new Date(a.shotTime).getTime() - new Date(b.shotTime).getTime();
             })
             break;
           case 3:
-            this.strucInfoList.sort((a, b) => {
+            this.curStrucInfoList.sort((a, b) => {
               return this.devicePinYin.indexOf(b.deviceNamePinyin.toLowerCase()[0]) - this.devicePinYin.indexOf(a.deviceNamePinyin.toLowerCase()[0]);
             })
             break;
           case 4:
-            this.strucInfoList.sort((a, b) => {
+            this.curStrucInfoList.sort((a, b) => {
               return b.semblance - a.semblance;
             })
             break;
         }
       },
       showStrucInfo (data, index) {
+        this.showShotImg = true;
         this.curImgIndex = index;
         this.strucDetailDialog = true;
         this.sturcDetail = data;
@@ -1389,6 +1390,9 @@
   }
 </script>
 <style lang="scss" scoped="scoped">
+  .cum_pagination {
+    padding-bottom: 0px;
+  }
   // 关闭设备tab
   .selected_device_comp {
     position: fixed;
@@ -1515,7 +1519,7 @@
       width: 272px;
       /*padding-top: 20px;*/
       height: calc(100% - 50px);
-      min-height: 790px;
+      min-height: 788px;
       background: #ffffff;
       box-shadow: 2px 3px 10px 0px rgba(131, 131, 131, 0.28);
       animation: fadeInLeft .4s ease-out .3s both;
@@ -1771,6 +1775,38 @@
           }
         }
       }
+      .ytsr_left_search_type {
+        padding: 0 20px;
+        display: flex;
+        color: #666666;
+        margin: 10px 0px;
+        span {
+          display: block;
+          width: 50%;
+          height: 40px;
+          line-height: 40px;
+          text-align: center;
+          border: 1px solid #D3D3D3;
+          cursor: pointer;
+          &:first-child {
+            border-right: none;
+            -webkit-border-radius: 4px 0px 0px 4px;
+            -moz-border-radius: 4px 0px 0px 4px;
+            border-radius: 4px 0px 0px 4px;
+          }
+          &:last-child {
+            border-left: none;
+            -webkit-border-radius: 0px 4px 4px 0px;
+            -moz-border-radius: 0px 4px 4px 0px;
+            border-radius: 0px 4px 4px 0px;
+          }
+        }
+        .active {
+          background: #0C70F8;
+          color: #ffffff;
+          border-color: #0C70F8;
+        }
+      }
       .ytsr_left_search {
         margin-left: 20px;
         width: 232px;
@@ -1861,14 +1897,15 @@
         }
         .vl_jig_right {
           width: 100%;
-          height: calc(100% - 50px);
-          padding: 0 20px;
+          height: calc(100% - 110px);
+          /*padding: 0 20px;*/
           padding-right: 0;
           .vl_jig_right_title {
             width: 100%;
-            height: 70px;
-            line-height: 70px;
+            height: 50px;
+            line-height: 50px;
             color: #999999;
+            padding-left: 20px;
             .vl_jr_t_item {
               float: left;
               width: 50%;
@@ -1905,7 +1942,7 @@
             }
           }
           .vl_jfo_event {
-            height: calc(100% - 159px);
+            height: calc(100% - 278px);
             min-height: 598px;
             .vl_jfo_event_box {
               width: 100%;
@@ -1913,10 +1950,10 @@
               .vl_jfo_box_item {
                 float: left;
                 cursor: pointer;
-                width: 387px;
+                width: 370px;
                 height: 203px;
                 padding: 20px;
-                margin-right: 20px;
+                margin-left: 20px;
                 margin-bottom: 20px;
                 background: rgba(255, 255, 255, 1);
                 box-shadow: 0px 5px 16px 0px rgba(169, 169, 169, 0.2);
@@ -2226,6 +2263,7 @@
               color: #0C70F8;
               font-size: 12px;
               padding: 0 .1rem;
+              cursor: pointer;
             }
             &:before {
               display: block;

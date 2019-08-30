@@ -292,26 +292,32 @@
             this.taskResult = JSON.parse(res.data.analysisTaskInfoWithBLOBsList[0].taskResult)
             this.struGroupResultDtoList = res.data.struGroupResultDtoList
             this.taskWebParam =JSON.parse(res.data.analysisTaskInfoWithBLOBsList[0].taskWebParam)
-            this.getBase64(this.taskWebParam.targetPicUrl)
-              .then((base64) => {
-                _this.taskWebParam.targetPicUrl = base64
-              },function(err){
-                console.log(err);//打印异常信息
-              });
-            this.getBase64(this.portrailInfoDto.photoUrl)
-              .then((base64) => {
-                _this.portrailInfoDto.photoUrl = base64
-              },function(err){
-                console.log(err);//打印异常信息
-              });
-            this.taskResult.forEach((item, index) => {
-              this.getBase64(item.subStoragePath)
+            if(this.taskWebParam.targetPicUrl){
+              this.getBase64(this.taskWebParam.targetPicUrl)
                 .then((base64) => {
-                  _this.taskResult[index].subStoragePath = base64
+                  _this.taskWebParam.targetPicUrl = base64
                 },function(err){
                   console.log(err);//打印异常信息
                 });
-            })
+            }
+            if (this.portrailInfoDto.photoUrl) {
+              this.getBase64(this.portrailInfoDto.photoUrl)
+                .then((base64) => {
+                  _this.portrailInfoDto.photoUrl = base64
+                },function(err){
+                  console.log(err);//打印异常信息
+                });
+            }
+            if (this.taskResult.length > 0) {
+              this.taskResult.forEach((item, index) => {
+                this.getBase64(item.subStoragePath)
+                  .then((base64) => {
+                    _this.taskResult[index].subStoragePath = base64
+                  },function(err){
+                    console.log(err);//打印异常信息
+                  });
+              })
+            }
             let list = []
             res.data.struPersonDtoList.forEach((item)=>{
               list.push(item.shotTime.substring(0,10))
