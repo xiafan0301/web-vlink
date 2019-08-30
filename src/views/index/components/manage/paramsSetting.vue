@@ -15,6 +15,15 @@
         <el-input v-model="stopTimeVal" maxlength="6" style="width: 200px;margin:0 8px" :disabled="!isEdit"></el-input>
         <span class="input_box_title">分钟</span>
       </div>
+      <!-- <div class="title">
+        <span>人像检索默认阀值：</span>
+        <span>人像检索应用中涉及人像比对功能中，两个人脸信息对比可视为同一人的相似度最低阈值</span>
+      </div>
+      <div class="input_box">
+        <span class="input_box_title">{{personTitle}}</span>
+        <el-input v-model="personSearchVal" style="width: 200px;margin:0 8px" :disabled="!isEdit"></el-input>
+        <span class="input_box_title">%</span>
+      </div> -->
     </div>
     <div class="operation-footer">
       <template v-if="isEdit === false">
@@ -35,10 +44,12 @@ export default {
       isEdit: false, // 是否修改
       stopTimeTitle: '落脚点停留时间 >',
       distanceTitle: '落脚点分析距离 <',
+      personTitle: '人像默认相似度 >',
       distanceVal: null,
       stopTimeVal: null,
       initDistance: null,
       initStopTime: null,
+      personSearchVal: null, 
     }
   },
   created () {
