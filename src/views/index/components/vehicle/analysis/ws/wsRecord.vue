@@ -282,12 +282,15 @@ export default {
               // iconType = 'vl_icon_05_019';
               sContent = '<div id="vehicle' + obj.deviceID + '"  title="'+ obj.deviceName +'" class="vl_icon vl_icon_05_019"></div>';
             } else {
+              let name;
               if (!obj.bayonetName) { // 摄像头
                 iconType = 0;
+                name = obj.deviceName;
               } else { // 卡口
                 iconType = 8;
+                name = obj.bayonetName;
               }
-              sContent = '<div id="vehicle' + obj.deviceID + '"  title="'+ obj.deviceName +'" class="vl_icon vl_icon_map_mark'+ iconType +'"></div>';
+              sContent = '<div id="vehicle' + obj.deviceID + '"  title="'+ name +'" class="vl_icon vl_icon_map_mark'+ iconType +'"></div>';
             }
 
             let marker = new window.AMap.Marker({
