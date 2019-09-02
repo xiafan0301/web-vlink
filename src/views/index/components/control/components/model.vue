@@ -261,7 +261,7 @@ import {getAreas, repertorySel, getVehicleByVehicleNumber, getAllBayontListByAre
 import uploadPic from './uploadPic.vue';
 import {mapXupuxian} from '@/config/config.js';
 export default {
-  components: {uploadPic},
+  components: {uploadPic},  
   name: 'model',
   props: ['mapId','operateType', 'allDevData', 'modelType', 'checkList', 'modelDataOne', 'modelDataTwo', 'modelDataThree', 'modelDataFour', 'imgurl', 'plateNo'],
   data () {
