@@ -24,12 +24,12 @@
                   <span>上报人:</span>
                   <div class="phone_box" style='margin-right:20px;'>
                     <span class="reportUser">{{addEventForm.reporterPhone}}</span>
-                    <div class="phone_dialog">
-                      <div>
+                    <div class="phone_dialog" v-show="reporterUserId">
+                      <div @click="addCalling('2')">
                         <i class="vl_icon vl_icon_event_14"></i>
                         <span>语音通话</span>
                       </div>
-                      <div>
+                      <div  @click="addCalling('1')">
                         <i class="vl_icon vl_icon_event_17"></i>
                         <span>视频通话</span>
                       </div>
@@ -240,6 +240,7 @@ import BigImg from '@/components/common/bigImg.vue';
 import { getEventDetail, updateEvent } from '@/views/index/api/api.event.js';
 import { getDepartmentList } from '@/views/index/api/api.manage.js';
 import { getDiciData } from '@/views/index/api/api.js';
+import {random14} from '@/utils/util.js';
 export default {
   components: { BigImg },
   data () {
@@ -310,6 +311,8 @@ export default {
       isShowErrorTip: false, // 是否显示图片上传错误提示
       errorText: null, // 图片上传错误提示
       autoInput: null, // 自动输入对象
+      reporterUserId: null, // 上报者userid
+      reporterUserName: null, // 上报者姓名
     }
   },
   watch: {
@@ -355,6 +358,26 @@ export default {
     this.getDetail();
   },
   methods: {
+    // 语音视频通话
+    addCalling (type) {
+      let _obj = {
+        uid: this.reporterUserId,
+        longitude: this.addEventForm.longitude,
+        latitude: this.addEventForm.latitude,
+        remoteId: this.reporterUserId,
+        remoteName: this.reporterUserName,
+        type: type, // 通话类型  1--视频  2--语音
+        _id: 'mapCall' + random14(),
+        _mid: '',
+        isTime: false,
+        minute: 0,
+        second: 0,
+        timer: null,
+        mark: null,
+        mute: false
+      }
+      this.$store.commit('WAIT_ADD', {oAdd: _obj})
+    },
     // 当获取地址输入框焦点时
     getAutoInputAddress () {
       this.autoInput = new window.AMap.Autocomplete({
@@ -440,6 +463,8 @@ export default {
             this.addEventForm.reportTime = res.data.reportTime;
             this.addEventForm.eventAddress = res.data.eventAddress;
             this.addEventForm.dealOrgId = res.data.dealOrgId;
+            this.reporterUserId = res.data.reporterUserId;
+            this.reporterUserName = res.data.reporterUserName;
            
             if (res.data.casualties === -1) {
               this.addEventForm.casualtieName = '不确定';

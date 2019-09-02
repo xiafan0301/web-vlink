@@ -627,9 +627,9 @@ export default {
       getTaskInfosPage(params)
         .then(res => {
           if (res && res.data) {
-            this.taskList = res.data.list;
             this.pagination.total = res.data.total;
-            this.taskList.map(item => {
+            
+            res.data.list.map(item => {
               let personGroupIdName = [];
               item.taskWebParam = JSON.parse(item.taskWebParam);
               let personGroupId = item.taskWebParam.personGroupId.split(',');
@@ -644,7 +644,7 @@ export default {
                 item.taskWebParam.personGroupId = personGroupIdName.join('、');
               }
             })
-
+            this.taskList = res.data.list;
           }
         })
         .catch(() => {})
@@ -745,9 +745,6 @@ export default {
     },
     // 显示相对应的地图框选区域
     showCurrentMapArea (index) {
-      // console.log('maoasa',this.selectMapType)
-      // console.log('selectAreaDataList', this.selectAreaDataList)
-      // console.log('index111111111111111111111', index)
       this.isEditMap = false;
       this.isShowMapAreaDialog = true;
       let zIndex;
@@ -925,9 +922,23 @@ export default {
     /**重置左边菜单的方法 */
     resetLeftMenu(form) {
       this.$refs[form].resetFields();
+
+      this.clearMapSelect1 = !this.clearMapSelect1;
+      this.clearMapSelect2 = !this.clearMapSelect2;
+      this.clearMapSelect3 = !this.clearMapSelect3;
+      this.clearMapSelect4 = !this.clearMapSelect4;
+      this.clearMapSelect5 = !this.clearMapSelect5;
+
       this.selectAreaDataList = [];
-      this.selectMapType = 1;
+      this.deleteIndexArr = [];
+      
+      this.selectMapType = 0;
+      
+      this.isEditMap = false;
+      this.isShowMapAreaDialog = false;
+
       this.infoRightShow = false; // 关闭右边的菜单数据
+
       this.peopleGroupOptions.map(item => {
         this.qyryfxFrom.personGroupId.push(item.uid);
       })
