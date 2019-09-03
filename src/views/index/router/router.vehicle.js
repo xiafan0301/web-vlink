@@ -117,6 +117,21 @@ export default {
       name: 'vehicle_report',
       component: () => import('@/views/index/components/vehicle/analysis/report.vue')
     },
+    {
+      path: 'restrictDriving', // 车辆限行
+      name: 'vehicle_restrict_driving',
+      component: () => import('@/views/index/components/vehicle/analysis/restrict-driving.vue')
+    },
+    {
+      path: 'restrictDetail', // 车辆限行详情
+      name: 'vehicle_restrict_detail',
+      component: () => import('@/views/index/components/vehicle/analysis/restrict-detail.vue')
+    },
+    {
+      path: 'restrictSnapDetail', // 车辆限行抓拍详情
+      name: 'vehicle_restrict_snap_detail',
+      component: () => import('@/views/index/components/vehicle/analysis/restrict-snap-detail.vue')
+    },
     /* 统计 */
     {
       path: 'cll', // 车流量统计

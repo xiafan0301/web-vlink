@@ -211,6 +211,7 @@ export default {
       mapLocationList: [], /// 地图上要显示轨迹路线数据
       peerVehicleList: [], // 同行车辆轨迹数据
       baseVehicleList: [], // 基准车辆的轨迹数据
+      deviceList: []
     }
   },
   mounted () {
@@ -327,10 +328,10 @@ export default {
     },
     filterData () {
       let _arr = [];
-      let deviceList = objDeepCopy(this.mapLocationList);
-      if (deviceList.length > 0) {
+      this.deviceList = objDeepCopy(this.mapLocationList);
+      if (this.deviceList.length > 0) {
         // console.log('mapLocationList', this.mapLocationList)
-        deviceList.forEach((item, index) => {
+        this.deviceList.forEach((item, index) => {
           if (item.pathRecords && item.pathRecords.length > 0) {
             item.pathRecords.forEach(a => {
               // console.log('aaaa', a)
@@ -373,8 +374,10 @@ export default {
               } else {
                 if (this.isCheckedVehicle === index) { // 选中的轨迹
                   // 判断是否重复出现在同一个设备点
-                  if (a.peerNumber === _arr[_i].plateNo) {
+                  if (a.plateNo === _arr[_i].plateNo) {
+                    
                     _arr[_i]['shotTime'] += ',' + a.shotTime;
+                    console.log('_arr[_i]', _arr[_i]['shotTime'])
                   } else {
                     a['simLength'] += 1;
                     _arr.splice(_i, 1, a);
@@ -415,7 +418,7 @@ export default {
             if (obj.showTime) {
               _time = '<p class="shot_time_p">';
               obj.shotTime.split(',').forEach(j => {
-                _time += `<span>抓拍时间:${j}</span>`
+                _time += `<span>${j}</span>`
               })
               _time += '</p>';
             }
@@ -427,10 +430,10 @@ export default {
 
             // 判断是不是起止点
 
-            let curList = _this.mapLocationList[_this.isCheckedVehicle].pathRecords;
+            let curList = _this.deviceList[_this.isCheckedVehicle].pathRecords;
             if (curList.length > 0) {
+
               if (obj.deviceID === curList[curList.length - 1].deviceID) {
-  
                  content = '<div id="'+ $id +'" class="icon_box vl_icon vl_icon_map_mark_start">'+
                     '<div class="device_box"><p>设备名称：'+ obj.detailDeviceName +'</p>'+
                     '<p>设备地址：'+ obj.detailShotAddress +'</p></div>'+ _time +'</div>';
@@ -438,7 +441,6 @@ export default {
                 isStartEnd = true;
               }
               if (obj.deviceID === curList[0].deviceID) {
-  
                 content = '<div id="'+ $id +'" class="icon_box vl_icon mark_span vl_icon_map_mark_end">'+
                     '<div class="device_box"><p>设备名称：'+ obj.detailDeviceName +'</p>'+
                     '<p>设备地址：'+ obj.detailShotAddress +'</p></div>'+ _time +'</div>';
@@ -791,13 +793,16 @@ export default {
             position: absolute;
             top: 10px;
             left: 98%;
-            width: 190px;
+            width: 150px;
             word-break: keep-all;
             font-size: 12px;
             color: #fff;
             background-color: rgba(0, 0, 0, 0.4);
             border-radius: 2px;
             padding: 5px;
+            span {
+              display: block;
+            }
           }
           // .is_show_time {
           //   display: none;

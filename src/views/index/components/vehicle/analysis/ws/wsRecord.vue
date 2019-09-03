@@ -273,24 +273,33 @@ export default {
             let _idBtn = 'vlJtcPlayBtn' + obj.struVehicleDto.deviceID;
             let _id = 'vlJtcVideo' + obj.deviceID;
 
-            let iconType, sContent;
+            let iconType, sContent, deviceName;
 
-            if (i === 0) {
-              // iconType = 'vl_icon_04_019';
-              sContent = '<div id="vehicle' + obj.deviceID + '"  title="'+ obj.deviceName +'" class="vl_icon vl_icon_04_019"></div>';
-            } else if (i === (data.length - 1)) {
-              // iconType = 'vl_icon_05_019';
-              sContent = '<div id="vehicle' + obj.deviceID + '"  title="'+ obj.deviceName +'" class="vl_icon vl_icon_05_019"></div>';
-            } else {
-              let name;
-              if (!obj.bayonetName) { // 摄像头
+            if (!obj.bayonetName) { // 摄像头
+              deviceName = obj.deviceName;
+              if (i === 0) {
+                // iconType = 'vl_icon_04_019';
+                sContent = '<div id="vehicle' + obj.deviceID + '"  title="'+ deviceName +'" class="vl_icon vl_icon_04_019"></div>';
+              } else if (i === (data.length - 1)) {
+                // iconType = 'vl_icon_05_019';
+                sContent = '<div id="vehicle' + obj.deviceID + '"  title="'+ deviceName +'" class="vl_icon vl_icon_05_019"></div>';
+              } else {
                 iconType = 0;
-                name = obj.deviceName;
-              } else { // 卡口
-                iconType = 8;
-                name = obj.bayonetName;
+                sContent = '<div id="vehicle' + obj.deviceID + '"  title="'+ deviceName +'" class="vl_icon vl_icon_map_mark'+ iconType +'"></div>';
               }
-              sContent = '<div id="vehicle' + obj.deviceID + '"  title="'+ name +'" class="vl_icon vl_icon_map_mark'+ iconType +'"></div>';
+            } else { // 卡口
+              deviceName = obj.bayonetName;
+              if (i === 0) {
+                // iconType = 'vl_icon_04_019';
+                sContent = '<div id="vehicle' + obj.deviceID + '"  title="'+ obj.deviceName +'" class="vl_icon vl_icon_04_019"></div>';
+              } else if (i === (data.length - 1)) {
+                // iconType = 'vl_icon_05_019';
+                sContent = '<div id="vehicle' + obj.deviceID + '"  title="'+ obj.deviceName +'" class="vl_icon vl_icon_05_019"></div>';
+              } else {
+                iconType = 8;
+                sContent = '<div id="vehicle' + obj.deviceID + '"  title="'+ deviceName +'" class="vl_icon vl_icon_map_mark'+ iconType +'"></div>';
+              }
+              deviceName = obj.bayonetName;
             }
 
             let marker = new window.AMap.Marker({
@@ -315,7 +324,7 @@ export default {
                     +"<span>"+ obj.shotTime +"</span><i id="+ _id +" class='vl_icon vl_icon_control_09'></i></div></div>"
                     +"<div class='tail_vehicle'><p class='tail_p'>尾随车辆</p><img src="+ obj.struVehicleDto.storagePath +" />"
                     +"<div class='mongolia'><span>"+ obj.struVehicleDto.shotTime +"</span><i id="+ _idBtn +" class='vl_icon vl_icon_control_09'></i></div></div>"
-                    +"<div class='divide'></div><div class='device_name'>"+ obj.deviceName +"</div></div>";
+                    +"<div class='divide'></div><div class='device_name'>"+ deviceName +"</div></div>";
 
                 hoverWindow = new window.AMap.InfoWindow({
                   isCustom: true,

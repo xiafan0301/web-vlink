@@ -296,6 +296,7 @@
                 // 判断出现的重复点是不是同一辆车的
                 if (x.plateNo === _arr[_i].plateNo) {
                   _arr[_i]['shotTime'] += ',' + x.shotTime;
+                  console.log('_arr[_i]', _arr[_i]['shotTime'])
                 } else {
                   x['simLength'] += 1;
                   _arr.splice(_i, 1, x);

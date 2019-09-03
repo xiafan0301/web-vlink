@@ -191,45 +191,6 @@
                 ></el-pagination>
               </template>
             </div>
-          <!-- </template> -->
-          <!-- <template v-else>
-            <div class="result_gzws_list">
-              <template v-if="isInitPage">
-                <div class="content_top">
-                  <p>
-                    <span>检索结果</span>
-                    <span>（777）</span>
-                  </p>
-                </div>
-                <div class="result_detail">
-                  <ul class="clearfix">
-                    <li>
-                      <div class="de_left">
-                        <img src="" alt="">
-                      </div>
-                      <div class="de_right">
-                        <span class="title">检索资料</span>
-                        <p class="time">
-                          <i class="vl_icon_tail_1 vl_icon"></i>
-                          <span>2019-12-12 12:12:12</span>
-                        </p>
-                        <p class="detail_info">
-                          <span>女性</span>
-                          <span>18</span>
-                          <span>戴帽子</span>
-                          <span>有口罩</span>
-                        </p>
-                        <div class="record_btn" @click="skipWsReocrdPage()">查看尾随记录</div>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
-              </template>
-              <template v-else>
-                <div is="noResult" :isInitPage="isInitPage"></div>
-              </template>
-            </div>
-          </template> -->
         </vue-scroll>
       </div>
     </div>
@@ -344,14 +305,14 @@ export default {
       deviceList: [], // 抓拍设备列表
       vehicleTypeList: [], // 车辆类型列表
       dataList: [], // 查询的抓拍结果列表
-      uploadClear: {}
+      uploadClear: {},
+      shotTimes: null, // 选中设备的抓拍时间
     }
   },
   created () {
     this.getDataList();
   },
   methods: {
-    skipWsReocrdPage () {},
     uploadEmit (data) {
       console.log('uploadEmit data', data);
       if (data && data.path) {
@@ -449,6 +410,8 @@ export default {
               // 初始化页面时默认选中第一个设备
               this.addForm.deviceCode = this.deviceList[0].deviceName;
               this.addForm.deviceName = this.deviceList[0].deviceName;
+
+              this.shotTimes = this.deviceList[0].shotTime;
               
               this.isShowDeviceTip = false;
             } else {
@@ -468,9 +431,9 @@ export default {
       }
     },
     // 跳至尾随记录页面
-    skipWsReocrdPage (obj) {
-      this.$router.push({name: 'gzws_detail'})
-    },
+    // skipWsReocrdPage (obj) {
+    //   this.$router.push({name: 'gzws_detail'})
+    // },
     // 取消新建
     cancelAdd (form) {
       this.$refs[form].resetFields();
@@ -507,7 +470,8 @@ export default {
             targetPicUrl: this.dialogImageUrl,
             deviceId: deviceCode,
             deviceName: this.addForm.deviceName,
-            startTime: formatDate(this.addForm.startTime),
+            startTime: formatDate(this.shotTimes),
+            // startTime: formatDate(this.addForm.startTime),
             endTime: formatDate(this.addForm.endTime),
             taskName: this.addForm.taskName,
             interval: this.addForm.interval
