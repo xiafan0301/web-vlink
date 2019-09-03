@@ -16,16 +16,22 @@
         <router-link :to="{name: 'control_add'}">新建布控</router-link>
       </li>
     </ul>
-    <div class="con_content">
+    <div class="con_content" id="conContent">
       <router-view></router-view>
     </div>
   </div>
 </template>
 <script>
+import { setTimeout } from 'timers';
 export default {
   data () {
     return {
     }
+  },
+  mounted () {
+    setTimeout(() => {
+      document.getElementById('conContent').scrollTop = 1000;
+    } ,500)
   },
   methods: {
   }

@@ -248,8 +248,10 @@ export default {
     }
   },
   created () {
+
   },
   mounted () {
+    
   },
   methods: {
     // 获取关联事件列表
@@ -382,6 +384,7 @@ export default {
     }
     .create_model{
       .create_model_box{
+        padding-bottom: 20px;
         margin-top: 10px;
         border-radius:4px 4px 0px 0px;
         border:1px solid rgba(211,211,211,1);

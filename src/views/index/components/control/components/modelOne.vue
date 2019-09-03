@@ -15,16 +15,26 @@
       </el-date-picker>
     </el-form-item>
     <el-form-item label="失踪地址:" prop="missingAddress" :rules="{ required: true, message: '请输入地名的关键词', trigger: 'blur'}">
-      <el-input
+       <el-autocomplete
+        style="width: 100%;"
         v-model="modelOneForm.missingAddress"
+        :trigger-on-focus="false"
+        :fetch-suggestions="autoAdress"
+        value-key="name"
+        @select="chooseAddress($event, 1)"
         placeholder="请输入地名的关键词">
-      </el-input>
+      </el-autocomplete>
     </el-form-item>
     <el-form-item label="家庭地址:" prop="familyAddress" :rules="{ required: true, message: '请输入地名的关键词', trigger: 'blur'}">
-      <el-input
+      <el-autocomplete
+        style="width: 100%;"
         v-model="modelOneForm.familyAddress"
+        :trigger-on-focus="false"
+        :fetch-suggestions="autoAdress"
+        value-key="name"
+        @select="chooseAddress($event, 2)"
         placeholder="请输入地名的关键词">
-      </el-input>
+      </el-autocomplete>
     </el-form-item>
     <!-- 嫌疑人照片上传 -->
     <el-form-item label="嫌疑人照片:" :rules="{ required: true, message: '请上传嫌疑人照片', trigger: 'blur'}">
@@ -50,12 +60,15 @@
     <el-form-item style="margin-top: 20px;">
       <el-button type="primary" @click="selControl">一键布控</el-button>
     </el-form-item>
+    <div is="controlDev" :addressObj="addressObj"></div>
   </el-form>
 </template>
 <script>
 import uploadPic from './uploadPic.vue';
+import controlDev from './controlDev.vue';
+import {mapXupuxian} from '@/config/config.js';
 export default {
-  components: {uploadPic},
+  components: {uploadPic, controlDev},
   data () {
     return {
       modelOneForm: {
@@ -64,11 +77,16 @@ export default {
         familyAddress: null,
         licensePlateNumList: [{licensePlateNum: null}]
       },
+      autoComplete: null,
+      addressObj: [],
       fileListOne: [],//上传的失踪人员信息数据
       fileListTwo: [],//上传的嫌疑人照片数据
       // 弹出框参数
       createSelDialog: false
     }
+  },
+  mounted () {
+    this.resetMap();
   },
   methods: {
     // 失踪人员信息的上传方法
@@ -99,9 +117,63 @@ export default {
     removeLicensePlateNum () {
       this.modelOneForm.licensePlateNumList.pop();
     },
+    // 初始化地图
+    resetMap () {
+      // 共有部分
+      let _this = this;
+      let map = new window.AMap.Map(
+        'xxx', {
+          zoom: 12,
+          center: mapXupuxian.center
+        }
+      );
+      map.plugin('AMap.Autocomplete', () => {
+        let autoOptions = {
+          city: '溆浦县'
+        }
+        _this.autoComplete = new window.AMap.Autocomplete(autoOptions);
+      })
+    },
+    autoAdress (queryString, cb) {
+      if (queryString === '') {
+        cb([])
+      } else {
+        this.autoComplete.search(queryString, (status, result) => {
+          if (status === 'complete') {
+            result.tips.forEach(f => {
+              f.name = `${f.name}(${f.district})`;
+            })
+            cb(result.tips);
+          } else {
+            cb([]);
+          }
+        })
+      }
+    },
+    // 获取追踪点
+    chooseAddress (e, type) {
+      console.log(e, 'eee')
+      if (!e.location) {
+        this.$message.error('无法获取到经纬度！');
+        return;
+      }
+      if (type === 1) {
+        this.addressObj.push({
+          lngLat: [e.location.lng, e.location.lat],
+          address: this.modelOneForm.missingAddress,
+          type: 1
+        });
+      } else {
+        this.addressObj.push({
+          lngLat: [e.location.lng, e.location.lat],
+          address: this.modelOneForm.familyAddress,
+          type: 2
+        });
+      }
+    },
     // 一键布控
     selControl () {
-
+      console.log(this.modelOneForm.missingAddress)
     }
   }
 }
