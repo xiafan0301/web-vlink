@@ -673,6 +673,9 @@
         window.sessionStorage.setItem('qyphParam', JSON.stringify(query));
         this.$router.push({name: 'vehicle_search_qyph_jg'})
       }
+    },
+    beforeDestroy () {
+      $('body').unbind('click');
     }
   };
 </script>
