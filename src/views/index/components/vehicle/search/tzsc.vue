@@ -105,11 +105,11 @@
                   >获取特征</el-button>
                   <div class="characteristic_list" v-if="characteristicList.length > 0">
                     <div
-                      class="characteristic_item"
+                      class="characteristic_yes_item"
                       :title="item.checked ? '取消选择此特征': '选择此特征'"
                       :class="{ color_blue: item.checked }"
-                      v-for="(item, index) in characteristicList"
-                      :key="'characteristic_list' + index"
+                      v-for="(item, index) in canSelectList"
+                      :key="'characteristic_yes_list' + index"
                       @click="item.checked = !item.checked"
                     >
                       <!-- 车牌号码 -->
@@ -127,6 +127,37 @@
                         v-else-if="item.plateClass || item.plateClass === 0"
                       >{{ '车牌类型:' + dicFormater(45, item.name) }}</span>
                       <!-- <span v-else>{{item.name}}</span> -->
+                    </div>
+                    <div
+                            style="cursor: not-allowed;"
+                            class="characteristic_no_item"
+                            v-for="(item, index) in noSelectList"
+                            :key="'characteristic_no_list' + index"
+                    >
+                      <!-- 车牌号码 -->
+                      <!--<span v-if="item.hasPlate">{{ '有无车牌:' + item.name }}</span>-->
+                      <span v-if="item.plateNo">{{ '车牌号码:' + item.name }}</span>
+                      <!-- 车牌颜色 -->
+                      <span v-else-if="item.plateColor">{{ '车牌颜色:' + item.name }}</span>
+                      <!-- 车辆型号 -->
+                      <span v-else-if="item.vehicleModel">{{ '车辆型号:' + item.name}}</span>
+                      <!-- 车辆颜色 -->
+                      <span v-else-if="item.vehicleColor">{{ '车辆颜色:' + item.name }}</span>
+                      <!-- 车辆类型 -->
+                      <span v-else-if="item.vehicleClass">{{ '车辆类型:' + item.name }}</span>
+                      <!-- 车牌类型 -->
+                      <span
+                              v-else-if="item.plateClass || item.plateClass === 0"
+                      >{{ '车牌类型:' + dicFormater(45, item.name) }}</span>
+                      <span v-else-if="item.vehicleBrand">{{ '车辆品牌:' + item.name }}</span>
+                      <span v-else-if="item.vehicleStyles">{{ '车辆年款:' + item.name }}</span>
+                      <span v-else-if="item.vehicleRoof">{{ '车顶天窗:' + item.name }}</span>
+                      <span v-else-if="item.hitMarkInfo">{{ '车辆撞痕:' + item.name }}</span>
+                      <span v-else-if="item.descOfFrontItem">{{ '车前物品:' + item.name }}</span>
+                      <span v-else-if="item.descOfRearItem">{{ '车后物品:' + item.name }}</span>
+                      <span v-else-if="item.sunvisor">{{ '遮阳板状态:' + item.name }}</span>
+                      <span v-else-if="item.safetyBelt">{{ '安全带状态:' + item.name }}</span>
+                      <span v-else-if="item.calling">{{ '打电话状态:' + item.name }}</span>
                     </div>
                     <!-- 没有特征 -->
                   </div>
@@ -241,6 +272,7 @@
               <el-button class="reset_btn" @click="resetMenu">重置</el-button>
               <el-button
                 class="select_btn"
+                type="primary"
                 :loading="getStrucInfoLoading"
                 :disabled="characteristicAble"
                 @click="getStrucInfo(true)"
@@ -458,6 +490,24 @@ export default {
         "vehicleClass", // 汽车类型（越野啥的）
         "plateClass" // 车牌类型
       ],
+      characterObj: [
+//          {name: 'hasPlate', disabled: false}, // 有无车牌
+          {name: 'plateNo', disabled: false}, // 车牌号
+          {name: 'plateClass', disabled: false},// 号牌类型
+          {name: 'plateColor', disabled: false},// 号牌颜色
+          {name: 'vehicleClass', disabled: false},// 车辆类型
+          {name: 'vehicleColor', disabled: false},// 车辆颜色
+          {name: 'vehicleModel', disabled: false},// 车辆型号
+          {name: 'vehicleBrand', disabled: true},// 车辆品牌
+          {name: 'vehicleStyles', disabled: true},// 车辆年款
+          {name: 'vehicleRoof', disabled: true}, // 车顶天窗
+          {name: 'hitMarkInfo', disabled: true}, // 车辆撞痕
+          {name: 'descOfFrontItem', disabled: true}, // 车前物品
+          {name: 'descOfRearItem', disabled: true}, // 车后物品
+          {name: 'sunvisor', disabled: true}, // 遮阳板状态
+          {name: 'safetyBelt', disabled: true}, // 安全带状态
+          {name: 'calling', disabled: true}, // 打电话状态
+      ],
       options: [
         {
           value: "选项1",
@@ -527,6 +577,12 @@ export default {
         }
         return true;
       }
+    },
+    canSelectList () {
+      return this.characteristicList.filter(x => !x.disabled)
+    },
+    noSelectList () {
+      return this.characteristicList.filter(x => x.disabled)
     }
   },
   mounted() {
@@ -740,14 +796,20 @@ export default {
                 data.descOfFrontItem = data.descOfFrontItem.replace(";", "");
               }
               this.characteristicList = [];
-              for (let i = 0; i < this.characterTypes.length; i++) {
+              for (let i = 0; i < this.characterObj.length; i++) {
                 for (let key in data) {
-                  if (key === this.characterTypes[i]) {
+                  if (key === this.characterObj[i]['name']) {
                     let obj = {
-                      checked: true
+                      disabled: this.characterObj[i]['disabled']
                     };
+                    if (this.characterObj[i]['disabled'] === false) {
+                      obj.checked = true;
+                    } else {
+                      obj.checked = false;
+                    }
                     obj[key] = data[key];
                     obj["name"] = data[key];
+                    console.log(obj)
                     if (obj[key]) {
                       // 如果特征值有数据
                       this.characteristicList = [
@@ -1115,7 +1177,18 @@ export default {
         .characteristic_list {
           min-height: 40px;
           overflow: hidden;
-          .characteristic_item {
+          .characteristic_yes_item {
+            float: left;
+            padding: 7px 10px;
+            font-size: 12px;
+            /*background: #fafafa;*/
+            border: 1px solid #f2f2f2;
+            border-radius: 3px;
+            margin: 10px 10px 0 0;
+            cursor: pointer;
+            color: #333333;
+          }
+          .characteristic_no_item {
             float: left;
             padding: 7px 10px;
             font-size: 12px;
@@ -1124,7 +1197,7 @@ export default {
             border-radius: 3px;
             margin: 10px 10px 0 0;
             cursor: pointer;
-            color: #999;
+            color: #999999;
           }
           .no_characteristic_list {
             line-height: 40px;
@@ -1218,14 +1291,14 @@ export default {
       // 按钮
       .btn_warp {
         .select_btn {
-          background: #0c70f8;
-          color: #ffffff;
+          /*background: #0c70f8;*/
+          /*color: #ffffff;*/
           width: 110px;
         }
         .reset_btn {
-          background: #ffffff;
-          border: 1px solid #dddddd;
-          color: #666666;
+          /*background: #ffffff;*/
+          /*border: 1px solid #dddddd;*/
+          /*color: #666666;*/
           width: 110px;
         }
       }

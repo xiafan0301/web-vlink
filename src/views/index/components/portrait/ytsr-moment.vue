@@ -31,9 +31,8 @@
             :on-error="handleError">
             <i v-if="uploading" class="el-icon-loading"></i>
             <img v-else-if="curImageUrl" :src="curImageUrl">
-            <div v-else>
+            <div class="vl_upload_tip" v-else>
               <i
-                      style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
                       class="vl_icon vl_icon_vehicle_01"
               ></i>
               <span>点击上传图片</span>
@@ -1539,19 +1538,6 @@
           border-radius: 10px;
           cursor: pointer;
           background: #f2f2f2;
-          span {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            margin-top: 119px;
-            line-height: 119px;
-            color: #999;
-          }
-          &:hover span {
-            color: #fff;
-          }
           .del_icon {
             display: none;
             position: absolute;
@@ -1581,6 +1567,11 @@
             .del_icon {
               display: block;
             }
+            .vl_upload_tip {
+              span {
+                display: none;
+              }
+            }
           }
           .vl_jtc_upload_ytsr {
             width: 100%;
@@ -1602,6 +1593,18 @@
                 border-radius: 10px;
               }
             }
+            .vl_upload_tip {
+              i {
+                width: 100px;height: 85px;opacity: .5; position: absolute;
+                top: 0;left: 0;right: 0;bottom: 0;margin: auto;
+              }
+              span {
+                position: absolute; bottom: 6px; left: 0;
+                width: 100%; line-height: normal;
+                text-align: center;
+                color: #999;
+              }
+            }
           }
           >p {
             display: none;
@@ -1615,7 +1618,7 @@
             -webkit-border-radius: 0 0 10px 10px;
             -moz-border-radius: 0 0 10px 10px;
             border-radius: 0 0 10px 10px;
-            background: #0C70F8;
+            background: rgba(0, 0, 0, 0.3);
           }
           .vl_jtc_ic_input {
             position: absolute;
