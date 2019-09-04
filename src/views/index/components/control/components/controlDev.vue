@@ -3,67 +3,74 @@
     <div class="dev_box" v-if="pageType === 1">
       <div class="tab">
         <span>布控设备</span>
-        <el-button type="info" plain>修改布控设备</el-button>
+        <el-button type="info" plain @click="pageType = 2">修改布控设备</el-button>
       </div>
       <div class="sel_dev">
         <div class="title">
           <span>已选设备（12）</span>
-          <i class="el-icon-arrow-down" v-if="false"></i>
-          <i class="el-icon-arrow-up" v-if="true"></i>
+          <i class="el-icon-arrow-up" v-show="isShowTree" @click="isShowTree = false"></i>
+          <i class="el-icon-arrow-down" v-show="!isShowTree" @click="isShowTree = true"></i>
         </div>
-        <div class="sel_tab">
-          <div @click="bayOrdev = 1" :class="{'active': bayOrdev === 1}">摄像头</div>
-          <div @click="bayOrdev = 2" :class="{'active': bayOrdev === 2}">卡口</div>
-        </div>
-        <div class="tree_box">
-          <el-tree
-            ref="to-tree"
-            :data="bayOrdev === 1 ? self_to_data1 : self_to_data2"
-            :node-key="node_key"
-            :props="defaultProps"
-            :default-expanded-keys="to_expanded_keys"
-            :default-expand-all="true"
-            @node-click="handleNodeClick"
-          >
-          </el-tree>
-          <el-tree
-            v-show="false"
-            slot="to"
-            ref="from-tree"
-            :data="self_from_data"
-            show-checkbox
-            :node-key="node_key"
-            :props="defaultProps"
-            :default-expand-all="true"
-          >
-          </el-tree>  
+        <div v-show="isShowTree">
+          <div class="sel_tab">
+            <div @click="bayOrdev = 1" :class="{'active': bayOrdev === 1}">摄像头</div>
+            <div @click="bayOrdev = 2" :class="{'active': bayOrdev === 2}">卡口</div>
+          </div>
+          <vue-scroll style="height: 352px;">
+            <div class="tree_box">
+              <el-tree
+                ref="to-tree" 
+                icon-class="el-icon-arrow-right"
+                :data="bayOrdev === 1 ? self_to_data1 : self_to_data2"
+                :node-key="node_key"
+                :props="defaultProps"
+                :default-expanded-keys="to_expanded_keys"
+                :default-expand-all="true"
+                @node-click="handleNodeClick"
+              >
+              </el-tree>
+              <!-- 不显示在页面上，作为已选设备树的参照 -->
+              <el-tree
+                v-show="false"
+                slot="to"
+                ref="from-tree"
+                :data="self_from_data"
+                show-checkbox
+                :node-key="node_key"
+                :props="defaultProps"
+                :default-expand-all="true"
+              >
+              </el-tree>  
+            </div>
+          </vue-scroll>
         </div>
       </div>
       <div class="dev_map" id="devMap"></div>
       <div class="map_zoom">
-        <div class="top"><i class="vl_icon vl_icon_control_23" @click="resetZoom()"></i></div>
+        <div class="top"><i class="el-icon-aim" @click="resetZoom()"></i></div>
         <ul class="bottom">
           <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
           <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
         </ul>
       </div>
     </div>
-    <div v-if="pageType === 2"></div>
+    <div v-if="pageType === 2" is="controlDevUpdate"></div>
   </div>
 </template>
 <script>
 import {mapXupuxian} from '@/config/config.js';
 import {MapGETmonitorList} from '@/views/index/api/api.map.js';
 import {random14, objDeepCopy} from '@/utils/util.js';
+import controlDevUpdate from './controlDevUpdate.vue';
 export default {
-  props: ['addressObj'],
+  components: {controlDevUpdate},
+  props: ['addressObj', 'missingTime'],
   data () {
     return {
-      pageType: 1,//页面类型，1为布控设备展示页面，2为修改布控设备页面
+      pageType: 2,//页面类型，1为布控设备展示页面，2为修改布控设备页面
       // 地图参数
       zoomLevel: 12,
       map: null,
-      scopeRadius: 15,
       autoComplete: null,
       devList: [],
       defaultProps: { label: 'areaName', children: 'areaTreeList' },
@@ -75,9 +82,12 @@ export default {
       bayIdList: [],
       bayFromData: [],
       devFromData: [],
+      bayFromData_: [],
+      devFromData_: [],
       node_key: 'areaId',
       pid: 'areaParentUid',
-      removeObj: {1: [],2: []} 
+      removeObj: {1: [],2: []},
+      isShowTree: false
     }
   },
   mounted () {
@@ -86,16 +96,17 @@ export default {
   },
   watch: {
     addressObj (val) {
-      val.length > 0 && this.getDevList();
+      console.log(this.addressObj, 'addressObj')
+      val.length > 0 && this.addressMark();
     },
-    self_from_data () {
+    bayOrdev () {
       if (this.bayOrdev === 2) {
         this.$nextTick(() => {
-          this.addDevIsLeft(2);
+          this.addressMark();
         })
       } else {
          this.$nextTick(() => {
-          this.addDevIsLeft(1);
+          this.addressMark();
         })
       }
     }
@@ -136,8 +147,10 @@ export default {
       }
       MapGETmonitorList(params).then(res => {
         if (res) {
-          this.bayFromData = this.commonFn1(objDeepCopy([res.data]));
-          this.devFromData = this.commonFn2(objDeepCopy([res.data]));
+         this.bayFromData = this.commonFn1(objDeepCopy([res.data]));
+         this.devFromData = this.commonFn2(objDeepCopy([res.data]));
+         this.bayFromData_ = objDeepCopy(this.bayFromData);
+         this.devFromData_ = objDeepCopy(this.devFromData);
 
           this.devList = this.flatDev([res.data]);
           console.log(this.devList);
@@ -221,6 +234,13 @@ export default {
     addressMark () {
       // 追踪点标记
       let offSet = [-20.5, -70], _this = this;
+      if (this.bayOrdev === 2) {
+        this.self_to_data2 = [];
+        this.bayFromData = objDeepCopy(this.bayFromData_);
+      } else {
+        this.self_to_data1 = [];
+        this.devFromData = objDeepCopy(this.devFromData_);
+      }
       this.addressObj.forEach(obj => {
         if (this.removeObj[obj.type].length > 0) {
           this.map.remove(this.removeObj[obj.type]);
@@ -256,12 +276,29 @@ export default {
         this.mapCircle(obj.lngLat, obj.type);
       })
     },
+    // 计算布控范围半径
+    scopeRadius (type) {
+      if (type === 2 ) return 3*1000;
+      const minute10 = 10*60*1000;
+      const minute30 = 30*60*1000;
+      const time = new Date().getTime() - this.missingTime.getTime();
+      console.log(time, 'time')
+      if (time === minute10) {
+        return 10*1000;
+      } else if (time > minute10 && time < minute30) {
+        return 60*1000;
+      } else if (time > minute30) {
+        return 200*1000;
+      } else {
+        return 10*1000;
+      }
+    },
     // 圆形覆盖物
     mapCircle (lngLat, type) {
       let _this = this;
       let circle = new window.AMap.Circle({
         center: new window.AMap.LngLat(lngLat[0], lngLat[1]), // 圆心位置
-        radius: _this.scopeRadius * 1000,  //半径
+        radius: _this.scopeRadius(type),  //半径
         strokeColor: "#F33",  //线颜色
         strokeOpacity: 1,  //线透明度
         strokeWeight: 3,  //线粗细度
@@ -269,7 +306,7 @@ export default {
         fillOpacity: 0.35 //填充透明度
       })
       circle.setMap(_this.map);
-      this.removeObj[obj.type].push(circle);
+      this.removeObj[type].push(circle);
       this.getCircleDev(circle);
     },
     // 获取圆形覆盖物内的设备和卡口
@@ -296,10 +333,20 @@ export default {
         }
         return pre;
       },[]);
+      const data = this.bayOrdev === 1 ? this.devIdList : this.bayIdList;
+      if (this.bayOrdev === 2) {
+        this.$nextTick(() => {
+          this.addDevIsLeft(data);
+        })
+      } else {
+        this.$nextTick(() => {
+          this.addDevIsLeft(data);
+        })
+      }
     },
     // 添加按钮
-    addDevIsLeft(type) {
-      const data = type === 1 ? this.devIdList : this.bayIdList;
+    addDevIsLeft(data) {
+      
       this.$refs["from-tree"].setCheckedKeys(data);
 
       // 获取选中通过穿梭框的keys - 仅用于传送纯净的id数组到父组件同后台通信
@@ -559,8 +606,6 @@ export default {
       left: 20px;
       top: 62px;
       width:260px;
-      height:460px;
-      background:rgba(255,255,255,1);
       box-shadow:0px 3px 10px 0px rgba(99,99,99,0.39),0px 0px 9px 0px rgba(255,255,255,0.55); 
       .title{
         width: 100%;
@@ -570,6 +615,7 @@ export default {
         border-bottom: 1px solid #F2F2F2;
         display: flex;
         justify-content: space-between;
+        background: #fff;
         > span{
           color: #0C70F8;
           font-size: 16px;
@@ -580,24 +626,34 @@ export default {
           cursor: pointer;
         }
       }
-      .sel_tab{
-        display: flex;
-        width:220px;
-        height:28px;
-        margin: 20px 20px 10px 20px;
+      > div:nth-child(2){
+        width: 100%;
+        height:420px;
+        padding: 20px 0;
         background:rgba(255,255,255,1);
-        border-radius:4px;
-        border:1px solid rgba(211,211,211,1);
-        > div{
-          width: 50%;
-          text-align: center;
-          line-height: 28px;
-          &.active, &:hover{
-            background: #E0F2FF;
-            color: #0C70F8;
-            cursor: pointer;
+        .sel_tab{
+          display: flex;
+          width:220px;
+          height:28px;
+          margin-left: 20px;
+          border-radius:4px;
+          border:1px solid rgba(211,211,211,1);
+          > div{
+            width: 50%;
+            text-align: center;
+            line-height: 28px;
+            &.active, &:hover{
+              background: #E0F2FF;
+              color: #0C70F8;
+              cursor: pointer;
+            }
+          
           }
-        
+        }
+        .tree_box{
+          width: 100%;
+          padding: 12px;
+          height: 352px;
         }
       }
     }

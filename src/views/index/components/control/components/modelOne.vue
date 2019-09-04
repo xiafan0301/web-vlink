@@ -7,6 +7,19 @@
       </div>
       <div is="uploadPic" :fileList="fileListOne" @uploadPicDel="uploadPicDelOne" @uploadPicFileList="uploadPicFileListOne"></div>
     </el-form-item>
+    <el-form-item label="人员姓名:" prop="personnelName" :rules="{ required: true, message: '请输入人员姓名', trigger: 'blur'}">
+      <el-input v-model="modelOneForm.personnelName"></el-input>
+    </el-form-item>
+    <el-form-item label="性别:" prop="sex" :rules="{ required: true, message: '请选择人员性别', trigger: 'blur'}">
+      <el-select value-key="uid" v-model="modelOneForm.sex" filterable placeholder="请选择">
+        <el-option
+          v-for="item in sexList"
+          :key="item.uid"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
+    </el-form-item>
     <el-form-item label="失踪时间:" prop="missingTime" :rules="{ required: true, message: '请选择失踪时间', trigger: 'blur'}">
       <el-date-picker
         v-model="modelOneForm.missingTime"
@@ -60,27 +73,33 @@
     <el-form-item style="margin-top: 20px;">
       <el-button type="primary" @click="selControl">一键布控</el-button>
     </el-form-item>
-    <div is="controlDev" :addressObj="addressObj"></div>
+    <div is="controlDev" :missingTime="modelOneForm.missingTime" :addressObj="addressObj_" v-if="isShowControlDev"></div>
   </el-form>
 </template>
 <script>
 import uploadPic from './uploadPic.vue';
 import controlDev from './controlDev.vue';
 import {mapXupuxian} from '@/config/config.js';
+import {random14, objDeepCopy} from '@/utils/util.js';
 export default {
   components: {uploadPic, controlDev},
   data () {
     return {
       modelOneForm: {
         missingTime: null,
+        personnelName: null,
+        sex: null,
         missingAddress: null,
         familyAddress: null,
         licensePlateNumList: [{licensePlateNum: null}]
       },
+      sexList: [],
       autoComplete: null,
       addressObj: [],
+      addressObj_: [],
       fileListOne: [],//上传的失踪人员信息数据
       fileListTwo: [],//上传的嫌疑人照片数据
+      isShowControlDev: true,//是否显示布控设备选择部分
       // 弹出框参数
       createSelDialog: false
     }
@@ -158,12 +177,14 @@ export default {
         return;
       }
       if (type === 1) {
+        if (this.addressObj.some(s => s.type === 1)) this.addressObj = this.addressObj.filter(f => f.type !== 1);
         this.addressObj.push({
           lngLat: [e.location.lng, e.location.lat],
           address: this.modelOneForm.missingAddress,
           type: 1
         });
       } else {
+        if (this.addressObj.some(s => s.type === 2)) this.addressObj = this.addressObj.filter(f => f.type !== 2);
         this.addressObj.push({
           lngLat: [e.location.lng, e.location.lat],
           address: this.modelOneForm.familyAddress,
@@ -174,6 +195,8 @@ export default {
     // 一键布控
     selControl () {
       console.log(this.modelOneForm.missingAddress)
+      this.isShowControlDev = true;
+      this.addressObj_ = objDeepCopy(this.addressObj);
     }
   }
 }
@@ -195,10 +218,16 @@ export default {
 </style>
 <style lang="scss">
 .model_one{
-  > .el-form-item:nth-child(2), > .el-form-item:nth-child(3), > .el-form-item:nth-child(4){
-    width: 50%;
-    .el-date-editor{
-      width: 100%;
+  > .el-form-item{
+    &:nth-child(2),
+    &:nth-child(3),
+    &:nth-child(4),
+    &:nth-child(5),
+    &:nth-child(6){
+      width: 50%;
+      .el-date-editor{
+        width: 100%;
+      }
     }
   }
   .plate_num_box .el-form-item__content{
