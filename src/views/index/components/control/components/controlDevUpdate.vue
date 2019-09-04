@@ -13,19 +13,33 @@
         </div>
         <div v-show="isShowTree">
           <div class="sel_tab">
-            <div @click="bayOrdev = 1" :class="{'active': bayOrdev === 1}">摄像头</div>
-            <div @click="bayOrdev = 2" :class="{'active': bayOrdev === 2}">卡口</div>
+            <div @click="tabClick(1)" :class="{'active': bayOrdev === 1}">摄像头</div>
+            <div @click="tabClick(2)" :class="{'active': bayOrdev === 2}">卡口</div>
           </div>
-
+        <!-- 内容区 -->
+        <vue-scroll style="height: 380px;" v-if="tabIndex === 1">
+          <div class="transfe_main">
+            <el-tree
+              slot="to"
+              ref="to-tree"
+              :data="bayOrdev === 1 ? self_to_data1 : self_to_data2"
+              :node-key="node_key"
+              :default-expanded-keys="to_expanded_keys"
+              :props="defaultProps"
+              :default-expand-all="true"
+            >
+            </el-tree>
+          </div>
+        </vue-scroll>
         </div>
       </div>
       <el-input placeholder="请输入内容" v-model="devName" class="search">
         <el-button slot="append" icon="el-icon-search"></el-button>
       </el-input>
       <div class="sel_type">
-        <div @click="bindDraw" :class="{'active': selAreaAcitve}"><i class="el-icon-setting"></i><span>框选</span></div>
-        <div><i class="el-icon-setting"></i><span>点选</span></div>
-        <div><i class="el-icon-setting"></i><span>自定义</span></div>
+        <div @click="bindDraw(1)" :class="{'active': selAreaAcitve && selType === 1}"><i class="el-icon-setting"></i><span>框选</span></div>
+        <div @click="bindDraw(2)" :class="{'active': selAreaAcitve && selType === 2}"><i class="el-icon-setting"></i><span>点选</span></div>
+        <div @click="bindDraw(3)" :class="{'active': selAreaAcitve && selType === 3}"><i class="el-icon-setting"></i><span>自定义</span></div>
         <div><i class="el-icon-setting"></i><span>清除</span></div>
       </div>
       <div class="sel_checkbox">
@@ -58,12 +72,12 @@
           <div @click="bayOrdev = 2" :class="{'active': bayOrdev === 2}">卡口</div>
         </div>
         <!-- 内容区 -->
-        <vue-scroll style="height: 380px;">
+        <vue-scroll style="height: 380px;" v-if="tabIndex === 2">
           <div class="transfe_main">
             <el-tree
               slot="to"
               ref="to-tree"
-              :data="self_to_data"
+              :data="bayOrdev === 1 ? self_to_data1 : self_to_data2"
               show-checkbox
               :node-key="node_key"
               @check="toTreeChecked"
@@ -158,8 +172,13 @@ export default {
       map: null,
       devList: [],
       mouseTool: null,
-      selAreaAcitve: false,
       polygon: null,
+      selAreaAcitve: false,
+      selType: null,
+      devIdList: [],
+      bayIdList: [],
+      self_to_data1: [],
+      self_to_data2: [],
 
       from_is_indeterminate: false, // 源数据是否半选
       from_check_all: false, // 源数据是否全选
@@ -181,6 +200,8 @@ export default {
       // 新加参数
       bayFromData: [],
       devFromData: [],
+      bayFromData_: [],
+      devFromData_: [],
       bayToData: [],
       devToData: [],
     }
@@ -226,7 +247,8 @@ export default {
 
         // 总全选是否开启 - 根据选中节点中为根节点的数量是否和源数据长度相等
         let allCheck = val.filter(item => item[this.pid] == 0);
-        if (allCheck.length == this.self_to_data.length) {
+        const data = this.bayOrdev === 1 ? this.self_to_data1 : this.self_to_data2;
+        if (allCheck.length == data.length) {
           // 关闭半选 开启全选
           this.to_is_indeterminate = false;
           this.to_check_all = true;
@@ -255,13 +277,13 @@ export default {
       }
     },
     // 右侧数据
-    self_to_data() {
-      if (this.bayOrdev === 2) {
-        return this.bayToData;
-      } else {
-        return this.devToData;
-      }
-    }
+    // self_to_data() {
+    //   if (this.bayOrdev === 2) {
+    //     return this.bayToData;
+    //   } else {
+    //     return this.devToData;
+    //   }
+    // }
   },
   methods: {
     // 初始化地图
@@ -290,6 +312,8 @@ export default {
         if (res) {
           this.bayFromData = this.commonFn1(objDeepCopy([res.data]));
           this.devFromData = this.commonFn2(objDeepCopy([res.data]));
+          this.bayFromData_ = objDeepCopy(this.bayFromData);
+          this.devFromData_ = objDeepCopy(this.devFromData);
           // this.bayToData = this.commonFn1(objDeepCopy(this.to_data));
           // this.devToData = this.commonFn2(objDeepCopy(this.to_data));    
           this.devList = this.flatDev([res.data]);
@@ -370,9 +394,10 @@ export default {
       _this.map.setFitView();
     },
     // 绑定draw
-    bindDraw () {
+    bindDraw (type) {
       let _this = this;
-      if (_this.polygon) _this.map.remove(_this.polygon);
+      
+      _this.selType = type;
       if (_this.mouseTool) {
         _this.selAreaRest();
         return false;
@@ -382,7 +407,11 @@ export default {
       _this.mouseTool = mouseTool;
       // 添加事件
       window.AMap.event.addListener(mouseTool, 'draw', function (e) {
-        let polygon = new window.AMap.Polygon({
+        if (_this.mouseTool) {
+          _this.selAreaRest();
+        }
+        if(_this.polygon) _this.map.remove(_this.polygon);
+        _this.polygon = new window.AMap.Polygon({
           map: _this.map,
           strokeColor: '#FA453A',
           strokeOpacity: 1,
@@ -392,9 +421,62 @@ export default {
           path: e.obj.getPath(),
           zIndex: 12
         });
-        _this.polygon = polygon;
+        _this.getPolygonDev(_this.polygon);
       });
-      _this.selArea();
+      _this.selArea(type);
+    },
+    // 获取覆盖物内的设备和卡口
+    getPolygonDev (polygon) {
+      let res = [];
+      this.devList.forEach(f => {
+        // 把在圆形覆盖物范围之内的追踪点添加进来
+        if (f.longitude > 0 && f.latitude > 0) {
+          if (polygon && polygon.contains(new window.AMap.LngLat(f.longitude, f.latitude))) {
+            // 在圆形之中
+            res.push(f);
+          }
+        }
+      })
+      this.devIdList = res.reduce((pre, cur) => {
+        if (cur.type === 1) {
+          pre = [...pre, cur.uid];
+        }
+        return pre;
+      },[]);
+      this.bayIdList = res.reduce((pre, cur) => {
+        if (cur.type === 2) {
+          pre = [...pre, cur.uid];
+        }
+        return pre;
+      },[]);
+      console.log(this.devIdList, 'this.devIdList')
+      console.log(this.bayIdList, 'this.bayIdList')
+      
+      // if (this.bayOrdev === 2) {
+      //   this.$nextTick(() => {
+      //     this.addDevIsLeft(data);
+      //   })
+      // } else {
+      //   this.$nextTick(() => {
+      //     this.addDevIsLeft(data);
+      //   })
+      // }
+      this.tabClick(this.bayOrdev);
+    },
+    tabClick (type) {
+      this.bayOrdev = type;
+      if (type === 2) {
+        this.self_to_data2 = [];
+        this.bayFromData = objDeepCopy(this.bayFromData_);
+      } else {
+        this.self_to_data1 = [];
+        this.devFromData = objDeepCopy(this.devFromData_);
+      }
+      const data = type === 1 ? this.devIdList : this.bayIdList;
+      this.$refs["from-tree"].setCheckedKeys(data);
+      this.$nextTick(() => {
+        this.addToAims();
+      })
     },
     // 重置选择区域
     selAreaRest () {
@@ -404,19 +486,40 @@ export default {
       this.map.setDefaultCursor('');
     },
     // 选择区域
-    selArea () {
+    selArea (type) {
       if (this.map && this.mouseTool) {
         this.selAreaAcitve = true;
         this.mouseTool.close(true);
         this.map.setDefaultCursor('crosshair');
-        this.mouseTool.polygon({
-          zIndex: 13,
-          strokeColor: '#FA453A',
-          strokeOpacity: 1,
-          strokeWeight: 1,
-          fillColor: '#FA453A',
-          fillOpacity: 0.2
-        });
+        if (type === 3) {
+          this.mouseTool.polygon({
+            zIndex: 13,
+            strokeColor: '#FA453A',
+            strokeOpacity: 1,
+            strokeWeight: 1,
+            fillColor: '#FA453A',
+            fillOpacity: 0.2
+          });
+        } else if (type === 1) {
+          this.mouseTool.rectangle({
+            zIndex: 13,
+            strokeColor: '#FA453A',
+            strokeOpacity: 1,
+            strokeWeight: 1,
+            fillColor: '#FA453A',
+            fillOpacity: 0.2
+          });
+        } else {
+          this.mouseTool.circle({
+            zIndex: 13,
+            strokeColor: '#FA453A',
+            strokeOpacity: 1,
+            strokeWeight: 1,
+            fillColor: '#FA453A',
+            fillOpacity: 0.2
+          });
+        }
+       
       }
     },
      // 添加按钮
@@ -448,7 +551,7 @@ export default {
        */
 
       // let不存在状态提升 因此在函数调用之前赋值 并递归为以为数组！
-      let self_to_data = JSON.stringify(this.self_to_data);
+      let self_to_data = JSON.stringify(this.bayOrdev === 1 ? this.self_to_data1 : this.self_to_data2);
       // 第一步
       let skeletonHalfCheckedNodes = objDeepCopy(arrayHalfCheckedNodes);// 深拷贝数据 - 半选节点
       // 筛选目标树不存在的骨架节点 - 半选内的节点
@@ -520,12 +623,12 @@ export default {
       }
 
       // 传递信息给父组件
-      this.$emit("addBtn", this.self_from_data, this.self_to_data, {
-        keys,
-        nodes,
-        harfKeys,
-        halfNodes
-      });
+      // this.$emit("addBtn", this.self_from_data, this.self_to_data, {
+      //   keys,
+      //   nodes,
+      //   harfKeys,
+      //   halfNodes
+      // });
 
       // 处理完毕取消选中
       this.$refs["from-tree"].setCheckedKeys([]);
@@ -629,12 +732,12 @@ export default {
       }
 
       // 传递信息给父组件
-      this.$emit("removeBtn", this.self_from_data, this.self_to_data, {
-        keys,
-        nodes,
-        harfKeys,
-        halfNodes
-      });
+      // this.$emit("removeBtn", this.self_from_data, this.self_to_data, {
+      //   keys,
+      //   nodes,
+      //   harfKeys,
+      //   halfNodes
+      // });
       // 处理完毕取消选中
       this.$refs["to-tree"].setCheckedKeys([]);
     },
@@ -663,12 +766,13 @@ export default {
     },
     // 目标数据 总全选checkbox
     toAllBoxChange(val) {
-      if (this.self_to_data.length == 0) {
+      const data = this.bayOrdev === 1 ? this.self_to_data1 : this.self_to_data2;
+      if (data.length == 0) {
         return;
       }
       if (val) {
-        this.to_check_keys = this.self_to_data;
-        this.$refs["to-tree"].setCheckedNodes(this.self_to_data);
+        this.to_check_keys = data;
+        this.$refs["to-tree"].setCheckedNodes(data);
       } else {
         this.$refs["to-tree"].setCheckedNodes([]);
         this.to_check_keys = [];
@@ -952,12 +1056,6 @@ export default {
           margin-right: 10px;
         }
       }
-      .transfe_main{
-        padding: 10px;
-      }
-    }
-    .transfer_left{
-     
     }
     .transfer_right{
       border-left: 1px solid #f2f2f2;
@@ -1026,6 +1124,9 @@ export default {
         font-size: 12px!important;
       }
     }
+  }
+  .transfe_main{
+    padding: 10px;
   }
 } 
 </style>
