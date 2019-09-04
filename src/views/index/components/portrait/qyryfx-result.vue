@@ -409,7 +409,7 @@ export default {
       box-shadow: 2px 3px 10px 0px rgba(131,131,131,0.28);
       .result_ul {
         width: 100%;  
-        margin-top: 10px;
+        padding-top: 10px;
         padding-left: 20px;
         padding-right: 10px;
         >li {

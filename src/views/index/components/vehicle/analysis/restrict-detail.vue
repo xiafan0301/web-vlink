@@ -10,29 +10,32 @@
       <div class="left">
         <vue-scroll>
           <ul class="result_ul">
-            <li class="person_list">
+            <li>
               <span>任务名称：</span>
               <p>我创建的任务1</p>
             </li>
-            <li class="person_list">
+            <li>
               <span>任务状态：</span>
               <p>已结束</p>
             </li>
-            <li>
+            <li class="time_li">
               <span>分析时间：</span>
-              <span>2019-06-30 12:12:12</span>
+              <p>
+                <span>2019-06-30 12:12:12</span>
+                <span>2019-06-30 12:12:12</span>
+              </p>
             </li>
             <li>
               <span>限行车牌尾号：</span>
               <span>1、3、5、7、9</span>
             </li>
-            <li>
+            <li class="different_li">
               <span>限行车辆类型：</span>
-              <span>无</span>
+              <p>摄像头名称1、摄像头名称1、摄像头名称1、摄像头名称1、摄像头名称1、摄像头名称1</p>
             </li>
-            <li>
+            <li class="different_li">
               <span>所选区域设备：</span>
-              <span>摄像头名称1、摄像头名称1、摄像头名称1、摄像头名称1、摄像头名称1、摄像头名称1</span>
+              <p>摄像头名称1、摄像头名称1、摄像头名称1、摄像头名称1、摄像头名称1、摄像头名称1</p>
             </li>
           </ul>
         </vue-scroll>
@@ -192,7 +195,7 @@ export default {
       box-shadow: 2px 3px 10px 0px rgba(131,131,131,0.28);
       .result_ul {
         width: 100%;
-        margin-top: 10px;
+        padding-top: 10px;
         padding-left: 20px;
         padding-right: 10px;
         >li {
@@ -200,11 +203,30 @@ export default {
           line-height: 30px;
           display: flex;
           flex-wrap: wrap;
-          span:first-child {
+          >span:first-child {
             color: #666666;
           }
-          span:last-child {
+          >span:last-child {
             color: #222222;
+          }
+        }
+        .different_li {
+          >span {
+            width: 100px;
+          }
+          >p {
+            width: calc(100% - 100px);
+          }
+        }
+        .time_li {
+          >span {
+            width: 80px;
+          }
+          >p {
+            width: calc(100% - 80px);
+            >span {
+              display: inline-block;
+            }
           }
         }
       }

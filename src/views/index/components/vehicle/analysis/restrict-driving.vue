@@ -21,7 +21,7 @@
               >
             </el-date-picker>
           </el-form-item>
-          <el-form-item prop="endTime">
+          <el-form-item prop="endTime" style="margin-bottom:0">
             <el-date-picker
               class="vl_date vl_date_end"
               v-model="addForm.endTime"
@@ -35,24 +35,49 @@
               placeholder="选择日期" 
             ></el-date-picker>
           </el-form-item>
-          <el-form-item label="限行区域：" label-width="85px">
+          <el-form-item label="限行区域：" label-width="72px" class="restrict_area" style="margin-bottom:0">
             <el-radio-group v-model="selectAreaType">
-              <!-- <el-row :gutter="10">
+              <el-row :gutter="10">
                 <el-col :span="12">
                   <el-radio :label="1">列表选择</el-radio>
                 </el-col>
-                <el-col :span="12" >
-                  <div @click="clickTab"><el-radio :label="2">地图选择</el-radio></div>
-                  
+                <el-col :span="12">
+                  <el-radio :label="2">地图选择</el-radio>
                 </el-col>
-              </el-row> -->
-               
-              <el-radio :label="1">列表选择</el-radio>
-              <el-radio :label="2">地图选择</el-radio>
+              </el-row> 
             </el-radio-group>
           </el-form-item>
-          <el-form-item>
-            
+          <el-form-item style="margin-bottom:0">
+            <el-select v-model="value" placeholder="请选择" style="width: 100%;">
+              <el-option
+                v-for="item in options"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item style="margin-bottom:0">
+            <el-checkbox>按照车牌尾号限行</el-checkbox>
+            <el-select v-model="value" placeholder="请选择" style="width: 100%;">
+              <el-option
+                v-for="item in options"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+           <el-form-item>
+            <el-checkbox>按照车辆类型限行</el-checkbox>
+            <el-select v-model="value" placeholder="请选择" style="width: 100%">
+              <el-option
+                v-for="item in options"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
           </el-form-item>
           <el-form-item>
             <el-input placeholder="请输入任务名称"></el-input>
@@ -158,6 +183,23 @@ export default {
   components: { vlBreadcrumb },
   data () {
     return {
+      options: [{
+        value: '选项1',
+        label: '黄金糕'
+      }, {
+        value: '选项2',
+        label: '双皮奶'
+      }, {
+        value: '选项3',
+        label: '蚵仔煎'
+      }, {
+        value: '选项4',
+        label: '龙须面'
+      }, {
+        value: '选项5',
+        label: '北京烤鸭'
+      }],
+      value: '',
       selectAreaType: 1, // 限行区域选择方式
       isSearchLoading: false,
       addForm: {
@@ -362,6 +404,19 @@ export default {
 </style>
 <style lang="scss">
 .search_restrict_form {
+  .el-checkbox__label {
+    color: #999999;
+    font-size: 12px;
+  }
+  .el-radio__label {
+    padding-left: 5px;
+  }
+  .restrict_area {
+    .el-form-item__label {
+      padding: 0;
+      text-align: left;
+    }
+  }
   .el-form-item {
     margin-bottom: 10px;
   }
