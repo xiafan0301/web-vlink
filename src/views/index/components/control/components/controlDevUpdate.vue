@@ -7,7 +7,7 @@
     <div class="up_map" v-show="tabIndex === 1">
       <div class="sel_dev">
         <div class="title">
-          <span>已选设备（12）</span>
+          <span>已选设备（{{selDevNum}}）</span>
           <i class="el-icon-arrow-up" v-show="isShowTree" @click="isShowTree = false"></i>
           <i class="el-icon-arrow-down" v-show="!isShowTree" @click="isShowTree = true"></i>
         </div>
@@ -17,34 +17,39 @@
             <div @click="tabClick(2)" :class="{'active': bayOrdev === 2}">卡口</div>
           </div>
         <!-- 内容区 -->
-        <vue-scroll style="height: 380px;" v-if="tabIndex === 1">
-          <div class="transfe_main">
+        <vue-scroll style="height: 350px;" v-if="tabIndex === 1">
+          <div class="transfer_main not_checked">
             <el-tree
               slot="to"
               ref="to-tree"
+              show-checkbox
               :data="bayOrdev === 1 ? self_to_data1 : self_to_data2"
               :node-key="node_key"
               :default-expanded-keys="to_expanded_keys"
               :props="defaultProps"
               :default-expand-all="true"
             >
+            <span class="custom_tree_node" slot-scope="{ node, data }">
+              <span>{{ node.label }}</span>
+              <i class="el-icon-delete" @click="removeSelDev(node, data)"></i>
+            </span>
             </el-tree>
           </div>
         </vue-scroll>
         </div>
       </div>
-      <el-input placeholder="请输入内容" v-model="devName" class="search">
-        <el-button slot="append" icon="el-icon-search"></el-button>
+      <el-input placeholder="请输入设备名称" v-model="devName" class="search">
+        <el-button slot="append" icon="el-icon-search" @click="searchDev"></el-button>
       </el-input>
       <div class="sel_type">
-        <div @click="bindDraw(1)" :class="{'active': selAreaAcitve && selType === 1}"><i class="el-icon-setting"></i><span>框选</span></div>
-        <div @click="bindDraw(2)" :class="{'active': selAreaAcitve && selType === 2}"><i class="el-icon-setting"></i><span>点选</span></div>
-        <div @click="bindDraw(3)" :class="{'active': selAreaAcitve && selType === 3}"><i class="el-icon-setting"></i><span>自定义</span></div>
-        <div><i class="el-icon-setting"></i><span>清除</span></div>
+        <div @click="selArea(1)" :class="{'active': selAreaAcitve && selType === 1}"><i class="el-icon-setting"></i><span>框选</span></div>
+        <div @click="selArea(2)" :class="{'active': selAreaAcitve && selType === 2}"><i class="el-icon-setting"></i><span>点选</span></div>
+        <div @click="selArea(3)" :class="{'active': selAreaAcitve && selType === 3}"><i class="el-icon-setting"></i><span>自定义</span></div>
+        <div @click="clearPolygon"><i class="el-icon-setting"></i><span>清除</span></div>
       </div>
       <div class="sel_checkbox">
-        <el-checkbox v-model="isCheckedDev" style="margin-right: 20px;">摄像头 <span class="num">100</span></el-checkbox>
-        <el-checkbox v-model="isCheckedBay">卡口 <span class="num">100</span></el-checkbox>
+        <el-checkbox @change="changeShowType" v-model="isCheckedDev" style="margin-right: 20px;">摄像头 <span class="num">100</span></el-checkbox>
+        <el-checkbox @change="changeShowType" v-model="isCheckedBay">卡口 <span class="num">100</span></el-checkbox>
       </div>
       <div id="devMap" class="dev_map"></div>
       <div class="map_zoom">
@@ -58,7 +63,7 @@
     <div class="up_list" v-show="tabIndex === 2">
       <!-- 右侧穿梭框 目标框 -->
       <div class="transfer_left">
-        <div>已选设备（12）</div>
+        <div>已选设备（{{selDevNum}}）</div>
         <h3 class="transfer_title">
           <el-checkbox
             :indeterminate="to_is_indeterminate"
@@ -73,7 +78,7 @@
         </div>
         <!-- 内容区 -->
         <vue-scroll style="height: 380px;" v-if="tabIndex === 2">
-          <div class="transfe_main">
+          <div class="transfer_main">
             <el-tree
               slot="to"
               ref="to-tree"
@@ -158,6 +163,7 @@
 import {MapGETmonitorList} from '@/views/index/api/api.map.js';
 import {mapXupuxian} from '@/config/config.js';
 import {random14, objDeepCopy} from '@/utils/util.js';
+import { setTimeout } from 'timers';
 export default {
   data () {
     return {
@@ -165,11 +171,12 @@ export default {
       devName: null,
       bayOrdev: 1,
       isShowTree: false,
-      isCheckedDev: false,//选中摄像头
-      isCheckedBay: false,//选中卡口
+      isCheckedDev: true,//选中摄像头
+      isCheckedBay: true,//选中卡口
       zoomLevel: 15,
       autoComplete: null,
       map: null,
+      markerList: [],
       devList: [],
       mouseTool: null,
       polygon: null,
@@ -207,90 +214,16 @@ export default {
     }
   },
   created () {
-    this.getDevList();
   },
   mounted () {
     this.resetMap();
-  },
-  watch: {
-    // 左侧 状态监测
-    from_check_keys(val) {
-      if (val.length > 0) {
-        // 穿梭按钮是否禁用
-        this.from_disabled = false;
-        // 总半选是否开启
-        this.from_is_indeterminate = true;
-
-        // 总全选是否开启 - 根据选中节点中为根节点的数量是否和源数据长度相等
-        let allCheck = val.filter(item => item[this.pid] == 0);
-        if (allCheck.length == this.self_from_data.length) {
-          // 关闭半选 开启全选
-          this.from_is_indeterminate = false;
-          this.from_check_all = true;
-        } else {
-          this.from_is_indeterminate = true;
-          this.from_check_all = false;
-        }
-      } else {
-        this.from_disabled = true;
-        this.from_is_indeterminate = false;
-        this.from_check_all = false;
-      }
-    },
-    // 右侧 状态监测
-    to_check_keys(val) {
-      if (val.length > 0) {
-        // 穿梭按钮是否禁用
-        this.to_disabled = false;
-        // 总半选是否开启
-        this.to_is_indeterminate = true;
-
-        // 总全选是否开启 - 根据选中节点中为根节点的数量是否和源数据长度相等
-        let allCheck = val.filter(item => item[this.pid] == 0);
-        const data = this.bayOrdev === 1 ? this.self_to_data1 : this.self_to_data2;
-        if (allCheck.length == data.length) {
-          // 关闭半选 开启全选
-          this.to_is_indeterminate = false;
-          this.to_check_all = true;
-        } else {
-          this.to_is_indeterminate = true;
-          this.to_check_all = false;
-        }
-      } else {
-        this.to_disabled = true;
-        this.to_is_indeterminate = false;
-        this.to_check_all = false;
-      }
-    },
-    // 左侧 数据筛选
-    filterFrom(val) {
-      this.$refs["from-tree"].filter(val);
-    }
-  },
-  computed: {
-    // 左侧数据
-    self_from_data() {
-      if (this.bayOrdev === 2) {
-        return this.bayFromData;
-      } else {
-        return this.devFromData;
-      }
-    },
-    // 右侧数据
-    // self_to_data() {
-    //   if (this.bayOrdev === 2) {
-    //     return this.bayToData;
-    //   } else {
-    //     return this.devToData;
-    //   }
-    // }
+    this.getDevList();
   },
   methods: {
     // 初始化地图
     resetMap () {
-      // 共有部分
       let _this = this;
-      let map = new window.AMap.Map('devMap', {
+      let map = new window.AMap.Map('devMap', { 
         zoom: this.zoomLevel,
         center: mapXupuxian.center
       });
@@ -302,6 +235,28 @@ export default {
         _this.autoComplete = new window.AMap.Autocomplete(autoOptions);
       })
       _this.map = map;
+      // 在地图中添加MouseTool插件
+      let mouseTool = new window.AMap.MouseTool(_this.map);
+      _this.mouseTool = mouseTool;
+      // 添加事件
+      _this.mouseTool.on('draw', function (e) {
+        if (_this.mouseTool) {
+          _this.selAreaRest();
+        }
+        if(_this.polygon) _this.map.remove(_this.polygon);
+        _this.polygon = new window.AMap.Polygon({
+          map: _this.map,
+          strokeColor: '#FA453A',
+          strokeOpacity: 1,
+          strokeWeight: 1,
+          fillColor: '#FA453A',
+          fillOpacity: 0.2, 
+          path: e.obj.getPath(),
+          zIndex: 12
+        });
+        // 获取覆盖物内的设备和卡口
+        _this.getPolygonDev(_this.polygon);
+      })
     },
     // 获取地图上的设备和卡口数据
     getDevList () {
@@ -327,8 +282,8 @@ export default {
       let res = [];
       let fn = (array) => {
         array.forEach(f => {
-          f.deviceBasicList.forEach(b => b.type = 1);
-          f.bayonetList.forEach(b => b.type = 2);
+          f.deviceBasicList.forEach(b => {b.type = 1;b.isShow = true});
+          f.bayonetList.forEach(b => {b.type = 2;b.isShow = true});
           res.push(...f.bayonetList, ...f.deviceBasicList);
           if (f.areaTreeList.length > 0) {
             fn(f.areaTreeList);
@@ -338,9 +293,24 @@ export default {
       fn(arr);
       return res;
     },
+    // 扁平设备和卡口数据
+    flatDev_ (arr) {
+      let res = [];
+      let fn = (array) => {
+        array.forEach(f => {
+          if (!('areaTreeList' in f)) {
+            res.push(f);
+          } else if (f.areaTreeList.length > 0) {
+            fn(f.areaTreeList);
+          }
+        })
+      }
+      fn(arr);
+      return res;
+    },
     // 地图设备和卡口标记 data:摄像头数据/卡口数据
     mapMark (data) {
-      let _this = this, _hoverWindow = null, markerList = [];
+      let _this = this, _hoverWindow = null;
       // 遍历列表，摄像头 或者卡口
       for (let i = 0; i < data.length; i++) {
         let offSet = [-20.5, -70];
@@ -387,53 +357,23 @@ export default {
           
           })
       
-          markerList.push(_marker);
+          _this.markerList.push(_marker);
         }
       }
-      _this.map.add(markerList);
-      _this.map.setFitView();
-    },
-    // 绑定draw
-    bindDraw (type) {
-      let _this = this;
-      
-      _this.selType = type;
-      if (_this.mouseTool) {
-        _this.selAreaRest();
-        return false;
-      }
-      // 在地图中添加MouseTool插件
-      let mouseTool = new window.AMap.MouseTool(_this.map);
-      _this.mouseTool = mouseTool;
-      // 添加事件
-      window.AMap.event.addListener(mouseTool, 'draw', function (e) {
-        if (_this.mouseTool) {
-          _this.selAreaRest();
-        }
-        if(_this.polygon) _this.map.remove(_this.polygon);
-        _this.polygon = new window.AMap.Polygon({
-          map: _this.map,
-          strokeColor: '#FA453A',
-          strokeOpacity: 1,
-          strokeWeight: 1,
-          fillColor: '#FA453A',
-          fillOpacity: 0.2, 
-          path: e.obj.getPath(),
-          zIndex: 12
-        });
-        _this.getPolygonDev(_this.polygon);
-      });
-      _this.selArea(type);
+      _this.map.add(_this.markerList);
+      // _this.map.setFitView();
     },
     // 获取覆盖物内的设备和卡口
     getPolygonDev (polygon) {
       let res = [];
-      this.devList.forEach(f => {
+      this.markerList.forEach(f => {
+        console.log(f)
+        const obj = f.B.extData;
         // 把在圆形覆盖物范围之内的追踪点添加进来
-        if (f.longitude > 0 && f.latitude > 0) {
-          if (polygon && polygon.contains(new window.AMap.LngLat(f.longitude, f.latitude))) {
+        if (obj.longitude > 0 && obj.latitude > 0) {
+          if (polygon && polygon.contains(new window.AMap.LngLat(obj.longitude, obj.latitude))) {
             // 在圆形之中
-            res.push(f);
+            obj.isShow && res.push(obj);
           }
         }
       })
@@ -449,22 +389,11 @@ export default {
         }
         return pre;
       },[]);
-      console.log(this.devIdList, 'this.devIdList')
-      console.log(this.bayIdList, 'this.bayIdList')
-      
-      // if (this.bayOrdev === 2) {
-      //   this.$nextTick(() => {
-      //     this.addDevIsLeft(data);
-      //   })
-      // } else {
-      //   this.$nextTick(() => {
-      //     this.addDevIsLeft(data);
-      //   })
-      // }
       this.tabClick(this.bayOrdev);
     },
     tabClick (type) {
       this.bayOrdev = type;
+      if (!this.polygon) return;//没有选择范围时，停止执行下去
       if (type === 2) {
         this.self_to_data2 = [];
         this.bayFromData = objDeepCopy(this.bayFromData_);
@@ -482,12 +411,13 @@ export default {
     selAreaRest () {
       this.selAreaAcitve = false;
       this.mouseTool.close(true);
-      this.mouseTool = null;
+      // this.mouseTool = null;
       this.map.setDefaultCursor('');
     },
     // 选择区域
     selArea (type) {
       if (this.map && this.mouseTool) {
+        this.selType = type;
         this.selAreaAcitve = true;
         this.mouseTool.close(true);
         this.map.setDefaultCursor('crosshair');
@@ -521,6 +451,89 @@ export default {
         }
        
       }
+    },
+    // 清除覆盖物和所选的设备和卡口
+    clearPolygon () {
+      if(this.polygon) this.map.remove(this.polygon);
+      this.polygon = null;
+      this.devIdList = [];
+      this.bayIdList = [];
+      this.self_to_data2 = [];
+      this.bayFromData = objDeepCopy(this.bayFromData_);
+      this.self_to_data1 = [];
+      this.devFromData = objDeepCopy(this.devFromData_);
+    },
+    // 根据设备名称搜索设备或卡口
+    searchDev () {
+      for (let item of this.markerList) {
+        const obj = item.B.extData;
+        const name = obj.type === 1 ? obj.deviceName : obj.bayonetName;
+        if (name.includes(this.devName)) {
+          console.log(item);
+          let _hoverWindow = null;
+          let _sContent = `<div class="vl_map_hover">
+            <div class="vl_map_hover_main"><ul>`;
+            if (obj.type === 1) {
+              _sContent += `<li><span>设备名称：</span><span>${obj.deviceName}</span></li>
+              <li><span>设备地址：</span><span>${obj.address}</span></li>`;
+            } else {
+              _sContent += `<li><span>卡口名称：</span><span>${obj.bayonetName}</span></li>
+              <li><span>卡口地址：</span><span>${obj.bayonetAddress}</span></li>`;
+            }
+            _sContent += '</ul></div>';
+          _hoverWindow = new window.AMap.InfoWindow({
+            isCustom: true,
+            closeWhenClickMap: true,
+            offset: new window.AMap.Pixel(0, -20), // 相对于基点的偏移位置
+            content: _sContent
+          });
+          _hoverWindow.open(this.map, new window.AMap.LngLat(obj.longitude, obj.latitude));
+          return;
+        }
+      }
+    },
+    // 切换当前显示的设备和卡口
+    changeShowType () {
+      for (let obj of this.markerList) {
+        const _obj = obj.B.extData;
+        const type = _obj.type;
+        if (type === 1) {
+          if (this.isCheckedDev) {
+            obj.show();
+            _obj.isShow = true;
+          } else {
+            obj.hide();
+            _obj.isShow = false;
+          }
+        }
+        if (type === 2) {
+          if (this.isCheckedBay) {
+            obj.show();
+            _obj.isShow = true;
+          } else {
+            obj.hide();
+            _obj.isShow = false;
+          }
+        }
+      }
+    },
+    // 删除左侧已选设备和卡口
+    removeSelDev (node, data) {     
+      // 把选取的所有节点的checked改为true
+      let fn = (node) => {
+        for (let key in node) {
+          if (node instanceof Array) {
+            node[key]['checked'] = true;
+            if (node[key] && node[key]['childNodes'].length > 0) fn(node[key]['childNodes']);
+          } else {
+            node['checked'] = true;
+            if (node['childNodes'].length > 0) fn(node['childNodes']);
+          }
+        }
+      }
+      fn(node);
+      this.removeToSource()
+      this.$refs['to-tree'].remove(node);
     },
      // 添加按钮
     addToAims() {
@@ -880,7 +893,104 @@ export default {
       if (this.map) {
         this.map.setZoom(this.map.getZoom() + val);
       }
+    }
+  },
+  watch: {
+    // 左侧 状态监测
+    from_check_keys(val) {
+      if (val.length > 0) {
+        // 穿梭按钮是否禁用
+        this.from_disabled = false;
+        // 总半选是否开启
+        this.from_is_indeterminate = true;
+
+        // 总全选是否开启 - 根据选中节点中为根节点的数量是否和源数据长度相等
+        let allCheck = val.filter(item => item[this.pid] == 0);
+        if (allCheck.length == this.self_from_data.length) {
+          // 关闭半选 开启全选
+          this.from_is_indeterminate = false;
+          this.from_check_all = true;
+        } else {
+          this.from_is_indeterminate = true;
+          this.from_check_all = false;
+        }
+      } else {
+        this.from_disabled = true;
+        this.from_is_indeterminate = false;
+        this.from_check_all = false;
+      }
     },
+    // 右侧 状态监测
+    to_check_keys(val) {
+      if (val.length > 0) {
+        // 穿梭按钮是否禁用
+        this.to_disabled = false;
+        // 总半选是否开启
+        this.to_is_indeterminate = true;
+
+        // 总全选是否开启 - 根据选中节点中为根节点的数量是否和源数据长度相等
+        let allCheck = val.filter(item => item[this.pid] == 0);
+        const data = this.bayOrdev === 1 ? this.self_to_data1 : this.self_to_data2;
+        if (allCheck.length == data.length) {
+          // 关闭半选 开启全选
+          this.to_is_indeterminate = false;
+          this.to_check_all = true;
+        } else {
+          this.to_is_indeterminate = true;
+          this.to_check_all = false;
+        }
+      } else {
+        this.to_disabled = true;
+        this.to_is_indeterminate = false;
+        this.to_check_all = false;
+      }
+    },
+    // 左侧 数据筛选
+    filterFrom(val) {
+      this.$refs["from-tree"].filter(val);
+    }
+  },
+  computed: {
+    // 左侧数据
+    self_from_data() {
+      if (this.bayOrdev === 2) {
+        return this.bayFromData;
+      } else {
+        return this.devFromData;
+      }
+    },
+    selDevNum () {
+      if (this.bayOrdev === 2) {
+        console.log(this.self_to_data2, 'this.self_to_data2')
+        const data = this.flatDev_(this.self_to_data2);
+        return data.length;
+      } else {
+        console.log(this.self_to_data1, 'this.self_to_data2')
+        const data = this.flatDev_(this.self_to_data1);
+        return data.length;
+      }
+    },
+    // selDevNumUp () {
+    //   if (this.bayOrdev === 2) {
+    //     return this.self_to_data2.length;
+    //   } else {
+    //     return this.self_to_data1.length;
+    //   }
+    // }
+    // 右侧数据
+    // self_to_data() {
+    //   if (this.bayOrdev === 2) {
+    //     return this.bayToData;
+    //   } else {
+    //     return this.devToData;
+    //   }
+    // }
+  },
+  // 销毁地图实例
+  isDestroyed () {
+    if (this.map) {
+      this.map.destroy();
+    }
   }
 }
 </script>
@@ -1125,8 +1235,24 @@ export default {
       }
     }
   }
-  .transfe_main{
+  .transfer_main{
     padding: 10px;
+  }
+  .custom_tree_node{
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    > i{
+      margin-top: 2px;
+      &:hover{
+        color: #0C70F8;
+      }
+    }
+  }
+  .not_checked{
+    .el-checkbox{
+      display: none;
+    }
   }
 } 
 </style>

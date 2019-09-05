@@ -67,7 +67,7 @@ export default {
   props: ['addressObj', 'missingTime'],
   data () {
     return {
-      pageType: 2,//页面类型，1为布控设备展示页面，2为修改布控设备页面
+      pageType: 1,//页面类型，1为布控设备展示页面，2为修改布控设备页面
       // 地图参数
       zoomLevel: 12,
       map: null,
@@ -544,6 +544,12 @@ export default {
         this.map.setZoom(this.map.getZoom() + val);
       }
     },
+  },
+  // 销毁地图实例
+  isDestroyed () {
+    if (this.map) {
+      this.map.destroy();
+    }
   }
 }
 </script>
