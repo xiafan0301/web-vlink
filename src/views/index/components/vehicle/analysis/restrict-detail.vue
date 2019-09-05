@@ -12,166 +12,146 @@
           <ul class="result_ul">
             <li>
               <span>任务名称：</span>
-              <p>我创建的任务1</p>
+              <p>{{taskDetail.taskName}}</p>
             </li>
             <li>
               <span>任务状态：</span>
-              <p>已结束</p>
+              <p>{{taskDetail.taskStatus && taskDetail.taskStatus === 1 ? '进行中' : taskDetail.taskStatus === 4 ? '待开始' :  taskDetail.taskStatus === 2 ? '已结束' : '-'}}</p>
             </li>
             <li class="time_li">
               <span>分析时间：</span>
               <p>
-                <span>2019-06-30 12:12:12</span>
-                <span>2019-06-30 12:12:12</span>
+                <span>{{taskDetail.startTime}}</span>
+                <span>{{taskDetail.endTime}}</span>
               </p>
             </li>
             <li>
               <span>限行车牌尾号：</span>
-              <span>1、3、5、7、9</span>
+              <span>{{taskDetail.tailNumbers ? taskDetail.tailNumbers : '无'}}</span>
             </li>
             <li class="different_li">
               <span>限行车辆类型：</span>
-              <p>摄像头名称1、摄像头名称1、摄像头名称1、摄像头名称1、摄像头名称1、摄像头名称1</p>
+              <p>{{taskDetail.vehicleTypes ? taskDetail.vehicleTypes : '无'}}</p>
             </li>
             <li class="different_li">
               <span>所选区域设备：</span>
-              <p>摄像头名称1、摄像头名称1、摄像头名称1、摄像头名称1、摄像头名称1、摄像头名称1</p>
+              <p>{{taskDetail.devNames}}</p>
             </li>
           </ul>
         </vue-scroll>
       </div>
       <div class="right">
-        <vue-scroll>
-          <div class="table_box">
-            <el-table :data="dataList">
-              <el-table-column label="序号" type="index" width="100"></el-table-column>
-              <el-table-column label="车牌号" prop="taskName" show-overflow-tooltip></el-table-column>
-              <el-table-column label="车辆颜色" prop="createTime" show-overflow-tooltip></el-table-column>
-              <el-table-column label="车辆类型" prop="taskWebParam" show-overflow-tooltip>
-                <template slot-scope="scope">
-                  <span>{{scope.row.taskWebParam.startTime}} - {{scope.row.taskWebParam.endTime}}</span>
+        <template v-if="dataList.length > 0">
+          <div class="result_container">
+            <vue-scroll>
+              <div class="table_box">
+                <el-table :data="dataList" @sort-change="sortPlateNoOrTimes">
+                  <el-table-column label="序号" type="index" width="100"></el-table-column>
+                  <el-table-column label="车牌号" prop="plateNo" show-overflow-tooltip sortable="custom" :sort-by="sortBy" :sort-orders="sortOrders"></el-table-column>
+                  <el-table-column label="车辆颜色" prop="plateColor" show-overflow-tooltip></el-table-column>
+                  <el-table-column label="车辆类型" prop="vehicleType" show-overflow-tooltip></el-table-column>
+                  <el-table-column label="抓拍次数" prop="shotTimes" show-overflow-tooltip sortable="custom" :sort-by="sortBy" :sort-orders="sortOrders"></el-table-column>
+                  <el-table-column label="操作" fixed="right" width="200px">
+                    <template slot-scope="scope">
+                      <span
+                        class="operation_btn"
+                        @click="skipDetailPage(scope.row)"
+                      >查看</span>
+                    </template>
+                  </el-table-column>
+                </el-table>
+                <template v-if="pagination.total > 0">
+                  <el-pagination
+                    class="cum_pagination"
+                    @current-change="handleCurrentChange"
+                    :current-page.sync="pagination.pageNum"
+                    :page-sizes="[100, 200, 300, 400]"
+                    :page-size="pagination.pageSize"
+                    layout="total, prev, pager, next, jumper"
+                    :total="pagination.total"
+                  ></el-pagination>
                 </template>
-              </el-table-column>
-              <el-table-column label="抓拍次数" prop="taskStatus" show-overflow-tooltip>
-                <template slot-scope="scope">
-                  <span>{{scope.row.taskStatus && scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 3 ? '失败' : '已中断'}}</span>
-                </template>
-              </el-table-column>
-              <el-table-column label="操作" fixed="right" width="200px">
-                <template slot-scope="scope">
-                  <span
-                    class="operation_btn"
-                    @click="skipDetailPage(scope.row)"
-                  >查看</span>
-                </template>
-              </el-table-column>
-            </el-table>
-            <template v-if="pagination.total === 0">
-              <el-pagination
-                class="cum_pagination"
-                @current-change="handleCurrentChange"
-                :current-page.sync="pagination.pageNum"
-                :page-sizes="[100, 200, 300, 400]"
-                :page-size="pagination.pageSize"
-                layout="total, prev, pager, next, jumper"
-                :total="pagination.total"
-              ></el-pagination>
-            </template>
+              </div>
+            </vue-scroll>
           </div>
-        </vue-scroll>
+        </template>
+        <template v-else>
+          <div is="noResult" :isInitPage="isInitPage"></div>
+        </template>
       </div>
     </div>
   </div>
 </template>
 <script>
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+import { getLimitTaskDetail } from "@/views/index/api/api.judge.js";
+import noResult from '@/components/common/noResult.vue';
 export default {
-  components: { vlBreadcrumb },
+  components: { vlBreadcrumb, noResult },
   data () {
     return {
-      pagination: { total: 0, pageSize: 10, pageNum: 1 },
-      dataList: [
-        {
-          taskName: '任务1',
-          createTime: '2019-12-12 12:12:12',
-          taskWebParam: {
-            startTime: '2019-07-12 12:12:12',
-            endTime: '2019-07-12 12:12:12'
-          },
-          taskStatus: 1
-        },
-        {
-          taskName: '任务2',
-          createTime: '2019-12-12 12:12:12',
-          taskWebParam: {
-            startTime: '2019-07-12 12:12:12',
-            endTime: '2019-07-12 12:12:12'
-          },
-          taskStatus: 2
-        },
-        {
-          taskName: '任务3',
-          createTime: '2019-12-12 12:12:12',
-          taskWebParam: {
-            startTime: '2019-07-12 12:12:12',
-            endTime: '2019-07-12 12:12:12'
-          },
-          taskStatus: 3
-        },
-        {
-          taskName: '任务3',
-          createTime: '2019-12-12 12:12:12',
-          taskWebParam: {
-            startTime: '2019-07-12 12:12:12',
-            endTime: '2019-07-12 12:12:12'
-          },
-          taskStatus: 3
-        },
-        {
-          taskName: '任务3',
-          createTime: '2019-12-12 12:12:12',
-          taskWebParam: {
-            startTime: '2019-07-12 12:12:12',
-            endTime: '2019-07-12 12:12:12'
-          },
-          taskStatus: 3
-        },
-        {
-          taskName: '任务3',
-          createTime: '2019-12-12 12:12:12',
-          taskWebParam: {
-            startTime: '2019-07-12 12:12:12',
-            endTime: '2019-07-12 12:12:12'
-          },
-          taskStatus: 3
-        },
-        {
-          taskName: '任务3',
-          createTime: '2019-12-12 12:12:12',
-          taskWebParam: {
-            startTime: '2019-07-12 12:12:12',
-            endTime: '2019-07-12 12:12:12'
-          },
-          taskStatus: 3
-        },
-        {
-          taskName: '任务3',
-          createTime: '2019-12-12 12:12:12',
-          taskWebParam: {
-            startTime: '2019-07-12 12:12:12',
-            endTime: '2019-07-12 12:12:12'
-          },
-          taskStatus: 3
-        }
-      ]
+      isInitPage: false, // 是否是初始化页面
+      sortBy: 'shotTimes',
+      sortOrders: ['descending'],
+      pagination: {
+        total: 0,
+        pageSize: 10,
+        pageNum: 1,
+        order: 'desc',
+        orderBy: 'shotTimes' // 默认按抓拍时间降序排序
+      },
+      dataList: [],
+      taskDetail: {},
+    }
+  },
+  mounted () {
+    this.taskDetail = JSON.parse(this.$route.query.queryObj);
+    if (this.taskDetail.uid) {
+      this.getDetailList();
     }
   },
   methods: {
-    // 跳至抓拍详情页面
-    skipDetailPage () {
-      this.$router.push({name: 'vehicle_restrict_snap_detail'});
+    // 车牌号和抓拍次数排序
+    sortPlateNoOrTimes () {
+      if (column.order) {
+        if (column.order === 'ascending') {
+          this.pagination.order = 'asc';
+        }
+        if (column.order === 'descending') {
+          this.pagination.order = 'desc';
+        }
+        this.pagination.orderBy = 'device_seq';
+      } else {
+        this.pagination.order = 'desc';
+        this.pagination.orderBy = 'create_time';
+      }
+
+      this.getDetailList();
     },
-    handleCurrentChange () {}
+    getDetailList () {
+      const params = {
+        taskId: this.taskDetail.uid,
+        pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize,
+        order: this.pagination.order,
+        orderBy: this.pagination.orderBy
+      };
+      getLimitTaskDetail (params)
+        .then(res => {
+          if (res) {
+            this.dataList = res.data.list;
+            thia.pagination.total = res.data.total;
+          }
+        })
+    },
+    // 跳至抓拍详情页面
+    skipDetailPage (obj) {
+      this.$router.push({name: 'vehicle_restrict_snap_detail', query: { taskId: this.taskDetail.uid, plateNo: obj.plateNo }});
+    },
+    handleCurrentChange (page) {
+      this.pagination.pageNum = page;
+      this.getDetailList();
+    }
   }
 }
 </script>
@@ -234,20 +214,22 @@ export default {
     .right {
       width: calc(100% - 272px);
       height: calc(100% - 50px);
-      margin: 20px;
-      background: #ffffff;
-      box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);
-      .table_box {
+      .result_container {
         margin: 20px;
-        .add_btn {
-          margin-bottom: 10px;
-        }
-        .operation_btn {
-          display: inline-block;
-          padding: 0 10px;
-          border-right: 1px solid #f2f2f2;
-          &:last-child {
-            border-right: none;
+        background: #ffffff;
+        box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);
+        .table_box {
+          margin: 20px;
+          .add_btn {
+            margin-bottom: 10px;
+          }
+          .operation_btn {
+            display: inline-block;
+            padding: 0 10px;
+            border-right: 1px solid #f2f2f2;
+            &:last-child {
+              border-right: none;
+            }
           }
         }
       }

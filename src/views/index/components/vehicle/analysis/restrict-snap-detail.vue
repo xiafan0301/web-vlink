@@ -9,126 +9,159 @@
       </div>
     </div>
     <div class="content_snap_box">
-      <div class="vehicle_info">
-        <span>车牌号湘A12346</span>
-        <span>限行区域内共有<span class="number">111111</span>条抓拍信息</span>
-      </div>
-      <div class="result_sort">
-        <div class="sort">
-          <div class="sort_item" :class="{ 'active_sort': sortType === 1 }" @click="clickTime">
-            时间排序
-            <i
-              :class="{'el-icon-arrow-down': timeSortType, 'el-icon-arrow-up': !timeSortType }"
-              v-show="sortType === 1"
-            ></i>
-          </div>
-          <div class="sort_item" :class="{ 'active_sort': sortType === 2 }" @click="clickCamera">
-            监控排序
-            <i
-              :class="{'el-icon-arrow-down': cameraSortType, 'el-icon-arrow-up': !cameraSortType }"
-              v-show="sortType === 2"
-            ></i>
+      <template v-if="dataList.length > 0">
+        <div class="vehicle_info">
+          <span>车牌号湘A12346</span>
+          <span>限行区域内共有<span class="number">111111</span>条抓拍信息</span>
+        </div>
+        <div class="result_sort">
+          <div class="sort">
+            <div class="sort_item" :class="{ 'active_sort': sortType === 1 }" @click="clickTime">
+              时间排序
+              <i
+                :class="{'el-icon-arrow-down': timeSortType, 'el-icon-arrow-up': !timeSortType }"
+                v-show="sortType === 1"
+              ></i>
+            </div>
+            <div class="sort_item" :class="{ 'active_sort': sortType === 2 }" @click="clickCamera">
+              监控排序
+              <i
+                :class="{'el-icon-arrow-down': cameraSortType, 'el-icon-arrow-up': !cameraSortType }"
+                v-show="sortType === 2"
+              ></i>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="result_list">
-        <vue-scroll>
-          <ul class="result_list_ul">
-            <li>
-              <div class="img_box">
-                <img src="../../../../../assets/img/666.jpg" alt="">
-              </div>
-              <div class="snap_detail">
-                <p class="time">2018-12-12 12:12:12</p>
-                <p class="device_name">抓拍设备2</p>
-                <p class="address">湖南省长沙市天心区桂花坪社区雀园路与君逸路交叉口</p>
-              </div>
-            </li>
-            <li>
-              <div class="img_box">
-                <img src="../../../../../assets/img/666.jpg" alt="">
-              </div>
-              <div class="snap_detail">
-                <p class="time">2018-12-12 12:12:12</p>
-                <p class="device_name">抓拍设备2</p>
-                <p class="address">湖南省长沙市天心区桂花坪社区雀园路与君逸路交叉口</p>
-              </div>
-            </li>
-            <li>
-              <div class="img_box">
-                <img src="../../../../../assets/img/666.jpg" alt="">
-              </div>
-              <div class="snap_detail">
-                <p class="time">2018-12-12 12:12:12</p>
-                <p class="device_name">抓拍设备2</p>
-                <p class="address">湖南省长沙市天心区桂花坪社区雀园路与君逸路交叉口</p>
-              </div>
-            </li>
-            <li>
-              <div class="img_box">
-                <img src="../../../../../assets/img/666.jpg" alt="">
-              </div>
-              <div class="snap_detail">
-                <p class="time">2018-12-12 12:12:12</p>
-                <p class="device_name">抓拍设备2</p>
-                <p class="address">湖南省长沙市天心区桂花坪社区雀园路与君逸路交叉口</p>
-              </div>
-            </li>
-            <li>
-              <div class="img_box">
-                <img src="../../../../../assets/img/666.jpg" alt="">
-              </div>
-              <div class="snap_detail">
-                <p class="time">2018-12-12 12:12:12</p>
-                <p class="device_name">抓拍设备2</p>
-                <p class="address">湖南省长沙市天心区桂花坪社区雀园路与君逸路交叉口</p>
-              </div>
-            </li>
-            <li>
-              <div class="img_box">
-                <img src="../../../../../assets/img/666.jpg" alt="">
-              </div>
-              <div class="snap_detail">
-                <p class="time">2018-12-12 12:12:12</p>
-                <p class="device_name">抓拍设备2</p>
-                <p class="address">湖南省长沙市天心区桂花坪社区雀园路与君逸路交叉口</p>
-              </div>
-            </li>
-          </ul>
-          <el-pagination
-            class="cum_pagination"
-            style="text-align:center;"
-            @current-change="handleCurrentChange"
-            :current-page.sync="pagination.pageNum"
-            :page-sizes="[100, 200, 300, 400]"
-            :page-size="pagination.pageSize"
-            layout="total, prev, pager, next, jumper"
-            :total="pagination.total"
-          ></el-pagination>
-        </vue-scroll>
-      </div>
+        <div class="result_list">
+          <vue-scroll>
+            <ul class="result_list_ul">
+              <li v-for="(item, index) in dataList" :key="index" @click="onOpenDetail(item, index)">
+                <div class="img_box">
+                  <img :src="item.subStoragePath" alt="">
+                </div>
+                <div class="snap_detail">
+                  <p class="time">{{item.shotTime}}</p>
+                  <p class="device_name">{{item.deviceName}}</p>
+                  <p class="address">{{item.address}}</p>
+                </div>
+              </li>
+              <li>
+                <div class="img_box">
+                  <img src="../../../../../assets/img/666.jpg" alt="">
+                </div>
+                <div class="snap_detail">
+                  <p class="time">2018-12-12 12:12:12</p>
+                  <p class="device_name">抓拍设备2</p>
+                  <p class="address">湖南省长沙市天心区桂花坪社区雀园路与君逸路交叉口</p>
+                </div>
+              </li>
+              <li>
+                <div class="img_box">
+                  <img src="../../../../../assets/img/666.jpg" alt="">
+                </div>
+                <div class="snap_detail">
+                  <p class="time">2018-12-12 12:12:12</p>
+                  <p class="device_name">抓拍设备2</p>
+                  <p class="address">湖南省长沙市天心区桂花坪社区雀园路与君逸路交叉口</p>
+                </div>
+              </li>
+              <li>
+                <div class="img_box">
+                  <img src="../../../../../assets/img/666.jpg" alt="">
+                </div>
+                <div class="snap_detail">
+                  <p class="time">2018-12-12 12:12:12</p>
+                  <p class="device_name">抓拍设备2</p>
+                  <p class="address">湖南省长沙市天心区桂花坪社区雀园路与君逸路交叉口</p>
+                </div>
+              </li>
+              <li>
+                <div class="img_box">
+                  <img src="../../../../../assets/img/666.jpg" alt="">
+                </div>
+                <div class="snap_detail">
+                  <p class="time">2018-12-12 12:12:12</p>
+                  <p class="device_name">抓拍设备2</p>
+                  <p class="address">湖南省长沙市天心区桂花坪社区雀园路与君逸路交叉口</p>
+                </div>
+              </li>
+              <li>
+                <div class="img_box">
+                  <img src="../../../../../assets/img/666.jpg" alt="">
+                </div>
+                <div class="snap_detail">
+                  <p class="time">2018-12-12 12:12:12</p>
+                  <p class="device_name">抓拍设备2</p>
+                  <p class="address">湖南省长沙市天心区桂花坪社区雀园路与君逸路交叉口</p>
+                </div>
+              </li>
+            </ul>
+            <el-pagination
+              class="cum_pagination"
+              style="text-align:center;"
+              @current-change="handleCurrentChange"
+              :current-page.sync="pagination.pageNum"
+              :page-sizes="[100, 200, 300, 400]"
+              :page-size="pagination.pageSize"
+              layout="total, prev, pager, next, jumper"
+              :total="pagination.total"
+            ></el-pagination>
+          </vue-scroll>
+        </div>
+      </template>
+      <template v-else>
+        <div is="noResult" :isInitPage="isInitPage"></div>
+      </template>
     </div>
+    <div is="vlDialog" :detailData="detailData"></div>
   </div>
 </template>
 <script>
+import vlDialog from '../common/vl-dialog.vue';
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+import { getLimitShotRecord } from "@/views/index/api/api.judge.js";
+import noResult from '@/components/common/noResult.vue';
 export default {
-  components: { vlBreadcrumb },
+  components: { vlBreadcrumb, noResult, vlDialog },
   data () {
     return {
+      isInitPage: false, // 是否是初始化页面
       sortType: 1, // 1---时间排序 2--监控排序
-      timeSortType: false, // true为时间降序， false为时间升序
+      timeSortType: true, // true为时间降序， false为时间升序
       cameraSortType: true, // true为监控降序， false为监控升序
       pagination: {
         total: 0,
         pageSize: 10,
         pageNum: 1,
-        order: 'asc',
-        orderBy: 'shotTime' // 默认抓拍时间升序 
+        order: 'desc',
+        orderBy: 'shotTime' // 默认抓拍时间降序
       },
+      dataList: [],
+    }
+  },
+  mounted () {
+    if (this.$route.query.taskId && this.$route.query.plateNo) {
+      this.getList();
     }
   },
   methods: {
+    getList () {
+      const params = {
+        'where.taskId': this.$route.query.taskId,
+        'where.plateNo': this.$route.query.plateNo,
+        pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize,
+        order: this.pagination.order,
+        orderBy: this.pagination.orderBy
+      };
+      getLimitShotRecord(params)
+        .then(res => {
+          if (res) {
+            this.dataList = res.data.list;
+            this.pagination.total = res.data.total;
+          }
+        })
+    },
     /*sort排序方法*/
     clickTime() {
       if (this.sortType === 1) {
@@ -145,7 +178,7 @@ export default {
       this.pagination.orderBy = 'shotTime';
 
       this.$nextTick(() => {
-        // this.getList();
+        this.getList();
       })
     },
     // 点击监控排序
@@ -165,13 +198,24 @@ export default {
       this.pagination.orderBy = 'deviceName';
 
       this.$nextTick(() => {
-        // this.getList();
+        this.getList();
       })
     },
     // 分页
     handleCurrentChange (page) {
       this.pagination.pageNum = page;
-    }
+      this.getList();
+    },
+    /**
+     * 打开抓拍弹框
+     */
+    onOpenDetail (obj, index) {
+      this.detailData = {
+        index: index,
+        pageNum: this.pagination.pageNum,
+        list: this.dataList
+      }
+    },
   }
 }
 </script>

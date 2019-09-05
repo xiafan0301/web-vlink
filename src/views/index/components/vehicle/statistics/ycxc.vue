@@ -195,7 +195,7 @@ export default {
   components: { vlBreadcrumb, noResult },
   data () {
     return {
-      isInitPage: true, // 是否是初始化页面  因为初始化的时候就调了接口
+      isInitPage: true, // 是否是初始化页面
       startTimeOptions: [
         {
           label: '19:00',
@@ -683,7 +683,7 @@ export default {
         this.checkAllTree = true;
         this.handleCheckedAll(true);
 
-        this.handleSubmitData();
+        // this.handleSubmitData();
       });
 
     },

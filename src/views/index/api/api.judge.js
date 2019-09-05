@@ -749,3 +749,66 @@ export function addAreaPersonTask(params) {
     mode: 'judge'
   })
 }
+
+
+/****************************车辆限行接口 ******************************** */
+/**
+ * 创建限行任务接口
+ * @param {object} params
+ */
+export function addLimitTask(params) {
+  return request({
+    url: '/limit-task',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+/**
+ * 限行任务详情接口
+ * @param {object} params
+ */
+export function getLimitTaskDetail(params) {
+  return request({
+    url: '/limit-task/detail',
+    data: params,
+    method: 'post',
+    mode: 'judge'
+  })
+}
+/**
+ * 车辆限行抓拍记录查询接口
+ * @param {object} params
+ */
+export function getLimitShotRecord(params) {
+  return request({
+    url: '/limit-task/shot-records',
+    method: 'get',
+    params,
+    mode: 'judge'
+  })
+}
+/**
+ * 限行任务状态修改接口
+ * @param {object} params
+ */
+export function updateLimitTaskStatus(params) {
+  return request({
+    url: '/limit-task/status',
+    method: 'put',
+    data: params,
+    mode: 'judge'
+  })
+}
+/**
+ * 限行任务分页查询接口
+ * @param {object} params
+ */
+export function getLimitTaskList(params) {
+  return request({
+    url: '/limit-tasks',
+    method: 'get',
+    params,
+    mode: 'judge'
+  })
+}
