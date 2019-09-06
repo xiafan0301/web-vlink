@@ -112,7 +112,8 @@ export default {
   },
   methods: {
     // 车牌号和抓拍次数排序
-    sortPlateNoOrTimes () {
+    sortPlateNoOrTimes (column) {
+      console.log(column)
       if (column.order) {
         if (column.order === 'ascending') {
           this.pagination.order = 'asc';
@@ -120,10 +121,10 @@ export default {
         if (column.order === 'descending') {
           this.pagination.order = 'desc';
         }
-        this.pagination.orderBy = 'device_seq';
+        this.pagination.orderBy = column.prop;
       } else {
         this.pagination.order = 'desc';
-        this.pagination.orderBy = 'create_time';
+        this.pagination.orderBy = 'shotTimes';
       }
 
       this.getDetailList();
@@ -140,13 +141,13 @@ export default {
         .then(res => {
           if (res) {
             this.dataList = res.data.list;
-            thia.pagination.total = res.data.total;
+            this.pagination.total = res.data.total;
           }
         })
     },
     // 跳至抓拍详情页面
     skipDetailPage (obj) {
-      this.$router.push({name: 'vehicle_restrict_snap_detail', query: { taskId: this.taskDetail.uid, plateNo: obj.plateNo }});
+      this.$router.push({name: 'vehicle_restrict_snap_detail', query: { queryObj: JSON.stringify(this.taskDetail), plateNo: obj.plateNo }});
     },
     handleCurrentChange (page) {
       this.pagination.pageNum = page;

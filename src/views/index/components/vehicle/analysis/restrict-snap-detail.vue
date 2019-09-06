@@ -4,15 +4,15 @@
       <div is="vlBreadcrumb" :breadcrumbData="
         [{name: '车辆侦查', routerName: 'vehicle'}, 
         {name: '车辆限行', routerName: 'vehicle_restrict_driving'},
-        {name: '限行详情', routerName: 'vehicle_restrict_detail'},
+        {name: '限行详情', routerName: 'vehicle_restrict_detail', query: { queryObj: $route.query.queryObj }},
         {name: '抓拍详情'}]">
       </div>
     </div>
     <div class="content_snap_box">
       <template v-if="dataList.length > 0">
         <div class="vehicle_info">
-          <span>车牌号湘A12346</span>
-          <span>限行区域内共有<span class="number">111111</span>条抓拍信息</span>
+          <span>车牌号{{$route.query.plateNo}}</span>
+          <span>限行区域内共有<span class="number">{{dataList.length}}</span>条抓拍信息</span>
         </div>
         <div class="result_sort">
           <div class="sort">
@@ -43,56 +43,6 @@
                   <p class="time">{{item.shotTime}}</p>
                   <p class="device_name">{{item.deviceName}}</p>
                   <p class="address">{{item.address}}</p>
-                </div>
-              </li>
-              <li>
-                <div class="img_box">
-                  <img src="../../../../../assets/img/666.jpg" alt="">
-                </div>
-                <div class="snap_detail">
-                  <p class="time">2018-12-12 12:12:12</p>
-                  <p class="device_name">抓拍设备2</p>
-                  <p class="address">湖南省长沙市天心区桂花坪社区雀园路与君逸路交叉口</p>
-                </div>
-              </li>
-              <li>
-                <div class="img_box">
-                  <img src="../../../../../assets/img/666.jpg" alt="">
-                </div>
-                <div class="snap_detail">
-                  <p class="time">2018-12-12 12:12:12</p>
-                  <p class="device_name">抓拍设备2</p>
-                  <p class="address">湖南省长沙市天心区桂花坪社区雀园路与君逸路交叉口</p>
-                </div>
-              </li>
-              <li>
-                <div class="img_box">
-                  <img src="../../../../../assets/img/666.jpg" alt="">
-                </div>
-                <div class="snap_detail">
-                  <p class="time">2018-12-12 12:12:12</p>
-                  <p class="device_name">抓拍设备2</p>
-                  <p class="address">湖南省长沙市天心区桂花坪社区雀园路与君逸路交叉口</p>
-                </div>
-              </li>
-              <li>
-                <div class="img_box">
-                  <img src="../../../../../assets/img/666.jpg" alt="">
-                </div>
-                <div class="snap_detail">
-                  <p class="time">2018-12-12 12:12:12</p>
-                  <p class="device_name">抓拍设备2</p>
-                  <p class="address">湖南省长沙市天心区桂花坪社区雀园路与君逸路交叉口</p>
-                </div>
-              </li>
-              <li>
-                <div class="img_box">
-                  <img src="../../../../../assets/img/666.jpg" alt="">
-                </div>
-                <div class="snap_detail">
-                  <p class="time">2018-12-12 12:12:12</p>
-                  <p class="device_name">抓拍设备2</p>
-                  <p class="address">湖南省长沙市天心区桂花坪社区雀园路与君逸路交叉口</p>
                 </div>
               </li>
             </ul>
@@ -137,17 +87,20 @@ export default {
         orderBy: 'shotTime' // 默认抓拍时间降序
       },
       dataList: [],
+      queryObj: {},
+      detailData: {}
     }
   },
   mounted () {
-    if (this.$route.query.taskId && this.$route.query.plateNo) {
+    this.queryObj = JSON.parse(this.$route.query.queryObj);
+    if (this.queryObj.uid && this.$route.query.plateNo) {
       this.getList();
     }
   },
   methods: {
     getList () {
       const params = {
-        'where.taskId': this.$route.query.taskId,
+        'where.taskId': this.queryObj.uid,
         'where.plateNo': this.$route.query.plateNo,
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,

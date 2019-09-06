@@ -119,7 +119,7 @@
               </el-option>
             </el-select>
           </el-form-item>
-          <el-form-item prop="taskName">
+          <el-form-item prop="taskName" :rules="[{ required: true, message: '该项内容不可为空', trigger: 'blur' }]">
             <el-input placeholder="请输入任务名称" v-model="addForm.taskName" maxlength="20"></el-input>
           </el-form-item>
           <el-form-item class="operation_button">
@@ -464,7 +464,6 @@ export default {
     searchData (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-          console.log(this.addForm)
            if (this.selectCameraArr && this.selectCameraArr.length > 0) {
             let cameraIds = this.selectCameraArr.map(res => res.id);
             this.addForm.devIds = cameraIds.join(",");
@@ -515,7 +514,6 @@ export default {
         'where.taskType': 10, // 10：车辆限行
         'where.startTime': this.searchForm.reportTime[0],
         'where.endTime': this.searchForm.reportTime[1],
-        // 'where.isFinish': this.selectIndex,   //是否完成 0:未完成(包含处理中、处理失败、处理中断) 1：已完成(处理成功)
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
         order: 'desc',
@@ -526,16 +524,12 @@ export default {
           if (res && res.data) {
             this.dataList = res.data.list;
             this.pagination.total = res.data.total;
-            // this.dataList.map(item => {
-            //   item.taskWebParam = JSON.parse(item.taskWebParam);
-            // })
           }
         })
         .catch(() => {})
     },
     // 跳至限制详情页
     skipDetailPage (obj) {
-      console.log(obj)
       let queryObj = JSON.stringify(obj);
       this.$router.push({name: 'vehicle_restrict_detail', query: {queryObj: queryObj}});
     },
@@ -632,9 +626,6 @@ export default {
       }
       .table_box {
         margin: 0 20px;
-        .add_btn {
-          margin-bottom: 10px;
-        }
         .operation_btn {
           display: inline-block;
           padding: 0 10px;
