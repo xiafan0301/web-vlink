@@ -86,7 +86,7 @@ export default {
   data () {
     return {
       modelOneForm: {
-        missingTime: null,
+        missingTime: new Date('2019-9-6 9:00'),
         personnelName: null,
         sex: null,
         missingAddress: null,

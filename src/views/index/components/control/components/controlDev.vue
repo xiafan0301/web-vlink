@@ -7,7 +7,7 @@
       </div>
       <div class="sel_dev">
         <div class="title">
-          <span>已选设备（12）</span>
+          <span>已选设备（{{selDevNum}}）</span>
           <i class="el-icon-arrow-up" v-show="isShowTree" @click="isShowTree = false"></i>
           <i class="el-icon-arrow-down" v-show="!isShowTree" @click="isShowTree = true"></i>
         </div>
@@ -54,7 +54,14 @@
         </ul>
       </div>
     </div>
-    <div v-if="pageType === 2" is="controlDevUpdate"></div>
+    <div v-if="pageType === 2" 
+      is="controlDevUpdate" 
+      :devFromDataUp="devFromData"
+      :bayFromDataUp="bayFromData"
+      :self_to_data1Up="self_to_data1"
+      :self_to_data2Up="self_to_data2"
+      :addressObj="addressObj"
+    ></div>
   </div>
 </template>
 <script>
@@ -94,33 +101,6 @@ export default {
     this.resetMap();
     this.getDevList();
   },
-  watch: {
-    addressObj (val) {
-      console.log(this.addressObj, 'addressObj')
-      val.length > 0 && this.addressMark();
-    },
-    bayOrdev () {
-      if (this.bayOrdev === 2) {
-        this.$nextTick(() => {
-          this.addressMark();
-        })
-      } else {
-         this.$nextTick(() => {
-          this.addressMark();
-        })
-      }
-    }
-  },
-   computed: {
-    // 右侧数据
-    self_from_data() {
-      if (this.bayOrdev === 2) {
-        return this.bayFromData;
-      } else {
-        return this.devFromData;
-      }
-    }
-  },
   methods: {
     handleNodeClick () {},
     // 初始化地图
@@ -155,7 +135,7 @@ export default {
           this.devList = this.flatDev([res.data]);
           console.log(this.devList);
           this.mapMark(this.devList);
-          this.addressMark();
+          this.addressObj && this.addressMark();
         }
       });
     },
@@ -168,6 +148,21 @@ export default {
           f.bayonetList.forEach(b => b.type = 2);
           res.push(...f.bayonetList, ...f.deviceBasicList);
           if (f.areaTreeList.length > 0) {
+            fn(f.areaTreeList);
+          }
+        })
+      }
+      fn(arr);
+      return res;
+    },
+    // 扁平已选设备的树数据，用来获取已选设备的数量
+    flatDev_ (arr) {
+      let res = [];
+      let fn = (array) => {
+        array.forEach(f => {
+          if (!('areaTreeList' in f)) {
+            res.push(f);
+          } else if (f.areaTreeList.length > 0) {
             fn(f.areaTreeList);
           }
         })
@@ -542,6 +537,42 @@ export default {
     mapZoomSet (val) {
       if (this.map) {
         this.map.setZoom(this.map.getZoom() + val);
+      }
+    },
+  },
+  watch: {
+    addressObj (val) {
+      console.log(this.addressObj, 'addressObj')
+      val.length > 0 && this.addressMark();
+    },
+    bayOrdev () {
+      if (this.bayOrdev === 2) {
+        this.$nextTick(() => {
+          this.addressObj && this.addressMark();
+        })
+      } else {
+         this.$nextTick(() => {
+          this.addressObj && this.addressMark();
+        })
+      }
+    }
+  },
+   computed: {
+    // 右侧数据
+    self_from_data() {
+      if (this.bayOrdev === 2) {
+        return this.bayFromData;
+      } else {
+        return this.devFromData;
+      }
+    },
+    selDevNum () {
+      if (this.bayOrdev === 2) {
+        const data = this.flatDev_(this.self_to_data2);
+        return data.length;
+      } else {
+        const data = this.flatDev_(this.self_to_data1);
+        return data.length;
       }
     },
   },

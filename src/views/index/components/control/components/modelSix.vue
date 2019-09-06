@@ -2,13 +2,13 @@
   <el-form ref="modelSix" :model="modelSixForm" class="model_six">
     <!-- 上访人员照片上传 -->
     <el-form-item label="布控人员信息:" :rules="{ required: true, message: '请上传失踪人员信息', trigger: 'blur'}" style="margin-bottom: 0;">
-      <div class="pic_format" style="left: 110px;top: -40px;">
+      <div class="pic_format" style="top: -40px;">
         <div @click="popSel">从布控库中选择</div>
       </div>
       <div is="uploadPic" :fileList="fileList" @uploadPicDel="uploadPicDel" @uploadPicFileList="uploadPicFileList"></div>
     </el-form-item>
     <el-form-item class="plate_num_box">
-      <div class="pic_format" style="left: 80px;top: -20px;cursor: pointer;">
+      <div class="pic_format">
         <div @click="popSel">从布控库中选择</div>
       </div>
       <div v-for="(item, index) in modelSixForm.licensePlateNumList" :key="index" style="position: relative;" class="license_plate_num">
@@ -24,19 +24,22 @@
     <el-form-item style="margin-top: 20px;">
       <el-button type="primary" @click="selControl">一键布控</el-button>
     </el-form-item>
+    <div is="controlDevUpdate" v-if="isShowControlDev"></div>
   </el-form>
 </template>
 <script>
 import uploadPic from './uploadPic.vue';
+import controlDevUpdate from './controlDevUpdate.vue';
 export default {
-  components: {uploadPic},
+  components: {uploadPic, controlDevUpdate},
   data () {
     return {
       modelSixForm: {
         licensePlateNumList: [{licensePlateNum: null}]
       },
       fileList: [],
-      createSelDialog: false
+      createSelDialog: false,
+      isShowControlDev: false
     }
   },
   methods: {
@@ -62,14 +65,23 @@ export default {
     },
     // 一键布控
     selControl () {
-
+      this.isShowControlDev = true;
     }
   }
 }
 </script>
-<style lang="scss" scoped>
+<style lang="scss">
 .model_six{
   padding: 0 20px;
+  .pic_format{
+    position: absolute;
+    top: 0;
+    left: 110px;
+    cursor: pointer;
+    > div{
+      color: #0C70F8;
+    }
+  }
   .plate_num_box .el-form-item__content{
     display: flex;
     flex-wrap: wrap;
@@ -101,10 +113,15 @@ export default {
         padding-right: 0!important;
       }
     }
+    .license_plate_num:not(:nth-child(2)){
+      margin-top: 40px;
+    }
+    .license_plate_num{
+      padding-right: 10px;
+    }
     .plate_num_btn_box{ 
       margin-bottom: 0!important;
-      padding-right: 38px!important;
-      padding-top: 20px;
+      padding: 40px 38px 0 0;
       &.top{
         padding-top: 20px;
       }

@@ -165,6 +165,10 @@
           </div>
         </el-form>
       </div>
+      <div class="footer_btn">
+        <el-button class="btn_100" type="primary" @click="saveControl('createForm')">保存</el-button>
+        <el-button  @click="toGiveUpDialog = true" class="btn_100">取消</el-button>
+      </div>
     </div>
     <el-dialog
       :visible.sync="toGiveUpDialog"
@@ -238,7 +242,7 @@ export default {
       eventList: [],//关联事件下拉列表
       cascadeList: [],//是否级联下拉列表
       sharedControlList: [],//是否共享布控下拉列表
-      modelType: 1,//布控模型类型
+      modelType: 6,//布控模型类型
       // 弹出框参数
       toGiveUpDialog: false,
       loading: false,
@@ -407,20 +411,8 @@ export default {
       margin: 20px 20px;
     }
   }
-  .create_f_box{
-    position: absolute;
-    left: 0;
-    bottom: -80px;
-    width: 100%;
-    height: 60px;
-    line-height: 60px;
-    padding: 0 20px;
-    background: #fff;
-    box-shadow: 0px -1px 2px 0px rgba(0, 0, 0, 0.03);
-    .el-button{
-      width: 100px;
-      height: 40px;
-    }
+  .footer_btn{
+    padding-top: 20px;
   }
 }
 </style>

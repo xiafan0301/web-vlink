@@ -7,14 +7,14 @@
     <div class="up_map" v-show="tabIndex === 1">
       <div class="sel_dev">
         <div class="title">
-          <span>已选设备（{{selDevNum}}）</span>
+          <span>已选设备（{{selDevMapNum}}）</span>
           <i class="el-icon-arrow-up" v-show="isShowTree" @click="isShowTree = false"></i>
           <i class="el-icon-arrow-down" v-show="!isShowTree" @click="isShowTree = true"></i>
         </div>
         <div v-show="isShowTree">
           <div class="sel_tab">
-            <div @click="tabClick(1)" :class="{'active': bayOrdev === 1}">摄像头</div>
-            <div @click="tabClick(2)" :class="{'active': bayOrdev === 2}">卡口</div>
+            <div @click="tabLeftClick(1)" :class="{'active': bayOrdev === 1}">摄像头</div>
+            <div @click="tabLeftClick(2)" :class="{'active': bayOrdev === 2}">卡口</div>
           </div>
         <!-- 内容区 -->
         <vue-scroll style="height: 350px;" v-if="tabIndex === 1">
@@ -22,6 +22,7 @@
             <el-tree
               slot="to"
               ref="to-tree"
+              icon-class="el-icon-arrow-right"
               show-checkbox
               :data="bayOrdev === 1 ? self_to_data1 : self_to_data2"
               :node-key="node_key"
@@ -30,7 +31,7 @@
               :default-expand-all="true"
             >
             <span class="custom_tree_node" slot-scope="{ node, data }">
-              <span>{{ node.label }}</span>
+              <span :title="node.label">{{ node.label | strCutWithLen(20)}}</span>
               <i class="el-icon-delete" @click="removeSelDev(node, data)"></i>
             </span>
             </el-tree>
@@ -43,12 +44,13 @@
       </el-input>
       <div class="sel_type">
         <div @click="selArea(1)" :class="{'active': selAreaAcitve && selType === 1}"><i class="el-icon-setting"></i><span>框选</span></div>
-        <div @click="selArea(2)" :class="{'active': selAreaAcitve && selType === 2}"><i class="el-icon-setting"></i><span>点选</span></div>
+        <div @click="selPoint(4)" :class="{'active': selAreaAcitve && selType === 4}"><i class="el-icon-setting"></i><span>点选</span></div>
+        <div @click="selArea(2)" :class="{'active': selAreaAcitve && selType === 2}"><i class="el-icon-setting"></i><span>圈选</span></div>
         <div @click="selArea(3)" :class="{'active': selAreaAcitve && selType === 3}"><i class="el-icon-setting"></i><span>自定义</span></div>
         <div @click="clearPolygon"><i class="el-icon-setting"></i><span>清除</span></div>
       </div>
       <div class="sel_checkbox">
-        <el-checkbox @change="changeShowType" v-model="isCheckedDev" style="margin-right: 20px;">摄像头 <span class="num">100</span></el-checkbox>
+        <el-checkbox @change="changeShowType" v-model="isCheckedDev">摄像头 <span class="num">100</span></el-checkbox>
         <el-checkbox @change="changeShowType" v-model="isCheckedBay">卡口 <span class="num">100</span></el-checkbox>
       </div>
       <div id="devMap" class="dev_map"></div>
@@ -63,7 +65,7 @@
     <div class="up_list" v-show="tabIndex === 2">
       <!-- 右侧穿梭框 目标框 -->
       <div class="transfer_left">
-        <div>已选设备（{{selDevNum}}）</div>
+        <div>已选设备（{{selDevListLeftNum}}）</div>
         <h3 class="transfer_title">
           <el-checkbox
             :indeterminate="to_is_indeterminate"
@@ -73,8 +75,8 @@
           <span>全选</span>
         </h3>
         <div class="sel_tab">
-          <div @click="bayOrdev = 1" :class="{'active': bayOrdev === 1}">摄像头</div>
-          <div @click="bayOrdev = 2" :class="{'active': bayOrdev === 2}">卡口</div>
+          <div @click="tabLeftClick(1)" :class="{'active': bayOrdev === 1}">摄像头</div>
+          <div @click="tabLeftClick(2)" :class="{'active': bayOrdev === 2}">卡口</div>
         </div>
         <!-- 内容区 -->
         <vue-scroll style="height: 380px;" v-if="tabIndex === 2">
@@ -82,6 +84,7 @@
             <el-tree
               slot="to"
               ref="to-tree"
+              icon-class="el-icon-arrow-right"
               :data="bayOrdev === 1 ? self_to_data1 : self_to_data2"
               show-checkbox
               :node-key="node_key"
@@ -118,7 +121,7 @@
       </div>
       <!-- 右侧穿梭框 原始框 -->
       <div class="transfer_right">
-        <div>已选设备（12）</div>
+        <div>已选设备（{{selDevListRightNum}}）</div>
         <el-input
           placeholder="请输入设备名称"
           v-model="filterFrom"
@@ -135,8 +138,8 @@
           <span>全选</span>
         </h3>
         <div class="sel_tab">
-          <div @click="bayOrdev = 1" :class="{'active': bayOrdev === 1}">摄像头</div>
-          <div @click="bayOrdev = 2" :class="{'active': bayOrdev === 2}">卡口</div>
+          <div @click="tabRightClick(1)" :class="{'active': bayOrdev === 1}">摄像头</div>
+          <div @click="tabRightClick(2)" :class="{'active': bayOrdev === 2}">卡口</div>
         </div>
         <!-- 内容区 -->
         <vue-scroll style="height: 333px;">
@@ -144,6 +147,7 @@
             <el-tree
               ref="from-tree"
               :data="self_from_data"
+              icon-class="el-icon-arrow-right"
               show-checkbox
               :node-key="node_key"
               @check="fromTreeChecked"
@@ -165,6 +169,13 @@ import {mapXupuxian} from '@/config/config.js';
 import {random14, objDeepCopy} from '@/utils/util.js';
 import { setTimeout } from 'timers';
 export default {
+  props: [
+    'devFromDataUp',
+    'bayFromDataUp',
+    'self_to_data1Up',
+    'self_to_data2Up',
+    'addressObj'
+  ],
   data () {
     return {
       tabIndex: 1,//设备选择tab
@@ -176,16 +187,22 @@ export default {
       zoomLevel: 15,
       autoComplete: null,
       map: null,
-      markerList: [],
       devList: [],
+      markerList: [],
       mouseTool: null,
       polygon: null,
       selAreaAcitve: false,
       selType: null,
       devIdList: [],
       bayIdList: [],
+      selDevListLeftNum: 0,
+      selDevListRightNum: 0,
+      bayFromData: [],
+      devFromData: [],
       self_to_data1: [],
       self_to_data2: [],
+      bayFromData_: [],
+      devFromData_: [],
 
       from_is_indeterminate: false, // 源数据是否半选
       from_check_all: false, // 源数据是否全选
@@ -203,17 +220,14 @@ export default {
       defaultProps: { label: 'areaName', children: 'areaTreeList' },
       node_key: 'areaId',
       pid: "areaParentUid",
-
-      // 新加参数
-      bayFromData: [],
-      devFromData: [],
-      bayFromData_: [],
-      devFromData_: [],
-      bayToData: [],
-      devToData: [],
+     
     }
   },
   created () {
+    this.bayFromData = this.bayFromDataUp;
+    this.devFromData = this.devFromDataUp;
+    this.self_to_data1 = this.self_to_data1Up || [];
+    this.self_to_data2 = this.self_to_data2Up || [];
   },
   mounted () {
     this.resetMap();
@@ -265,17 +279,47 @@ export default {
       }
       MapGETmonitorList(params).then(res => {
         if (res) {
-          this.bayFromData = this.commonFn1(objDeepCopy([res.data]));
-          this.devFromData = this.commonFn2(objDeepCopy([res.data]));
-          this.bayFromData_ = objDeepCopy(this.bayFromData);
-          this.devFromData_ = objDeepCopy(this.devFromData);
-          // this.bayToData = this.commonFn1(objDeepCopy(this.to_data));
-          // this.devToData = this.commonFn2(objDeepCopy(this.to_data));    
+          this.bayFromData_ = this.commonFn1(objDeepCopy([res.data]));
+          this.devFromData_ = this.commonFn2(objDeepCopy([res.data]));
           this.devList = this.flatDev([res.data]);
-          console.log(this.devList);
           this.mapMark(this.devList);
+          this.addressObj && this.addressMark();
         }
       });
+    },
+    // 点标记失踪人员位置
+    addressMark () {
+      const obj = this.addressObj.find(f => f.type === 1);
+      if (obj) {
+        let offSet = [-20.5, -70], _this = this;
+        const lng = obj.lngLat[0], lat = obj.lngLat[1];
+        if (lng > 0 && lat > 0) {
+          let marker = new window.AMap.Marker({ // 添加自定义点标记
+            position: [lng, lat],
+            offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
+            draggable: false, // 是否可拖动
+            extData: '',
+            // 自定义点标记覆盖物内容
+            content: `<div id="${random14()}" class="vl_icon vl_icon_zzd"></div>`
+          });
+          // mouseover
+          marker.on('mouseover', function () {
+            let _hoverWindow = null;
+            let _sContent = `<div class="vl_map_hover">
+              <div class="vl_map_hover_main"><ul>
+                <li><span>失踪地址：</span><span>${obj.address}</span></li>
+              </ul></div>`;
+            _hoverWindow = new window.AMap.InfoWindow({
+              isCustom: true,
+              closeWhenClickMap: true,
+              offset: new window.AMap.Pixel(0, -20), // 相对于基点的偏移位置
+              content: _sContent
+            });
+            _hoverWindow.open(_this.map, new window.AMap.LngLat(lng, lat));
+          });
+          marker.setMap(_this.map);
+        }
+      }
     },
     // 扁平设备和卡口数据
     flatDev (arr) {
@@ -293,12 +337,12 @@ export default {
       fn(arr);
       return res;
     },
-    // 扁平设备和卡口数据
+    // 扁平已选设备的树数据，用来获取已选设备的数量
     flatDev_ (arr) {
       let res = [];
       let fn = (array) => {
         array.forEach(f => {
-          if (!('areaTreeList' in f)) {
+          if (!f.hasOwnProperty('areaTreeList')) {
             res.push(f);
           } else if (f.areaTreeList.length > 0) {
             fn(f.areaTreeList);
@@ -319,10 +363,10 @@ export default {
           let _content = null;
           // 摄像头
           if (obj.type === 1) {
-            _content = '<div id="' + obj.uid + '_sxt' + '" class="vl_icon vl_icon_sxt"></div>';
+            _content = '<div id="' + obj.uid + '_sxt' + '" class="vl_icon vl_icon_sxt vl_icon_click"></div>';
           // 卡口
           } else {
-            _content = '<div id="' + obj.uid + '_kk' + '" class="vl_icon vl_icon_kk"></div>';
+            _content = '<div id="' + obj.uid + '_kk' + '" class="vl_icon vl_icon_kk vl_icon_click"></div>';
           }
           let _marker = new window.AMap.Marker({ // 添加自定义点标记
             position: [obj.longitude, obj.latitude],
@@ -353,9 +397,9 @@ export default {
             _hoverWindow.open(_this.map, new window.AMap.LngLat(obj.longitude, obj.latitude));
           });
           // click
-          _marker.on('click', function () {
+          // _marker.on('click', function () {
           
-          })
+          // })
       
           _this.markerList.push(_marker);
         }
@@ -367,7 +411,6 @@ export default {
     getPolygonDev (polygon) {
       let res = [];
       this.markerList.forEach(f => {
-        console.log(f)
         const obj = f.B.extData;
         // 把在圆形覆盖物范围之内的追踪点添加进来
         if (obj.longitude > 0 && obj.latitude > 0) {
@@ -378,6 +421,7 @@ export default {
         }
       })
       this.devIdList = res.reduce((pre, cur) => {
+        console.log(cur,'cur')
         if (cur.type === 1) {
           pre = [...pre, cur.uid];
         }
@@ -389,10 +433,15 @@ export default {
         }
         return pre;
       },[]);
-      this.tabClick(this.bayOrdev);
+      this.tabLeftClick(this.bayOrdev);
     },
-    tabClick (type) {
+    // 目标树tab
+    tabLeftClick (type) {
       this.bayOrdev = type;
+      this.to_check_all = false;// 清空全选的状态
+      this.to_is_indeterminate = false;// 清空全选的状态
+      this.getSelDevListLeftNum();// 重新获取已选设备数量
+      this.to_check_keys = [];
       if (!this.polygon) return;//没有选择范围时，停止执行下去
       if (type === 2) {
         this.self_to_data2 = [];
@@ -406,6 +455,14 @@ export default {
       this.$nextTick(() => {
         this.addToAims();
       })
+    },
+    // 源树tab
+    tabRightClick (type) {
+      this.bayOrdev = type;
+      this.from_check_all = false;// 清空全选的状态
+      this.from_is_indeterminate = false;// 清空全选的状态
+      this.getSelDevListRightNum();//重新获取已选设备数量
+      this.from_check_keys = [];
     },
     // 重置选择区域
     selAreaRest () {
@@ -421,16 +478,7 @@ export default {
         this.selAreaAcitve = true;
         this.mouseTool.close(true);
         this.map.setDefaultCursor('crosshair');
-        if (type === 3) {
-          this.mouseTool.polygon({
-            zIndex: 13,
-            strokeColor: '#FA453A',
-            strokeOpacity: 1,
-            strokeWeight: 1,
-            fillColor: '#FA453A',
-            fillOpacity: 0.2
-          });
-        } else if (type === 1) {
+        if (type === 1) {
           this.mouseTool.rectangle({
             zIndex: 13,
             strokeColor: '#FA453A',
@@ -439,7 +487,7 @@ export default {
             fillColor: '#FA453A',
             fillOpacity: 0.2
           });
-        } else {
+        } else if (type === 2) {
           this.mouseTool.circle({
             zIndex: 13,
             strokeColor: '#FA453A',
@@ -448,8 +496,40 @@ export default {
             fillColor: '#FA453A',
             fillOpacity: 0.2
           });
-        }
+        } else {
+          this.mouseTool.polygon({
+            zIndex: 13,
+            strokeColor: '#FA453A',
+            strokeOpacity: 1,
+            strokeWeight: 1,
+            fillColor: '#FA453A',
+            fillOpacity: 0.2
+          });
+        } 
        
+      }
+    },
+    // 点选
+    selPoint (type) {
+      this.selAreaAcitve = !this.selAreaAcitve;
+      if (this.selAreaAcitve) {
+        this.selType = type;
+        $('#devMap').on('click', '.vl_icon_click', (e) => {
+          const objId = e.target.getAttribute('id');
+          if (objId.endsWith('_sxt')) {
+            this.bayOrdev = 1;
+            this.$refs["from-tree"].setCheckedKeys([objId.replace('_sxt', '')]);
+          } else if (objId.endsWith('_kk')) {
+            this.bayOrdev = 2;
+            this.$refs["from-tree"].setCheckedKeys([objId.replace('_kk', '')]);
+          }
+          this.$nextTick(() => {
+            this.addToAims();
+          })
+        })
+      } else {
+        this.selType = null;
+        $('#devMap').unbind('click');
       }
     },
     // 清除覆盖物和所选的设备和卡口
@@ -462,6 +542,9 @@ export default {
       this.bayFromData = objDeepCopy(this.bayFromData_);
       this.self_to_data1 = [];
       this.devFromData = objDeepCopy(this.devFromData_);
+      this.selAreaAcitve = !this.selAreaAcitve;
+      this.selType = null;
+      $('#devMap').unbind('click');
     },
     // 根据设备名称搜索设备或卡口
     searchDev () {
@@ -520,20 +603,38 @@ export default {
     // 删除左侧已选设备和卡口
     removeSelDev (node, data) {     
       // 把选取的所有节点的checked改为true
-      let fn = (node) => {
-        for (let key in node) {
-          if (node instanceof Array) {
-            node[key]['checked'] = true;
-            if (node[key] && node[key]['childNodes'].length > 0) fn(node[key]['childNodes']);
-          } else {
-            node['checked'] = true;
-            if (node['childNodes'].length > 0) fn(node['childNodes']);
-          }
-        }
-      }
-      fn(node);
-      this.removeToSource()
-      this.$refs['to-tree'].remove(node);
+      // let fn = (node) => {
+      //   for (let key in node) {
+      //     if (node instanceof Array) {
+      //       node[key]['checked'] = true;
+      //       if (node[key] && node[key]['childNodes'].length > 0) fn(node[key]['childNodes']);
+      //     } else {
+      //       node['checked'] = true;
+      //       if (node['childNodes'].length > 0) fn(node['childNodes']);
+      //     }
+      //   }
+      // }
+      // fn(node);
+      this.$refs["to-tree"].setCheckedKeys([data.areaId]);
+      this.$nextTick(() => {
+        this.removeToSource()
+      })
+    },
+    // 获取列表选择的右边已选设备数量
+    getSelDevListRightNum() {
+      this.$nextTick(() => {
+        this.selDevListRightNum = 0;
+        const data = this.$refs["from-tree"].getCheckedNodes().filter(f => !f.hasOwnProperty('areaTreeList'));
+        this.selDevListRightNum = data.length;
+      })
+    },
+    // 获取列表选择的左边已选设备数量
+    getSelDevListLeftNum() {
+      this.$nextTick(() => {
+        this.selDevListLeftNum = 0;
+        const data = this.$refs["to-tree"].getCheckedNodes().filter(f => !f.hasOwnProperty('areaTreeList'));
+        this.selDevListLeftNum = data.length;
+      })
     },
      // 添加按钮
     addToAims() {
@@ -756,13 +857,15 @@ export default {
     },
     // 源树选中事件 - 是否禁用穿梭按钮
     fromTreeChecked(nodeObj, treeObj) {
+      this.getSelDevListRightNum();
       this.from_check_keys = treeObj.checkedNodes;
-      this.$emit("left-check-change", nodeObj, treeObj);
+      this.$emit("right-check-change", nodeObj, treeObj);
     },
     // 目标树选中事件 - 是否禁用穿梭按钮
     toTreeChecked(nodeObj, treeObj) {
+      this.getSelDevListLeftNum();
       this.to_check_keys = treeObj.checkedNodes;
-      this.$emit("right-check-change", nodeObj, treeObj);
+      this.$emit("left-check-change", nodeObj, treeObj);
     },
     // 源数据 总全选checkbox
     fromAllBoxChange(val) {
@@ -776,6 +879,7 @@ export default {
         this.$refs["from-tree"].setCheckedNodes([]);
         this.from_check_keys = [];
       }
+      this.getSelDevListRightNum();
     },
     // 目标数据 总全选checkbox
     toAllBoxChange(val) {
@@ -790,6 +894,7 @@ export default {
         this.$refs["to-tree"].setCheckedNodes([]);
         this.to_check_keys = [];
       }
+      this.getSelDevListLeftNum();
     },
     // 源数据 筛选
     filterNodeFrom(value, data) {
@@ -959,13 +1064,11 @@ export default {
         return this.devFromData;
       }
     },
-    selDevNum () {
+    selDevMapNum () {
       if (this.bayOrdev === 2) {
-        console.log(this.self_to_data2, 'this.self_to_data2')
         const data = this.flatDev_(this.self_to_data2);
         return data.length;
       } else {
-        console.log(this.self_to_data1, 'this.self_to_data2')
         const data = this.flatDev_(this.self_to_data1);
         return data.length;
       }
@@ -977,20 +1080,13 @@ export default {
     //     return this.self_to_data1.length;
     //   }
     // }
-    // 右侧数据
-    // self_to_data() {
-    //   if (this.bayOrdev === 2) {
-    //     return this.bayToData;
-    //   } else {
-    //     return this.devToData;
-    //   }
-    // }
   },
   // 销毁地图实例
   isDestroyed () {
     if (this.map) {
       this.map.destroy();
     }
+    $('#devMap').unbind('click');
   }
 }
 </script>
@@ -1023,8 +1119,8 @@ export default {
     .sel_dev{
       position: absolute;
       z-index: 999;
-      left: 20px;
-      top: 20px;
+      left: 10px;
+      top: 10px;
       width:260px;
       box-shadow:0px 3px 10px 0px rgba(99,99,99,0.39),0px 0px 9px 0px rgba(255,255,255,0.55); 
       .title{
@@ -1061,17 +1157,17 @@ export default {
     .search{
       position: absolute;
       z-index: 999;
-      top:20px;
-      left: 290px;
-      width: 240px;
+      top:10px;
+      left: 280px;
+      width: 220px;
       box-shadow:0px 3px 10px 0px rgba(99,99,99,0.39),0px 0px 9px 0px rgba(255,255,255,0.55);
     }
     .sel_type{
       position: absolute;
       z-index: 999;
-      top:20px;
-      left: 540px;
-      width: 240px;
+      top:10px;
+      left: 510px;
+      width: 300px;
       height: 40px;
       line-height: 40px;
       display: flex;
@@ -1093,13 +1189,13 @@ export default {
       }
     }
     .sel_checkbox{
-      padding: 0 10px;
+      padding: 0 5px;
       position: absolute;
       z-index: 999;
       height: 40px;
       line-height: 40px;
-      top:20px;
-      left: 790px;
+      top:10px;
+      left: 820px;
       background: #fff;
       box-shadow:0px 3px 10px 0px rgba(99,99,99,0.39),0px 0px 9px 0px rgba(255,255,255,0.55);
       .num{
@@ -1244,14 +1340,28 @@ export default {
     justify-content: space-between;
     > i{
       margin-top: 2px;
-      &:hover{
-        color: #0C70F8;
+      display: none;
+    }
+    &:hover{
+      > i{
+        display: inline-block;
+        &:hover{
+          color: #0C70F8;
+        }
       }
     }
   }
   .not_checked{
     .el-checkbox{
       display: none;
+    }
+  }
+  .sel_checkbox{
+    .el-checkbox{
+      margin-right: 8px!important;
+      .el-checkbox__label{
+        padding-left: 2px;
+      }
     }
   }
 } 
