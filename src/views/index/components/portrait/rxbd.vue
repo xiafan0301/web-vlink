@@ -18,98 +18,23 @@
           <p>{{compSimWord}}</p>
         </div>
         <div class="vl_judge_tc_c_item">
-          <el-upload
-                  :class="{'vl_jtc_upload': true}"
-                  :show-file-list="false"
-                  accept="image/*"
-                  :action="uploadAcion"
-                  list-type="picture-card"
-                  :before-upload="beforeAvatarUpload"
-                  :on-success="uploadSucess"
-                  :on-error="handleError">
-            <i v-if="uploading" class="el-icon-loading"></i>
-            <img v-else-if="curImageUrl" :src="curImageUrl">
-            <div  v-else>
-              <i
-                      style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
-                      class="vl_icon vl_icon_vehicle_01"
-              ></i>
-              <span>点击上传图片</span>
-            </div>
-          </el-upload>
-          <p @click="showHistoryPic(1)">从上传记录中选择</p>
-          <div v-show="curImageUrl" class="del_icon">
-            <i class="el-icon-delete" @click="delPic(1)"></i>
-          </div>
+          <div is="vlUpload" :clear="uploadClearOne" @uploadEmit="uploadEmitOne"></div>
         </div>
         <div class="vl_judge_tc_c_item">
-          <el-upload
-                  :class="{'vl_jtc_upload': true}"
-                  :show-file-list="false"
-                  accept="image/*"
-                  :action="uploadAcion"
-                  list-type="picture-card"
-                  :before-upload="beforeAvatarUpload2"
-                  :on-success="uploadSucess2"
-                  :on-error="handleError2">
-            <i v-if="uploading2" class="el-icon-loading"></i>
-            <img v-else-if="curImageUrl2" :src="curImageUrl2">
-            <div  v-else>
-              <i
-                      style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
-                      class="vl_icon vl_icon_vehicle_01"
-              ></i>
-              <span>点击上传图片</span>
-            </div>
-          </el-upload>
-          <!--<div class="vl_jtc_ic_input" v-show="!curImageUrl2">-->
-            <!--<el-form :model="numberValidateForm" ref="vlJtcIdCard"  class="demo-ruleForm">-->
-              <!--<el-form-item-->
-                      <!--label=""-->
-                      <!--prop="idCard"-->
-                      <!--:rules="[-->
-                  <!--{ validator: validateIdCard, trigger: 'blur' }-->
-                <!--]"-->
-              <!--&gt;-->
-                <!--<el-input type="idCard" placeholder="请输入证件号" @blur="checkId" v-model="numberValidateForm.idCard" autocomplete="off"></el-input>-->
-              <!--</el-form-item>-->
-            <!--</el-form>-->
-          <!--</div>-->
-          <p @click="showHistoryPic(2)">从上传记录中选择</p>
-          <div v-show="curImageUrl2" class="del_icon">
-            <i class="el-icon-delete" @click="delPic(2)"></i>
-          </div>
+          <div is="vlUpload" :clear="uploadClearTwo" @uploadEmit="uploadEmitTwo"></div>
         </div>
       </div>
       <el-button class="vl_judge_tc_btn" @click="beginComp" type="primary" :disabled="!this.curImageUrl || !this.curImageUrl2" :loading="compLoading">立即比对</el-button>
     </div>
-    <!--历史记录弹窗-->
-    <el-dialog
-      :visible.sync="historyPicDialog"
-      class="history-pic-dialog"
-      :close-on-click-modal="false"
-      top="4vh"
-      title="最近上传的图片">
-      <div style="text-align: center;font-size: 20px;" v-if="loadingHis"><i class="el-icon-loading"></i></div>
-      <vue-scroll class="his-pic-box" v-else-if="historyPicList.length">
-        <div class="his-pic-item" :class="{'active': item.checked}" v-for="item in historyPicList" :key="item.id" @click="chooseHisPic(item)">
-          <img :src="item.path" alt="">
-        </div>
-        <div style="clear: both;"></div>
-      </vue-scroll>
-      <p v-else>暂无历史记录</p>
-      <div slot="footer">
-        <el-button @click="historyPicDialog = false">取消</el-button>
-        <el-button type="primary" @click="addHisToImg(curIndex)" :disabled="choosedHisPic.length === 0">确认</el-button>
-      </div>
-    </el-dialog>
   </div>
 </template>
 <script>
+  import vlUpload from '@/components/common/upload.vue';
   import {ajaxCtx} from '@/config/config';
   import {ScpGETbasePortraitInfo, ScpGETportraitCmpInfo, ScpGETretrievalHisById} from '../../api/api.search.js';
   import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcPUTAppendixsOrder} from '../../api/api.judge.js'
   export default {
+    components: {vlUpload},
     data () {
       return {
         uploadAcion: ajaxCtx.base + '/new',
@@ -123,9 +48,9 @@
           imgOne: null,
           imgTwo: null
         },
+        uploadClearOne: {},
+        uploadClearTwo: {},
         historyPicList: [], // 上传历史记录
-        historyPicDialog: false,
-        loadingHis: false,
         numberValidateForm: {
           idCard: ''
         },
@@ -155,192 +80,25 @@
       }
     },
     methods: {
-      validateIdCard (rule, value, callback) {
-        if (value !== "") {
-          var reg = /^[1-9]\d{5}(18|19|([23]\d))\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/;
-          if (!reg.test(value)) {
-            callback(new Error("请输入有效的身份证号码"));
-          }
-        }
-        callback();
-      },
-      checkId (){
-        if (this.numberValidateForm.idCard) {
-          this.$refs['vlJtcIdCard'].validate((valid) => {
-            if (valid) {
-              ScpGETbasePortraitInfo({idNo: this.numberValidateForm.idCard})
-                  .then(res => {
-                    if (res.data) {
-                      this.curImageUrl2 = res.data.photoUrl;
-                    } else {
-                      this.$message({
-                        message: '您所查询的人员不在信息库中',
-                        type: 'success'
-                      });
-                      this.numberValidateForm.idCard = '';
-                    }
-                  })
-            }
-          })
-        }
-      },
-      // 上传图片
-      beforeAvatarUpload (file) {
-        const isJPG = (file.type === 'image/jpeg' || file.type === 'image/png');
-        const isLt = file.size / 1024 / 1024 < 100;
-        if (!isJPG) {
-          this.$message.error('只能上传 JPG / PNG 格式图片!');
-        }
-        if (!isLt) {
-          this.$message.error('上传图片大小不能超过 100MB!');
-        }
-        this.uploading = true;
-        return isJPG && isLt;
-      },
-      uploadSucess (response, file, fileList) {
-        this.uploading = false;
-        this.compSim = '';
-        this.compSimWord = '';
-        if (response && response.data) {
-          let oRes = response.data;
-          if (oRes) {
-            let x = {
-              cname: oRes.fileName, // 附件名称 ,
-              contentUid: this.$store.state.loginUser.uid,
-              // desci: '', // 备注 ,
-              filePathName: oRes.fileName, // 附件保存名称 ,
-              fileType: 1, // 文件类型 ,
-              imgHeight: oRes.fileHeight, // 图片高存储的单位位px ,
-              imgSize: oRes.fileSize, // 图片大小存储的单位位byte ,
-              imgWidth: oRes.fileWidth, //  图片宽存储的单位位px ,
-              // otherFlag: '', // 其他标识 ,
-              path: oRes.fileFullPath, // 附件路径 ,
-              // path: oRes.path,
-              thumbnailName: oRes.thumbnailFileName, // 缩略图名称 ,
-              thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
-              // uid: '' //  附件标识
-            };
-            JtcPOSTAppendixInfo(x).then(jRes => {
-              if (jRes) {
-                x['uid'] = jRes.data;
-                console.log(x);
-              }
-            })
-            this.imgData.imgOne = x;
-            this.curImageUrl = x.path;
-          }
-        }
-        this.uploadFileList = fileList;
-      },
-      handleError () {
-        this.uploading = false;
-        this.$message.error('上传失败')
-      },
-      // 上传图片2
-      beforeAvatarUpload2 (file) {
-        const isJPG = (file.type === 'image/jpeg' || file.type === 'image/png');
-        const isLt = file.size / 1024 / 1024 < 100;
-        if (!isJPG) {
-          this.$message.error('只能上传 JPG / PNG 格式图片!');
-        }
-        if (!isLt) {
-          this.$message.error('上传图片大小不能超过 100MB!');
-        }
-        this.uploading2 = true;
-        return isJPG && isLt;
-      },
-      uploadSucess2 (response, file, fileList) {
-        this.uploading2 = false;
-        this.compSim = '';
-        this.compSimWord = '';
-        if (response && response.data) {
-          let oRes = response.data;
-          if (oRes) {
-            let x = {
-              cname: oRes.fileName, // 附件名称 ,
-              contentUid: this.$store.state.loginUser.uid,
-              // desci: '', // 备注 ,
-              filePathName: oRes.fileName, // 附件保存名称 ,
-              fileType: 1, // 文件类型 ,
-              imgHeight: oRes.fileHeight, // 图片高存储的单位位px ,
-              imgSize: oRes.fileSize, // 图片大小存储的单位位byte ,
-              imgWidth: oRes.fileWidth, //  图片宽存储的单位位px ,
-              // otherFlag: '', // 其他标识 ,
-              path: oRes.fileFullPath, // 附件路径 ,
-              // path: oRes.path,
-              thumbnailName: oRes.thumbnailFileName, // 缩略图名称 ,
-              thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
-              // uid: '' //  附件标识
-            };
-            JtcPOSTAppendixInfo(x).then(jRes => {
-              if (jRes) {
-                x['uid'] = jRes.data;
-                console.log(x);
-              }
-            })
-            this.imgData.imgTwo = x;
-            this.curImageUrl2 = x.path;
-            this.numberValidateForm.idCard = '';
-          }
-        }
-        this.uploadFileList2 = fileList;
-      },
-      handleError2 () {
-        this.uploading2 = false;
-        this.$message.error('上传失败')
-      },
-      delPic (index) {
-        this.compSim = '';
-        this.compSimWord = '';
-        if (index === 1) {
-          this.uploadFileList.splice(0, 1);
-          this.curImageUrl = '';
+      uploadEmitOne (data) {
+        console.log('uploadEmit data', data);
+        if (data && data.path) {
+          this.curImageUrl = data.path;
+          this.imgData.imgOne = data;
         } else {
-          this.uploadFileList2.splice(0, 1);
-          this.curImageUrl2 = '';
+          this.curImageUrl = null;
+          this.imgData.imgOne = null;
         }
       },
-      showHistoryPic (index) {
-        this.curIndex = index;
-        this.loadingHis = true;
-        this.historyPicDialog = true;
-        let params = {
-          userId: this.$store.state.loginUser.uid,
-          fileType: 1
+      uploadEmitTwo (data) {
+        console.log('uploadEmit data', data);
+        if (data && data.path) {
+          this.curImageUrl2 = data.path;
+          this.imgData.imgTwo = data;
+        } else {
+          this.curImageUrl2 = null;
+          this.imgData.imgTwo = null;
         }
-        JtcGETAppendixInfoList(params).then(res => {
-          if (res) {
-            this.loadingHis = false;
-            res.data.forEach(x => x.checked = false);
-            this.historyPicList = res.data;
-          }
-        }).catch(() => {
-          this.historyPicDialog = false;
-        })
-      },
-      chooseHisPic (item) {
-        this.historyPicList.forEach(x => {
-          x.checked = false;
-        })
-        item.checked = true;
-      },
-      addHisToImg (index) {
-        this.historyPicDialog = false;
-        let _ids = [];
-        this.choosedHisPic.forEach(x => {
-          _ids.push(x.uid)
-          if (index === 1) {``
-            this.curImageUrl = x.path;
-            this.imgData.imgOne = x;
-          } else {
-            this.imgData.imgTwo = x;
-            this.curImageUrl2 = x.path;
-          }
-        })
-        let _obj = {
-          appendixInfoIds: _ids.join(',')
-        }
-        JtcPUTAppendixsOrder(_obj);
       },
       beginComp () {
         if (this.curImageUrl && this.curImageUrl2) {
@@ -482,29 +240,21 @@
         &:last-child {
           margin-left: .15rem;
         }
-        span {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          margin-top: 1.7rem;
-          line-height: 1.7rem;
-          color: #999;
-        }
-        &:hover {
-          background: #2981F8;
-          span {
-            color: #fff;
-          }
-          >p {
-            display: block;
-          }
-          .del_icon {
-            display: block;
-          }
-        }
-        .vl_jtc_upload {
+        /*&:hover {*/
+          /*background: #2981F8;*/
+          /*>p {*/
+            /*display: block;*/
+          /*}*/
+          /*.del_icon {*/
+            /*display: block;*/
+          /*}*/
+          /*.vl_upload_tip {*/
+            /*span {*/
+              /*display: none;*/
+            /*}*/
+          /*}*/
+        /*}*/
+        .vl_jtc_upload_rxbd {
           width: 100%;
           height: 100%;
           background: none;
@@ -524,6 +274,18 @@
               border-radius: 10px;
             }
           }
+          .vl_upload_tip {
+            i {
+              width: 100px;height: 85px;opacity: .5; position: absolute;
+              top: 0;left: 0;right: 0;bottom: 0;margin: auto;
+            }
+            span {
+              position: absolute; bottom: 6px; left: 0;
+              width: 100%; line-height: normal;
+              text-align: center;
+              color: #999;
+            }
+          }
         }
         >p {
           display: none;
@@ -537,7 +299,7 @@
           -webkit-border-radius: 0 0 10px 10px;
           -moz-border-radius: 0 0 10px 10px;
           border-radius: 0 0 10px 10px;
-          background: #0C70F8;
+          background: rgba(0, 0, 0, 0.3);
         }
         .vl_jtc_ic_input {
           position: absolute;

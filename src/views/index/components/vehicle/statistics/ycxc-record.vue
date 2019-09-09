@@ -235,6 +235,7 @@ export default {
     onOpenDetail (obj, index) {
       this.detailData = {
         index: index,
+        pageNum: this.pagination.pageNum,
         list: this.allDataList
       }
      

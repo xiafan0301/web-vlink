@@ -404,9 +404,7 @@ export default {
         .then(res => {
           if (res && res.code === '00000000') {
             if (res.data) {
-
               this.deviceList = res.data;
-
               // 初始化页面时默认选中第一个设备
               this.addForm.deviceCode = this.deviceList[0].deviceName;
               this.addForm.deviceName = this.deviceList[0].deviceName;

@@ -114,8 +114,8 @@
 .vl_icon_map_mark_end { width: 80px; height: 80px; background-position: -319px -1083px; }  /* 共同途径点摄像头 */
 
 .vl_icon_map_sxt_error { width: 43px; height: 68px; background-position: -402px -174px; } /* 报警的红色摄像头*/
-.vl_icon_map_sxt_in_area0 { width: 43px; height: 68px; background-position: -1224px -1163px; } /* 区域选择框选中的摄像头*/
-.vl_icon_map_sxt_in_area1 { width: 43px; height: 68px; background-position: -1166px -1163px; } /* 区域选择框选中的卡口*/
+.vl_icon_map_sxt_in_area0 { width: 43px; height: 68px; background-position: -1220px -1152px; } /* 区域选择框选中的摄像头*/
+.vl_icon_map_sxt_in_area1 { width: 43px; height: 68px; background-position: -1162px -1154px; } /* 区域选择框选中的卡口*/
 .vl_icon_map_hover_mark0 { width: 47px;  height: 68px; background-position: -609px -1160px;} /* 摄像头移上去效果 */
 .vl_icon_map_hover_mark1 { width: 47px;  height: 68px; background-position: -670px -1160px;} /* 卡口紫色移上去效果 **/
 .vl_icon_map_hover_mark2{ width: 47px;  height: 68px; background-position: -787px -1163px;}

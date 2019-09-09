@@ -55,6 +55,7 @@
                           style="width: 100%;"
                           class="vl_date"
                           :time-arrow-control="true"
+                          :picker-options="pickerOptions"
                           type="datetime"
                           value-format="timestamp"
                           placeholder="请选择开始时间">
@@ -68,6 +69,7 @@
                           class="vl_date vl_date_end"
                           :time-arrow-control="true"
                           v-model="searchData.endTime"
+                          :picker-options="pickerOptions"
                           type="datetime"
                           @change="chooseEndTime"
                           value-format="timestamp"
@@ -135,11 +137,6 @@
           minTimes: 3// 最少次数
         },
         pickerOptions: {
-          disabledDate (time) {
-            return time > new Date();
-          }
-        },
-        pickerOptions1: {
           disabledDate (time) {
             return time > new Date();
           }
@@ -673,6 +670,9 @@
         window.sessionStorage.setItem('qyphParam', JSON.stringify(query));
         this.$router.push({name: 'vehicle_search_qyph_jg'})
       }
+    },
+    beforeDestroy () {
+      $('body').unbind('click');
     }
   };
 </script>

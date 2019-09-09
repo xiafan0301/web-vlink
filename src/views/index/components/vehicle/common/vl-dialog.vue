@@ -32,33 +32,29 @@
             <div class="struc_cd_info_main">
               <vue-scroll>
                 <div class="scroll_box">
-                  <!--<div class="struc_cdi_line">-->
-                  <!--<span><font>抓拍时间</font>{{sturcDetail.shotTime}}</span>-->
-                  <!--</div>-->
-                  <!--<div class="struc_cdi_line">-->
-                  <!--<span><font>抓拍设备</font>{{sturcDetail.deviceName}}</span>-->
-                  <!--</div>-->
-                  <!--<div class="struc_cdi_line">-->
-                  <!--<span><font>抓拍地址</font>{{sturcDetail.address}}</span>-->
-                  <!--</div>-->
+                  <div class="struc_cdi_line"><span>有无车牌</span><span :title="sturcDetail.hasPlate">{{sturcDetail.hasPlate ? sturcDetail.hasPlate : '未识别'}}</span></div>
                   <div class="struc_cdi_line">
-                    <span><font>车牌号码</font>{{sturcDetail.plateNo}}</span>
+                    <span>号牌类型</span>
+                    <span :title="dicFormater(45, sturcDetail.plateClass)">{{dicFormater(45, sturcDetail.plateClass)}}</span>
                   </div>
-                  <div class="struc_cdi_line">
-                    <span><font>车牌颜色</font>{{sturcDetail.plateColor}}</span>
-                  </div>
-                  <div class="struc_cdi_line">
-                    <span><font>车辆型号</font>{{sturcDetail.vehiclelModel ? sturcDetail.vehiclelModel : '未知'}}</span>
-                  </div>
-                  <div class="struc_cdi_line">
-                    <span><font>车辆颜色</font>{{sturcDetail.vehicleColor ? sturcDetail.vehicleColor : '未知'}}</span>
-                  </div>
-                  <div class="struc_cdi_line">
-                    <span><font>车辆类型</font>{{sturcDetail.vehicleClass ? sturcDetail.vehicleClass : '未知'}}</span>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.plateNo && sturcDetail.plateClass">
-                    <span><font>号牌类型</font>{{dicFormater(45, sturcDetail.plateClass)}}</span>
-                  </div>
+                  <div class="struc_cdi_line"><span>车牌颜色</span><span :title="sturcDetail.plateColor">{{sturcDetail.plateColor ? sturcDetail.plateColor : '未识别'}}</span></div>
+                  <div class="struc_cdi_line"><span>车牌号码</span><span :title="sturcDetail.plateNo">{{sturcDetail.plateNo ? sturcDetail.plateNo : '未识别'}}</span></div>
+                  <!--<div><span>车辆分组</span><span :title="sturcDetail.vehicleType">{{(sturcDetail.vehicleType && sturcDetail.vehicleType.length > 0) ? sturcDetail.vehicleType.join(',') : '&#45;&#45;'}}</span></div>-->
+                  <!-- <div v-if="type === 3 && sturcDetail.shotTime"><span>入城时间</span><span :title="sturcDetail.shotTime">{{sturcDetail.shotTime}}</span></div>
+                  <div v-if="type === 3 && sturcDetail.bayonetName"><span>入城卡口</span><span :title="sturcDetail.bayonetName">{{sturcDetail.bayonetName}}</span></div> -->
+                  <!--<div v-if="type === 3 && sturcDetail.firstEnterFlag"><span>初次入城</span><span>是</span></div>-->
+                  <div class="struc_cdi_line"><span>车辆类型</span><span :title="sturcDetail.vehicleClass">{{sturcDetail.vehicleClass ? sturcDetail.vehicleClass : '未识别'}}</span></div>
+                  <div class="struc_cdi_line"><span>车辆品牌</span><span :title="sturcDetail.vehicleBrand">{{sturcDetail.vehicleBrand ? sturcDetail.vehicleBrand : '未识别'}}</span></div>
+                  <div class="struc_cdi_line"><span>车辆型号</span><span :title="sturcDetail.vehicleModel">{{sturcDetail.vehicleModel ? sturcDetail.vehicleModel : '未识别'}}</span></div>
+                  <div class="struc_cdi_line"><span>车辆年款</span><span :title="sturcDetail.vehicleStyles">{{sturcDetail.vehicleStyles ? sturcDetail.vehicleStyles : '未识别'}}</span></div>
+                  <div class="struc_cdi_line"><span>车辆颜色</span><span :title="sturcDetail.vehicleColor">{{sturcDetail.vehicleColor ? sturcDetail.vehicleColor : '未识别'}}</span></div>
+                  <div class="struc_cdi_line"><span>车顶天窗</span><span :title="sturcDetail.vehicleRoof">{{sturcDetail.vehicleRoof ? sturcDetail.vehicleRoof : '未识别'}}</span></div>
+                  <div class="struc_cdi_line"><span>有无撞痕</span><span :title="sturcDetail.hitMarkInfo">{{sturcDetail.hitMarkInfo ? sturcDetail.hitMarkInfo : '未识别'}}</span></div>
+                  <div class="struc_cdi_line"><span>车前物品</span><span :title="sturcDetail.descOfFrontItem">{{sturcDetail.descOfFrontItem ? sturcDetail.descOfFrontItem : '未识别'}}</span></div>
+                  <div class="struc_cdi_line"><span>车后物品</span><span :title="sturcDetail.descOfRearItem">{{sturcDetail.descOfRearItem ? sturcDetail.descOfRearItem : '未识别'}}</span></div>
+                  <div class="struc_cdi_line"><span>遮阳板状态</span><span :title="sturcDetail.sunvisor">{{sturcDetail.sunvisor ? sturcDetail.sunvisor : '未识别'}}</span></div>
+                  <div class="struc_cdi_line"><span>安全带状态</span><span :title="sturcDetail.safetyBelt">{{sturcDetail.safetyBelt ? sturcDetail.safetyBelt : '未识别'}}</span></div>
+                  <div class="struc_cdi_line"><span>打电话状态</span><span :title="sturcDetail.calling">{{sturcDetail.calling ? sturcDetail.calling : '未识别'}}</span></div>
                 </div>
               </vue-scroll>
             </div>
@@ -280,7 +276,7 @@
         this.curImgIndex = val.index;
         this.strucInfoList = val.list;
         this.pagination.total = val.list.length;
-        this.pagination.pageNum = 1;
+        this.pagination.pageNum = val.pageNum ? val.pageNum : 1;
         this.sturcDetail = val.list[val.index]
         this.strucDetailDialog = true;
       },
@@ -307,6 +303,7 @@
     beforeDestroy () {
       if (this.amap) {
         this.amap.destroy();
+        this.amap = null;
       }
     }
   }
@@ -354,13 +351,13 @@
       border-bottom: 1px solid #F2F2F2;
       .struc_c_detail {
         width:  100%;
-        height: 3.6rem;
+        height: 3.8rem;
         >div {
           float: left;
         }
         .struc_c_d_img {
           width: 3.6rem;
-          height: 3.6rem;
+          height: 3.8rem;
           background: #EAEAEA;
           position: relative;
           &:before {
@@ -437,7 +434,7 @@
             width: calc(100% - 3.6rem);
             padding-left: .24rem;
             color: #333333;
-            height: 3.2rem;
+            height: 3.8rem;
             h2 {
               font-weight: bold;
               line-height: .74rem;
@@ -460,38 +457,32 @@
               height: calc(100% - 0.74rem);
             }
             .struc_cdi_line {
-              >span {
-                /*position: relative;*/
-                max-width: 100%;
-                display: inline-block;
-                height: .3rem;
-                line-height: .3rem;
-                margin-bottom: .08rem;
-                border: 1px solid #F2F2F2;
-                color: #333333;
-                white-space: nowrap;
-                text-overflow: ellipsis;
-                border-radius:3px;
-                font-size: 12px;
-                overflow: hidden;
-                padding-right: .1rem;
-                margin-right: .08rem;
-                > i {
-                  vertical-align: middle;
-                  margin-left: .1rem;
-                }
-                > font {
-                  width: 75px;
+              margin-bottom: .1rem;
+              overflow: hidden;
+              width: 50%;
+              float: left;
+              > span {
+                line-height: .26rem; height: .28rem;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                float: left;
+                &:first-child {
+                  width: .85rem;
+                  background-color: #FAFAFA;
                   text-align: center;
-                  border-right: 1px solid #F2F2F2;
-                  color: #999999;
-                  background: #FAFAFA;
-                  display: inline-block;
-                  margin-right: .1rem;
+                  border: 1px solid #f2f2f2;
+                  border-radius: 4px 0 0 4px;
+                  color: #999;
                 }
-              }
-              p {
-                color: #999999;
+                &:last-child {
+                  width: .9rem;
+                  border: 1px solid #f2f2f2;
+                  border-left: 0;
+                  background-color: #fff;
+                  padding: 0 10px 0 10px;
+                  border-radius: 0 4px 4px 0;
+                  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; word-break: break-all;
+                }
               }
             }
           }
@@ -514,7 +505,7 @@
           }
         }
         .struc_t_btn {
-          margin-top: .2rem;
+          /*margin-top: .2rem;*/
           float: right;
           a {
             display: inline-block;
