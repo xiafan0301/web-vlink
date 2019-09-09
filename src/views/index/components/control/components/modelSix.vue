@@ -1,7 +1,7 @@
 <template>
   <el-form ref="modelSix" :model="modelSixForm" class="model_six">
     <!-- 上访人员照片上传 -->
-    <el-form-item label="布控人员信息:" :rules="{ required: true, message: '请上传失踪人员信息', trigger: 'blur'}" style="margin-bottom: 0;">
+    <el-form-item label="布控人员信息:" style="margin-bottom: 0;">
       <div class="pic_format" style="top: -40px;">
         <div @click="popSel">从布控库中选择</div>
       </div>
@@ -12,7 +12,7 @@
         <div @click="popSel">从布控库中选择</div>
       </div>
       <div v-for="(item, index) in modelSixForm.licensePlateNumList" :key="index" style="position: relative;" class="license_plate_num">
-        <el-form-item :label="index === 0 ? '车库车辆信息:' : ''" :prop="'licensePlateNumList.' + index + '.recipient'" :rules="{ required: true, message: '请输入车辆车牌号', trigger: 'blur'}" >
+        <el-form-item :label="index === 0 ? '布控车辆信息:' : ''" :prop="'licensePlateNumList.' + index + '.licensePlateNum'" :rules="{validator: validPlateNumber, trigger: 'blur'}">
           <el-input v-model="item.licensePlateNum" placeholder="请输入车辆车牌号"></el-input>
         </el-form-item>
       </div>
@@ -22,14 +22,15 @@
       </el-form-item>
     </el-form-item>
     <el-form-item style="margin-top: 20px;">
-      <el-button type="primary" @click="selControl">一键布控</el-button>
+      <el-button type="primary" @click="selControl('modelSix')">一键布控</el-button>
     </el-form-item>
-    <div is="controlDevUpdate" v-if="isShowControlDev"></div>
+    <div is="controlDevUpdate" v-if="isShowControlDev" :modelType="6"></div>
   </el-form>
 </template>
 <script>
 import uploadPic from './uploadPic.vue';
 import controlDevUpdate from './controlDevUpdate.vue';
+import {checkPlateNumber} from '@/utils/validator.js';
 export default {
   components: {uploadPic, controlDevUpdate},
   data () {
@@ -38,6 +39,7 @@ export default {
         licensePlateNumList: [{licensePlateNum: null}]
       },
       fileList: [],
+      validPlateNumber: checkPlateNumber,
       createSelDialog: false,
       isShowControlDev: false
     }
@@ -45,11 +47,11 @@ export default {
   methods: {
     // 失踪人员信息的上传方法
     uploadPicDel (fileList) {
-      this.fileListOne = fileList;
+      this.fileList = fileList;
     },
     // 失踪人员信息的上传方法
     uploadPicFileList (fileList) {
-      this.fileListOne = fileList;
+      this.fileList = fileList;
     },
     // 从库中选择
     popSel () {
@@ -64,8 +66,17 @@ export default {
       this.modelSixForm.licensePlateNumList.pop();
     },
     // 一键布控
-    selControl () {
-      this.isShowControlDev = true;
+    selControl (formName) {
+      if (this.fileList.length === 0 && !this.modelSixForm.licensePlateNumList[0].licensePlateNum) {
+        return this.$message.warning('请选择布控人员或者车辆');
+      } 
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          this.isShowControlDev = true;
+        } else {
+          return false;
+        }
+      });
     }
   }
 }

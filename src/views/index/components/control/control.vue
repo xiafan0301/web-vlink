@@ -368,6 +368,16 @@ export default {
     .btn_140{
       width: 140px!important;
     }
+    // 重置marker hover 时弹出窗样式
+    .vl_map_hover_main > ul > li > span{
+      text-align: left;
+      &:nth-child(1){
+        width: 70px;
+      }
+      &:nth-child(2){
+        width: 100px;
+      }
+    }
   }
   .vl_map_hover_main{
     bottom: 58px;

@@ -15,9 +15,9 @@
       <el-input v-model="modelFiveForm.duration" filterable placeholder="请输入停留时长"></el-input>
     </el-form-item>
     <el-form-item style="margin-bottom: 0;width: 100%;">
-      <div class="sel_lib"><span>禁入车辆：</span><span>从布控库中选择</span></div>
+      <div class="sel_lib"><span>布控车辆：</span><span>从公务车辆中选择</span></div>
       <div class="sel_img_box">
-        <div class="img_box" v-for="item in '123'" :key="item.id">
+        <div class="img_box" v-for="item in vehicleList" :key="item.id">
           <img src="http://temp.im/104x104" alt="">
           <i class="el-icon-error"></i>
           <span>汪诗诗</span>
@@ -25,7 +25,7 @@
       </div>
     </el-form-item>
     <el-form-item style="margin-top: 20px;">
-      <el-button type="primary" @click="selControl">一键布控</el-button>
+      <el-button type="primary" @click="selControl('modelFive')">一键布控</el-button>
     </el-form-item>
     <div is="controlDev" v-if="isShowControlDev"></div>
   </el-form>
@@ -40,16 +40,26 @@ export default {
     return {
       modelFiveForm: {
         site: null,
-        duration: null
+        duration: 30
       },
+      vehicleList: '123',
       siteList: [],
       isShowControlDev: false
     }
   },
   methods: {
     // 一键布控
-    selControl () {
-      this.isShowControlDev = true;
+    selControl (formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          if (!this.vehicleList) {
+            return this.$message.wraning('请选择布控车辆');
+          }
+          this.isShowControlDev = true;
+        } else {
+          return false;
+        }
+      });
     }
   }
 }

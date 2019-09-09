@@ -98,27 +98,27 @@
               </el-form-item>
             </div>
             <el-form-item class="period_time_btn_box">
-              <div class="period_time_btn" @click="addPeriodTime()"><i class="vl_icon vl_icon_control_22"></i><span>添加布控时间段</span></div>
+              <div v-if="createForm.periodTime.length < 5" class="period_time_btn" @click="addPeriodTime()"><i class="vl_icon vl_icon_control_22"></i><span>添加布控时间段</span></div>
               <div v-if="createForm.periodTime.length > 1" class="period_time_btn" @click="removePeriodTime()"><i class="vl_icon vl_icon_control_28"></i><span>删除布控时间段</span></div>
             </el-form-item>
           </el-form-item>
           <el-form-item class="period_time_box" style="margin-bottom: 6px;">
             <div v-for="(item, index) in createForm.cellphoneMessages" :key="index" style="position: relative;" class="period_time">
-              <el-form-item style="margin-bottom: 0;" :label="index === 0 ? '短信联动:' : ''" :prop="'cellphoneMessages.' + index + '.recipient'" :rules="{ required: true, message: '请输入短信接收人', trigger: 'blur'}" >
-                <el-input v-model="item.recipient" placeholder="短信接收人"></el-input>
+              <el-form-item style="margin-bottom: 0;" :label="index === 0 ? '短信联动:' : ''" :prop="'cellphoneMessages.' + index + '.recipient'" :rules="{validator: validName, trigger: 'blur'}" >
+                <el-input v-model="item.recipient" placeholder="短信接收人" maxlength="5" show-word-limit></el-input>
               </el-form-item>
               <span class="vl_f_666">-</span>
-              <el-form-item style="margin-bottom: 0;" :prop="'cellphoneMessages.' + index + '.phone'" :rules="{ required: true, message: '请输入手机号码', trigger: 'blur'}" >
+              <el-form-item style="margin-bottom: 0;" :prop="'cellphoneMessages.' + index + '.phone'" :rules="{validator: validPhone, trigger: 'blur'}" >
                 <el-input v-model="item.phone" placeholder="手机号码"></el-input>
               </el-form-item>
             </div>
             <el-form-item class="period_time_btn_box">
-              <div class="period_time_btn" @click="addCellphoneMessages()"><i class="vl_icon vl_icon_control_22"></i><span>添加短信联动</span></div>
+              <div v-if="createForm.cellphoneMessages.length < 5" class="period_time_btn" @click="addCellphoneMessages()"><i class="vl_icon vl_icon_control_22"></i><span>添加短信联动</span></div>
               <div v-if="createForm.cellphoneMessages.length > 1" class="period_time_btn" @click="removeCellphoneMessages()"><i class="vl_icon vl_icon_control_28"></i><span>删除短信联动</span></div>
             </el-form-item>
           </el-form-item>
           <el-form-item class="bl_box">
-            <el-form-item label="是否级联:">
+            <el-form-item label="是否级联:" prop="cascade" :rules="{ required: true, message: '请选择', trigger: 'change'}">
               <el-select value-key="uid" v-model="createForm.cascade" filterable placeholder="请选择">
                 <el-option
                   v-for="item in cascadeList"
@@ -128,7 +128,7 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="共享布控:">
+            <el-form-item label="共享布控:" prop="sharedControl" :rules="{ required: true, message: '请选择', trigger: 'change'}">
               <el-select value-key="uid" v-model="createForm.sharedControl" filterable placeholder="请选择">
                 <el-option
                   v-for="item in sharedControlList"
@@ -140,7 +140,7 @@
             </el-form-item>
           </el-form-item>
           <el-form-item label="布控原因:" class="control_reason">
-            <el-input v-model="createForm.controlReason" type="textarea" placeholder="请输入布控原因"></el-input>
+            <el-input v-model="createForm.controlReason" type="textarea" placeholder="请输入布控原因"  maxlength="100" show-word-limit></el-input>
           </el-form-item>
           <div class="create_model">
             <span class="vl_f_666">分析模型：</span>
@@ -190,6 +190,7 @@ import {getEventList, getEventDetail, updateEvent} from '@/views/index/api/api.e
 import {formatDate} from '@/utils/util.js';
 import {mapXupuxian} from '@/config/config.js';
 import {dataList} from '@/utils/data.js';
+import {checkName, validatePhone} from '@/utils/validator.js';
 export default {
   components: {
     modelOne,
@@ -208,6 +209,8 @@ export default {
           return time.getTime() < Date.now() - 8.64e7;
         }
       },
+      validName: checkName,
+      validPhone: validatePhone,
       labelPosition: 'top',
       // 布控类型
       controlTypeList: [
@@ -222,7 +225,7 @@ export default {
         event: null,
         controlType: 1,
         controlDate: [],
-        controlAlarmId: null,
+        controlAlarmId: '3',
         periodTime: [
           {
             startTime: new Date(2019, 4, 10, 0, 0, 0),
@@ -288,10 +291,6 @@ export default {
   
     // 新增时间段
     addPeriodTime() {
-      if (this.createForm.periodTime.length === 5) {
-        this.$message.error('布控时间段不能超过5个');
-        return false;
-      }
       this.createForm.periodTime.push({
         startTime: null,
         endTime: null

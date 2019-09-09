@@ -1208,6 +1208,7 @@ export default {
       this.loading = true;
       getPortraitList(params).then(res => {
         if (res && res.data) {
+          console.log(JSON.stringify(res.data), 'res.data');
           this.protraitMemberList = res.data;
           // 跳转到设置页
           if (pageType === '2') {
@@ -1245,6 +1246,7 @@ export default {
       this.loading = true;
       getVehicleList(params).then(res => {
         if (res && res.data) {
+          console.log(JSON.stringify(res.data), 'res.data');
           this.carMemberList = res.data;
           // 跳转到设置页
           if (pageType === '2') {

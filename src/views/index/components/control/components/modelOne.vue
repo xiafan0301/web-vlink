@@ -1,16 +1,16 @@
 <template>
   <el-form ref="modelOne" :model="modelOneForm" class="model_one">
     <!-- 失踪人员信息上传 -->
-    <el-form-item label="失踪人员信息:" :rules="{ required: true, message: '请上传失踪人员信息', trigger: 'blur'}" style="margin-bottom: 0;">
+    <el-form-item label="失踪人员信息:" :rules="{ required: true, message: '', trigger: 'blur'}" style="margin-bottom: 0;">
       <div class="pic_format" style="left: 110px;top: -40px;">
         <div @click="popSel">从布控库中选择</div>
       </div>
-      <div is="uploadPic" :fileList="fileListOne" @uploadPicDel="uploadPicDelOne" @uploadPicFileList="uploadPicFileListOne"></div>
+      <div is="uploadPic" :fileList="fileListOne" @uploadPicDel="uploadPicDelOne" @uploadPicFileList="uploadPicFileListOne" :maxSize="1"></div>
     </el-form-item>
-    <el-form-item label="人员姓名:" prop="personnelName" :rules="{ required: true, message: '请输入人员姓名', trigger: 'blur'}">
+    <el-form-item label="人员姓名:" prop="personnelName" :rules="[{ required: true, message: '请输入人员姓名', trigger: 'blur'}, {validator: validName, trigger: 'blur'}]">
       <el-input v-model="modelOneForm.personnelName"></el-input>
     </el-form-item>
-    <el-form-item label="性别:" prop="sex" :rules="{ required: true, message: '请选择人员性别', trigger: 'blur'}">
+    <el-form-item label="性别:" prop="sex" :rules="{ required: true, message: '请选择人员性别', trigger: 'change'}">
       <el-select value-key="uid" v-model="modelOneForm.sex" filterable placeholder="请选择">
         <el-option
           v-for="item in sexList"
@@ -18,7 +18,7 @@
           :label="item.label"
           :value="item.value">
         </el-option>
-      </el-select>
+      </el-select>  
     </el-form-item>
     <el-form-item label="失踪时间:" prop="missingTime" :rules="{ required: true, message: '请选择失踪时间', trigger: 'blur'}">
       <el-date-picker
@@ -38,7 +38,7 @@
         placeholder="请输入地名的关键词">
       </el-autocomplete>
     </el-form-item>
-    <el-form-item label="家庭地址:" prop="familyAddress" :rules="{ required: true, message: '请输入地名的关键词', trigger: 'blur'}">
+    <el-form-item label="家庭地址:">
       <el-autocomplete
         style="width: 100%;"
         v-model="modelOneForm.familyAddress"
@@ -50,7 +50,7 @@
       </el-autocomplete>
     </el-form-item>
     <!-- 嫌疑人照片上传 -->
-    <el-form-item label="嫌疑人照片:" :rules="{ required: true, message: '请上传嫌疑人照片', trigger: 'blur'}">
+    <el-form-item label="嫌疑人照片:">
       <div class="pic_format" style="left: 96px;top: -40px;">
         <div @click="popSel">从布控库中选择</div>
       </div>
@@ -61,7 +61,7 @@
         <div @click="popSel">从布控库中选择</div>
       </div>
       <div v-for="(item, index) in modelOneForm.licensePlateNumList" :key="index" style="position: relative;" class="plate_num">
-        <el-form-item :label="index === 0 ? '嫌疑车辆:' : ''" :prop="'licensePlateNumList.' + index + '.recipient'" :rules="{ required: true, message: '请输入车辆车牌号', trigger: 'blur'}" >
+        <el-form-item :label="index === 0 ? '嫌疑车辆:' : ''" :prop="'licensePlateNumList.' + index + '.licensePlateNum'" :rules="{validator: validPlateNumber, trigger: 'blur'}">
           <el-input v-model="item.licensePlateNum" placeholder="请输入车辆车牌号"></el-input>
         </el-form-item>
       </div>
@@ -71,20 +71,25 @@
       </el-form-item>
     </el-form-item>
     <el-form-item style="margin-top: 20px;">
-      <el-button type="primary" @click="selControl">一键布控</el-button>
+      <el-button type="primary" @click="selControl('modelOne')">一键布控</el-button>
     </el-form-item>
     <div is="controlDev" :missingTime="modelOneForm.missingTime" :addressObj="addressObj_" v-if="isShowControlDev"></div>
+    <div is="vehicleLib" ref="vehicleLibDialog"></div>
+    <div is="portraitLib" ref="portraitLibDialog"></div>
   </el-form>
 </template>
 <script>
 import uploadPic from './uploadPic.vue';
 import controlDev from './controlDev.vue';
-import {mapXupuxian} from '@/config/config.js';
+import vehicleLib from './vehicleLib.vue';
+import portraitLib from './portraitLib.vue';
 import {random14, objDeepCopy} from '@/utils/util.js';
+import {checkName, checkPlateNumber} from '@/utils/validator.js';
 export default {
-  components: {uploadPic, controlDev},
+  components: {uploadPic, controlDev, vehicleLib, portraitLib},
   data () {
     return {
+      map: null,
       modelOneForm: {
         missingTime: new Date('2019-9-6 9:00'),
         personnelName: null,
@@ -93,21 +98,41 @@ export default {
         familyAddress: null,
         licensePlateNumList: [{licensePlateNum: null}]
       },
-      sexList: [],
+      validPlateNumber: checkPlateNumber,
+      validName: checkName,
+      sexList: [
+        {value: 1, label: '男'},
+        {value: 2, label: '女'},
+        {value: 3, label: '性别不限'}
+      ],
       autoComplete: null,
       addressObj: [],
       addressObj_: [],
       fileListOne: [],//上传的失踪人员信息数据
       fileListTwo: [],//上传的嫌疑人照片数据
-      isShowControlDev: true,//是否显示布控设备选择部分
-      // 弹出框参数
-      createSelDialog: false
+      isShowControlDev: false,//是否显示布控设备选择部分
     }
   },
   mounted () {
     this.resetMap();
   },
   methods: {
+    // 一键布控
+    selControl (formName) {
+      // if (this.fileListOne.length === 0) {
+      //   return this.$message.warning('请上传失踪人员图片');
+      // } 
+      // this.$refs[formName].validate((valid) => {
+      //   if (valid) {
+          this.isShowControlDev = true;
+          this.addressObj_ = objDeepCopy(this.addressObj);
+      //   } else {
+      //     return false;
+      //   }
+      // });
+    
+     
+    },
     // 失踪人员信息的上传方法
     uploadPicDelOne (fileList) {
       this.fileListOne = fileList;
@@ -126,7 +151,8 @@ export default {
     },
     // 从库中选择
     popSel () {
-      this.createSelDialog = true;
+      this.$refs['portraitLibDialog'].portraitLibDialog = true;
+      this.$refs['portraitLibDialog'].reset();
     },
     // 添加车牌号码
     addLicensePlateNum () {
@@ -136,17 +162,16 @@ export default {
     removeLicensePlateNum () {
       this.modelOneForm.licensePlateNumList.pop();
     },
-    // 初始化地图
+    // 拿到地图实列
     resetMap () {
-      // 共有部分
       let _this = this;
-      let map = new window.AMap.Map(
+      _this.map = new window.AMap.Map(
         'xxx', {
-          zoom: 12,
-          center: mapXupuxian.center
+          zoom: null,
+          center: null
         }
       );
-      map.plugin('AMap.Autocomplete', () => {
+      _this.map.plugin('AMap.Autocomplete', () => {
         let autoOptions = {
           city: '溆浦县'
         }
@@ -192,11 +217,11 @@ export default {
         });
       }
     },
-    // 一键布控
-    selControl () {
-      console.log(this.modelOneForm.missingAddress)
-      this.isShowControlDev = true;
-      this.addressObj_ = objDeepCopy(this.addressObj);
+  },
+  // 销毁地图实例
+  isDestroyed () {
+    if (this.map) {
+      this.map.destroy();
     }
   }
 }

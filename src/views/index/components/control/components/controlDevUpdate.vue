@@ -174,7 +174,8 @@ export default {
     'bayFromDataUp',
     'self_to_data1Up',
     'self_to_data2Up',
-    'addressObj'
+    'addressObj',
+    'modelType'
   ],
   data () {
     return {
@@ -281,6 +282,10 @@ export default {
         if (res) {
           this.bayFromData_ = this.commonFn1(objDeepCopy([res.data]));
           this.devFromData_ = this.commonFn2(objDeepCopy([res.data]));
+          if (this.modelType === 4 || this.modelType === 6) {
+            this.bayFromData = objDeepCopy(this.bayFromData_);
+            this.devFromData = objDeepCopy(this.devFromData_);
+          }
           this.devList = this.flatDev([res.data]);
           this.mapMark(this.devList);
           this.addressObj && this.addressMark();
@@ -385,7 +390,9 @@ export default {
                 <li><span>设备地址：</span><span>${obj.address}</span></li>`;
               } else {
                 _sContent += `<li><span>卡口名称：</span><span>${obj.bayonetName}</span></li>
-                <li><span>卡口地址：</span><span>${obj.bayonetAddress}</span></li>`;
+                <li><span>卡口编号：</span><span>${obj.bayonetNo}</span></li>
+                <li><span>地理位置：</span><span>${obj.bayonetAddress}</span></li>
+                <li><span>设备数量：</span><span>${obj.devNum}</span></li>`;
               }
               _sContent += '</ul></div>';
             _hoverWindow = new window.AMap.InfoWindow({

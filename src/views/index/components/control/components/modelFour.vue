@@ -3,7 +3,7 @@
     <h1>布控信息：</h1>
     <div class="sel_lib"><span>禁入人员：</span><span>从布控库中选择</span></div>
     <div class="sel_img_box">
-      <div class="img_box" v-for="item in '113'" :key="item.id">
+      <div class="img_box" v-for="item in protraitList" :key="item.id">
         <img src="http://temp.im/104x104" alt="">
         <i class="el-icon-error"></i>
         <span>汪诗诗</span>
@@ -11,14 +11,15 @@
     </div>
     <div class="sel_lib"><span>禁入车辆：</span><span>从布控库中选择</span></div>
     <div class="sel_img_box">
-      <div class="img_box" v-for="item in '123'" :key="item.id">
+      <div class="img_box" v-for="item in vehicleList" :key="item.id">
         <img src="http://temp.im/104x104" alt="">
         <i class="el-icon-error"></i>
         <span>汪诗诗</span>
       </div>
     </div>
     <el-button type="primary" @click="selControl">一键布控</el-button>
-    <div is="controlDevUpdate" v-if="isShowControlDev"></div>
+    <div 
+    is="controlDevUpdate" v-if="isShowControlDev" :modelType="4"></div>
   </div>  
 </template>
 <script>
@@ -28,11 +29,16 @@ export default {
   data () {
     return {
       isShowControlDev: false,
+      protraitList: '123',
+      vehicleList: '123',
     }
   },
   methods: {
     // 一键布控
     selControl () {
+      if (!this.protraitList && !this.vehicleList) {
+        return this.$message.warning('禁入人员、禁入车辆至少选一种');
+      }
       this.isShowControlDev = true;
     }
   }

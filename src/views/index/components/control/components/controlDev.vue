@@ -26,7 +26,6 @@
                 :props="defaultProps"
                 :default-expanded-keys="to_expanded_keys"
                 :default-expand-all="true"
-                @node-click="handleNodeClick"
               >
               </el-tree>
               <!-- 不显示在页面上，作为已选设备树的参照 -->
@@ -71,7 +70,7 @@ import {random14, objDeepCopy} from '@/utils/util.js';
 import controlDevUpdate from './controlDevUpdate.vue';
 export default {
   components: {controlDevUpdate},
-  props: ['addressObj', 'missingTime'],
+  props: ['addressObj', 'addressObjTwo', 'modelType', 'missingTime'],
   data () {
     return {
       pageType: 1,//页面类型，1为布控设备展示页面，2为修改布控设备页面
@@ -102,7 +101,6 @@ export default {
     this.getDevList();
   },
   methods: {
-    handleNodeClick () {},
     // 初始化地图
     resetMap () {
       // 共有部分
@@ -135,7 +133,12 @@ export default {
           this.devList = this.flatDev([res.data]);
           console.log(this.devList);
           this.mapMark(this.devList);
+          // 第1次点击第1个布控模型的一键布控时所执行的
           this.addressObj && this.addressMark();
+          // 第1次点击第2个布控模型的一键布控时所执行的
+          this.addressObjTwo && this.mapCircleTwo();
+          // 第1次点击第3个布控模型的一键布控时所执行的
+          this.modelType === 3 && this.getAllBay();
         }
       });
     },
@@ -203,7 +206,9 @@ export default {
                 <li><span>设备地址：</span><span>${obj.address}</span></li>`;
               } else {
                 _sContent += `<li><span>卡口名称：</span><span>${obj.bayonetName}</span></li>
-                <li><span>卡口地址：</span><span>${obj.bayonetAddress}</span></li>`;
+                <li><span>卡口编号：</span><span>${obj.bayonetNo}</span></li>
+                <li><span>地理位置：</span><span>${obj.bayonetAddress}</span></li>
+                <li><span>设备数量：</span><span>${obj.devNum}</span></li>`;
               }
               _sContent += '</ul></div>';
             _hoverWindow = new window.AMap.InfoWindow({
@@ -304,6 +309,22 @@ export default {
       this.removeObj[type].push(circle);
       this.getCircleDev(circle);
     },
+    // 圆形覆盖物
+    mapCircleTwo () {
+      let _this = this;
+      const lngLat = this.addressObjTwo.lnglat;
+      let circle = new window.AMap.Circle({
+        center: new window.AMap.LngLat(lngLat[0], lngLat[1]), // 圆心位置
+        radius: this.addressObjTwo.radius * 1000,  //半径
+        strokeColor: "#F33",  //线颜色
+        strokeOpacity: 1,  //线透明度
+        strokeWeight: 3,  //线粗细度
+        fillColor: "#ee2200",  //填充颜色
+        fillOpacity: 0.35 //填充透明度
+      })
+      circle.setMap(_this.map);
+      this.getCircleDev(circle);
+    },
     // 获取圆形覆盖物内的设备和卡口
     getCircleDev (circle) {
       let _this = this, res = [];
@@ -338,6 +359,20 @@ export default {
           this.addDevIsLeft(data);
         })
       }
+    },
+    // 获取城内所有卡口
+    getAllBay () {
+      let _this = this, res = [];
+      const bayList = this.devList.reduce((pre, cur) => {
+        if (cur.type === 2) {
+          pre = [...pre, cur.uid];
+        }
+        return pre;
+      },[]);
+      this.bayOrdev = 2;
+      this.$nextTick(() => {
+        this.addDevIsLeft(bayList);
+      })
     },
     // 添加按钮
     addDevIsLeft(data) {
@@ -541,9 +576,18 @@ export default {
     },
   },
   watch: {
+    // 再次点击第1个一键布控所执行的
     addressObj (val) {
       console.log(this.addressObj, 'addressObj')
       val.length > 0 && this.addressMark();
+    },
+    // 再次点击第2个一键布控所执行的
+    addressObjTwo (val) {
+      val && this.mapCircleTwo();
+    },
+    // 再次点击第3个一键布控所执行的
+    modelType (val) {
+      val === 3 && this.getAllBay();
     },
     bayOrdev () {
       if (this.bayOrdev === 2) {
