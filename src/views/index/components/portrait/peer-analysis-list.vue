@@ -22,31 +22,8 @@
         </span>
         </div>
         <div class="vl_jtc_img_box">
-          <div style="margin-left: 17px;" class="vl_judge_tc_c_item"  @drop="drop($event)" @dragover="allowDrop($event)">
-            <el-upload
-                    :class="{'vl_jtc_upload_ytsr': true}"
-                    :show-file-list="false"
-                    accept="image/*"
-                    :action="uploadAcion"
-                    list-type="picture-card"
-                    @drop="drop($event)"
-                    :before-upload="beforeAvatarUpload"
-                    :on-success="uploadSucess"
-                    :on-error="handleError">
-              <i v-if="uploading" class="el-icon-loading"></i>
-              <img v-else-if="curImageUrl" :src="curImageUrl">
-              <div class="vl_upload_tip" v-else>
-                <i
-                        style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
-                        class="vl_icon vl_icon_vehicle_01"
-                ></i>
-                <span>点击上传图片</span>
-              </div>
-            </el-upload>
-            <div v-show="curImageUrl" class="del_icon">
-              <i class="el-icon-delete" @click="delPic()"></i>
-            </div>
-            <p @click="showHistoryPic">从上传记录中选择</p>
+          <div style="padding: 0 25px; height: 210px;">
+            <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit"></div>
           </div>
         </div>
         <div class="per_semblance_ytsr"><span>同行次数：</span><el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100; if(value&&value <2)value = 2;" placeholder="填写同行次数" v-model="searchData.minSemblance"></el-input>(2-100)</div>
@@ -235,26 +212,6 @@
           </template>
         </div>
       </div>
-      <!--历史记录弹窗-->
-      <el-dialog
-              :visible.sync="historyPicDialog"
-              class="history-pic-dialog"
-              :close-on-click-modal="false"
-              top="4vh"
-              title="最近上传的图片">
-        <div style="text-align: center;font-size: 20px;" v-if="loadingHis"><i class="el-icon-loading"></i></div>
-        <vue-scroll class="his-pic-box" v-else-if="historyPicList.length">
-          <div class="his-pic-item" :class="{'active': item.checked}" v-for="item in historyPicList" :key="item.id" @click="chooseHisPic(item)">
-            <img :src="item.path" alt="">
-          </div>
-          <div style="clear: both;"></div>
-        </vue-scroll>
-        <p v-else>暂无历史记录</p>
-        <div slot="footer">
-          <el-button @click="historyPicDialog = false">取消</el-button>
-          <el-button type="primary" @click="addHisToImg" :disabled="choosedHisPic.length === 0">确认</el-button>
-        </div>
-      </el-dialog>
       <!--中断任务弹出框-->
       <el-dialog
         title="中断任务确认"
@@ -308,7 +265,6 @@ export default {
       uploading: false,
       uploadAcion: ajaxCtx.base + '/new',
       searching: false,
-      curImageUrl: '', // 当前上传的图片
       imgList: '',
       historyPicDialog: false,
       historyPicList: [], // 上传历史记录
@@ -350,7 +306,6 @@ export default {
       isAddLoading: false,
       fileList: [], // 图片上传列表
       dialogImageUrl: null,
-      curImageUrl: null,
       uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
       addData: {
         taskName: null,
@@ -421,87 +376,6 @@ export default {
       if (e > this.searchData.endTime) {
         this.$message.info('结束时间必须大于开始时间才会有结果')
       }
-    },
-    handleError () {
-      this.uploading = false;
-      this.$message.error('上传失败')
-    },
-    showHistoryPic () {
-      this.loadingHis = true;
-      this.historyPicDialog = true;
-      let params = {
-        userId: this.$store.state.loginUser.uid,
-        fileType: 1
-      }
-      JtcGETAppendixInfoList(params).then(res => {
-        if (res) {
-          this.loadingHis = false;
-          res.data.forEach(x => x.checked = false);
-          this.historyPicList = res.data;
-        }
-      }).catch(() => {
-        this.historyPicDialog = false;
-      })
-    },
-    chooseHisPic (item) {
-      this.historyPicList.forEach(x => x.checked = false)
-      item.checked = true;
-    },
-    addHisToImg () {
-      this.historyPicDialog = false;
-      let _ids = [];
-      this.choosedHisPic.forEach(x => {
-        _ids.push(x.uid)
-        this.imgList = x;
-        this.curImageUrl = x.path;
-      })
-      let _obj = {
-        appendixInfoIds: _ids.join(',')
-      }
-      JtcPUTAppendixsOrder(_obj);
-    },
-    // 上传图片
-    uploadPicExceed () {
-      this.$message.warning('当前限制选择 3 个文件，请删除后再上传！');
-    },
-    beforeAvatarUpload (file) {
-      const isJPG = (file.type === 'image/jpeg' || file.type === 'image/png');
-      const isLt = file.size / 1024 / 1024 < 100;
-      if (!isJPG) {
-        this.$message.error('只能上传 JPG / PNG 格式图片!');
-      }
-      if (!isLt) {
-        this.$message.error('上传图片大小不能超过 100MB!');
-      }
-      this.uploading = true;
-      return isJPG && isLt;
-    },
-    uploadSucess (response, file, fileList) {
-      this.uploading = false;
-      if (response && response.data) {
-        let oRes = response.data;
-        if (oRes) {
-          let x = {
-            cname: oRes.fileName, // 附件名称 ,
-            contentUid: this.$store.state.loginUser.uid,
-            // desci: '', // 备注 ,
-            filePathName: oRes.fileName, // 附件保存名称 ,
-            fileType: 1, // 文件类型 ,
-            imgHeight: oRes.fileHeight, // 图片高存储的单位位px ,
-            imgSize: oRes.fileSize, // 图片大小存储的单位位byte ,
-            imgWidth: oRes.fileWidth, //  图片宽存储的单位位px ,
-            // otherFlag: '', // 其他标识 ,
-            path: oRes.fileFullPath, // 附件路径 ,
-            // path: oRes.path,
-            thumbnailName: oRes.thumbnailFileName, // 缩略图名称 ,
-            thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
-            // uid: '' //  附件标识
-          };
-          this.imgList = x;
-          this.curImageUrl = x.path;
-        }
-      }
-      console.log(fileList)
     },
     //获取摄像头卡口信息列表
     getMonitorList() {
@@ -634,8 +508,7 @@ export default {
     resetSearch () {
       this.taskName = '';
       this.searchData.minSemblance = 5;
-      this.imgList = '';
-      this.curImageUrl = '';
+      this.uploadClear = {}
       this.$nextTick(() => {
         this.checkAllTree = true;
         this.handleCheckedAll(true);
@@ -737,9 +610,9 @@ export default {
     },
     uploadEmit(data) {
       if (data && data.path) {
-        this.curImageUrl = data.path;
+        this.imgList = data;
       } else {
-        this.curImageUrl = "";
+        this.imgList = null;
       }
     },
     // 上传成功
@@ -1010,136 +883,6 @@ export default {
       border-bottom: 1px solid #D3D3D3;
       padding-bottom: 30px;
       margin-bottom: 30px;
-      .vl_judge_tc_c_item {
-        width: 238px;
-        height: 238px;
-        display: inline-block;
-        position: relative;
-        -webkit-border-radius: 10px;
-        -moz-border-radius: 10px;
-        border-radius: 10px;
-        cursor: pointer;
-        background: #f2f2f2;
-        .del_icon {
-          display: none;
-          position: absolute;
-          top: 10px;
-          right: 10px;
-          width: 24px;
-          height: 24px;
-          line-height: 24px;
-          text-align: center;
-          background: rgba(0, 0, 0, 0.4);
-          -webkit-border-radius: 4px;
-          -moz-border-radius: 4px;
-          border-radius: 4px;
-          color: #ffffff;
-        }
-        &:first-child {
-          margin-right: .15rem;
-        }
-        &:last-child {
-          margin-left: .15rem;
-        }
-        &:hover {
-          background: #2981F8;
-          >p {
-            display: block;
-          }
-          .del_icon {
-            display: block;
-          }
-          .vl_upload_tip {
-            span {
-              display: none;
-            }
-          }
-        }
-        .vl_jtc_upload_ytsr {
-          width: 100%;
-          height: 100%;
-          background: none;
-          .el-upload--picture-card {
-            border: none;
-          }
-          .el-upload {
-            width: 100%;
-            height: 100%;
-            background: none;
-            line-height: 238px;
-            img {
-              width: 100%;
-              height: 100%;
-              -webkit-border-radius: 10px;
-              -moz-border-radius: 10px;
-              border-radius: 10px;
-            }
-          }
-          .vl_upload_tip {
-            i {
-              width: 100px;height: 85px;opacity: .5; position: absolute;
-              top: 0;left: 0;right: 0;bottom: 0;margin: auto;
-            }
-            span {
-              position: absolute; bottom: 6px; left: 0;
-              width: 100%; line-height: normal;
-              text-align: center;
-              color: #999;
-            }
-          }
-        }
-        >p {
-          display: none;
-          position: absolute;
-          bottom: 0;
-          text-align: center;
-          width: 100%;
-          color: #FFFFFF;
-          height: 40px;
-          line-height: 40px;
-          -webkit-border-radius: 0 0 10px 10px;
-          -moz-border-radius: 0 0 10px 10px;
-          border-radius: 0 0 10px 10px;
-          background: rgba(0, 0, 0, 0.3);
-        }
-        .vl_jtc_ic_input {
-          position: absolute;
-          top: .2rem;
-          width: 3rem;
-          height: .26rem;
-          left: .2rem;
-          border: 1px solid #D3D3D3;
-          -webkit-border-radius: .13rem;
-          -moz-border-radius: .13rem;
-          border-radius: .13rem;
-          padding: 0 .02rem;
-          background: #FFFFFF;
-          .el-form-item__content {
-            height: .23rem;
-            line-height: .23rem;
-          }
-          input {
-            border: none!important;
-            height: .23rem;
-            line-height: .23rem;
-          }
-        }
-        .del_icon {
-          display: none;
-          position: absolute;
-          top: 10px;
-          right: 10px;
-          width: 24px;
-          height: 24px;
-          line-height: 24px;
-          text-align: center;
-          background: rgba(0, 0, 0, .4);
-          -webkit-border-radius: 4px;
-          -moz-border-radius: 4px;
-          border-radius: 4px;
-          color: #FFFFFF;
-        }
-      }
       .vl_jtc_img_list {
         width: 100%;
         margin-top: 10px;

@@ -33,6 +33,7 @@
                     class="vl_date vl_date_end"
                     v-model="ruleForm.data2"
                     :time-arrow-control="true"
+                    :picker-options="pickerOptions"
                     @change="chooseEndTime"
                     type="datetime"
                     time-arrow-control
@@ -41,28 +42,8 @@
           </el-form-item>
           <el-form-item>
             <div class="upload_warp">
-              <el-upload
-                      class="vl_jtc_upload_gjfx gjfx_upload"
-                      multiple
-                      :show-file-list="false"
-                      accept="image/*"
-                      :action="uploadAcion"
-                      list-type="picture-card"
-                      :before-upload="beforeAvatarUpload"
-                      :on-success="uploadSucess"
-                      :on-error="handleError">
-                <i v-if="uploading" class="el-icon-loading"></i>
-                <img v-else-if="ruleForm.input3" :src="ruleForm.input3">
-                <div v-else>
-                  <i
-                          style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
-                          class="vl_icon vl_icon_vehicle_01"
-                  ></i>
-                  <span>点击上传图片</span>
-                </div>
-              </el-upload>
-              <div v-show="ruleForm.input3" class="del_icon">
-                <i class="el-icon-delete" @click="delPic()"></i>
+              <div style="height: 210px;">
+                <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit" :imgData="imgData"></div>
               </div>
             </div>
           </el-form-item>
@@ -335,6 +316,7 @@
   </div>
 </template>
 <script>
+  import vlUpload from '@/components/common/upload.vue';
   import vlBreadcrumb from '@/components/common/breadcrumb.vue';
   import flvplayer from '@/components/common/flvplayer.vue';
   import { mapXupuxian,ajaxCtx } from "@/config/config.js";
@@ -344,13 +326,14 @@
   import { MapGETmonitorList } from "@/views/index/api/api.map.js";
   import { getAllBayonetList } from "@/views/index/api/api.base.js";
   export default {
-    components: {vlBreadcrumb, flvplayer},
+    components: {vlBreadcrumb, flvplayer, vlUpload},
     data() {
       return {
+        imgData: null,
+        uploadClear: {},
         playerData: null,
         filterDialog: false,
         showLeft: false,
-        selectMapClear: '',
         loading: false,
         count: 3,
         totalAddressNum: 0,
@@ -389,7 +372,6 @@
           data1: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)),
           data2: new Date(),
           input3: '',
-          input5: "1",
           value1: null,
         },
         pricecode:cityCode,
@@ -427,12 +409,20 @@
     },
     mounted() {
       this.renderMap();
-      this.setDTime();
       if (this.$route.query.imgurl) {
         this.ruleForm.input3 = this.$route.query.imgurl;
+        this.imgData = {path: this.$route.query.imgurl}
       }
     },
     methods: {
+      uploadEmit (data) {
+        console.log('uploadEmit data', data);
+        if (data && data.path) {
+          this.ruleForm.input3 = data.path;
+        } else {
+          this.ruleForm.input3 = '';
+        }
+      },
       // 设置视频数据
       setPlayerData () {
         if (this.sturcDetail.videoPath) {
@@ -447,9 +437,6 @@
         } else {
           this.playerData = null;
         }
-      },
-      delPic () {
-        this.ruleForm.input3 = '';
       },
       chooseEndTime (e) {
         if (e < this.ruleForm.data1) {
@@ -475,37 +462,9 @@
          }
         }
       },
-      beforeAvatarUpload (file) {
-        const isJPG = (file.type === 'image/jpeg' || file.type === 'image/png');
-        const isLt = file.size / 1024 / 1024 < 100;
-        if (!isJPG) {
-          this.$message.error('只能上传 JPG / PNG 格式图片!');
-        }
-        if (!isLt) {
-          this.$message.error('上传图片大小不能超过 100MB!');
-        }
-        this.uploading = true;
-        return isJPG && isLt;
-      },
-      uploadSucess (response, file, fileList) {
-        if (response && response.data) {
-          let oRes = response.data;
-          if (oRes) {
-            this.uploading = false;
-            this.ruleForm.input3 = oRes.fileFullPath;
-          }
-        }
-      },
-      handleError () {
-        this.uploading = false;
-        this.$message.error('上传失败')
-      },
       setDTime () {
-        /* let date = new Date();
-        let curDate = date.getTime();
-        let curS = 1 * 24 * 3600 * 1000;
-        this.ruleForm.data1 = curDate - curS;
-        this.ruleForm.data2 = curDate; */
+        this.ruleForm.data1 = dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000));
+        this.ruleForm.data2 = new Date();
       },
       hideResult() {
         this.reselt = false;
@@ -543,15 +502,10 @@
         }
       },
       resetForm(){
-        this.ruleForm.input5 = '1';
+        this.setDTime();
         this.ruleForm.input3 = '';
         this.ruleForm.value1 = [];
-        this.selectMapClear = random14();
-        this.pointData = {
-          deviceList: [],
-          bayonetList: []
-        }
-        this.curChooseNum = '已选择0个设备';
+        this.uploadClear = {};
         this.setDTime ();
       },
       renderMap() {

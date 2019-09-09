@@ -103,7 +103,7 @@
                     @click.stop="getCharacter"
                     :loading="getCharacterLoading"
                   >获取特征</el-button>
-                  <div class="characteristic_list" v-if="characteristicList.length > 0">
+                  <div class="characteristic_list" :style="{'height': showAllCharac ? 'auto' : '146px'}" v-if="characteristicList.length > 0">
                     <div
                       class="characteristic_yes_item"
                       :title="item.checked ? '取消选择此特征': '选择此特征'"
@@ -160,6 +160,8 @@
                       <span v-else-if="item.calling">{{ '打电话状态:' + item.name }}</span>
                     </div>
                     <!-- 没有特征 -->
+                    <span class="show_more_btn" @click="showAllCharac = false" v-show="showAllCharac">收起更多<i class="el-icon-arrow-up"></i></span>
+                    <span class="show_more_btn" @click="showAllCharac = true" v-show="!showAllCharac">更多特征<i class="el-icon-arrow-down"></i></span>
                   </div>
                 </div>
               </div>
@@ -360,7 +362,6 @@
       </div>
     </div>
     <!--检索详情弹窗-->
-    <div id="capMap"></div>
     <div is="vehicleDetail" :detailData="detailData"></div>
   </div>
 </template>
@@ -490,23 +491,24 @@ export default {
         "vehicleClass", // 汽车类型（越野啥的）
         "plateClass" // 车牌类型
       ],
+      showAllCharac: false,// 展示更多特征
       characterObj: [
 //          {name: 'hasPlate', disabled: false}, // 有无车牌
-          {name: 'plateNo', disabled: false}, // 车牌号
-          {name: 'plateClass', disabled: false},// 号牌类型
-          {name: 'plateColor', disabled: false},// 号牌颜色
-          {name: 'vehicleClass', disabled: false},// 车辆类型
-          {name: 'vehicleColor', disabled: false},// 车辆颜色
-          {name: 'vehicleModel', disabled: false},// 车辆型号
-          {name: 'vehicleBrand', disabled: true},// 车辆品牌
-          {name: 'vehicleStyles', disabled: true},// 车辆年款
-          {name: 'vehicleRoof', disabled: true}, // 车顶天窗
-          {name: 'hitMarkInfo', disabled: true}, // 车辆撞痕
-          {name: 'descOfFrontItem', disabled: true}, // 车前物品
-          {name: 'descOfRearItem', disabled: true}, // 车后物品
-          {name: 'sunvisor', disabled: true}, // 遮阳板状态
-          {name: 'safetyBelt', disabled: true}, // 安全带状态
-          {name: 'calling', disabled: true}, // 打电话状态
+          {name: 'plateNo', disabled: false, label: '车牌号码'}, // 车牌号
+          {name: 'plateClass', disabled: false, label: '车牌类型'},// 号牌类型
+          {name: 'plateColor', disabled: false, label: '车牌颜色'},// 号牌颜色
+          {name: 'vehicleClass', disabled: false, label: '车辆类型'},// 车辆类型
+          {name: 'vehicleColor', disabled: false, label: '车辆颜色'},// 车辆颜色
+          {name: 'vehicleModel', disabled: false, label: '车辆型号'},// 车辆型号
+          {name: 'vehicleBrand', disabled: true, label: '车辆品牌'},// 车辆品牌
+          {name: 'vehicleStyles', disabled: true, label: '车辆年款'},// 车辆年款
+          {name: 'vehicleRoof', disabled: true, label: '车顶天窗'}, // 车顶天窗
+          {name: 'hitMarkInfo', disabled: true, label: '车辆撞痕'}, // 车辆撞痕
+          {name: 'descOfFrontItem', disabled: true, label: '车前物品'}, // 车前物品
+          {name: 'descOfRearItem', disabled: true, label: '车后物品'}, // 车后物品
+          {name: 'sunvisor', disabled: true, label: '遮阳板状态'}, // 遮阳板状态
+          {name: 'safetyBelt', disabled: true, label: '安全带状态'}, // 安全带状态
+          {name: 'calling', disabled: true, label: '打电话状态'}, // 打电话状态
       ],
       options: [
         {
@@ -586,13 +588,6 @@ export default {
     }
   },
   mounted() {
-    // 初始化地图
-    let map = new AMap.Map("capMap", {
-      center: [112.974691, 28.093846],
-      zoom: 16
-    });
-    map.setMapStyle("amap://styles/whitesmoke");
-    this.amap = map;
     // 选择一个默认的日期
     this.setDTime();
     //获取摄像头卡口数据
@@ -807,16 +802,18 @@ export default {
                     } else {
                       obj.checked = false;
                     }
-                    obj[key] = data[key];
-                    obj["name"] = data[key];
-                    console.log(obj)
-                    if (obj[key]) {
-                      // 如果特征值有数据
-                      this.characteristicList = [
-                        ...this.characteristicList,
-                        obj
-                      ];
+                    if (data[key]) {
+                      obj[key] = data[key];
+                      obj["name"] = data[key];
+                    } else {
+                      obj[key] = '未识别';
+                      obj['name'] = '未识别';
                     }
+                    console.log(obj)
+                    this.characteristicList = [
+                      ...this.characteristicList,
+                      obj
+                    ];
                   }
                 }
               }
@@ -1012,52 +1009,6 @@ export default {
         key => key.treeType === 2
       );
     },
-    // 绘制地图
-    drawPoint(data) {
-      this.$nextTick(() => {
-        $(".struc_c_address").append($("#capMap"));
-      });
-      if (this.markerPoint) {
-        this.amap.remove(this.markerPoint);
-      }
-      let _content = '<div class="vl_icon vl_icon_judge_02"></div>';
-      this.markerPoint = new AMap.Marker({
-        // 添加自定义点标记
-        map: this.amap,
-        position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-        offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
-        draggable: false, // 是否可拖动
-        // 自定义点标记覆盖物内容
-        content: _content
-      });
-      this.amap.setZoomAndCenter(16, [
-        data.shotPlaceLongitude,
-        data.shotPlaceLatitude
-      ]); // 自适应点位置
-      let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`;
-      this.infoWindow = new AMap.InfoWindow({
-        map: this.amap,
-        isCustom: true,
-        closeWhenClickMap: false,
-        position: [data.shotPlaceLongitude, data.shotPlaceLatitude],
-        offset: new AMap.Pixel(0, -70),
-        content: sConent
-      });
-    },
-    videoTap() {
-      // 播放视频
-      let vDom = document.getElementById("capVideo");
-      if (this.playing) {
-        vDom.pause();
-      } else {
-        vDom.play();
-      }
-      vDom.addEventListener("ended", e => {
-        e.target.currentTime = 0;
-        this.playing = false;
-      });
-      this.playing = !this.playing;
-    },
     showStrucInfo(data, index) {
       // strucInfoList
       this.detailData = {
@@ -1069,23 +1020,6 @@ export default {
         total: this.total,
         pageNum: this.pageNum
       };
-    },
-    /* showStrucInfo(data, index) {
-      // 打开抓拍详情
-      this.$nextTick(() => {
-        console.log("swiper", this.$refs.mySwiper);
-      });
-      this.sturcDetail = null;
-      this.curImgIndex = index;
-      this.strucDetailDialog = true;
-      this.sturcDetail = data;
-      this.drawPoint(data);
-    }, */
-    imgListTap(data, index) {
-      // 点击swiper图片
-      this.curImgIndex = index;
-      this.sturcDetail = data;
-      this.drawPoint(data); // 重新绘制地图
     },
     uploadEmit(data) {
       if (data && data.path) {
@@ -1112,13 +1046,6 @@ export default {
     curImageUrl(e) {
       if (e === "") {
         this.characteristicList = [];
-      }
-    },
-    strucCurTab(e) {
-      if (e === 2) {
-        this.drawPoint(this.sturcDetail);
-      } else if (e === 3) {
-        this.videoUrl = document.getElementById("capVideo").src;
       }
     }
   }
@@ -1177,12 +1104,19 @@ export default {
         .characteristic_list {
           min-height: 40px;
           overflow: hidden;
+          position: relative;
+          padding-bottom: 20px;
+          -webkit-transition: height .4s ease-out .2s;
+          -moz-transition: height .4s ease-out .2s;
+          -ms-transition: height .4s ease-out .2s;
+          -o-transition: height .4s ease-out .2s;
+          transition: height .4s ease-out .2s;
           .characteristic_yes_item {
             float: left;
             padding: 7px 10px;
             font-size: 12px;
             /*background: #fafafa;*/
-            border: 1px solid #f2f2f2;
+            border: 1px solid #D3D3D3;
             border-radius: 3px;
             margin: 10px 10px 0 0;
             cursor: pointer;
@@ -1199,11 +1133,16 @@ export default {
             cursor: pointer;
             color: #999999;
           }
-          .no_characteristic_list {
-            line-height: 40px;
-            text-align: center;
-            font-size: 16px;
-            color: #999;
+          .show_more_btn {
+            position: absolute;
+            bottom: -3px;
+            display: block;
+            background: #ffffff;
+            width: 100%;
+            left: 0px;
+            color: #0C70F8;
+            cursor: pointer;
+            padding-left: 12px;
           }
           .color_blue {
             color: #fff;
