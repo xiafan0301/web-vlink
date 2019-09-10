@@ -103,7 +103,7 @@
         <p class="transfer_center_item">
           <el-button
             type="primary"
-            @click="addToAims"
+            @click="addToAims(true)"
             :disabled="from_disabled"
             icon="el-icon-arrow-left"
             >添加</el-button
@@ -112,7 +112,7 @@
         <p class="transfer_center_item">
           <el-button
             type="primary"
-            @click="removeToSource"
+            @click="removeToSource(true)"
             :disabled="to_disabled"
           >
             移出<i class="el-icon-arrow-right"></i>
@@ -503,9 +503,9 @@ export default {
       const type = obj.type === 1 ? 0 : 1;
       if (flag) {
         const name = obj.type === 1 ? 'sxt' : 'kk';
-        return '<div id="' + obj.uid + '_" class="map_icons vl_icon vl_icon_' + name + '"></div>'
+        return `<div id="${obj.uid}_${name}" class="map_icons vl_icon vl_icon_${name} vl_icon_click"></div>`
       }
-      return '<div id="' + obj.uid + '" class="map_icons vl_icon vl_icon_map_sxt_in_area' + type + '"></div>'
+      return `<div id="${obj.uid}_${name}" class="map_icons vl_icon vl_icon_map_sxt_in_area${type} vl_icon_click"></div>`
     },
     // 获取覆盖物内的设备和卡口
     getPolygonDev (polygon) {
@@ -654,7 +654,7 @@ export default {
       this.bayFromData = objDeepCopy(this.bayFromData_);
       this.self_to_data1 = [];
       this.devFromData = objDeepCopy(this.devFromData_);
-      this.selAreaAcitve = !this.selAreaAcitve;
+      this.selAreaAcitve = false;
       this.selType = null;
       $('body').unbind('click');
       
@@ -787,9 +787,22 @@ export default {
       })
     },
      // 添加按钮
-    addToAims() {
+    addToAims(flag = false) {
       // 获取选中通过穿梭框的keys - 仅用于传送纯净的id数组到父组件同后台通信
       let keys = this.$refs["from-tree"].getCheckedKeys();
+      if (flag) {
+        let markers = [];
+        this.markerList.forEach(f => {
+          const obj = f.getExtData();
+          if (keys.some(s => s === obj.uid)) {
+            markers.push(f);
+            this.map.cluster.removeMarkers(f);
+            let uContent = this.setMarkContent(f.getExtData())
+            f.setContent(uContent);
+            this.map.add(f);
+          }
+        })
+      }
       // 获取半选通过穿梭框的keys - 仅用于传送纯净的id数组到父组件同后台通信
       let harfKeys = this.$refs["from-tree"].getHalfCheckedKeys();
       // 选中节点数据
@@ -898,9 +911,20 @@ export default {
       this.$refs["from-tree"].setCheckedKeys([]);
     },
     // 移除按钮
-    removeToSource() {
+    removeToSource(flag = false) {
       // 获取选中通过穿梭框的keys - 仅用于传送纯净的id数组到父组件同后台通信
       let keys = this.$refs["to-tree"].getCheckedKeys();
+      if (flag) {
+        let curMks = [];
+        this.markerList.forEach(f => {
+          if (keys.some(s => s === f.getExtData().uid)) {
+            let uContent = this.setMarkContent(f.getExtData(), true);
+            f.setContent(uContent);
+            curMks.push(f);
+          }
+        })
+        this.map.cluster.addMarkers(curMks);
+      }
       // 获取半选通过穿梭框的keys - 仅用于传送纯净的id数组到父组件同后台通信
       let harfKeys = this.$refs["to-tree"].getHalfCheckedKeys();
       // 获取选中通过穿梭框的nodes 选中节点数据
@@ -1236,8 +1260,8 @@ export default {
     if (this.map) {
       this.map.destroy();
     }
-    $('body').unbind('click');
     $('#devMap').unbind('click');
+    $('body').unbind('click');
   }
 }
 </script>
