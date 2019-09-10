@@ -2,6 +2,15 @@
   <div class="params_setting">
     <div class="content_box">
       <div class="title">
+        <span>人像检索默认阀值：</span>
+        <span>人像检索应用中涉及人像比对功能中，两个人脸信息对比可视为同一人的相似度最低阈值</span>
+      </div>
+      <div class="input_box">
+        <span class="input_box_title">{{personTitle}}</span>
+        <el-input v-model="personSearchVal" style="width: 200px;margin:0 8px" :disabled="!isEdit"></el-input>
+        <span class="input_box_title">%</span>
+      </div>
+      <div class="title">
         <span>落脚点分析阀值：</span>
         <span>若是相邻两次抓拍的设备距离和抓拍时间间隔满足以下两个条件，则将其中一个抓拍点设为落脚点</span>
       </div>
@@ -15,15 +24,6 @@
         <el-input v-model="stopTimeVal" maxlength="6" style="width: 200px;margin:0 8px" :disabled="!isEdit"></el-input>
         <span class="input_box_title">分钟</span>
       </div>
-      <!-- <div class="title">
-        <span>人像检索默认阀值：</span>
-        <span>人像检索应用中涉及人像比对功能中，两个人脸信息对比可视为同一人的相似度最低阈值</span>
-      </div>
-      <div class="input_box">
-        <span class="input_box_title">{{personTitle}}</span>
-        <el-input v-model="personSearchVal" style="width: 200px;margin:0 8px" :disabled="!isEdit"></el-input>
-        <span class="input_box_title">%</span>
-      </div> -->
     </div>
     <div class="operation-footer">
       <template v-if="isEdit === false">

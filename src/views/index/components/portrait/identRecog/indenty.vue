@@ -133,7 +133,6 @@ export default {
   },
   methods: {
     uploadEmit (data) {
-      console.log('uploadEmit data', data);
       if (data) {
         this.uploadImgId = data.uid;
       } else {

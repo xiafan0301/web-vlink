@@ -17,11 +17,6 @@
                   <span :class="{active_span: selectType === 1}" @click="handleRadioSelectType(1)">在线查询</span>
                   <span :class="{active_span: selectType === 2}" @click="handleRadioSelectType(2)">离线任务</span>
                 </div>
-                <!-- <span>查询方式:</span>
-                <el-radio-group v-model="selectType" class="select_radio" @change="handleRadioSelectType">
-                  <el-radio :label="1">在线查询</el-radio>
-                  <el-radio :label="2">离线任务</el-radio>
-                </el-radio-group> -->
               </el-form-item>
               <el-form-item prop="personGroupId" :rules="[{ required: true, message: '该项内容不能为空', trigger: 'blur' }]">
                 <el-select
@@ -128,7 +123,6 @@
                   </li>
                 </ul>
               </div>
-              
               <el-form-item prop="taskName" v-if="selectType === 2" :rules="[{ required: true, message: '该项内容不能为空', trigger: 'blur' }]">
                 <el-input placeholder="请设置任务名称" maxlength="20" v-model="qyryfxFrom.taskName"></el-input>
               </el-form-item>
@@ -326,6 +320,11 @@
                     </template>
                   </el-table-column>
                   <el-table-column label="年龄段" prop="age" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                      <span>{{scope.row.taskWebParam.age ? scope.row.taskWebParam.age : '不限'}}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="结果数" prop="age" show-overflow-tooltip v-if="selectIndex === 1">
                     <template slot-scope="scope">
                       <span>{{scope.row.taskWebParam.age ? scope.row.taskWebParam.age : '不限'}}</span>
                     </template>

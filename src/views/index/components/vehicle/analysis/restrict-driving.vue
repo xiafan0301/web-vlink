@@ -98,8 +98,8 @@
             </div>
           </div>
           <el-form-item style="margin-bottom:0" prop="tailNumbers">
-            <el-checkbox v-model="addForm.isTailNumberLimit">按照车牌尾号限行</el-checkbox>
-            <el-select v-model="addForm.tailNumbers" placeholder="请选择" style="width: 100%;" multiple clearable collapse-tags>
+            <el-checkbox v-model="addForm.isTailNumberLimit" @change="handleTailNumber">按照车牌尾号限行</el-checkbox>
+            <el-select v-model="addForm.tailNumbers" placeholder="请选择车牌尾号" style="width: 100%;" multiple clearable collapse-tags>
               <el-option
                 v-for="item in tailNumberOptions"
                 :key="item"
@@ -109,7 +109,7 @@
             </el-select>
           </el-form-item>
            <el-form-item prop="vehicleTypes">
-            <el-checkbox v-model="addForm.isVehicleTypeLimit">按照车辆类型限行</el-checkbox>
+            <el-checkbox v-model="addForm.isVehicleTypeLimit" @change="handleVehicleType">按照车辆类型限行</el-checkbox>
             <el-select v-model="addForm.vehicleTypes" placeholder="请选择车辆类型" style="width: 100%" multiple clearable collapse-tags>
               <el-option
                 v-for="(item, index) in vehicleTypeList"
@@ -392,6 +392,18 @@ export default {
       }
       return data;
     },
+    // 车牌尾号change
+    handleTailNumber (val) {
+      if (!val) {
+        this.addForm.tailNumbers = [];
+      }
+    },
+    // 车牌类型change
+    handleVehicleType (val) {
+      if (!val) {
+        this.addForm.vehicleTypes = [];
+      }
+    },
     // tab的方法
     chooseDevice() {
       // 选择了树的设备
@@ -464,7 +476,25 @@ export default {
     searchData (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-           if (this.selectCameraArr && this.selectCameraArr.length > 0) {
+
+          if (this.addForm.isTailNumberLimit) {
+            if (this.addForm.tailNumbers.length <= 0) {
+              if (!document.querySelector('.el-message--info')) {
+                this.$message.info('请选择车牌尾号');
+              }
+              return;
+            }
+          }
+          if (this.addForm.isVehicleTypeLimit) {
+            if (this.addForm.vehicleTypes.length <= 0) {
+              if (!document.querySelector('.el-message--info')) {
+                this.$message.info('请选择车牌类型');
+              }
+              return;
+            }
+          }
+
+          if (this.selectCameraArr && this.selectCameraArr.length > 0) {
             let cameraIds = this.selectCameraArr.map(res => res.id);
             this.addForm.devIds = cameraIds.join(",");
           }

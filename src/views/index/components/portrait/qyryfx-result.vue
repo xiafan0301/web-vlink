@@ -11,37 +11,156 @@
     <div class="content_box">
       <div class="left">
         <vue-scroll>
-          <ul class="result_ul">
-            <li class="person_list">
-              <span>任务名称：</span>
-              <p>{{taskDetail && taskDetail.taskName}}</p>
-            </li>
-            <li class="person_list">
-              <span>关注人群：</span>
-              <p>{{taskDetail.taskWebParam && taskDetail.taskWebParam.personGroupId}}</p>
-            </li>
-            <li>
-              <span>性别：</span>
-              <span>{{taskDetail.taskWebParam && taskDetail.taskWebParam.sex ? taskDetail.taskWebParam.sex : '不限'}}</span>
-            </li>
-            <li>
-              <span>年龄段：</span>
-              <span>{{taskDetail.taskWebParam && taskDetail.taskWebParam.age ? taskDetail.taskWebParam.age : '不限'}}</span>
-            </li>
-            <li class="area_list" v-for="(item, index) in taskDetail.taskWebParam && taskDetail.taskWebParam.deviceAndTimeList" :key="index">
-              <div>
-                <span>区域1时间：</span>
-                <div class="time_box">
-                  <p>{{item.startTime}}</p>
-                  <p>{{item.endTime}}</p>
+          <template v-if="!isUpdateTask">
+            <ul class="result_ul">
+              <li class="person_list">
+                <span>任务名称：</span>
+                <p>{{taskDetail && taskDetail.taskName}}</p>
+              </li>
+              <li class="person_list">
+                <span>关注人群：</span>
+                <p>{{taskDetail.taskWebParam && taskDetail.taskWebParam.personGroupNames}}</p>
+              </li>
+              <li>
+                <span>性别：</span>
+                <span>{{taskDetail.taskWebParam && taskDetail.taskWebParam.sex ? taskDetail.taskWebParam.sex : '不限'}}</span>
+              </li>
+              <li>
+                <span>年龄段：</span>
+                <span>{{taskDetail.taskWebParam && taskDetail.taskWebParam.age ? taskDetail.taskWebParam.age : '不限'}}</span>
+              </li>
+              <li class="area_list" v-for="(item, index) in taskDetail.taskWebParam && taskDetail.taskWebParam.deviceAndTimeList" :key="index">
+                <div>
+                  <span>区域1时间：</span>
+                  <div class="time_box">
+                    <p>{{item.startTime}}</p>
+                    <p>{{item.endTime}}</p>
+                  </div>
                 </div>
+                <div>
+                  <span>区域1设备：</span>
+                  <p>{{item.deviceNames && item.deviceNames ? item.deviceNames : '无'}}</p>
+                </div>
+              </li>
+            </ul>
+            <div class="update_task" @click="showUpdateTask">修改任务</div>
+          </template>
+          <template v-else>
+            <el-form :model="qyryfxFrom" ref="qyryfxFrom" class="qyryfx_form">
+              <p class="task_name">
+                <span>任务名称：</span>
+                <span>{{qyryfxFrom.taskName}}</span>
+              </p>
+              <el-form-item prop="personGroupId" :rules="[{ required: true, message: '该项内容不能为空', trigger: 'blur' }]">
+                <el-select
+                  ref="personSelect"
+                  class="width232"
+                  v-model="qyryfxFrom.personGroupId"
+                  placeholder="请选择分析人群"
+                  multiple
+                  collapse-tags
+                >
+                  <el-option
+                    v-for="item in peopleGroupOptions"
+                    :key="item.uid"
+                    :label="item.groupName"
+                    :value="item.uid"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item prop="sex">
+                <el-select class="width232" v-model="qyryfxFrom.sex" placeholder="请选择性别" clearable>
+                  <el-option
+                    v-for="item in peopleSexOptions"
+                    :key="item.enumField"
+                    :label="item.enumValue"
+                    :value="item.enumField"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item prop="age">
+                <el-select
+                  class="width232"
+                  v-model="qyryfxFrom.age"
+                  placeholder="请选择年龄段"
+                  clearable
+                  multiple
+                  collapse-tags
+                >
+                  <el-option
+                    v-for="item in peopleAgeOptions"
+                    :key="item.enumField"
+                    :label="item.enumValue"
+                    :value="item.enumField"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item class="area_time" prop="startTime">
+                <span>抓拍时间:</span>
+                <el-date-picker
+                  v-model="qyryfxFrom.startTime"
+                  type="datetime"
+                  :clearable="false"
+                  format="yyyy-MM-dd HH:mm:ss"
+                  value-format="yyyy-MM-dd HH:mm:ss"
+                  :picker-options="startDateOptArr"
+                  :time-arrow-control="true"
+                  placeholder="开始时间"
+                  class="width232 vl_date"
+                ></el-date-picker>
+                <el-date-picker
+                  v-model="qyryfxFrom.endTime"
+                  :clearable="false"
+                  :picker-options="endDateOptArr"
+                  :time-arrow-control="true"
+                  format="yyyy-MM-dd HH:mm:ss"
+                  value-format="yyyy-MM-dd HH:mm:ss"
+                  type="datetime"
+                  placeholder="结束时间"
+                  class="width232 vl_date vl_date_end"
+                ></el-date-picker>
+              </el-form-item>
+              <el-form-item class="area_select">
+                <span class="area_title">抓拍区域:</span>
+                <template v-if="isDisabledSelect">
+                  <span class="area_map_select area_map_disabled_select">地图区域选择</span>
+                </template>
+                <template v-else>
+                  <span class="area_map_select" @click="showMapDialog" >地图区域选择</span>
+                </template>
+                <div class="divide"></div>
+              </el-form-item>
+              <div class="area_list">
+                <ul>
+                  <li v-for="(item, index) in selectAreaDataList" :key="index">
+                    <div class="area_list_title">
+                      <span>区域{{index + 1}}</span>
+                      <div class="area_list_btn">
+                        <i class="vl_icon vl_icon_position_1" @click="showCurrentMapArea(item.index)"></i>
+                        <i class="vl_icon vl_icon_manage_8" @click="deleteSelectArea(index, item.index)"></i>
+                      </div>
+                    </div>
+                    <div class="area_list_time">
+                      <span>时间：</span>
+                      <div>
+                        <p>{{item.startTime}}</p>
+                        <p>{{item.endTime}}</p>
+                      </div>
+                    </div>
+                    <div class="area_list_device">
+                      <span>设备：</span>
+                      <div>{{item.allDeviceNameList && item.allDeviceNameList.join('、') }}</div>
+                    </div>
+                    <div class="divide"></div>
+                  </li>
+                </ul>
               </div>
-              <div>
-                <span>区域1设备：</span>
-                <p>{{item.deviceNames && item.deviceNames ? item.deviceNames : '无'}}</p>
-              </div>
-            </li>
-          </ul>
+              <el-form-item class="function_form_btn">
+                <el-button style="width: 110px;" @click="cancelEdit('qyryfxFrom')">取消</el-button>
+                <el-button type="primary" style="width: 110px;" :loading="submitLoading" @click="submitData('qyryfxFrom')">确定</el-button>
+              </el-form-item>
+            </el-form>
+          </template>
         </vue-scroll>
       </div>
       <div class="right">
@@ -158,7 +277,7 @@ import vlBreadcrumb from "@/components/common/breadcrumb.vue";
 import { mapXupuxian } from "@/config/config.js";
 import { getGroupAllList } from "@/views/index/api/api.control.js";
 import { getTaskInfosDetail } from '@/views/index/api/api.analysis.js';
-import { objDeepCopy } from "@/utils/util.js";
+import { objDeepCopy, formatDate, dateOrigin } from "@/utils/util.js";
 export default {
   components: { vlBreadcrumb },
   data () {
@@ -172,6 +291,62 @@ export default {
       currentClickDevice: [],
       markerList: [],
       swiper: null,
+      isUpdateTask: true, // 是否修改任务
+      submitLoading: false,
+      startDateOptArr: {
+        disabledDate (time) {
+          return time.getTime() > Date.now();
+        }
+      },
+      endDateOptArr: {
+        disabledDate (time) {
+          return time.getTime() > Date.now();
+        }
+      },
+      peopleGroupOptions: [], // 分析人群下拉
+      peopleSexOptions: [
+        {
+          enumField: "男",
+          enumValue: "男"
+        },
+        {
+          enumField: "女",
+          enumValue: "女"
+        }
+      ], // 性别下拉
+      peopleAgeOptions: [
+        {
+          enumField: "儿童",
+          enumValue: "儿童"
+        },
+        {
+          enumField: "少年",
+          enumValue: "少年"
+        },
+        {
+          enumField: "青年",
+          enumValue: "青年"
+        },
+        {
+          enumField: "中年",
+          enumValue: "中年"
+        },
+        {
+          enumField: "老年",
+          enumValue: "老年"
+        }
+      ], // 年龄段下拉
+      qyryfxFrom: {
+        taskName: null, // 任务名称
+        personGroupId: [], //分析人群
+        sex: null, // 性别
+        age: "", // 年龄段
+        startTime: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)), // 开始时间
+        endTime: new Date(), // 结束时间
+      },
+      isDisabledSelect: false, // 是否还能区域选择
+      selectAreaDataList: [], // 左侧选中的区域信息
+      deleteIndexArr: [], // 删除了的索引
     }
   },
   created () {
@@ -214,12 +389,14 @@ export default {
               });
               if (personGroupIdName.length > 0) {
                 if (personGroupIdName.length === this.peopleGroupOptions.length) {
-                  this.taskDetail.taskWebParam.personGroupId = '全部人群';
+                  this.taskDetail.taskWebParam.personGroupNames = '全部人群';
                 } else {
-                  this.taskDetail.taskWebParam.personGroupId = personGroupIdName.join('、');
+                  this.taskDetail.taskWebParam.personGroupNames = personGroupIdName.join('、');
                 }
               }
               this.initMap(this.taskDetail.taskResult);
+
+              console.log(this.taskDetail.taskWebParam)
             }
           })
       }
@@ -362,6 +539,37 @@ export default {
       }
       this.amap.setFitView();
     },
+    // 显示地图区域选择弹出框
+    showMapDialog () {
+      // this.isEditMap = true; // 是否可以编辑地图区域
+
+      // if (this.deleteIndexArr.length > 0) { // 判断是否删除过区域，，如果删除过，则将删除数组中的一个值赋值给selectMapType
+      //   // console.log('asdasdasd')
+      //   // console.log('deleteIndexArr', this.deleteIndexArr)
+      //   this.selectMapType = this.deleteIndexArr[0];
+      // } else {
+      //   this.selectMapType = this.selectAreaDataList.length + 1;
+      // }
+
+      // // console.log('selectMapType', this.selectMapType)
+      // this.handleSelectType(this.selectMapType);
+    },
+    // 显示修改任务表单
+    showUpdateTask () {
+      this.isUpdateTask = true;
+    },
+    // 取消修改
+    cancelEdit () {
+      this.isUpdateTask = false;
+    },
+    // 确认修改
+    submitData (form) {
+      this.$refs[form].validate(valid => {
+        if (valid) {
+
+        }
+      })
+    }
   }
 }
 </script>
@@ -390,6 +598,12 @@ export default {
 }
 </style>
 <style lang="scss" scoped>
+.__view {
+  width: 100%;
+}
+.width232 {
+  width: 100%;
+}
 .vc_gcck_bd {
   position: absolute; top: 0; left: 0;
   width: 100%; height: 50px; line-height: 50px;
@@ -431,6 +645,7 @@ export default {
           }
           >p {
             width: calc(100% - 70px);
+            overflow-wrap: break-word;
           }
         }
         .area_list{
@@ -448,6 +663,129 @@ export default {
           }
         }
         
+      }
+      .update_task {
+        text-align: center;
+        color: #ffffff;
+        background-color: #0C70F8;
+        border-radius: 4px;
+        height: 40px;
+        width: 110px;
+        line-height: 40px;
+        margin: 20px auto;
+        cursor: pointer;
+      }
+      .qyryfx_form {
+        padding: 10px 20px 0 20px;
+        .task_name {
+          margin-bottom: 10px;
+          span:first-child {
+            color: #999999;
+          }
+          span:last-child {
+            color: #333333;
+          }
+        }
+        .area_list {
+          >ul {
+            margin-bottom: 20px;
+            >li {
+              margin-top: 20px;
+              .divide {
+                width: 100%;
+                height: 1px;
+                border: 1px solid #f2f2f2;
+              }
+              .area_list_title, .area_list_time, .area_list_device {
+                margin-bottom: 10px;
+                display: flex;
+                // align-items: center;
+              }
+              .area_list_title {
+                justify-content: space-between;
+                >span {
+                  color: #333333;
+                }
+                >div {
+                  display: flex;
+                  align-items: center;
+                  i {
+                    margin: 0 5px;
+                    cursor: pointer;
+                  }
+                }
+              }
+              .area_list_time, .area_list_device {
+                >span {
+                  width: 45px;
+                }
+                >div {
+                  width: calc(100% - 45px);
+                  color: #333333;
+                }
+              }
+            }
+          }
+        }
+        /deep/ .el-form-item {
+          margin-bottom: 10px;
+        }
+        .function_form_btn {
+          margin-top: 20px;
+        }
+        .select_type {
+          // margin-bottom: 0 !important;
+          .select_type_box {
+            width: 100%;
+            border-radius: 4px;
+            color: #666666;
+            border: 1px solid #D3D3D3;
+            >span {
+              text-align: center;
+              display: inline-block;
+              width: 50%;
+              cursor: pointer;
+            }
+            .active_span {
+              color: #ffffff;
+              background:rgba(12,112,248,1);
+            }
+          }
+        }
+        .area_select {
+          // margin-bottom: 0;
+          /deep/ .el-form-item__content {
+            line-height: 20px !important;
+          }
+          .area_map_select {
+            color: #0C70F8;
+            margin-left: 5px;
+            cursor: pointer;
+          }
+          .area_map_disabled_select {
+            cursor: auto;
+            color: #999999;
+          }
+          .divide {
+            width: 100%;
+            height: 1px;
+            margin-top: 10px;
+            border: 1px dashed #F2F2F2;
+          }
+        }
+        .area_time {
+          margin-top: -10px;
+          /deep/ .el-form-item__content {
+            display: flex;
+            flex-wrap: wrap;
+            .width232 {
+              margin-bottom: 10px;
+              &:last-child {
+                margin-bottom: 0;
+              }
+            }
+          }
+        }
       }
     }
     .right {

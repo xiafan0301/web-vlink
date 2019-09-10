@@ -144,6 +144,11 @@
                     <span>{{scope.row.taskWebParam.interval ? scope.row.taskWebParam.interval + '分钟' : '-'}}</span>
                   </template>
                 </el-table-column>
+                <el-table-column label="结果数" prop="taskWebParam" show-overflow-tooltip v-if="selectIndex === 1">
+                  <template slot-scope="scope">
+                    <span>{{scope.row.taskWebParam.number ? scope.row.taskWebParam.number : 0}}</span>
+                  </template>
+                </el-table-column>
                 <el-table-column label="状态" v-if="selectIndex === 0" prop="taskStatus" show-overflow-tooltip>
                   <template slot-scope="scope">
                     <span>{{scope.row.taskStatus && scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 3 ? '失败' : '已中断'}}</span>
@@ -242,10 +247,6 @@ export default {
     // const startTime = new Date() - 24 * 60 * 60 *1000;
     return {
       tabList: [
-        // {
-        //   label: "查询结果",
-        //   value: 2
-        // },
         {
           label: "已完成任务",
           value: 1
@@ -652,11 +653,7 @@ export default {
             .span_tips {
               color: #F56C6C;
               font-size: 12px;
-              // line-height: 1;
-              // padding-top: 4px;
               position: static;
-              // top: 100%;
-              // left: 0;
             }
           }
         }
