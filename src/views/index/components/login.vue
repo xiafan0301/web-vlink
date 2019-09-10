@@ -4,7 +4,10 @@
       <div class="lg_main">
           <div class="lg_fm">
             <!-- <div class="lg_logo vl_icon vl_icon_lg_logo"></div> -->
-            <div class="lg_logo"></div>
+            <div class="lg_logo_box">
+              <div  class="lg_logo"><img src="../../../assets/img/logo_ysd_lg_3.png" alt=""></div>
+              <!--<p class="lg_logo_title">公共安全视频监控联网应用系统</p>-->
+            </div>
             <el-form :inline="false" ref="loginForm" :model="loginForm" :rules="loginFormRules" class="lg_form">
               <el-form-item prop="userMobile" class="login_form_item">
                 <el-input v-model="loginForm.userMobile" placeholder="请输入手机号"></el-input>
@@ -180,12 +183,20 @@ export default {
         border-radius: 6px;
         box-shadow: 0 0 5px #ddd;
         animation: fadeIn .6s ease-out both;
-        .lg_logo {
-          display: inline-block;
-          width: 350px; height: 90px;
-          margin: 45px 0 35px 10px;
-          background: url(../../../assets/img/logo_ysd_lg.png) center center no-repeat;
-          animation: fadeIn .6s ease-out .2s both;
+        .lg_logo_box {
+          text-align: center;
+          margin: 28px 0px 25px 0px;
+          .lg_logo {
+            display: inline-block;
+            width: 328px; height: 120px;
+            img {
+              width: 100%;
+              height: 100%;
+            }
+          }
+          .lg_logo_title {
+
+          }
         }
         .lg_form {
         }

@@ -23,6 +23,7 @@
               style="width: 100%;"
               class="vl_date"
               :picker-options="pickerOptions"
+              :time-arrow-control="true"
               type="datetime"
               value-format="timestamp"
               placeholder="请选择开始时间">
@@ -32,6 +33,7 @@
             <el-date-picker
               style="width: 100%;"
               class="vl_date vl_date_end"
+              :time-arrow-control="true"
               :picker-options="pickerOptions"
               v-model="ruleForm.data2"
               @change="chooseEndTime"
@@ -114,19 +116,7 @@
         pricecode:cityCode,
         pickerOptions: {
           disabledDate (time) {
-            let date = new Date();
-            let y = date.getFullYear();
-            let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
-            let d = date.getDate();
-            let threeMonths = '';
-            let start = '';
-            if (parseFloat(m) >= 4) {
-              start = y + '-' + (m - 1) + '-' + d;
-            } else {
-              start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
-            }
-            threeMonths = new Date(start).getTime();
-            return time.getTime() > Date.now() || time.getTime() < threeMonths;
+            return time > new Date();
           }
         },
         evData: [],
@@ -197,9 +187,10 @@
         let date = new Date();
         let curDate = date.getTime();
         let curS = 1 * 24 * 3600 * 1000;
-        let yDate = new Date(curDate - curS);
-        this.ruleForm.data1 = new Date(yDate.getFullYear() + '-' + (yDate.getMonth() + 1) + '-' + yDate.getDate() + ' 00:00:00').getTime();
-        this.ruleForm.data2 =  new Date(yDate.getFullYear() + '-' + (yDate.getMonth() + 1) + '-' + yDate.getDate() + ' 23:59:59').getTime();
+        let _sDate = new Date(curDate - curS);
+        let _s = _sDate.getFullYear()+ '-' + (_sDate.getMonth() + 1) + '-' + _sDate.getDate() + ' 00:00:00' ;
+        this.ruleForm.data1 = new Date(_s).getTime();
+        this.ruleForm.data2 = curDate;
       },
       hideLeft() {
         this.hideleft = !this.hideleft;
@@ -265,7 +256,15 @@
               this.$message.info("抱歉，没有找到匹配结果");
               return false;
             }
-            this.evData = res.data;
+//            this.evData = res.data;
+            res.data.forEach(x => {
+              x.traceList.forEach(y => {
+                if (y.bayonetName) {
+                  y.deviceID = y.bayonetName;
+                }
+              })
+            })
+            console.log(res.data)
             this.originEvData = objDeepCopy(res.data);
             this.filterData();
             this.drawLine();
@@ -404,8 +403,10 @@
         this.evData.forEach((x, index)  => {
           let path = [];
           x.traceList.forEach(y => {
-            let _path = [y.shotPlaceLongitude, y.shotPlaceLatitude];
-            path.push(_path);
+            if (y.shotPlaceLatitude && y.shotPlaceLongitude) {
+              let _path = [y.shotPlaceLongitude, y.shotPlaceLatitude];
+              path.push(_path);
+            }
           })
           var polyline = new window.AMap.Polyline({
             path: path,
@@ -458,6 +459,7 @@
     .vl_icon.vl_icon_map_mark_start {
       width: 80px;
       height: 80px;
+      right: 20px;
     }
     .vl_icon.vl_icon_map_mark_end {
       width: 80px;

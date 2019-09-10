@@ -312,8 +312,57 @@ export const autoDownloadUrl = (url) => {
  * 时间戳处理
  * */
 export const transMinute = (seconds) => {
+  if (seconds < 0) { seconds = 0; }
   let iH = Math.floor(seconds / 60);
   let iS = seconds % 60;
-  return ((iH > 0) ? iH : '') + '小时' + 
+  return (((iH === 0 && iS > 0) || (iH === 0 && iS === 0)) ? '' : (iH + '小时')) +
     ((iH > 0 && iS === 0) ? '' : (iS + '分钟'));
 };
+
+/*
+* 高德地图点聚合
+* mapObj 地图对象，markers所有的地图marker;
+* */
+export const addCluster = (mapObj, markers) => {
+  mapObj.plugin(["AMap.MarkerClusterer"], () => {
+    var count = markers.length;
+    let renderClusterMarker = function (context) {
+      var div = document.createElement('div');
+      var arrow = document.createElement('span');
+      var size = Math.round(30 + Math.pow(context.count / count, 1 / 5) * 20);
+      div.style.backgroundColor = '#1264F8';
+      div.style.backgroundImage =`url("${'static/img/miniSxt.png'}")`
+      div.style.backgroundRepeat = 'no-repeat'
+      div.style.width = size + 14 + 'px';
+      div.style.height = '34px';
+      div.style.border = 'solid 3px #ffffff';
+      div.style.borderRadius = '26px';
+      div.style.backgroundPosition = '5px';
+      div.style.boxShadow = '0 0 1px ';
+      div.innerHTML = context.count;
+      div.style.lineHeight = '30px';
+      div.style.color = '#ffffff';
+      div.style.padding = '0 4px 3px 20px';
+      div.style.fontSize = '14px';
+      div.style.textAlign = 'center';
+      div.style.position = 'relative';
+      arrow.style.display = 'block'
+      arrow.style.position = 'absolute'
+      arrow.style.width = '24px';
+      arrow.style.height = '16px';
+      arrow.style.right = 'calc(50% - 12px)';
+      arrow.style.backgroundImage =`url("${'static/img/miniArrow.png'}")`
+      div.appendChild(arrow)
+      context.marker.setOffset(new window.AMap.Pixel(-15, -15));
+      context.marker.setContent(div)
+    };
+    if (mapObj.cluster) {
+      mapObj.cluster.setMap(null);
+    }
+    mapObj.cluster = new window.AMap.MarkerClusterer(mapObj, markers, {
+      gridSize: 80,
+      minClusterSize: 8,
+      renderClusterMarker: renderClusterMarker
+    });
+  })
+}

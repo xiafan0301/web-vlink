@@ -34,37 +34,38 @@
             <div style="width: 272px;height: calc(100% - 40px);">
               <vue-scroll>
                 <div class="search_main">
-                  <div class="search_top">
-                    <span  @click="addArea"><i class="el-icon-circle-plus-outline"></i>增加区域列表</span>
-                  </div>
+                  <!--<div class="search_top">-->
+                    <!--<span  @click="addArea"><i class="el-icon-circle-plus-outline"></i>增加区域列表</span>-->
+                  <!--</div>-->
                   <!--区域选择-->
-                  <div class="search_item" v-for="(item, index) in searchData" :key="item.id">
+                  <div class="search_item">
                     <div class="search_line_ts">
                       <div class="title">
-                        <span class="">抓拍区域:</span>
-                        <span>
-                      <i class="choose_btn el-icon-location-outline" @click="setFitV(index)" :class="{'not-active': !item.area}"></i>
-                      <i class="choose_btn el-icon-delete" v-show="index > 1" @click="clearArea(index)"></i>
-                    </span>
+                        <span class="">区域:</span>
+                        <!--<span>-->
+                          <!--<i class="choose_btn el-icon-location-outline" @click="setFitV(index)" :class="{'not-active': !item.area}"></i>-->
+                          <!--<i class="choose_btn el-icon-delete" v-show="index > 1" @click="clearArea(index)"></i>-->
+                        <!--</span>-->
                       </div>
                       <div class="drawBox">
                         <div class="items">
-                          <span @click="clickTab('cut1', index)" :class="['cut1',{'hover':hover[index]=='cut1' && index === curDrawIndex}]"></span>
-                          <span @click="clickTab('cut2', index)"  :class="['cut2',{'hover':hover[index]=='cut2' && index === curDrawIndex}]"></span>
-                          <span @click="clickTab('cut3', index)"  :class="['cut3',{'hover':hover[index]=='cut3' && index === curDrawIndex}]"></span>
-                          <span @click="clickTab('cut4', index)"  :class="['cut4',{'hover':hover[index]=='cut4' && index === curDrawIndex}]"></span>
-                          <span @click="clickTab('cut5', index)"  :class="['cut5',{'hover':hover[index]=='cut5' && index === curDrawIndex}]"></span>
+                          <span @click="clickTab('cut1', searchData.length)" :class="['cut1',{'hover':hover=='cut1'}]"></span>
+                          <span @click="clickTab('cut2', searchData.length)"  :class="['cut2',{'hover':hover=='cut2'}]"></span>
+                          <span @click="clickTab('cut3', searchData.length)"  :class="['cut3',{'hover':hover=='cut3'}]"></span>
+                          <span @click="clickTab('cut4', searchData.length)"  :class="['cut4',{'hover':hover=='cut4'}]"></span>
+                          <span @click="clickTab('cut5', searchData.length)"  :class="['cut5',{'hover':hover=='cut5'}]"></span>
                         </div>
                       </div>
                     </div>
                     <div class="search_line">
                       <!--<span class="time">开始</span>-->
                       <el-date-picker
-                        v-model="item.startTime"
+                        v-model="curAddSearch.startTime"
                         style="width: 100%;"
                         class="vl_date"
-                        :picker-options="pickerOptions"
+                        @change="chooseStartTime"
                         type="datetime"
+                        :picker-options="pickerOptions"
                         value-format="timestamp"
                         placeholder="请选择开始时间">
                       </el-date-picker>
@@ -75,8 +76,9 @@
                       <el-date-picker
                               style="width: 100%;"
                               class="vl_date vl_date_end"
-                              :picker-options="pickerOptions1"
-                              v-model="item.endTime"
+                              :picker-options="pickerOptions"
+                              v-model="curAddSearch.endTime"
+                              @change="chooseEndTime"
                               value-format="timestamp"
                               type="datetime"
                               placeholder="请选择结束时间">
@@ -86,7 +88,7 @@
                   <!--按钮-->
                   <div class="search_btn">
                     <el-button @click="clearAllArea">重置</el-button>
-                    <el-button type="primary" @click="tcDiscuss">区域碰撞</el-button>
+                    <el-button type="primary" :disabled="searchData.length < 2" @click="tcDiscuss">区域碰撞</el-button>
                   </div>
                 </div>
               </vue-scroll>
@@ -101,6 +103,35 @@
         <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
         <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
       </ul>
+      <!--右侧已选区域列表-->
+      <div class="map_complete_area">
+        <vue-scroll>
+          <ul class="map_complete_cc">
+            <li :class="{'active': index === curRightActive}" @click="changeRightActive(index)" v-for="(item, index) in searchData" :key="item.id">
+              <div class="title">
+                <span>区域{{index + 1}}</span>
+                <div class="btn_list">
+                  <span class="el-icon-location-outline"  @click.stop="setFitV(index)" ></span>
+                  <span class="el-icon-delete"  @click.stop="clearArea(index)"></span>
+                </div>
+              </div>
+              <div class="info_line">
+                <span>时间：</span>
+                <p>{{item.startTime}}至{{item.endTime}}</p>
+              </div>
+              <div class="info_line">
+                <span>设备：</span>
+                <p v-if="item.curPointData.length <= 2">
+                  <template v-for="(sItem, dIndex) in item.curPointData">{{dIndex !== 0 ? ',' : ''}}{{sItem.deviceName}}</template>
+                </p>
+                <p v-else>
+                  {{item.curPointData[0].deviceName}},{{item.curPointData[1].deviceName}}等{{item.curPointData.length - 2}}个设备
+                </p>
+              </div>
+            </li>
+          </ul>
+        </vue-scroll>
+      </div>
     </div>
 
     <el-dialog
@@ -120,7 +151,7 @@
   import { mapXupuxian } from "@/config/config.js";
   import {getAllDevice} from '../../../api/api.judge.js';
   import {getAllBayonetList} from '../../../api/api.base.js';
-  import { objDeepCopy, formatDate} from '../../../../../utils/util.js';
+  import { objDeepCopy, formatDate, addCluster} from '../../../../../utils/util.js';
   export default {
     components: {vlBreadcrumb},
     data() {
@@ -129,72 +160,33 @@
         tipInfo: null,
         map: null,
         input3: null,
-        hover:{
-          0: null,
-          1: null,
-          2: null,
-          3: null,
-          4: null,
-        },
+        hover: null,
         // 选择区域
         mouseTool: null,
         lnglat:null,
-        searchData: [
-          {
-            activeArea: false,
-            area: null, // 区域
-            startTime: '',
-            endTime: '',
-          },
-          {
-            activeArea: false,
-            area: null, // 区域
-            startTime: '',
-            endTime: '',
-          }
-        ],
+        curAddSearch: {
+          startTime: '',
+          endTime: '',
+          area: null,
+          curPointData: [],
+          curMarks: []
+        },
+        searchData: [],
         pickerOptions: {
           disabledDate (time) {
-            let date = new Date();
-            let y = date.getFullYear();
-            let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
-            let d = date.getDate();
-            let threeMonths = '';
-            let start = '';
-            if (parseFloat(m) >= 4) {
-              start = y + '-' + (m - 1) + '-' + d;
-            } else {
-              start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
-            }
-            threeMonths = new Date(start).getTime();
-            return time.getTime() > Date.now() || time.getTime() < threeMonths;
-          }
-        },
-        pickerOptions1: {
-          disabledDate (time) {
-            let date = new Date();
-            let y = date.getFullYear();
-            let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
-            let d = date.getDate();
-            let threeMonths = '';
-            let start = '';
-            if (parseFloat(m) >= 4) {
-              start = y + '-' + (m - 1) + '-' + d;
-            } else {
-              start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
-            }
-            threeMonths = new Date(start).getTime();
-            return time.getTime() > Date.now() || time.getTime() < threeMonths;
+            return time > new Date();
           }
         },
         mapTreeData: [],
-        marks: [[], []],
+        marks: [],
         hoverWindow: null,// 全局信息窗口
         pointData: [[], []],
         circle: null,
         delDialog: false,
         curDrawIndex: 0, // 当前画区域的索引
+        curRightActive: 0, // 右边已选区域当前激活索引
         clearAll: false,
+        confirmIcon: null, // 选择区域之后的小弹窗
       };
     },
     mounted() {
@@ -206,8 +198,45 @@
 //      })
       this.getAllDevice();
       this.resetZoom();
+      let that = this;
+      $('body').on('click', '.vl_map_area_confirm', function (e) {
+        if (e.target.classList.contains('el-icon-close')) {
+          that.cancelAddArea();
+        }
+        if (e.target.classList.contains('vl_area_complete')) {
+          // 判断有没有选时间
+          if (that.curAddSearch.startTime && that.curAddSearch.endTime) {
+            if (that.curAddSearch.curPointData.length) {
+              let addObj = {};
+              addObj.startTime = formatDate(that.curAddSearch.startTime, 'yyyy-MM-dd HH:mm:ss');
+              addObj.endTime = formatDate(that.curAddSearch.endTime, 'yyyy-MM-dd HH:mm:ss');
+              addObj.area = that.curAddSearch.area;
+              addObj.curPointData = that.curAddSearch.curPointData;
+              addObj.curMarks = that.curAddSearch.curMarks;
+              that.addCompleteData(addObj);
+              that.map.remove(that.confirmIcon);
+            } else {
+              that.showInfoMes('所选区域没有设备信息')
+            }
+          } else {
+            that.showInfoMes('起止时间不能为空')
+          }
+        }
+      })
     },
     methods: {
+      chooseEndTime (e) {
+        if (e < this.curAddSearch.startTime && this.curAddSearch.startTime) {
+          this.$message.info('结束时间必须大于开始时间才会有结果')
+          this.curAddSearch.endTime = '';
+        }
+      },
+      chooseStartTime (e) {
+        if (e > this.curAddSearch.endTime && this.curAddSearch.endTime) {
+          this.$message.info('结束时间必须大于开始时间才会有结果')
+          this.curAddSearch.startTime = '';
+        }
+      },
       hideLeft() {
         this.hideleft = !this.hideleft;
       },
@@ -276,9 +305,6 @@
         }
         //return pois
       },
-      setFitV (index) {
-        this.map.setFitView([this.searchData[index].area]);
-      },
       getAllDevice(){
         getAllDevice().then(res=>{
           if(res.data && res.data.length>0){
@@ -337,20 +363,10 @@
           let _this = this;
           data.forEach(obj => {
             if (obj.longitude > 0 && obj.latitude > 0) {
-              let offSet = {0: [-15, -16],1: [-15, -16],2: [-15, -60],3: [-15, -16], 4: [-15, -16],5: [-15, -16]}, sDataType;
-              if (obj.dataType === 0 && obj.deviceStatus !== 1) {
-                sDataType = 6;
-              }else if (obj.dataType === 2) {
-                sDataType = '2' + obj.vehicleType
-              } else {
-                sDataType = obj.dataType;
-              }
-              let uContent = '<div id="' + obj.markSid + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + '"></div>'
-              if (obj.dataType === 2 && !_this.constObj[obj.dataType].supTypeList.includes(obj.vehicleType - 1)) {
-                uContent = '<div id="' + obj.markSid + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + ' '+ _this.hideClass +'"></div>'
-              }
+              let offSet = {0: [-15, -16],1: [-15, -16],2: [-15, -60],3: [-15, -16], 4: [-15, -16],5: [-15, -16]};
+              let uContent = _this.setMarkContent(obj);
               let marker = new window.AMap.Marker({ // 添加自定义点标记
-                map: _this.map,
+//                map: _this.map,
                 position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
                 offset: new window.AMap.Pixel(offSet[obj.dataType][0], offSet[obj.dataType][1]), // 相对于基点的偏移位置
                 draggable: false, // 是否可拖动
@@ -359,7 +375,7 @@
                 // 自定义点标记覆盖物内容
                 content: uContent
               });
-              _this.marks[obj.dataType].push(marker);
+              _this.marks.push(marker);
               // hover
               marker.on('mouseover', function () {
 //                  $('#' + obj.markSid).addClass('vl_icon_map_hover_mark' + obj.dataType)
@@ -380,7 +396,25 @@
               })
             }
           })
+          addCluster(_this.map, _this.marks);
+          console.log(_this.map.cluster);
         }
+      },
+      setMarkContent (obj, type) {
+        let sDataType, uContent;
+        if (obj.dataType === 0 && obj.deviceStatus !== 1) {
+          sDataType = 6;
+        }else if (obj.dataType === 2) {
+          sDataType = '2' + obj.vehicleType
+        } else {
+          sDataType = obj.dataType;
+        }
+        uContent = '<div id="' + obj.markSid + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + '"></div>'
+        if (type === 'error') {
+          let sClass = 'vl_icon_map_sxt_in_area' + obj.dataType;
+          uContent = '<div id="' + obj.markSid + '" class="map_icons vl_icon ' + sClass +'"></div>';
+        }
+        return uContent;
       },
       renderMap() {
         let map = new window.AMap.Map("mapSelect", {
@@ -394,10 +428,10 @@
         let _this=this
         this.map.on( 'click',   function (e) {
           //lnglatInput.value = e.lnglat.toString();
-          if(_this.hover[_this.curDrawIndex]=='cut5'){
+          if(_this.hover=='cut5'){
             _this.mouseTool.close(false);
-            if (_this.searchData[_this.curDrawIndex].area) {
-              _this.map.remove(_this.searchData[_this.curDrawIndex].area)
+            if (_this.curAddSearch.area) {
+              _this.map.remove(_this.curAddSearch.area)
             }
             let circle = new AMap.Circle({
               center:e.lnglat,
@@ -414,21 +448,136 @@
               zIndex: 50,
             })
             circle.setMap(_this.map);
-            _this.searchData[_this.curDrawIndex].area = circle;
-            _this.checkout(circle,'AMap.circle')
+            _this.curAddSearch.area = circle;
+            // 画完区域取消地图工具激活状态
+            _this.map.setDefaultCursor();
+            _this.mouseTool.close(false);
+            _this.hover = '';
+            _this.createConfirmMark(e.lnglat);
+
+            _this.checkout(circle,'AMap.circle');
+            // 判断如果当前curAddSearch.curMarks有数据的话，先加入点聚合
+            if (_this.curAddSearch.curMarks.length) {
+              _this.pointIntoCluster(_this.curAddSearch.curMarks)
+            }
+            _this.curAddSearch.curMarks = [];
+            _this.curAddSearch.curPointData.forEach(j => {
+              _this.marks.forEach(m => {
+                if (m.getExtData() === j) {
+                  _this.curAddSearch.curMarks.push(m);
+                }
+              })
+            })
+            _this.removeSomeCluster(_this.curAddSearch.curMarks)
           }
 
         });
         window.AMap.event.addListener(this.mouseTool, 'draw', function (e) {
-          if (_this.searchData[_this.curDrawIndex].area) {_this.map.remove(_this.searchData[_this.curDrawIndex].area);}
-          _this.searchData[_this.curDrawIndex].area = e.obj;
-          let a=e.obj
+          if (_this.curAddSearch.area) {_this.map.remove(_this.curAddSearch.area);}
+          if (_this.confirmIcon) {_this.map.remove(_this.confirmIcon);}
+          _this.curAddSearch.area = e.obj;
+          // 画完区域取消地图工具激活状态
+          _this.map.setDefaultCursor();
+          _this.mouseTool.close(false);
+          _this.hover = '';
+          _this.createConfirmMark(e.obj.getPath()[e.obj.getPath().length - 1]);
+
+          let a=e.obj;
           let t=e.obj.CLASS_NAME
-          _this.checkout(a,t)
+          _this.checkout(a,t);
+          console.log(_this.curAddSearch.curPointData)
+          // 判断如果当前curAddSearch.curMarks有数据的话，先加入点聚合
+          if (_this.curAddSearch.curMarks.length) {
+            _this.pointIntoCluster(_this.curAddSearch.curMarks)
+          }
+          _this.curAddSearch.curMarks = [];
+          _this.curAddSearch.curPointData.forEach(j => {
+            _this.marks.forEach(m => {
+              if (m.getExtData() === j) {
+                _this.curAddSearch.curMarks.push(m);
+              }
+            })
+          })
+          _this.removeSomeCluster(_this.curAddSearch.curMarks)
         });
       },
+      // 改变右侧激活
+      changeRightActive (index){
+        this.curRightActive = index;
+        for (let i = 0; i < this.searchData.length; i++) {
+          if (i !== index) {
+            this.searchData[i].curMarks.forEach(x => {
+              let uContent = this.setMarkContent(x.getExtData())
+              x.setContent(uContent);
+            })
+          } else {
+            this.searchData[i].curMarks.forEach(x => {
+              let uContent = this.setMarkContent(x.getExtData(), 'error')
+              x.setContent(uContent);
+            })
+          }
+        }
+      },
+      // 创建确定，取消区域的小marker
+      createConfirmMark (path) {
+        let m = new window.AMap.Marker({
+          map: this.map,
+          position: path,
+          offset: new window.AMap.Pixel(-15, -16),
+          draggable: false, // 是否可拖动
+          zIndex: 200,
+          bubble: false,
+          content: '<div  class="vl_map_area_confirm"><span class="vl_area_cancel"><i class="el-icon-close"></i></span><span class="vl_area_complete el-icon-check">完成</span></div>'
+        })
+        this.confirmIcon = m;
+      },
+      // 将指定mark集合移除点聚合
+      removeSomeCluster (mks) {
+        this.map.cluster.removeMarkers(mks);
+        // 把被移除的mark摄像头设置成红色
+        mks.forEach(y => {
+          let uContent = this.setMarkContent(y.getExtData(), 'error')
+          y.setContent(uContent);
+        })
+        this.map.add(mks);
+      },
+      // 画完区域完成，将数据添加到searchData,右侧列表
+      addCompleteData (obj) {
+        console.log(obj);
+        this.searchData.push(obj);
+        // 重置curAddSearch
+        this.curAddSearch = {
+          startTime: '',
+          endTime: '',
+          area: null,
+          curPointData: [],
+          curMarks: []
+        };
+        this.changeRightActive(this.searchData.length - 1)
+      },
+      // 删除区域之后将指定mark加入点聚合 mks当前区域的mark
+      pointIntoCluster (mks, index) {
+        console.log(mks);
+        // 判断这个点是不是在其他区域被选中，选中了则不处理
+        let curMks = [];
+        mks.forEach(x => {
+          let b = true;
+          this.searchData.forEach((y, sIndex) => {
+            if (index !== sIndex && y.curPointData.includes(x.getExtData())) {
+              b = false;
+            }
+          })
+          if (b) {
+            let uContent = this.setMarkContent(x.getExtData())
+            x.setContent(uContent);
+            curMks.push(x);
+          }
+        })
+        // curMks确定要加入点聚合，并且重新设置了content
+        this.map.cluster.addMarkers(curMks);
+      },
       checkout(obj , type){
-        this.pointData[this.curDrawIndex] = [];
+        this.curAddSearch.curPointData = [];
         if(type!="AMap.Polyline"){
           this.mapTreeData.forEach(el=>{
             let myLngLat=new window.AMap.LngLat(el.longitude,el.latitude);
@@ -436,9 +585,9 @@
             let isPointInRing = obj.contains(myLngLat);
             // console.log(marker.getPosition());
             if(isPointInRing){//如果点在圆内则输出
-              let id = this.pointData.findIndex(item=>item.uid==el.uid)
+              let id = this.curAddSearch.curPointData.findIndex(item=>item.uid==el.uid)
               if(id == -1){
-                this.pointData[this.curDrawIndex].push(el)
+                this.curAddSearch.curPointData.push(el)
               }
             }
           })
@@ -450,9 +599,9 @@
 
             let distance =  Math.round(window.AMap.GeometryUtil.distanceToLine(myLngLat,obj.B.path));
             // console.log(distance);
-            let id = this.pointData[this.curDrawIndex].findIndex(item=>item.uid==el.uid)
+            let id = this.curAddSearch.curPointData.findIndex(item=>item.uid==el.uid)
             if(id==-1 && distance <=1000){
-              this.pointData[this.curDrawIndex].push(el)
+              this.curAddSearch.curPointData.push(el)
             }
           })
         }
@@ -488,10 +637,9 @@
         })
 
       },
-      clickTab(val, index){
-        this.curDrawIndex = index;
-        this.hover[index] = this.hover[index]==val?'':val
-        if(!this.hover[index]){
+      clickTab(val){
+        this.hover = this.hover==val?'':val
+        if(!this.hover){
           this.map.setDefaultCursor();
           this.mouseTool.close(false);
         }else{
@@ -514,37 +662,37 @@
         }
         return str;
       },
-
+      setFitV (index) {
+        this.map.setFitView([this.searchData[index].area]);
+      },
+      cancelAddArea () {
+        if (this.curAddSearch.area) {this.map.remove(this.curAddSearch.area);}
+        if (this.confirmIcon) {this.map.remove(this.confirmIcon)};
+        // 先判断你选择的区域有没有设备,没有就不用做处理
+        if (this.curAddSearch.curPointData.length) {
+          this.pointIntoCluster(this.curAddSearch.curMarks);
+        }
+      },
       delAllArea() {
-        this.searchData.forEach(x => {
+        this.cancelAddArea();
+        this.curAddSearch = {
+          startTime: '',
+          endTime: '',
+          area: null,
+          curPointData: [],
+          curMarks: []
+        };
+        this.searchData.forEach((x, index) => {
           if (x.area) {
             this.map.remove(x.area);
             x.area = null;
+            this.pointIntoCluster(x.curMarks, index);
+            this.searchData[index].curPointData = [];
           }
-          x.startTime = '';
-          x.endTime = '';
         })
-        this.hover = {
-          0: null,
-            1: null,
-            2: null,
-            3: null,
-            4: null,
-        }
-        this.pointData.splice(2);
-        this.searchData.splice(2);
+        this.searchData = [];
+        this.hover = null;
         this.mouseTool.close(false);
-      },
-      addArea () {
-        this.searchData.push(
-            {
-              activeArea: false,
-              area: null, // 区域
-              startTime: '',
-              endTime:  '',
-            }
-        )
-        this.pointData.push([]);
       },
       setDTime () {
         let date = new Date();
@@ -626,51 +774,115 @@
           if (this.searchData[this.curDrawIndex].area) {
             this.map.remove(this.searchData[this.curDrawIndex].area);
           }
+          // 判断如果当前删除的是激活的区域，那么将curRightActive改变
+          if(this.curDrawIndex === this.curRightActive) {
+            if (this.curRightActive - 1 >= 0) {
+              this.changeRightActive(this.curRightActive - 1)
+            } else {
+              this.changeRightActive(this.curRightActive + 1)
+            }
+          }
+          this.pointIntoCluster(this.searchData[this.curDrawIndex].curMarks, this.curDrawIndex)
           this.searchData.splice(this.curDrawIndex, 1)
         }
       },
       tcDiscuss () {
         let supQuery = {'where': {dtoList: []}};
-        if (this.searchData.find((x, index) => !x.area || !x.startTime || !x.endTime)) {
-          if (!document.querySelector('.el-message--info')) {
-            this.$message.info('列表的每个区域跟起止时间都必须选择');
-          }
-          return false;
-        } else  {
-          for (let i = 0; i < this.searchData.length; i++) {
-            if(this.pointData[i].length === 0) {
-              if (!document.querySelector('.el-message--info')) {
-                this.$message.info('第' + (i + 1) + '个区域没有框选中设备，请重新选择第' + (i + 1) + '个区域');
-              }
-              return false;
-            } else if (this.searchData[i].endTime < this.searchData[i].startTime) {
-              if (!document.querySelector('.el-message--info')) {
-                 this.$message.info('结束时间必须大于开始时间');
-               }
-               return false;
-            }
-//            else if (this.searchData[i].endTime > this.searchData[i].startTime + 3 * 3600 * 24 * 1000 || this.searchData[i].endTime < this.searchData[i].startTime ) {
-//               if (!document.querySelector('.el-message--info')) {
-//                 this.$message.info('结束时间必须大于开始时间并且区间小于三天');
-//               }
-//               return false;
-//            }
-          }
           supQuery.where['dtoList'] = this.searchData.map((x, index) => {
             let obj = {}
-            obj['cameraIds'] = this.pointData[index].filter(x => x.dataType === 0).map(y => {return y.uid}).join(',');
-            obj['bayonetIds'] = this.pointData[index].filter(x => x.dataType === 1).map(y => {return y.uid}).join(',');
+            obj['cameraIds'] = x.curPointData.filter(x => x.dataType === 0).map(y => {return y.uid}).join(',');
+            obj['bayonetIds'] = x.curPointData.filter(x => x.dataType === 1).map(y => {return y.uid}).join(',');
             obj['startTime'] =  formatDate(x.startTime, 'yyyy-MM-dd HH:mm:ss');
             obj['endTime'] =  formatDate(x.endTime, 'yyyy-MM-dd HH:mm:ss');
             return obj;
           })
-          this.$router.push({name: 'vehicle_search_qy_jg', query: supQuery})
+          window.sessionStorage.setItem('qyParam', JSON.stringify(supQuery));
+          this.$router.push({name: 'vehicle_search_qy_jg'})
+      },
+      showInfoMes(mes) {
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info(mes);
         }
       }
+    },
+    beforeDestroy () {
+      $('body').unbind('click');
     }
   };
 </script>
 <style lang="scss" scoped>
+  // 右侧已选区域
+  .map_complete_area {
+    position: absolute;
+    top: 40px;
+    right: 0px;
+    width: 376px;
+    max-height: 4rem;
+    background: #ffffff;
+    .map_complete_cc {
+      max-height: 4rem;
+      li {
+        padding: 0 24px 20px 20px;
+        border-bottom: 1px solid #F2F2F2;
+        &:last-child {
+          border-bottom: none;
+        }
+        .title {
+          height: 50px;
+          line-height: 50px;
+          >span {
+            color: #333333;
+          }
+          .btn_list {
+            float: right;
+            color: #999999;
+            >span {
+              cursor: pointer;
+              font-size: 17px;
+            }
+            .el-icon-location-outline {
+              margin-right: 8px;
+              &:hover {
+                color: #0466DE;
+              }
+            }
+            .el-icon-delete {
+              &:hover {
+                color: #FA453A;
+              }
+            }
+          }
+        }
+        .info_line {
+          display: flex;
+          span {
+            display: block;
+            width: 42px;
+            color: #999999;
+          }
+          p {
+            width: 290px;
+            color: #333333;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+        }
+      }
+      .active {
+        color: #0466DE;
+        .title >span {
+          color: #0466DE;
+        }
+        .info_line span {
+          color: #0466DE;
+        }
+        .info_line p {
+          color: #0466DE;
+        }
+      }
+    }
+  }
   .right.hide {
     width: calc(100% - 272px);
     height: 100%;
@@ -837,14 +1049,14 @@
               display: block;
               width: 50%;
               padding-left: 10px;
-              &:last-child {
-                text-align: right;
-                padding-top: 2px;
-                color: #999999;
-                i{
-                  margin-right: 10px;
-                }
-              }
+              /*&:last-child {*/
+                /*text-align: right;*/
+                /*padding-top: 2px;*/
+                /*color: #999999;*/
+                /*i{*/
+                  /*margin-right: 10px;*/
+                /*}*/
+              /*}*/
             }
             .choose_btn {
               cursor: pointer;
@@ -941,6 +1153,44 @@
   }
 </style>
 <style lang="scss">
+  // 框选区域之后小弹窗
+  .vl_map_area_confirm {
+    background: #FFFFFF;
+    box-shadow:0px 12px 12px 0px rgba(2,10,62,0.36);
+    padding: 5px 0px;
+    width: 100px;
+    height: 30px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    display: flex;
+    > span {
+      display: block;
+      height: 20px;
+      text-align: center;
+    }
+    .vl_area_cancel {
+      width: 30px;
+      border-right: 1px solid #F2F2F2;
+      i {
+        color: #F95826;
+        font-size: 20px;
+        font-weight: bold;
+      }
+    }
+    .vl_area_complete {
+      width: 70px;
+      vertical-align: middle;
+      &:before {
+        color: #1264F8;
+        font-size: 20px;
+        font-weight: bold;
+        vertical-align: middle;
+        margin-right: 3px;
+      }
+      color: #666666;
+    }
+  }
   .red_star {
     &:before {
       content: '*';

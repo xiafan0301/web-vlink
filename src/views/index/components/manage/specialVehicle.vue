@@ -452,7 +452,7 @@ import { autoDownloadUrl } from '@/utils/util.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import { getSpecialGroup, addSpecialVehicle, editSpecialVehicle, getSpecialVehicleDetail, 
   getSpecialVehicleList, addGroup, checkRename, editVeGroup, delGroup,
-  getVehicleBrand, getVehicleModel, moveoutGroup, vehicleImport, vehicleExport, getReVehicleInfo } from '@/views/index/api/api.manage.js';
+  getVehicleBrand, getVehicleModel, moveoutGroup, vehicleImport, vehicleExport, getReVehicleInfo, downloadVehicleModel } from '@/views/index/api/api.manage.js';
 export default {
   components: { vlUpload },
   data () {
@@ -1251,8 +1251,28 @@ export default {
     },
     // 下载模板
     downloadModel () {
-      const file = 'http://file.aorise.org/vlink/file/8dc4e25f-5f7b-4021-9a19-a58f8708b4fd.xls';
-      autoDownloadUrl(file);
+      downloadVehicleModel()
+        .then(res => {
+          if (res) {
+            const content = res;
+            const blob = new Blob([content]);
+            const fileName = '特殊车辆导入模板.xlsx';
+            if ('download' in document.createElement('a')) { // 非IE下载
+              const elink = document.createElement('a');
+              elink.download = fileName;
+              elink.style.display = 'none';
+              elink.href = URL.createObjectURL(blob);
+              document.body.appendChild(elink);
+              elink.click();
+              URL.revokeObjectURL(elink.href); // 释放URL 对象
+              document.body.removeChild(elink);
+            } else { // IE10+下载
+              navigator.msSaveBlob(blob, fileName);
+            }
+          }
+        })
+      // const file = 'http://file.aorise.org/vlink/file/8dc4e25f-5f7b-4021-9a19-a58f8708b4fd.xls';
+      // autoDownloadUrl(file);
     }
   }
 }

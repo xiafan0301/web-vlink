@@ -50,7 +50,8 @@
         this.$router.push({ name: 'control_library', query: {imgurl: data.subStoragePath, plateNo: data.plateNo} })
       },
       getTheList () {
-        let params = {where: this.$route.query};
+        let query = JSON.parse(window.sessionStorage.getItem('qyphParam'));
+        let params = {where: query};
         params.pageNum = this.pagination.pageNum;
         params.pageSize = this.pagination.pageSize;
         params.firstSetted = true;
@@ -67,7 +68,7 @@
             }
             this.strucInfoList = res.data.list;
             this.pagination.pageNum = res.data.pageNum;
-            this.pagination.total = this.strucInfoList.length;
+            this.pagination.total = res.data.total;
           } else {
             this.$message.info('抱歉，没有找到匹配结果');
             this.$router.push({name: "vehicle_search_qyph"})
@@ -85,7 +86,7 @@
       showStrucInfo (data, index) {
         this.curStrucList = this.strucInfoList[index].vehicleDetailList;
         this.detailData = {
-          index: index,
+          index: 0,
           list: this.curStrucList
         };
         this.btnList = [

@@ -7,7 +7,7 @@
     :show-close="false"
     width="1180px"
     class="map_selector_dialog">
-    <div class="map_sd_content" :id="sid">
+    <div class="map_sd_content" :class="{'map_sd_edit_false': !bEdit}" :id="sid">
       <div class="sd_search">
         <input type="text" placeholder="请输入关键字" class="sd_search_input" id="map_sd_search_input">
         <span><i class="el-icon-search"></i></span>
@@ -62,11 +62,13 @@ export default {
     showTypes  需要操作的东西 D设备 B卡口
     oConfig   初始化地图配置参数
     clear  改变clear值则会清空已绘制的图形
+    editAble 可编辑，默认为true
   */
-  props: ['open', 'clear', 'showTypes', 'oConfig'],
+  props: ['open', 'clear', 'showTypes', 'oConfig', 'editAble'],
   data () {
     return {
       sid: 'map_selector_' + random14(),
+      bEdit: true,
       treeList: [],
       // selectorId: 'db_tree_' + random14(),
       amap: null,
@@ -108,6 +110,9 @@ export default {
     }
   },
   watch: {
+    editAble (val) {
+      this.bEdit = val;
+    },
     open () {
       this.dialogVisible = true;
       if (this.amap) {
@@ -1049,6 +1054,13 @@ export default {
 }
 </style>
 <style lang="scss">
+  .map_sd_edit_false {
+    .ms_marker_opt.ms_marker_circle {
+      display: none;
+    }
+    .sd_search { display: none; }
+    .sd_opts { display: none; }
+  }
   .map_selector_dialog {
     .el-dialog__header { display: none; }
     .el-dialog__body { padding: 0; }

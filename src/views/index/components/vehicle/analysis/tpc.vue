@@ -271,9 +271,9 @@ export default {
         sD =  new Date(curDate - curS).getDate()
       }
       let _s = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD + ' 00:00:00';
-      let _e = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD + ' 23:59:59';
+      // let _e = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD + ' 23:59:59';
       this.value1 = new Date(_s)
-      this.value2 = _e
+      this.value2 = new Date(curDate)
     },
     //查询
     search() {
@@ -289,7 +289,7 @@ export default {
       let params = {};
       if(this.value1 && this.value2) {
         params['startDate'] = formatDate(this.value1);
-        params['endDate'] = this.value2;
+        params['endDate'] = formatDate(this.value2);
         params['pageNum'] = this.pagination.pageNum;
         params['pageSize'] =this.pagination.pageSize;
       }

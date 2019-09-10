@@ -185,9 +185,9 @@ export default {
     },
     // flag false 上一个， true 下一个
     doSliderDetail (flag) {
-      console.log(this.strucIndex);
-      console.log(this.strucInfoList.length);
-      console.log(this.pagination);
+      // console.log(this.strucIndex);
+      // console.log(this.strucInfoList.length);
+      // console.log(this.pagination);
       if (flag) {
         // 下一个
         if (this.strucIndex < (this.strucInfoList.length - 1)) {

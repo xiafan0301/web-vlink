@@ -493,15 +493,19 @@ export default {
 
   mounted() {
     
-    let dic = this.dicFormater(dataList.vehicleType);
-    let dic1 = this.dicFormater(dataList.plateType);
-    let dic2 = this.dicFormater(dataList.plateColor);
-    let dic3 = this.dicFormater(dataList.carColor);
+//    let dic = this.dicFormater(dataList.vehicleType);
+//    let dic1 = this.dicFormater(dataList.plateType);
+//    let dic2 = this.dicFormater(dataList.plateColor);
+//    let dic3 = this.dicFormater(dataList.carColor);
+    this.plateType = this.dicFormater(45)[0].dictList;
+    this.plateColor = this.dicFormater(46)[0].dictList;
+    this.vehicleType = this.dicFormater(44)[0].dictList;
+    this.carColor = this.dicFormater(47)[0].dictList;
 
-    this.plateType = [...dic1[0].dictList]; // 号牌类型
-    this.plateColor = [...dic2[0].dictList]; // 号牌颜色
-    this.vehicleType = [...dic[0].dictList]; // 车辆类型
-    this.carColor = [...dic3[0].dictList]; // 车辆颜色
+//    this.plateType = [...dic1[0].dictList]; // 号牌类型
+//    this.plateColor = [...dic2[0].dictList]; // 号牌颜色
+//    this.vehicleType = [...dic[0].dictList]; // 车辆类型
+//    this.carColor = [...dic3[0].dictList]; // 车辆颜色
     this.setDTime();
   },
   methods: {

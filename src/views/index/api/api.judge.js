@@ -543,8 +543,31 @@ export function getFocusList(params) {
     mode: 'judge'
   })
 }
-
-
+/**
+ * 重点关注实时接口
+ * @param {object} params
+ */
+export function PortraitPostFocusRealTime(data, extData) {
+  return request({
+    url: '/portrait/shot-num/focus/real-time',
+    method: 'post',
+    data,
+    mode: 'judge',
+    extData: extData
+  })
+}
+/**
+ * 重点关注离线任务接口
+ * @param {object} params
+ */
+export function PortraitPostFocusTask(data) {
+  return request({
+    url: '/portrait/shot-num/focus/task',
+    method: 'post',
+    data,
+    mode: 'judge'
+  })
+}
 /*--------------------------  导入导出  ---------------------------------*/
 /**
  * 夜间行车分析导出接口
@@ -587,12 +610,13 @@ export function getFaceRetrieval(params) {
  * 人体查询接口
  * @param {object} params
  */
-export function getFaceRetrievalPerson(params) {
+export function getFaceRetrievalPerson(params, extData) {
   return request({
     url: '/face-retrieval/query-person',
     method: 'post',
     data: params,
-    mode: 'judge'
+    mode: 'judge',
+    extData: extData
   })
 }
 
@@ -698,3 +722,30 @@ export function getVideoContinueAllpointss(params) {
   })
 }
 
+
+/**************************** 区域人员分析接口 ******************************** */
+/**
+ * 区域人员在线查询实时接口
+ * @param {object} params
+ */
+export function getAreaRealTimeData(params, extData) {
+  return request({
+    url: '/portrait/shot-num/area/real-time/web',
+    method: 'post',
+    data: params,
+    mode: 'judge',
+    extData: extData
+  })
+}
+/**
+ * 区域人员新建离线任务接口
+ * @param {object} params
+ */
+export function addAreaPersonTask(params) {
+  return request({
+    url: '/portrait/shot-num/area/task/web',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}

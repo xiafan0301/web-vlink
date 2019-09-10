@@ -299,7 +299,7 @@ export default {
   },
   mounted () {
     this.userInfo = this.$store.state.loginUser;
-
+    console.log('userInfo', this.userInfo)
     this.addUnit.proKey = this.userInfo.proKey;
     this.editUnit.proKey = this.userInfo.proKey;
 
@@ -408,6 +408,7 @@ export default {
     },
     // 获取当前部门及子级部门
     getDepartList () {
+      console.log('this.userInfo.organList[0].uid', this.userInfo.organList[0].uid)
        this.allDepartmentList = [];
        this.departmentList = [];
        let organPid = null;
@@ -416,6 +417,7 @@ export default {
        } else {
          organPid = this.userInfo.organList[0].uid;
        }
+      
       const params = {
         'where.organName': this.keyWord,
         'where.proKey': this.userInfo.proKey,
@@ -426,12 +428,12 @@ export default {
         .then(res => {
           if (res) {
             const params = {
-              uid: parseInt(this.userInfo.organList[0].uid),
+              uid: this.userInfo.organList[0].uid,
               organName: this.userInfo.organList[0].organName,
+              chargeUserName: this.userInfo.organList[0].chargeUserName,
               isShow: true,
               children: []
             };
-
             this.allDepartmentList.push(params);
 
             res.data.list.map(item => {
@@ -579,11 +581,23 @@ export default {
     },
     // 显示添加部门弹出框
     onAddDepart (obj, e) {
-       e.stopPropagation();
-
+      console.log(obj)
+      e.stopPropagation();
+      this.departmentFormList = [];
+      this.addUnit = {
+        proKey: this.userInfo.proKey,
+        // chargeUserName: null, // 组织机构负责人
+        organName: null, // 单位名称
+        // organPid: null, // 上级单位
+        province: null, // 省
+        city: null, // 市
+        region: null, // 县
+        street: null // 镇
+      };
       this.newDepartmentDialog = true;
 
       this.addUnit.organPid = obj.uid;
+      this.addUnit.chargeUserName = obj.chargeUserName;
 
       const params = {
         'where.proKey': this.userInfo.proKey,
@@ -603,7 +617,7 @@ export default {
     // 显示编辑部门弹出框
     onEditDepart (obj, e) {
       e.stopPropagation();
-
+      this.editDepartmentFormList = [];
       const params = {
         'where.proKey': this.userInfo.proKey,
         pageSize: 0

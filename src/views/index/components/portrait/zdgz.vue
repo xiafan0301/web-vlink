@@ -1,5 +1,5 @@
 <template>
-<div class="judge_content">
+<div class="judge_zdgz_content">
   <div class="vl_judge_tc">
     <div class="Breadc">
       <div is="vlBreadcrumb" 
@@ -8,80 +8,90 @@
       </div>
     </div>
     
-    <div :class="['vl_j_left',{hideleft:hideleft}]">
+    <div :class="['vl_j_left']">
       <div class="vl_jtc_search" style="padding-top: 0;">
+        <div class="zdgz_left_search_type">
+          <span :class="{'active': taskType === '1'}" @click="taskType = '1'">在线查询</span>
+          <span :class="{'active': taskType === '2'}" @click="taskType = '2'">离线任务</span>
+        </div>
+        <div v-show="taskType === '2'" class="zdgz_left_radio">
+          <span>任务名称：</span>
+          <span>
+          <el-input v-model="taskName" placeholder="请输入任务名称" maxlength="20"></el-input>
+        </span>
+        </div>
         <el-date-picker
           v-model="searchData.time1"
           type="datetime"
-          time-arrow-control
           placeholder="开始时间"
-          :picker-options="pickerOptions"
+          :time-arrow-control="true"
           class="full vl_date"
           :clearable="false"
+          value-format="timestamp"
         ></el-date-picker>
         <el-date-picker
-            v-model="searchData.time2"
-            type="datetime"
-            time-arrow-control
-            :clearable="false"
-            :picker-options="pickerOptions"
-            placeholder="结束时间"
-            class="full vl_date vl_date_end"
+          v-model="searchData.time2"
+          type="datetime"
+          :clearable="false"
+          :time-arrow-control="true"
+          placeholder="结束时间"
+          class="full vl_date vl_date_end"
+          value-format="timestamp"
         ></el-date-picker>
-          <el-select class="full" v-model="searchData.portraitGroupId" placeholder="关注人群">
-            <el-option
-              v-for="item in portraitGroupList"
-              :key="item.id"
-              :label="item.groupName"
-              :value="item.uid">
-            </el-option>
-          </el-select>
-          <el-select class="full" v-model="searchData.sex" placeholder="请选择性别" clearable>
-            <el-option
-              v-for="item in sexList"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
-            </el-option>
-          </el-select>
-          <el-select class="full" v-model="searchData.ageGroup" placeholder="请选择年龄段" clearable>
-            <el-option
-              v-for="item in ageGroupList"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
-            </el-option>
-          </el-select>
-          <el-radio-group v-model="input5" @change="changeTab">
-              <el-row :gutter="10">
-              <el-col :span="12">
-                <el-radio label="1">列表选择</el-radio>
-              </el-col>
-              <el-col :span="12">
-                <div @click="clickTab">
-                  <el-radio label="2">地图选择</el-radio>
-                </div>
-              </el-col>
-            </el-row>
-          </el-radio-group>
-          <div v-if="input5==2" >
-            <el-input  v-model="selectValue" :disabled="true">
-            </el-input>
-          </div>
-          <el-select 
-            v-model="areaIds"
-            class="camera-select full"
-            multiple
-            collapse-tags
-            placeholder="关注范围" v-if="input5==1">
-            <el-option
-              v-for="item in eventAreas"
-              :key="item.id"
-              :label="item.areaName"
-              :value="item.areaId">
-            </el-option>
-          </el-select>
-          <div>
+        <el-select class="full" v-model="searchData.portraitGroupId" placeholder="关注人群">
+          <el-option
+            v-for="item in portraitGroupList"
+            :key="item.id"
+            :label="item.groupName"
+            :value="item.uid">
+          </el-option>
+        </el-select>
+        <el-select class="full" v-model="searchData.sex" placeholder="请选择性别" clearable>
+          <el-option
+            v-for="item in sexList"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+        <el-select class="full" v-model="searchData.ageGroup" placeholder="请选择年龄段" clearable>
+          <el-option
+            v-for="item in ageGroupList"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+        <el-radio-group v-model="input5" @change="changeTab">
+            <el-row :gutter="10">
+            <!--<el-col :span="12">-->
+              <!--<el-radio label="1">列表选择</el-radio>-->
+            <!--</el-col>-->
+            <el-col :span="12">
+              <div @click="clickTab">
+                <el-radio label="2">地图选择</el-radio>
+              </div>
+            </el-col>
+          </el-row>
+        </el-radio-group>
+        <!--<div v-if="input5==2" >-->
+          <!--<el-input  v-model="selectValue" :disabled="true">-->
+          <!--</el-input>-->
+        <!--</div>-->
+        <!--<el-select-->
+          <!--v-model="areaIds"-->
+          <!--class="camera-select full"-->
+          <!--multiple-->
+          <!--collapse-tags-->
+          <!--placeholder="关注范围" v-if="input5==1">-->
+          <!--<el-option-->
+            <!--v-for="item in eventAreas"-->
+            <!--:key="item.id"-->
+            <!--:label="item.areaName"-->
+            <!--:value="item.areaId">-->
+          <!--</el-option>-->
+        <!--</el-select>-->
+        <div>
           <el-row :gutter="10">
             <el-col :span="12">
               <el-button  @click="resetSearch" class="full">重置</el-button>
@@ -94,173 +104,212 @@
           </el-row>
         </div>
       </div>
-      <span class="insetLeft2" @click="hideResult"></span>
     </div>
-    <div :class="['vl_j_right',{hideleft:hideleft}]">
-      <div id="tcMap"></div>
-      <ul class="map_rrt_u2">
-        <li  @click="resemt"><i class="el-icon-aim"></i></li>
-        <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
-        <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
-      </ul>
-      <div class="vl_jfo_switch">
-        <div><span :class="{'active': switchType === 0}" @click="switchType = 0">抓拍结果</span></div>
-        <div><span :class="{'active': switchType === 1}" @click="switchType = 1;">关联事件</span></div>
-      </div>
-      <div class="vl_jfo_right" v-show="showVideoList">
-        <div class="vl_jig_right_title">
-          <p><i class="vl_icon vl_icon_v11"></i><span :title="curSXT.deviceName">{{curSXT.deviceName}}</span></p>
-          <p><i class="vl_icon vl_icon_position_1"></i><span :title="curSXT.address">{{curSXT.address}}</span></p>
-          <!-- < span>抓拍{{curSXT.shotNum}}次</span> -->
-        </div>
-        <div class="video_container">
-          <vue-scroll>
-            <div class="vl_jtc_mk" v-for="(item, index) in curVideo.videoList" :key="item.id">
-              <p>{{item.shotTime}}</p>
-              <video :id="'vlJigVideo' + index" :src="item.videoPath"></video>
-              <p>{{item.shotTime}}</p>
-              <div class="vl_jig_right_btn">
-                <span class="vl_icon vl_icon_judge_01" @click="playVideo(index)" v-if="item.playing"></span>
-                <span class="vl_icon vl_icon_control_09" @click="playVideo(index)" v-else></span>
-                <span class="vl_icon vl_icon_control_08" @click="largeVideo(index)"></span>
+    <div :class="['vl_j_right']">
+      <div class="frequent-a-content">
+        <ul class="tab-menu">
+          <li
+                  v-for="(item,index) in tabList"
+                  :key="index"
+                  :class="{'is-active': selectIndex === item.value}"
+                  @click="selectTab(item.value)"
+          >{{item.label}}</li>
+        </ul>
+        <template v-if="selectIndex === 2">
+          <div class="vl_jig_right">
+            <ul class="map_rrt_u2">
+              <li  @click="resemt"><i class="el-icon-aim"></i></li>
+              <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
+              <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
+            </ul>
+            <div class="vl_jfo_right" v-show="showVideoList">
+              <div class="vl_jig_right_title">
+                <p><i class="vl_icon vl_icon_v11"></i><span>{{curSXT.bayonetName ? curSXT.bayonetName : curSXT.deviceName}}</span></p>
+                <p><i class="vl_icon vl_icon_position_1"></i><span :title="curSXT.address">{{curSXT.address}}</span></p>
+                <!-- < span>抓拍{{curSXT.shotNum}}次</span> -->
               </div>
-            </div>
-          </vue-scroll>
-        </div>
-        <div class="vl_jig_right_close"><i class="el-icon-error" @click="hideVideoList"></i></div>
-      </div>
-      <div class="vl_jig_event" v-show="switchType === 1">
-        <div class="vl_jfo_event_box se_hi_box">
-          <vue-scroll>
-            <el-table
-              :data="eventList"
-              style="width: 100%">
-              <el-table-column
-                label="布控图片"
-                align="center"
-                min-width="120">
-                <template slot-scope="scope">
-                  <div class="tt_img">
-                    <img :src="scope.row.surveillancePhoto" alt="" >
-                    <span>{{scope.row.surveillancePhotoNum}}</span>
+              <div class="video_container">
+                <vue-scroll>
+                  <div class="vl_jtc_mk" v-for="(item, index) in curVideoList" :key="item.id">
+                    <p>{{item.shotTime}}</p>
+                    <div is="flvplayer" :oData="item.playerData"
+                         :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
+                    </div>
                   </div>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="eventNumber"
-                label="事件编号"
-                align="left"
-                min-width="140">
-              </el-table-column>
-              <el-table-column
-                min-width="150"
-                label="事件内容">
-                <template slot-scope="scope">
-                  {{scope.row.describe.length > 28 ? (scope.row.describe.slice(0, 28) + '...') : scope.row.describe}}
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="departmentName"
-                label="处理单位"
-                min-width="80">
-              </el-table-column>
-              <el-table-column
-                label="上报时间"
-                min-width="120">
-                <template slot-scope="scope">
-                  {{scope.row.reportTime.split(' ')[0]}}
-                </template>
-              </el-table-column>
-              <el-table-column
-                min-width="150"
-                label="发生地点">
-                <template slot-scope="scope">
-                  {{scope.row.address.length > 28 ? (scope.row.address.slice(0, 28) + '...') : scope.row.address}}
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="processStatus"
-                label="处理状态"
-                min-width="100">
-                <template slot-scope="scope">
-                  <span class="event_status" :class="[scope.row.processStatus === 1 ? 'untreated_event' : scope.row.processStatus === 2 ? 'treating_event' : 'end_event']">{{scope.row.processStatusName}}</span>
-                </template>
-              </el-table-column>
-              <el-table-column
-                label="操作"
-                min-width="100">
-                <template slot-scope="scope">
-                  <el-button type="text" @click="checkIt(scope.row)">查看</el-button>
-                </template>
-              </el-table-column>
-            </el-table>
+                </vue-scroll>
+              </div>
+              <div class="vl_jig_right_close"><i class="el-icon-error" @click="hideVideoList"></i></div>
+            </div>
+          </div>
+        </template>
+        <template v-else>
+          <div class="search_box">
+            <el-form :inline="true" :model="taskForm" class="event_form" ref="taskForm">
+              <el-form-item label="任务名称：" prop="taskName">
+                <el-input
+                        style="width: 200px;"
+                        type="text"
+                        placeholder="请输入任务名称"
+                        v-model="taskForm.taskName"
+                />
+              </el-form-item>
+              <el-form-item label="创建时间：" prop="reportTime">
+                <el-date-picker
+                        v-model="taskForm.reportTime"
+                        type="datetimerange"
+                        value-format="yyyy-MM-dd HH:mm:ss"
+                        format="yyyy-MM-dd HH:mm:ss"
+                        range-separator="至"
+                        start-placeholder="开始日期"
+                        end-placeholder="结束日期"
+                        :default-time="['00:00:00', '23:59:59']"
+                ></el-date-picker>
+              </el-form-item>
+              <el-form-item>
+                <el-button class="select_btn" @click="selectDataList">查询</el-button>
+                <el-button class="reset_btn" @click="resetForm('taskForm')">重置</el-button>
+              </el-form-item>
+            </el-form>
+            <div class="divide"></div>
+            <!--<el-button @click="skipAddTaskPage" class="th-button-export-color">新建任务</el-button>-->
+          </div>
+          <div class="content-box">
+            <div class="table_box">
+              <el-table :data="list">
+                <el-table-column label="序号" type="index" width="100"></el-table-column>
+                <el-table-column label="任务名称" prop="taskName" show-overflow-tooltip></el-table-column>
+                <el-table-column label="创建时间" prop="createTime" show-overflow-tooltip></el-table-column>
+                <el-table-column label="分析时间范围" show-overflow-tooltip>
+                  <template slot-scope="scope">
+                    {{scope.row.taskWebParam.startTime}}-{{scope.row.taskWebParam.endTime}}
+                  </template>
+                </el-table-column>
+                <el-table-column label="人群" show-overflow-tooltip>
+                  <template slot-scope="scope">
+                    {{scope.row.taskWebParam.portraitGroupName ? scope.row.taskWebParam.portraitGroupName : '不限'}}
+                  </template>
+                </el-table-column>
+                <el-table-column label="性别" show-overflow-tooltip>
+                  <template slot-scope="scope">
+                    {{scope.row.taskWebParam.sex ? scope.row.taskWebParam.sex : '不限'}}
+                  </template>
+                </el-table-column>
+                <el-table-column label="年龄段" show-overflow-tooltip>
+                  <template slot-scope="scope">
+                    {{scope.row.taskWebParam.age ? scope.row.taskWebParam.age : '不限'}}
+                  </template>
+                </el-table-column>
+                <el-table-column label="状态" v-if="selectIndex === 0" prop="taskStatus" show-overflow-tooltip>
+                  <template slot-scope="scope">
+                    <span>{{scope.row.taskStatus && scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 3 ? '失败' : '已中断'}}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="操作" fixed="right">
+                  <template slot-scope="scope">
+                  <span
+                          class="operation_btn"
+                          @click="skipResultPage(scope.row)"
+                          v-if="selectIndex === 1"
+                  >查看</span>
+                    <span
+                            class="operation_btn"
+                            @click="showInterruptDialog(scope.row)"
+                            v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 1"
+                    >中断任务</span>
+                    <span
+                            class="operation_btn"
+                            @click="recoveryOrRestart(scope.row)"
+                            v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 4"
+                    >恢复任务</span>
+                    <span
+                            class="operation_btn"
+                            @click="recoveryOrRestart(scope.row)"
+                            v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 3"
+                    >重启任务</span>
+                    <span
+                            class="operation_btn"
+                            @click="showDeleteDialog(scope.row)"
+                            v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus !== 4"
+                    >删除任务</span>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </div>
+          </div>
+          <template v-if="pagination.total > 0">
             <el-pagination
-              v-show="pagination.total > 6"
-              class="se_hi_pa"
-              background
-              layout="prev, pager, next"
-              @current-change="handleCurrentChange"
-              :current-page="pagination.currentPage"
-              :page-size="pagination.pageSize"
-              :total="pagination.total">
-            </el-pagination>
-          </vue-scroll>
-        </div>
+                    class="cum_pagination"
+                    @current-change="handleCurrentChange"
+                    :current-page.sync="pagination.pageNum"
+                    :page-sizes="[100, 200, 300, 400]"
+                    :page-size="pagination.pageSize"
+                    layout="total, prev, pager, next, jumper"
+                    :total="pagination.total"
+            ></el-pagination>
+          </template>
+        </template>
       </div>
     </div>
-    <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
-      <video id="vlJfoLargeV" :src="curVideoUrl" crossOrigin="anonymous"></video>
-      <div @click="closeVideo" class="close_btn el-icon-error"></div>
-      <div class="control_bottom">
-        <div>{{curSXT.deviceName}}</div>
-        <div>
-          <span @click="pauseLargeVideo" class="vl_icon vl_icon_judge_01" v-if="curVideo.playing"></span>
-          <span @click="playLargeVideo" class="vl_icon vl_icon_control_09" v-else></span>
-          <span><a download="视频" :href="curVideoUrl" class="el-icon-download"></a></span>
-          <span @click="cutScreen" class="vl_icon vl_icon_control_07"></span>
-        </div>
-      </div>
-    </div>
-    <!-- <div style="width: 0; height: 0;" v-show="showCut"  :class="{vl_j_cutscreen: showCut}">
-      <img :src="demoImg" alt="">
-      <i @click="showCut = false" class="close_btn el-icon-error"></i>
-      <a download="截图" :href="demoImg" id="vlJidDownloadImg" ></a>
-    </div> -->
   </div>
-  <!-- 截屏 dialog -->
-    <el-dialog title="截屏" :visible.sync="cutDialogVisible" :center="false" :append-to-body="true" width="1000px" style="z-index: 11111;">
-      <div style="text-align: center; padding-top: 30px;">
-        <canvas :id="flvplayerId + '_cut_canvas'"></canvas>
-      </div>
-      <div slot="footer" class="dialog-footer" style="padding: 0 0 20px 0;">
-        <el-button  @click="cutDialogVisible = false">取 消</el-button>&nbsp;&nbsp;&nbsp;&nbsp;
-        <el-button  type="priamry" @click="playerCutSave">保 存</el-button>
-        <a :id="flvplayerId + '_cut_a'" style="display: none;">保存</a>
-      </div>
-    </el-dialog>
+  <div id="tcMap"></div>
   <!-- 地图选择 -->
    <!-- D设备 B卡口  这里是设备和卡口 -->
     <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" :clear="clearMapSelect" @mapSelectorEmit="mapPoint"></div>
+    <!--中断任务弹出框-->
+    <el-dialog
+            title="中断任务确认"
+            :visible.sync="interruptDialog"
+            width="482px"
+            :close-on-click-modal="false"
+            :close-on-press-escape="false"
+            class="dialog_comp"
+    >
+      <span style="color: #999999;">任务中断，任务的数据处理进程将中止，可以在列表中恢复任务的数据处理</span>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="interruptDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" @click="sureInterruptTask">确认</el-button>
+      </div>
+    </el-dialog>
+
+    <!--删除任务弹出框-->
+    <el-dialog
+            title="删除任务确认"
+            :visible.sync="deleteDialog"
+            width="482px"
+            :close-on-click-modal="false"
+            :close-on-press-escape="false"
+            class="dialog_comp"
+    >
+      <span style="color: #999999;">任务删除，任务的数据处理进程将被清除，任务不再可以恢复</span>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="deleteDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="sureDeleteTask">确认</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
 let AMap = window.AMap;
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
-import {getFocusList, newGETAlarmSnapList, JfoGETEventList,getAllDevice } from "@/views/index/api/api.judge.js";
+import {PortraitPostFocusRealTime, PortraitPostFocusTask, newGETAlarmSnapList, JfoGETEventList,getAllDevice } from "@/views/index/api/api.judge.js";
 import {MapGETmonitorList} from '../../api/api.map.js';
 import {getGroupListIsPortrait, getGroupListIsVehicle} from '../../api/api.control.js';
+import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
 import mapSelector from '@/components/common/mapSelector.vue';
-import { random14, dateOrigin, formatDate } from '@/utils/util.js';
-import { mapXupuxian } from "@/config/config.js";
+import flvplayer from '@/components/common/flvplayer.vue';
+import { random14, formatDate } from '@/utils/util.js';
+import { mapXupuxian, onlineOutTime } from "@/config/config.js";
 export default {
    components: {
     mapSelector,
-    vlBreadcrumb
+    vlBreadcrumb,
+     flvplayer
   },
   data() {
     return {
+      taskName: '', // 左侧输入任务名称
+      taskType: "1", // 左侧任务类型，1 实时，2离线
       flvplayerId: 'flv_' + random14(),
-      cutDialogVisible: false, // 截图弹出框
       clearMapSelect: null, // 清除地图选择
       input5:"1",
       areaIds: [],
@@ -272,25 +321,19 @@ export default {
       },
       evData: [],
       searchData: {
-        type: 1, // 1：人， 2： 车,0 无限
+        type: 1, // 1：人， 2： 车,0 不限
         portraitGroupId: null,  // 人员组
         sex: null, // 1男，2女
         ageGroup: null, // 年龄段
-        time1: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)),
-        time2: new Date()
+        time1: null,
+        time2: null
       },
       sexList: [
-        // {value: null, label: '不限'},
         {value: '男', label: '男'},
         {value: '女', label: '女'}
       ],
       portraitGroupList: [],
       vehicleGroupList: [],
-      // focusType: [
-      //   {value: null, label: '不限'},
-      //   {value: 1, label: '布控人员'},
-      //   {value: 2, label: '布控车辆'}
-      // ],
       ageGroupList: [
         // {value: null, label: '不限'},
         {value: '儿童', label: '儿童'},
@@ -304,40 +347,36 @@ export default {
       
       pickerOptions: {
         disabledDate (time) {
-        //   let date = new Date();
-        //   let curDate = date.getTime();
-        //   let curS = 3 * 24 * 3600 * 1000;
-        //     let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
-        //   let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
-        //   let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
-        //   let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
-        //   let start = new Date(curDate - curS).getFullYear() +
-        // "-" + _sm + "-" +_sd;
+          let date = new Date();
+          let curDate = date.getTime();
+          let curS = 3 * 24 * 3600 * 1000;
+            let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
+          let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
+          let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
+          let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
+          let start = new Date(curDate - curS).getFullYear() +
+        "-" + _sm + "-" +_sd;
           
-        //   let threeMonths = new Date(start).getTime();
+          let threeMonths = new Date(start).getTime();
           //return time.getTime() > Date.now() || time.getTime() < threeMonths;
           return time.getTime() > Date.now();
         }
       },
-      switchType: 0, // 0活动范围，1关联事件
       amap: null, // 地图实例
       searching: false,
       curVideo: {
         id: '',
         indexNum: null, // 当前展示的摄像头索引
         playNum: null, // 当前摄像头里正在大屏播放的索引
-        playing: false,
         videoList: []
       }, // 当前被放大播放的video
+      curVideoList: [],
       showVideoList: false,
       curSXT: {
         deviceName: '',
         shotNum: '',
         // snapTime: ''
       }, // 显示的摄像头数据
-      showLarge: false,
-      showCut: false,
-      curVideoUrl: '',
       demoImg: '',
       surveillanceIds: [], // 布控ids.
       eventList: [],
@@ -346,13 +385,42 @@ export default {
       selectDevice:[],
       selectBayonet:[],
       selectValue:"已选设备0个",
-      hideleft:false,
+      // 任务
+      tabList: [
+        {
+          label: "已完成任务",
+          value: 1
+        },
+        {
+          label: "未完成任务",
+          value: 0
+        },
+        {
+          label: "查询结果",
+          value: 2
+        }
+      ],
+      selectIndex: 1, // 默认已完成的任务
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
+      taskForm: {
+        startTime: '',
+        endTime: '',
+        taskName: null // 任务名称
+      },
+      list: [], //已完成列表
+      taskId: null, // 任务id
+      deleteDialog: false,
+      isDeleteLoading: false,
+      interruptDialog: false, //中断任务
+      addTaskDialog: false,
+      isAddLoading: false,
     }
   },
   mounted () {
-    // this.setDTime();
+    this.setDTime();
+    this.getDataList();
     let map = new AMap.Map('tcMap', {
-      center: [112.974691, 28.093846],
+      center: mapXupuxian.center,
       zoom: 16
     });
     map.setMapStyle('amap://styles/whitesmoke');
@@ -377,6 +445,129 @@ export default {
     })
   },
   methods: {
+    randerMap () {
+      this.$nextTick(() => {
+        $('.vl_jig_right').append($('#tcMap'))
+        this.amap.clearMap();
+        this.drawMarkers(this.evData);
+      })
+    },
+    // 获取离线任务
+    getDataList () {
+      const params = {
+        'where.taskName': this.taskForm.taskName,
+        'where.taskType': 6, //  1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析 4:以图搜人 9：人员侦查报告,6重点关注
+        'where.startTime': this.taskForm.reportTime ? this.taskForm.reportTime[0] : null,
+        'where.endTime': this.taskForm.reportTime ? this.taskForm.reportTime[1] : null,
+        'where.isFinish': this.selectIndex,   //是否完成 0:未完成(包含处理中、处理失败、处理中断) 1：已完成(处理成功)
+        pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize,
+        order: 'desc',
+        orderBy: 'create_time'
+      };
+      getTaskInfosPage(params)
+          .then(res => {
+            if (res) {
+              res.data.list.forEach(item => {
+                this.$set(item, 'taskWebParam', JSON.parse(item.taskWebParam))
+              })
+              this.list = res.data.list;
+              this.pagination.total = res.data.total;
+            }
+          })
+          .catch(() => {})
+    },
+    //tab切换
+    selectTab (val) {
+      this.selectIndex = val;
+      if(parseFloat(val) < 2) {
+        this.getDataList();
+      }
+    },
+    skipResultPage (obj) {
+      this.$router.push({name: 'portrait_zdgz_jg', query: {uid: obj.uid}})
+    },
+    // 显示中断任务弹出框
+    showInterruptDialog (obj) {
+      this.interruptDialog = true;
+      this.taskId = obj.uid;
+    },
+    // 显示删除任务弹出框
+    showDeleteDialog (obj) {
+      this.deleteDialog = true;
+      this.taskId = obj.uid;
+    },
+    // 确认中断任务
+    sureInterruptTask () {
+      if (this.taskId) {
+        const params = {
+          uid: this.taskId,
+          taskType: 6, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
+          taskStatus: 4 // 1：处理中 2：处理成功 3：处理失败 4：处理中断
+        };
+        this.isInterruptLoading = true;
+        putAnalysisTask(params)
+            .then(res => {
+              if (res) {
+                this.$message({
+                  type: 'success',
+                  message: '中断任务成功',
+                  customClass: 'request_tip'
+                });
+                this.interruptDialog = false;
+                this.isInterruptLoading = false;
+                this.getDataList();
+              } else {
+                this.isInterruptLoading = false;
+              }
+            })
+            .catch(() => {this.isInterruptLoading = false;})
+      }
+    },
+    // 确认删除任务
+    sureDeleteTask () {
+      if (this.taskId) {
+        const params = {
+          uid: this.taskId,
+          taskType: 6, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
+          delFlag: true
+        };
+        this.isDeleteLoading = true;
+        putAnalysisTask(params)
+            .then(res => {
+              if (res) {
+                this.$message({
+                  type: 'success',
+                  message: '删除任务成功',
+                  customClass: 'request_tip'
+                });
+                this.deleteDialog = false;
+                this.isDeleteLoading = false;
+                this.getDataList();
+              } else {
+                this.isDeleteLoading = false;
+              }
+            })
+            .catch(() => {this.isDeleteLoading = false;})
+      }
+    },
+    //恢复任务,重启任务
+    recoveryOrRestart(obj) {
+      putTaskInfosResume(obj.uid).then(res => {
+        console.log(res)
+        if(res) {
+          this.getDataList();
+        }
+      }).catch(() => {})
+    },
+    // 查询任务列表数据
+    selectDataList () {
+      this.getDataList();
+    },
+    handleCurrentChange (e) {
+      this.pagination.pageNum = e;
+      this.getDataList();
+    },
     mapZoomSet(val) {
       if (this.amap) {
         this.amap.setZoom(this.amap.getZoom() + val);
@@ -387,9 +578,6 @@ export default {
         this.amap.setZoomAndCenter(14, mapXupuxian.center);
       }
     },
-    hideResult(){
-      this.hideleft = !this.hideleft;
-    },
     changeTab(v) {
      
     },
@@ -397,21 +585,9 @@ export default {
         this.dialogVisible = !this.dialogVisible;
     },
     mapPoint(data){
-      let v = data.deviceList;
-      let p = data.bayonetList;
-      this.selectDevice = [];
-      this.selectBayonet = [];
+      this.selectDevice = data.deviceList;
+      this.selectBayonet = data.bayonetList;
       //返回有效点集合
-      if (v && v.length > 0) {
-        v.forEach(element => {
-          this.selectDevice.push(element.uid);
-        });
-      }
-      if (p && p.length > 0) {
-        p.forEach(element => {
-          this.selectBayonet.push(element.uid);
-        });
-      }
       this.selectValue =
         "已选设备" +
         (this.selectDevice.length + this.selectBayonet.length) +
@@ -442,34 +618,18 @@ export default {
             }
           })
     },
-    chooseType (e) {
-      if (e === 1) {
-        this.searchData.vehicleGroupId = null;
-        this.searchData.plateType = null;
-        this.searchData.vehicleColor = null;
-      } else if (e === 2) {
-        this.searchData.portraitGroupId = null;
-        this.searchData.sex = null;
-        this.searchData.ageGroup = null;
-      }
-    },
     setDTime () {
-      /* let date = new Date();
+      let date = new Date();
       let curDate = date.getTime();
       let curS = 1 * 24 * 3600 * 1000;
-        let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
-      let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
-      let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
-      let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
-      
-      let _s = new Date(curDate - curS).getFullYear() +
-        "-" + _sm + "-" +_sd;
-      let _e = date.getFullYear() + "-" + _em + "-" + _ed;
-      this.searchData.time1 = _s
-      this.searchData.time2 = _s */
+      let _sDate = new Date(curDate - curS);
+      let _s = _sDate.getFullYear()+ '-' + (_sDate.getMonth() + 1) + '-' + _sDate.getDate() + ' 00:00:00' ;
+      this.searchData.time1 = new Date(_s).getTime();
+      this.searchData.time2 = curDate;
     },
     resetSearch () {
-      // this.setDTime()
+      this.setDTime()
+      this.taskName = '';
       this.searchData.type = null;
       this.searchData.portraitGroupId = null;
       this.searchData.sex = null;
@@ -477,8 +637,6 @@ export default {
       this.searchData.ageGroup = null;
       this.searchData.vehicleGroupId = '';
       this.searchData.plateType = null;
-      this.searchData.time1 = dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000));
-      this.searchData.time2 = new Date();
       this.selectDevice = [];
       this.selectBayonet = [];
       this.selectValue = "已选设备0个";
@@ -493,6 +651,12 @@ export default {
     },
     beginSearch () {
       let _todo = false;
+      if(this.selectBayonet.length === 0 && this.selectDevice.length === 0) {
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('请至少选择一个设备')
+        }
+        return false;
+      }
       for (let key in this.searchData) {
         if (this.searchData[key] && key !== 'time1') {
           _todo = true;
@@ -504,13 +668,11 @@ export default {
       }
       this.searching = true;
       this.surveillanceIds = [];
-      this.$_showLoading({
-        target: '.se_hi_box'
-      })
       let params = {
-        startTime: formatDate(this.searchData.time1),
-        endTime: formatDate(this.searchData.time2),
+        startTime: formatDate(this.searchData.time1, 'yyyy-MM-dd HH:mm:ss'),
+        endTime: formatDate(this.searchData.time2, 'yyyy-MM-dd HH:mm:ss'),
         personGroupId: this.searchData.portraitGroupId || "" ,
+//        personGroupId: '1lwx3mJIbdF4c4vEgpyLk0' ,
         // sex: this.searchData.sex || "",
         // age: this.searchData.ageGroup || "" ,
       }
@@ -522,55 +684,85 @@ export default {
       if(this.searchData.ageGroup){
            params.age=this.searchData.ageGroup
       }
-      // for (let key in this.searchData) {
-      //   if (this.searchData[key] && key !== 'time') {
-      //     params[key] = this.searchData[key];
-      //   }
-      // }
-      if (this.areaIds.length) {
-        params['areaIds'] = this.areaIds.join(',');
+      let dNameList = [];
+      let dList = this.selectDevice.map(res =>  res.deviceName);
+      let bList = this.selectBayonet.map(res => res.bayonetName);
+      dNameList = dList.concat(bList);
+      console.log(dNameList, this.selectDevice)
+      if (dNameList.length > 3) {
+        params['deviceNames'] = dNameList.splice(0, 2);
+        params['deviceNames'].push('等' + dNameList.length + '个设备');
+        params['deviceNames'] =  params['deviceNames'].join(',')
+      } else {
+        params['deviceNames'] = dNameList.join(',')
       }
+//      if (this.input5 === '1' && this.areaIds.length) {
+//        params['areaIds'] = this.areaIds.join(',');
+//      }
       if (this.selectBayonet.length) {
-        params['bayonetIds'] = this.selectBayonet.join(',');
+        params['bayonetIds'] = this.selectBayonet.map(res => res.uid).join(',');
       }
       if (this.selectDevice.length) {
-        params['deviceIds'] = this.selectDevice.join(',');
+        params['deviceIds'] = this.selectDevice.map(res => res.uid).join(',');
       }
-      getFocusList(params)
-        .then(res => {
-          if (res) {
-            if (!res.data || res.data.length === 0) {
-              this.$message.info('抱歉，没有找到匹配结果')
-              this.amap.clearMap();
+      params['portraitGroupName'] = this.portraitGroupList.find(y => y.uid === this.searchData.portraitGroupId).groupName;
+      // 判断选择的是实时还是离线 taskType 1为实时，2为离线.
+      if (this.taskType === "1") {
+        PortraitPostFocusRealTime(params, {
+          errorMsg: '因数据量过大导致查询超时，建议进行离线分析',
+          timeout: onlineOutTime
+        }).then(res => {
               this.searching = false;
-              return false;
-            }
-            console.log(res);
-            
-            //  res.data.forEach(z => {
-            //   if (z.surveillanceId) {
-            //     this.surveillanceIds.push(z.surveillanceId)
-            //   }
-            // });
-            this.evData = res.data.map(x => {
-              x.checked = false;
-              return x;
+              if (res) {
+                this.$set(res.data, 'taskResult', JSON.parse(res.data.taskResult));
+                console.log(res);
+                this.evData = res.data.taskResult.map(x => {
+                  x.checked = false;
+                  return x;
+                })
+                this.selectIndex = 2;
+                this.randerMap();
+              }
             })
-            this.amap.clearMap();
-            this.drawMarkers(this.evData);
-            this.showEventList();
-          }
+      } else {
+        if (!this.taskName.replace(/\s+|\s+$/g, '')) {
           this.searching = false;
-        })
+          if (!document.querySelector('.el-message--info')) {
+            this.$message.info('任务名称不能为空');
+            return false;
+          }
+        } else {
+          params.taskName = this.taskName;
+          PortraitPostFocusTask(params).then(res => {
+            this.searching = false;
+            if (res && res.data) {
+              this.resetSearch();
+              this.$message({
+                type: 'success',
+                message: '新建成功',
+                customClass: 'request_tip'
+              })
+              this.getDataList()
+              console.log(res.data)
+            }
+          })
+        }
+      }
     },
     drawMarkers (data) {
       console.log(data);
-      
       for (let  i = 0; i < data.length; i++) {
         let obj = data[i];
         let _idWin = 'vlJfoImg' + i;
         if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
-          let _sContent = `<div id="${_idWin}" class="vl_jig_mk_img"><img src="${obj.subStoragePath}"><div><p>${obj.deviceName}</p><p>抓拍${obj.shotNum}次</p></div></div>`;
+          let name = '', className = 'vl_icon_map_mark0';
+          if (obj.bayonetName) {
+            name = obj.bayonetName;
+            className = 'vl_icon_map_mark1'
+          } else {
+            name = obj.deviceName
+          }
+          let _sContent = `<div id="${_idWin}" class="vl_jig_mk_img"><img src="${obj.subStoragePath}"><div><p>${name}</p><p>抓拍${obj.shotNum}次</p></div></div>`;
           // 窗体
           new AMap.Marker({ // 添加自定义点标记
             map: this.amap,
@@ -583,7 +775,7 @@ export default {
           });
           // 摄像头
           let _id = 'vlJfoSxt' + i;
-          let _content = '<div id=' + _id + ' class="vl_icon vl_jfo_sxt vl_icon_judge_04"></div>'
+          let _content = '<div id=' + _id + ' class="vl_icon ' + className + ' "></div>'
           new AMap.Marker({ // 添加自定义点标记
             map: this.amap,
             position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
@@ -594,7 +786,7 @@ export default {
             content: _content
           });
           setTimeout(() => {
-            this.addListen($('#' + _id), 'mouseover', i);
+            this.addListen($('#' + _id), 'mouseover', i, obj);
             this.addListen($('#' + _id), 'mouseout', i, obj);
             this.addListen($('#' + _id), 'click', i, obj);
           }, 300)
@@ -608,13 +800,21 @@ export default {
       el.bind(evType, function () {
         switch (evType) {
           case 'mouseover':
-            $('#vlJfoImg' + key).addClass('vl_jig_mk_img_hover')
-            $('#vlJfoSxt' + key).addClass('vl_icon_judge_02')
+            $('#vlJfoImg' + key).addClass('vl_jig_mk_img_hover');
+            if (obj.bayonetName) {
+              $('#vlJfoSxt' + key).addClass('vl_icon_map_hover_mark1');
+            } else {
+              $('#vlJfoSxt' + key).addClass('vl_icon_judge_02');
+            }
             break;
           case 'mouseout':
             if (!obj.checked) {
               $('#vlJfoImg' + key).removeClass('vl_jig_mk_img_hover')
-              $('#vlJfoSxt' + key).removeClass('vl_icon_judge_02')
+              if (obj.bayonetName) {
+                $('#vlJfoSxt' + key).removeClass('vl_icon_map_hover_mark1');
+              } else {
+                $('#vlJfoSxt' + key).removeClass('vl_icon_judge_02');
+              }
             }
             break;
           case 'click':
@@ -625,10 +825,18 @@ export default {
             obj.checked = true;
             if (_key !== null) {
               $('#vlJfoImg' + _key).removeClass('vl_jig_mk_img_hover')
-              $('#vlJfoSxt' + _key).removeClass('vl_icon_judge_02')
+              if (obj.bayonetName) {
+                $('#vlJfoSxt' + _key).removeClass('vl_icon_map_hover_mark1');
+              } else {
+                $('#vlJfoSxt' + _key).removeClass('vl_icon_judge_02');
+              }
             }
             $('#vlJfoImg' + key).addClass('vl_jig_mk_img_hover')
-            $('#vlJfoSxt' + key).addClass('vl_icon_judge_02')
+            if (obj.bayonetName) {
+              $('#vlJfoSxt' + key).addClass('vl_icon_map_hover_mark1');
+            } else {
+              $('#vlJfoSxt' + key).addClass('vl_icon_judge_02');
+            }
             self.showVideo(obj);
             break;
         }
@@ -639,333 +847,49 @@ export default {
       this.curVideo.indexNum = this.evData.indexOf(data);
       this.curSXT = data;
       this.showVideoList = true;
-      const params = {
-        personGroupId:this.searchData.portraitGroupId,
-        deviceCode:data.groupName,
-        sex:this.searchData.sex,
-        startTime :this.searchData.time1 ? formatDate(this.searchData.time1):null,
-        endTime :this.searchData.time2 ? formatDate(this.searchData.time2):null,
-        age:this.searchData.ageGroup,
-        // surveillanceId: this.curSXT.surveillanceId ? this.curSXT.surveillanceId : '',
-        // deviceId: this.curSXT.deviceId,
-        // dateStart: this.searchData.time ? this.searchData.time[0] : null,
-        // dateEnd: this.searchData.time ? this.searchData.time[1] : null
+      let arr = data.focusList.map(x => {
+        this.setPlayerData(x);
+        return x;
+      });
+      this.curVideoList = arr;
+    },
+    setPlayerData (obj) {
+      if (obj.videoPath) {
+        obj.playerData = {
+          type: 3,
+          title: obj.deviceName,
+          video: {
+            uid: new Date().getTime() + '',
+            downUrl: obj.videoPath
+          }
+        }
+      } else {
+        obj.playerData = null;
       }
-      this.$_showLoading({target: '.__vuescroll'});
-      newGETAlarmSnapList(params)
-          .then(res => {
-            if (res) {
-              this.curVideo.videoList = res.data.map(x => {
-                x.playing = false;
-                return x;
-              });
-              console.log('curVideo', this.curVideo);
-              
-              this.$_hideLoading();
-            }
-          })
     },
     hideVideoList () {
       this.evData.forEach(x => x.checked = false);
       const _key = this.curVideo.indexNum;
       $('#vlJfoImg' + _key).removeClass('vl_jig_mk_img_hover')
-      $('#vlJfoSxt' + _key).removeClass('vl_icon_judge_02')
+      if (document.getElementById('vlJfoSxt' + _key).classList.contains('vl_icon_map_hover_mark1')) {
+        $('#vlJfoSxt' + _key).removeClass('vl_icon_map_hover_mark1')
+      } else {
+        $('#vlJfoSxt' + _key).removeClass('vl_icon_judge_02')
+      }
       this.curVideo.indexNum = null;
       this.showVideoList = false;
-    },
-    playVideo (_i) {
-      let vDom = document.getElementById('vlJigVideo' + _i);
-      if (this.curVideo.videoList[_i].playing) {
-        vDom.pause();
-      } else {
-        vDom.play();
-        vDom.addEventListener('ended', (e) => {
-          e.target.currentTime = 0;
-          vDom.pause();
-          this.curVideo.videoList[_i].playing = false;
-        })
-      }
-      this.curVideo.videoList[_i].playing = !this.curVideo.videoList[_i].playing;
-    },
-    largeVideo (_i) {
-      this.curVideo.playing = false;
-      let vDom = document.getElementById('vlJigVideo' + _i);
-      vDom.pause();
-      this.curVideo.id = 'vlJigVideo' + _i;
-      // this.curVideo.playing = this.curVideo.videoList[_i].playing;
-      this.curVideo.playNum = _i;
-      this.showLarge = true;
-      if (this.curVideo.videoList[_i].playing) {
-        document.getElementById('vlJfoLargeV').play();
-      }
-      document.getElementById('vlJfoLargeV').addEventListener('ended', (e) => {
-        e.target.currentTime = 0;
-        vDom.currentTime = 0;
-        document.getElementById('vlJfoLargeV').pause();
-        this.curVideo.videoList[_i].playing = false;
-        this.showLarge = false;
-      })
-      document.getElementById('vlJfoLargeV').currentTime = vDom.currentTime;
-      this.curVideoUrl = vDom.src;
-
-      console.log('curVideoUrl', this.curVideoUrl)
-    },
-    closeVideo () {
-      let vDom = document.getElementById(this.curVideo.id);
-      document.getElementById('vlJfoLargeV').pause();
-      vDom.currentTime = document.getElementById('vlJfoLargeV').currentTime;
-      this.showLarge = false;
-      if (this.curVideo.playing) {
-        this.curVideo.videoList[this.curVideo.playNum].playing = true;
-        vDom.play();
-      }
-    },
-    pauseLargeVideo () {
-      this.curVideo.playing = false;
-      this.curVideo.videoList[this.curVideo.playNum].playing = false;
-      document.getElementById('vlJfoLargeV').pause();
-    } ,
-    playLargeVideo () {
-      this.curVideo.playing = true;
-      document.getElementById('vlJfoLargeV').play();
-    },
-    cutScreen () {
-      console.log('mmmmmm')
-      this.cutDialogVisible = true;
-      console.log('vvvvv')
-      this.$nextTick(() => {
-        let $video = $('#vlJfoLargeV');
-        let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
-        // console.log($video.width(), $video.height());
-        if ($canvas && $canvas.length > 0) {
-          // let w = 920, h = 540;
-          let w = $video.width(), h = $video.height();
-          if (w > 920) {
-            h = Math.floor(920 / w * h);
-            w = 920;
-          }
-          $canvas.attr({
-            width: w,
-            height: h,
-          });
-          // $video[0].crossOrigin = 'anonymous';
-          // video canvas 必须为原生对象
-          let ctx = $canvas[0].getContext('2d');
-          this.cutTime = new Date().getTime();
-          ctx.drawImage($video[0], 0, 0, w, h);
-        }
-      });
-    },
-    // 截屏保存
-    playerCutSave () {
-      let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
-      if ($canvas && $canvas.length > 0) {
-        console.log('$canvas[0]', $canvas[0])
-        let img = $canvas[0].toDataURL('image/png');
-        // img.crossOrigin  = '';
-        let filename = 'image_' + this.cutTime + '.png';
-        if('msSaveOrOpenBlob' in navigator){
-          // 兼容EDGE
-          let arr = img.split(',');
-          let mime = arr[0].match(/:(.*?);/)[1];
-          let bstr = atob(arr[1]);
-          let n = bstr.length;
-          let u8arr = new Uint8Array(n);
-          while (n--) {
-            u8arr[n] = bstr.charCodeAt(n);
-          }
-          let blob = new Blob([u8arr], {type:mime});
-          window.navigator.msSaveOrOpenBlob(blob, filename);
-          return;
-        }
-        img.replace('image/png', 'image/octet-stream');
-        let saveLink = $('#' + this.flvplayerId + '_cut_a')[0];
-        saveLink.href = img;
-        saveLink.download = filename;
-        saveLink.click();
-        // console.log(base64);
-      }
-    },
-    showEventList () {
-      if (!this.$_loading) {
-        this.$_showLoading({
-          target: '.se_hi_box'
-        })
-      }
-      let params = {
-        pageNum: this.pagination.currentPage,
-        pageSize: this.pagination.pageSize
-        // surveillanceIds: '23, 11'
-      }
-      if (this.surveillanceIds.length) {
-        params['where.surveillanceIds'] = [...new Set(this.surveillanceIds.join(',').split(','))].join(',')
-      } else {
-        params['where.surveillanceIds'] = "";
-      }
-      console.log(params)
-      JfoGETEventList(params)
-        .then(res => {
-          this.$_hideLoading();
-          if (res) {
-            this.eventList = res.data.list;
-            this.pagination.total = res.data.total;
-          }
-        }).catch(() => {
-        this.$_hideLoading();
-      })
-    },
-    handleCurrentChange (val) {
-      this.pagination.currentPage = val;
-      this.showEventList();
-    },
-    checkIt (obj) {
-      if (obj.processStatus === '1') {
-        this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle', eventId: obj.eventId}});
-      }
-      if (obj.processStatus === '2') {
-        this.$router.push({name: 'treating_event_detail', query: {status: 'handling', eventId: obj.eventId}});
-      }
-      if (obj.processStatus === '3') {
-        this.$router.push({name: 'treating_event_detail', query: {status: 'ending', eventId: obj.eventId}});
-      }
     }
   },
-  watch: {}
+  watch: {
+    selectIndex (e) {
+      if (e === 2) {
+        this.randerMap();
+      }
+    }
+  }
 }
 </script>
 <style lang="scss">
-  .vl_jfo_switch {
-    width: 2.34rem;
-    height: .5rem;
-    background: #FFFFFF;
-    box-shadow:0px 3px 10px 0px rgba(99,99,99,0.39);
-    position: absolute;
-    top: .2rem;
-    left: calc(50% - 1.17rem);
-    z-index: 99;
-    &:after {
-      display: block;
-      content: ' ';
-      position: absolute;
-      left: 50%;
-      top: 0;
-      width: 1px;
-      background: #f2f2f2;
-      height: .3rem;
-      margin-top: .1rem;
-    }
-    > div {
-      display: inline-block;
-      width: 50%;
-      height: 100%;
-      text-align: center;
-      span {
-        display: inline-block;
-        font-size: 14px;
-        color: #666666;
-        height: .46rem;
-        line-height: .46rem;
-        cursor: pointer;
-        &:hover {
-          color: #1264F8;
-          border-bottom: .02rem solid #1264F8;
-        }
-      }
-    }
-    .active {
-      color: #1264F8;
-      border-bottom: .02rem solid #1264F8;
-    }
-  }
-  .vl_jig_event {
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: #fafafa;
-    animation: fadeInRight .1s ease-out .1s both;
-    z-index: 9;
-    padding: 0 .2rem .4rem .2rem;
-    .vl_jfo_event_box {
-      width: 100%;
-      height: 100%;
-      background: #FFFFFF;
-      padding-top: .9rem;
-    }
-  }
-  .vl_jfo_right {
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 2.6rem;
-    height: 100%;
-    padding: 0.08rem .2rem .2rem .2rem;
-    box-shadow: 0px 10px 12px 0px rgba(4,24,54,0.2);
-    background: #ffffff;
-    &:hover {
-      .vl_jig_right_close {
-        display: block;
-      }
-    }
-    .video_container {
-      height: calc(100% - 30px);
-      .vl_jtc_mk {
-        margin-top: .2rem;
-        .vl_jig_right_btn {
-          position: absolute;
-          bottom: 0;
-          right: 0;
-          height: 28px;
-          padding-top: 2px;
-          span {
-            cursor: pointer;
-          }
-        }
-      }
-    }
-    .vl_jig_right_title {
-      width: 2.2rem;
-      color: #333333;
-      >p {
-        width: 100%;
-        display: flex;
-        align-items: center;
-        i {
-          margin-right: 5px;
-        }
-        span {
-          width: calc(100% - 17px);
-          display: inline-block;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-      }
-    }
-    
-    .vl_jig_right_close {
-      display: none;
-      position: absolute;
-      width: .28rem;
-      height: .5rem;
-      line-height: .5rem;
-      text-align: center;
-      background: #FFFFFF;
-      top: 50%;
-      right: 100%;
-      -webkit-border-radius: .14rem 0 0 .14rem;
-      -moz-border-radius: .14rem 0 0 .14rem;
-      border-radius: .14rem 0 0 .14rem;
-      animation: fadeInRight .2s ease-out .2s both;
-      > i {
-        cursor: pointer;
-        &:hover {
-          color: #409EFF;
-        }
-      }
-    }
-  }
   .vl_jtc_mk_img {
     width: 98px;
     height: 98px;
@@ -1025,14 +949,12 @@ export default {
         }
       }
     }
-    .hideleft.vl_j_left{
-      margin-left: -272px;
-    }
     .vl_j_left {
       position: relative;
-      z-index: 11;
+      /*z-index: 11;*/
       float: left;
       width: 272px;
+      min-height: 763px;
       padding-top: 24px;
       height: 100%;
       // margin-left: 0.2rem;
@@ -1144,29 +1066,52 @@ export default {
         height: auto;
         padding: 0 20px;
         padding-top: .4rem;
-        // .el-input__inner {
-        //   height: .4rem!important;
-        //   line-height: .4rem!important;
-        // }
-        // .el-input__icon {
-        //   height: .4rem!important;
-        //   line-height: .4rem!important;
-        // }
+        .zdgz_left_radio {
+          display: flex;
+          height: 40px;
+          >span {
+            display: block;
+            &:first-child {
+              width: 90px;
+              line-height: 40px;
+            }
+          }
+        }
+        .zdgz_left_search_type {
+          display: flex;
+          color: #666666;
+          margin: 10px 0px;
+          span {
+            display: block;
+            width: 50%;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            border: 1px solid #D3D3D3;
+            cursor: pointer;
+            &:first-child {
+              border-right: none;
+              -webkit-border-radius: 4px 0px 0px 4px;
+              -moz-border-radius: 4px 0px 0px 4px;
+              border-radius: 4px 0px 0px 4px;
+            }
+            &:last-child {
+              border-left: none;
+              -webkit-border-radius: 0px 4px 4px 0px;
+              -moz-border-radius: 0px 4px 4px 0px;
+              border-radius: 0px 4px 4px 0px;
+            }
+          }
+          .active {
+            background: #0C70F8;
+            color: #ffffff;
+            border-color: #0C70F8;
+          }
+        }
         .el-range-editor {
-          // width: 100%;
-          // padding: 0;
-          // > i {
-          //   display: none;
-          // }
           > input {
             width: 50%;
           }
-          // .el-range-separator {
-          //   height: .4rem;
-          //   line-height: .4rem;
-          //   width: 10px;
-          //   padding: 0;
-          // }
         }
         button {
           height: .5rem;
@@ -1182,92 +1127,158 @@ export default {
         }
       }
     }
-    .vl_j_right.hideleft{
-      width: 100%;
-    }
     .vl_j_right {
       display: inline-block;
       width: calc(100% - 272px);
       height: calc(100% - 5px);
       position: relative;
-      #tcMap {
-        width: 100%;
-        height: 100%;
-      }
-    }
-    .vl_j_fullscreen {
-      position: fixed;
-      width: 100%!important;
-      height: 100%!important;
-      top: 0;
-      right: 0;
-      left: 0;
-      bottom: 0;
-      background: #000000;
-      z-index: 99;
-      -webkit-transition: all .4s;
-      -moz-transition: all .4s;
-      -ms-transition: all .4s;
-      -o-transition: all .4s;
-      transition: all .4s;
-      > video {
-        width: 100%;
-        height: 100%;
-      }
-      > .control_bottom {
-        position: absolute;
-        bottom: 0;
-        width: 100%;
-        height: 48px;
-        background: rgba(0, 0, 0, .65);
-        > div {
-          float: left;
-          width: 50%;
-          height: 100%;
-          line-height: 48px;
-          text-align: right;
-          padding-right: 20px;
-          color: #FFFFFF;
-          &:first-child {
-            text-align: left;
-            padding-left: 20px;
-          }
-          > span {
-            display: inline-block;
-            height: 22px;
-            margin-left: 10px;
-            vertical-align: middle;
+      .frequent-a-content {
+        height: calc(100% - 20px);
+        min-height: 760px;
+        margin: 20px;
+        margin-bottom: 0px;
+        background: #ffffff;
+        box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);
+        .tab-menu {
+          background-color: #fff;
+          padding-top: 8px;
+          overflow: hidden;
+          border-bottom: 1px solid #f2f2f2;
+          li {
+            float: left;
+            width: auto;
+            font-size: 16px;
+            margin: 0 20px;
+            height: 44px;
+            line-height: 44px;
+            text-align: center;
+            color: #333;
             cursor: pointer;
-            a {
-              font-size: 25px;
-              text-decoration: none;
+          }
+          .is-active {
+            color: #0c70f8;
+            border-bottom: 2px solid #0c70f8;
+          }
+        }
+        .search_box {
+          width: 100%;
+          padding: 20px;
+          .event_form {
+            width: 100%;
+            .select_btn,
+            .reset_btn {
+              width: 80px;
+            }
+            .select_btn {
+              background-color: #0c70f8;
               color: #ffffff;
-              vertical-align: top;
+            }
+            .reset_btn {
+              background-color: #ffffff;
+              color: #666666;
+              border-color: #dddddd;
+            }
+          }
+          .divide {
+            border: 1px dashed #fafafa;
+          }
+        }
+        .content-box {
+          padding: 0 20px;
+          .table_box {
+            margin-top: 10px;
+            .operation_btn {
+              display: inline-block;
+              padding: 0 10px;
+              border-right: 1px solid #f2f2f2;
+              &:last-child {
+                border-right: none;
+              }
             }
           }
         }
-      }
-    }
-    .vl_j_cutscreen {
-      position: fixed;
-      width: 90%!important;
-      height: 90%!important;
-      top: 0;
-      right: 0;
-      left: 0;
-      bottom: 0;
-      background: #FFFFFF;
-      z-index: 9999;
-      -webkit-transition: all .4s;
-      -moz-transition: all .4s;
-      -ms-transition: all .4s;
-      -o-transition: all .4s;
-      transition: all .4s;
-      padding: 20px;
-      margin: auto;
-      img {
-        width: 100%;
-        height: 100%;
+        .vl_jig_right {
+          width: 100%;
+          height: calc(100% - 53px);
+          position: relative;
+          #tcMap {
+            width: 100%;
+            height: 100%;
+          }
+          .vl_jfo_right {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 2.6rem;
+            height: 100%;
+            z-index: 1;
+            padding: 0.08rem .2rem .2rem .2rem;
+            box-shadow: 0px 10px 12px 0px rgba(4,24,54,0.2);
+            background: #ffffff;
+            &:hover {
+              .vl_jig_right_close {
+                display: block;
+              }
+            }
+            .video_container {
+              height: calc(100% - 30px);
+              .vl_jtc_mk {
+                margin-top: .2rem;
+                .vl_jig_right_btn {
+                  position: absolute;
+                  bottom: 0;
+                  right: 0;
+                  height: 28px;
+                  padding-top: 2px;
+                  span {
+                    cursor: pointer;
+                  }
+                }
+              }
+            }
+            .vl_jig_right_title {
+              width: 2.2rem;
+              color: #333333;
+              >p {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                i {
+                  margin-right: 5px;
+                }
+                span {
+                  width: calc(100% - 17px);
+                  display: inline-block;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                }
+              }
+            }
+
+            .vl_jig_right_close {
+              display: none;
+              position: absolute;
+              width: .28rem;
+              height: .5rem;
+              line-height: .5rem;
+              text-align: center;
+              background: #FFFFFF;
+              top: 50%;
+              right: 100%;
+              -webkit-border-radius: .14rem 0 0 .14rem;
+              -moz-border-radius: .14rem 0 0 .14rem;
+              border-radius: .14rem 0 0 .14rem;
+              animation: fadeInRight .2s ease-out .2s both;
+              > i {
+                cursor: pointer;
+                &:hover {
+                  color: #409EFF;
+                }
+              }
+            }
+          }
+        }
       }
     }
     .close_btn {
@@ -1415,17 +1426,6 @@ export default {
       transition: 0s all!important;
     }
   }
-  .judge_content {
-  .el-dialog__wrapper .el-dialog__body {
-    padding: 0px;
-  }
-  .el-dialog__header {
-    padding: 0px 20px 3px;
-  }
-  .el-dialog__headerbtn {
-    z-index: 1;
-  }
-}
 </style>
 <style lang="scss" scoped="scoped">
 .map_rrt_u2 {
@@ -1454,44 +1454,6 @@ export default {
  .vl_judge_tc{
     padding-top: 50px;
   }
-.hideleft {
-  .insetLeft2 {
-    transform: rotate(180deg);
-    background-position: -504px -1269px;
-  }
-  .insetLeft2:hover{
-    transform: rotate(180deg);
-    background-position: -440px -1269px;
-  }
-}
-.insetLeft2{
-  position: absolute;
-  right: -28px;
-  width: 25px;
-  height: 178px;
-  top: 50%;
-  margin-top: -89px;
-  display: inline-block;
-  background-repeat: no-repeat;
-  transform: rotate(180deg);
-  background-image: url(../../../../assets/img/icons.png);
-  background-position: -380px -1269px;
-  cursor: pointer;
-}
-.insetLeft2:hover{
-  position: absolute;
-  right: -28px;
-  width: 28px;
-  height: 178px;
-  top: 50%;
-  margin-top: -89px;
-  display: inline-block;
-  background-repeat: no-repeat;
-  transform: rotate(180deg);
-  background-image: url(../../../../assets/img/icons.png);
-  background-position: -318px -1269px;
-  cursor: pointer;
-}
 .full {
   width: 100%;
 }
@@ -1502,7 +1464,7 @@ export default {
 .select_btn:hover {
    background-color: #0466de;
 }
-.judge_content {
+.judge_zdgz_content {
       height: 100%;
      
     }

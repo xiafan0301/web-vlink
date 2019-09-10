@@ -15,8 +15,18 @@ let service = axios.create({
   timeout: 30000, // request timeout
   withCredentials: true
 })
+/*
+ * extData {
+ *    timeout: 自定义超时时间，单位毫秒，默认为30000，
+ *    errorMsg：自定义普通错误信息，默认为'网络繁忙，请稍后重试！'
+ *    timeoutMsg：自定义超时错误信息，默认为'网络繁忙，请稍后重试！'，优先级大于errorMsg
+ * }
+ *  e.g. xxxx(params, extData).then()
+ */
 // axios添加一个请求拦截器
 service.interceptors.request.use((config) => {
+  // console.log('request config', config)
+  if (config.extData && config.extData.timeout) { config.timeout = config.extData.timeout; }
   // 用户信息
   const userInfo = localStorage.getItem('as_vlink_user_info');
   // console.log(userInfo);
@@ -56,7 +66,7 @@ service.interceptors.response.use(function (response) {
       return null;
       // 未登录
       // ElementUI.Message({ message: _data.viewMsg, type: 'error', customClass: 'request_tip' });
-    } else if ( contenType === 'application/msexcel') {
+    } else if ( contenType === 'application/msexcel' || contenType === 'application/octet-stream;charset=UTF-8') {
       return _data;
     } else {
       let msg = '网络繁忙，请稍后重试！';
@@ -70,7 +80,18 @@ service.interceptors.response.use(function (response) {
     return null;
   }
 }, function (error) {
+  // 请求失败、错误处理回调
+  // 默认请求错误信息
   let msg = '网络繁忙，请稍后重试！';
+  if (error.config.extData) {
+    if (error.config.extData.errorMsg) {
+      // 自定义普通错误信息
+      msg = error.config.extData.errorMsg;
+    } else if (error.code === 'ECONNABORTED' && error.message.indexOf('timeout') != -1 && error.config.extData.timeoutMsg) {
+      // 自定义超时错误信息
+      msg = error.config.extData.timeoutMsg;
+    }
+  }
   ElementUI.Message({ message: msg, type: 'error', customClass: 'request_tip' });
   return Promise.reject(error);
 });

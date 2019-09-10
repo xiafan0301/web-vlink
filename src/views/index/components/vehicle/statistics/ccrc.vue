@@ -16,6 +16,7 @@
               style="width: 230px; vertical-align: top"
               class="full vl_date"
               type="datetime"
+              :time-arrow-control="true"
               :clearable = 'false'
               placeholder="选择日期时间">
           </el-date-picker>
@@ -30,6 +31,7 @@
               class="full vl_date vl_date_end"
               style="width: 230px; vertical-align: top"
               type="datetime"
+              :time-arrow-control="true"
               placeholder="选择日期时间">
           </el-date-picker>
         </div>
@@ -259,33 +261,13 @@ export default {
 
       pickerOptions: {
         disabledDate: time => {
-          if (this.value2) {
-            return (
-              time.getTime() > new Date(this.value2).getTime() ||
-              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90
-            );
-          } else {
-            return (
-              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90 ||
-              time.getTime() > new Date().getTime()
-            );
-          }
+          return time > new Date();
         }
           // return  time.getTime() < new Date(new Date().getTime() - 90*86400000) || time.getTime() > new Date(new Date().getTime())
       },
       pickerOptions1: {
         disabledDate: time => {
-          if (this.value1) {
-            return (
-              time.getTime() < new Date(this.value1).getTime() ||
-              time.getTime() > new Date().getTime()
-            );
-          } else {
-            return (
-              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 30 ||
-              time.getTime() > new Date().getTime()
-            );
-          }
+          return time > new Date();
         }
       },
       searchLoading: false,
@@ -429,7 +411,7 @@ export default {
         sD =  new Date(curDate - curS).getDate()
       }
       let _s = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD + ' 00:00:00';
-      let _e = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD + ' 23:59:59';
+      let _e = new Date(curDate)
       this.value1 = _s
       this.value2 = _e
     },
@@ -472,13 +454,17 @@ export default {
       this.searchLoading = true;
       const params = {
         startTime: this.value1,
-        endTime: this.value2,
+        endTime: formatDate(this.value2),
         unvehicleFlag: this.unvehicleFlag,
         onlyFirstEnterCity: this.onlySurveillance,
         vehicleNumber: this.v
       }
       if (this.lll&& this.lll.length > 0) {
         params['bayonetUid'] = this.lll.join(',')
+      }else{
+        params['bayonetUid'] = this.kakou.map((item)=> {
+          return item.uid
+        }).join(',')
       }
       if (this.carType&& this.carType.length > 0) {
         params['vehicleType'] = this.carType.join(',')

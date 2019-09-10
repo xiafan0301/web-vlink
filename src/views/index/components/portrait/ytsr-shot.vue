@@ -1,5 +1,5 @@
 <template>
-  <div class="vl_judge_tc">
+  <div class="vl_ytsr_shot_tc">
     <div class="">
       <div is="vlBreadcrumb"
            :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
@@ -46,7 +46,7 @@
           <div class="vl_jfo_event">
             <vue-scroll>
               <div class="vl_jfo_event_box clearfix">
-                <div class="vl_jfo_box_item" v-for="(item, index) in strucInfoList" :key="item.id" @click="showStrucInfo(item, index)">
+                <div class="vl_jfo_box_item" v-for="(item, index) in curStrucInfoList" :key="item.id" @click="showStrucInfo(item, index)">
                   <div class="vl_jfo_i_left"><img :src="item.subStoragePath" alt=""></div>
                   <div class="vl_jfo_i_right">
                     <p>检索资料</p>
@@ -58,6 +58,15 @@
                 </div>
               </div>
             </vue-scroll>
+            <el-pagination
+              class="cum_pagination"
+              @current-change="handleCurrentChange1"
+              :current-page.sync="pagination1.pageNum"
+              :page-sizes="[100, 200, 300, 400]"
+              :page-size="pagination1.pageSize"
+              layout="total, prev, pager, next, jumper"
+              :total="pagination1.total"
+            ></el-pagination>
           </div>
         </template>
         <template v-else>
@@ -91,8 +100,9 @@
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img">
-              <img class="bigImg" :src="sturcDetail.subStoragePath" alt="">
-              <span>抓拍图</span>
+              <img class="bigImg" :src="showShotImg ? sturcDetail.subStoragePath : sturcDetail.storagePath" alt="">
+              <i @click="showShotImg = !showShotImg">{{showShotImg ? '全景图' : '抓拍图'}}</i>
+              <span>{{showShotImg ? '抓拍图' : '全景图'}}</span>
             </div>
             <div class="struc_c_d_info">
               <h2>分析结果<div class="vl_jfo_sim" ><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? (sturcDetail.semblance*1).toFixed(2) : '0.00'}}<span style="font-size: 12px;">%</span></div></h2>
@@ -205,7 +215,7 @@
       <div class="struc-list">
         <swiper :options="swiperOption" ref="mySwiper">
           <!-- slides -->
-          <swiper-slide v-for="(item, index) in strucInfoList" :key="item.id">
+          <swiper-slide v-for="(item, index) in curStrucInfoList" :key="item.id">
             <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
               <img style="height: .88rem;width: 50%;padding-right: .02rem;" :src="item.personStoragePath" alt="">
               <img style="height: .88rem;width: 50%;padding-left: .02rem;" :src="item.subStoragePath" alt="">
@@ -233,6 +243,8 @@
     components: {vlBreadcrumb, noResult, flvplayer},
     data() {
       return {
+        pagination1: { total: 0, pageSize: 12, pageNum: 1 },// 假分页
+        showShotImg: true, // true展示抓拍，false,展示全景
         playerData: null,
         swiperOption: {
           slidesPerView: 5,
@@ -246,7 +258,6 @@
             prevEl: '.swiper-button-prev',
           },
         },
-        pagination: { total: 0, pageSize: 12, pageNum: 1 },
         mapData: [],
         amap: null, // 地图实例
         markerPoint: null, // 地图点集合
@@ -276,7 +287,16 @@
         this.getTheList();
       }
     },
+    computed: {
+      curStrucInfoList () {
+        return this.strucInfoList.slice((this.pagination1.pageNum - 1) * this.pagination1.pageSize,  (this.pagination1.pageNum) * this.pagination1.pageSize)
+      }
+    },
     methods: {
+      handleCurrentChange1 (e) {
+        this.pagination1.pageNum = e;
+
+      },
       gotoControl (url) {
         this.$router.push({ name: 'control_create', query: {modelName: "人员追踪", imgurl: url} })
       },
@@ -320,6 +340,7 @@
                 this.$set(sRes.data, 'taskWebParam', JSON.parse(sRes.data.taskWebParam));
                 sRes.data.taskWebParam.deviceNames = sRes.data.taskWebParam.deviceNames.split(',')
                 this.strucInfoList = sRes.data.taskResult;
+                this.pagination1.total = this.strucInfoList.length;
                 this.changeOrder();
                 this.taskDetail = sRes.data.taskWebParam;
                 console.log(sRes.data)
@@ -337,6 +358,7 @@
                   this.$set(res.data, 'taskWebParam', JSON.parse(res.data.taskWebParam));
                   res.data.taskWebParam.deviceNames = res.data.taskWebParam.deviceNames.split(',')
                   this.strucInfoList = res.data.taskResult;
+                  this.pagination1.total = this.strucInfoList.length;
                   this.changeOrder();
                   this.taskDetail = res.data.taskWebParam;
                   console.log(res.data)
@@ -440,7 +462,7 @@
       left: calc(50% - .05rem);
     }
   }
-  .vl_judge_tc {
+  .vl_ytsr_shot_tc {
     width: 100%;
     height: 100%;
     .vl_j_left {
@@ -483,17 +505,18 @@
     .vl_s_right {
       display: inline-block;
       width: calc(100% - 272px);
-      height: calc(100% - 60px);
+      height: calc(100% - 56px);
       position: relative;
       .vl_jig_right {
         width: 100%;
-        height: 100%;
+        height: calc(100% - 48px);
         padding: 0 20px;
         padding-right: 0;
+        min-height: 738px;
         .vl_jig_right_title {
           width: 100%;
-          height: 70px;
-          line-height: 70px;
+          height: 50px;
+          line-height: 50px;
           color: #999999;
           .vl_jr_t_item {
             float: left;
@@ -531,7 +554,7 @@
           }
         }
         .vl_jfo_event {
-          height: calc(100% - 70px);
+          height: calc(100% - 50px);
           min-height: 693px;
           .vl_jfo_event_box {
             width: 100%;
@@ -851,6 +874,7 @@
               color: #0C70F8;
               font-size: 12px;
               padding: 0 .1rem;
+              cursor: pointer;
             }
             &:before {
               display: block;

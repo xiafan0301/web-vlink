@@ -51,6 +51,19 @@ export function delAlarm(uid) {
     mode: 'control'
   })
 }
+/**
+ * getACount
+ * 报警记录数量查询接口
+ * @param {string} uid
+ */
+export function getACount(data) {
+  return request({
+    url: '/alarm-snaps/count',
+    method: 'get',
+    mode: 'control',
+    params: data,
+  })
+}
 /*-------------------------- 告警end ---------------------------------*/
 
 /* ================== 布控模块 =================== */

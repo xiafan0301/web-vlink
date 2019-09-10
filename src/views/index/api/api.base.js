@@ -179,6 +179,7 @@ export function downloadCameraModel () {
   return request({
     url: '/device-service/templateDown',
     method: 'get',
+    responseType: 'blob',
     mode: baseModeName
   });
 }
@@ -259,4 +260,17 @@ export function exportService (data) {
     method: 'post',
     mode: baseModeName
   });
+}
+
+/*
+* 上传
+* */
+export function handUpload (file) {
+  return request({
+    url: '/new',
+    data: file,
+    datatype: 'json',
+    method: 'post',
+    mode: baseModeName
+  })
 }

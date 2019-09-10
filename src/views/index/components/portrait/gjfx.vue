@@ -22,8 +22,8 @@
                     style="width: 100%;"
                     class="vl_date"
                     :picker-options="pickerOptions"
-                    type="date"
-                    value-format="timestamp"
+                    type="datetime"
+                     time-arrow-control
                     placeholder="选择日期时间">
             </el-date-picker>
           </el-form-item>
@@ -31,38 +31,19 @@
             <el-date-picker
                     style="width: 100%;"
                     class="vl_date vl_date_end"
-                    :picker-options="pickerOptions"
                     v-model="ruleForm.data2"
+                    :time-arrow-control="true"
+                    :picker-options="pickerOptions"
                     @change="chooseEndTime"
-                    value-format="timestamp"
-                    type="date"
+                    type="datetime"
+                    time-arrow-control
                     placeholder="选择日期时间">
             </el-date-picker>
           </el-form-item>
           <el-form-item>
             <div class="upload_warp">
-              <el-upload
-                      class="vl_jtc_upload_gjfx gjfx_upload"
-                      multiple
-                      :show-file-list="false"
-                      accept="image/*"
-                      :action="uploadAcion"
-                      list-type="picture-card"
-                      :before-upload="beforeAvatarUpload"
-                      :on-success="uploadSucess"
-                      :on-error="handleError">
-                <i v-if="uploading" class="el-icon-loading"></i>
-                <img v-else-if="ruleForm.input3" :src="ruleForm.input3">
-                <div v-else>
-                  <i
-                          style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
-                          class="vl_icon vl_icon_vehicle_01"
-                  ></i>
-                  <span>点击上传图片</span>
-                </div>
-              </el-upload>
-              <div v-show="ruleForm.input3" class="del_icon">
-                <i class="el-icon-delete" @click="delPic()"></i>
+              <div style="height: 210px;">
+                <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit" :imgData="imgData"></div>
               </div>
             </div>
           </el-form-item>
@@ -106,7 +87,7 @@
                           <div><i class="vl_icon vl_icon_retrieval_03"></i>{{sItem.semblance ? (sItem.semblance * 1).toFixed(2) : '0.00'}}%</div>
                         </div>
                       </div>
-                      <div :title="sItem.address" class="address"><i class="el-icon-location-outline"></i>{{sItem.address ? sItem.address : '无'}}</div>
+                      <div class="address"><i class="el-icon-location-outline"></i>{{sItem.bayonetAddress ? sItem.bayonetAddress : sItem.address}}</div>
                       <div class="del_icon el-icon-delete" @click.stop="updateLine(sItem, item.list, sIndex)"></div>
                     </div>
                   </li>
@@ -302,8 +283,11 @@
               <!--可以展开列表-->
               <div class="infinite-list-wrapper">
                 <ul>
-                  <li class="p_main_list" :class="{'is_open': item.isOpen}" v-for="item in allLeftEvData" :key="item.id">
-                    <div class="p_main_head" @click="item.isOpen = !item.isOpen"><i :class="{'el-icon-caret-right': !item.isOpen, 'el-icon-caret-bottom': item.isOpen}"></i>{{item.label}}({{item.times}}次)</div>
+                  <li class="p_main_list" :class="{'is_open': item.isOpen}" v-for="item in curAllLeftEvData" :key="item.id">
+                    <div class="p_main_head" @click="item.isOpen = !item.isOpen">
+                      <i :class="{'el-icon-caret-right': !item.isOpen, 'el-icon-caret-bottom': item.isOpen}"></i>{{item.label}}({{item.times}}次)
+                      <span class="del_icon el-icon-delete" @click.stop="delOneDay(item)"></span>
+                    </div>
                     <div class="p_main_item p_main_dialog_item" v-for="(sItem, sIndex) in item.list" :key="sItem.id">
                       <div class="info">
                         <div class="info_left">
@@ -314,7 +298,7 @@
                           <div><i class="vl_icon vl_icon_retrieval_03"></i>{{sItem.semblance ? (sItem.semblance * 1).toFixed(2) : '0.00'}}%</div>
                         </div>
                       </div>
-                      <div :title="sItem.address" class="address"><i class="el-icon-location-outline"></i>{{sItem.address ? sItem.address : '无'}}</div>
+                      <div class="address"><i class="el-icon-location-outline"></i>{{sItem.bayonetAddress ? sItem.bayonetAddress : sItem.address}}</div>
                       <div class="del_icon el-icon-delete" @click.stop="delSitem(item, sItem, sIndex)"></div>
                     </div>
                   </li>
@@ -332,22 +316,24 @@
   </div>
 </template>
 <script>
+  import vlUpload from '@/components/common/upload.vue';
   import vlBreadcrumb from '@/components/common/breadcrumb.vue';
   import flvplayer from '@/components/common/flvplayer.vue';
   import { mapXupuxian,ajaxCtx } from "@/config/config.js";
-  import { objDeepCopy, random14, formatDate } from "@/utils/util.js";
+  import { objDeepCopy, random14, formatDate, dateOrigin } from "@/utils/util.js";
   import { cityCode } from "@/utils/data.js";
   import {PortraitPostPersonTrace} from "@/views/index/api/api.portrait.js";
   import { MapGETmonitorList } from "@/views/index/api/api.map.js";
   import { getAllBayonetList } from "@/views/index/api/api.base.js";
   export default {
-    components: {vlBreadcrumb, flvplayer},
+    components: {vlBreadcrumb, flvplayer, vlUpload},
     data() {
       return {
+        imgData: null,
+        uploadClear: {},
         playerData: null,
         filterDialog: false,
         showLeft: false,
-        selectMapClear: '',
         loading: false,
         count: 3,
         totalAddressNum: 0,
@@ -383,10 +369,9 @@
         hideleft: false,
         timeOrder: false,
         ruleForm: {
-          data1:null,
-          data2: null,
+          data1: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)),
+          data2: new Date(),
           input3: '',
-          input5: "1",
           value1: null,
         },
         pricecode:cityCode,
@@ -394,19 +379,7 @@
         options: [],
         pickerOptions: {
           disabledDate (time) {
-            let date = new Date();
-            let y = date.getFullYear();
-            let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
-            let d = date.getDate();
-            let threeMonths = '';
-            let start = '';
-            if (parseFloat(m) >= 4) {
-              start = y + '-' + (m - 1) + '-' + d;
-            } else {
-              start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
-            }
-            threeMonths = new Date(start).getTime();
-            return time.getTime() > Date.now() || time.getTime() < threeMonths;
+            return time > new Date();
           }
         },
         evData: [],
@@ -428,16 +401,28 @@
     computed: {
       noMore () {
         return this.count >= this.totalMapNum;
+      },
+      // 过滤allLeftEvData里面list为空的数据，人工筛选的时候全部删除自动去除一列
+      curAllLeftEvData () {
+        return this.allLeftEvData.filter(x => x.list.length)
       }
     },
     mounted() {
       this.renderMap();
-      this.setDTime();
       if (this.$route.query.imgurl) {
         this.ruleForm.input3 = this.$route.query.imgurl;
+        this.imgData = {path: this.$route.query.imgurl}
       }
     },
     methods: {
+      uploadEmit (data) {
+        console.log('uploadEmit data', data);
+        if (data && data.path) {
+          this.ruleForm.input3 = data.path;
+        } else {
+          this.ruleForm.input3 = '';
+        }
+      },
       // 设置视频数据
       setPlayerData () {
         if (this.sturcDetail.videoPath) {
@@ -452,9 +437,6 @@
         } else {
           this.playerData = null;
         }
-      },
-      delPic () {
-        this.ruleForm.input3 = '';
       },
       chooseEndTime (e) {
         if (e < this.ruleForm.data1) {
@@ -480,37 +462,9 @@
          }
         }
       },
-      beforeAvatarUpload (file) {
-        const isJPG = (file.type === 'image/jpeg' || file.type === 'image/png');
-        const isLt = file.size / 1024 / 1024 < 100;
-        if (!isJPG) {
-          this.$message.error('只能上传 JPG / PNG 格式图片!');
-        }
-        if (!isLt) {
-          this.$message.error('上传图片大小不能超过 100MB!');
-        }
-        this.uploading = true;
-        return isJPG && isLt;
-      },
-      uploadSucess (response, file, fileList) {
-        if (response && response.data) {
-          let oRes = response.data;
-          if (oRes) {
-            this.uploading = false;
-            this.ruleForm.input3 = oRes.fileFullPath;
-          }
-        }
-      },
-      handleError () {
-        this.uploading = false;
-        this.$message.error('上传失败')
-      },
       setDTime () {
-        let date = new Date();
-        let curDate = date.getTime();
-        let curS = 1 * 24 * 3600 * 1000;
-        this.ruleForm.data1 = curDate - curS;
-        this.ruleForm.data2 = curDate;
+        this.ruleForm.data1 = dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000));
+        this.ruleForm.data2 = new Date();
       },
       hideResult() {
         this.reselt = false;
@@ -530,8 +484,8 @@
 //            this.$message.info('选择的区域没有设备，请重新选择区域');
 //            return false;
 //          }
-          pg['startTime'] = formatDate(this.ruleForm.data1, 'yyyy-MM-dd') + ' 00:00:00';
-          pg['endTime'] = formatDate(this.ruleForm.data2, 'yyyy-MM-dd') + ' 23:59:59';
+          pg['startTime'] = formatDate(this.ruleForm.data1);
+          pg['endTime'] = formatDate(this.ruleForm.data2);
 //          pg['imageUrl'] = 'http://file.aorise.org/vlink/image/18c70cc3-424a-43fc-92ee-a6c6de4248f2.jpg';
           pg['imageUrl'] = this.ruleForm.input3;
 //          if(this.ruleForm.input5 == "1"){
@@ -548,15 +502,10 @@
         }
       },
       resetForm(){
-        this.ruleForm.input5 = '1';
+        this.setDTime();
         this.ruleForm.input3 = '';
         this.ruleForm.value1 = [];
-        this.selectMapClear = random14();
-        this.pointData = {
-          deviceList: [],
-          bayonetList: []
-        }
-        this.curChooseNum = '已选择0个设备';
+        this.uploadClear = {};
         this.setDTime ();
       },
       renderMap() {
@@ -612,17 +561,13 @@
             }
             this.reselt = true;
             this.evData = res.data.list;
-            this.evData.sort(this.compare("shotTime", this.timeOrder ? false : true));
-            this.totalMapNum = res.data.total;
-            // 计算经过多少个地方
-            let dvIds = [];
-            this.totalAddressNum = 0;
-            res.data.list.forEach(x => {
-              if(!dvIds.includes(x.deviceID)) {
-                this.totalAddressNum += 1;
-                dvIds.push(x.deviceID);
+            this.evData.forEach(x => {
+              if (x.bayonetName) {
+                x.deviceID = x.bayonetName;
               }
             })
+            this.evData.sort(this.compare("shotTime", this.timeOrder ? false : true));
+            this.shotAddressAndTimes(this.evData)
 
             //  重组数据，给左边列表使用
             this.operData(true);
@@ -636,6 +581,18 @@
         }).catch(() => {
           this.searchLoading = false;
         });
+      },
+      shotAddressAndTimes (data) {
+        this.totalMapNum = data.length;
+        // 计算经过多少个地方
+        let dvIds = [];
+        this.totalAddressNum = 0;
+        data.forEach(x => {
+          if(!dvIds.includes(x.deviceID)) {
+            this.totalAddressNum += 1;
+            dvIds.push(x.deviceID);
+          }
+        })
       },
       operData (isAll) {
         this.leftEvData = [];
@@ -673,10 +630,16 @@
           }
         })
       },
+      delOneDay (item) {
+        item.list.forEach((x, index) => {
+          this.delSitem(item, x, index)
+        })
+      },
       delSitem (item, sItem, index) {
         item.list.splice(index, 1);
         item.times--;
         this.evData.splice(this.evData.findIndex(x => x === sItem), 1);
+        this.shotAddressAndTimes(this.evData);
       },
       chooseOk () {
         this.showLeft = true;
@@ -731,7 +694,11 @@
               _time += `<span>${j}</span>`
             })
             _time += '</p>';
-            let _content = `<div class="vl_icon vl_icon_sxt">` + _time + `</div>`
+            let sClass = 'vl_icon_map_mark0';
+            if (obj.bayonetName) {
+              sClass = 'vl_icon_map_mark1'
+            }
+            let _content = `<div class="vl_icon ` + sClass + `">` + _time + `</div>`
             let point = new AMap.Marker({ // 添加自定义点标记
               map: this.amap,
               position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
@@ -785,7 +752,7 @@
         let _i = this.evData.indexOf(obj);
         // list.splice(index, 1)
         this.evData.splice(_i, 1);
-        this.totalMapNum = this.evData.length;
+        this.shotAddressAndTimes(this.evData);
         this.operData();
         this.drawMapMarker(this.evData)
       }, // 更新画线
@@ -805,7 +772,11 @@
         if (this.supMarkerPoint) {
           this.map.remove(this.supMarkerPoint)
         }
-        let _content = '<div class="vl_icon vl_icon_judge_02"></div>'
+        let sClass = 'vl_icon_map_hover_mark0';
+        if (data.bayonetName) {
+          sClass = 'vl_icon_map_hover_mark1'
+        }
+        let _content = '<div class="vl_icon ' + sClass + '"></div>'
         this.supMarkerPoint = new AMap.Marker({ // 添加自定义点标记
           map: this.map,
           position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
@@ -815,7 +786,7 @@
           content: _content
         });
         this.map.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
-        let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`
+        let sConent = `<div class="cap_info_win"><p>设备名称：${data.bayonetName ? data.bayonetName : data.deviceName}</p><p>抓拍地址：${data.bayonetAddress ? data.bayonetAddress : data.address}</p></div>`
         new AMap.InfoWindow({
           map: this.map,
           isCustom: true,
@@ -845,6 +816,22 @@
   };
 </script>
 <style lang="scss" scoped>
+  .cap_info_win {
+    background: #FFFFFF;
+    padding: .18rem;
+    font-size: .14rem;
+    color: #666666;
+    position: relative;
+    &:after {
+      display: block;
+      content: '';
+      border: .1rem solid #FFFFFF;
+      border-color: #FFFFFF transparent transparent;
+      position: absolute;
+      bottom: -.2rem;
+      left: calc(50% - .05rem);
+    }
+  }
   .upload_warp {
     position: relative;
     .del_icon {
@@ -1061,6 +1048,15 @@
         i{
           color: #999999;
         }
+        span {
+          margin-left: 30px;
+          font-size: 20px;
+          color: #999999;
+          vertical-align: middle;
+          &:hover {
+            color: #0C70F8;
+          }
+        }
       }
       .p_main_item {
         width: 100%;
@@ -1128,7 +1124,7 @@
           overflow: hidden;
           white-space: nowrap;
           text-overflow: ellipsis;
-          border-bottom: 1px solid #F2F2F2;
+          /*border-bottom: 1px solid #F2F2F2;*/
           padding: 0 30px 0 10px;
         }
         .del_icon {
@@ -1146,6 +1142,8 @@
       .p_main_dialog_item {
         width: 33%;
         display: inline-block;
+        border: 1px solid #D3D3D3;
+        margin: 5px;
       }
     }
     .is_open {

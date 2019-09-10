@@ -54,6 +54,7 @@
                           v-model="searchData.startTime"
                           style="width: 100%;"
                           class="vl_date"
+                          :time-arrow-control="true"
                           :picker-options="pickerOptions"
                           type="datetime"
                           value-format="timestamp"
@@ -66,8 +67,9 @@
                   <el-date-picker
                           style="width: 100%;"
                           class="vl_date vl_date_end"
-                          :picker-options="pickerOptions1"
+                          :time-arrow-control="true"
                           v-model="searchData.endTime"
+                          :picker-options="pickerOptions"
                           type="datetime"
                           @change="chooseEndTime"
                           value-format="timestamp"
@@ -112,7 +114,7 @@
   import { mapXupuxian } from "@/config/config.js";
   import {getAllDevice} from '../../../api/api.judge.js';
   import {getAllBayonetList} from '../../../api/api.base.js';
-  import { objDeepCopy, formatDate} from '../../../../../utils/util.js';
+  import { objDeepCopy, formatDate, addCluster} from '../../../../../utils/util.js';
   export default {
     components: {vlBreadcrumb},
     data() {
@@ -130,47 +132,20 @@
           area: null, // 区域
           startTime: '',
           endTime: '',
+          curPointData: [],
+          curMarks: [],
           minTimes: 3// 最少次数
         },
         pickerOptions: {
           disabledDate (time) {
-            let date = new Date();
-            let y = date.getFullYear();
-            let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
-            let d = date.getDate();
-            let threeMonths = '';
-            let start = '';
-            if (parseFloat(m) >= 4) {
-              start = y + '-' + (m - 1) + '-' + d;
-            } else {
-              start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
-            }
-            threeMonths = new Date(start).getTime();
-            return time.getTime() > Date.now() || time.getTime() < threeMonths;
-          }
-        },
-        pickerOptions1: {
-          disabledDate (time) {
-            let date = new Date();
-            let y = date.getFullYear();
-            let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
-            let d = date.getDate();
-            let threeMonths = '';
-            let start = '';
-            if (parseFloat(m) >= 4) {
-              start = y + '-' + (m - 1) + '-' + d;
-            } else {
-              start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
-            }
-            threeMonths = new Date(start).getTime();
-            return time.getTime() > Date.now() || time.getTime() < threeMonths;
+            return time > new Date();
           }
         },
         mapTreeData: [],
-        marks: [[], []],
+        marks: [],
         hoverWindow: null,// 全局信息窗口
-        pointData:[],
-        circle: null
+        circle: null,
+        confirmIcon: null, // 选择区域之后的小弹窗
       };
     },
     mounted() {
@@ -178,9 +153,89 @@
       this.setDTime();
       this.getAllDevice() //查询所有的设备
       this.resetZoom();
+      let that = this;
+      $('body').on('click', '.vl_map_area_confirm', function (e) {
+        if (e.target.classList.contains('el-icon-close')) {
+          that.cancelAddArea();
+        }
+        if (e.target.classList.contains('vl_area_complete')) {
+          // 判断有没有选时间
+          if (that.searchData.curPointData.length) {
+            console.log('1')
+            that.map.remove(that.confirmIcon);
+          } else {
+            console.log('2')
+            that.showInfoMes('所选区域没有设备信息')
+          }
+        }
+      })
 
     },
     methods: {
+      cancelAddArea () {
+        if (this.searchData.area) {this.map.remove(this.searchData.area);}
+        if (this.confirmIcon) {this.map.remove(this.confirmIcon)};
+        // 先判断你选择的区域有没有设备,没有就不用做处理
+        if (this.searchData.curPointData.length) {
+          this.pointIntoCluster(this.searchData.curMarks);
+        }
+      },
+      pointIntoCluster (mks) {
+        console.log(mks);
+        // 判断这个点是不是在其他区域被选中，选中了则不处理
+        let curMks = [];
+        mks.forEach(x => {
+          let uContent = this.setMarkContent(x.getExtData())
+          x.setContent(uContent);
+          curMks.push(x);
+        })
+        // curMks确定要加入点聚合，并且重新设置了content
+        this.map.cluster.addMarkers(curMks);
+      },
+      setMarkContent (obj, type) {
+        let sDataType, uContent;
+        if (obj.dataType === 0 && obj.deviceStatus !== 1) {
+          sDataType = 6;
+        }else if (obj.dataType === 2) {
+          sDataType = '2' + obj.vehicleType
+        } else {
+          sDataType = obj.dataType;
+        }
+        uContent = '<div id="' + obj.markSid + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + '"></div>'
+        if (type === 'error') {
+          let sClass = 'vl_icon_map_sxt_in_area' + obj.dataType;
+          uContent = '<div id="' + obj.markSid + '" class="map_icons vl_icon ' + sClass +'"></div>';
+        }
+        return uContent;
+      },
+      // 创建确定，取消区域的小marker
+      createConfirmMark (path) {
+        let m = new window.AMap.Marker({
+          map: this.map,
+          position: path,
+          offset: new window.AMap.Pixel(-15, -16),
+          draggable: false, // 是否可拖动
+          zIndex: 200,
+          bubble: false,
+          content: '<div  class="vl_map_area_confirm"><span class="vl_area_cancel"><i class="el-icon-close"></i></span><span class="vl_area_complete el-icon-check">完成</span></div>'
+        })
+        this.confirmIcon = m;
+      },
+      // 将指定mark集合移除点聚合
+      removeSomeCluster (mks) {
+        this.map.cluster.removeMarkers(mks);
+        // 把被移除的mark摄像头设置成红色
+        mks.forEach(y => {
+          let uContent = this.setMarkContent(y.getExtData(), 'error')
+          y.setContent(uContent);
+        })
+        this.map.add(mks);
+      },
+      showInfoMes(mes) {
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info(mes);
+        }
+      },
       chooseEndTime (e) {
         if (new Date(e).getTime() < this.searchData.startTime) {
           this.$message.info('结束时间必须大于开始时间才会有结果')
@@ -310,7 +365,7 @@
                   uContent = '<div id="' + obj.markSid + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + ' '+ _this.hideClass +'"></div>'
                 }
                 let marker = new window.AMap.Marker({ // 添加自定义点标记
-                  map: _this.map,
+//                  map: _this.map,
                   position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
                   offset: new window.AMap.Pixel(offSet[obj.dataType][0], offSet[obj.dataType][1]), // 相对于基点的偏移位置
                   draggable: false, // 是否可拖动
@@ -319,7 +374,7 @@
                   content: uContent,
                   bubble: true
                 });
-                _this.marks[obj.dataType].push(marker);
+                _this.marks.push(marker);
                 // hover
                 marker.on('mouseover', function () {
 //                  $('#' + obj.markSid).addClass('vl_icon_map_hover_mark' + obj.dataType)
@@ -340,6 +395,7 @@
                 })
               }
             })
+          addCluster(_this.map, _this.marks)
         }
       },
       renderMap() {
@@ -356,10 +412,10 @@
           //lnglatInput.value = e.lnglat.toString();
           if(_this.hover=='cut5'){
             _this.mouseTool.close(true);
-            if (_this.circle) {
-              _this.map.remove(_this.circle)
+            if (_this.searchData.area) {
+              _this.map.remove(_this.searchData.area)
             }
-            _this.circle = new AMap.Circle({
+            let circle = new AMap.Circle({
               center:e.lnglat,
               radius: 5000, //半径
               borderWeight: 3,
@@ -373,25 +429,63 @@
               fillColor: '#1791fc',
               zIndex: 50,
             })
-            _this.circle.setMap(_this.map);
-            _this.searchData.area = _this.circle;
-            _this.checkout(_this.circle,'AMap.circle')
+            circle.setMap(_this.map);
+            _this.searchData.area = circle;
+            // 画完区域取消地图工具激活状态
+            _this.map.setDefaultCursor();
+            _this.mouseTool.close(false);
+            _this.hover = '';
+            _this.createConfirmMark(e.lnglat);
+
+            _this.checkout(circle,'AMap.circle')
+
+            // 判断如果当前curAddSearch.curMarks有数据的话，先加入点聚合
+            if (_this.searchData.curMarks.length) {
+              _this.pointIntoCluster(_this.searchData.curMarks)
+            }
+            _this.searchData.curMarks = [];
+            _this.searchData.curPointData.forEach(j => {
+              _this.marks.forEach(m => {
+                if (m.getExtData() === j) {
+                  _this.searchData.curMarks.push(m);
+                }
+              })
+            })
+            _this.removeSomeCluster(_this.searchData.curMarks)
           }
 
         });
         window.AMap.event.addListener(this.mouseTool, 'draw', function (e) {
           if (_this.searchData.area) {_this.map.remove(_this.searchData.area);}
-          if (_this.circle) {
-            _this.map.remove(_this.circle)
-          }
+          if (_this.confirmIcon) {_this.map.remove(_this.confirmIcon);}
           _this.searchData.area = e.obj;
+          // 画完区域取消地图工具激活状态
+          _this.map.setDefaultCursor();
+          _this.mouseTool.close(false);
+          _this.hover = '';
+          _this.createConfirmMark(e.obj.getPath()[e.obj.getPath().length - 1]);
+
           let a=e.obj
           let t=e.obj.CLASS_NAME
-          _this.checkout(a,t)
+          _this.checkout(a,t);
+
+          // 判断如果当前curAddSearch.curMarks有数据的话，先加入点聚合
+          if (_this.searchData.curMarks.length) {
+            _this.pointIntoCluster(_this.searchData.curMarks)
+          }
+          _this.searchData.curMarks = [];
+          _this.searchData.curPointData.forEach(j => {
+            _this.marks.forEach(m => {
+              if (m.getExtData() === j) {
+                _this.searchData.curMarks.push(m);
+              }
+            })
+          })
+          _this.removeSomeCluster(_this.searchData.curMarks)
         });
       },
       checkout(obj , type){
-        this.pointData = [];
+        this.searchData.curPointData = [];
         if(type!="AMap.Polyline"){
           this.mapTreeData.forEach(el=>{
             let myLngLat=new AMap.LngLat(el.longitude,el.latitude);
@@ -399,9 +493,9 @@
             let isPointInRing = obj.contains(myLngLat);
             // console.log(marker.getPosition());
             if(isPointInRing){//如果点在圆内则输出
-              let id = this.pointData.findIndex(item=>item.uid==el.uid)
+              let id = this.searchData.curPointData.findIndex(item=>item.uid==el.uid)
               if(id == -1){
-                this.pointData.push(el)
+                this.searchData.curPointData.push(el)
               }
             }
           })
@@ -413,9 +507,9 @@
 
             let distance =  Math.round(window.AMap.GeometryUtil.distanceToLine(myLngLat,obj.B.path));
             // console.log(distance);
-            let id = this.pointData.findIndex(item=>item.uid==el.uid)
+            let id = this.searchData.curPointData.findIndex(item=>item.uid==el.uid)
             if(id==-1 && distance <=1000){
-              this.pointData.push(el)
+              this.searchData.curPointData.push(el)
             }
           })
         }
@@ -486,9 +580,10 @@
         let date = new Date();
         let curDate = date.getTime();
         let curS = 1 * 24 * 3600 * 1000;
-        let yDate = new Date(curDate - curS);
-        this.searchData.startTime = new Date(yDate.getFullYear() + '-' + (yDate.getMonth() + 1) + '-' + yDate.getDate() + ' 00:00:00').getTime();
-        this.searchData.endTime =  new Date(yDate.getFullYear() + '-' + (yDate.getMonth() + 1) + '-' + yDate.getDate() + ' 23:59:59').getTime();
+        let _sDate = new Date(curDate - curS);
+        let _s = _sDate.getFullYear()+ '-' + (_sDate.getMonth() + 1) + '-' + _sDate.getDate() + ' 00:00:00' ;
+        this.searchData.startTime = new Date(_s).getTime();
+        this.searchData.endTime = curDate;
       },
       // 选择区域
       selArea (v) {
@@ -546,31 +641,22 @@
       // 清除区域
       clearArea () {
         this.hover = null;
-        this.pointData = [];
+        this.searchData.curPointData = [];
         this.delDialog = false;
         this.mouseTool.close(true);
-        if (this.circle) {
-          this.map.remove(this.circle)
+        if (this.searchData.area) {
+          this.map.remove(this.searchData.area)
         }
+        this.pointIntoCluster(this.searchData.curMarks)
         this.searchData.area = null;
       },
       tcDiscuss () {
         if (!this.searchData.minTimes || this.searchData.minTimes < 3) {
-          if (!document.querySelector('.el-message--info')) {
-            this.$message.info('频次必须是3-200的数字');
-          }
+          this.showInfoMes('频次必须是3-200的数字')
           return false;
         }
         if (!this.searchData.area) {
-          if (!document.querySelector('.el-message--info')) {
-            this.$message.info('请先选择区域');
-          }
-          return false;
-        }
-        if (this.pointData.length === 0) {
-          if (!document.querySelector('.el-message--info')) {
-            this.$message.info('选择的区域没有设备，请重新选择区域');
-          }
+          this.showInfoMes('请先选择区域')
           return false;
         }
         let sT = formatDate(this.searchData.startTime, 'yyyy-MM-dd HH:mm:ss');
@@ -579,10 +665,14 @@
         query.startTime = sT;
         query.endTime = eT;
         query.frequence = this.searchData.minTimes;
-        query['bayonetIds'] = this.pointData.filter(x => x.dataType === 1).map(y => {return y.uid}).join(',');
-        query['cameraIds'] = this.pointData.filter(x => x.dataType === 0).map(y => {return y.uid}).join(',');
-        this.$router.push({name: 'vehicle_search_qyph_jg', query: query})
+        query['bayonetIds'] = this.searchData.curPointData.filter(x => x.dataType === 1).map(y => {return y.uid}).join(',');
+        query['cameraIds'] = this.searchData.curPointData.filter(x => x.dataType === 0).map(y => {return y.uid}).join(',');
+        window.sessionStorage.setItem('qyphParam', JSON.stringify(query));
+        this.$router.push({name: 'vehicle_search_qyph_jg'})
       }
+    },
+    beforeDestroy () {
+      $('body').unbind('click');
     }
   };
 </script>
@@ -842,6 +932,44 @@
   }
 </style>
 <style lang="scss">
+  // 框选区域之后小弹窗
+  .vl_map_area_confirm {
+    background: #FFFFFF;
+    box-shadow:0px 12px 12px 0px rgba(2,10,62,0.36);
+    padding: 5px 0px;
+    width: 100px;
+    height: 30px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    display: flex;
+    > span {
+      display: block;
+      height: 20px;
+      text-align: center;
+    }
+    .vl_area_cancel {
+      width: 30px;
+      border-right: 1px solid #F2F2F2;
+      i {
+        color: #F95826;
+        font-size: 20px;
+        font-weight: bold;
+      }
+    }
+    .vl_area_complete {
+      width: 70px;
+      vertical-align: middle;
+      &:before {
+        color: #1264F8;
+        font-size: 20px;
+        font-weight: bold;
+        vertical-align: middle;
+        margin-right: 3px;
+      }
+      color: #666666;
+    }
+  }
 .red_star {
   &:before {
     content: '*';

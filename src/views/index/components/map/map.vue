@@ -242,8 +242,8 @@
         bResize: null,
         timer: null,
         constObj: [
-          {name:'摄像头', _key: 'deviceBasicListNum', supOptions: [{name: '部门范围'},{name: '其他范围'}], isIndeterminate: false, checkAll: true, supTypeList: [0, 1], supTypeListAll: [0, 1]},
-          {name:'卡口', _key: 'bayonetListNum', isIndeterminate: false, checkAll: true},
+          {name:'摄像头', _key: 'deviceBasicListNum', supOptions: [], isIndeterminate: false, checkAll: true, supTypeList: [0, 1], supTypeListAll: [0, 1]},
+          {name:'卡口', _key: 'bayonetListNum', supOptions: [], isIndeterminate: false, checkAll: true, supTypeList: [], supTypeListAll: [0, 1]},
           {name: '车辆', _key: 'carListNum', supOptions: [{name: '公交车'},{name: '出租车'}, {name: '客运车'}, {name: '校车'}, {name: '危化车'}], isIndeterminate: false, checkAll: true, supTypeList: [0, 1, 2, 3, 4], supTypeListAll: [0, 1, 2, 3, 4]},
           {name: '人员', _key: 'sysUserExtendListNum', supOptions: [{name: '部门成员'},{name: '普通民众'}], isIndeterminate: false, checkAll: true, supTypeList: [0, 1], supTypeListAll: [0, 1]}
         ],
@@ -885,11 +885,12 @@
                                   _this.bayonetOpened.push(_bay)
                                 }
                                 if (badDeviceList.length) {
-                                  let badName = badDeviceList.map(n => {return n.deviceName})
-                                  _this.$message.warning('该卡口里设备' + badName.jion(',') + '异常')
+                                  let badName = badDeviceList.map(n => {return n.deviceName}).join(',')
+                                  console.log(badName, badDeviceList)
+                                  _this.$message.info('该卡口里设备' + badName + '异常')
                                 }
                               } else {
-                                _this.$message.warning('该卡口没有关联设备')
+                                _this.$message.info('该卡口没有关联设备')
                               }
                             }
                           })
@@ -1230,7 +1231,9 @@
             let _index = e.target.getAttribute('_index');
             let el = _this.videoMarker.curObj[_index]._id;
             $('#' + el).hide();
-            _this.videoMarker.players[_index].pause();
+            if (_this.videoMarker.players[_index]) {
+              _this.videoMarker.players[_index].pause();
+            }
 //          _this.videoMarker.players[_index].unload();
           }
           // show big video
@@ -1392,7 +1395,7 @@
                 })
                 let point = m.getPosition();
                 if (window.AMap.GeometryUtil.isPointInRing(point, this.selAreaPolygon.getPath())) {
-                  // 判断是不是卡口
+                  // 判断是不是卡口,则没有下拉勾选
                   if (y.dataType === 1) {
                     if (this.mapTypeList.includes(1)) {
                       y.isShow = true;
@@ -1411,7 +1414,7 @@
                 }
                 m = null;
               } else {
-                // 判断是不是卡口
+                // 判断是不是卡口则没有下拉勾选
                 if (y.dataType === 1) {
                   if (this.mapTypeList.includes(1)) {
                     y.isShow = true;
@@ -1663,6 +1666,7 @@
           if (res && res.data) {
             this.initPlayerDo(res.data.liveFlvUrl, curV._id);
           } else {
+            this.$_hideLoading();
             // 未获取到视频
             console.log('未获取到视频');
             this.videoLoadingFailed = true;
@@ -1698,7 +1702,7 @@
       // 获得设备报警列表
       getAlarmListByDev () {
         let params = {
-          interval: 12
+          interval: 30
         }
         let _this = this;
         getAlarmListByDev(params).then(res => {
@@ -1723,21 +1727,24 @@
                 }
               })
             })
-            _this.timer = setTimeout(() => {
+          }
+          _this.timer = setTimeout(() => {
+            if(_this.snapMarks.length) {
               _this.map.remove(_this.snapMarks);
               _this.marks[0].forEach(y => {
                 if (document.getElementById('mapMark' + y.getExtData().dataType + y.getExtData().uid).classList.contains('vl_icon_map_sxt_error')) {
                   document.getElementById('mapMark' + y.getExtData().dataType + y.getExtData().uid).classList.remove('vl_icon_map_sxt_error')
                 }
               })
-              _this.snapMarks = [];
-              _this.$once('hook:beforeDestroy', () => {
-                clearTimeout(_this.timer);
-                return false;
-              })
-              _this.getAlarmListByDev();
-            }, 12000)
-          }
+            }
+            _this.snapMarks = [];
+            _this.$once('hook:beforeDestroy', () => {
+              clearTimeout(_this.timer);
+              return false;
+            })
+            console.log('24143')
+            _this.getAlarmListByDev();
+          }, 12000)
         })
       },
 

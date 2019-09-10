@@ -10,13 +10,15 @@
         :on-success="uploadSucess"
         :on-error="uploadError">
         <span v-if="uploading" class="el-icon-loading"></span>
-        <img class="vl_upload_img" v-else-if="currentImg" :src="currentImg.path">
+        <img :style="{'transform': 'rotate(' + rotateNum * 90 + 'deg)'}" class="vl_upload_img" v-else-if="currentImg" :src="currentImg.path">
         <div class="vl_upload_tip" v-else>
           <span class="vl_icon"></span>
+          <div>支持jpg,png,bmp格式</div>
           <p>点击上传图片</p>
         </div>
       </el-upload>
       <p @click="showHistoryPic">从上传记录中选择</p>
+      <span class="upload_rotate" v-show="currentImg && currentImg.path" @click="rotateImg" title="旋转"><i class="el-icon-refresh-right"></i></span>
       <span v-show="currentImg && currentImg.path" title="清空" @click="uploadClear(true)"><i class="el-icon-delete"></i></span>
     </div>
     <!--历史记录弹窗 :close-on-click-modal="false" -->
@@ -48,10 +50,13 @@
         <el-button type="primary" @click="addHisToImg" :disabled="!choosedHisPic">确认</el-button>
       </div>
     </el-dialog>
+    <!--等待旋转的图片放入canvas-->
+    <canvas style="display: none;" id="uploadImageCanvas"></canvas>
   </div>
 </template>
 <script>
 import {ajaxCtx} from '@/config/config';
+import { handUpload} from '@/views/index/api/api.base.js';
 import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList} from '@/views/index/api/api.judge.js';
 export default {
   /**
@@ -76,6 +81,7 @@ export default {
   props: ['clear', 'width', 'height', 'imgData'],
   data () {
     return {
+      rotateNum: 0, // 当前旋转基数
       uploadAcion: ajaxCtx.base + '/new',
       currentImg: null,
       uploading: false, // 是否上传中
@@ -102,9 +108,67 @@ export default {
     },
     clear () {
       this.uploadClear();
+    },
+    currentImg () {
+      this.rotateNum = 0;
     }
   },
   methods: {
+    // 图片旋转
+    rotateImg () {
+      if (this.currentImg && this.currentImg.path) {
+        this.rotateNum++;
+        let degree = 0;
+        let rotateInput = this.rotateNum * 90;
+        degree += parseInt(rotateInput);
+        degree %= 360;
+        let img = new Image();
+        img.setAttribute("crossOrigin",'Anonymous');
+        img.src = this.currentImg.path;
+        img.onload = () => {
+          let $w = img.width, $h = img.height, $c = document.getElementById("uploadImageCanvas");
+          let ctx = $c.getContext("2d");
+          if (degree === 90) {
+            $c.width = $h;
+            $c.height = $w;
+            ctx.clearRect(0, 0, $h, $w);
+            ctx.rotate(degree / 180 * Math.PI);
+            ctx.translate(0, -$h);
+            ctx.drawImage(img, 0, 0);
+          } else if (degree === 270) {
+            $c.width = $h;
+            $c.height = $w;
+            ctx.clearRect(0, 0, $h, $w);
+            ctx.rotate(degree / 180 * Math.PI);
+            ctx.translate(-$w, 0);
+            ctx.drawImage(img, 0, 0);
+          } else {
+            $c.width = $w;
+            $c.height = $h;
+            ctx.clearRect(0, 0, $w, $h);
+            ctx.translate($w / 2, $h / 2);
+            ctx.rotate(degree / 180 * Math.PI);
+            ctx.translate(-$w / 2, -$h / 2);
+            ctx.drawImage(img, $w / 2 - $w / 2, $h / 2 - $h / 2);
+          }
+          $c.toBlob((blob) => {
+            let fd = new FormData();
+            let fileBlob = new File([blob], new Date().getTime() + '.png')
+            fd.append("file", fileBlob);
+            handUpload(fd).then((response, file, fileList) => {
+              if (response && response.data) {
+                let oRes = response.data;
+                if (oRes) {
+                  this.setImgUid(oRes);
+                }
+              }
+            })
+          });
+        }
+      } else {
+        this.rotateNum = 0;
+      }
+    },
     // drag over
     dragOver () {
       // console.log('drag over')
@@ -151,33 +215,36 @@ export default {
       if (response && response.data) {
         let oRes = response.data;
         if (oRes) {
-          this.currentImg = {
-            cname: oRes.fileName, // 附件名称 ,
-            // contentUid: this.$store.state.loginUser.uid,
-            // desci: '', // 备注 ,
-            filePathName: oRes.fileName, // 附件保存名称 ,
-            fileType: 1, // 文件类型 ,
-            imgHeight: oRes.fileHeight, // 图片高存储的单位位px ,
-            imgSize: oRes.fileSize, // 图片大小存储的单位位byte ,
-            imgWidth: oRes.fileWidth, //  图片宽存储的单位位px ,
-            // otherFlag: '', // 其他标识 ,
-            path: oRes.fileFullPath, // 附件路径 ,
-            // path: oRes.path,
-            thumbnailName: oRes.thumbnailFileName, // 缩略图名称 ,
-            thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
-            // uid: '' //  附件标识
-          };
-          this.picSubmit();
-          // this.curImageUrl = x.path;
-          if (this.$store.state.loginUser && this.$store.state.loginUser.uid) {
-            this.currentImg.contentUid = this.$store.state.loginUser.uid;
-            JtcPOSTAppendixInfo(this.currentImg).then(jRes => {
-              if (jRes) {
-                this.currentImg['uid'] = jRes.data;
-              }
-            })
-          }
+          this.setImgUid(oRes);
         }
+      }
+    },
+    setImgUid (oRes) {
+      this.currentImg = {
+        cname: oRes.fileName, // 附件名称 ,
+        // contentUid: this.$store.state.loginUser.uid,
+        // desci: '', // 备注 ,
+        filePathName: oRes.fileName, // 附件保存名称 ,
+        fileType: 1, // 文件类型 ,
+        imgHeight: oRes.fileHeight, // 图片高存储的单位位px ,
+        imgSize: oRes.fileSize, // 图片大小存储的单位位byte ,
+        imgWidth: oRes.fileWidth, //  图片宽存储的单位位px ,
+        // otherFlag: '', // 其他标识 ,
+        path: oRes.fileFullPath, // 附件路径 ,
+        // path: oRes.path,
+        thumbnailName: oRes.thumbnailFileName, // 缩略图名称 ,
+        thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
+        // uid: '' //  附件标识
+      };
+      // this.curImageUrl = x.path;
+      if (this.$store.state.loginUser && this.$store.state.loginUser.uid) {
+        this.currentImg.contentUid = this.$store.state.loginUser.uid;
+        JtcPOSTAppendixInfo(this.currentImg).then(jRes => {
+          if (jRes) {
+            this.currentImg['uid'] = jRes.data;
+            this.picSubmit();
+          }
+        })
       }
     },
     uploadError () {
@@ -262,12 +329,19 @@ export default {
           text-align: center;
           color: #999;
         }
+        > div {
+          color: #CCCCCC;
+          position: absolute;
+          bottom: 0px;
+          width: 100%;
+          height: 50%;
+        }
       }
     }
     > p {
       display: none;
       position: absolute; bottom: 0; left: 0;
-      width: 100%; height: 40px; line-height: 40px;
+      width: 100%; height: 26px; line-height: 26px;
       cursor: pointer;
       background: #000;
       background: rgba(0, 0, 0, 0.3);
@@ -289,12 +363,18 @@ export default {
         color: #fff;
       }
     }
+    > .upload_rotate {
+      right: 33px;
+    }
     &:hover {
       .el-upload--picture-card {
         background-color: #2981F8;
       }
       .vl_upload_tip {
         > p { display: none; }
+        > div {
+          color: #ABCFFF;
+        }
       }
       > p { display: block; }
       > span { display: block; }
