@@ -21,10 +21,10 @@
         <div v-if="modelSixForm.licensePlateNumList.length > 1" class="period_time_btn" @click="removeLicensePlateNum()"><i class="vl_icon vl_icon_control_28"></i><span>删除车牌号码</span></div>
       </el-form-item>
     </el-form-item>
-    <el-form-item style="margin-top: 20px;">
+    <!-- <el-form-item style="margin-top: 20px;">
       <el-button type="primary" @click="selControl('modelSix')">一键布控</el-button>
-    </el-form-item>
-    <div is="controlDevUpdate" v-if="isShowControlDev" :modelType="6"></div>
+    </el-form-item> -->
+    <div is="controlDevUpdate" :modelType="6"></div>
   </el-form>
 </template>
 <script>
@@ -66,18 +66,18 @@ export default {
       this.modelSixForm.licensePlateNumList.pop();
     },
     // 一键布控
-    selControl (formName) {
-      if (this.fileList.length === 0 && !this.modelSixForm.licensePlateNumList[0].licensePlateNum) {
-        return this.$message.warning('请选择布控人员或者车辆');
-      } 
-      this.$refs[formName].validate((valid) => {
-        if (valid) {
-          this.isShowControlDev = true;
-        } else {
-          return false;
-        }
-      });
-    }
+    // selControl (formName) {
+    //   if (this.fileList.length === 0 && !this.modelSixForm.licensePlateNumList[0].licensePlateNum) {
+    //     return this.$message.warning('请选择布控人员或者车辆');
+    //   } 
+    //   this.$refs[formName].validate((valid) => {
+    //     if (valid) {
+    //       this.isShowControlDev = true;
+    //     } else {
+    //       return false;
+    //     }
+    //   });
+    // }
   }
 }
 </script>

@@ -13,8 +13,8 @@
         </div>
         <div v-show="isShowTree">
           <div class="sel_tab">
-            <div @click="bayOrdev = 1" :class="{'active': bayOrdev === 1}">摄像头</div>
-            <div @click="bayOrdev = 2" :class="{'active': bayOrdev === 2}">卡口</div>
+            <div @click="tabLeftClick(1)" :class="{'active': bayOrdev === 1}">摄像头</div>
+            <div @click="tabLeftClick(2)" :class="{'active': bayOrdev === 2}">卡口</div>
           </div>
           <vue-scroll style="height: 352px;">
             <div class="tree_box">
@@ -60,14 +60,17 @@
       :self_to_data1Up="self_to_data1"
       :self_to_data2Up="self_to_data2"
       :addressObj="addressObj"
+      :devIdListUp="devIdList"
+      :bayIdListUp="bayIdList"
     ></div>
   </div>
 </template>
 <script>
 import {mapXupuxian} from '@/config/config.js';
 import {MapGETmonitorList} from '@/views/index/api/api.map.js';
-import {random14, objDeepCopy} from '@/utils/util.js';
+import {random14, objDeepCopy, addCluster} from '@/utils/util.js';
 import controlDevUpdate from './controlDevUpdate.vue';
+import { setTimeout } from 'timers';
 export default {
   components: {controlDevUpdate},
   props: ['addressObj', 'addressObjTwo', 'modelType', 'missingTime'],
@@ -93,7 +96,8 @@ export default {
       node_key: 'areaId',
       pid: 'areaParentUid',
       removeObj: {1: [],2: []},
-      isShowTree: false
+      isShowTree: false,
+      markerList: [],
     }
   },
   mounted () {
@@ -175,7 +179,7 @@ export default {
     },
     // 地图设备和卡口标记 data:摄像头数据/卡口数据
     mapMark (data) {
-      let _this = this, _hoverWindow = null, markerList = [];
+      let _this = this, _hoverWindow = null;
       // 遍历列表，摄像头 或者卡口
       for (let i = 0; i < data.length; i++) {
         let offSet = [-20.5, -70];
@@ -190,6 +194,7 @@ export default {
             _content = '<div id="' + obj.uid + '_kk' + '" class="vl_icon vl_icon_kk"></div>';
           }
           let _marker = new window.AMap.Marker({ // 添加自定义点标记
+            map: _this.map,
             position: [obj.longitude, obj.latitude],
             offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
             draggable: false, // 是否可拖动
@@ -223,12 +228,10 @@ export default {
           _marker.on('click', function () {
           
           })
-      
-          markerList.push(_marker);
+          _this.markerList.push(_marker);
         }
       }
-      _this.map.add(markerList);
-      _this.map.setFitView();
+      addCluster(_this.map, _this.markerList);
     },
     // 人员失踪位置和家庭位置标记
     addressMark () {
@@ -306,6 +309,7 @@ export default {
         fillOpacity: 0.35 //填充透明度
       })
       circle.setMap(_this.map);
+      this.setViewingArea(circle);
       this.removeObj[type].push(circle);
       this.getCircleDev(circle);
     },
@@ -323,42 +327,64 @@ export default {
         fillOpacity: 0.35 //填充透明度
       })
       circle.setMap(_this.map);
+      this.setViewingArea(circle);
       this.getCircleDev(circle);
     },
+    // 把地图的可视区域设置在选中设备或卡口的区域
+    setViewingArea (obj) {
+      this.map.setCenter(obj.getCenter());
+    },
     // 获取圆形覆盖物内的设备和卡口
-    getCircleDev (circle) {
-      let _this = this, res = [];
-      this.devList.forEach(f => {
+    getCircleDev (polygon) {
+      let res = [];
+      this.markerList.forEach(f => {
+        const obj = f.getExtData();
         // 把在圆形覆盖物范围之内的追踪点添加进来
-        if (f.longitude > 0 && f.latitude > 0) {
-          if (circle && circle.contains(new window.AMap.LngLat(f.longitude, f.latitude))) {
+        if (obj.longitude > 0 && obj.latitude > 0) {
+          if (polygon && polygon.contains(new window.AMap.LngLat(obj.longitude, obj.latitude))) {
             // 在圆形之中
-            res.push(f);
+            res.push(obj);
+            this.map.cluster.removeMarkers(f);
+            let uContent = this.setMarkContent(f.getExtData())
+            f.setContent(uContent);
+            this.map.add(f);
           }
         }
       })
-      this.devIdList = res.reduce((pre, cur) => {
+      const _devIdList = res.reduce((pre, cur) => {
         if (cur.type === 1) {
           pre = [...pre, cur.uid];
         }
         return pre;
       },[]);
-      this.bayIdList = res.reduce((pre, cur) => {
+      this.devIdList = [...this.devIdList, ..._devIdList];
+      const _bayIdList = res.reduce((pre, cur) => {
         if (cur.type === 2) {
           pre = [...pre, cur.uid];
         }
         return pre;
       },[]);
+      this.bayIdList = [...this.bayIdList, ..._bayIdList];
+      // 为了生成设备和卡口左边的树数据，重复调取2次
+      setTimeout(() => {
+        this.tabLeftClick(2);
+      })
+      setTimeout(() => {
+        this.tabLeftClick(1);
+      })
+    },
+    // 设置marker的显示图标
+    setMarkContent (obj) {
+      const type = obj.type === 1 ? 0 : 1;
+      return '<div id="' + obj.uid + '" class="map_icons vl_icon vl_icon_map_sxt_in_area' + type + '"></div>'
+    },
+    // 目标树tab
+    tabLeftClick (type) {
+      this.bayOrdev = type;
       const data = this.bayOrdev === 1 ? this.devIdList : this.bayIdList;
-      if (this.bayOrdev === 2) {
-        this.$nextTick(() => {
-          this.addDevIsLeft(data);
-        })
-      } else {
-        this.$nextTick(() => {
-          this.addDevIsLeft(data);
-        })
-      }
+      this.$nextTick(() => {
+        this.addDevIsLeft(data);
+      })
     },
     // 获取城内所有卡口
     getAllBay () {
@@ -578,7 +604,6 @@ export default {
   watch: {
     // 再次点击第1个一键布控所执行的
     addressObj (val) {
-      console.log(this.addressObj, 'addressObj')
       val.length > 0 && this.addressMark();
     },
     // 再次点击第2个一键布控所执行的
@@ -588,20 +613,9 @@ export default {
     // 再次点击第3个一键布控所执行的
     modelType (val) {
       val === 3 && this.getAllBay();
-    },
-    bayOrdev () {
-      if (this.bayOrdev === 2) {
-        this.$nextTick(() => {
-          this.addressObj && this.addressMark();
-        })
-      } else {
-         this.$nextTick(() => {
-          this.addressObj && this.addressMark();
-        })
-      }
     }
   },
-   computed: {
+  computed: {
     // 右侧数据
     self_from_data() {
       if (this.bayOrdev === 2) {

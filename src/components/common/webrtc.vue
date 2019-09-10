@@ -213,9 +213,9 @@ export default {
         }
         if (_this.bReconnect) {
           // 重连ws
-          // _this.wsObj.wsTimeout = window.setTimeout(() => {
-          //   _this.wsReInit(_data);
-          // }, 3000);
+          _this.wsObj.wsTimeout = window.setTimeout(() => {
+            _this.wsReInit(_data);
+          }, 3000);
         }
       });
     },

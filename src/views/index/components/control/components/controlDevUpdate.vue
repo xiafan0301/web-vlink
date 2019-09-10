@@ -166,7 +166,7 @@
 <script>
 import {MapGETmonitorList} from '@/views/index/api/api.map.js';
 import {mapXupuxian} from '@/config/config.js';
-import {random14, objDeepCopy} from '@/utils/util.js';
+import {random14, objDeepCopy, addCluster} from '@/utils/util.js';
 import { setTimeout } from 'timers';
 export default {
   props: [
@@ -175,7 +175,9 @@ export default {
     'self_to_data1Up',
     'self_to_data2Up',
     'addressObj',
-    'modelType'
+    'modelType',
+    'devIdListUp',
+    'bayIdListUp'
   ],
   data () {
     return {
@@ -204,6 +206,8 @@ export default {
       self_to_data2: [],
       bayFromData_: [],
       devFromData_: [],
+      confirmIcon: null,
+      selDevList: [],
 
       from_is_indeterminate: false, // 源数据是否半选
       from_check_all: false, // 源数据是否全选
@@ -233,6 +237,31 @@ export default {
   mounted () {
     this.resetMap();
     this.getDevList();
+    let _this = this;
+    $('#devMap').on('click', '.vl_map_area_confirm', function (e) {
+      if (e.target.classList.contains('el-icon-close')) {
+        _this.cancelAddArea();
+        // 判断当前选中范围内是否有设备或卡口
+        if (_this.selDevList.length > 0) {
+          let curMks = [];
+          let devAndBayList = [..._this.devIdList, ..._this.bayIdList];
+          _this.selDevList.forEach(f => {
+            // 当前设备或卡口没有被之前范围所选中
+            if (devAndBayList.every(s => s !== (f.getExtData().uid))) {
+              let uContent = _this.setMarkContent(f.getExtData(), true);
+              f.setContent(uContent);
+              curMks.push(f);
+            }
+          })
+          _this.map.cluster.addMarkers(curMks);
+        }
+      }
+      if (e.target.classList.contains('vl_area_complete')) {
+        // 获取覆盖物内的设备和卡口
+        _this.getPolygonDev(_this.polygon);
+        _this.cancelAddArea();
+      }
+    })
   },
   methods: {
     // 初始化地图
@@ -269,9 +298,43 @@ export default {
           path: e.obj.getPath(),
           zIndex: 12
         });
-        // 获取覆盖物内的设备和卡口
-        _this.getPolygonDev(_this.polygon);
+        _this.createConfirmMark(e.obj.getPath()[e.obj.getPath().length - 1]);
+
+      
+        // 让选中的设备或卡口变成选中颜色
+        _this.selDevList = [];
+        _this.markerList.forEach(f => {
+          const obj = f.getExtData();
+          // 把在圆形覆盖物范围之内的追踪点添加进来
+          if (obj.longitude > 0 && obj.latitude > 0) {
+            if (_this.polygon && _this.polygon.contains(new window.AMap.LngLat(obj.longitude, obj.latitude))) {
+              // 在圆形之中
+              _this.selDevList.push(f);
+              _this.map.cluster.removeMarkers(f);
+              let uContent = _this.setMarkContent(f.getExtData())
+              f.setContent(uContent);
+              _this.map.add(f);
+            }
+          }
+        })
       })
+    },
+    // 创建确定，取消区域的小marker
+    createConfirmMark (path) {
+      let m = new window.AMap.Marker({
+        map: this.map,
+        position: path,
+        offset: new window.AMap.Pixel(-15, -16),
+        draggable: false, // 是否可拖动
+        zIndex: 200,
+        bubble: false,
+        content: '<div  class="vl_map_area_confirm"><span class="vl_area_cancel"><i class="el-icon-close"></i></span><span class="vl_area_complete el-icon-check">完成</span></div>'
+      })
+      this.confirmIcon = m;
+    },
+    cancelAddArea () {
+      if(this.polygon) this.map.remove(this.polygon);
+      if (this.confirmIcon) {this.map.remove(this.confirmIcon)};
     },
     // 获取地图上的设备和卡口数据
     getDevList () {
@@ -374,6 +437,7 @@ export default {
             _content = '<div id="' + obj.uid + '_kk' + '" class="vl_icon vl_icon_kk vl_icon_click"></div>';
           }
           let _marker = new window.AMap.Marker({ // 添加自定义点标记
+            map: _this.map,
             position: [obj.longitude, obj.latitude],
             offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
             draggable: false, // 是否可拖动
@@ -403,22 +467,51 @@ export default {
             });
             _hoverWindow.open(_this.map, new window.AMap.LngLat(obj.longitude, obj.latitude));
           });
-          // click
-          // _marker.on('click', function () {
-          
-          // })
-      
           _this.markerList.push(_marker);
         }
       }
-      _this.map.add(_this.markerList);
-      // _this.map.setFitView();
+      addCluster(_this.map, _this.markerList);
+      // 只有在父组件传了已经选中的设备或卡口时才会把设备或卡口颜色置为选中颜色
+      if (this.devIdListUp || this.bayIdListUp) {
+        _this.changeSelDevColor();
+      }
+    },
+    // 让选中的点标记变色
+    changeSelDevColor () {
+      const devAndBayList = [...this.devIdListUp, ...this.bayIdListUp];
+      let markers = [];
+      this.markerList.forEach(f => {
+        const obj = f.getExtData();
+        if (devAndBayList.some(s => s === obj.uid)) {
+          markers.push(f);
+          this.map.cluster.removeMarkers(f);
+          let uContent = this.setMarkContent(f.getExtData())
+          f.setContent(uContent);
+          this.map.add(f);
+        }
+      })
+      this.$nextTick(() => {
+        this.setViewingArea(markers[markers.length - 1]);
+      })
+    },
+    // 把地图的可视区域设置在选中设备或卡口的区域
+    setViewingArea (obj) {
+      this.map.setCenter(obj.getPosition());
+    },
+    // 设置marker的显示图标
+    setMarkContent (obj, flag = false) {
+      const type = obj.type === 1 ? 0 : 1;
+      if (flag) {
+        const name = obj.type === 1 ? 'sxt' : 'kk';
+        return '<div id="' + obj.uid + '_" class="map_icons vl_icon vl_icon_' + name + '"></div>'
+      }
+      return '<div id="' + obj.uid + '" class="map_icons vl_icon vl_icon_map_sxt_in_area' + type + '"></div>'
     },
     // 获取覆盖物内的设备和卡口
     getPolygonDev (polygon) {
       let res = [];
       this.markerList.forEach(f => {
-        const obj = f.B.extData;
+        const obj = f.getExtData();
         // 把在圆形覆盖物范围之内的追踪点添加进来
         if (obj.longitude > 0 && obj.latitude > 0) {
           if (polygon && polygon.contains(new window.AMap.LngLat(obj.longitude, obj.latitude))) {
@@ -427,19 +520,21 @@ export default {
           }
         }
       })
-      this.devIdList = res.reduce((pre, cur) => {
+      const _devIdList = res.reduce((pre, cur) => {
         console.log(cur,'cur')
         if (cur.type === 1) {
           pre = [...pre, cur.uid];
         }
         return pre;
       },[]);
-      this.bayIdList = res.reduce((pre, cur) => {
+      this.devIdList = [...this.devIdList, ..._devIdList];
+      const _bayIdList = res.reduce((pre, cur) => {
         if (cur.type === 2) {
           pre = [...pre, cur.uid];
         }
         return pre;
       },[]);
+      this.bayIdList = [...this.bayIdList, ..._bayIdList];
       this.tabLeftClick(this.bayOrdev);
     },
     // 目标树tab
@@ -521,14 +616,24 @@ export default {
       this.selAreaAcitve = !this.selAreaAcitve;
       if (this.selAreaAcitve) {
         this.selType = type;
-        $('#devMap').on('click', '.vl_icon_click', (e) => {
+        $('body').on('click', '.vl_icon_click', (e) => {
           const objId = e.target.getAttribute('id');
           if (objId.endsWith('_sxt')) {
             this.bayOrdev = 1;
-            this.$refs["from-tree"].setCheckedKeys([objId.replace('_sxt', '')]);
+            const id = objId.replace('_sxt', '');
+            this.$refs["from-tree"].setCheckedKeys([id]);
+            if (this.devIdList.every(e => e !== id)) {
+              this.devIdList.push(id);
+            }
+            $(`#${objId}`).addClass('vl_icon_map_sxt_in_area0');
           } else if (objId.endsWith('_kk')) {
             this.bayOrdev = 2;
-            this.$refs["from-tree"].setCheckedKeys([objId.replace('_kk', '')]);
+            const id = objId.replace('_kk', '');
+            this.$refs["from-tree"].setCheckedKeys([id]);
+            if (this.bayIdList.every(e => e !== id)) {
+              this.bayIdList.push(id);
+            }
+            $(`#${objId}`).addClass('vl_icon_map_sxt_in_area1');
           }
           this.$nextTick(() => {
             this.addToAims();
@@ -536,7 +641,7 @@ export default {
         })
       } else {
         this.selType = null;
-        $('#devMap').unbind('click');
+        $('body').unbind('click');
       }
     },
     // 清除覆盖物和所选的设备和卡口
@@ -551,7 +656,15 @@ export default {
       this.devFromData = objDeepCopy(this.devFromData_);
       this.selAreaAcitve = !this.selAreaAcitve;
       this.selType = null;
-      $('#devMap').unbind('click');
+      $('body').unbind('click');
+      
+      let curMks = [];
+      this.markerList.forEach(f => {
+        let uContent = this.setMarkContent(f.getExtData(), true);
+        f.setContent(uContent);
+        curMks.push(f);
+      })
+      this.map.cluster.addMarkers(curMks);
     },
     // 根据设备名称搜索设备或卡口
     searchDev () {
@@ -607,25 +720,55 @@ export default {
         }
       }
     },
+    fn (data, res) {
+      if (data instanceof Array) {
+        for (let item of data) {
+          if (!item.hasOwnProperty('areaTreeList')) {
+            res.push(item);
+          } else {
+            this.fn(item.areaTreeList, res);
+          }
+        }
+      } else {
+        if (!data.hasOwnProperty('areaTreeList')) {
+          res.push(data);
+        } else {
+          this.fn(data.areaTreeList, res);
+        }
+      }
+    },
     // 删除左侧已选设备和卡口
-    removeSelDev (node, data) {     
-      // 把选取的所有节点的checked改为true
-      // let fn = (node) => {
-      //   for (let key in node) {
-      //     if (node instanceof Array) {
-      //       node[key]['checked'] = true;
-      //       if (node[key] && node[key]['childNodes'].length > 0) fn(node[key]['childNodes']);
-      //     } else {
-      //       node['checked'] = true;
-      //       if (node['childNodes'].length > 0) fn(node['childNodes']);
-      //     }
-      //   }
-      // }
-      // fn(node);
+    removeSelDev (node, data) {  
+      let res = [];        
+      this.fn(data, res);// 获取左侧树的设备或卡口列表
+      // 删除左侧树时，同时删除devIdList或bayIdList；
+      if (this.bayOrdev === 1) {
+        this.common1(res, this.devIdList);
+      } else {
+        this.common1(res, this.bayIdList);
+      }
       this.$refs["to-tree"].setCheckedKeys([data.areaId]);
       this.$nextTick(() => {
         this.removeToSource()
       })
+    },
+    common1 (res, data) {
+      const delList = res.map(m => m.uid);
+      data.forEach(f => {
+        if (delList.some(s => s === f)) {
+          data = data.filter(d => d !== f);
+          this.bayOrdev === 1 ? this.devIdList = data : this.bayIdList = data;
+        }
+      })
+      let markers = [];
+      this.markerList.forEach(f => {
+        if (delList.some(s => s === (f.getExtData().uid))) {
+          let uContent = this.setMarkContent(f.getExtData(), true);
+          f.setContent(uContent);
+          markers.push(f);
+        }
+      })
+      this.map.cluster.addMarkers(markers);
     },
     // 获取列表选择的右边已选设备数量
     getSelDevListRightNum() {
@@ -1093,6 +1236,7 @@ export default {
     if (this.map) {
       this.map.destroy();
     }
+    $('body').unbind('click');
     $('#devMap').unbind('click');
   }
 }
@@ -1372,4 +1516,42 @@ export default {
     }
   }
 } 
+// 框选区域之后小弹窗
+.vl_map_area_confirm {
+  background: #FFFFFF;
+  box-shadow:0px 12px 12px 0px rgba(2,10,62,0.36);
+  padding: 5px 0px;
+  width: 100px;
+  height: 30px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  display: flex;
+  > span {
+    display: block;
+    height: 20px;
+    text-align: center;
+  }
+  .vl_area_cancel {
+    width: 30px;
+    border-right: 1px solid #F2F2F2;
+    i {
+      color: #F95826;
+      font-size: 20px;
+      font-weight: bold;
+    }
+  }
+  .vl_area_complete {
+    width: 70px;
+    vertical-align: middle;
+    &:before {
+      color: #1264F8;
+      font-size: 20px;
+      font-weight: bold;
+      vertical-align: middle;
+      margin-right: 3px;
+    }
+    color: #666666;
+  }
+}
 </style>
