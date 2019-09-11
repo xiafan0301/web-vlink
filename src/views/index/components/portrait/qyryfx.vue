@@ -261,7 +261,7 @@
             </div>
           </template>
           <template v-else>
-            <div is="noResult" :isInitPage="isInitPage"></div>
+            <div is="noResult" :isInitPage="isInitPage" :tipMessage="initPageMessage"></div>
           </template>
         </template>
         <template v-else>
@@ -447,6 +447,7 @@ export default {
       isInterruptLoading: false, // 中断任务弹出框
       selectMapType: 0, // 选择的第几个地图区域
       isInitPage: true,
+      initPageMessage: '选择分析区域，查询所选时间内布控人群在指定区域的出没情况',
       isShowMapAreaDialog: true, // 是否显示地图弹出框
       mapDialogVisible1: false, // 地图选择弹出框
       mapDialogVisible2: false, // 地图选择弹出框
@@ -840,7 +841,6 @@ export default {
     mapPoint (data) {
       // console.log('data', data)
       if (data) {
-        this.isFirstClick = false;
 
         let allDeviceNameList = [];
         if (data.deviceList.length > 0) {
@@ -984,36 +984,6 @@ export default {
             deviceAndTimeList: deviceAndTimeList,
             taskName: this.qyryfxFrom.taskName
           };
-          // const queryParams = {
-          //   sex:null,
-          //   age:"",
-          //   personGroupId:"",
-          //   deviceAndTimeList:
-          //     [
-          //       {
-          //         deviceIds:"11,26",
-          //         bayonetIds:"2,7,9,3UUWvZxRHfsEqDu0D8ZCDp",
-          //         deviceNames:"溆浦县国土资源局153、人脸抓拍设备、卡口2、卡口7、卡口9、人脸抓拍卡口",
-          //         startTime:"2019-08-20 00:00:00",
-          //         endTime:"2019-08-21 15:54:08"
-          //       }
-          //     ],
-          //   taskName:null
-          // }
-          //  const queryParams = {
-          //   deviceAndTimeList: [
-          //     {
-          //       deviceIds: "27",
-          //       startTime: "2019-08-12 12:00:00",
-          //       endTime: "2019-08-12 23:00:00"
-          //     }
-          //   ],
-          //   age: '青年,少年',
-          //   sex: '男',
-          //   personGroupId: "1lwx3mJIbdF4c4vEgpyLk0",
-          //   taskName: "webTestvvvvv111111"
-          // };
-          // console.log('queryParams', queryParams)
 
           this.submitLoading = true; // 打开加载效果
           if (this.selectType === 1) {

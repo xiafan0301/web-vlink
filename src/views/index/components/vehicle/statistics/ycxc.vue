@@ -175,7 +175,7 @@
           </vue-scroll>
         </template>
         <template v-else>
-          <div is="noResult" :isInitPage="isInitPage"></div>
+          <div is="noResult" :isInitPage="isInitPage" :tipMessage="initPageMessage"></div>
         </template>
       </div>
     </div> 
@@ -196,6 +196,7 @@ export default {
   data () {
     return {
       isInitPage: true, // 是否是初始化页面
+      initPageMessage: '输入夜间时间段，查询有频繁夜出情况的车辆',
       startTimeOptions: [
         {
           label: '19:00',

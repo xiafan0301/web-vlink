@@ -109,7 +109,7 @@
 
         </template>
          <template v-else>
-          <div is="noResult" :isInitPage="isInitPage"></div>
+          <div is="noResult" :isInitPage="isInitPage" :tipMessage="initPageMessage"></div>
         </template>
       </div>
     </div>
@@ -162,6 +162,7 @@ export default {
   data () {
     return {
       isInitPage: true, // 是否是初始化页面
+      initPageMessage: '输入多个完整车牌，分析车辆之间的同行可能性',
       isShowTip: false,
       isSearchLoading: false,
       isDisabled: false,
