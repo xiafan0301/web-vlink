@@ -42,64 +42,33 @@
                   <el-radio :label="1">列表选择</el-radio>
                 </el-col>
                 <el-col :span="12">
-                  <el-radio :label="2">地图选择</el-radio>
+                  <div @click="clickMapSelect"><el-radio :label="2">地图选择</el-radio></div>
                 </el-col>
               </el-row> 
             </el-radio-group>
           </el-form-item>
-          <!-- 选择设备 -->
-          <!-- treeTabShow 为展开 -->
-          <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
-          <div class="selected_device" @click="treeTabShow = true;">
-            <i v-if="treeTabShow" class="el-icon-arrow-up"></i>
-            <i v-else class="el-icon-arrow-down"></i>
-            <div class="device_list" v-if="selectDeviceArr.length > 0">
-              <template v-if="checkAllTree">
-                <span>全部设备</span>
-              </template>
-              <template v-else>
-                <span>{{ selectDeviceArr[0].label }}</span>
-                <span
-                  v-show="selectDeviceArr.length > 1"
-                  title="展开选中的设备"
-                  class="device_count"
-                >+{{ selectDeviceArr.length - 1 }}</span>
-              </template>
-              <!-- <span>{{ selectDeviceArr[0].label }}</span>
-              <span v-show="selectDeviceArr.length > 1" title="展开选中的设备" class="device_count">+{{ selectDeviceArr.length - 1 }}</span> -->
-            </div>
-            <!-- placeholder -->
-            <div class="no_device" v-else>选择设备</div>
-            <!-- 树tab页面 -->
-            <div class="device_tree_tab" v-show="treeTabShow">
-              <div style="overflow: hidden;"></div>
-              <!-- 视频树 -->
-              <div class="tree_content">
-                <vue-scroll>
-                  <div class="checked_all">
-                    <el-checkbox
-                      :indeterminate="isIndeterminate"
-                      v-model="checkAllTree"
-                      @change="handleCheckedAll"
-                    >全选</el-checkbox>
-                  </div>
-                  <el-tree
-                    @check="listenChecked"
-                    :data="cameraTree"
-                    show-checkbox
-                    default-expand-all
-                    node-key="label"
-                    ref="cameraTree"
-                    highlight-current
-                    :props="defaultProps"
-                  ></el-tree>
-                </vue-scroll>
-              </div>
-            </div>
-          </div>
+          <el-form-item prop="areaId" v-if="selectAreaType === 1" style="margin-bottom:0">
+            <el-select v-model="addForm.areaId" placeholder="请选择限行区域" style="width: 100%" multiple collapse-tags>
+              <el-option-group
+                v-for="group in areaDataList"
+                :key="group.areaName"
+                :label="group.areaName">
+                <el-option
+                  v-for="item in group.areaTreeList"
+                  :key="item.areaId"
+                  :label="item.areaName"
+                  :value="item.areaId">
+                </el-option>
+              </el-option-group>
+            </el-select>
+          </el-form-item>
+          <el-form-item v-if="selectAreaType === 2" style="margin-bottom:0" prop="selectDeviceNumber">
+            <el-input v-model="selectDeviceNumber" :disabled="true">
+            </el-input>
+          </el-form-item>
           <el-form-item style="margin-bottom:0" prop="tailNumbers">
             <el-checkbox v-model="addForm.isTailNumberLimit" @change="handleTailNumber">按照车牌尾号限行</el-checkbox>
-            <el-select v-model="addForm.tailNumbers" placeholder="请选择车牌尾号" style="width: 100%;" multiple clearable collapse-tags>
+            <el-select v-model="addForm.tailNumbers" placeholder="请选择车牌尾号" style="width: 100%;" multiple clearable collapse-tags :disabled="disabledTailNumber">
               <el-option
                 v-for="item in tailNumberOptions"
                 :key="item"
@@ -108,9 +77,9 @@
               </el-option>
             </el-select>
           </el-form-item>
-           <el-form-item prop="vehicleTypes">
+          <el-form-item prop="vehicleTypes">
             <el-checkbox v-model="addForm.isVehicleTypeLimit" @change="handleVehicleType">按照车辆类型限行</el-checkbox>
-            <el-select v-model="addForm.vehicleTypes" placeholder="请选择车辆类型" style="width: 100%" multiple clearable collapse-tags>
+            <el-select v-model="addForm.vehicleTypes" placeholder="请选择车辆类型" style="width: 100%" multiple clearable collapse-tags :disabled="disabledVehicleType">
               <el-option
                 v-for="(item, index) in vehicleTypeList"
                 :key="index"
@@ -241,11 +210,14 @@
         <el-button class="operation_btn function_btn" :loading="isChangeStatusLoading" @click="changeTaskStatus(2)">确认</el-button>
       </div>
     </el-dialog>
+
+    <div is="mapSelector" :open="mapDialogVisible" :showTypes="'DB'" :clear="clearMapSelect" @mapSelectorEmit="mapPoint"></div>
   </div>
 </template>
 <script>
 import { getDiciData } from '@/views/index/api/api.js';
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+import mapSelector from '@/components/common/mapSelector.vue';
 import { formatDate, dateOrigin, objDeepCopy } from "@/utils/util.js";
 import { mapXupuxian } from "@/config/config";
 import { dataList } from '@/utils/data.js';
@@ -253,9 +225,11 @@ import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import { addLimitTask, getLimitTaskList, updateLimitTaskStatus } from "@/views/index/api/api.judge.js";
 const overStartTime = new Date().getTime() + 24 * 60 * 60 * 1000;
 export default {
-  components: { vlBreadcrumb },
+  components: { vlBreadcrumb, mapSelector },
   data () {
     return {
+      mapDialogVisible: false,
+      clearMapSelect: {},
       cancelDialog: false, // 取消任务弹出框
       isChangeStatusLoading: false, // 取消--结束任务加载中
       endDialog: false, // 结束任务弹出框
@@ -278,11 +252,13 @@ export default {
       treeTabShow: false,
       selectAreaType: 1, // 限行区域选择方式
       isSearchLoading: false,
+      selectDeviceNumber: '已选设备0个', // 地图选择选择的设备数量
       addForm: {
         startTime: new Date(), // 开始时间
         endTime: dateOrigin(true, new Date(overStartTime)), // 结束时间
         bayonetIds: null, // 卡口
         devIds: null, // 摄像头
+        areaId: [], // 区域id
         isTailNumberLimit: false, // 是否按车牌尾号限行
         isVehicleTypeLimit: false, // 是否按车辆类型限行
         tailNumbers: [], // 车牌尾号
@@ -302,16 +278,50 @@ export default {
       dataList: [],
       vehicleTypeList: [], // 车辆类型列表
       operateTaskId: null, // 要操作的任务id
+      areaDataList: [], // 行政区域列表
+      disabledTailNumber: true, // 是否禁止选择车辆尾号
+      disabledVehicleType: true, // 是否禁止选择车辆类型
     }
   },
   mounted () {
     this.getVehicleTypeList();
-    this.getMonitorList();
+    this.getMapGETmonitorList();
 
     // 获取离线任务
     this.getDataList();
   },
   methods: {
+    //查询行政区域
+    getMapGETmonitorList () {
+      let d = {
+        areaUid: mapXupuxian.adcode
+      }
+      MapGETmonitorList(d).then(res=>{
+        if (res && res.data) {
+          this.areaDataList.push(res.data);
+          res.data.areaTreeList.forEach(el=>{
+            this.addForm.areaId.push(el.areaId);
+          })
+        }
+      })
+    },
+    // 限行区域change
+    clickMapSelect () {
+      this.mapDialogVisible = !this.mapDialogVisible;
+    },
+    // 获取地图选择的数据
+    mapPoint (data) {
+      console.log('data', data)
+      if (data) {
+        this.selectDeviceNumber = '已选设备' + (data.bayonetList.length + data.deviceList.length) + '个';
+        if (data.bayonetList.length > 0) {
+          this.selectBayonetArr = data.bayonetList;
+        }
+        if (data.deviceList.length > 0) {
+          this.selectCameraArr = data.deviceList;
+        }
+      }
+    },
     // 获取车辆类型列表
     getVehicleTypeList () {
       const type = dataList.vehicleType;
@@ -322,154 +332,48 @@ export default {
           }
         })
     },
-    //获取摄像头卡口信息列表
-    getMonitorList() {
-      let params = {
-        areaUid: mapXupuxian.adcode
-      };
-      this.videoTreeNodeCount = 0;
-      this.selectDeviceArr = [];
-      this.selectCameraArr = [];
-      this.selectBayonetArr = [];
-
-      MapGETmonitorList(params).then(res => {
-        if (res && res.data) {
-          let camera = objDeepCopy(res.data.areaTreeList);
-          this.cameraTree = this.getTreeList(camera);
-          this.getLeafCountTree(this.cameraTree);
-
-            
-          this.$nextTick(() => {
-            this.checkAllTree = true;
-            this.handleCheckedAll(true);
-          });
-        }
-      });
-    },
-    getLeafCountTree(json) {
-      // console.log('json', json)
-      // 获取树节点的数量
-      for (let i = 0; i < json.length; i++) {
-        if (json[i].hasOwnProperty("id")) {
-          this.videoTreeNodeCount++;
-        }
-        if (json[i].hasOwnProperty("children")) {
-          this.getLeafCountTree(json[i].children);
-        } else {
-          continue;
-        }
-      }
-      // console.log('videoTreeNodeCount', this.videoTreeNodeCount)
-    },
-    //获取摄像头数据
-    getTreeList(data) {
-      for (let item of data) {
-        item["id"] = item.areaId;
-        item["label"] = item.areaName;
-        let children = [],
-          deviceBasic = [],
-          bayonet = [];
-        if (item.deviceBasicList && item.deviceBasicList.length > 0) {
-          deviceBasic = item.deviceBasicList;
-          for (let key of deviceBasic) {
-            key["label"] = key.deviceName;
-            key["id"] = key.uid;
-            key["treeType"] = 1;
-          }
-          delete item.deviceBasicList;
-        }
-        if (item.bayonetList && item.bayonetList.length > 0) {
-          bayonet = item.bayonetList;
-          for (let key of bayonet) {
-            key["label"] = key.bayonetName;
-            key["id"] = key.uid;
-            key["treeType"] = 2;
-          }
-          delete item.bayonetList;
-        }
-        children.push(...deviceBasic, ...bayonet);
-        item["children"] = children;
-      }
-      return data;
-    },
     // 车牌尾号change
     handleTailNumber (val) {
       if (!val) {
         this.addForm.tailNumbers = [];
+        this.disabledTailNumber = true;
+      } else {
+        this.disabledTailNumber = false;
       }
     },
     // 车牌类型change
     handleVehicleType (val) {
       if (!val) {
         this.addForm.vehicleTypes = [];
-      }
-    },
-    // tab的方法
-    chooseDevice() {
-      // 选择了树的设备
-      this.treeTabShow = false;
-    },
-    // 处理摄像头树全选时间
-    handleCheckedAll(val) {
-      this.isIndeterminate = false;
-      if (val) {
-        this.$refs.cameraTree.setCheckedNodes(this.cameraTree);
+        this.disabledVehicleType = true;
       } else {
-        this.$refs.cameraTree.setCheckedNodes([]);
-      }
-      this.selectDeviceArr = this.$refs.cameraTree.getCheckedNodes(true);
-      this.handleData();
-    },
-    // 选中的设备数量处理
-    handleData() {
-      /* this.selectDeviceArr = [...this.selectCameraArr, ...this.selectBayonetArr].filter(key => key.treeType); */
-      this.selectDeviceArr = [...this.selectDeviceArr].filter(
-        key => key.treeType
-      );
-      this.selectCameraArr = [...this.selectDeviceArr].filter(
-        key => key.treeType === 1
-      );
-      this.selectBayonetArr = [...this.selectDeviceArr].filter(
-        key => key.treeType === 2
-      );
-      console.log(
-        "选中的数据",
-        this.selectDeviceArr,
-        this.selectBayonetArr,
-        this.selectCameraArr
-      );
-    },
-    //摄像头
-    listenChecked(val, val1) {
-      console.log('val1', val1);
-      
-      this.selectDeviceArr = this.$refs.cameraTree.getCheckedNodes(true);
-      this.handleData();
-      if (val1.checkedNodes.length === this.videoTreeNodeCount) {
-        this.isIndeterminate = false;
-        this.checkAllTree = true;
-      } else if (
-        val1.checkedNodes.length < this.videoTreeNodeCount &&
-        val1.checkedNodes.length > 0
-      ) {
-        this.checkAllTree = false;
-        this.isIndeterminate = true;
-      } else if (val1.checkedNodes.length === 0) {
-        this.checkAllTree = false;
-        this.isIndeterminate = false;
+        this.disabledVehicleType = false;
       }
     },
+    
     // 重置查询条件
     resetData (form) {
       this.$refs[form].resetFields();
 
+      this.selectAreaType = 1;
+
+      this.selectDeviceNumber = '已选设备0个';
+      this.selectCameraArr = [];
+      this.selectBayonetArr = [];
+      this.clearMapSelect = {};
+
       this.addForm.isVehicleTypeLimit = false;
       this.addForm.isTailNumberLimit = false;
 
-      this.$nextTick(() => {
-        this.checkAllTree = true;
-        this.handleCheckedAll(true);
+      this.disabledVehicleType = true;
+      this.disabledTailNumber = true;
 
+      this.$nextTick(() => {
+        this.areaDataList.forEach(val => {
+          val.areaTreeList.forEach(el=>{
+            this.addForm.areaId.push(el.areaId);
+          });
+        });
       });
     },
     // 左侧查询
@@ -495,28 +399,45 @@ export default {
           }
 
           if (this.selectCameraArr && this.selectCameraArr.length > 0) {
-            let cameraIds = this.selectCameraArr.map(res => res.id);
+            let cameraIds = this.selectCameraArr.map(res => res.uid);
             this.addForm.devIds = cameraIds.join(",");
           }
           if (this.selectBayonetArr && this.selectBayonetArr.length > 0) {
-            let bayonentIds = this.selectBayonetArr.map(res => res.id);
+            let bayonentIds = this.selectBayonetArr.map(res => res.uid);
             this.addForm.bayonetIds = bayonentIds.join(",");
+          }
+
+          if (this.selectAreaType === 2) {
+            if ((this.selectCameraArr && this.selectCameraArr.length <= 0) && (this.selectBayonetArr && this.selectCameraArr.length <= 0)) {
+              if (!document.querySelector('.el-message--info')) {
+                this.$message.info('请选择限行区域');
+              }
+              return;
+            }
+          } else {
+            if (this.addForm.areaId <= 0) {
+              if (!document.querySelector('.el-message--info')) {
+                this.$message.info('请选择限行区域');
+              }
+              return;
+            }
           }
 
           const params = {
             startTime: formatDate(this.addForm.startTime),
             endTime: formatDate(this.addForm.endTime),
-            bayonetIds: this.addForm.bayonetIds,
-            devIds: this.addForm.devIds,
+            areaId: this.selectAreaType === 1 ? this.addForm.areaId.join(',') : [],
+            bayonetIds: this.selectAreaType === 2 ? this.addForm.bayonetIds : null,
+            devIds: this.selectAreaType === 2 ? this.addForm.devIds : null,
             vehicleTypes: this.addForm.vehicleTypes.join(','),
             tailNumbers: this.addForm.tailNumbers.join(','),
             taskName: this.addForm.taskName,
             isTailNumberLimit: this.addForm.isTailNumberLimit,
             isVehicleTypeLimit: this.addForm.isVehicleTypeLimit
           };
-
+          console.log('params', params)
           this.isSearchLoading = true;
-          addLimitTask(this.addForm)
+          addLimitTask(params)
             .then(res => {
               if (res && res.data) {
                 this.$message({
