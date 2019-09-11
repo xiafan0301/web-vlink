@@ -165,7 +165,7 @@
                       {{scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 2 ? '成功' : scope.row.taskStatus === 3 ? '失败' : scope.row.taskStatus === 4 ? '已中断' : ''}}
                   </template>
               </el-table-column>
-              <el-table-column label="操作" fixed="right">
+              <el-table-column label="操作" fixed="right" width="168">
                 <template slot-scope="scope">
                   <span
                     class="operation_btn"

@@ -109,7 +109,7 @@
 
         </template>
          <template v-else>
-          <div is="noResult" :isInitPage="isInitPage"></div>
+          <div is="noResult" :isInitPage="isInitPage" :tipMessage="initPageMessage"></div>
         </template>
       </div>
     </div>
@@ -162,6 +162,7 @@ export default {
   data () {
     return {
       isInitPage: true, // 是否是初始化页面
+      initPageMessage: '输入多个完整车牌，分析车辆之间的同行可能性',
       isShowTip: false,
       isSearchLoading: false,
       isDisabled: false,
@@ -211,10 +212,8 @@ export default {
       mapLocationList: [], /// 地图上要显示轨迹路线数据
       peerVehicleList: [], // 同行车辆轨迹数据
       baseVehicleList: [], // 基准车辆的轨迹数据
+      deviceList: []
     }
-  },
-  mounted () {
-    // this.initMap();
   },
   methods: {
     // 基准车辆失焦
@@ -251,7 +250,7 @@ export default {
     },
     // 添加同行车辆
     onAddVehicleNumber () {
-      const vehicleNumber = this.searchForm.peerVehicleNumber;
+      const vehicleNumber = this.searchForm.peerVehicleNumber.trim();
       if (!reg.test(vehicleNumber)) {
         if (!document.querySelector('.el-message--info')) {
           this.$message.info('请输入正确的车牌号码');
@@ -327,12 +326,17 @@ export default {
     },
     filterData () {
       let _arr = [];
-      let deviceList = objDeepCopy(this.mapLocationList);
-      if (deviceList.length > 0) {
+      this.deviceList = objDeepCopy(this.mapLocationList);
+      if (this.deviceList.length > 0) {
         // console.log('mapLocationList', this.mapLocationList)
-        deviceList.forEach((item, index) => {
+        this.deviceList.forEach((item, index) => {
           if (item.pathRecords && item.pathRecords.length > 0) {
             item.pathRecords.forEach(a => {
+              // console.log('aaaa', a)
+              // 判断同一个卡口是否出现多次，，若出现，则只显示一个卡口
+              if (a.bayonetName) {
+                a.deviceID = a.bayonetName;
+              }
               // 是否显示抓拍时间
               if (index === this.isCheckedVehicle) {
                 a['showTime'] = true;
@@ -368,8 +372,10 @@ export default {
               } else {
                 if (this.isCheckedVehicle === index) { // 选中的轨迹
                   // 判断是否重复出现在同一个设备点
-                  if (a.peerNumber === _arr[_i].plateNo) {
+                  if (a.plateNo === _arr[_i].plateNo) {
+                    
                     _arr[_i]['shotTime'] += ',' + a.shotTime;
+                    console.log('_arr[_i]', _arr[_i]['shotTime'])
                   } else {
                     a['simLength'] += 1;
                     _arr.splice(_i, 1, a);
@@ -387,7 +393,6 @@ export default {
         });
         let currArr = _arr;
         this.drawPoint(currArr);
-        
       }
     },
     /**
@@ -411,7 +416,7 @@ export default {
             if (obj.showTime) {
               _time = '<p class="shot_time_p">';
               obj.shotTime.split(',').forEach(j => {
-                _time += `<span>抓拍时间:${j}</span>`
+                _time += `<span>${j}</span>`
               })
               _time += '</p>';
             }
@@ -423,10 +428,10 @@ export default {
 
             // 判断是不是起止点
 
-            let curList = _this.mapLocationList[_this.isCheckedVehicle].pathRecords;
+            let curList = _this.deviceList[_this.isCheckedVehicle].pathRecords;
             if (curList.length > 0) {
+
               if (obj.deviceID === curList[curList.length - 1].deviceID) {
-  
                  content = '<div id="'+ $id +'" class="icon_box vl_icon vl_icon_map_mark_start">'+
                     '<div class="device_box"><p>设备名称：'+ obj.detailDeviceName +'</p>'+
                     '<p>设备地址：'+ obj.detailShotAddress +'</p></div>'+ _time +'</div>';
@@ -434,7 +439,6 @@ export default {
                 isStartEnd = true;
               }
               if (obj.deviceID === curList[0].deviceID) {
-  
                 content = '<div id="'+ $id +'" class="icon_box vl_icon mark_span vl_icon_map_mark_end">'+
                     '<div class="device_box"><p>设备名称：'+ obj.detailDeviceName +'</p>'+
                     '<p>设备地址：'+ obj.detailShotAddress +'</p></div>'+ _time +'</div>';
@@ -535,7 +539,7 @@ export default {
       }
       
       if (this.searchForm.peerVehicleNumber) {
-        vehicleNumberList.push(this.searchForm.peerVehicleNumber);
+        vehicleNumberList.push(this.searchForm.peerVehicleNumber.trim());
       }
       vehicleNumberList.map(item => {
         if (item === this.searchForm.basicVehicleNumber) {
@@ -548,10 +552,8 @@ export default {
       const params = {
         startTime: formatDate(this.searchForm.startTime),
         endTime: formatDate(this.searchForm.endTime),
-        baseNumber: this.searchForm.basicVehicleNumber,
+        baseNumber: this.searchForm.basicVehicleNumber.trim(),
         peerNumbers: vehicleNumberList.join(','),
-        //  baseNumber: '湘A5Y79T',
-        // peerNumbers: '湘A754MY, 粤TQE512',
         timeSlot: this.searchForm.timeSlot
       };
       this.isSearchLoading = true;
@@ -787,13 +789,16 @@ export default {
             position: absolute;
             top: 10px;
             left: 98%;
-            width: 190px;
+            width: 150px;
             word-break: keep-all;
             font-size: 12px;
             color: #fff;
             background-color: rgba(0, 0, 0, 0.4);
             border-radius: 2px;
             padding: 5px;
+            span {
+              display: block;
+            }
           }
           // .is_show_time {
           //   display: none;

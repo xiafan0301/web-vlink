@@ -94,6 +94,11 @@
               <i class="vl_icon2 vl_icon2_007"></i><span>区域徘徊</span>
             </router-link>
           </li>
+          <li>
+            <router-link :to="{name: 'vehicle_restrict_driving'}">
+              <i class="vl_icon2 vl_icon2_028"></i><span>车辆限行</span>
+            </router-link>
+          </li>
         </ul>
       </li>
       <li>
