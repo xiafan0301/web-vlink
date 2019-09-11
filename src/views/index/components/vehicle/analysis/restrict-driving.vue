@@ -234,22 +234,8 @@ export default {
       isChangeStatusLoading: false, // 取消--结束任务加载中
       endDialog: false, // 结束任务弹出框
       tailNumberOptions: [0,1,2,3,4,5,6,7,8,9], // 车辆尾号列表
-      // 选择设备的数据
-      isIndeterminate: false, // 是否处于全选与全不选之间
-      checkAllTree: false, // 树是否全选
-      // isIndeterminateBayonet: false, // 是否处于全选与全不选之间
-      checkAllTreeBayonet: false, // 树是否全选
-      cameraTree: [],
-      videoTreeNodeCount: 0, // 摄像头节点数量
-      defaultProps: {
-        children: "children",
-        label: "label"
-      },
-      selectDeviceArr: [], // 选中的设备数组
       selectVedioArr: [], // 选中的摄像头数组
       selectBayonetArr: [], // 选中的卡口数组
-      selectedTreeTab: 0, // 当前选中的
-      treeTabShow: false,
       selectAreaType: 1, // 限行区域选择方式
       isSearchLoading: false,
       selectDeviceNumber: '已选设备0个', // 地图选择选择的设备数量
@@ -311,7 +297,6 @@ export default {
     },
     // 获取地图选择的数据
     mapPoint (data) {
-      console.log('data', data)
       if (data) {
         this.selectDeviceNumber = '已选设备' + (data.bayonetList.length + data.deviceList.length) + '个';
         if (data.bayonetList.length > 0) {
@@ -349,8 +334,7 @@ export default {
       } else {
         this.disabledVehicleType = false;
       }
-    },
-    
+    },   
     // 重置查询条件
     resetData (form) {
       this.$refs[form].resetFields();

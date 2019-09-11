@@ -563,14 +563,11 @@ export default {
       this.isEditMap = true; // 是否可以编辑地图区域
 
       if (this.deleteIndexArr.length > 0) { // 判断是否删除过区域，，如果删除过，则将删除数组中的一个值赋值给selectMapType
-        // console.log('asdasdasd')
-        // console.log('deleteIndexArr', this.deleteIndexArr)
         this.selectMapType = this.deleteIndexArr[0];
       } else {
         this.selectMapType = this.selectAreaDataList.length + 1;
       }
 
-      // console.log('selectMapType', this.selectMapType)
       this.handleSelectType(this.selectMapType);
     },
     // 显示相对应的地图框选区域
@@ -634,8 +631,6 @@ export default {
     },
     // 删除某个选中的区域
     deleteSelectArea (idx, index) {
-      // console.log('nnnnnnnnnnnn', idx)
-      // console.log('mmmmm', index)
       this.selectAreaDataList.splice(idx, 1);
 
       this.deleteIndexArr.push(index);
@@ -644,7 +639,6 @@ export default {
 
       this.isShowMapAreaDialog = false;
 
-      // console.log('delet', this.deleteIndexArr)
     },
     handleClearMap (index) {
       switch (index) {
@@ -669,7 +663,6 @@ export default {
     },
     // 获取地图选择的数据
     mapPoint (data) {
-      // console.log('data', data)
       if (data) {
 
         let allDeviceNameList = [];
@@ -695,7 +688,6 @@ export default {
         if (this.deleteIndexArr.length > 0) { // 如果之前删除过，则将之前删除的值删除
           this.deleteIndexArr.splice(0, 1);
         }
-        // console.log('addddd', this.deleteIndexArr)
         this.selectAreaDataList.push(obj);
       }
     },

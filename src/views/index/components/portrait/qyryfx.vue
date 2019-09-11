@@ -24,7 +24,6 @@
                   class="width232"
                   v-model="qyryfxFrom.personGroupId"
                   placeholder="请选择分析人群"
-                  @change="changePersonGroup"
                   :multiple="isMultiplePerson"
                   collapse-tags
                 >
@@ -590,23 +589,6 @@ export default {
       } else {
         this.selectIndex = 1;
       }
-    },
-    // 人群分析change
-    changePersonGroup (val) {
-      console.log('val', val)
-      // if (val) {
-      //   console.log('asdasdasd')
-      //   this.isMultiplePerson = true;
-      // } else {
-      //   this.isMultiplePerson = false;
-      // }
-      // if (this.$refs.personSelect.multiple) {
-      //   this.isMultiplePerson = false
-      // } else {
-      //   this.isMultiplePerson = true;
-      // }
-      // this.$refs.personSelect.multiple = false;
-      console.log(this.$refs.personSelect.multiple)
     },
     // 获取离线任务列表
     getTaskList () {

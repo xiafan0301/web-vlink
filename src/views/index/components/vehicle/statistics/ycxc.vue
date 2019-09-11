@@ -621,7 +621,6 @@ export default {
           continue;
         }
       }
-      // console.log('videoTreeNodeCount', this.videoTreeNodeCount)
     },
     //摄像头
     listenChecked(val, val1) {
@@ -684,7 +683,6 @@ export default {
         this.checkAllTree = true;
         this.handleCheckedAll(true);
 
-        // this.handleSubmitData();
       });
 
     },
@@ -693,8 +691,6 @@ export default {
       this.handleSubmitData();
     },
     handleSubmitData () {
-      // this.queryForm.bayonetIds = null;
-      // this.queryForm.cameraIds = null;
       
       console.log('this.selectCameraArr', this.selectCameraArr)
       console.log('this.selectBayonetArr', this.selectBayonetArr)
@@ -771,9 +767,6 @@ export default {
         let bayonentIds = this.selectBayonetArr.map(res => res.id);
         this.queryForm.bayonetIds = bayonentIds.join(",");
       }
-
-      // this.queryForm.startDate = this.queryDate[0];
-      // this.queryForm.endDate = this.queryDate[1];
 
       const data = {
         bayonetIds: this.queryForm.bayonetIds,

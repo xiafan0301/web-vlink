@@ -87,7 +87,7 @@
           </vue-scroll>
         </template>
         <template v-else>
-          <div is="noResult" :isInitPage="isInitPage"></div>
+          <div is="noResult" :isInitPage="isInitPage" :tipMessage="initPageMessage"></div>
         </template>
       </div>
     </div>
@@ -105,6 +105,7 @@ export default {
   data () {
     return {
       isInitPage: true, // 是否是初始化页面
+      initPageMessage: '上传人脸图片与身份证号，分析上传的图片与身份证信息是否为同一人',
       uploadImgId: null, // 上传的图片id
       curImageUrl: null, // 正在上传的照片
       fileList: [],
@@ -139,7 +140,6 @@ export default {
         this.uploadImgId = null;
       }
     },
-   
     // 重置查询条件
     resetData (form) {
       this.isInitPage = false;

@@ -215,9 +215,6 @@ export default {
       deviceList: []
     }
   },
-  mounted () {
-    // this.initMap();
-  },
   methods: {
     // 基准车辆失焦
     judgeBaseVehicle () {
@@ -557,8 +554,6 @@ export default {
         endTime: formatDate(this.searchForm.endTime),
         baseNumber: this.searchForm.basicVehicleNumber.trim(),
         peerNumbers: vehicleNumberList.join(','),
-        //  baseNumber: '湘A5Y79T',
-        // peerNumbers: '湘A754MY, 粤TQE512',
         timeSlot: this.searchForm.timeSlot
       };
       this.isSearchLoading = true;

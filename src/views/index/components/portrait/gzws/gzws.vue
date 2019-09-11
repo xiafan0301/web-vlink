@@ -394,9 +394,6 @@ export default {
       this.deviceList = [];
       const params = {
         targetPicUrl : this.dialogImageUrl,
-        // targetPicUrl: 'http://file.aorise.org/vlink/image/810ddc87-f9db-4e60-9da2-4e1ffc076683.jpg',
-        // startTime : '2019-07-09 09:59:00',
-        // endTime: '2019-07-09 10:03:00'
         startTime : formatDate(this.addForm.startTime),
         endTime: formatDate(this.addForm.endTime)
       };
@@ -429,10 +426,6 @@ export default {
         })
       }
     },
-    // 跳至尾随记录页面
-    // skipWsReocrdPage (obj) {
-    //   this.$router.push({name: 'gzws_detail'})
-    // },
     // 取消新建
     cancelAdd (form) {
       this.$refs[form].resetFields();
@@ -463,14 +456,10 @@ export default {
             }
           })
           const params = {
-            // targetPicUrl: 'http://10.116.126.10/root/image/2019/07/10/34020000001320000016414920190709100000000009_1_1.jpeg',
-            // startTime : '2019-07-09 09:59:00',
-            // endTime: '2019-07-09 10:03:00',
             targetPicUrl: this.dialogImageUrl,
             deviceId: deviceCode,
             deviceName: this.addForm.deviceName,
             startTime: formatDate(this.shotTimes),
-            // startTime: formatDate(this.addForm.startTime),
             endTime: formatDate(this.addForm.endTime),
             taskName: this.addForm.taskName,
             interval: this.addForm.interval
@@ -484,9 +473,7 @@ export default {
                   message: '新建成功',
                   customClass: 'request_tip'
                 });
-                // this.dataList = res.data;
                 this.isAddLoading = false;
-                // this.addTaskDialog = false;
 
                 this.getDataList();
               } else {
@@ -514,7 +501,6 @@ export default {
       };
       this.dialogImageUrl = null;
       this.uploadClear = {};
-      // this.fileList = [];
       
     },
     // 显示中断任务弹出框
