@@ -270,16 +270,22 @@
         </div>
       </div>
     </div>
+    <div is="mapSelector" :editAble="isEditMap" v-show="selectMapType === 1 && (isShowMapAreaDialog === true)" :open="mapDialogVisible1" :showTypes="'DB'" :clear="clearMapSelect1" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :editAble="isEditMap" v-show="selectMapType === 2 && (isShowMapAreaDialog === true)" :open="mapDialogVisible2" :showTypes="'DB'" :clear="clearMapSelect2" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :editAble="isEditMap" v-show="selectMapType === 3 && (isShowMapAreaDialog === true)" :open="mapDialogVisible3" :showTypes="'DB'" :clear="clearMapSelect3" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :editAble="isEditMap" v-show="selectMapType === 4 && (isShowMapAreaDialog === true)" :open="mapDialogVisible4" :showTypes="'DB'" :clear="clearMapSelect4" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :editAble="isEditMap" v-show="selectMapType === 5 && (isShowMapAreaDialog === true)" :open="mapDialogVisible5" :showTypes="'DB'" :clear="clearMapSelect5" @mapSelectorEmit="mapPoint"></div>
   </div>
 </template>
 <script>
+import mapSelector from '@/components/common/mapSelector.vue';
 import vlBreadcrumb from "@/components/common/breadcrumb.vue";
 import { mapXupuxian } from "@/config/config.js";
 import { getGroupAllList } from "@/views/index/api/api.control.js";
 import { getTaskInfosDetail } from '@/views/index/api/api.analysis.js';
 import { objDeepCopy, formatDate, dateOrigin } from "@/utils/util.js";
 export default {
-  components: { vlBreadcrumb },
+  components: { vlBreadcrumb, mapSelector },
   data () {
     return {
       taskDetail: {},
@@ -291,7 +297,7 @@ export default {
       currentClickDevice: [],
       markerList: [],
       swiper: null,
-      isUpdateTask: true, // 是否修改任务
+      isUpdateTask: false, // 是否修改任务
       submitLoading: false,
       startDateOptArr: {
         disabledDate (time) {
@@ -347,6 +353,19 @@ export default {
       isDisabledSelect: false, // 是否还能区域选择
       selectAreaDataList: [], // 左侧选中的区域信息
       deleteIndexArr: [], // 删除了的索引
+      isShowMapAreaDialog: true, // 是否显示地图弹出框
+      mapDialogVisible1: false, // 地图选择弹出框
+      mapDialogVisible2: false, // 地图选择弹出框
+      mapDialogVisible3: false, // 地图选择弹出框
+      mapDialogVisible4: false, // 地图选择弹出框
+      mapDialogVisible5: false, // 地图选择弹出框
+      clearMapSelect1: null, // 清除地图选择
+      clearMapSelect2: null, // 清除地图选择
+      clearMapSelect3: null, // 清除地图选择
+      clearMapSelect4: null, // 清除地图选择
+      clearMapSelect5: null, // 清除地图选择
+      selectMapType: 0, // 选择的第几个地图区域
+      isEditMap: true, // 地图区域选择是否可以编辑
     }
   },
   created () {
@@ -541,32 +560,175 @@ export default {
     },
     // 显示地图区域选择弹出框
     showMapDialog () {
-      // this.isEditMap = true; // 是否可以编辑地图区域
+      this.isEditMap = true; // 是否可以编辑地图区域
 
-      // if (this.deleteIndexArr.length > 0) { // 判断是否删除过区域，，如果删除过，则将删除数组中的一个值赋值给selectMapType
-      //   // console.log('asdasdasd')
-      //   // console.log('deleteIndexArr', this.deleteIndexArr)
-      //   this.selectMapType = this.deleteIndexArr[0];
-      // } else {
-      //   this.selectMapType = this.selectAreaDataList.length + 1;
-      // }
+      if (this.deleteIndexArr.length > 0) { // 判断是否删除过区域，，如果删除过，则将删除数组中的一个值赋值给selectMapType
+        // console.log('asdasdasd')
+        // console.log('deleteIndexArr', this.deleteIndexArr)
+        this.selectMapType = this.deleteIndexArr[0];
+      } else {
+        this.selectMapType = this.selectAreaDataList.length + 1;
+      }
 
-      // // console.log('selectMapType', this.selectMapType)
-      // this.handleSelectType(this.selectMapType);
+      // console.log('selectMapType', this.selectMapType)
+      this.handleSelectType(this.selectMapType);
+    },
+    // 显示相对应的地图框选区域
+    showCurrentMapArea (index) {
+      this.isEditMap = false;
+      this.isShowMapAreaDialog = true;
+      let zIndex;
+      if (this.selectMapType === index) { // 这个因为删除过区域，所以显示的是之前删除过的区域
+        zIndex = this.selectMapType;
+      } else {
+        zIndex = index;
+      }
+      if (this.isShowMapAreaDialog) {
+        switch (zIndex) {
+          case 1:
+            this.selectMapType = 1;
+            this.mapDialogVisible1 = !this.mapDialogVisible1;
+            break;
+          case 2:
+            this.selectMapType = 2;
+            this.mapDialogVisible2 = !this.mapDialogVisible2;
+            break;
+          case 3:
+            this.selectMapType = 3;
+            this.mapDialogVisible3 = !this.mapDialogVisible3;
+            break;
+          case 4:
+            this.selectMapType = 4;
+            this.mapDialogVisible4 = !this.mapDialogVisible4;
+            break;
+          case 5:
+            this.selectMapType = 5;
+            this.mapDialogVisible5 = !this.mapDialogVisible5;
+            break;
+          default:
+            this.selectMapType = 0;
+            break;
+        }
+      }
+    },
+    handleSelectType (index) {
+      switch (index) {
+        case 1:
+          this.mapDialogVisible1 = !this.mapDialogVisible1;
+          break;
+        case 2:
+          this.mapDialogVisible2 = !this.mapDialogVisible2;
+          break;
+        case 3:
+          this.mapDialogVisible3 = !this.mapDialogVisible3;
+          break;
+        case 4:
+          this.mapDialogVisible4 = !this.mapDialogVisible4;
+          break;
+        case 5:
+          this.mapDialogVisible5 = !this.mapDialogVisible5;
+          break;
+        default:
+          break;
+      }
+    },
+    // 删除某个选中的区域
+    deleteSelectArea (idx, index) {
+      // console.log('nnnnnnnnnnnn', idx)
+      // console.log('mmmmm', index)
+      this.selectAreaDataList.splice(idx, 1);
+
+      this.deleteIndexArr.push(index);
+
+      this.handleClearMap(index);
+
+      this.isShowMapAreaDialog = false;
+
+      // console.log('delet', this.deleteIndexArr)
+    },
+    handleClearMap (index) {
+      switch (index) {
+        case 1:
+          this.clearMapSelect1 = !this.clearMapSelect1;
+          break;
+        case 2:
+          this.clearMapSelect2 = !this.clearMapSelect2;
+          break;
+        case 3:
+          this.clearMapSelect3 = !this.clearMapSelect3;
+          break;
+        case 4:
+          this.clearMapSelect4 = !this.clearMapSelect4;
+          break;
+        case 5:
+          this.clearMapSelect5 = !this.clearMapSelect5;
+          break;
+        default:
+          break;
+      }
+    },
+    // 获取地图选择的数据
+    mapPoint (data) {
+      // console.log('data', data)
+      if (data) {
+
+        let allDeviceNameList = [];
+        if (data.deviceList.length > 0) {
+          data.deviceList.map(item => {
+            allDeviceNameList.push(item.deviceName);
+          })
+        }
+        if (data.bayonetList.length > 0) {
+          data.bayonetList.map(item => {
+            allDeviceNameList.push(item.bayonetName);
+          })
+        }
+        const obj = { 
+          index: this.deleteIndexArr.length > 0 ? this.selectMapType : this.selectAreaDataList.length + 1,
+          startTime: formatDate(this.qyryfxFrom.startTime),
+          endTime: formatDate(this.qyryfxFrom.endTime),
+          deviceList: data.deviceList,
+          bayonetList: data.bayonetList,
+          allDeviceNameList: allDeviceNameList.length > 0 ? allDeviceNameList : null
+        };
+
+        if (this.deleteIndexArr.length > 0) { // 如果之前删除过，则将之前删除的值删除
+          this.deleteIndexArr.splice(0, 1);
+        }
+        // console.log('addddd', this.deleteIndexArr)
+        this.selectAreaDataList.push(obj);
+      }
     },
     // 显示修改任务表单
     showUpdateTask () {
       this.isUpdateTask = true;
+      
+      const detail = this.taskDetail.taskWebParam;
+
+      this.qyryfxFrom.taskName = detail.taskName;
+      this.qyryfxFrom.sex = detail.sex;
+      this.qyryfxFrom.age = detail.age;
+      this.qyryfxFrom.sex = detail.sex && detail.sex ? detail.sex.split(',') : '';
+      this.qyryfxFrom.personGroupId = detail.personGroupId.split(',');
+
+      detail.deviceAndTimeList.map((item, index) => {
+        const obj = {
+          ...item,
+          index: index + 1,
+          allDeviceNameList: item.deviceNames && item.deviceNames ? item.deviceNames.split('、'): ''
+        };
+        this.selectAreaDataList.push(obj);
+      })
     },
     // 取消修改
     cancelEdit () {
       this.isUpdateTask = false;
+      this.selectAreaDataList = [];
     },
     // 确认修改
     submitData (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-
         }
       })
     }
