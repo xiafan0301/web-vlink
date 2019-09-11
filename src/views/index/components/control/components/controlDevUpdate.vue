@@ -346,8 +346,8 @@ export default {
       }
       MapGETmonitorList(params).then(res => {
         if (res) {
-          this.bayFromData_ = this.commonFn1([res.data]);
-          this.devFromData_ = this.commonFn2([res.data]);
+          this.bayFromData_ = this.commonFn1(objDeepCopy([res.data]));
+          this.devFromData_ = this.commonFn2(objDeepCopy([res.data]));
           if (this.modelType === 4 || this.modelType === 6) {
             this.bayFromData = objDeepCopy(this.bayFromData_);
             this.devFromData = objDeepCopy(this.devFromData_);
