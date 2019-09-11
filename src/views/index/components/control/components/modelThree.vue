@@ -21,20 +21,24 @@
         <div v-if="modelThreeForm.licensePlateNumList.length > 1" class="period_time_btn" @click="removeLicensePlateNum()"><i class="vl_icon vl_icon_control_28"></i><span>删除车牌号码</span></div>
       </el-form-item>
     </el-form-item>
-    <el-form-item style="margin-top: 20px;">
+    <el-form-item style="margin-top: 20px;" v-if="!isShowControlDev">
       <el-button type="primary" @click="selControl('modelThree')">一键布控</el-button>
     </el-form-item>
-    <div is="controlDev" v-if="isShowControlDev" :modelType="3"></div>
+    <div is="controlDev" ref="controlDev" v-if="isShowControlDev" :modelType="3" @getChildModel="getChildModel"></div>
+    <div is="vehicleLib" ref="vehicleLibDialog"></div>
+    <div is="portraitLib" ref="portraitLibDialog"></div>
   </el-form>
 </template>
 <script>
 import uploadPic from './uploadPic.vue';
 import controlDev from './controlDev.vue';
+import vehicleLib from './vehicleLib.vue';
+import portraitLib from './portraitLib.vue';
 import {mapXupuxian} from '@/config/config.js';
 import {random14, objDeepCopy} from '@/utils/util.js';
 import {checkPlateNumber} from '@/utils/validator.js';
 export default {
-  components: {uploadPic, controlDev},
+  components: {uploadPic, controlDev, vehicleLib, portraitLib},
   data () {
     return {
       modelThreeForm: {
@@ -57,7 +61,8 @@ export default {
     },
     // 从库中选择
     popSel () {
-      this.createSelDialog = true;
+      this.$refs['portraitLibDialog'].portraitLibDialog = true;
+      this.$refs['portraitLibDialog'].reset();
     },
     // 添加车牌号码
     addLicensePlateNum () {
@@ -67,10 +72,26 @@ export default {
     removeLicensePlateNum () {
       this.modelThreeForm.licensePlateNumList.pop();
     },
+    // 向父组件传值
+    sendParent () {
+      if (this.fileList.length === 0 && !this.modelThreeForm.licensePlateNumList[0].licensePlateNum) {
+        return this.$message.warning('请选择布控人员或者车辆');
+      } 
+      this.$refs['modelThree'].validate((valid) => {
+        if (valid) {
+          this.$refs['controlDev'].sendParent();
+          this.$emit('getModel', {modelThreeForm: this.modelThreeForm, fileList: this.fileList, ...this.devData});
+        } else {
+          return false;
+        }
+      });
+    },
+    getChildModel (data) {
+      this.devData = data;
+    },
     // 一键布控
     selControl (formName) {
       if (this.fileList.length === 0 && !this.modelThreeForm.licensePlateNumList[0].licensePlateNum) {
-        console.log(1111111111)
         return this.$message.warning('请选择布控人员或者车辆');
       } 
       this.$refs[formName].validate((valid) => {
@@ -166,6 +187,7 @@ export default {
     position: absolute;
     top: 0;
     left: 110px;
+    z-index: 99;
     cursor: pointer;
     > div{
       color: #0C70F8;

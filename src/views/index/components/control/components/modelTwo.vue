@@ -24,7 +24,7 @@
         </el-select>
       </el-form-item>
     </el-form-item>
-    <div class="sel_lib"><span>禁入人员：</span><span>从布控库中选择</span></div>
+    <div class="sel_lib"><span>禁入人员：</span><span @click="popSel">从布控库中选择</span></div>
     <div class="sel_img_box">
       <div class="img_box" v-for="item in protraitList" :key="item.id">
         <img src="http://temp.im/104x104" alt="">
@@ -32,7 +32,7 @@
         <span>汪诗诗</span>
       </div>
     </div>
-    <div class="sel_lib"><span>禁入车辆：</span><span>从布控库中选择</span></div>
+    <div class="sel_lib"><span>禁入车辆：</span><span @click="popSel">从布控库中选择</span></div>
     <div class="sel_img_box">
       <div class="img_box" v-for="item in vehicleList" :key="item.id">
         <img src="http://temp.im/104x104" alt="">
@@ -40,18 +40,22 @@
         <span>汪诗诗</span>
       </div>
     </div>
-    <el-form-item style="margin-top: 20px;">
+    <el-form-item style="margin-top: 20px;" v-if="!isShowControlDev">
       <el-button type="primary" @click="selControl('modelTwo')">一键布控</el-button>
     </el-form-item>
-    <div is="controlDev" v-if="isShowControlDev" :addressObjTwo="addressObjTwo"></div>
+    <div is="controlDev" ref="controlDev" v-if="isShowControlDev" :addressObjTwo="addressObjTwo" @getChildModel="getChildModel"></div>
+    <div is="vehicleLib" ref="vehicleLibDialog"></div>
+    <div is="portraitLib" ref="portraitLibDialog"></div>
   </el-form>
 </template>
 <script>
 import controlDev from './controlDev.vue';
+import vehicleLib from './vehicleLib.vue';
+import portraitLib from './portraitLib.vue';
 import {mapXupuxian} from '@/config/config.js';
 import {random14, objDeepCopy} from '@/utils/util.js';
 export default {
-  components: {controlDev},
+  components: {controlDev, vehicleLib, portraitLib},
   data () {
     return {
       labelPosition: 'top',
@@ -75,17 +79,37 @@ export default {
         lnglat: [],
         radius: null
       },
+      devData: {}
     }
   },
   mounted () {
     this.resetMap();
   },
   methods: {
+    // 向父组件传值
+    sendParent () {
+      if (!this.protraitList && !this.vehicleList) {
+        return this.$message.warning('禁入人员、禁入车辆至少选一种');
+      }
+      this.$refs['modelTwo'].validate((valid) => {
+        if (valid) {
+          this.$refs['controlDev'].sendParent();
+          this.$emit('getModel', {modelTwoForm: this.modelTwoForm, protraitList: this.protraitList, vehicleList: this.vehicleList, ...this.devData});
+        } else {
+          return false;
+        }
+      });
+    },
+    getChildModel (data) {
+      this.devData = data;
+    },
+    // 从库中选择
+    popSel () {
+      this.$refs['portraitLibDialog'].portraitLibDialog = true;
+      this.$refs['portraitLibDialog'].reset();
+    },
     // 一键布控
     selControl (formName) {
-      // if (this.fileListOne.length === 0) {
-      //   return this.$message.warning('请上传失踪人员图片');
-      // } 
       this.$refs[formName].validate((valid) => {
         if (valid) {
           if (!this.protraitList && !this.vehicleList) {

@@ -12,10 +12,10 @@
       </el-select>
     </el-form-item>
     <el-form-item label="停留时长:" prop="duration" :rules="{ required: true, message: '请输入停留时长', trigger: 'blur'}" style="margin-bottom: 0;">
-      <el-input v-model="modelFiveForm.duration" filterable placeholder="请输入停留时长"></el-input>
+      <el-input class="time" v-model="modelFiveForm.duration" filterable placeholder="请输入停留时长"></el-input>
     </el-form-item>
     <el-form-item style="margin-bottom: 0;width: 100%;">
-      <div class="sel_lib"><span>布控车辆：</span><span>从公务车辆中选择</span></div>
+      <div class="sel_lib"><span>布控车辆：</span><span @click="popSel">从公务车辆中选择</span></div>
       <div class="sel_img_box">
         <div class="img_box" v-for="item in vehicleList" :key="item.id">
           <img src="http://temp.im/104x104" alt="">
@@ -24,18 +24,22 @@
         </div>
       </div>
     </el-form-item>
-    <el-form-item style="margin-top: 20px;">
+    <el-form-item style="margin-top: 20px;" v-if="!isShowControlDev">
       <el-button type="primary" @click="selControl('modelFive')">一键布控</el-button>
     </el-form-item>
-    <div is="controlDev" v-if="isShowControlDev"></div>
+    <div is="controlDev" ref="controlDev" v-if="isShowControlDev" @getChildModel="getChildModel"></div>
+    <div is="vehicleLib" ref="vehicleLibDialog"></div>
+    <div is="portraitLib" ref="portraitLibDialog"></div>
   </el-form>
 </template>
 <script>
 import controlDev from './controlDev.vue';
+import vehicleLib from './vehicleLib.vue';
+import portraitLib from './portraitLib.vue';
 import {mapXupuxian} from '@/config/config.js';
 import {random14, objDeepCopy} from '@/utils/util.js';
 export default {
-  components: {controlDev},
+  components: {controlDev, vehicleLib, portraitLib},
   data () {
     return {
       modelFiveForm: {
@@ -44,7 +48,8 @@ export default {
       },
       vehicleList: '123',
       siteList: [],
-      isShowControlDev: false
+      isShowControlDev: false,
+      devData: {}
     }
   },
   methods: {
@@ -60,7 +65,29 @@ export default {
           return false;
         }
       });
-    }
+    },
+    // 向父组件传值
+    sendParent () {
+      if (!this.vehicleList) {
+        return this.$message.wraning('请选择布控车辆');
+      }
+      this.$refs['modelFive'].validate((valid) => {
+        if (valid) {
+          this.$refs['controlDev'].sendParent();
+          this.$emit('getModel', {modelFiveForm: this.modelFiveForm, vehicleList: this.vehicleList, ...this.devData});
+        } else {
+          return false;
+        }
+      });
+    },
+    getChildModel (data) {
+      this.devData = data;
+    },
+    // 从库中选择
+    popSel () {
+      this.$refs['portraitLibDialog'].portraitLibDialog = true;
+      this.$refs['portraitLibDialog'].reset();
+    },
   }
 }
 </script>
@@ -109,5 +136,28 @@ export default {
       }
     }
   }
+}
+</style>
+<style lang="scss">
+.model_five{
+  .time{
+    position: relative;
+    .el-input__inner{
+      padding-left: 30px;
+      padding-right: 40px;
+    }
+    &:before{
+      content: '>';
+      position: absolute;
+      color: #999999;
+      left: 10px;
+    }
+    &:after{
+      content: '分钟';
+      position: absolute;
+      color: #999999;
+      right: 10px;
+    }
+  } 
 }
 </style>

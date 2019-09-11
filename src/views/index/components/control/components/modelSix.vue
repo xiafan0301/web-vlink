@@ -21,18 +21,19 @@
         <div v-if="modelSixForm.licensePlateNumList.length > 1" class="period_time_btn" @click="removeLicensePlateNum()"><i class="vl_icon vl_icon_control_28"></i><span>删除车牌号码</span></div>
       </el-form-item>
     </el-form-item>
-    <!-- <el-form-item style="margin-top: 20px;">
-      <el-button type="primary" @click="selControl('modelSix')">一键布控</el-button>
-    </el-form-item> -->
-    <div is="controlDevUpdate" :modelType="6"></div>
+    <div is="controlDevUpdate" :modelType="6" @getControlDevUpdate="getControlDevUpdate"></div>
+    <div is="vehicleLib" ref="vehicleLibDialog"></div>
+    <div is="portraitLib" ref="portraitLibDialog"></div>
   </el-form>
 </template>
 <script>
 import uploadPic from './uploadPic.vue';
+import vehicleLib from './vehicleLib.vue';
+import portraitLib from './portraitLib.vue';
 import controlDevUpdate from './controlDevUpdate.vue';
 import {checkPlateNumber} from '@/utils/validator.js';
 export default {
-  components: {uploadPic, controlDevUpdate},
+  components: {uploadPic, controlDevUpdate, vehicleLib, portraitLib},
   data () {
     return {
       modelSixForm: {
@@ -41,7 +42,7 @@ export default {
       fileList: [],
       validPlateNumber: checkPlateNumber,
       createSelDialog: false,
-      isShowControlDev: false
+      devUpdateData: {}
     }
   },
   methods: {
@@ -55,7 +56,15 @@ export default {
     },
     // 从库中选择
     popSel () {
-      this.createSelDialog = true;
+      this.$refs['portraitLibDialog'].portraitLibDialog = true;
+      this.$refs['portraitLibDialog'].reset();
+    },
+    // 向父组件传值
+    sendParent () {
+      this.$emit('getModel', {fileList: this.fileList,modelSixForm: this.modelSixForm, ...this.devUpdateData});
+    },
+    getControlDevUpdate (data) {
+      this.devUpdateData = data;
     },
     // 添加车牌号码
     addLicensePlateNum () {
@@ -65,19 +74,6 @@ export default {
     removeLicensePlateNum () {
       this.modelSixForm.licensePlateNumList.pop();
     },
-    // 一键布控
-    // selControl (formName) {
-    //   if (this.fileList.length === 0 && !this.modelSixForm.licensePlateNumList[0].licensePlateNum) {
-    //     return this.$message.warning('请选择布控人员或者车辆');
-    //   } 
-    //   this.$refs[formName].validate((valid) => {
-    //     if (valid) {
-    //       this.isShowControlDev = true;
-    //     } else {
-    //       return false;
-    //     }
-    //   });
-    // }
   }
 }
 </script>
@@ -88,6 +84,7 @@ export default {
     position: absolute;
     top: 0;
     left: 110px;
+    z-index: 99;
     cursor: pointer;
     > div{
       color: #0C70F8;

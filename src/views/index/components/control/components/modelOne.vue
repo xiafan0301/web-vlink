@@ -70,10 +70,10 @@
         <div v-if="modelOneForm.licensePlateNumList.length > 1" class="period_time_btn" @click="removeLicensePlateNum()"><i class="vl_icon vl_icon_control_28"></i><span>删除车牌号码</span></div>
       </el-form-item>
     </el-form-item>
-    <el-form-item style="margin-top: 20px;">
+    <el-form-item style="margin-top: 20px;" v-if="!isShowControlDev">
       <el-button type="primary" @click="selControl('modelOne')">一键布控</el-button>
     </el-form-item>
-    <div is="controlDev" :missingTime="modelOneForm.missingTime" :addressObj="addressObj_" v-if="isShowControlDev"></div>
+    <div is="controlDev" ref="controlDev" @getChildModel="getChildModel" :missingTime="modelOneForm.missingTime" :addressObj="addressObj_" v-if="isShowControlDev"></div>
     <div is="vehicleLib" ref="vehicleLibDialog"></div>
     <div is="portraitLib" ref="portraitLibDialog"></div>
   </el-form>
@@ -111,6 +111,7 @@ export default {
       fileListOne: [],//上传的失踪人员信息数据
       fileListTwo: [],//上传的嫌疑人照片数据
       isShowControlDev: false,//是否显示布控设备选择部分
+      devData: {}
     }
   },
   mounted () {
@@ -130,8 +131,24 @@ export default {
       //     return false;
       //   }
       // });
-    
-     
+    },
+    // 向父组件传值
+    sendParent () {
+      if (this.fileListOne.length === 0) {
+        return this.$message.warning('请上传失踪人员图片');
+      } 
+      this.$refs['modelOne'].validate((valid) => {
+        if (valid) {
+          console.log(111111111)
+          this.$refs['controlDev'].sendParent();
+          this.$emit('getModel', {modelOneForm: this.modelOneForm, fileListOne: this.fileListOne, fileListTwo: this.fileListTwo, ...this.devData});
+        } else {
+          return false;
+        }
+      });
+    },
+    getChildModel (data) {
+      this.devData = data;
     },
     // 失踪人员信息的上传方法
     uploadPicDelOne (fileList) {
@@ -234,6 +251,7 @@ export default {
   }
   .pic_format{
     position: absolute;
+    z-index: 99;
     > div{
       color: #0C70F8;
       cursor: pointer;

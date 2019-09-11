@@ -155,12 +155,12 @@
                   <el-radio :label="6">自定义</el-radio>
                 </el-radio-group>
               </div>
-              <div is="modelOne" v-if="modelType === 1"></div>
-              <div is="modelTwo" v-if="modelType === 2"></div>
-              <div is="modelThree" v-if="modelType === 3"></div>
-              <div is="modelFour" v-if="modelType === 4"></div>
-              <div is="modelFive" v-if="modelType === 5"></div>
-              <div is="modelSix" v-if="modelType === 6"></div>
+              <div is="modelOne" v-if="modelType === 1" ref="model" @getModel="getModel"></div>
+              <div is="modelTwo" v-if="modelType === 2" ref="model" @getModel="getModel"></div>
+              <div is="modelThree" v-if="modelType === 3" ref="model" @getModel="getModel"></div>
+              <div is="modelFour" v-if="modelType === 4" ref="model" @getModel="getModel"></div>
+              <div is="modelFive" v-if="modelType === 5" ref="model" @getModel="getModel"></div>
+              <div is="modelSix" v-if="modelType === 6" ref="model" @getModel="getModel"></div>
             </div>
           </div>
         </el-form>
@@ -245,13 +245,15 @@ export default {
       eventList: [],//关联事件下拉列表
       cascadeList: [],//是否级联下拉列表
       sharedControlList: [],//是否共享布控下拉列表
-      modelType: 6,//布控模型类型
+      modelType: 1,//布控模型类型
       // 弹出框参数
       toGiveUpDialog: false,
       loading: false,
       loadingBtn: false,
       // 布控编辑参数
       controlDetail: {},
+      // 子组件传过来的数据
+      modelData: {},
     }
   },
   created () {
@@ -333,9 +335,23 @@ export default {
         })
       }
     },
+    getModel (data) {
+      this.modelData = data;
+    },
+  
     // 保存布控任务
     saveControl (formName) {
-    
+      // this.$refs[formName].validate((valid) => {
+      //   if (valid) {
+          this.modelData = {};
+          this.$refs['model'].sendParent();
+          console.log(this.modelData, 'this.modelData');
+   
+        
+      //   } else {
+      //     return false;
+      //   }
+      // });
     },
     // 对比布控时间段是否重叠的方法
     isOverlap () {

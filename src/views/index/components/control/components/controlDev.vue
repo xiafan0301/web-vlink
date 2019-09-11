@@ -62,6 +62,8 @@
       :addressObj="addressObj"
       :devIdListUp="devIdList"
       :bayIdListUp="bayIdList"
+      :modelType="modelType"
+      @getControlDevUpdate="getControlDevUpdate"
     ></div>
   </div>
 </template>
@@ -98,6 +100,7 @@ export default {
       removeObj: {1: [],2: []},
       isShowTree: false,
       markerList: [],
+      devUpdateData: {}
     }
   },
   mounted () {
@@ -105,6 +108,17 @@ export default {
     this.getDevList();
   },
   methods: {
+    // 传给父组件
+    sendParent () {
+      if (this.pageType === 1) {
+        this.$emit('getChildModel', {self_to_data1: this.self_to_data1, self_to_data2: this.self_to_data2})
+      } else {
+        this.$emit('getChildModel', this.devUpdateData);
+      }
+    },
+    getControlDevUpdate (data) {
+      this.devUpdateData = data;
+    },
     // 初始化地图
     resetMap () {
       // 共有部分
@@ -129,19 +143,19 @@ export default {
       }
       MapGETmonitorList(params).then(res => {
         if (res) {
-         this.bayFromData = this.commonFn1(objDeepCopy([res.data]));
-         this.devFromData = this.commonFn2(objDeepCopy([res.data]));
+         this.bayFromData = this.commonFn1([res.data]);
+         this.devFromData = this.commonFn2([res.data]);
          this.bayFromData_ = objDeepCopy(this.bayFromData);
          this.devFromData_ = objDeepCopy(this.devFromData);
 
           this.devList = this.flatDev([res.data]);
           console.log(this.devList);
           this.mapMark(this.devList);
-          // 第1次点击第1个布控模型的一键布控时所执行的
+          // 第1个布控模型的一键布控时所执行的
           this.addressObj && this.addressMark();
-          // 第1次点击第2个布控模型的一键布控时所执行的
+          // 第2个布控模型的一键布控时所执行的
           this.addressObjTwo && this.mapCircleTwo();
-          // 第1次点击第3个布控模型的一键布控时所执行的
+          // 第3个布控模型的一键布控时所执行的
           this.modelType === 3 && this.getAllBay();
         }
       });
@@ -231,6 +245,7 @@ export default {
           _this.markerList.push(_marker);
         }
       }
+      _this.map.setFitView();
       addCluster(_this.map, _this.markerList);
     },
     // 人员失踪位置和家庭位置标记
@@ -309,7 +324,7 @@ export default {
         fillOpacity: 0.35 //填充透明度
       })
       circle.setMap(_this.map);
-      this.setViewingArea(circle);
+      // this.setViewingArea(circle);
       this.removeObj[type].push(circle);
       this.getCircleDev(circle);
     },
@@ -327,7 +342,7 @@ export default {
         fillOpacity: 0.35 //填充透明度
       })
       circle.setMap(_this.map);
-      this.setViewingArea(circle);
+      // this.setViewingArea(circle);
       this.getCircleDev(circle);
     },
     // 把地图的可视区域设置在选中设备或卡口的区域
@@ -389,15 +404,24 @@ export default {
     // 获取城内所有卡口
     getAllBay () {
       let _this = this, res = [];
-      const bayList = this.devList.reduce((pre, cur) => {
+      this.bayIdList = this.devList.reduce((pre, cur) => {
         if (cur.type === 2) {
           pre = [...pre, cur.uid];
         }
         return pre;
       },[]);
+      // 让选中的卡口变色
+      _this.markerList.forEach(f => {
+        if (this.bayIdList.some(s => s === f.getExtData().uid)) {
+          _this.map.cluster.removeMarkers(f);
+          let uContent = _this.setMarkContent(f.getExtData())
+          f.setContent(uContent);
+          _this.map.add(f);
+        }
+      })
       this.bayOrdev = 2;
       this.$nextTick(() => {
-        this.addDevIsLeft(bayList);
+        this.addDevIsLeft(this.bayIdList);
       })
     },
     // 添加按钮
@@ -601,20 +625,20 @@ export default {
       }
     },
   },
-  watch: {
-    // 再次点击第1个一键布控所执行的
-    addressObj (val) {
-      val.length > 0 && this.addressMark();
-    },
-    // 再次点击第2个一键布控所执行的
-    addressObjTwo (val) {
-      val && this.mapCircleTwo();
-    },
-    // 再次点击第3个一键布控所执行的
-    modelType (val) {
-      val === 3 && this.getAllBay();
-    }
-  },
+  // watch: {
+  //   // 再次点击第1个一键布控所执行的
+  //   addressObj (val) {
+  //     val.length > 0 && this.addressMark();
+  //   },
+  //   // 再次点击第2个一键布控所执行的
+  //   addressObjTwo (val) {
+  //     val && this.mapCircleTwo();
+  //   },
+  //   // 再次点击第3个一键布控所执行的
+  //   modelType (val) {
+  //     val === 3 && this.getAllBay();
+  //   }
+  // },
   computed: {
     // 右侧数据
     self_from_data() {
