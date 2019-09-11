@@ -78,32 +78,7 @@ export default {
       currentPage: 1,
       sortTimeType: 'asc', // 时间排序active  默认升序
       sortMonitoryType: null, // 监控排序active
-      // /* 抓拍记录页面参数 */
-      // strucDetailDialog: false, // 抓拍记录弹窗
-      // strucCurTab: 1, // 抓拍记录弹窗tab
-      // curImgIndex: 0, // 当前选择的图片index
-      // strucInfoList: [],
-      // sturcDetail: {},
-      // bResize: {},
-      // markerPoint: null, // 地图icon
-      // newMarker: null,
-      // playUrl: {},
-      // videoUrl: null, // 下载地址
-      // map: null,
       detailData: null,
-      // swiperOption: {
-      //   initialSlide: 5,
-      //   slidesPerView: 10,
-      //   spaceBetween: 18,
-      //   slidesPerGroup: 10,
-      //   loop: false,
-      //   slideToClickedSlide: true,
-      //   loopFillGroupWithBlank: true,
-      //   navigation: {
-      //     nextEl: '.swiper-button-next',
-      //     prevEl: '.swiper-button-prev',
-      //   },
-      // },
       dataList: [], // 分页抓拍记录
       allDataList: [], // 所有的抓拍记录
       // playing: false, // 视频播放是否

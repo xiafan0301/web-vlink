@@ -149,7 +149,12 @@
 /* 地图板块 标注 */
 .vl_icon_051 { width: 31px; height: 34px; background-position: -477px -196px; }
 /* 地图板块 视频通话 */
-.vl_icon_vc_011 { width: 37px; height: 27px; background: url("../img/webrtc/webrtc01.png") no-repeat; }
+/*.vl_icon_vc_011 { width: 37px; height: 27px; background: url("../img/webrtc/webrtc01.png") no-repeat; }*/
+.vl_icon_vc_011 {
+    width:37px;
+    height: 27px;
+    background: url("../img/webrtc/webrtc01.png") no-repeat;
+}
 .vl_icon_vc_021 { width: 48px; height: 48px; background: url("../img/webrtc/webrtc08.png") no-repeat; }
 .vl_icon_vc_022 { width: 48px; height: 48px; background: url("../img/webrtc/webrtc02.png") no-repeat  -2px -1px; }
 .vl_icon_vc_023 { width: 48px; height: 48px; background: url("../img/webrtc/webrtc07.png") no-repeat  -5px -3px; }
@@ -384,6 +389,8 @@
 .vl_icon2_026:hover { background-position: -1259px -417px; }
 .vl_icon2_027 { background-position: -1398px -293px; }
 .vl_icon2_027:hover { background-position: -1397px -417px; }
+.vl_icon2_028 { background-position: -305px -815px; }
+.vl_icon2_028:hover { background-position: -304px -936px; }
 /**人像检索**/
 .vl_icon2_101 { background-position: -23px -566px; }
 .vl_icon2_101:hover { background-position: -22px -683px; }

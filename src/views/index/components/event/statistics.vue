@@ -462,6 +462,7 @@ export default {
       let _this = this;
       chart.source(data);
       chart.coord('theta', {
+        radius: 0.7,
         innerRadius: 0.75
       });
       chart.tooltip({
@@ -1223,16 +1224,19 @@ export default {
   }
 </style>
 <style lang="scss">
-// @media screen and (max-width: 1440px) {.tab_one { max-width: 150px; width: auto; }}
-// @media screen and (min-width: 1441px) {.tab_one { min-width: 150px;}}
+#stat_1 {
+  .g-label {
+    &:hover {
+      z-index: 999;
+      cursor: pointer;
+    }
+  }
+}
 .tab_one {
   box-shadow: 0px 5px 16px 0px rgba(169,169,169,0.2);
   background-color: #ffffff;
   padding: 10px;
   min-width: 150px;
-  &:hover {
-    z-index: 111;
-  }
   .icon_number {
     display: flex;
     align-items: center;

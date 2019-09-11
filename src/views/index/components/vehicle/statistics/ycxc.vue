@@ -175,7 +175,7 @@
           </vue-scroll>
         </template>
         <template v-else>
-          <div is="noResult" :isInitPage="isInitPage"></div>
+          <div is="noResult" :isInitPage="isInitPage" :tipMessage="initPageMessage"></div>
         </template>
       </div>
     </div> 
@@ -195,7 +195,8 @@ export default {
   components: { vlBreadcrumb, noResult },
   data () {
     return {
-      isInitPage: true, // 是否是初始化页面  因为初始化的时候就调了接口
+      isInitPage: true, // 是否是初始化页面
+      initPageMessage: '输入夜间时间段，查询有频繁夜出情况的车辆',
       startTimeOptions: [
         {
           label: '19:00',
@@ -388,10 +389,13 @@ export default {
     this.getControlVehicleList();
     //获取摄像头卡口数据
     this.getMonitorList();
+    
+    if (this.$route.query.startDate) {
+      setTimeout(() => {
+        this.handleSubmitData();
+      }, 2000)
 
-    // setTimeout(() => {
-    //   this.handleSubmitData();
-    // }, 2000)
+    }
   },
   methods: {
     //设置默认时间
@@ -452,6 +456,7 @@ export default {
 
       this.pagination.pageNum = this.$route.query.pageNum;
       this.pagination.pageSize = this.$route.query.pageSize;
+
     },
     // 获取布控车辆
     getControlVehicleList () {
@@ -616,7 +621,6 @@ export default {
           continue;
         }
       }
-      // console.log('videoTreeNodeCount', this.videoTreeNodeCount)
     },
     //摄像头
     listenChecked(val, val1) {
@@ -679,7 +683,6 @@ export default {
         this.checkAllTree = true;
         this.handleCheckedAll(true);
 
-        this.handleSubmitData();
       });
 
     },
@@ -688,8 +691,6 @@ export default {
       this.handleSubmitData();
     },
     handleSubmitData () {
-      // this.queryForm.bayonetIds = null;
-      // this.queryForm.cameraIds = null;
       
       console.log('this.selectCameraArr', this.selectCameraArr)
       console.log('this.selectBayonetArr', this.selectBayonetArr)
@@ -736,6 +737,9 @@ export default {
       getNightVehicleList(params)
         .then(res => {
           if (res && res.data) {
+            if (res.data.list.length <= 0) {
+              this.isInitPage = false;
+            }
             this.dataList = res.data.list;
             this.pagination.total = res.data.total;
             this.searchLoading = false;
@@ -763,9 +767,6 @@ export default {
         let bayonentIds = this.selectBayonetArr.map(res => res.id);
         this.queryForm.bayonetIds = bayonentIds.join(",");
       }
-
-      // this.queryForm.startDate = this.queryDate[0];
-      // this.queryForm.endDate = this.queryDate[1];
 
       const data = {
         bayonetIds: this.queryForm.bayonetIds,

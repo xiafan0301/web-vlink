@@ -10,6 +10,7 @@ export const km2 = (m) => {
  * */
 export const dateOrigin = (flag, date) => {
   if (!date) { date = new Date(); }
+  console.log('date', date)
   date.setHours(flag ? 23 : 0);
   date.setMinutes(flag ? 59 : 0);
   date.setSeconds(flag ? 59 : 0);
