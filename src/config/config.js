@@ -50,7 +50,7 @@ const oDomains = {
         // dev: 'http://10.116.64.97:8081',
         // dev: 'http://10.116.64.231:8087',
         // dev: 'https://apidev.aorise.org/vlink-judge/',
-        dev: 'https://apidev.aorise.org/vlink-judge/',
+        dev: 'https://apirel.aorise.org/vlink-judge/',
         test: 'https://apirel.aorise.org/vlink-judge/',
         // test: 'http://10.116.64.53:8081',
         prod: 'https://apiprod.aorise.org/vlink-judge/',
