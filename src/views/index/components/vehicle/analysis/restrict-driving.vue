@@ -218,7 +218,7 @@
 import { getDiciData } from '@/views/index/api/api.js';
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import mapSelector from '@/components/common/mapSelector.vue';
-import { formatDate, dateOrigin, objDeepCopy } from "@/utils/util.js";
+import { formatDate, dateOrigin } from "@/utils/util.js";
 import { mapXupuxian } from "@/config/config";
 import { dataList } from '@/utils/data.js';
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
@@ -410,9 +410,9 @@ export default {
           const params = {
             startTime: formatDate(this.addForm.startTime),
             endTime: formatDate(this.addForm.endTime),
-            areaId: this.selectAreaType === 1 ? this.addForm.areaId.join(',') : [],
-            bayonetIds: this.selectAreaType === 2 ? this.addForm.bayonetIds : null,
-            devIds: this.selectAreaType === 2 ? this.addForm.devIds : null,
+            areaIds: this.selectAreaType === 1 ? this.addForm.areaId.join(',') : '',
+            bayonetIds: this.selectAreaType === 2 ? this.addForm.bayonetIds : '',
+            devIds: this.selectAreaType === 2 ? this.addForm.devIds : '',
             vehicleTypes: this.addForm.vehicleTypes.join(','),
             tailNumbers: this.addForm.tailNumbers.join(','),
             taskName: this.addForm.taskName,
