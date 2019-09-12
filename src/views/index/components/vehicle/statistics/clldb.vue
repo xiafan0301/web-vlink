@@ -8,7 +8,7 @@
     </div>
     <div class="con_box">
       <div class="con_left">
-        <el-select v-model="queryForm.bayonet" filterable placeholder="请选择卡口" style="width: 100%;">
+        <el-select v-model="queryForm.bayonetIds" multiple collapse-tags filterable placeholder="请选择卡口" style="width: 100%;">
           <el-option
             v-for="item in listBayonet"
             :key="item.value"
@@ -17,12 +17,12 @@
           </el-option>
         </el-select>
         <el-select v-model="queryForm.carType" placeholder="选择车辆类型">
-          <el-option value="" label="全部类型"></el-option>
+          <el-option :value="null" label="全部类型"></el-option>
           <el-option
             v-for="item in carTypeList"
-            :key="item.value"
-            :label="item.label"
-            :value="item.label">
+            :key="item.enumField"
+            :label="item.enumValue"
+            :value="item.enumField">
           </el-option>
         </el-select>
         <el-select v-model="queryForm.lane" placeholder="选择车道">
@@ -33,6 +33,30 @@
             :value="item.value">
           </el-option>
         </el-select>
+        <div class="left_start">
+          <el-date-picker
+            :clearable="false"
+            class="vl_date"
+            style="width: 100%"
+            :time-arrow-control="true"
+            v-model="queryForm.startTime"
+            :picker-options="pickerOptions"
+            type="datetime"
+            placeholder="请选择开始时间">
+          </el-date-picker>
+        </div>
+        <div class="left_end">
+          <el-date-picker
+            :clearable="false"
+            class="vl_date vl_date_end"
+            style="width: 100%"
+            :time-arrow-control="true"
+            :picker-options="pickerOptions1"
+            v-model="queryForm.endTime"
+            type="datetime"
+            placeholder="请选择结束时间">
+          </el-date-picker>
+        </div>
         <div class="left_btn">
           <el-button class="reset_btn" @click="resetQueryForm">重置</el-button>
           <el-button class="select_btn" type="primary" :loading="loadingBtn" @click="getCarComparison">统计</el-button>
@@ -42,7 +66,7 @@
         <div class="right_box" v-if="isShowChart">
           <div class="tab_box">
             <div>
-              <i class="vl_icon vl_icon_vehicle_cll_01" :class="{'active': tabIndex === 1}" @click="tabIndex = 1"></i>
+              <i class="vl_icon vl_icon_vehicle_cll_01" :class="{'active': tabIndex === 1}" @click="drawChart"></i>
               <i class="vl_icon vl_icon_vehicle_cll_03" :class="{'active': tabIndex === 2}" @click="tabIndex = 2"></i>
             </div>
             <h1>各卡口车流量统计</h1>
@@ -53,11 +77,8 @@
             <div id="chartContainer"></div>
           </div>
           <div class="main_box" v-show="tabIndex === 2">
-            <el-table :data="bodyList">
-              <el-table-column :label="name" v-for="(name, key) in headerList" :key="name">
-                <template>
-                  <span>{{bodyList[0][key]}}</span>
-                </template>
+            <el-table :data="tableData">
+              <el-table-column show-overflow-tooltip :prop="item.key" :label="item.title" v-for="(item, index) in headerList" :key="index">
               </el-table-column>
             </el-table>
           </div>
@@ -75,14 +96,15 @@ import {getAllBayonetListByName} from '@/views/index/api/api.vehicle.js';
 import {formatDate, dateOrigin} from '@/utils/util.js';
 import {dataList} from '@/utils/data.js';
 import noResult from '@/components/common/noResult.vue';
+import {apiCarFlowCompa} from '@/views/index/api/api.portrait.js';
 export default {
   components: {noResult},
   data () {
     return {
       isInitPage: true,
       queryForm: {
-        carType: "",
-        bayonet: {value: ''},
+        carType: null,
+        bayonetIds: [],
         lane: null,
         statementType: 1,
         startTime: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)),
@@ -120,13 +142,24 @@ export default {
       },
       listBayonet: [],
       tabIndex: 1,
-      carTypeList: this.dicFormater(dataList.vehicleType)[0].dictList.map(m => {
-        return {
-          value: parseInt(m.enumField),
-          label: m.enumValue
-        }
-      }),
-      laneList: [],
+      carTypeList: this.dicFormater(dataList.vehicleType)[0].dictList,
+      laneList: [
+        {value: null, label: '全部'},
+        {value: 1, label: '1'},
+        {value: 2, label: '2'},
+        {value: 3, label: '3'},
+        {value: 4, label: '4'},
+        {value: 5, label: '5'},
+        {value: 6, label: '6'},
+        {value: 7, label: '7'},
+        {value: 8, label: '8'},
+        {value: 9, label: '9'},
+        {value: 10, label: '10'},
+        {value: 11, label: '11'},
+        {value: 12, label: '12'},
+        {value: 13, label: '13'},
+        {value: 14, label: '14'}
+      ],
       loading: false,
       loadingBtn: false,
       loadingBtnExport: false,
@@ -134,23 +167,15 @@ export default {
       currentPage: 1,
       pageSize: 10,
       // 图表参数
-      chartData: [
-        {name: '卡口1', total: 50},
-        {name: '卡口2', total: 70},
-        {name: '卡口3', total: 80},
-        {name: '卡口4', total: 50},
-        {name: '卡口5', total: 60},
-        {name: '卡口6', total: 40},
-        {name: '卡口7', total: 50}
-      ],
+      chartData: [],
+      tableData: [],
       // 保存生成的图表用来删除
       chart: null,
       isShowChart: false, // 选择卡口，点统计按钮后，显示右边统计图表
       headerList: [], // 表格头部数据
-      bodyList: [], // 表格主体数据
       //当时间间隔超过30天时，X轴 只取第一个，和最后一个现实
-      beforeDate: null,
-      afterDate: null
+      // beforeDate: null,
+      // afterDate: null
     }
   },
   mounted () {
@@ -160,8 +185,8 @@ export default {
     // 重置查询表单
     resetQueryForm () {
       this.queryForm = {
-        carType: '',
-        bayonet: {value: ''},
+        carType: null,
+        bayonetIds: [],
         lane: null,
         statementType: 1,
         warningNum: '',
@@ -185,94 +210,123 @@ export default {
       })
     },
     // 获取车流量对比数据
-    getCarComparison () {
-      this.isShowChart = true;
-      this.$nextTick(() => {
-        this.headerList = this.chartData.map(m => m.name);
-        this.headerList.unshift('卡口名称');
-        this.bodyList[0] = this.chartData.map(m => m.total);
-        this.bodyList[0].unshift('车流量');
+    async getCarComparison () {
+      try {
+        this.loadingBtn = true;
+        const {
+          data: {
+            carFlowResultList: _chartData, 
+            carFlowCompaList: _tableData
+          }
+        } = await apiCarFlowCompa({
+          bayonetIds: this.queryForm.bayonetIds.map(m => m.value).join(','),
+          startTime: formatDate(this.queryForm.startTime),
+          endTime: formatDate(this.queryForm.endTime),
+          laneNo: this.queryForm.lane,
+          vehicleTypes: this.queryForm.carType
+        })
+        this.chartData = _chartData;
+        this.tableData = _tableData;
+        this.loadingBtn = false;
+        this.isShowChart = true;
         this.chartData = this.chartData.map(m => {
           return {
-            name: m.name, '车流量': m.total, '车流量1': 1
+            name: m.name, '车流量': m.total
           }
         });
         this.drawChart();
-      })
+        this.headerList = [];
+        Object.keys(this.tableData[0]).forEach((f, i) => {
+          this.headerList.push({
+            title: i === 0 ? '卡口名称' : ((f.slice(1)).startsWith('0') ? f.slice(2) + '点' : f.slice(1) + '点'),
+            key: f
+          })
+        })
+      }catch(err){
+        console.log(err)
+      }
     },
     // 导出
-    exportExcel () {
-     
+    async exportExcel () {
+      try {
+        this.loadingBtnExport = true;
+        const {data} = await exportExcel({
+          carFlowCompaQueryDto: {
+            bayonetIds: this.queryForm.bayonetIds.map(m => m.value).join(','),
+            startTime: formatDate(this.queryForm.startTime),
+            endTime: formatDate(this.queryForm.endTime),
+            laneNo: this.queryForm.lane,
+            vehicleTypes: this.queryForm.carType
+          },
+          viewType: 7
+        });
+        this.loadingBtnExport = false;
+        const eleA = document.getElementById('export_id');
+        if (eleA) {
+          document.body.removeChild(eleA);
+        }
+        let a = document.createElement('a');
+        a.setAttribute('href', data.fileUrl);
+        a.setAttribute('target', '_self');
+        a.setAttribute('id', 'export_id');
+        document.body.appendChild(a);
+        a.click();
+      }catch(err){
+        console.log(err)
+      }
     },
     // 画图表
     drawChart () {
-      let temp = document.getElementById('chartContainer');
-      let chart = new G2.Chart({
-        container: 'chartContainer',
-        forceFit: true,
-        padding: [ 20, 40, 60, 40 ],
-        width: G2.DomUtil.getWidth(temp),
-        height: G2.DomUtil.getHeight(temp)
-      });
-      // let dv = new View().source(this.chartData);
-      // dv.transform({
-      //   type: 'fold',
-      //   fields: ['车流量'], // 展开字段集
-      //   key: 'type', // key字段
-      //   value: 'value', // value字段
-      // });
-      // impute 补全列/补全字段
-      // dv.transform({
-      //   type: 'impute',
-      //   field: '车流量1',       // 待补全字段
-      //   // groupBy: [ 'value' ], // 分组字段集（传空则不分组）
-      //   method: 'value',  // 补全常量
-      //   value: 1     // 补全字段值时执行的规则
-      // });
-
-      // let view2 = chart.view();
-      // view2.source(dv, {});
-      
-      // chart.interval()
-      // .position('name*车流量1') 
-      // .color('#F2F2F2')
-      // .size(30);
-      chart.source(this.chartData, {
-        '车流量': {
-          min: 0
+      this.tabIndex = 1;
+      this.$nextTick(() => {
+        if (this.chart) {
+          this.chart.destroy();
+          this.chart = null;
         }
-      });
-      // 坐标轴刻度
-      chart.scale('车流量', {
-        title: {
-          offset: 50  
-        }
-      });
-
-      // chart.axis('车流量', false);
-      chart.axis('name', {
-        label: {
-          textStyle: {
-            fill: '#999999',
-            fontSize: 12
+        let temp = document.getElementById('chartContainer');
+        let chart = new G2.Chart({
+          container: 'chartContainer',
+          forceFit: true,
+          padding: [ 20, 40, 60, 40 ],
+          width: G2.DomUtil.getWidth(temp),
+          height: G2.DomUtil.getHeight(temp)
+        });
+        chart.source(this.chartData, {
+          '车流量': {
+            min: 0
           }
-        }
-      });
-      chart.tooltip({
-        useHtml: true,
-        htmlContent: function (title, items) {
-          return `<div class="my_tooltip">
-            <h1>${title}</h1>
-            <span><span>${items[0].name}：</span><span>${items[0].value}辆</span></span></div>`;
-        }
-      });
-      chart.legend(false);
-      chart.interval()
-      .position('name*车流量')
-      .color('l(270) 0:#0C70F8 1:#0D9DF4')
-      .size(30);
-      chart.render();
-      this.chart = chart;
+        });
+        // 坐标轴刻度
+        chart.scale('车流量', {
+          title: {
+            offset: 50  
+          }
+        });
+
+        chart.axis('name', {
+          label: {
+            textStyle: {
+              fill: '#999999',
+              fontSize: 12
+            }
+          }
+        });
+        chart.tooltip({
+          useHtml: true,
+          htmlContent: function (title, items) {
+            return `<div class="my_tooltip">
+              <h1>${title}</h1>
+              <span><span>${items[0].name}：</span><span>${items[0].value}辆</span></span></div>`;
+          }
+        });
+        chart.legend(false);
+        chart.interval()
+        .position('name*车流量')
+        .color('l(270) 0:#0C70F8 1:#0D9DF4')
+        .size(30);
+        chart.render();
+        this.chart = chart;
+      })
     },
   }
 }
@@ -296,9 +350,6 @@ export default {
       padding: 20px;
       .left_start, .left_end{
         padding-bottom: 10px; 
-      }
-      .left_start{
-        margin-top: 10px;
       }
       .left_btn{
         display: flex;
