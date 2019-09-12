@@ -120,17 +120,17 @@ export default {
   methods: {
     // 一键布控
     selControl (formName) {
-      // if (this.fileListOne.length === 0) {
-      //   return this.$message.warning('请上传失踪人员图片');
-      // } 
-      // this.$refs[formName].validate((valid) => {
-      //   if (valid) {
+      if (this.fileListOne.length === 0) {
+        return this.$message.warning('请上传失踪人员图片');
+      } 
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
           this.isShowControlDev = true;
           this.addressObj_ = objDeepCopy(this.addressObj);
-      //   } else {
-      //     return false;
-      //   }
-      // });
+        } else {
+          return false;
+        }
+      });
     },
     // 向父组件传值
     sendParent () {
@@ -140,8 +140,12 @@ export default {
       this.$refs['modelOne'].validate((valid) => {
         if (valid) {
           console.log(111111111)
-          this.$refs['controlDev'].sendParent();
-          this.$emit('getModel', {modelOneForm: this.modelOneForm, fileListOne: this.fileListOne, fileListTwo: this.fileListTwo, ...this.devData});
+          if (this.$refs['controlDev']) {
+            this.$refs['controlDev'].sendParent();
+            this.$emit('getModel', {modelOneForm: this.modelOneForm, fileListOne: this.fileListOne, fileListTwo: this.fileListTwo, ...this.devData});
+          } else {
+            this.$message.warning('请先选择布控设备');
+          }
         } else {
           return false;
         }

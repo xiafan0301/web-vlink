@@ -79,8 +79,12 @@ export default {
       } 
       this.$refs['modelThree'].validate((valid) => {
         if (valid) {
-          this.$refs['controlDev'].sendParent();
-          this.$emit('getModel', {modelThreeForm: this.modelThreeForm, fileList: this.fileList, ...this.devData});
+          if (this.$refs['controlDev']) {
+            this.$refs['controlDev'].sendParent();
+            this.$emit('getModel', {modelThreeForm: this.modelThreeForm, fileList: this.fileList, ...this.devData});
+          } else {
+            this.$message.warning('请先选择布控设备');
+          }
         } else {
           return false;
         }

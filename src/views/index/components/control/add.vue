@@ -243,8 +243,14 @@ export default {
         controlReason: null
       },
       eventList: [],//关联事件下拉列表
-      cascadeList: [],//是否级联下拉列表
-      sharedControlList: [],//是否共享布控下拉列表
+      cascadeList: [
+        {value: 1, label: '是'},
+        {value: 0, label: '否'}
+      ],//是否级联下拉列表
+      sharedControlList: [
+        {value: 1, label: '是'},
+        {value: 0, label: '否'}
+      ],//是否共享布控下拉列表
       modelType: 1,//布控模型类型
       // 弹出框参数
       toGiveUpDialog: false,
@@ -341,17 +347,17 @@ export default {
   
     // 保存布控任务
     saveControl (formName) {
-      // this.$refs[formName].validate((valid) => {
-      //   if (valid) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
           this.modelData = {};
           this.$refs['model'].sendParent();
           console.log(this.modelData, 'this.modelData');
    
         
-      //   } else {
-      //     return false;
-      //   }
-      // });
+        } else {
+          return false;
+        }
+      });
     },
     // 对比布控时间段是否重叠的方法
     isOverlap () {

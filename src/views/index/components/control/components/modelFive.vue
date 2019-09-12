@@ -73,8 +73,12 @@ export default {
       }
       this.$refs['modelFive'].validate((valid) => {
         if (valid) {
-          this.$refs['controlDev'].sendParent();
-          this.$emit('getModel', {modelFiveForm: this.modelFiveForm, vehicleList: this.vehicleList, ...this.devData});
+          if (this.$refs['controlDev']) {
+            this.$refs['controlDev'].sendParent();
+            this.$emit('getModel', {modelFiveForm: this.modelFiveForm, vehicleList: this.vehicleList, ...this.devData});
+          } else {
+            this.$message.warning('请先选择布控设备');
+          }
         } else {
           return false;
         }
