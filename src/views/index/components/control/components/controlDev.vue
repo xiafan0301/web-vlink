@@ -240,10 +240,10 @@ export default {
             });
             _hoverWindow.open(_this.map, new window.AMap.LngLat(obj.longitude, obj.latitude));
           });
-          // click
-          _marker.on('click', function () {
+          // // click
+          // _marker.on('click', function () {
           
-          })
+          // })
           _this.markerList.push(_marker);
         }
       }
@@ -535,84 +535,56 @@ export default {
     },
     // 改造卡口和摄像头数据  成-- areaTreeList  下的数据 的公共方法
     commonFn1(array) {
-      if (!this.arrayToTree) {
-        array.forEach(item => {
-          item[this.pid] = 0;
-        });
-        const fn = (arr) => {
-          for (let item of arr) {
-            if (item.areaTreeList.length > 0) {
-              fn(item.areaTreeList);
-            } else {
-              if (item.bayonetList.length > 0) {
-                // 卡口
-                item.areaTreeList = item.bayonetList.map(m => {
-                  return {
-                    ...m,
-                    areaParentUid: item.areaId,
-                    areaName: m.bayonetName,
-                    areaId: m.uid
-                  }
-                })
-              }
-              // item.areaTreeList = [
-              //   {areaName: '卡口', areaId: areaId1, areaParentUid: item.areaId, areaTreeList: bayonetList},
-              //   {areaName: '摄像头', areaId: areaId2, areaParentUid: item.areaId, areaTreeList: deviceBasicList}
-              // ]
+      array.forEach(item => {
+        item[this.pid] = 0;
+      });
+      const fn = (arr) => {
+        for (let item of arr) {
+          if (item.areaTreeList.length > 0) {
+            fn(item.areaTreeList);
+          } else {
+            if (item.bayonetList.length > 0) {
+              // 卡口
+              item.areaTreeList = item.bayonetList.map(m => {
+                return {
+                  ...m,
+                  areaParentUid: item.areaId,
+                  areaName: m.bayonetName,
+                  areaId: m.uid
+                }
+              })
             }
           }
         }
-        fn(array);
-        console.log(array, 'array')
-        return array;
-      } else {
-        return arrayToTree(array, {
-          id: this.node_key,
-          pid: this.pid,
-          children: this.defaultProps.children
-        });
       }
-
+      fn(array);
+      return array;
     },
     commonFn2(array) {
-      if (!this.arrayToTree) {
-        array.forEach(item => {
-          item[this.pid] = 0;
-        });
-        const fn = (arr) => {
-          for (let item of arr) {
-            if (item.areaTreeList.length > 0) {
-              fn(item.areaTreeList);
-            } else {
-              if (item.deviceBasicList.length > 0) {
-                // 摄像头
-                item.areaTreeList = item.deviceBasicList.map(m => {
-                  return {
-                    ...m,
-                    areaName: m.deviceName,
-                    areaId: m.uid,
-                    areaParentUid: item.areaId,
-                  }
-                })
-              }
-              // item.areaTreeList = [
-              //   {areaName: '卡口', areaId: areaId1, areaParentUid: item.areaId, areaTreeList: bayonetList},
-              //   {areaName: '摄像头', areaId: areaId2, areaParentUid: item.areaId, areaTreeList: deviceBasicList}
-              // ]
+      array.forEach(item => {
+        item[this.pid] = 0;
+      });
+      const fn = (arr) => {
+        for (let item of arr) {
+          if (item.areaTreeList.length > 0) {
+            fn(item.areaTreeList);
+          } else {
+            if (item.deviceBasicList.length > 0) {
+              // 摄像头
+              item.areaTreeList = item.deviceBasicList.map(m => {
+                return {
+                  ...m,
+                  areaName: m.deviceName,
+                  areaId: m.uid,
+                  areaParentUid: item.areaId,
+                }
+              })
             }
           }
         }
-        fn(array);
-        console.log(array, 'array')
-        return array;
-      } else {
-        return arrayToTree(array, {
-          id: this.node_key,
-          pid: this.pid,
-          children: this.defaultProps.children
-        });
       }
-
+      fn(array);
+      return array;
     },
     // 初始化缩放等级
     resetZoom () {
@@ -627,20 +599,6 @@ export default {
       }
     },
   },
-  // watch: {
-  //   // 再次点击第1个一键布控所执行的
-  //   addressObj (val) {
-  //     val.length > 0 && this.addressMark();
-  //   },
-  //   // 再次点击第2个一键布控所执行的
-  //   addressObjTwo (val) {
-  //     val && this.mapCircleTwo();
-  //   },
-  //   // 再次点击第3个一键布控所执行的
-  //   modelType (val) {
-  //     val === 3 && this.getAllBay();
-  //   }
-  // },
   computed: {
     // 右侧数据
     self_from_data() {
