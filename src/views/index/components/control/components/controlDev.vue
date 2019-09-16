@@ -1,39 +1,64 @@
 <template>
   <div class="con_dev">
-    <div class="dev_box" v-if="pageType === 1">
+    <div class="dev_box" v-if="pageType === 1" v-loading="loading">
       <div class="tab">
         <span>布控设备</span>
         <el-button type="info" plain @click="pageType = 2">修改布控设备</el-button>
       </div>
       <div class="sel_dev">
         <div class="title">
-          <span>已选设备（{{selDevNum}}）</span>
+          <span>已选设备（{{bayOrdev === 1 ? devIdList.length : bayIdList.length}}）</span>
           <i class="el-icon-arrow-up" v-show="isShowTree" @click="isShowTree = false"></i>
           <i class="el-icon-arrow-down" v-show="!isShowTree" @click="isShowTree = true"></i>
         </div>
         <div v-show="isShowTree">
           <div class="sel_tab">
-            <div @click="tabLeftClick(1)" :class="{'active': bayOrdev === 1}">摄像头</div>
-            <div @click="tabLeftClick(2)" :class="{'active': bayOrdev === 2}">卡口</div>
+            <div @click="bayOrdev = 1" :class="{'active': bayOrdev === 1}">摄像头</div>
+            <div @click="bayOrdev = 2" :class="{'active': bayOrdev === 2}">卡口</div>
           </div>
           <vue-scroll style="height: 352px;">
             <div class="tree_box">
               <el-tree
-                ref="to-tree" 
+                v-show="bayOrdev === 1"
+                ref="to-tree1" 
                 icon-class="el-icon-arrow-right"
-                :data="bayOrdev === 1 ? self_to_data1 : self_to_data2"
+                :data="self_to_data1"
                 :node-key="node_key"
                 :props="defaultProps"
                 :default-expanded-keys="to_expanded_keys"
                 :default-expand-all="true"
               >
               </el-tree>
+              <el-tree
+                v-show="bayOrdev === 2"
+                ref="to-tree2" 
+                icon-class="el-icon-arrow-right"
+                :data="self_to_data2"
+                :node-key="node_key"
+                :props="defaultProps"
+                :default-expanded-keys="to_expanded_keys"
+                :default-expand-all="true"
+              >
+              </el-tree>
+
+
               <!-- 不显示在页面上，作为已选设备树的参照 -->
               <el-tree
                 v-show="false"
                 slot="to"
-                ref="from-tree"
-                :data="self_from_data"
+                ref="from-tree1" 
+                :data="devFromData"
+                show-checkbox
+                :node-key="node_key"
+                :props="defaultProps"
+                :default-expand-all="true"
+              >
+              </el-tree>  
+              <el-tree
+                v-show="false"
+                slot="to"
+                ref="from-tree2" 
+                :data="bayFromData"
                 show-checkbox
                 :node-key="node_key"
                 :props="defaultProps"
@@ -93,14 +118,15 @@ export default {
       bayIdList: [],
       bayFromData: [],
       devFromData: [],
-      bayFromData_: [],
-      devFromData_: [],
+      // bayFromData_: [],
+      // devFromData_: [],
       node_key: 'areaId',
       pid: 'areaParentUid',
       removeObj: {1: [],2: []},
       isShowTree: false,
       markerList: [],
-      devUpdateData: {}
+      devUpdateData: {},
+      loading: false,
     }
   },
   mounted () {
@@ -138,20 +164,16 @@ export default {
     },
     // 获取地图上的设备和卡口数据
     getDevList () {
+      this.loading = true;
       let params = {
         areaUid: '431224'
       }
       MapGETmonitorList(params).then(res => {
         if (res) {
-          console.log([res.data], '[res.data]')
-          console.log(objDeepCopy([res.data]), 'objDeepCopy([res.data])')
          this.bayFromData = this.commonFn1(objDeepCopy([res.data]));
          this.devFromData = this.commonFn2(objDeepCopy([res.data]));
-         this.bayFromData_ = objDeepCopy(this.bayFromData);
-         this.devFromData_ = objDeepCopy(this.devFromData);
 
           this.devList = this.flatDev([res.data]);
-          console.log(this.devList);
           this.mapMark(this.devList);
           // 第1个布控模型的一键布控时所执行的
           this.addressObj && this.addressMark();
@@ -254,13 +276,6 @@ export default {
     addressMark () {
       // 追踪点标记
       let offSet = [-20.5, -70], _this = this;
-      if (this.bayOrdev === 2) {
-        this.self_to_data2 = [];
-        this.bayFromData = objDeepCopy(this.bayFromData_);
-      } else {
-        this.self_to_data1 = [];
-        this.devFromData = objDeepCopy(this.devFromData_);
-      }
       this.addressObj.forEach(obj => {
         if (this.removeObj[obj.type].length > 0) {
           this.map.remove(this.removeObj[obj.type]);
@@ -383,25 +398,21 @@ export default {
       },[]);
       this.bayIdList = [...this.bayIdList, ..._bayIdList];
       // 为了生成设备和卡口左边的树数据，重复调取2次
-      setTimeout(() => {
-        this.tabLeftClick(2);
-      })
-      setTimeout(() => {
-        this.tabLeftClick(1);
-      })
+      if (this.devIdList.length > 0) {
+        setTimeout(() => {
+          this.addDevIsLeft(this.devIdList, this.self_to_data1, 'from-tree1', 'to-tree1');
+        })
+      }
+      if (this.bayIdList.length > 0) {
+        setTimeout(() => {
+          this.addDevIsLeft(this.bayIdList, this.self_to_data2, 'from-tree2', 'to-tree2');
+        }, 5000)
+      }
     },
     // 设置marker的显示图标
     setMarkContent (obj) {
       const type = obj.type === 1 ? 0 : 1;
       return '<div id="' + obj.uid + '" class="map_icons vl_icon vl_icon_map_sxt_in_area' + type + '"></div>'
-    },
-    // 目标树tab
-    tabLeftClick (type) {
-      this.bayOrdev = type;
-      const data = this.bayOrdev === 1 ? this.devIdList : this.bayIdList;
-      this.$nextTick(() => {
-        this.addDevIsLeft(data);
-      })
     },
     // 获取城内所有卡口
     getAllBay () {
@@ -423,27 +434,27 @@ export default {
       })
       this.bayOrdev = 2;
       this.$nextTick(() => {
-        this.addDevIsLeft(this.bayIdList);
+        this.addDevIsLeft(this.bayIdList, this.self_to_data2, 'from-tree2', 'to-tree2');
       })
     },
     // 添加按钮
-    addDevIsLeft(data) {
+    addDevIsLeft(data, selfToData, fromTree, toTree) {
       
-      this.$refs["from-tree"].setCheckedKeys(data);
+      this.$refs[fromTree].setCheckedKeys(data);
 
       // 获取选中通过穿梭框的keys - 仅用于传送纯净的id数组到父组件同后台通信
-      let keys = this.$refs["from-tree"].getCheckedKeys();
+      let keys = this.$refs[fromTree].getCheckedKeys();
       // 获取半选通过穿梭框的keys - 仅用于传送纯净的id数组到父组件同后台通信
-      let harfKeys = this.$refs["from-tree"].getHalfCheckedKeys();
+      // let harfKeys = this.$refs[fromTree].getHalfCheckedKeys();
       // 选中节点数据
-      let arrayCheckedNodes = this.$refs["from-tree"].getCheckedNodes();
+      let arrayCheckedNodes = this.$refs[fromTree].getCheckedNodes();
       // 获取选中通过穿梭框的nodes - 仅用于传送选中节点数组到父组件同后台通信需求
       let nodes = objDeepCopy(arrayCheckedNodes);
       console.log(nodes, 'nodes')
       // 半选中节点数据
-      let arrayHalfCheckedNodes = this.$refs["from-tree"].getHalfCheckedNodes();
+      let arrayHalfCheckedNodes = this.$refs[fromTree].getHalfCheckedNodes();
       // 获取半选通过穿梭框的nodes - 仅用于传送选中节点数组到父组件同后台通信需求
-      let halfNodes = objDeepCopy(arrayHalfCheckedNodes);
+      // let halfNodes = objDeepCopy(arrayHalfCheckedNodes);
 
       // 自定义参数读取设置
       let children__ = this.defaultProps.children || "children";
@@ -458,13 +469,12 @@ export default {
        */
 
       // let不存在状态提升 因此在函数调用之前赋值 并递归为以为数组！
-      let self_to_data = JSON.stringify(this.bayOrdev === 1 ? this.self_to_data1 : this.self_to_data2);
+      let self_to_data = JSON.stringify(selfToData);
       // 第一步
       let skeletonHalfCheckedNodes = objDeepCopy(arrayHalfCheckedNodes);// 深拷贝数据 - 半选节点
       // 筛选目标树不存在的骨架节点 - 半选内的节点
       let newSkeletonHalfCheckedNodes = [];
       skeletonHalfCheckedNodes.forEach(item => {
-        console.log(item, 'item')
         if (!inquireIsExist(item)) {
           newSkeletonHalfCheckedNodes.push(item);
         }
@@ -473,8 +483,8 @@ export default {
       newSkeletonHalfCheckedNodes.forEach(item => {
         item[children__] = [];
         [0, "0"].includes(item[pid__])
-          ? this.$refs["to-tree"].append(item)
-          : this.$refs["to-tree"].append(item, item[pid__]);
+          ? this.$refs[toTree].append(item)
+          : this.$refs[toTree].append(item, item[pid__]);
       });
 
       // 第二步
@@ -490,8 +500,8 @@ export default {
         if (item[children__] && item[children__].length > 0) {
           item[children__] = [];
           [0, "0"].includes(item[pid__])
-            ? this.$refs["to-tree"].append(item)
-            : this.$refs["to-tree"].append(item, item[pid__]);
+            ? this.$refs[toTree].append(item)
+            : this.$refs[toTree].append(item, item[pid__]);
         }
       });
 
@@ -502,7 +512,7 @@ export default {
       // 末端叶子插入目标树
       leafCheckedNodes.forEach(item => {
         if (!inquireIsExist(item)) {
-          this.$refs["to-tree"].append(item, item[pid__]);
+          this.$refs[toTree].append(item, item[pid__]);
         }
       });
 
@@ -519,10 +529,10 @@ export default {
       }
 
       // 右侧删掉选中数据
-      arrayCheckedNodes.map(item => this.$refs["from-tree"].remove(item));
+      arrayCheckedNodes.map(item => this.$refs[fromTree].remove(item));
 
       // 处理完毕按钮恢复禁用状态
-      this.from_check_keys = [];
+      // this.from_check_keys = [];
 
       // 目标数据节点展开
       if (this.transferOpenNode) {
@@ -530,8 +540,8 @@ export default {
       }
 
       // 处理完毕取消选中
-      this.$refs["from-tree"].setCheckedKeys([]);
-    
+      this.$refs[fromTree].setCheckedKeys([]);
+      this.loading = false;
     },
     // 改造卡口和摄像头数据  成-- areaTreeList  下的数据 的公共方法
     commonFn1(array) {
@@ -602,20 +612,20 @@ export default {
   computed: {
     // 右侧数据
     self_from_data() {
-      if (this.bayOrdev === 2) {
-        return this.bayFromData;
-      } else {
-        return this.devFromData;
-      }
+      // if (this.bayOrdev === 2) {
+      //   return this.bayFromData;
+      // } else {
+      //   return this.devFromData;
+      // }
     },
     selDevNum () {
-      if (this.bayOrdev === 2) {
-        const data = this.flatDev_(this.self_to_data2);
-        return data.length;
-      } else {
-        const data = this.flatDev_(this.self_to_data1);
-        return data.length;
-      }
+      // if (this.bayOrdev === 2) {
+      //   const data = this.flatDev_(this.self_to_data2);
+      //   return data.length;
+      // } else {
+      //   const data = this.flatDev_(this.self_to_data1);
+      //   return data.length;
+      // }
     },
   },
   // 销毁地图实例

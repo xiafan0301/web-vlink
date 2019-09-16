@@ -1,7 +1,7 @@
 <template>
   <div class="model_four">
     <h1>布控信息：</h1>
-    <div class="sel_lib"><span>禁入人员：</span><span @click="popSel">从布控库中选择</span></div>
+    <div class="sel_lib"><span>禁入人员：</span><span @click="popSel(1)">从布控库中选择</span></div>
     <div class="sel_img_box">
       <div class="img_box" v-for="item in protraitList" :key="item.id">
         <img src="http://temp.im/104x104" alt="">
@@ -9,7 +9,7 @@
         <span>汪诗诗</span>
       </div>
     </div>
-    <div class="sel_lib"><span>禁入车辆：</span><span @click="popSel">从布控库中选择</span></div>
+    <div class="sel_lib"><span>禁入车辆：</span><span @click="popSel(2)">从布控库中选择</span></div>
     <div class="sel_img_box">
       <div class="img_box" v-for="item in vehicleList" :key="item.id">
         <img src="http://temp.im/104x104" alt="">
@@ -18,8 +18,8 @@
       </div>
     </div>
     <div is="controlDevUpdate" :modelType="4" @getControlDevUpdate="getControlDevUpdate"></div>
-    <div is="vehicleLib" ref="vehicleLibDialog"></div>
-    <div is="portraitLib" ref="portraitLibDialog"></div>
+    <div is="vehicleLib" ref="vehicleLibDialog" @getVehicleData="getVehicleData"></div>
+    <div is="portraitLib" ref="portraitLibDialog" @getPortraitData="getPortraitData"></div>
   </div>  
 </template>
 <script>
@@ -36,10 +36,23 @@ export default {
     }
   },
   methods: {
+    // 从布控库中获取人像
+    getPortraitData (data) {
+      console.log(data, 'datadata')
+    },
+    // 从布控库中获取车像
+    getVehicleData (data) {
+      console.log(data, 'datadata')
+    },
     // 从库中选择
-    popSel () {
-      this.$refs['portraitLibDialog'].portraitLibDialog = true;
-      this.$refs['portraitLibDialog'].reset();
+    popSel (type) {
+      if (type === 1) {
+        this.$refs['portraitLibDialog'].portraitLibDialog = true;
+        this.$refs['portraitLibDialog'].reset();
+      } else {
+        this.$refs['vehicleLibDialog'].vehicleLibDialog = true;
+        this.$refs['vehicleLibDialog'].reset();
+      }
     },
     // 向父组件传值
     sendParent () {

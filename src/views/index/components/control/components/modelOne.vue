@@ -3,7 +3,7 @@
     <!-- 失踪人员信息上传 -->
     <el-form-item label="失踪人员信息:" :rules="{ required: true, message: '', trigger: 'blur'}" style="margin-bottom: 0;">
       <div class="pic_format" style="left: 110px;top: -40px;">
-        <div @click="popSel">从布控库中选择</div>
+        <div @click="popSel(1)">从布控库中选择</div>
       </div>
       <div is="uploadPic" :fileList="fileListOne" @uploadPicDel="uploadPicDelOne" @uploadPicFileList="uploadPicFileListOne" :maxSize="1"></div>
     </el-form-item>
@@ -52,13 +52,13 @@
     <!-- 嫌疑人照片上传 -->
     <el-form-item label="嫌疑人照片:">
       <div class="pic_format" style="left: 96px;top: -40px;">
-        <div @click="popSel">从布控库中选择</div>
+        <div @click="popSel(1)">从布控库中选择</div>
       </div>
       <div is="uploadPic" :fileList="fileListTwo" @uploadPicDel="uploadPicDelTwo" @uploadPicFileList="uploadPicFileListTwo"></div>
     </el-form-item>
     <el-form-item class="plate_num_box">
       <div class="pic_format" style="left: 80px;top: -20px;cursor: pointer;">
-        <div @click="popSel">从布控库中选择</div>
+        <div @click="popSel(2)">从布控库中选择</div>
       </div>
       <div v-for="(item, index) in modelOneForm.licensePlateNumList" :key="index" style="position: relative;" class="plate_num">
         <el-form-item :label="index === 0 ? '嫌疑车辆:' : ''" :prop="'licensePlateNumList.' + index + '.licensePlateNum'" :rules="{validator: validPlateNumber, trigger: 'blur'}">
@@ -74,8 +74,8 @@
       <el-button type="primary" @click="selControl('modelOne')">一键布控</el-button>
     </el-form-item>
     <div is="controlDev" ref="controlDev" @getChildModel="getChildModel" :missingTime="modelOneForm.missingTime" :addressObj="addressObj_" v-if="isShowControlDev"></div>
-    <div is="vehicleLib" ref="vehicleLibDialog"></div>
-    <div is="portraitLib" ref="portraitLibDialog"></div>
+    <div is="vehicleLib" ref="vehicleLibDialog" @getVehicleData="getVehicleData"></div>
+    <div is="portraitLib" ref="portraitLibDialog" @getPortraitData="getPortraitData"></div>
   </el-form>
 </template>
 <script>
@@ -118,6 +118,14 @@ export default {
     this.resetMap();
   },
   methods: {
+    // 从布控库中获取人像
+    getPortraitData (data) {
+      console.log(data, 'datadata')
+    },
+    // 从布控库中获取车像
+    getVehicleData (data) {
+      console.log(data, 'datadata')
+    },
     // 一键布控
     selControl (formName) {
       if (this.fileListOne.length === 0) {
@@ -171,9 +179,14 @@ export default {
       this.fileListTwo = fileList;
     },
     // 从库中选择
-    popSel () {
-      this.$refs['portraitLibDialog'].portraitLibDialog = true;
-      this.$refs['portraitLibDialog'].reset();
+    popSel (type) {
+      if (type === 1) {
+        this.$refs['portraitLibDialog'].portraitLibDialog = true;
+        this.$refs['portraitLibDialog'].reset();
+      } else {
+        this.$refs['vehicleLibDialog'].vehicleLibDialog = true;
+        this.$refs['vehicleLibDialog'].reset();
+      }
     },
     // 添加车牌号码
     addLicensePlateNum () {

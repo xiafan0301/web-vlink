@@ -3,13 +3,13 @@
     <!-- 上访人员照片上传 -->
     <el-form-item label="布控人员信息:" style="margin-bottom: 0;">
       <div class="pic_format" style="top: -40px;">
-        <div @click="popSel">从布控库中选择</div>
+        <div @click="popSel(1)">从布控库中选择</div>
       </div>
       <div is="uploadPic" :fileList="fileList" @uploadPicDel="uploadPicDel" @uploadPicFileList="uploadPicFileList"></div>
     </el-form-item>
     <el-form-item class="plate_num_box">
       <div class="pic_format">
-        <div @click="popSel">从布控库中选择</div>
+        <div @click="popSel(2)">从布控库中选择</div>
       </div>
       <div v-for="(item, index) in modelSixForm.licensePlateNumList" :key="index" style="position: relative;" class="license_plate_num">
         <el-form-item :label="index === 0 ? '布控车辆信息:' : ''" :prop="'licensePlateNumList.' + index + '.licensePlateNum'" :rules="{validator: validPlateNumber, trigger: 'blur'}">
@@ -22,8 +22,8 @@
       </el-form-item>
     </el-form-item>
     <div is="controlDevUpdate" :modelType="6" @getControlDevUpdate="getControlDevUpdate"></div>
-    <div is="vehicleLib" ref="vehicleLibDialog"></div>
-    <div is="portraitLib" ref="portraitLibDialog"></div>
+    <div is="vehicleLib" ref="vehicleLibDialog" @getVehicleData="getVehicleData"></div>
+    <div is="portraitLib" ref="portraitLibDialog" @getPortraitData="getPortraitData"></div>
   </el-form>
 </template>
 <script>
@@ -46,6 +46,14 @@ export default {
     }
   },
   methods: {
+    // 从布控库中获取人像
+    getPortraitData (data) {
+      console.log(data, 'datadata')
+    },
+    // 从布控库中获取车像
+    getVehicleData (data) {
+      console.log(data, 'datadata')
+    },
     // 失踪人员信息的上传方法
     uploadPicDel (fileList) {
       this.fileList = fileList;
@@ -55,9 +63,14 @@ export default {
       this.fileList = fileList;
     },
     // 从库中选择
-    popSel () {
-      this.$refs['portraitLibDialog'].portraitLibDialog = true;
-      this.$refs['portraitLibDialog'].reset();
+    popSel (type) {
+      if (type === 1) {
+        this.$refs['portraitLibDialog'].portraitLibDialog = true;
+        this.$refs['portraitLibDialog'].reset();
+      } else {
+        this.$refs['vehicleLibDialog'].vehicleLibDialog = true;
+        this.$refs['vehicleLibDialog'].reset();
+      }
     },
     // 向父组件传值
     sendParent () {

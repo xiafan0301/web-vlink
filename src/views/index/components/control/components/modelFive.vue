@@ -28,18 +28,16 @@
       <el-button type="primary" @click="selControl('modelFive')">一键布控</el-button>
     </el-form-item>
     <div is="controlDev" ref="controlDev" v-if="isShowControlDev" @getChildModel="getChildModel"></div>
-    <div is="vehicleLib" ref="vehicleLibDialog"></div>
-    <div is="portraitLib" ref="portraitLibDialog"></div>
+    <div is="vehicleLib" ref="vehicleLibDialog" @getVehicleData="getVehicleData"></div>
   </el-form>
 </template>
 <script>
 import controlDev from './controlDev.vue';
 import vehicleLib from './vehicleLib.vue';
-import portraitLib from './portraitLib.vue';
 import {mapXupuxian} from '@/config/config.js';
 import {random14, objDeepCopy} from '@/utils/util.js';
 export default {
-  components: {controlDev, vehicleLib, portraitLib},
+  components: {controlDev, vehicleLib},
   data () {
     return {
       modelFiveForm: {
@@ -53,6 +51,10 @@ export default {
     }
   },
   methods: {
+    // 从布控库中获取车像
+    getVehicleData (data) {
+      console.log(data, 'datadata')
+    },
     // 一键布控
     selControl (formName) {
       this.$refs[formName].validate((valid) => {
@@ -88,9 +90,9 @@ export default {
       this.devData = data;
     },
     // 从库中选择
-    popSel () {
-      this.$refs['portraitLibDialog'].portraitLibDialog = true;
-      this.$refs['portraitLibDialog'].reset();
+    popSel (type) {
+      this.$refs['vehicleLibDialog'].vehicleLibDialog = true;
+      this.$refs['vehicleLibDialog'].reset();
     },
   }
 }

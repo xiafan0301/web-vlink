@@ -24,7 +24,7 @@
         </el-select>
       </el-form-item>
     </el-form-item>
-    <div class="sel_lib"><span>禁入人员：</span><span @click="popSel">从布控库中选择</span></div>
+    <div class="sel_lib"><span>禁入人员：</span><span @click="popSel(1)">从布控库中选择</span></div>
     <div class="sel_img_box">
       <div class="img_box" v-for="item in protraitList" :key="item.id">
         <img src="http://temp.im/104x104" alt="">
@@ -32,7 +32,7 @@
         <span>汪诗诗</span>
       </div>
     </div>
-    <div class="sel_lib"><span>禁入车辆：</span><span @click="popSel">从布控库中选择</span></div>
+    <div class="sel_lib"><span>禁入车辆：</span><span @click="popSel(2)">从布控库中选择</span></div>
     <div class="sel_img_box">
       <div class="img_box" v-for="item in vehicleList" :key="item.id">
         <img src="http://temp.im/104x104" alt="">
@@ -44,8 +44,8 @@
       <el-button type="primary" @click="selControl('modelTwo')">一键布控</el-button>
     </el-form-item>
     <div is="controlDev" ref="controlDev" v-if="isShowControlDev" :addressObjTwo="addressObjTwo" @getChildModel="getChildModel"></div>
-    <div is="vehicleLib" ref="vehicleLibDialog"></div>
-    <div is="portraitLib" ref="portraitLibDialog"></div>
+    <div is="vehicleLib" ref="vehicleLibDialog" @getVehicleData="getVehicleData"></div>
+    <div is="portraitLib" ref="portraitLibDialog" @getPortraitData="getPortraitData"></div>
   </el-form>
 </template>
 <script>
@@ -70,7 +70,7 @@ export default {
         {value: 10, label: '周边10公里'},
         {value: 15, label: '周边15公里'},
         {value: 20, label: '周边20公里'},
-        {value: 0, label: '全城'},
+        {value: 50, label: '全城'},
       ],
       protraitList: '123',
       vehicleList: '123',
@@ -86,6 +86,14 @@ export default {
     this.resetMap();
   },
   methods: {
+    // 从布控库中获取人像
+    getPortraitData (data) {
+      console.log(data, 'datadata')
+    },
+    // 从布控库中获取车像
+    getVehicleData (data) {
+      console.log(data, 'datadata')
+    },
     // 向父组件传值
     sendParent () {
       if (!this.protraitList && !this.vehicleList) {
@@ -108,9 +116,14 @@ export default {
       this.devData = data;
     },
     // 从库中选择
-    popSel () {
-      this.$refs['portraitLibDialog'].portraitLibDialog = true;
-      this.$refs['portraitLibDialog'].reset();
+    popSel (type) {
+      if (type === 1) {
+        this.$refs['portraitLibDialog'].portraitLibDialog = true;
+        this.$refs['portraitLibDialog'].reset();
+      } else {
+        this.$refs['vehicleLibDialog'].vehicleLibDialog = true;
+        this.$refs['vehicleLibDialog'].reset();
+      }
     },
     // 一键布控
     selControl (formName) {
