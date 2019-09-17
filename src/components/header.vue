@@ -298,9 +298,9 @@ export default {
     if(startInfo) {
       this.startDate = startInfo.startDate
     }
-    this.timer = setInterval(() => {
-      this.getAlarmCount();
-    }, 3000);
+    // this.timer = setInterval(() => {
+    //   this.getAlarmCount();
+    // }, 3000);
   },
   methods: {
     // 将输入框的type改为password

@@ -12,8 +12,8 @@
         <div @click="popSel(2)">从布控库中选择</div>
       </div>
       <div v-for="(item, index) in modelSixForm.licensePlateNumList" :key="index" style="position: relative;" class="license_plate_num">
-        <el-form-item :label="index === 0 ? '布控车辆信息:' : ''" :prop="'licensePlateNumList.' + index + '.licensePlateNum'" :rules="{validator: validPlateNumber, trigger: 'blur'}">
-          <el-input v-model="item.licensePlateNum" placeholder="请输入车辆车牌号"></el-input>
+        <el-form-item :label="index === 0 ? '布控车辆信息:' : ''" :prop="'licensePlateNumList.' + index + '.vehicleNumber'" :rules="{validator: validPlateNumber, trigger: 'blur'}">
+          <el-input v-model="item.vehicleNumber" placeholder="请输入车辆车牌号"></el-input>
         </el-form-item>
       </div>
       <el-form-item class="plate_num_btn_box">
@@ -32,12 +32,13 @@ import vehicleLib from './vehicleLib.vue';
 import portraitLib from './portraitLib.vue';
 import controlDevUpdate from './controlDevUpdate.vue';
 import {checkPlateNumber} from '@/utils/validator.js';
+import {random14, objDeepCopy, unique, imgUrls} from '@/utils/util.js';
 export default {
   components: {uploadPic, controlDevUpdate, vehicleLib, portraitLib},
   data () {
     return {
       modelSixForm: {
-        licensePlateNumList: [{licensePlateNum: null}]
+        licensePlateNumList: [{vehicleNumber: null}]
       },
       fileList: [],
       validPlateNumber: checkPlateNumber,
@@ -49,18 +50,28 @@ export default {
     // 从布控库中获取人像
     getPortraitData (data) {
       console.log(data, 'datadata')
+      const _list = this.fileList.concat(data);
+      this.fileList = unique(_list, 'photoUrl');
     },
     // 从布控库中获取车像
     getVehicleData (data) {
       console.log(data, 'datadata')
+      this.modelThreeForm.licensePlateNumList.forEach((item, index) => {
+        if (item.vehicleNumber === null) {
+          item.vehicleNumber = data[index].vehicleNumber;
+        }
+      })
+      // this.modelThreeForm.licensePlateNumList.push(...data);
     },
-    // 失踪人员信息的上传方法
+   // 失踪人员信息的上传方法
     uploadPicDel (fileList) {
       this.fileList = fileList;
     },
     // 失踪人员信息的上传方法
     uploadPicFileList (fileList) {
-      this.fileList = fileList;
+      const _list = imgUrls(fileList);
+      this.fileList = this.fileList.concat(_list);
+      this.fileList = unique(this.fileList, 'photoUrl');
     },
     // 从库中选择
     popSel (type) {
@@ -81,7 +92,7 @@ export default {
     },
     // 添加车牌号码
     addLicensePlateNum () {
-      this.modelSixForm.licensePlateNumList.push({licensePlateNum: null});
+      this.modelSixForm.licensePlateNumList.push({vehicleNumber: null});
     },
     // 删除车牌号码
     removeLicensePlateNum () {

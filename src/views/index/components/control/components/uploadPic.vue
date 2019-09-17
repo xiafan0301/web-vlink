@@ -68,6 +68,8 @@ export default {
   },
   watch: {
     fileList () {
+      this.fileList.forEach(f => f.url = f.photoUrl);
+      
       if (this.fileList.some(s => s.fileType === 2)) {
         this.isShow = true;
         this.videoUrl = this.fileList[0].url;
@@ -101,7 +103,8 @@ export default {
       this.picNum = fileList && fileList.length;
     },
     handlePictureCardPreview (file) {
-      this.dialogImageUrl = file.url;
+      console.log(file, 'file')
+      this.dialogImageUrl = file.photoUrl;
       this.dialogVisible = true;
       console.log(this.dialogImageUrl, 'this.dialogImageUrl')
     },

@@ -16,12 +16,12 @@
       <div class="create_content">
         <el-form ref="createForm" :label-position="labelPosition" :model="createForm" class="create_form">
           <el-form-item class="create_form_one" style="margin-bottom: 0;">
-            <el-form-item label="布控名称:" prop="controlName" style="width: 25%;" :rules="{required: true, message: '请输入布控名称', trigger: 'blur'}">
-              <el-input v-model="createForm.controlName" maxlength="20" @blur="getControlInfoByName"></el-input>
+            <el-form-item label="布控名称:" prop="surveillanceName" style="width: 25%;" :rules="{required: true, message: '请输入布控名称', trigger: 'blur'}">
+              <el-input v-model="createForm.surveillanceName" maxlength="20" @blur="getControlInfoByName"></el-input>
             </el-form-item>
-            <el-form-item label="关联事件:" prop="event" style="width: 25%;">
+            <el-form-item label="关联事件:" prop="eventId" style="width: 25%;">
               <el-select 
-                v-model="createForm.event"
+                v-model="createForm.eventId"
                 filterable 
                 placeholder="请输入关联事件编号"
                 :disabled="($route.query.eventId ? true : false) || (controlDetail.eventId && pageType === 2)"
@@ -34,8 +34,8 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="布控类型:" style="width: 25%;" prop="controlType" :rules="{required: true, message: '请选择布控类型', trigger: 'change'}">
-              <el-select value-key="uid" v-model="createForm.controlType" filterable placeholder="请选择">
+            <el-form-item label="布控类型:" style="width: 25%;" prop="surveillanceType" :rules="{required: true, message: '请选择布控类型', trigger: 'change'}">
+              <el-select value-key="uid" v-model="createForm.surveillanceType" filterable placeholder="请选择">
                 <el-option
                   v-for="item in controlTypeList"
                   :key="item.uid"
@@ -44,7 +44,7 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item v-if="createForm.controlType === 1" label="布控日期:" prop="controlDate" style="width: 25%;" :rules="{required: true, message: '请选择布控日期', trigger: 'blur'}">
+            <el-form-item v-if="createForm.surveillanceType === 1" label="布控日期:" prop="controlDate" style="width: 25%;" :rules="{required: true, message: '请选择布控日期', trigger: 'blur'}">
               <el-date-picker
                 style="width: 192px;"
                 class="vl_date"
@@ -59,8 +59,8 @@
                 :default-time="['00:00:00', '23:59:59']">
               </el-date-picker>
             </el-form-item>
-            <el-form-item label="告警级别:" prop="controlAlarmId" style="width: 25%;margin-bottom: 10px;" :rules="{required: true, message: '请选择告警级别', trigger: 'change'}">
-              <el-select value-key="uid" v-model="createForm.controlAlarmId" filterable placeholder="请选择">
+            <el-form-item label="告警级别:" prop="alarmLevel" style="width: 25%;margin-bottom: 10px;" :rules="{required: true, message: '请选择告警级别', trigger: 'change'}">
+              <el-select value-key="uid" v-model="createForm.alarmLevel" filterable placeholder="请选择">
                 <el-option
                   v-for="item in controAlarmList"
                   :key="item.uid"
@@ -71,8 +71,8 @@
             </el-form-item>
           </el-form-item>
           <el-form-item class="period_time_box" style="margin-bottom: 26px;">
-            <div v-for="(item, index) in createForm.periodTime" :key="index" style="position: relative;" class="period_time">
-              <el-form-item style="margin-bottom: 0;" :label="index === 0 ? '布控时间段（最多可设置5个时间段）:' : ''" :prop="'periodTime.' + index + '.startTime'" :rules="{ required: true, message: '请选择起始时间', trigger: 'blur'}" >
+            <div v-for="(item, index) in createForm.surveillancTimeList" :key="index" style="position: relative;" class="period_time">
+              <el-form-item style="margin-bottom: 0;" :label="index === 0 ? '布控时间段（最多可设置5个时间段）:' : ''" :prop="'surveillancTimeList.' + index + '.startTime'" :rules="{ required: true, message: '请选择起始时间', trigger: 'blur'}" >
                 <el-time-picker
                   placeholder="起始时间"
                   v-model="item.startTime"
@@ -84,7 +84,7 @@
                 </el-time-picker>
               </el-form-item>
               <span class="vl_f_666">-</span>
-              <el-form-item style="margin-bottom: 0;" :prop="'periodTime.' + index + '.endTime'" :rules="{ required: true, message: '请选择结束时间', trigger: 'blur'}" >
+              <el-form-item style="margin-bottom: 0;" :prop="'surveillancTimeList.' + index + '.endTime'" :rules="{ required: true, message: '请选择结束时间', trigger: 'blur'}" >
                 <el-time-picker
                   placeholder="结束时间"
                   v-model="item.endTime"
@@ -98,28 +98,28 @@
               </el-form-item>
             </div>
             <el-form-item class="period_time_btn_box">
-              <div v-if="createForm.periodTime.length < 5" class="period_time_btn" @click="addPeriodTime()"><i class="vl_icon vl_icon_control_22"></i><span>添加布控时间段</span></div>
-              <div v-if="createForm.periodTime.length > 1" class="period_time_btn" @click="removePeriodTime()"><i class="vl_icon vl_icon_control_28"></i><span>删除布控时间段</span></div>
+              <div v-if="createForm.surveillancTimeList.length < 5" class="period_time_btn" @click="addPeriodTime()"><i class="vl_icon vl_icon_control_22"></i><span>添加布控时间段</span></div>
+              <div v-if="createForm.surveillancTimeList.length > 1" class="period_time_btn" @click="removePeriodTime()"><i class="vl_icon vl_icon_control_28"></i><span>删除布控时间段</span></div>
             </el-form-item>
           </el-form-item>
           <el-form-item class="period_time_box" style="margin-bottom: 6px;">
-            <div v-for="(item, index) in createForm.cellphoneMessages" :key="index" style="position: relative;" class="period_time">
-              <el-form-item style="margin-bottom: 0;" :label="index === 0 ? '短信联动:' : ''" :prop="'cellphoneMessages.' + index + '.recipient'" :rules="{validator: validName, trigger: 'blur'}" >
-                <el-input v-model="item.recipient" placeholder="短信接收人" maxlength="5" show-word-limit></el-input>
+            <div v-for="(item, index) in createForm.contactList" :key="index" style="position: relative;" class="period_time">
+              <el-form-item style="margin-bottom: 0;" :label="index === 0 ? '短信联动:' : ''" :prop="'contactList.' + index + '.contact'" :rules="{validator: validName, trigger: 'blur'}" >
+                <el-input v-model="item.contact" placeholder="短信接收人" maxlength="5" show-word-limit></el-input>
               </el-form-item>
               <span class="vl_f_666">-</span>
-              <el-form-item style="margin-bottom: 0;" :prop="'cellphoneMessages.' + index + '.phone'" :rules="{validator: validPhone, trigger: 'blur'}" >
-                <el-input v-model="item.phone" placeholder="手机号码"></el-input>
+              <el-form-item style="margin-bottom: 0;" :prop="'contactList.' + index + '.mobile'" :rules="{validator: validPhone, trigger: 'blur'}" >
+                <el-input v-model="item.mobile" placeholder="手机号码"></el-input>
               </el-form-item>
             </div>
             <el-form-item class="period_time_btn_box">
-              <div v-if="createForm.cellphoneMessages.length < 5" class="period_time_btn" @click="addCellphoneMessages()"><i class="vl_icon vl_icon_control_22"></i><span>添加短信联动</span></div>
-              <div v-if="createForm.cellphoneMessages.length > 1" class="period_time_btn" @click="removeCellphoneMessages()"><i class="vl_icon vl_icon_control_28"></i><span>删除短信联动</span></div>
+              <div v-if="createForm.contactList.length < 5" class="period_time_btn" @click="addCellphoneMessages()"><i class="vl_icon vl_icon_control_22"></i><span>添加短信联动</span></div>
+              <div v-if="createForm.contactList.length > 1" class="period_time_btn" @click="removeCellphoneMessages()"><i class="vl_icon vl_icon_control_28"></i><span>删除短信联动</span></div>
             </el-form-item>
           </el-form-item>
           <el-form-item class="bl_box">
-            <el-form-item label="是否级联:" prop="cascade" :rules="{ required: true, message: '请选择', trigger: 'change'}">
-              <el-select value-key="uid" v-model="createForm.cascade" filterable placeholder="请选择">
+            <el-form-item label="是否级联:" prop="cascadePlatform" :rules="{ required: true, message: '请选择', trigger: 'change'}">
+              <el-select value-key="uid" v-model="createForm.cascadePlatform" filterable placeholder="请选择">
                 <el-option
                   v-for="item in cascadeList"
                   :key="item.uid"
@@ -128,8 +128,8 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="共享布控:" prop="sharedControl" :rules="{ required: true, message: '请选择', trigger: 'change'}">
-              <el-select value-key="uid" v-model="createForm.sharedControl" filterable placeholder="请选择">
+            <el-form-item label="共享布控:" prop="shareDept" :rules="{ required: true, message: '请选择', trigger: 'change'}">
+              <el-select value-key="uid" v-model="createForm.shareDept" filterable placeholder="请选择">
                 <el-option
                   v-for="item in sharedControlList"
                   :key="item.uid"
@@ -140,7 +140,7 @@
             </el-form-item>
           </el-form-item>
           <el-form-item label="布控原因:" class="control_reason">
-            <el-input v-model="createForm.controlReason" type="textarea" placeholder="请输入布控原因"  maxlength="100" show-word-limit></el-input>
+            <el-input v-model="createForm.surveillanceReason" type="textarea" placeholder="请输入布控原因"  maxlength="100" show-word-limit></el-input>
           </el-form-item>
           <div class="create_model">
             <span class="vl_f_666">分析模型：</span>
@@ -166,7 +166,7 @@
         </el-form>
       </div>
       <div class="footer_btn">
-        <el-button class="btn_100" type="primary" @click="saveControl('createForm')">保存</el-button>
+        <el-button class="btn_100" type="primary" :loading="loadingBtn" @click="saveControl('createForm')">保存</el-button>
         <el-button  @click="toGiveUpDialog = true" class="btn_100">取消</el-button>
       </div>
     </div>
@@ -187,7 +187,7 @@
 import {modelOne,modelTwo,modelThree,modelFour,modelFive,modelSix} from './components/modelType.js';
 import {getAllMonitorList, getControlInfoByName, addControl, getControlDetailIsEditor, putControl} from '@/views/index/api/api.control.js';
 import {getEventList, getEventDetail, updateEvent} from '@/views/index/api/api.event.js';
-import {formatDate} from '@/utils/util.js';
+import {formatDate, objDeepCopy} from '@/utils/util.js';
 import {mapXupuxian} from '@/config/config.js';
 import {dataList} from '@/utils/data.js';
 import {checkName, validatePhone} from '@/utils/validator.js';
@@ -221,37 +221,37 @@ export default {
       controAlarmList: this.dicFormater(dataList.alarmLevel)[0].dictList,
       // 布控表单参数
       createForm: {
-        controlName: null,
-        event: null,
-        controlType: 1,
+        surveillanceName: null,
+        eventId: null,
+        surveillanceType: 1,
         controlDate: [],
-        controlAlarmId: '3',
-        periodTime: [
+        alarmLevel: '3',
+        surveillancTimeList: [
           {
             startTime: new Date(2019, 4, 10, 0, 0, 0),
             endTime:  new Date(2019, 4, 10, 23, 59, 59)
           }
         ],
-        cellphoneMessages: [
+        contactList: [
           {
-            recipient: null,
-            phone:  null
+            contact: null,
+            mobile:  null
           }
         ],
-        cascade: null,
-        sharedControl: null,
-        controlReason: null
+        cascadePlatform: null,
+        shareDept: null,
+        surveillanceReason: null
       },
       eventList: [],//关联事件下拉列表
       cascadeList: [
-        {value: 1, label: '是'},
-        {value: 0, label: '否'}
+        {value: '1', label: '是'},
+        {value: '0', label: '否'}
       ],//是否级联下拉列表
       sharedControlList: [
-        {value: 1, label: '是'},
-        {value: 0, label: '否'}
+        {value: '1', label: '是'},
+        {value: '0', label: '否'}
       ],//是否共享布控下拉列表
-      modelType: 1,//布控模型类型
+      modelType: 2,//布控模型类型
       // 弹出框参数
       toGiveUpDialog: false,
       loading: false,
@@ -299,27 +299,27 @@ export default {
   
     // 新增时间段
     addPeriodTime() {
-      this.createForm.periodTime.push({
+      this.createForm.surveillancTimeList.push({
         startTime: null,
         endTime: null
       });
     },
     // 删除时间段
     removePeriodTime() {
-      this.createForm.periodTime.pop();
+      this.createForm.surveillancTimeList.pop();
     },
     // 添加短信联动
     addCellphoneMessages () {
-      this.createForm.cellphoneMessages.push(
+      this.createForm.contactList.push(
         {
-          recipient: null,
-          phone:  null
+          contact: null,
+          mobile:  null
         }
       );
     },
     // 删除短信联动
     removeCellphoneMessages () {
-      this.createForm.cellphoneMessages.pop();
+      this.createForm.contactList.pop();
     },
     skipIsList () {
     
@@ -328,11 +328,11 @@ export default {
     getControlInfoByName () {
       // 编辑布控时，只有布控名称做出改动以后才会异步判断是否存在
       if (this.controlDetail.surveillanceName) {
-        if (this.createForm.controlName === this.controlDetail.surveillanceName) {
+        if (this.createForm.surveillanceName === this.controlDetail.surveillanceName) {
           return false;
         }
       }
-      const name = this.Trim(this.createForm.controlName, 'g');
+      const name = this.Trim(this.createForm.surveillanceName, 'g');
       if (name) {
         getControlInfoByName({name}).then(res => {
           if (res && res.data) {
@@ -349,11 +349,39 @@ export default {
     saveControl (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
+          const _createForm = objDeepCopy(this.createForm);
+          if (_createForm.controlDate.length > 0) {
+            _createForm.surveillanceDateStart = _createForm.controlDate[0];
+            _createForm.surveillanceDateEnd = _createForm.controlDate[1];
+          }
+          delete _createForm.controlDate;
+          _createForm.surveillancTimeList = _createForm.surveillancTimeList.map(m => {
+            return {
+              startTime: formatDate(m.startTime, 'HH:mm:ss'),
+              endTime: formatDate(m.endTime, 'HH:mm:ss')
+            }
+          })
           this.modelData = {};
           this.$refs['model'].sendParent();
           console.log(this.modelData, 'this.modelData');
-   
-        
+          let data  = {
+            ..._createForm,
+            modelList: [this.modelData]
+          }
+          this.loadingBtn = true;
+          addControl(data).then(res => {
+            if (res) {
+              this.$message.success(this.pageType === 3 ? '复用成功' : '新增成功');
+              this.$router.push({ name: 'control_manage' });
+              // // 新增布控后，状态为待开始的事件，改为进行中
+              // const obj = this.eventList.find(f => f.value === this.createForm.event);
+              // if (obj && obj.eventStatus === 1) {
+              //   updateEvent({uid: obj.value, type: 6});
+              // }
+            }
+          }).finally(() => {
+            this.loadingBtn = false;
+          })
         } else {
           return false;
         }
@@ -361,11 +389,11 @@ export default {
     },
     // 对比布控时间段是否重叠的方法
     isOverlap () {
-      let startTimeArr = this.createForm.periodTime.map(m => m.startTime);
-      let endTimeArr = this.createForm.periodTime.map(m => m.endTime);
+      let startTimeArr = this.createForm.surveillancTimeList.map(m => m.startTime);
+      let endTimeArr = this.createForm.surveillancTimeList.map(m => m.endTime);
       let begin = startTimeArr.sort();
       let over = endTimeArr.sort();
-      if (this.createForm.periodTime.length === 1) {
+      if (this.createForm.surveillancTimeList.length === 1) {
         return true;
       } else {
         for (let k = 1; k < begin.length; k++) {

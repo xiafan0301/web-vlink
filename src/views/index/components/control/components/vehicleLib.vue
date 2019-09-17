@@ -46,7 +46,7 @@
     </el-form>
     <div class="list_box" v-loading="loading">
       <div class="list_info" v-for="item in carMemberList.list" :key="item.uid">
-        <div class="list_img"><img :src="item.vehicleImagePath" alt="" style="width: 100%;height: 100%;"></div>
+        <div class="list_img"><img :src="item.photoUrl" alt="" style="width: 100%;height: 100%;"></div>
         <div class="list_data">
           <div class="data_title">
             <span class="vl_f_999">详情资料</span>
@@ -159,14 +159,14 @@ export default {
         if (res && res.data) {
           console.log(JSON.stringify(res.data), 'res.data');
           this.carMemberList = res.data;
-          this.carMemberList.list.forEach(f => {
+          this.carMemberList.list = this.carMemberList.list.map(f => {
             this.$set(f, 'isChecked', false);
+            const {vehicleImagePath, ...other} = f;
+            return {
+              photoUrl: vehicleImagePath,
+              ...other
+            }
           })
-          // 跳转到设置页
-          if (pageType === '2') {
-            this.pageType = pageType;
-          }
-          console.log(this.currentPage, 'currentPage')
         }
       }).finally(() => {
         this.loading = false;

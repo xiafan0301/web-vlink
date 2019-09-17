@@ -100,7 +100,7 @@ import controlDevUpdate from './controlDevUpdate.vue';
 import { setTimeout } from 'timers';
 export default {
   components: {controlDevUpdate},
-  props: ['addressObj', 'addressObjTwo', 'modelType', 'missingTime'],
+  props: ['addressObj', 'addressObjTwo', 'modelType', 'lostTime'],
   data () {
     return {
       pageType: 1,//页面类型，1为布控设备展示页面，2为修改布控设备页面
@@ -137,7 +137,9 @@ export default {
     // 传给父组件
     sendParent () {
       if (this.pageType === 1) {
-        this.$emit('getChildModel', {self_to_data1: this.self_to_data1, self_to_data2: this.self_to_data2})
+        const devList = this.devIdList.map(m => {return {deviceId: m}})
+        const bayonetList = this.bayIdList.map(m => {return {bayonetId: m}})
+        this.$emit('getChildModel', {devList, bayonetList});
       } else {
         this.$emit('getChildModel', this.devUpdateData);
       }
@@ -316,7 +318,7 @@ export default {
       if (type === 2 ) return 3*1000;
       const minute10 = 10*60*1000;
       const minute30 = 30*60*1000;
-      const time = new Date().getTime() - this.missingTime.getTime();
+      const time = new Date().getTime() - this.lostTime.getTime();
       console.log(time, 'time')
       if (time === minute10) {
         return 10*1000;
@@ -611,14 +613,14 @@ export default {
   },
   computed: {
     // 右侧数据
-    self_from_data() {
+    // self_from_data() {
       // if (this.bayOrdev === 2) {
       //   return this.bayFromData;
       // } else {
       //   return this.devFromData;
       // }
-    },
-    selDevNum () {
+    // },
+    // selDevNum () {
       // if (this.bayOrdev === 2) {
       //   const data = this.flatDev_(this.self_to_data2);
       //   return data.length;
@@ -626,7 +628,7 @@ export default {
       //   const data = this.flatDev_(this.self_to_data1);
       //   return data.length;
       // }
-    },
+    // },
   },
   // 销毁地图实例
   isDestroyed () {

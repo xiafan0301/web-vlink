@@ -144,8 +144,13 @@ export default {
       getPortraitList(params).then(res => {
         if (res && res.data) {
           this.protraitMemberList = res.data;
-          this.protraitMemberList.list.forEach(f => {
+           this.protraitMemberList.list = this.protraitMemberList.list.map(f => {
             this.$set(f, 'isChecked', false);
+            const {photoUrl, ...other} = f;
+            return {
+              photoUrl: photoUrl,
+              ...other
+            }
           })
         }
       }).finally(() => {

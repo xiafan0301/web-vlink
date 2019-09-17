@@ -3,18 +3,18 @@
     <h1>布控信息：</h1>
     <div class="sel_lib"><span>禁入人员：</span><span @click="popSel(1)">从布控库中选择</span></div>
     <div class="sel_img_box">
-      <div class="img_box" v-for="item in protraitList" :key="item.id">
-        <img src="http://temp.im/104x104" alt="">
-        <i class="el-icon-error"></i>
-        <span>汪诗诗</span>
+      <div class="img_box" v-for="(item, index) in protraitList" :key="index">
+        <img :src="item.photoUrl" alt="">
+        <i class="el-icon-error" @click="delPortrait(index)"></i>
+        <span :title="item.name">{{item.name | strCutWithLen(12)}}</span>
       </div>
     </div>
     <div class="sel_lib"><span>禁入车辆：</span><span @click="popSel(2)">从布控库中选择</span></div>
     <div class="sel_img_box">
-      <div class="img_box" v-for="item in vehicleList" :key="item.id">
-        <img src="http://temp.im/104x104" alt="">
-        <i class="el-icon-error"></i>
-        <span>汪诗诗</span>
+      <div class="img_box" v-for="(item, index) in vehicleList" :key="index">
+        <img :src="item.photoUrl" alt="">
+        <i class="el-icon-error" @click="delVehicle(index)"></i>
+        <span>{{item.vehicleNumber}}</span>
       </div>
     </div>
     <div is="controlDevUpdate" :modelType="4" @getControlDevUpdate="getControlDevUpdate"></div>
@@ -26,23 +26,36 @@
 import controlDevUpdate from './controlDevUpdate.vue';
 import vehicleLib from './vehicleLib.vue';
 import portraitLib from './portraitLib.vue';
+import {random14, objDeepCopy, unique} from '@/utils/util.js';
 export default {
   components: {controlDevUpdate, vehicleLib, portraitLib},
   data () {
     return {
-      protraitList: '123',
-      vehicleList: '123',
+      protraitList: [],
+      vehicleList: [],
       devUpdateData: {}
     }
   },
   methods: {
-    // 从布控库中获取人像
+     // 从布控库中获取失踪人像
     getPortraitData (data) {
       console.log(data, 'datadata')
+      this.protraitList = this.protraitList.concat(data);
+      this.protraitList = unique(this.protraitList, 'photoUrl');
     },
-    // 从布控库中获取车像
+    // 从布控库中获取嫌疑车辆
     getVehicleData (data) {
       console.log(data, 'datadata')
+      this.vehicleList = this.vehicleList.concat(data);
+      this.vehicleList = unique(this.vehicleList, 'photoUrl');
+    },
+    // 删除从布控库中已选择的人员
+    delPortrait (index) {
+      this.protraitList.splice(index, 1);
+    },
+    // 删除从布控库中已选择的车辆
+    delVehicle (index) {
+      this.vehicleList.splice(index, 1);
     },
     // 从库中选择
     popSel (type) {

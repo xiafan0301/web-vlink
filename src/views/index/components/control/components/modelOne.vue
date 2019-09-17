@@ -7,8 +7,8 @@
       </div>
       <div is="uploadPic" :fileList="fileListOne" @uploadPicDel="uploadPicDelOne" @uploadPicFileList="uploadPicFileListOne" :maxSize="1"></div>
     </el-form-item>
-    <el-form-item label="人员姓名:" prop="personnelName" :rules="[{ required: true, message: '请输入人员姓名', trigger: 'blur'}, {validator: validName, trigger: 'blur'}]">
-      <el-input v-model="modelOneForm.personnelName"></el-input>
+    <el-form-item label="人员姓名:" prop="name" :rules="[{ required: true, message: '请输入人员姓名', trigger: 'blur'}, {validator: validName, trigger: 'blur'}]">
+      <el-input v-model="modelOneForm.name"></el-input>
     </el-form-item>
     <el-form-item label="性别:" prop="sex" :rules="{ required: true, message: '请选择人员性别', trigger: 'change'}">
       <el-select value-key="uid" v-model="modelOneForm.sex" filterable placeholder="请选择">
@@ -20,17 +20,17 @@
         </el-option>
       </el-select>  
     </el-form-item>
-    <el-form-item label="失踪时间:" prop="missingTime" :rules="{ required: true, message: '请选择失踪时间', trigger: 'blur'}">
+    <el-form-item label="失踪时间:" prop="lostTime" :rules="{ required: true, message: '请选择失踪时间', trigger: 'blur'}">
       <el-date-picker
-        v-model="modelOneForm.missingTime"
+        v-model="modelOneForm.lostTime"
         type="datetime"
         placeholder="请选择失踪时间">
       </el-date-picker>
     </el-form-item>
-    <el-form-item label="失踪地址:" prop="missingAddress" :rules="{ required: true, message: '请输入地名的关键词', trigger: 'blur'}">
+    <el-form-item label="失踪地址:" prop="address" :rules="{ required: true, message: '请输入地名的关键词', trigger: 'blur'}">
        <el-autocomplete
         style="width: 100%;"
-        v-model="modelOneForm.missingAddress"
+        v-model="modelOneForm.address"
         :trigger-on-focus="false"
         :fetch-suggestions="autoAdress"
         value-key="name"
@@ -41,7 +41,7 @@
     <el-form-item label="家庭地址:">
       <el-autocomplete
         style="width: 100%;"
-        v-model="modelOneForm.familyAddress"
+        v-model="modelOneForm.homeAddress"
         :trigger-on-focus="false"
         :fetch-suggestions="autoAdress"
         value-key="name"
@@ -52,30 +52,31 @@
     <!-- 嫌疑人照片上传 -->
     <el-form-item label="嫌疑人照片:">
       <div class="pic_format" style="left: 96px;top: -40px;">
-        <div @click="popSel(1)">从布控库中选择</div>
+        <div @click="popSel(2)">从布控库中选择</div>
       </div>
       <div is="uploadPic" :fileList="fileListTwo" @uploadPicDel="uploadPicDelTwo" @uploadPicFileList="uploadPicFileListTwo"></div>
     </el-form-item>
     <el-form-item class="plate_num_box">
       <div class="pic_format" style="left: 80px;top: -20px;cursor: pointer;">
-        <div @click="popSel(2)">从布控库中选择</div>
+        <div @click="popSel(3)">从布控库中选择</div>
       </div>
-      <div v-for="(item, index) in modelOneForm.licensePlateNumList" :key="index" style="position: relative;" class="plate_num">
-        <el-form-item :label="index === 0 ? '嫌疑车辆:' : ''" :prop="'licensePlateNumList.' + index + '.licensePlateNum'" :rules="{validator: validPlateNumber, trigger: 'blur'}">
-          <el-input v-model="item.licensePlateNum" placeholder="请输入车辆车牌号"></el-input>
+      <div v-for="(item, index) in modelOneForm.carNumberInfo" :key="index" style="position: relative;" class="plate_num">
+        <el-form-item :label="index === 0 ? '嫌疑车辆:' : ''" :prop="'carNumberInfo.' + index + '.vehicleNumber'" :rules="{validator: validPlateNumber, trigger: 'blur'}">
+          <el-input v-model="item.vehicleNumber" placeholder="请输入车辆车牌号"></el-input>
         </el-form-item>
       </div>
       <el-form-item class="plate_num_btn_box">
         <div class="period_time_btn" @click="addLicensePlateNum()"><i class="vl_icon vl_icon_control_22"></i><span>添加车牌号码</span></div>
-        <div v-if="modelOneForm.licensePlateNumList.length > 1" class="period_time_btn" @click="removeLicensePlateNum()"><i class="vl_icon vl_icon_control_28"></i><span>删除车牌号码</span></div>
+        <div v-if="modelOneForm.carNumberInfo.length > 1" class="period_time_btn" @click="removeLicensePlateNum()"><i class="vl_icon vl_icon_control_28"></i><span>删除车牌号码</span></div>
       </el-form-item>
     </el-form-item>
     <el-form-item style="margin-top: 20px;" v-if="!isShowControlDev">
       <el-button type="primary" @click="selControl('modelOne')">一键布控</el-button>
     </el-form-item>
-    <div is="controlDev" ref="controlDev" @getChildModel="getChildModel" :missingTime="modelOneForm.missingTime" :addressObj="addressObj_" v-if="isShowControlDev"></div>
+    <div is="controlDev" ref="controlDev" @getChildModel="getChildModel" :lostTime="modelOneForm.lostTime" :addressObj="addressObj_" v-if="isShowControlDev"></div>
+    <div is="portraitLib" ref="portraitLibDialogOne" @getPortraitData="getPortraitDataOne"></div>
+    <div is="portraitLib" ref="portraitLibDialogTwo" @getPortraitData="getPortraitDataTwo"></div>
     <div is="vehicleLib" ref="vehicleLibDialog" @getVehicleData="getVehicleData"></div>
-    <div is="portraitLib" ref="portraitLibDialog" @getPortraitData="getPortraitData"></div>
   </el-form>
 </template>
 <script>
@@ -83,7 +84,7 @@ import uploadPic from './uploadPic.vue';
 import controlDev from './controlDev.vue';
 import vehicleLib from './vehicleLib.vue';
 import portraitLib from './portraitLib.vue';
-import {random14, objDeepCopy} from '@/utils/util.js';
+import {random14, objDeepCopy, imgUrls, unique, formatDate} from '@/utils/util.js';
 import {checkName, checkPlateNumber} from '@/utils/validator.js';
 export default {
   components: {uploadPic, controlDev, vehicleLib, portraitLib},
@@ -91,12 +92,19 @@ export default {
     return {
       map: null,
       modelOneForm: {
-        missingTime: new Date('2019-9-10 11:00'),
-        personnelName: null,
+        lostTime: new Date('2019-9-10 11:00'),
+        name: null,
         sex: null,
-        missingAddress: null,
-        familyAddress: null,
-        licensePlateNumList: [{licensePlateNum: null}]
+        address: null,
+        homeAddress: null,
+        carNumberInfo: [{vehicleNumber: null}],
+        radius: null,
+        // stayTime: null,
+        url: null,
+        longitude: null,
+        latitude: null,
+        bayonetList: [],
+        devList: []
       },
       validPlateNumber: checkPlateNumber,
       validName: checkName,
@@ -111,20 +119,61 @@ export default {
       fileListOne: [],//上传的失踪人员信息数据
       fileListTwo: [],//上传的嫌疑人照片数据
       isShowControlDev: false,//是否显示布控设备选择部分
-      devData: {}
+      devData: {},
     }
   },
   mounted () {
     this.resetMap();
   },
   methods: {
-    // 从布控库中获取人像
-    getPortraitData (data) {
-      console.log(data, 'datadata')
+    // 计算布控范围半径
+    scopeRadius () {
+      const minute10 = 10*60*1000;
+      const minute30 = 30*60*1000;
+      const time = new Date().getTime() - this.modelOneForm.lostTime.getTime();
+      if (time === minute10) {
+        return 10;
+      } else if (time > minute10 && time < minute30) {
+        return 60;
+      } else if (time > minute30) {
+        return 60;
+      } else {
+        return 10;
+      }
+    },
+    // 从布控库中获取失踪人像
+    getPortraitDataOne (data) {
+      this.fileListOne = data.map(m => {
+        return {
+          objId: m.uid,
+          objType: 1,
+          photoUrl: m.photoUrl
+        }
+      });
+      console.log(this.fileListOne, 'this.fileListOne')
+    },
+    // 从布控库中获取嫌疑人像
+    getPortraitDataTwo (data) {
+      const _list = data.map(m => {
+        return {
+          objId: m.uid,
+          objType: 1,
+          photoUrl: m.photoUrl  
+        }
+      });
+      this.fileListTwo = this.fileListTwo.concat(_list);
+      this.fileListTwo = unique(this.fileListTwo, 'photoUrl');
+      console.log(this.fileListTwo, 'this.fileListTwo')
     },
     // 从布控库中获取车像
     getVehicleData (data) {
       console.log(data, 'datadata')
+      this.modelOneForm.carNumberInfo.forEach((item, index) => {
+        if (item.vehicleNumber === null) {
+          item.vehicleNumber = data[index].vehicleNumber;
+        }
+      })
+      // this.modelOneForm.carNumberInfo.push(...data);
     },
     // 一键布控
     selControl (formName) {
@@ -147,10 +196,21 @@ export default {
       } 
       this.$refs['modelOne'].validate((valid) => {
         if (valid) {
-          console.log(111111111)
           if (this.$refs['controlDev']) {
             this.$refs['controlDev'].sendParent();
-            this.$emit('getModel', {modelOneForm: this.modelOneForm, fileListOne: this.fileListOne, fileListTwo: this.fileListTwo, ...this.devData});
+
+            const _modelOneForm = objDeepCopy(this.modelOneForm);
+
+            _modelOneForm.carNumberInfo = _modelOneForm.carNumberInfo.map(m => m.vehicleNumber).join(',');
+            _modelOneForm.radius = this.scopeRadius();
+            _modelOneForm.url = this.fileListOne[0].photoUrl;
+            _modelOneForm.lostTime = formatDate(_modelOneForm.lostTime);
+            _modelOneForm.longitude = this.addressObj_.map(m => m.lngLat[0]).join(',');
+            _modelOneForm.latitude = this.addressObj_.map(m => m.lngLat[1]).join(',');
+            _modelOneForm.bayonetList = this.devData.bayonetList;
+            _modelOneForm.devList = this.devData.devList;
+            const surveillanceObjectDtoList = this.fileListOne.concat(this.fileListTwo);
+            this.$emit('getModel', {carNumberInfo: _modelOneForm.carNumberInfo, modelType: 1,  pointDtoList: [_modelOneForm], surveillanceObjectDtoList});
           } else {
             this.$message.warning('请先选择布控设备');
           }
@@ -165,24 +225,35 @@ export default {
     // 失踪人员信息的上传方法
     uploadPicDelOne (fileList) {
       this.fileListOne = fileList;
+      console.log(this.fileListOne)
     },
     // 失踪人员信息的上传方法
     uploadPicFileListOne (fileList) {
-      this.fileListOne = fileList;
+      console.log(fileList, 'fileList')
+      this.fileListOne = imgUrls(fileList);
+      console.log(this.fileListOne)
     },
+
     // 嫌疑人照片的上传方法
     uploadPicDelTwo (fileList) {
       this.fileListTwo = fileList;
     },
     // 嫌疑人照片的上传方法
     uploadPicFileListTwo (fileList) {
-      this.fileListTwo = fileList;
+      console.log(fileList, 'fileList')
+      const _list = imgUrls(fileList);
+      this.fileListTwo = this.fileListTwo.concat(_list);
+      this.fileListTwo = unique(this.fileListTwo, 'photoUrl');
+      console.log(this.fileListTwo)
     },
     // 从库中选择
     popSel (type) {
       if (type === 1) {
-        this.$refs['portraitLibDialog'].portraitLibDialog = true;
-        this.$refs['portraitLibDialog'].reset();
+        this.$refs['portraitLibDialogOne'].portraitLibDialog = true;
+        this.$refs['portraitLibDialogOne'].reset();
+      } else if (type === 2) {
+        this.$refs['portraitLibDialogTwo'].portraitLibDialog = true;
+        this.$refs['portraitLibDialogTwo'].reset();
       } else {
         this.$refs['vehicleLibDialog'].vehicleLibDialog = true;
         this.$refs['vehicleLibDialog'].reset();
@@ -190,11 +261,11 @@ export default {
     },
     // 添加车牌号码
     addLicensePlateNum () {
-      this.modelOneForm.licensePlateNumList.push({licensePlateNum: null});
+      this.modelOneForm.carNumberInfo.push({vehicleNumber: null});
     },
     // 删除车牌号码
     removeLicensePlateNum () {
-      this.modelOneForm.licensePlateNumList.pop();
+      this.modelOneForm.carNumberInfo.pop();
     },
     // 拿到地图实列
     resetMap () {
@@ -239,14 +310,14 @@ export default {
         if (this.addressObj.some(s => s.type === 1)) this.addressObj = this.addressObj.filter(f => f.type !== 1);
         this.addressObj.push({
           lngLat: [e.location.lng, e.location.lat],
-          address: this.modelOneForm.missingAddress,
+          address: this.modelOneForm.address,
           type: 1
         });
       } else {
         if (this.addressObj.some(s => s.type === 2)) this.addressObj = this.addressObj.filter(f => f.type !== 2);
         this.addressObj.push({
           lngLat: [e.location.lng, e.location.lat],
-          address: this.modelOneForm.familyAddress,
+          address: this.modelOneForm.homeAddress,
           type: 2
         });
       }

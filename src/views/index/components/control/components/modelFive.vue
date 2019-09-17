@@ -17,10 +17,10 @@
     <el-form-item style="margin-bottom: 0;width: 100%;">
       <div class="sel_lib"><span>布控车辆：</span><span @click="popSel">从公务车辆中选择</span></div>
       <div class="sel_img_box">
-        <div class="img_box" v-for="item in vehicleList" :key="item.id">
-          <img src="http://temp.im/104x104" alt="">
-          <i class="el-icon-error"></i>
-          <span>汪诗诗</span>
+        <div class="img_box" v-for="(item, index) in vehicleList" :key="index">
+          <img :src="item.photoUrl" alt="">
+          <i class="el-icon-error" @click="delVehicle(index)"></i>
+          <span>{{item.vehicleNumber}}</span>
         </div>
       </div>
     </el-form-item>
@@ -35,7 +35,7 @@
 import controlDev from './controlDev.vue';
 import vehicleLib from './vehicleLib.vue';
 import {mapXupuxian} from '@/config/config.js';
-import {random14, objDeepCopy} from '@/utils/util.js';
+import {random14, objDeepCopy, unique} from '@/utils/util.js';
 export default {
   components: {controlDev, vehicleLib},
   data () {
@@ -44,16 +44,22 @@ export default {
         site: null,
         duration: 30
       },
-      vehicleList: '123',
+      vehicleList: [],
       siteList: [],
       isShowControlDev: false,
       devData: {}
     }
   },
   methods: {
-    // 从布控库中获取车像
+    // 从布控库中获取嫌疑车辆
     getVehicleData (data) {
       console.log(data, 'datadata')
+      this.vehicleList = this.vehicleList.concat(data);
+      this.vehicleList = unique(this.vehicleList, 'photoUrl');
+    },
+    // 删除从布控库中已选择的车辆
+    delVehicle (index) {
+      this.vehicleList.splice(index, 1);
     },
     // 一键布控
     selControl (formName) {

@@ -26,26 +26,26 @@
     </el-form-item>
     <div class="sel_lib"><span>禁入人员：</span><span @click="popSel(1)">从布控库中选择</span></div>
     <div class="sel_img_box">
-      <div class="img_box" v-for="item in protraitList" :key="item.id">
-        <img src="http://temp.im/104x104" alt="">
-        <i class="el-icon-error" @click="delPortrait()"></i>
-        <span>汪诗诗</span>
+      <div class="img_box" v-for="(item, index) in protraitList" :key="index">
+        <img :src="item.photoUrl" alt="">
+        <i class="el-icon-error" @click="delPortrait(index)"></i>
+        <span :title="item.name">{{item.name | strCutWithLen(12)}}</span>
       </div>
     </div>
     <div class="sel_lib"><span>禁入车辆：</span><span @click="popSel(2)">从布控库中选择</span></div>
     <div class="sel_img_box">
-      <div class="img_box" v-for="item in vehicleList" :key="item.id">
-        <img src="http://temp.im/104x104" alt="">
-        <i class="el-icon-error" @click="delVehicle()"></i>
-        <span>汪诗诗</span>
+      <div class="img_box" v-for="(item, index) in vehicleList" :key="index">
+        <img :src="item.photoUrl" alt="">
+        <i class="el-icon-error" @click="delVehicle(index)"></i>
+        <span>{{item.vehicleNumber}}</span>
       </div>
     </div>
     <el-form-item style="margin-top: 20px;" v-if="!isShowControlDev">
       <el-button type="primary" @click="selControl('modelTwo')">一键布控</el-button>
     </el-form-item>
     <div is="controlDev" ref="controlDev" v-if="isShowControlDev" :addressObjTwo="addressObjTwo" @getChildModel="getChildModel"></div>
-    <div is="vehicleLib" ref="vehicleLibDialog" @getVehicleData="getVehicleData"></div>
     <div is="portraitLib" ref="portraitLibDialog" @getPortraitData="getPortraitData"></div>
+    <div is="vehicleLib" ref="vehicleLibDialog" @getVehicleData="getVehicleData"></div>
   </el-form>
 </template>
 <script>
@@ -53,7 +53,7 @@ import controlDev from './controlDev.vue';
 import vehicleLib from './vehicleLib.vue';
 import portraitLib from './portraitLib.vue';
 import {mapXupuxian} from '@/config/config.js';
-import {random14, objDeepCopy} from '@/utils/util.js';
+import {random14, objDeepCopy, unique} from '@/utils/util.js';
 export default {
   components: {controlDev, vehicleLib, portraitLib},
   data () {
@@ -61,7 +61,7 @@ export default {
       labelPosition: 'top',
       modelTwoForm: {
         address: null,
-        radius: 3,
+        radius: 3
       },
       autoComplete: null,
       radiusList: [
@@ -72,8 +72,8 @@ export default {
         {value: 20, label: '周边20公里'},
         {value: 50, label: '全城'},
       ],
-      protraitList: '123',
-      vehicleList: '123',
+      protraitList: [],
+      vehicleList: [],
       isShowControlDev: false,
       addressObjTwo: {
         lnglat: [],
@@ -86,13 +86,33 @@ export default {
     this.resetMap();
   },
   methods: {
-    // 从布控库中获取人像
-    getPortraitData (data) {
+    // 从布控库中获取失踪人像
+    getPortraitData (data) { 
       console.log(data, 'datadata')
+      const _list = data.map(m => {
+        return {
+          objId: m.uid,
+          objType: 1,
+          photoUrl: m.photoUrl,
+          name: m.name
+        }
+      });
+      this.protraitList = this.protraitList.concat(_list);
+      this.protraitList = unique(this.protraitList, 'photoUrl');
     },
-    // 从布控库中获取车像
+    // 从布控库中获取禁入车辆
     getVehicleData (data) {
       console.log(data, 'datadata')
+      const _list = data.map(m => {
+        return {
+          objId: m.uid,
+          objType: 2,
+          photoUrl: m.photoUrl,
+          vehicleNumber: m.vehicleNumber
+        }
+      });
+      this.vehicleList = this.vehicleList.concat(_list);
+      this.vehicleList = unique(this.vehicleList, 'photoUrl');
     },
     // 向父组件传值
     sendParent () {
@@ -103,7 +123,11 @@ export default {
         if (valid) {
           if (this.$refs['controlDev']) {
             this.$refs['controlDev'].sendParent();
-            this.$emit('getModel', {modelTwoForm: this.modelTwoForm, protraitList: this.protraitList, vehicleList: this.vehicleList, ...this.devData});
+
+            const _carNumberInfo = this.vehicleList.map(m => m.vehicleNumber).join(',');
+            this.modelTwoForm.bayonetList = this.devData.bayonetList;
+            this.modelTwoForm.devList = this.devData.devList;
+            this.$emit('getModel', {carNumberInfo: _carNumberInfo, modelType: 2,  pointDtoList: [this.modelTwoForm], surveillanceObjectDtoList: this.protraitList});
           } else {
             this.$message.warning('请先选择布控设备');
           }
@@ -139,12 +163,12 @@ export default {
       });
     },
     // 删除从布控库中已选择的人员
-    delPortrait () {
-      
+    delPortrait (index) {
+      this.protraitList.splice(index, 1);
     },
     // 删除从布控库中已选择的车辆
-    delVehicle () {
-
+    delVehicle (index) {
+      this.vehicleList.splice(index, 1);
     },
     // 拿到地图实列
     resetMap () {
