@@ -44,8 +44,8 @@
       <el-button type="primary" @click="selControl('modelTwo')">一键布控</el-button>
     </el-form-item>
     <div is="controlDev" ref="controlDev" v-if="isShowControlDev" :addressObjTwo="addressObjTwo" @getChildModel="getChildModel"></div>
-    <div is="portraitLib" ref="portraitLibDialog" @getPortraitData="getPortraitData"></div>
-    <div is="vehicleLib" ref="vehicleLibDialog" @getVehicleData="getVehicleData"></div>
+    <div is="portraitLib" ref="portraitLibDialog" :fileListOne="protraitList" @getPortraitData="getPortraitData"></div>
+    <div is="vehicleLib" ref="vehicleLibDialog" :carNumberInfo="vehicleList" @getVehicleData="getVehicleData"></div>
   </el-form>
 </template>
 <script>
@@ -89,30 +89,14 @@ export default {
     // 从布控库中获取失踪人像
     getPortraitData (data) { 
       console.log(data, 'datadata')
-      const _list = data.map(m => {
-        return {
-          objId: m.uid,
-          objType: 1,
-          photoUrl: m.photoUrl,
-          name: m.name
-        }
-      });
-      this.protraitList = this.protraitList.concat(_list);
-      this.protraitList = unique(this.protraitList, 'photoUrl');
+      this.protraitList = this.protraitList.concat(data);
+      this.protraitList = unique(this.protraitList, 'objId');
     },
     // 从布控库中获取禁入车辆
     getVehicleData (data) {
       console.log(data, 'datadata')
-      const _list = data.map(m => {
-        return {
-          objId: m.uid,
-          objType: 2,
-          photoUrl: m.photoUrl,
-          vehicleNumber: m.vehicleNumber
-        }
-      });
-      this.vehicleList = this.vehicleList.concat(_list);
-      this.vehicleList = unique(this.vehicleList, 'photoUrl');
+      this.vehicleList = this.vehicleList.concat(data);
+      this.vehicleList = unique(this.vehicleList, 'objId');
     },
     // 向父组件传值
     sendParent () {

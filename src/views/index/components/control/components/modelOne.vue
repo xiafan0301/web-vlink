@@ -74,9 +74,9 @@
       <el-button type="primary" @click="selControl('modelOne')">一键布控</el-button>
     </el-form-item>
     <div is="controlDev" ref="controlDev" @getChildModel="getChildModel" :lostTime="modelOneForm.lostTime" :addressObj="addressObj_" v-if="isShowControlDev"></div>
-    <div is="portraitLib" ref="portraitLibDialogOne" @getPortraitData="getPortraitDataOne"></div>
-    <div is="portraitLib" ref="portraitLibDialogTwo" @getPortraitData="getPortraitDataTwo"></div>
-    <div is="vehicleLib" ref="vehicleLibDialog" @getVehicleData="getVehicleData"></div>
+    <div is="portraitLib" ref="portraitLibDialogOne" :fileListOne="fileListOne" :imgNum="true" @getPortraitData="getPortraitDataOne"></div>
+    <div is="portraitLib" ref="portraitLibDialogTwo" :fileListTwo="fileListTwo" @getPortraitData="getPortraitDataTwo"></div>
+    <div is="vehicleLib" ref="vehicleLibDialog" @getVehicleData="getVehicleData" :carNumberInfo="modelOneForm.carNumberInfo"></div>
   </el-form>
 </template>
 <script>
@@ -143,37 +143,24 @@ export default {
     },
     // 从布控库中获取失踪人像
     getPortraitDataOne (data) {
-      this.fileListOne = data.map(m => {
-        return {
-          objId: m.uid,
-          objType: 1,
-          photoUrl: m.photoUrl
-        }
-      });
+      this.fileListOne = data;
       console.log(this.fileListOne, 'this.fileListOne')
     },
     // 从布控库中获取嫌疑人像
     getPortraitDataTwo (data) {
-      const _list = data.map(m => {
-        return {
-          objId: m.uid,
-          objType: 1,
-          photoUrl: m.photoUrl  
-        }
-      });
-      this.fileListTwo = this.fileListTwo.concat(_list);
-      this.fileListTwo = unique(this.fileListTwo, 'photoUrl');
+      this.fileListTwo = this.fileListTwo.concat(data);
+      this.fileListTwo = unique(this.fileListTwo, 'objId');
       console.log(this.fileListTwo, 'this.fileListTwo')
     },
     // 从布控库中获取车像
     getVehicleData (data) {
-      console.log(data, 'datadata')
-      this.modelOneForm.carNumberInfo.forEach((item, index) => {
-        if (item.vehicleNumber === null) {
-          item.vehicleNumber = data[index].vehicleNumber;
+      data.forEach((f, i) => {
+        if (this.modelOneForm.carNumberInfo[i] === undefined) {
+          this.modelOneForm.carNumberInfo.push({vehicleNumber: f.vehicleNumber});
+        } else if (this.modelOneForm.carNumberInfo[i].vehicleNumber === null) {
+          this.modelOneForm.carNumberInfo[i].vehicleNumber = f.vehicleNumber;
         }
       })
-      // this.modelOneForm.carNumberInfo.push(...data);
     },
     // 一键布控
     selControl (formName) {
@@ -243,7 +230,7 @@ export default {
       console.log(fileList, 'fileList')
       const _list = imgUrls(fileList);
       this.fileListTwo = this.fileListTwo.concat(_list);
-      this.fileListTwo = unique(this.fileListTwo, 'photoUrl');
+      this.fileListTwo = unique(this.fileListTwo, 'objId');
       console.log(this.fileListTwo)
     },
     // 从库中选择

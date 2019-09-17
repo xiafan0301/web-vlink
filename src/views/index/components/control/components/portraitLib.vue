@@ -40,7 +40,7 @@
         <div class="list_data">
           <div class="data_title">
             <span class="vl_f_999">详情资料</span>
-            <el-checkbox v-model="item.isChecked" @change="operateRadio()"></el-checkbox>
+            <el-checkbox v-model="item.isChecked" :disabled="item.disabled" @change="operateRadio()"></el-checkbox>
           </div>
           <div class="data_list">
             <span :title="item.name">{{item.name}}</span>
@@ -97,6 +97,7 @@ import {dataList} from '@/utils/data.js';
 import {nationData} from '../testData.js';
 import {getPortraitList} from '@/views/index/api/api.control.js';
 export default {
+  props: ['fileListOne', 'fileListTwo', 'imgNum'],
   data () {
     return {
       libForm: {
@@ -118,6 +119,27 @@ export default {
       protraitMemberList: {}
     }
 
+  },
+  watch: {
+    'protraitMemberList.list': {
+      handler (val) {
+        if (this.imgNum) {
+          let uid = null;
+          if (val.some(s => {if (s.isChecked) {uid = s.uid;return true;}})) {
+            val.forEach(f => {
+              if (f.uid !== uid) {
+                f.disabled = true
+              }
+            })
+          } else {
+            val.forEach(f => {
+              f.disabled = false
+            })
+          }
+        }
+      },
+      deep: true
+    }
   },
   mounted () {
     this.getPortraitList();
@@ -145,7 +167,16 @@ export default {
         if (res && res.data) {
           this.protraitMemberList = res.data;
            this.protraitMemberList.list = this.protraitMemberList.list.map(f => {
-            this.$set(f, 'isChecked', false);
+            if (this.fileListOne && this.fileListOne.some(s => s.objId === f.uid)) {
+              this.$set(f, 'isChecked', true);
+            } else if (this.fileListTwo && this.fileListTwo.some(s => s.objId === f.uid)) {
+              this.$set(f, 'isChecked', true);
+            } else {
+              this.$set(f, 'isChecked', false);
+            }
+            if (this.imgNum) {
+              this.$set(f, 'disabled', false);
+            }
             const {photoUrl, ...other} = f;
             return {
               photoUrl: photoUrl,
@@ -163,7 +194,18 @@ export default {
     },
     // 确认
     selControlLibMember () {
-      const selList = this.protraitMemberList.list.filter(f => f.isChecked);
+      let selList = this.protraitMemberList.list.reduce((next, cur) => {
+        if (cur.isChecked) {
+          return [...next, {
+            objId: cur.uid,
+            objType: 1,
+            photoUrl: cur.photoUrl,
+            name: cur.name 
+          }]
+        } else {
+          return next;
+        }
+      }, []);
       this.$emit('getPortraitData', selList);
       this.portraitLibDialog = false;
     },

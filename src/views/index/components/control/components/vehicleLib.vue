@@ -113,7 +113,7 @@
 import {dataList} from '@/utils/data.js';
 import {getVehicleList} from '@/views/index/api/api.control.js';
 export default {
-  props: ['groupId'],
+  props: ['groupId', 'carNumberInfo'],
   data () {
     return {
       libForm: {
@@ -157,10 +157,13 @@ export default {
       this.loading = true;
       getVehicleList(params).then(res => {
         if (res && res.data) {
-          console.log(JSON.stringify(res.data), 'res.data');
           this.carMemberList = res.data;
           this.carMemberList.list = this.carMemberList.list.map(f => {
-            this.$set(f, 'isChecked', false);
+            if (this.carNumberInfo && this.carNumberInfo.some(s => s.vehicleNumber === f.vehicleNumber)) {
+              this.$set(f, 'isChecked', true);
+            } else {
+              this.$set(f, 'isChecked', false);
+            }
             const {vehicleImagePath, ...other} = f;
             return {
               photoUrl: vehicleImagePath,
@@ -178,7 +181,18 @@ export default {
     },
     // 确认
     selControlLibMember () {
-      const selList = this.carMemberList.list.filter(f => f.isChecked);
+      let selList = this.carMemberList.list.reduce((next, cur) => {
+        if (cur.isChecked) {
+          return [...next, {
+            objId: cur.uid,
+            objType: 2,
+            photoUrl: cur.photoUrl,
+            vehicleNumber: cur.vehicleNumber
+          }]
+        } else {
+          return next;
+        }
+      }, []);
       this.$emit('getVehicleData', selList);
       this.vehicleLibDialog = false;
     },
