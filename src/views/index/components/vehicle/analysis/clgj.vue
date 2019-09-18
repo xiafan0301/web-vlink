@@ -22,6 +22,7 @@
               v-model="ruleForm.data1"
               style="width: 100%;"
               class="vl_date"
+              :picker-options="pickerOptions"
               :time-arrow-control="true"
               type="datetime"
               value-format="timestamp"
@@ -33,6 +34,7 @@
               style="width: 100%;"
               class="vl_date vl_date_end"
               :time-arrow-control="true"
+              :picker-options="pickerOptions"
               v-model="ruleForm.data2"
               @change="chooseEndTime"
               value-format="timestamp"
@@ -296,6 +298,7 @@
                 // 判断出现的重复点是不是同一辆车的
                 if (x.plateNo === _arr[_i].plateNo) {
                   _arr[_i]['shotTime'] += ',' + x.shotTime;
+                  console.log('_arr[_i]', _arr[_i]['shotTime'])
                 } else {
                   x['simLength'] += 1;
                   _arr.splice(_i, 1, x);

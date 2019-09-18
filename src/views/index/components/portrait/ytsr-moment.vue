@@ -18,31 +18,8 @@
         </span>
       </div>
       <div class="vl_jtc_img_box">
-        <div style="margin-left: 17px;" class="vl_judge_tc_c_item"  @drop="drop($event)" @dragover="allowDrop($event)">
-          <el-upload
-            :class="{'vl_jtc_upload_ytsr': true}"
-            :show-file-list="false"
-            accept="image/*"
-            :action="uploadAcion"
-            list-type="picture-card"
-            @drop="drop($event)"
-            :before-upload="beforeAvatarUpload"
-            :on-success="uploadSucess"
-            :on-error="handleError">
-            <i v-if="uploading" class="el-icon-loading"></i>
-            <img v-else-if="curImageUrl" :src="curImageUrl">
-            <div v-else>
-              <i
-                      style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
-                      class="vl_icon vl_icon_vehicle_01"
-              ></i>
-              <span>点击上传图片</span>
-            </div>
-          </el-upload>
-          <div v-show="curImageUrl" class="del_icon">
-            <i class="el-icon-delete" @click="delPic()"></i>
-          </div>
-          <p @click="showHistoryPic">从上传记录中选择</p>
+        <div style="padding: 0 25px; height: 210px;">
+          <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit" :imgData="imgData"></div>
         </div>
       </div>
       <div class="per_semblance_ytsr"><span>相似度：≥</span><el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100" placeholder="填写相似度数字" v-model="searchData.minSemblance"></el-input>%</div>
@@ -78,6 +55,7 @@
             type="datetime"
             :time-arrow-control="true"
             @change="chooseStartTime"
+            :picker-options="pickerOptions"
             value-format="timestamp"
             placeholder="选择日期时间">
           </el-date-picker>
@@ -86,6 +64,7 @@
                   class="vl_date vl_date_end"
                   v-model="searchData.endTime"
                   @change="chooseEndTime"
+                  :picker-options="pickerOptions"
                   :time-arrow-control="true"
                   value-format="timestamp"
                   type="datetime"
@@ -331,26 +310,6 @@
         </template>
       </div>
     </div>
-    <!--历史记录弹窗-->
-    <el-dialog
-      :visible.sync="historyPicDialog"
-      class="history-pic-dialog"
-      :close-on-click-modal="false"
-      top="4vh"
-      title="最近上传的图片">
-      <div style="text-align: center;font-size: 20px;" v-if="loadingHis"><i class="el-icon-loading"></i></div>
-      <vue-scroll class="his-pic-box" v-else-if="historyPicList.length">
-        <div class="his-pic-item" :class="{'active': item.checked}" v-for="item in historyPicList" :key="item.id" @click="chooseHisPic(item)">
-          <img :src="item.path" alt="">
-        </div>
-        <div style="clear: both;"></div>
-      </vue-scroll>
-      <p v-else>暂无历史记录</p>
-      <div slot="footer">
-        <el-button @click="historyPicDialog = false">取消</el-button>
-        <el-button type="primary" @click="addHisToImg" :disabled="choosedHisPic.length === 0">确认</el-button>
-      </div>
-    </el-dialog>
     <!--中断任务弹出框-->
     <el-dialog
             title="中断任务确认"
@@ -599,11 +558,13 @@
   </div>
 </template>
 <script>
+  import vlUpload from '@/components/common/upload.vue';
   import vlBreadcrumb from '@/components/common/breadcrumb.vue';
   import { PortraitPostByphotoTask, PortraitPostByphotoRealtime, PortraitGetDispatch } from '@/views/index/api/api.portrait.js';
   import { ScpGETdeviceListById, ScpGETretrievalHisById} from '../../api/api.search.js';
   import {JtcPUTAppendixsOrder, JtcPOSTAppendixInfo, JtcGETAppendixInfoList,  getShotDevice, getTailBehindList } from '../../api/api.judge'
   import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
+  import { handUpload} from '@/views/index/api/api.base.js';
   import {getGroups} from '../../api/api.judge.js';
   import noResult from '@/components/common/noResult.vue';
   import flvplayer from '@/components/common/flvplayer.vue';
@@ -611,9 +572,10 @@
   import { MapGETmonitorList } from "@/views/index/api/api.map.js";
   import { objDeepCopy, formatDate } from "@/utils/util.js";
   export default {
-    components: {vlBreadcrumb, noResult, flvplayer},
+    components: {vlBreadcrumb, noResult, flvplayer, vlUpload},
     data() {
       return {
+        rotateNum: 0, // 当前旋转基数
         showShotImg: true, // true展示抓拍，false,展示全景
         map: null,
         playerData: null,
@@ -625,6 +587,11 @@
         defaultProps: {
           children: "children",
           label: "label"
+        },
+        pickerOptions: {
+          disabledDate (time) {
+            return time > new Date();
+          }
         },
         messageDevTip: "",
         isDeviceTrue: false,
@@ -670,11 +637,9 @@
         uploading: false,
         uploadAcion: ajaxCtx.base + '/new',
         searching: false,
-        curImageUrl: '', // 当前上传的图片
+        uploadClear: {},
         imgList: '',
-        historyPicDialog: false,
-        historyPicList: [], // 上传历史记录
-        loadingHis: false,
+        imgData: null,
         searchData: {
           minSemblance: 85, // 最小相似度
           portraitGroupId: [],
@@ -704,9 +669,6 @@
       }
     },
     computed: {
-      choosedHisPic () {
-        return this.historyPicList.filter(x => x.checked)
-      },
       curStrucInfoList () {
         return this.strucInfoList.slice((this.pagination1.pageNum - 1) * this.pagination1.pageSize,  (this.pagination1.pageNum) * this.pagination1.pageSize)
       }
@@ -730,10 +692,10 @@
           if (jRes) {
             x['uid'] = jRes.data;
             console.log(x);
+            this.imgList = Object.assign({}, x)
           }
         })
-        this.imgList = x;
-        this.curImageUrl = x.path;
+        this.imgData = x;
       }
       // 获取人员组，跟车辆组列表
       getGroups({groupType: 4}).then(res => {
@@ -750,6 +712,14 @@
       this.setDTime();
     },
     methods: {
+      uploadEmit (data) {
+        console.log('uploadEmit data', data);
+        if (data && data.path) {
+          this.imgList = data;
+        } else {
+          this.imgList = null;
+        }
+      },
       // 设置视频数据
       setPlayerData () {
         if (this.sturcDetail.videoPath) {
@@ -917,77 +887,6 @@
             this.selectCameraArr
         );
       },
-      drag (ev) {
-        ev.dataTransfer.setData("Text",ev.target.currentSrc);
-      },
-      drop (e) {
-        let x = {
-          contentUid: this.$store.state.loginUser.uid,
-          cname: '拖拽图片' + Math.random(),
-          filePathName: '拖拽图片' + Math.random(),
-          path: e.dataTransfer.getData("Text")
-        }
-        JtcPOSTAppendixInfo(x).then(jRes => {
-          if (jRes) {
-            x['uid'] = jRes.data;
-            console.log(x);
-          }
-        })
-        this.imgList = x;
-        this.curImageUrl = x.path;
-      },
-      allowDrop (e) {
-        e.preventDefault();
-      },
-      // 上传图片
-      uploadPicExceed () {
-        this.$message.warning('当前限制选择 3 个文件，请删除后再上传！');
-      },
-      beforeAvatarUpload (file) {
-        const isJPG = (file.type === 'image/jpeg' || file.type === 'image/png');
-        const isLt = file.size / 1024 / 1024 < 100;
-        if (!isJPG) {
-          this.$message.error('只能上传 JPG / PNG 格式图片!');
-        }
-        if (!isLt) {
-          this.$message.error('上传图片大小不能超过 100MB!');
-        }
-        this.uploading = true;
-        return isJPG && isLt;
-      },
-      uploadSucess (response, file, fileList) {
-        this.uploading = false;
-        if (response && response.data) {
-          let oRes = response.data;
-          if (oRes) {
-            let x = {
-              cname: oRes.fileName, // 附件名称 ,
-              contentUid: this.$store.state.loginUser.uid,
-              // desci: '', // 备注 ,
-              filePathName: oRes.fileName, // 附件保存名称 ,
-              fileType: 1, // 文件类型 ,
-              imgHeight: oRes.fileHeight, // 图片高存储的单位位px ,
-              imgSize: oRes.fileSize, // 图片大小存储的单位位byte ,
-              imgWidth: oRes.fileWidth, //  图片宽存储的单位位px ,
-              // otherFlag: '', // 其他标识 ,
-              path: oRes.fileFullPath, // 附件路径 ,
-              // path: oRes.path,
-              thumbnailName: oRes.thumbnailFileName, // 缩略图名称 ,
-              thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
-              // uid: '' //  附件标识
-            };
-            JtcPOSTAppendixInfo(x).then(jRes => {
-              if (jRes) {
-                x['uid'] = jRes.data;
-                console.log(x);
-              }
-            })
-            this.imgList = x;
-            this.curImageUrl = x.path;
-          }
-        }
-        console.log(fileList)
-      },
       // 获取离线任务
       getDataList () {
         const params = {
@@ -1021,15 +920,20 @@
         }
       },
       skipResultPage (obj) {
-        if (obj.taskResult) {
-          if (obj.taskWebParam.origin === 1) {
-            this.$router.push({name: 'portrait_ytsr', query: {uid: obj.uid}})
-          } else {
-            this.$router.push({name: 'portrait_ytsr_shot', query: {uid: obj.uid}})
-          }
+        if (obj.taskWebParam.origin === 1) {
+          this.$router.push({name: 'portrait_ytsr', query: {uid: obj.uid}})
         } else {
-          this.$message.info('抱歉，没有找到匹配结果');
+          this.$router.push({name: 'portrait_ytsr_shot', query: {uid: obj.uid}})
         }
+//        if (obj.taskResult) {
+//          if (obj.taskWebParam.origin === 1) {
+//            this.$router.push({name: 'portrait_ytsr', query: {uid: obj.uid}})
+//          } else {
+//            this.$router.push({name: 'portrait_ytsr_shot', query: {uid: obj.uid}})
+//          }
+//        } else {
+//          this.$message.info('抱歉，没有找到匹配结果');
+//        }
       },
       // 显示中断任务弹出框
       showInterruptDialog (obj) {
@@ -1108,55 +1012,17 @@
       selectDataList () {
         this.getDataList();
       },
-      handleError () {
-        this.uploading = false;
-        this.$message.error('上传失败')
-      },
-      showHistoryPic () {
-        this.loadingHis = true;
-        this.historyPicDialog = true;
-        let params = {
-          userId: this.$store.state.loginUser.uid,
-          fileType: 1
-        }
-        JtcGETAppendixInfoList(params).then(res => {
-          if (res) {
-            this.loadingHis = false;
-            res.data.forEach(x => x.checked = false);
-            this.historyPicList = res.data;
-          }
-        }).catch(() => {
-          this.historyPicDialog = false;
-        })
-      },
-      chooseHisPic (item) {
-        this.historyPicList.forEach(x => x.checked = false)
-        item.checked = true;
-      },
-      addHisToImg () {
-        this.historyPicDialog = false;
-        let _ids = [];
-        this.choosedHisPic.forEach(x => {
-          _ids.push(x.uid)
-          this.imgList = x;
-          this.curImageUrl = x.path;
-        })
-        let _obj = {
-          appendixInfoIds: _ids.join(',')
-        }
-        JtcPUTAppendixsOrder(_obj);
-      },
       resetSearch () {
         this.taskName = '';
         this.searchData.minSemblance = 85;
         this.imgList = '';
-        this.curImageUrl = '';
         this.radio = '1';
         this.searchData.portraitGroupId= [];
         this.$nextTick(() => {
           this.checkAllTree = true;
           this.handleCheckedAll(true);
         });
+        this.uploadClear = {};
         this.setDTime();
       },
       tcDiscuss (boolean) {
@@ -1294,9 +1160,6 @@
       handleCurrentChange1 (e) {
         this.pagination1.pageNum = e;
 
-      },
-      delPic () {
-        this.curImageUrl = '';
       },
       timeOrderS () {
         if (this.stucOrder > 2) {
@@ -1524,132 +1387,6 @@
         border-bottom: 1px solid #D3D3D3;
         padding-bottom: 30px;
         margin-bottom: 30px;
-        .vl_judge_tc_c_item {
-          width: 238px;
-          height: 238px;
-          display: inline-block;
-          position: relative;
-          -webkit-border-radius: 10px;
-          -moz-border-radius: 10px;
-          border-radius: 10px;
-          cursor: pointer;
-          background: #f2f2f2;
-          span {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            margin-top: 119px;
-            line-height: 119px;
-            color: #999;
-          }
-          &:hover span {
-            color: #fff;
-          }
-          .del_icon {
-            display: none;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 24px;
-            height: 24px;
-            line-height: 24px;
-            text-align: center;
-            background: rgba(0, 0, 0, 0.4);
-            -webkit-border-radius: 4px;
-            -moz-border-radius: 4px;
-            border-radius: 4px;
-            color: #ffffff;
-          }
-          &:first-child {
-            margin-right: .15rem;
-          }
-          &:last-child {
-            margin-left: .15rem;
-          }
-          &:hover {
-            background: #2981F8;
-            >p {
-              display: block;
-            }
-            .del_icon {
-              display: block;
-            }
-          }
-          .vl_jtc_upload_ytsr {
-            width: 100%;
-            height: 100%;
-            background: none;
-            .el-upload--picture-card {
-              border: none;
-            }
-            .el-upload {
-              width: 100%;
-              height: 100%;
-              background: none;
-              line-height: 238px;
-              img {
-                width: 100%;
-                height: 100%;
-                -webkit-border-radius: 10px;
-                -moz-border-radius: 10px;
-                border-radius: 10px;
-              }
-            }
-          }
-          >p {
-            display: none;
-            position: absolute;
-            bottom: 0;
-            text-align: center;
-            width: 100%;
-            color: #FFFFFF;
-            height: 40px;
-            line-height: 40px;
-            -webkit-border-radius: 0 0 10px 10px;
-            -moz-border-radius: 0 0 10px 10px;
-            border-radius: 0 0 10px 10px;
-            background: #0C70F8;
-          }
-          .vl_jtc_ic_input {
-            position: absolute;
-            top: .2rem;
-            width: 3rem;
-            height: .26rem;
-            left: .2rem;
-            border: 1px solid #D3D3D3;
-            -webkit-border-radius: .13rem;
-            -moz-border-radius: .13rem;
-            border-radius: .13rem;
-            padding: 0 .02rem;
-            background: #FFFFFF;
-            .el-form-item__content {
-              height: .23rem;
-              line-height: .23rem;
-            }
-            input {
-              border: none!important;
-              height: .23rem;
-              line-height: .23rem;
-            }
-          }
-          .del_icon {
-            display: none;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 24px;
-            height: 24px;
-            line-height: 24px;
-            text-align: center;
-            background: rgba(0, 0, 0, .4);
-            -webkit-border-radius: 4px;
-            -moz-border-radius: 4px;
-            border-radius: 4px;
-            color: #FFFFFF;
-          }
-        }
         .vl_jtc_img_list {
           width: 100%;
           margin-top: 10px;

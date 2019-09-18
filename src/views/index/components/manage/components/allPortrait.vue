@@ -22,7 +22,7 @@
         </el-collapse-transition>
       </div>
     </div>
-    <div class="list_box">
+    <div class="list_box" v-loading="loading">
       <div class="list_info" v-for="item in memberList" :key="item.uid">
         <div class="list_img"><img :src="item.photoUrl" alt="" style="width: 100%;height: 100%;"></div>
         <div class="list_data">
@@ -100,7 +100,7 @@ import groupDialog from './groupDialog.vue';
 import {delPortrait, copyPortrait, getGroupListIsPortrait} from '@/views/index/api/api.control.js';
 export default {
   components: {groupDialog},
-  props: ['protraitMemberList', 'tabType', 'currentPage'],
+  props: ['protraitMemberList', 'tabType', 'currentPage', 'loading'],
   data () {
     return {
       allChecked: false,

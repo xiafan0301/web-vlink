@@ -65,6 +65,7 @@
                         class="vl_date"
                         @change="chooseStartTime"
                         type="datetime"
+                        :picker-options="pickerOptions"
                         value-format="timestamp"
                         placeholder="请选择开始时间">
                       </el-date-picker>
@@ -75,6 +76,7 @@
                       <el-date-picker
                               style="width: 100%;"
                               class="vl_date vl_date_end"
+                              :picker-options="pickerOptions"
                               v-model="curAddSearch.endTime"
                               @change="chooseEndTime"
                               value-format="timestamp"
@@ -171,11 +173,6 @@
         },
         searchData: [],
         pickerOptions: {
-          disabledDate (time) {
-            return time > new Date();
-          }
-        },
-        pickerOptions1: {
           disabledDate (time) {
             return time > new Date();
           }

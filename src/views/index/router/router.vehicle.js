@@ -93,10 +93,18 @@ export default {
       name: 'vehicle_search_xcgl',
       component: () => import('@/views/index/components/vehicle/analysis/xcgl.vue')
     }, {
-      path: 'tpc', // 套牌车分析
+      path: 'tpc', // 套牌车
       name: 'vehicle_search_tpc',
       component: () => import('@/views/index/components/vehicle/analysis/tpc.vue')
     }, {
+      path: 'tpcfx', // 套牌车分析
+      name: 'vehicle_search_tpcfx',
+      component: () => import('@/views/index/components/vehicle/analysis/tpcfx.vue')
+    }, {
+      path: 'tpcfxxq', // 套牌车分析详情
+      name: 'vehicle_search_tpcfxxq',
+      component: () => import('@/views/index/components/vehicle/analysis/tpcfxxq.vue')
+    },{
       path: 'txcl', // 同行车辆分析
       name: 'vehicle_search_txcl',
       component: () => import('@/views/index/components/vehicle/analysis/txcl.vue')
@@ -117,11 +125,30 @@ export default {
       name: 'vehicle_report',
       component: () => import('@/views/index/components/vehicle/analysis/report.vue')
     },
+    {
+      path: 'restrictDriving', // 车辆限行
+      name: 'vehicle_restrict_driving',
+      component: () => import('@/views/index/components/vehicle/analysis/restrict-driving.vue')
+    },
+    {
+      path: 'restrictDetail', // 车辆限行详情
+      name: 'vehicle_restrict_detail',
+      component: () => import('@/views/index/components/vehicle/analysis/restrict-detail.vue')
+    },
+    {
+      path: 'restrictSnapDetail', // 车辆限行抓拍详情
+      name: 'vehicle_restrict_snap_detail',
+      component: () => import('@/views/index/components/vehicle/analysis/restrict-snap-detail.vue')
+    },
     /* 统计 */
     {
       path: 'cll', // 车流量统计
       name: 'vehicle_search_cll',
       component: () => import('@/views/index/components/vehicle/statistics/cll.vue')
+    }, {
+      path: 'clldb', // 车流量对比
+      name: 'vehicle_search_clldb',
+      component: () => import('@/views/index/components/vehicle/statistics/clldb.vue')
     }, {
       path: 'ccrc', // 初次入城统计
       name: 'vehicle_search_ccrc',
@@ -142,10 +169,6 @@ export default {
       path: 'ycxc-record', // 夜车行车抓拍记录
       name: 'vehicle_search_ycxc_record',
       component: () => import('@/views/index/components/vehicle/statistics/ycxc-record.vue')
-    }, {
-      path: 'yjxc', // 夜车行车统计
-      name: 'vehicle_search_yjxc',
-      component: () => import('@/views/index/components/vehicle/statistics/yjxc.vue')
     }
   ]
 }

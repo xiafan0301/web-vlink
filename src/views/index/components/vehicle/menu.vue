@@ -39,6 +39,11 @@
               <i class="vl_icon2 vl_icon2_005"></i><span>车辆档案</span>
             </router-link>
           </li>
+          <li>
+            <router-link :to="{name: 'vehicle_search_tpc'}">
+              <i class="vl_icon2 vl_icon2_015"></i><span>套牌车查询</span>
+            </router-link>
+          </li>
           <!-- <li>
             <router-link :to="{name: 'vehicle_search_pfgc'}">
               <i class="vl_icon2 vl_icon2_007"></i><span>频繁过车</span>
@@ -70,7 +75,7 @@
             </router-link>
           </li>
           <li>
-            <router-link :to="{name: 'vehicle_search_tpc'}">
+            <router-link :to="{name: 'vehicle_search_tpcfx'}">
               <i class="vl_icon2 vl_icon2_015"></i><span>套牌车分析</span>
             </router-link>
           </li>
@@ -94,6 +99,11 @@
               <i class="vl_icon2 vl_icon2_007"></i><span>区域徘徊</span>
             </router-link>
           </li>
+          <li>
+            <router-link :to="{name: 'vehicle_restrict_driving'}">
+              <i class="vl_icon2 vl_icon2_028"></i><span>车辆限行</span>
+            </router-link>
+          </li>
         </ul>
       </li>
       <li>
@@ -102,6 +112,11 @@
           <li>
             <router-link :to="{name: 'vehicle_search_cll'}">
               <i class="vl_icon2 vl_icon2_021"></i><span>车流量统计</span>
+            </router-link>
+          </li>
+          <li>
+            <router-link :to="{name: 'vehicle_search_clldb'}">
+              <i class="vl_icon2 vl_icon2_021"></i><span>车流量对比</span>
             </router-link>
           </li>
           <li>

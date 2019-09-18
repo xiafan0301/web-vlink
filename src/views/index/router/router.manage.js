@@ -12,6 +12,11 @@ export default {
       component: () => import('@/views/index/components/manage/specialVehicle.vue')
     },
     {
+      path: 'specialcsManage',
+      name: 'special_csmanage',
+      component: () => import('@/views/index/components/manage/specialcsManage.vue')
+    },
+    {
       path: 'user',
       name: 'user',
       component: () => import('@/views/index/components/manage/user.vue'),
@@ -34,6 +39,12 @@ export default {
       path: 'addUser',
       name: 'add_user',
       component: () => import('@/views/index/components/manage/addUser.vue')
+    },
+    // 布控库管理
+    {
+      path: 'library',
+      name: 'control_library',
+      component: () => import('@/views/index/components/manage/library.vue'),
     },
     {
       path: 'roleManage',

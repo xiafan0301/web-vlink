@@ -154,7 +154,8 @@ export default {
               // res.data.taskResult.push(...res.data.taskResult)
               this.pagination.total = res.data.taskResult.length
               this.boxList = [...res.data.taskResult.slice(0, 12)]
-              this.boxList.sort((a, b) => {return a.peerNumber - b.peerNumber})
+              this.boxList.sort((a, b) => {return b.peerNumber - a.peerNumber})
+
               this.taskDetail = res.data
             }
           })

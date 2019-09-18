@@ -32,6 +32,7 @@ export default {
     } else {
       // 不存在参数breadcrumb，则从父组件传递的breadcrumbData中拿面包屑数据
       this.bdData = this.breadcrumbData;
+      console.log(this.bdData)
     }
   }
 }

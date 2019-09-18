@@ -7,23 +7,31 @@
       <li>
         <router-link :to="{name: 'control_manage'}">布控管理</router-link>
       </li>
-      <li>
+      <!-- 1.0v -->
+      <!-- <li>
         <router-link :to="{name: 'control_create'}">新建布控</router-link>
-      </li>
+      </li> -->
+      <!-- 1.1v -->
       <li>
-        <router-link :to="{name: 'control_library'}">布控库</router-link>
+        <router-link :to="{name: 'control_add'}">新建布控</router-link>
       </li>
     </ul>
-    <div class="con_content">
+    <div class="con_content" id="conContent">
       <router-view></router-view>
     </div>
   </div>
 </template>
 <script>
+import { setTimeout } from 'timers';
 export default {
   data () {
     return {
     }
+  },
+  mounted () {
+    setTimeout(() => {
+      document.getElementById('conContent').scrollTop = 1000;
+    } ,500)
   },
   methods: {
   }
@@ -247,148 +255,6 @@ export default {
         cursor: pointer;
       }
     }
-    // 布控库设置页公共样式
-    .control_library .set_list{
-      width: 100%;
-      height: 100%;
-      .member_title{
-        display: flex;
-        flex-wrap: nowrap;
-        justify-content: space-between;
-        padding: 10px 20px 0 20px;
-        line-height: 40px;
-        > div:nth-child(1){
-          display: flex;
-          > div:nth-child(1){
-            margin-right: 20px;
-            > span{
-              font-size: 20px;
-            }
-            > i{
-              margin-left: 10px;
-              color: #186DFB;
-              cursor: pointer;
-            }
-          }
-          > div:nth-child(2){
-            > span{
-              margin-left: 10px;
-              > span{
-                color: #0C70F8;
-              }
-            }
-          }
-        }
-        > div:nth-child(2){
-          position: relative;
-          .group_copy{
-            width:152px;
-            height: 280px;
-            position: absolute;
-            left: 0;
-            top: 50px;
-            z-index: 999;
-            background:rgba(255,255,255,1);
-            box-shadow:0px 12px 14px 0px rgba(148,148,148,0.4);
-            border-radius:4px;
-            li{
-              padding: 0 10px;
-              cursor: pointer;
-              &:hover{
-                background:rgba(237,249,255,1);
-                border-radius:4px 4px 0px 0px;
-              }
-            }
-            .group_copy_add{
-              > i{
-                position: relative;
-                top: 2px;
-                font-size: 20px;
-              }
-              > span{
-                margin-left: 10px;
-              }
-            }
-          }
-        }
-      }
-      .list_box{
-        margin: 20px 0.5%;
-        display: flex;
-        flex-wrap: wrap;
-        align-items: flex-start;
-        .list_info{
-          margin: 0 0.5%;
-          width: 32%;
-          height: 240px;
-          padding: 20px;
-          margin-bottom: 20px;
-          background:rgba(255,255,255,1);
-          box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
-          display: flex;
-          justify-content: space-between;
-          .list_img{
-            width: 50%;
-            padding-right: 20px;
-          }
-          .list_data{
-            width: 50%;
-            .data_title{
-              display: flex;
-              justify-content: space-between;
-              i{
-                cursor: pointer;
-                &:hover{
-                  background-position: -584px -347px!important;
-                }
-              }
-            }
-            .data_list{
-              display: flex;
-              margin-top: 9px;
-              span{
-                padding: 5px 10px;
-                background:rgba(250,250,250,1);
-                border:1px solid rgba(242,242,242,1);
-                border-radius: 3px;
-                white-space:nowrap;
-                text-overflow: ellipsis;
-                overflow: hidden;
-              }
-              & > span:not(:last-child){
-                margin-right: 2px;
-              }
-              .more{
-                position: relative;
-                padding-top: 6px;
-                .more_hover{
-                  margin-bottom: 10px;
-                  cursor: pointer;
-                  color: #0C70F8;
-                  border: none;
-                  padding: 0;
-                }
-              }
-            }
-          }
-        }
-      }
-      .bread_crumbs{
-        margin: 20px 20px 0 20px;
-        padding-bottom: 14px;
-        border-bottom: 1px solid rgba(221,221,221,1);
-        > span:nth-child(5){
-          color: #666;
-        }
-        > span:not(:nth-child(5)){
-          color: #999;
-          cursor: pointer;
-          &:hover{
-            color: #666;
-          }
-        }
-      }
-    }
     // 布控详情视频公共样式
     .vl_j_fullscreen {
       position: fixed;
@@ -502,26 +368,19 @@ export default {
     .btn_140{
       width: 140px!important;
     }
+    // 重置marker hover 时弹出窗样式
+    .vl_map_hover_main > ul > li > span{
+      text-align: left;
+      &:nth-child(1){
+        width: 70px;
+      }
+      &:nth-child(2){
+        width: 100px;
+      }
+    }
   }
   .vl_map_hover_main{
     bottom: 58px;
-  }
-}
-// 重置布控库popover
-.more_popover_box .more_popover{
-  max-height: 240px;
-  display: flex;
-  flex-wrap: wrap;
-  > span{
-    margin-bottom: 10px;
-    margin-right: 2px;
-    padding: 5px 10px;
-    background:rgba(250,250,250,1);
-    border:1px solid rgba(242,242,242,1);
-    border-radius: 3px;
-    white-space:nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden; 
   }
 }
 </style>

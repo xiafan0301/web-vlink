@@ -42,12 +42,12 @@
             </template>
             <template v-else>
               <span class='reportUser'>{{basicInfo.reporterPhone}}</span>
-              <div class="phone_dialog">
-                <div>
+              <div class="phone_dialog" v-show="basicInfo.reporterUserId">
+                <div  @click="addCalling('2')">
                   <i class="vl_icon vl_icon_event_14"></i>
                   <span>语音通话</span>
                 </div>
-                <div>
+                <div  @click="addCalling('1')">
                   <i class="vl_icon vl_icon_event_17"></i>
                   <span>视频通话</span>
                 </div>
@@ -114,6 +114,7 @@
   </div>
 </template>
 <script>
+import {random14} from '@/utils/util.js';
 export default {
   props: [ 'status', 'basicInfo' ],
   data () {
@@ -140,6 +141,26 @@ export default {
     }, 500)
   },
   methods: {
+    // 语音视频通话
+    addCalling (type) {
+      let _obj = {
+        uid: this.basicInfo.reporterUserId,
+        longitude: this.basicInfo.longitude,
+        latitude: this.basicInfo.latitude,
+        remoteId: this.basicInfo.reporterUserId,
+        remoteName: this.basicInfo.reporterUserName,
+        type: type, // 通话类型  1--视频  2--语音
+        _id: 'mapCall' + random14(),
+        _mid: '',
+        isTime: false,
+        minute: 0,
+        second: 0,
+        timer: null,
+        mark: null,
+        mute: false
+      }
+      this.$store.commit('WAIT_ADD', {oAdd: _obj})
+    },
     // 点击视频播放按钮全屏播放视频
     openVideo (obj) {
       this.videoDetail = obj;

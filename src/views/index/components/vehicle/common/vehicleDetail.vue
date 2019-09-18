@@ -33,23 +33,34 @@
           <div class="struc_c_d_info">
             <h2>分析结果</h2>
             <ul>
-              <li v-if="sturcDetail.plateNo"><span>车牌号码</span><span :title="sturcDetail.plateNo">{{sturcDetail.plateNo}}</span></li>
-              <li v-if="type === 3 && sturcDetail.vehicleType"><span>车辆分组</span><span :title="sturcDetail.vehicleType">{{(sturcDetail.vehicleType && sturcDetail.vehicleType.length > 0) ? sturcDetail.vehicleType.join(',') : '--'}}</span></li>
+              <li><span>有无车牌</span><span :title="sturcDetail.hasPlate">{{sturcDetail.hasPlate ? sturcDetail.hasPlate : '未识别'}}</span></li>
+              <li >
+                <span>号牌类型</span>
+                <span :title="dicFormater(45, sturcDetail.plateClass)">{{dicFormater(45, sturcDetail.plateClass)}}</span>
+              </li>
+              <li><span>车牌颜色</span><span :title="sturcDetail.plateColor">{{sturcDetail.plateColor ? sturcDetail.plateColor : '未识别'}}</span></li>
+              <li><span>车牌号码</span><span :title="sturcDetail.plateNo">{{sturcDetail.plateNo ? sturcDetail.plateNo : '未识别'}}</span></li>
+              <!--<li><span>车辆分组</span><span :title="sturcDetail.vehicleType">{{(sturcDetail.vehicleType && sturcDetail.vehicleType.length > 0) ? sturcDetail.vehicleType.join(',') : '&#45;&#45;'}}</span></li>-->
               <!-- <li v-if="type === 3 && sturcDetail.shotTime"><span>入城时间</span><span :title="sturcDetail.shotTime">{{sturcDetail.shotTime}}</span></li>
               <li v-if="type === 3 && sturcDetail.bayonetName"><span>入城卡口</span><span :title="sturcDetail.bayonetName">{{sturcDetail.bayonetName}}</span></li> -->
-              <li v-if="type === 3"><span>初次入城</span><span>{{sturcDetail.firstEnterFlag? '是': '否'}}</span></li>
-              <li v-if="sturcDetail.plateColor && sturcDetail.plateNo"><span>车牌颜色</span><span :title="sturcDetail.plateColor">{{sturcDetail.plateColor}}</span></li>
-              <li v-if="sturcDetail.vehicleModel"><span>车辆型号</span><span :title="sturcDetail.vehicleModel">{{sturcDetail.vehicleModel}}</span></li>
-              <li v-if="sturcDetail.vehicleColor"><span>车辆颜色</span><span :title="sturcDetail.vehicleColor">{{sturcDetail.vehicleColor}}</span></li>
-              <li v-if="sturcDetail.vehicleClass"><span>车辆类型</span><span :title="sturcDetail.vehicleClass">{{sturcDetail.vehicleClass}}</span></li>
-              <li v-if="sturcDetail.plateNo && (sturcDetail.plateClass || sturcDetail.plateClass === 0 || sturcDetail.plateClass === '0')">
-                <span>车牌类型</span>
-                <span :title="sturcDetail.plateClass">{{dicFormater(45, sturcDetail.plateClass)}}</span>
-              </li>
+              <!--<li v-if="type === 3 && sturcDetail.firstEnterFlag"><span>初次入城</span><span>是</span></li>-->
+              <li ><span>车辆类型</span><span :title="sturcDetail.vehicleClass">{{sturcDetail.vehicleClass ? sturcDetail.vehicleClass : '未识别'}}</span></li>
+              <li ><span>车辆品牌</span><span :title="sturcDetail.vehicleBrand">{{sturcDetail.vehicleBrand ? sturcDetail.vehicleBrand : '未识别'}}</span></li>
+              <li ><span>车辆型号</span><span :title="sturcDetail.vehicleModel">{{sturcDetail.vehicleModel ? sturcDetail.vehicleModel : '未识别'}}</span></li>
+              <li ><span>车辆年款</span><span :title="sturcDetail.vehicleStyles">{{sturcDetail.vehicleStyles ? sturcDetail.vehicleStyles : '未识别'}}</span></li>
+              <li ><span>车辆颜色</span><span :title="sturcDetail.vehicleColor">{{sturcDetail.vehicleColor ? sturcDetail.vehicleColor : '未识别'}}</span></li>
+              <li ><span>车顶天窗</span><span :title="sturcDetail.vehicleRoof">{{sturcDetail.vehicleRoof ? sturcDetail.vehicleRoof : '未识别'}}</span></li>
+              <li ><span>有无撞痕</span><span :title="sturcDetail.hitMarkInfo">{{sturcDetail.hitMarkInfo ? sturcDetail.hitMarkInfo : '未识别'}}</span></li>
+              <li ><span>车前物品</span><span :title="sturcDetail.descOfFrontItem">{{sturcDetail.descOfFrontItem ? sturcDetail.descOfFrontItem : '未识别'}}</span></li>
+              <li ><span>车后物品</span><span :title="sturcDetail.descOfRearItem">{{sturcDetail.descOfRearItem ? sturcDetail.descOfRearItem : '未识别'}}</span></li>
+              <li ><span>遮阳板状态</span><span :title="sturcDetail.sunvisor">{{sturcDetail.sunvisor ? sturcDetail.sunvisor : '未识别'}}</span></li>
+              <li ><span>安全带状态</span><span :title="sturcDetail.safetyBelt">{{sturcDetail.safetyBelt ? sturcDetail.safetyBelt : '未识别'}}</span></li>
+              <li ><span>打电话状态</span><span :title="sturcDetail.calling">{{sturcDetail.calling ? sturcDetail.calling : '未识别'}}</span></li>
+              
               <!-- <li v-if="type === 3 && sturcDetail.vehicleType"><span>车辆分组</span><span :title="sturcDetail.vehicleType">{{(sturcDetail.vehicleType && sturcDetail.vehicleType.length > 0) ? sturcDetail.vehicleType.join(',') : '--'}}</span></li> -->
               <!-- 套牌依据 -->
               <!-- li v-if="type === 5"><span>号牌颜色：</span><span>{{sturcDetail.plateColor}}</span></<!-->
-              <li v-if="type === 5"><span>套牌依据</span><span :title="sturcDetail.fakeReason">{{sturcDetail.fakeReason}}</span></li>
+              <!--<li v-if="type === 5"><span>套牌依据</span><span :title="sturcDetail.fakeReason">{{sturcDetail.fakeReason}}</span></li>-->
             </ul>
              <!--  <span class='tz' v-if="sturcDetail.features"><b>特征码：</b>{{sturcDetail.features}}</span> -->
           </div>
@@ -369,8 +380,8 @@ export default {
 // 抓拍详情弹窗
 .cl_detail_dialog {
   .el-dialog {
-    width: 1130px;
-    margin-left: -565px !important; margin-top: -276px !important;
+    width: 1200px;
+    margin-left: -600px !important; margin-top: -276px !important;
     /* 祖先元素设置了transform属性则会导致固定定位属性position: fixed失效。 */
     transform: none !important;
   }
@@ -514,7 +525,7 @@ export default {
           float: left;
         }
         .struc_c_d_info {
-          width: 348px; height: 400px;
+          width: 418px; height: 400px;
           padding: 0 10px 0 20px;
           color: #333333;
           overflow: auto;
@@ -525,8 +536,10 @@ export default {
           > ul {
             overflow: hidden;
             > li {
-              margin-bottom: 10px; margin-right: 10px;
+              margin-bottom: 10px;
               overflow: hidden;
+              width: 50%;
+              float: left;
               > span {
                 line-height: 26px; height: 28px;
                 border: 1px solid #ddd;
@@ -541,11 +554,11 @@ export default {
                   color: #999;
                 }
                 &:last-child {
-                  max-width: 220px;
+                  width: 95px;
                   border: 1px solid #f2f2f2;
                   border-left: 0;
                   background-color: #fff;
-                  padding: 0 15px 0 15px;
+                  padding: 0 10px 0 10px;
                   border-radius: 0 4px 4px 0;
                   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; word-break: break-all;
                 }

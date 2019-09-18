@@ -144,6 +144,11 @@
                     <span>{{scope.row.taskWebParam.interval ? scope.row.taskWebParam.interval + '分钟' : '-'}}</span>
                   </template>
                 </el-table-column>
+                <el-table-column label="结果数" prop="taskWebParam" show-overflow-tooltip v-if="selectIndex === 1">
+                  <template slot-scope="scope">
+                    <span>{{scope.row.taskWebParam.number ? scope.row.taskWebParam.number : 0}}</span>
+                  </template>
+                </el-table-column>
                 <el-table-column label="状态" v-if="selectIndex === 0" prop="taskStatus" show-overflow-tooltip>
                   <template slot-scope="scope">
                     <span>{{scope.row.taskStatus && scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 3 ? '失败' : '已中断'}}</span>
@@ -191,45 +196,6 @@
                 ></el-pagination>
               </template>
             </div>
-          <!-- </template> -->
-          <!-- <template v-else>
-            <div class="result_gzws_list">
-              <template v-if="isInitPage">
-                <div class="content_top">
-                  <p>
-                    <span>检索结果</span>
-                    <span>（777）</span>
-                  </p>
-                </div>
-                <div class="result_detail">
-                  <ul class="clearfix">
-                    <li>
-                      <div class="de_left">
-                        <img src="" alt="">
-                      </div>
-                      <div class="de_right">
-                        <span class="title">检索资料</span>
-                        <p class="time">
-                          <i class="vl_icon_tail_1 vl_icon"></i>
-                          <span>2019-12-12 12:12:12</span>
-                        </p>
-                        <p class="detail_info">
-                          <span>女性</span>
-                          <span>18</span>
-                          <span>戴帽子</span>
-                          <span>有口罩</span>
-                        </p>
-                        <div class="record_btn" @click="skipWsReocrdPage()">查看尾随记录</div>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
-              </template>
-              <template v-else>
-                <div is="noResult" :isInitPage="isInitPage"></div>
-              </template>
-            </div>
-          </template> -->
         </vue-scroll>
       </div>
     </div>
@@ -281,10 +247,6 @@ export default {
     // const startTime = new Date() - 24 * 60 * 60 *1000;
     return {
       tabList: [
-        // {
-        //   label: "查询结果",
-        //   value: 2
-        // },
         {
           label: "已完成任务",
           value: 1
@@ -344,14 +306,14 @@ export default {
       deviceList: [], // 抓拍设备列表
       vehicleTypeList: [], // 车辆类型列表
       dataList: [], // 查询的抓拍结果列表
-      uploadClear: {}
+      uploadClear: {},
+      shotTimes: null, // 选中设备的抓拍时间
     }
   },
   created () {
     this.getDataList();
   },
   methods: {
-    skipWsReocrdPage () {},
     uploadEmit (data) {
       console.log('uploadEmit data', data);
       if (data && data.path) {
@@ -432,9 +394,6 @@ export default {
       this.deviceList = [];
       const params = {
         targetPicUrl : this.dialogImageUrl,
-        // targetPicUrl: 'http://file.aorise.org/vlink/image/810ddc87-f9db-4e60-9da2-4e1ffc076683.jpg',
-        // startTime : '2019-07-09 09:59:00',
-        // endTime: '2019-07-09 10:03:00'
         startTime : formatDate(this.addForm.startTime),
         endTime: formatDate(this.addForm.endTime)
       };
@@ -443,12 +402,12 @@ export default {
         .then(res => {
           if (res && res.code === '00000000') {
             if (res.data) {
-
               this.deviceList = res.data;
-
               // 初始化页面时默认选中第一个设备
               this.addForm.deviceCode = this.deviceList[0].deviceName;
               this.addForm.deviceName = this.deviceList[0].deviceName;
+
+              this.shotTimes = this.deviceList[0].shotTime;
               
               this.isShowDeviceTip = false;
             } else {
@@ -466,10 +425,6 @@ export default {
           }
         })
       }
-    },
-    // 跳至尾随记录页面
-    skipWsReocrdPage (obj) {
-      this.$router.push({name: 'gzws_detail'})
     },
     // 取消新建
     cancelAdd (form) {
@@ -501,13 +456,10 @@ export default {
             }
           })
           const params = {
-            // targetPicUrl: 'http://10.116.126.10/root/image/2019/07/10/34020000001320000016414920190709100000000009_1_1.jpeg',
-            // startTime : '2019-07-09 09:59:00',
-            // endTime: '2019-07-09 10:03:00',
             targetPicUrl: this.dialogImageUrl,
             deviceId: deviceCode,
             deviceName: this.addForm.deviceName,
-            startTime: formatDate(this.addForm.startTime),
+            startTime: formatDate(this.shotTimes),
             endTime: formatDate(this.addForm.endTime),
             taskName: this.addForm.taskName,
             interval: this.addForm.interval
@@ -521,9 +473,7 @@ export default {
                   message: '新建成功',
                   customClass: 'request_tip'
                 });
-                // this.dataList = res.data;
                 this.isAddLoading = false;
-                // this.addTaskDialog = false;
 
                 this.getDataList();
               } else {
@@ -551,7 +501,6 @@ export default {
       };
       this.dialogImageUrl = null;
       this.uploadClear = {};
-      // this.fileList = [];
       
     },
     // 显示中断任务弹出框
@@ -690,11 +639,7 @@ export default {
             .span_tips {
               color: #F56C6C;
               font-size: 12px;
-              // line-height: 1;
-              // padding-top: 4px;
               position: static;
-              // top: 100%;
-              // left: 0;
             }
           }
         }
