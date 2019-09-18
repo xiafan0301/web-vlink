@@ -42,9 +42,9 @@
                     <div class="items">
                       <span @click="clickTab('cut1')" :class="['cut1',{'hover':hover=='cut1'}]"></span>
                       <span @click="clickTab('cut2')"  :class="['cut2',{'hover':hover=='cut2'}]"></span>
-                      <span @click="clickTab('cut3')"  :class="['cut3',{'hover':hover=='cut3'}]"></span>
+                      <!--<span @click="clickTab('cut3')"  :class="['cut3',{'hover':hover=='cut3'}]"></span>-->
                       <span @click="clickTab('cut4')"  :class="['cut4',{'hover':hover=='cut4'}]"></span>
-                      <span @click="clickTab('cut5')"  :class="['cut5',{'hover':hover=='cut5'}]"></span>
+                      <!--<span @click="clickTab('cut5')"  :class="['cut5',{'hover':hover=='cut5'}]"></span>-->
                     </div>
                   </div>
                 </div>
@@ -65,15 +65,15 @@
                 <div class="search_line">
                   <!--<span class="time">至</span>-->
                   <el-date-picker
-                          style="width: 100%;"
-                          class="vl_date vl_date_end"
-                          :time-arrow-control="true"
-                          v-model="searchData.endTime"
-                          :picker-options="pickerOptions"
-                          type="datetime"
-                          @change="chooseEndTime"
-                          value-format="timestamp"
-                          placeholder="请选择结束时间">
+                    style="width: 100%;"
+                    class="vl_date vl_date_end"
+                    :time-arrow-control="true"
+                    v-model="searchData.endTime"
+                    :picker-options="pickerOptions"
+                    type="datetime"
+                    @change="chooseEndTime"
+                    value-format="timestamp"
+                    placeholder="请选择结束时间">
                   </el-date-picker>
                 </div>
                 <div class="search_line">
@@ -112,8 +112,8 @@
 <script>
   import vlBreadcrumb from "@/components/common/breadcrumb.vue";
   import { mapXupuxian } from "@/config/config.js";
-  import {getAllDevice} from '../../../api/api.judge.js';
-  import {getAllBayonetList} from '../../../api/api.base.js';
+//  import {getAllDevice} from '../../../api/api.judge.js';
+  import {getAllMonitorList, getAllBayonetList} from '../../../api/api.base.js';
   import { objDeepCopy, formatDate, addCluster} from '../../../../../utils/util.js';
   export default {
     components: {vlBreadcrumb},
@@ -161,10 +161,8 @@
         if (e.target.classList.contains('vl_area_complete')) {
           // 判断有没有选时间
           if (that.searchData.curPointData.length) {
-            console.log('1')
             that.map.remove(that.confirmIcon);
           } else {
-            console.log('2')
             that.showInfoMes('所选区域没有设备信息')
           }
         }
@@ -177,27 +175,22 @@
         if (this.confirmIcon) {this.map.remove(this.confirmIcon)};
         // 先判断你选择的区域有没有设备,没有就不用做处理
         if (this.searchData.curPointData.length) {
-          this.pointIntoCluster(this.searchData.curMarks);
+          this.recoverSXTcolor(this.searchData.curMarks);
         }
       },
-      pointIntoCluster (mks) {
-        console.log(mks);
-        // 判断这个点是不是在其他区域被选中，选中了则不处理
-        let curMks = [];
+      // 摄像头恢复原始颜色
+      recoverSXTcolor (mks) {
         mks.forEach(x => {
           let uContent = this.setMarkContent(x.getExtData())
           x.setContent(uContent);
-          curMks.push(x);
         })
-        // curMks确定要加入点聚合，并且重新设置了content
-        this.map.cluster.addMarkers(curMks);
       },
       setMarkContent (obj, type) {
         let sDataType, uContent;
         if (obj.dataType === 0 && obj.deviceStatus !== 1) {
           sDataType = 6;
-        }else if (obj.dataType === 2) {
-          sDataType = '2' + obj.vehicleType
+        } else if (obj.dataType === 1 && !obj.isEnabled) {
+          sDataType = 9
         } else {
           sDataType = obj.dataType;
         }
@@ -221,15 +214,12 @@
         })
         this.confirmIcon = m;
       },
-      // 将指定mark集合移除点聚合
-      removeSomeCluster (mks) {
-        this.map.cluster.removeMarkers(mks);
-        // 把被移除的mark摄像头设置成红色
+      // 给选中的设备上色
+      putSelectColor (mks) {
         mks.forEach(y => {
           let uContent = this.setMarkContent(y.getExtData(), 'error')
           y.setContent(uContent);
         })
-        this.map.add(mks);
       },
       showInfoMes(mes) {
         if (!document.querySelector('.el-message--info')) {
@@ -313,20 +303,20 @@
         this.map.setFitView([this.searchData.area]);
       },
       getAllDevice(){
-        getAllDevice().then(res=>{
+        let newBlist = [], newDlist = [];
+        getAllMonitorList({
+          ccode: mapXupuxian.adcode
+        }).then(res=>{
           if(res.data && res.data.length>0){
-//            this.allDevice=res.data
-            console.log(res.data)
-            this.objSetItem(res.data, {infoName: 'deviceName', dataType: 0});
+            newDlist = this.objSetItem(res.data, {infoName: 'deviceName', dataType: 0});
           }
           getAllBayonetList({
             areaId: mapXupuxian.adcode
           }).then(resBon => {
-            console.log(resBon.data);
             if(resBon.data && resBon.data.length>0){
-              this.objSetItem(resBon.data, {infoName: 'bayonetName', dataType: 1});
+              newBlist = this.objSetItem(resBon.data, {infoName: 'bayonetName', dataType: 1});
             }
-            this.mapTreeData = res.data.concat(resBon.data)
+            this.mapTreeData = newDlist.concat(newBlist)
             console.log(this.mapTreeData)
             this.mapMark(this.mapTreeData)
           })
@@ -334,23 +324,26 @@
       },
       // keys的各个props 代表接口返回的摄像头，人物，车辆，卡口的list的字段名及list里面元素name;;allKey
       objSetItem (list, obj) {
+        let result = [];
         list.map(z => {
-          for (let key in obj) {
-            z[key] = z[obj[key]] ? z[obj[key]] : obj[key]
+          if (z.longitude && z.latitude) {
+            for (let key in obj) {
+              z[key] = z[obj[key]] ? z[obj[key]] : obj[key]
+            }
+            // 都加上markSid , 方便处理移动端发起的通话
+            if (!z['markSid']) {
+              z['markSid'] = 'mapMark' + z['dataType'] + z['uid'];
+            }
           }
-          // 都加上markSid , 方便处理移动端发起的通话
-          if (!z['markSid']) {
-            z['markSid'] = 'mapMark' + z['dataType'] + z['uid'];
-          }
-          return z;
+          result.push(z)
         })
-        return list;
+        return result;
       },
       // 地图标记
       mapMark (data) {
         if (data && data.length > 0) {
           let _this = this;
-          data.forEach(obj => {
+          data.forEach((obj, _index) => {
               if (obj.longitude > 0 && obj.latitude > 0) {
                 let offSet = {0: [-15, -16],1: [-15, -16],2: [-15, -60],3: [-15, -16], 4: [-15, -16],5: [-15, -16]}, sDataType;
                 if (obj.dataType === 0 && obj.deviceStatus !== 1) {
@@ -364,6 +357,8 @@
                 if (obj.dataType === 2 && !_this.constObj[obj.dataType].supTypeList.includes(obj.vehicleType - 1)) {
                   uContent = '<div id="' + obj.markSid + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + ' '+ _this.hideClass +'"></div>'
                 }
+                // 给obj设置markIndex ,为当前在marks集合中所处的位置，
+                obj['markIndex'] = _index;
                 let marker = new window.AMap.Marker({ // 添加自定义点标记
 //                  map: _this.map,
                   position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
@@ -441,17 +436,13 @@
 
             // 判断如果当前curAddSearch.curMarks有数据的话，先加入点聚合
             if (_this.searchData.curMarks.length) {
-              _this.pointIntoCluster(_this.searchData.curMarks)
+              _this.recoverSXTcolor(_this.searchData.curMarks)
             }
             _this.searchData.curMarks = [];
             _this.searchData.curPointData.forEach(j => {
-              _this.marks.forEach(m => {
-                if (m.getExtData() === j) {
-                  _this.searchData.curMarks.push(m);
-                }
-              })
+              _this.searchData.curMarks.push(_this.marks[j.markIndex]);
             })
-            _this.removeSomeCluster(_this.searchData.curMarks)
+            _this.putSelectColor(_this.searchData.curMarks)
           }
 
         });
@@ -468,20 +459,15 @@
           let a=e.obj
           let t=e.obj.CLASS_NAME
           _this.checkout(a,t);
-
-          // 判断如果当前curAddSearch.curMarks有数据的话，先加入点聚合
+          // 判断如果当前curAddSearch.curMarks有数据的话，恢复初始颜色
           if (_this.searchData.curMarks.length) {
-            _this.pointIntoCluster(_this.searchData.curMarks)
+            _this.recoverSXTcolor(_this.searchData.curMarks)
           }
           _this.searchData.curMarks = [];
           _this.searchData.curPointData.forEach(j => {
-            _this.marks.forEach(m => {
-              if (m.getExtData() === j) {
-                _this.searchData.curMarks.push(m);
-              }
-            })
+            _this.searchData.curMarks.push(_this.marks[j.markIndex]);
           })
-          _this.removeSomeCluster(_this.searchData.curMarks)
+          _this.putSelectColor(_this.searchData.curMarks)
         });
       },
       checkout(obj , type){
@@ -647,7 +633,7 @@
         if (this.searchData.area) {
           this.map.remove(this.searchData.area)
         }
-        this.pointIntoCluster(this.searchData.curMarks)
+        this.recoverSXTcolor(this.searchData.curMarks)
         this.searchData.area = null;
       },
       tcDiscuss () {
@@ -852,12 +838,13 @@
               padding-top: 0px;
               span{
                 display: inline-block;
-                width: 46px;
+                width: 50px;
                 height: 46px;
                 text-align: center;
                 vertical-align: middle;
                 line-height: 46px;
                 cursor: pointer;
+                margin: 0 3px;
                 &:last-child{
                   border-right: none;
                 }
