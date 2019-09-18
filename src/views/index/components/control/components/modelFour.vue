@@ -17,9 +17,9 @@
         <span>{{item.vehicleNumber}}</span>
       </div>
     </div>
+    <div is="portraitLib" ref="portraitLibDialog" :fileListOne="protraitList" @getPortraitData="getPortraitData"></div>
+    <div is="vehicleLib" ref="vehicleLibDialog" :fileList="vehicleList" @getVehicleData="getVehicleData"></div>
     <div is="controlDevUpdate" :modelType="4" @getControlDevUpdate="getControlDevUpdate"></div>
-    <div is="vehicleLib" ref="vehicleLibDialog" @getVehicleData="getVehicleData"></div>
-    <div is="portraitLib" ref="portraitLibDialog" @getPortraitData="getPortraitData"></div>
   </div>  
 </template>
 <script>
@@ -37,17 +37,13 @@ export default {
     }
   },
   methods: {
-     // 从布控库中获取失踪人像
+     // 从布控库中获取禁入人员
     getPortraitData (data) {
-      console.log(data, 'datadata')
-      this.protraitList = this.protraitList.concat(data);
-      this.protraitList = unique(this.protraitList, 'photoUrl');
+      this.protraitList = data;
     },
-    // 从布控库中获取嫌疑车辆
+    // 从布控库中获取禁入车辆
     getVehicleData (data) {
-      console.log(data, 'datadata')
-      this.vehicleList = this.vehicleList.concat(data);
-      this.vehicleList = unique(this.vehicleList, 'photoUrl');
+      this.vehicleList = data;
     },
     // 删除从布控库中已选择的人员
     delPortrait (index) {
@@ -69,7 +65,7 @@ export default {
     },
     // 向父组件传值
     sendParent () {
-      this.$emit('getModel', {protraitList: this.protraitList,vehicleList: this.vehicleList, ...this.devUpdateData});
+      this.$emit('getModel', {modelType: 4,  pointDtoList: [this.devUpdateData], surveillanceObjectDtoList: [...this.protraitList, ...this.vehicleList]});
     },
     getControlDevUpdate (data) {
       this.devUpdateData = data;

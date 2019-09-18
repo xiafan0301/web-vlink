@@ -197,19 +197,19 @@
       <div is="stopDialog" ref="stopDialog" :controlId="controlId" @getControlList="getControlList"></div>
     </div>
     <div v-if="pageType === 2" is="manageDetail" @changePageType="changePageType" :controlId="controlId" @getControlList="getControlList"></div>
-    <div v-if="pageType === 3" is="create" @changePageType="changePageType" :createType="2" :controlId="controlId" @getControlList="getControlList"></div>
+    <div v-if="pageType === 3" is="add" @changePageType="changePageType" :createType="2" :controlId="controlId" @getControlList="getControlList"></div>
   </div>
 </template>
 <script>
 import manageDetail from './components/manageDetail.vue';
-import create from './create.vue';
+import add from './add.vue';
 import delDialog from './components/delDialog.vue';
 import stopDialog from './components/stopDialog.vue';
 import {getControlObjBySelect, getControlList, getControlDevice} from '@/views/index/api/api.control.js';
 import {dataList} from '@/utils/data.js';
 import {unique} from '@/utils/util.js';
 export default {
-  components: {manageDetail, create, delDialog, stopDialog},
+  components: {manageDetail, add, delDialog, stopDialog},
   data () {
     return {
       pageType: 1,//页面类型：1-列表页，2-详情页，3-修改页

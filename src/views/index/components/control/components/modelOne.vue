@@ -2,7 +2,7 @@
   <el-form ref="modelOne" :model="modelOneForm" class="model_one">
     <!-- 失踪人员信息上传 -->
     <el-form-item label="失踪人员信息:" :rules="{ required: true, message: '', trigger: 'blur'}" style="margin-bottom: 0;">
-      <div class="pic_format" style="left: 110px;top: -40px;">
+      <div class="pic_format" style="left: 105px;top: -40px;">
         <div @click="popSel(1)">从布控库中选择</div>
       </div>
       <div is="uploadPic" :fileList="fileListOne" @uploadPicDel="uploadPicDelOne" @uploadPicFileList="uploadPicFileListOne" :maxSize="1"></div>
@@ -50,18 +50,21 @@
       </el-autocomplete>
     </el-form-item>
     <!-- 嫌疑人照片上传 -->
-    <el-form-item label="嫌疑人照片:">
-      <div class="pic_format" style="left: 96px;top: -40px;">
+    <el-form-item label="嫌疑人照片:" style="margin-bottom: 0px">
+      <div class="pic_format" style="left: 80px;top: -40px;">
         <div @click="popSel(2)">从布控库中选择</div>
       </div>
       <div is="uploadPic" :fileList="fileListTwo" @uploadPicDel="uploadPicDelTwo" @uploadPicFileList="uploadPicFileListTwo"></div>
     </el-form-item>
+    <el-form-item>
+      <div class="sel_car"><span>嫌疑车辆：</span><span @click="popSel(3)">从布控库中选择</span></div>
+    </el-form-item>
     <el-form-item class="plate_num_box">
-      <div class="pic_format" style="left: 80px;top: -20px;cursor: pointer;">
-        <div @click="popSel(3)">从布控库中选择</div>
+      <div class="plate_num" v-for="item in fileListThree" :key="item.uid">
+        <el-input v-model="item.vehicleNumber" :disabled="true"></el-input>
       </div>
       <div v-for="(item, index) in modelOneForm.carNumberInfo" :key="index" style="position: relative;" class="plate_num">
-        <el-form-item :label="index === 0 ? '嫌疑车辆:' : ''" :prop="'carNumberInfo.' + index + '.vehicleNumber'" :rules="{validator: validPlateNumber, trigger: 'blur'}">
+        <el-form-item :prop="'carNumberInfo.' + index + '.vehicleNumber'" :rules="{validator: validPlateNumber, trigger: 'blur'}">
           <el-input v-model="item.vehicleNumber" placeholder="请输入车辆车牌号"></el-input>
         </el-form-item>
       </div>
@@ -76,7 +79,7 @@
     <div is="controlDev" ref="controlDev" @getChildModel="getChildModel" :lostTime="modelOneForm.lostTime" :addressObj="addressObj_" v-if="isShowControlDev"></div>
     <div is="portraitLib" ref="portraitLibDialogOne" :fileListOne="fileListOne" :imgNum="true" @getPortraitData="getPortraitDataOne"></div>
     <div is="portraitLib" ref="portraitLibDialogTwo" :fileListTwo="fileListTwo" @getPortraitData="getPortraitDataTwo"></div>
-    <div is="vehicleLib" ref="vehicleLibDialog" @getVehicleData="getVehicleData" :carNumberInfo="modelOneForm.carNumberInfo"></div>
+    <div is="vehicleLib" ref="vehicleLibDialog" @getVehicleData="getVehicleData" :fileList="fileListThree"></div>
   </el-form>
 </template>
 <script>
@@ -88,6 +91,7 @@ import {random14, objDeepCopy, imgUrls, unique, formatDate} from '@/utils/util.j
 import {checkName, checkPlateNumber} from '@/utils/validator.js';
 export default {
   components: {uploadPic, controlDev, vehicleLib, portraitLib},
+  props: ['modelList'],
   data () {
     return {
       map: null,
@@ -99,7 +103,6 @@ export default {
         homeAddress: null,
         carNumberInfo: [{vehicleNumber: null}],
         radius: null,
-        // stayTime: null,
         url: null,
         longitude: null,
         latitude: null,
@@ -118,12 +121,41 @@ export default {
       addressObj_: [],
       fileListOne: [],//上传的失踪人员信息数据
       fileListTwo: [],//上传的嫌疑人照片数据
+      fileListThree: [],//从布控库中选择的车辆
       isShowControlDev: false,//是否显示布控设备选择部分
       devData: {},
     }
   },
   mounted () {
     this.resetMap();
+    // 修改时回填数据
+    if (this.modelList) {
+      console.log(this.modelList, 'this.modelList')
+      // 回填嫌疑车牌
+      let [{carNumberInfo, pointDtoList: [{bayonetList, devList, longitude, latitude, url, ...other}], surveillanceObjectDtoList}] = this.modelList;
+      carNumberInfo = carNumberInfo.split(',');
+      other.carNumberInfo = [];
+      carNumberInfo.forEach(f => {
+        other.carNumberInfo.push({vehicleNumber: f});
+      })
+      other.lostTime = new Date(other.lostTime);
+      this.modelOneForm = other;
+      
+      let typeTwo = surveillanceObjectDtoList.filter(m => m.objType === 2);
+      let typeOne = surveillanceObjectDtoList.filter(m => m.objType === 1 && url === m.photoUrl);
+      let typeThree = surveillanceObjectDtoList.filter(m => m.objType === 1 && url !== m.photoUrl);
+
+      longitude = longitude.split(',');
+      latitude = latitude.split(',');
+      longitude.forEach((f, i) => {
+        this.addressObj_.push({
+          lngLat: [longitude[i], latitude[i]],
+          address: i === 0 ? this.modelOneForm.address : this.modelOneForm.homeAddress,
+          type: i + 1
+        });
+      })
+      this.isShowControlDev = true;
+    }
   },
   methods: {
     // 计算布控范围半径
@@ -144,23 +176,15 @@ export default {
     // 从布控库中获取失踪人像
     getPortraitDataOne (data) {
       this.fileListOne = data;
-      console.log(this.fileListOne, 'this.fileListOne')
     },
     // 从布控库中获取嫌疑人像
     getPortraitDataTwo (data) {
       this.fileListTwo = this.fileListTwo.concat(data);
       this.fileListTwo = unique(this.fileListTwo, 'objId');
-      console.log(this.fileListTwo, 'this.fileListTwo')
     },
     // 从布控库中获取车像
     getVehicleData (data) {
-      data.forEach((f, i) => {
-        if (this.modelOneForm.carNumberInfo[i] === undefined) {
-          this.modelOneForm.carNumberInfo.push({vehicleNumber: f.vehicleNumber});
-        } else if (this.modelOneForm.carNumberInfo[i].vehicleNumber === null) {
-          this.modelOneForm.carNumberInfo[i].vehicleNumber = f.vehicleNumber;
-        }
-      })
+      this.fileListThree = data;
     },
     // 一键布控
     selControl (formName) {
@@ -186,7 +210,7 @@ export default {
           if (this.$refs['controlDev']) {
             this.$refs['controlDev'].sendParent();
 
-            const _modelOneForm = objDeepCopy(this.modelOneForm);
+            let _modelOneForm = objDeepCopy(this.modelOneForm);
 
             _modelOneForm.carNumberInfo = _modelOneForm.carNumberInfo.map(m => m.vehicleNumber).join(',');
             _modelOneForm.radius = this.scopeRadius();
@@ -194,10 +218,8 @@ export default {
             _modelOneForm.lostTime = formatDate(_modelOneForm.lostTime);
             _modelOneForm.longitude = this.addressObj_.map(m => m.lngLat[0]).join(',');
             _modelOneForm.latitude = this.addressObj_.map(m => m.lngLat[1]).join(',');
-            _modelOneForm.bayonetList = this.devData.bayonetList;
-            _modelOneForm.devList = this.devData.devList;
-            const surveillanceObjectDtoList = this.fileListOne.concat(this.fileListTwo);
-            this.$emit('getModel', {carNumberInfo: _modelOneForm.carNumberInfo, modelType: 1,  pointDtoList: [_modelOneForm], surveillanceObjectDtoList});
+            _modelOneForm = {..._modelOneForm, ...this.devData}
+            this.$emit('getModel', {carNumberInfo: _modelOneForm.carNumberInfo, modelType: 1,  pointDtoList: [_modelOneForm], surveillanceObjectDtoList: [...this.fileListOne, ...this.fileListTwo, ...this.fileListThree]});
           } else {
             this.$message.warning('请先选择布控设备');
           }
@@ -212,13 +234,10 @@ export default {
     // 失踪人员信息的上传方法
     uploadPicDelOne (fileList) {
       this.fileListOne = fileList;
-      console.log(this.fileListOne)
     },
     // 失踪人员信息的上传方法
     uploadPicFileListOne (fileList) {
-      console.log(fileList, 'fileList')
       this.fileListOne = imgUrls(fileList);
-      console.log(this.fileListOne)
     },
 
     // 嫌疑人照片的上传方法
@@ -227,11 +246,8 @@ export default {
     },
     // 嫌疑人照片的上传方法
     uploadPicFileListTwo (fileList) {
-      console.log(fileList, 'fileList')
       const _list = imgUrls(fileList);
       this.fileListTwo = this.fileListTwo.concat(_list);
-      this.fileListTwo = unique(this.fileListTwo, 'objId');
-      console.log(this.fileListTwo)
     },
     // 从库中选择
     popSel (type) {
@@ -332,6 +348,13 @@ export default {
       cursor: pointer;
     }
   }
+  .sel_car{
+    height: 26px;
+    > span:nth-child(2){
+      color: #0C70F8;
+      cursor: pointer;
+    }
+  }
 }
 </style>
 <style lang="scss">
@@ -354,8 +377,8 @@ export default {
     .plate_num{
       width: 25%;
       display: flex;
-      margin-top: 20px;
       padding-right: 10px;
+      padding-bottom: 10px;
       > span{
         margin: 0 3px;
       }
@@ -375,14 +398,10 @@ export default {
           width: 100%!important;
         }
       }
-      &:nth-child(5){
-        padding-right: 0!important;
-      }
     }
     .plate_num_btn_box{ 
       margin-bottom: 0!important;
       padding-right: 38px!important;
-      padding-top: 20px;
       &.top{
         padding-top: 20px;
       }

@@ -1,6 +1,6 @@
 <template>
   <div class="con_dev">
-    <div class="dev_box" v-if="pageType === 1" v-loading="loading">
+    <div class="dev_box" v-if="pageType === 1">
       <div class="tab">
         <span>布控设备</span>
         <el-button type="info" plain @click="pageType = 2">修改布控设备</el-button>
@@ -100,7 +100,7 @@ import controlDevUpdate from './controlDevUpdate.vue';
 import { setTimeout } from 'timers';
 export default {
   components: {controlDevUpdate},
-  props: ['addressObj', 'addressObjTwo', 'modelType', 'lostTime'],
+  props: ['addressObj', 'addressObjTwo', 'modelType', 'lostTime', 'devIdListSel', 'bayIdListSel'],
   data () {
     return {
       pageType: 1,//页面类型，1为布控设备展示页面，2为修改布控设备页面
@@ -132,9 +132,10 @@ export default {
   mounted () {
     this.resetMap();
     this.getDevList();
+    console.log(this.addressObj, 'addressObj')
   },
   methods: {
-    // 传给父组件
+    // 传给父组件 
     sendParent () {
       if (this.pageType === 1) {
         const devList = this.devIdList.map(m => {return {deviceId: m}})
@@ -183,6 +184,12 @@ export default {
           this.addressObjTwo && this.mapCircleTwo();
           // 第3个布控模型的一键布控时所执行的
           this.modelType === 3 && this.getAllBay();
+          // 第5个布控模型的一键布控时所执行的,暂时这样写
+          if (this.devIdListSel) {
+            this.devIdList = this.devIdListSel;
+            this.bayIdList = this.bayIdListSel;
+            console.log(this.devIdList, 'this.devIdList')
+          }          
         }
       });
     },

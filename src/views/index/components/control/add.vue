@@ -3,16 +3,16 @@
   <div class="control_add">
     <!-- 面包屑 -->
     <!-- 编辑布控时出现 -->
-    <!-- <div class="breadcrumb_heaer" v-if="pageType === 2">
+    <div class="breadcrumb_heaer" v-if="pageType === 2">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item>布控</el-breadcrumb-item>
         <el-breadcrumb-item  @click.native="skipIsList" class="con_back">布控管理</el-breadcrumb-item>
         <el-breadcrumb-item>编辑布控</el-breadcrumb-item>
       </el-breadcrumb>
-    </div> -->
+    </div>
     <div :class="['create_box', {'editor': pageType !== 2}]">
       <!-- 编辑布控时出现 -->
-      <!-- <div v-if="pageType === 2" class="create_num"><span class="vl_f_666">布控编号：</span><span class="vl_f_333">{{controlDetail.surveillanceNo}}</span></div> -->
+      <div v-if="pageType === 2" class="create_num"><span class="vl_f_666">布控编号：</span><span class="vl_f_333">{{controlDetail.surveillanceNo}}</span></div>
       <div class="create_content">
         <el-form ref="createForm" :label-position="labelPosition" :model="createForm" class="create_form">
           <el-form-item class="create_form_one" style="margin-bottom: 0;">
@@ -155,7 +155,7 @@
                   <el-radio :label="6">自定义</el-radio>
                 </el-radio-group>
               </div>
-              <div is="modelOne" v-if="modelType === 1" ref="model" @getModel="getModel"></div>
+              <div is="modelOne" v-if="modelType === 1" ref="model" @getModel="getModel" :modelList="modelList"></div>
               <div is="modelTwo" v-if="modelType === 2" ref="model" @getModel="getModel"></div>
               <div is="modelThree" v-if="modelType === 3" ref="model" @getModel="getModel"></div>
               <div is="modelFour" v-if="modelType === 4" ref="model" @getModel="getModel"></div>
@@ -200,6 +200,7 @@ export default {
     modelFive,
     modelSix
   },
+  props: ['createType', 'controlId'],
   data () {
     return {
       pageType: null,//页面类型
@@ -251,7 +252,7 @@ export default {
         {value: '1', label: '是'},
         {value: '0', label: '否'}
       ],//是否共享布控下拉列表
-      modelType: 2,//布控模型类型
+      modelType: null,//布控模型类型
       // 弹出框参数
       toGiveUpDialog: false,
       loading: false,
@@ -260,13 +261,38 @@ export default {
       controlDetail: {},
       // 子组件传过来的数据
       modelData: {},
+      eventDetail: {},
+      modelList: null
     }
   },
   created () {
-
+    // 编辑页-2
+    if (this.createType) {
+      this.pageType = parseInt(this.createType);
+      if (this.pageType === 2) {
+        this.getControlDetailIsEditor(this.controlId);
+      }
+    // 新增页-1
+    } else {
+      this.pageType = 1;
+      this.modelType = 1;
+      // 从车辆侦查或者人像侦查跳转过来新建布控
+      // const {imgurl, modelName, plateNo} = this.$route.query;
+      // this.imgurl = imgurl;
+      // this.plateNo = plateNo;
+    }
+    // 复用页-3
+    if (this.$route.query.createType) {
+      this.pageType = parseInt(this.$route.query.createType);
+      this.getControlDetailIsEditor(this.$route.query.controlId);
+    }
+    // 事件管理模块通过路由跳转过来
+    if (this.$route.query.eventId) {
+      this.getEventDetail(this.$route.query.eventId);
+    }
   },
   mounted () {
-    
+    // this.getEventList();
   },
   methods: {
     // 获取关联事件列表
@@ -296,7 +322,19 @@ export default {
         }
       })
     },
-  
+    // 获取事件详情
+    getEventDetail (eventId) {
+      getEventDetail(eventId).then(res => {
+        if (res && res.data) {
+          this.eventDetail = res.data;
+          this.eventList = [{
+            label: this.eventDetail.eventCode,
+            value: this.eventDetail.uid
+          }]
+          this.createForm.eventId = this.eventDetail.uid;
+        }
+      })
+    },
     // 新增时间段
     addPeriodTime() {
       this.createForm.surveillancTimeList.push({
@@ -320,9 +358,6 @@ export default {
     // 删除短信联动
     removeCellphoneMessages () {
       this.createForm.contactList.pop();
-    },
-    skipIsList () {
-    
     },
     // 通过布控名称获取布控信息，异步查询布控是否存在
     getControlInfoByName () {
@@ -374,7 +409,7 @@ export default {
               this.$message.success(this.pageType === 3 ? '复用成功' : '新增成功');
               this.$router.push({ name: 'control_manage' });
               // // 新增布控后，状态为待开始的事件，改为进行中
-              // const obj = this.eventList.find(f => f.value === this.createForm.event);
+              // const obj = this.eventList.find(f => f.value === this.createForm.eventId);
               // if (obj && obj.eventStatus === 1) {
               //   updateEvent({uid: obj.value, type: 6});
               // }
@@ -407,16 +442,80 @@ export default {
       }
     },
 
-   
+    skipIsList () {
+      // 编辑布控任务时
+      if (this.pageType === 2) {
+        this.$emit('changePageType', 1);
+      // 新建、复用布控任务时
+      } else {
+        // 从事件模块跳转过来的
+        if (this.$route.query.eventId) {
+          this.$router.push({ name: 'event_manage' });
+        } else {
+          this.$router.push({ name: 'control_manage' });
+        }
+      }
+      this.toGiveUpDialog = false;
+    },
     // 根据布控id获取布控详情，用于回填数据
     getControlDetailIsEditor (controlId) {
       getControlDetailIsEditor(controlId).then(res => {
-    
+        if (res && res.data) {
+          const detail = res.data;
+          const {modelList} = detail;
+          delete detail.modelList;
+          const {surveillanceDateStart, surveillanceDateEnd} = detail;
+          detail.controlDate = [surveillanceDateStart, surveillanceDateEnd];
+          detail.surveillancTimeList = detail.surveillancTimeList.map(m => {
+            return {
+              startTime: new Date('2016, 9,' + m.startTime),
+              endTime: new Date('2016, 9,' + m.endTime)
+            }
+          })
+          this.createForm = detail;
+          const [{modelType}] = modelList;
+          this.modelList = modelList;
+          this.modelType = modelType;
+          
+        }
       })
     },
     // 编辑布控任务
     putControl (formName) {
-    
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          const _createForm = objDeepCopy(this.createForm);
+          if (_createForm.controlDate.length > 0) {
+            _createForm.surveillanceDateStart = _createForm.controlDate[0];
+            _createForm.surveillanceDateEnd = _createForm.controlDate[1];
+          }
+          delete _createForm.controlDate;
+          _createForm.surveillancTimeList = _createForm.surveillancTimeList.map(m => {
+            return {
+              startTime: formatDate(m.startTime, 'HH:mm:ss'),
+              endTime: formatDate(m.endTime, 'HH:mm:ss')
+            }
+          })
+          this.modelData = {};
+          this.$refs['model'].sendParent();
+          console.log(this.modelData, 'this.modelData');
+          let data  = {
+            ..._createForm,
+            modelList: [this.modelData]
+          }
+          this.loadingBtn = true;
+          addControl(data).then(res => {
+            if (res) {
+              this.$message.success('编辑成功');
+              this.$emit('getControlList');
+            }
+          }).finally(() => {
+            this.loadingBtn = false;
+          })
+        } else {
+          return false;
+        }
+      });
     }
   }
 }

@@ -45,7 +45,7 @@
     </el-form-item>
     <div is="controlDev" ref="controlDev" v-if="isShowControlDev" :addressObjTwo="addressObjTwo" @getChildModel="getChildModel"></div>
     <div is="portraitLib" ref="portraitLibDialog" :fileListOne="protraitList" @getPortraitData="getPortraitData"></div>
-    <div is="vehicleLib" ref="vehicleLibDialog" :carNumberInfo="vehicleList" @getVehicleData="getVehicleData"></div>
+    <div is="vehicleLib" ref="vehicleLibDialog" :fileList="vehicleList" @getVehicleData="getVehicleData"></div>
   </el-form>
 </template>
 <script>
@@ -86,17 +86,13 @@ export default {
     this.resetMap();
   },
   methods: {
-    // 从布控库中获取失踪人像
+    // 从布控库中获取禁入人员
     getPortraitData (data) { 
-      console.log(data, 'datadata')
-      this.protraitList = this.protraitList.concat(data);
-      this.protraitList = unique(this.protraitList, 'objId');
+      this.protraitList = data;
     },
     // 从布控库中获取禁入车辆
     getVehicleData (data) {
-      console.log(data, 'datadata')
-      this.vehicleList = this.vehicleList.concat(data);
-      this.vehicleList = unique(this.vehicleList, 'objId');
+      this.vehicleList = data;
     },
     // 向父组件传值
     sendParent () {
@@ -108,10 +104,8 @@ export default {
           if (this.$refs['controlDev']) {
             this.$refs['controlDev'].sendParent();
 
-            const _carNumberInfo = this.vehicleList.map(m => m.vehicleNumber).join(',');
-            this.modelTwoForm.bayonetList = this.devData.bayonetList;
-            this.modelTwoForm.devList = this.devData.devList;
-            this.$emit('getModel', {carNumberInfo: _carNumberInfo, modelType: 2,  pointDtoList: [this.modelTwoForm], surveillanceObjectDtoList: this.protraitList});
+            this.modelTwoForm = {...this.modelTwoForm, ...this.devData}
+            this.$emit('getModel', {modelType: 2,  pointDtoList: [this.modelTwoForm], surveillanceObjectDtoList: [...this.protraitList, ...this.vehicleList]});
           } else {
             this.$message.warning('请先选择布控设备');
           }

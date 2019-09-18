@@ -5,28 +5,31 @@
       <div class="pic_format" style="top: -40px;">
         <div @click="popSel(1)">从布控库中选择</div>
       </div>
-      <div is="uploadPic" :fileList="fileList" @uploadPicDel="uploadPicDel" @uploadPicFileList="uploadPicFileList"></div>
+      <div is="uploadPic" :fileList="fileListOne" @uploadPicDel="uploadPicDel" @uploadPicFileList="uploadPicFileList"></div>
+    </el-form-item>
+    <el-form-item style="margin-bottom: 10px;">
+      <div class="sel_car"><span>上访车辆信息：</span><span @click="popSel(2)">从布控库中选择</span></div>
     </el-form-item>
     <el-form-item class="plate_num_box">
-      <div class="pic_format">
-        <div @click="popSel(2)">从布控库中选择</div>
+      <div class="plate_num" v-for="item in fileListTwo" :key="item.uid">
+        <el-input v-model="item.vehicleNumber" :disabled="true"></el-input>
       </div>
-      <div v-for="(item, index) in modelThreeForm.licensePlateNumList" :key="index" style="position: relative;" class="license_plate_num">
-        <el-form-item :label="index === 0 ? '上访车辆信息:' : ''" :prop="'licensePlateNumList.' + index + '.vehicleNumber'" :rules="{validator: validPlateNumber, trigger: 'blur'}" >
+      <div v-for="(item, index) in modelThreeForm.carNumberInfo" :key="index" style="position: relative;" class="license_plate_num">
+        <el-form-item :prop="'carNumberInfo.' + index + '.vehicleNumber'" :rules="{validator: validPlateNumber, trigger: 'blur'}" >
           <el-input v-model="item.vehicleNumber" placeholder="请输入车辆车牌号"></el-input>
         </el-form-item>
       </div>
       <el-form-item class="plate_num_btn_box">
         <div class="period_time_btn" @click="addLicensePlateNum()"><i class="vl_icon vl_icon_control_22"></i><span>添加车牌号码</span></div>
-        <div v-if="modelThreeForm.licensePlateNumList.length > 1" class="period_time_btn" @click="removeLicensePlateNum()"><i class="vl_icon vl_icon_control_28"></i><span>删除车牌号码</span></div>
+        <div v-if="modelThreeForm.carNumberInfo.length > 1" class="period_time_btn" @click="removeLicensePlateNum()"><i class="vl_icon vl_icon_control_28"></i><span>删除车牌号码</span></div>
       </el-form-item>
     </el-form-item>
     <el-form-item style="margin-top: 20px;" v-if="!isShowControlDev">
       <el-button type="primary" @click="selControl('modelThree')">一键布控</el-button>
     </el-form-item>
     <div is="controlDev" ref="controlDev" v-if="isShowControlDev" :modelType="3" @getChildModel="getChildModel"></div>
-    <div is="vehicleLib" ref="vehicleLibDialog" @getVehicleData="getVehicleData"></div>
-    <div is="portraitLib" ref="portraitLibDialog" @getPortraitData="getPortraitData"></div>
+    <div is="portraitLib" ref="portraitLibDialog" :fileListOne="fileListOne" @getPortraitData="getPortraitData"></div>
+    <div is="vehicleLib" ref="vehicleLibDialog" :fileList="fileListTwo" @getVehicleData="getVehicleData"></div>
   </el-form>
 </template>
 <script>
@@ -42,10 +45,11 @@ export default {
   data () {
     return {
       modelThreeForm: {
-        licensePlateNumList: [{vehicleNumber: null}]
+        carNumberInfo: [{vehicleNumber: null}]
       },
       validPlateNumber: checkPlateNumber,
-      fileList: [],
+      fileListOne: [],
+      fileListTwo: [],
       createSelDialog: false,
       isShowControlDev: false
     }
@@ -54,28 +58,21 @@ export default {
     // 从布控库中获取人像
     getPortraitData (data) {
       console.log(data, 'datadata')
-      this.fileList = this.fileList.concat(data);
-      this.fileList = unique(this.fileList, 'photoUrl');
+      this.fileListOne = this.fileListOne.concat(data);
+      this.fileListOne = unique(this.fileListOne, 'objId');
     },
     // 从布控库中获取车像
-    getVehicleData (data) {
-      console.log(data, 'datadata')
-      this.modelThreeForm.licensePlateNumList.forEach((item, index) => {
-        if (item.vehicleNumber === null) {
-          item.vehicleNumber = data[index].vehicleNumber;
-        }
-      })
-      // this.modelThreeForm.licensePlateNumList.push(...data);
+    getVehicleData (data) {    
+      this.fileListTwo = data; 
     },
-    // 失踪人员信息的上传方法
-    uploadPicDel (fileList) {
-      this.fileList = fileList;
+    // 上访人员信息的上传方法
+    uploadPicDel (fileListOne) {
+      this.fileListOne = fileListOne;
     },
-    // 失踪人员信息的上传方法
-    uploadPicFileList (fileList) {
-      const _list = imgUrls(fileList);
-      this.fileList = this.fileList.concat(_list);
-      this.fileList = unique(this.fileList, 'photoUrl');
+    // 上访人员信息的上传方法
+    uploadPicFileList (fileListOne) {
+      const _list = imgUrls(fileListOne);
+      this.fileListOne = this.fileListOne.concat(_list);
     },
     // 从库中选择
     popSel (type) {
@@ -89,22 +86,24 @@ export default {
     },
     // 添加车牌号码
     addLicensePlateNum () {
-      this.modelThreeForm.licensePlateNumList.push({vehicleNumber: null});
+      this.modelThreeForm.carNumberInfo.push({vehicleNumber: null});
     },
     // 删除车牌号码
     removeLicensePlateNum () {
-      this.modelThreeForm.licensePlateNumList.pop();
+      this.modelThreeForm.carNumberInfo.pop();
     },
     // 向父组件传值
     sendParent () {
-      if (this.fileList.length === 0 && !this.modelThreeForm.licensePlateNumList[0].vehicleNumber) {
+      if (this.fileListOne.length === 0 && !this.modelThreeForm.carNumberInfo[0].vehicleNumber) {
         return this.$message.warning('请选择布控人员或者车辆');
       } 
       this.$refs['modelThree'].validate((valid) => {
         if (valid) {
           if (this.$refs['controlDev']) {
             this.$refs['controlDev'].sendParent();
-            this.$emit('getModel', {modelThreeForm: this.modelThreeForm, fileList: this.fileList, ...this.devData});
+
+            const _carNumberInfo = this.modelThreeForm.carNumberInfo.map(m => m.vehicleNumber).join(',');
+            this.$emit('getModel', {carNumberInfo: _carNumberInfo, modelType: 3,  pointDtoList: [this.devData], surveillanceObjectDtoList: [...this.fileListOne, ...this.fileListTwo]});
           } else {
             this.$message.warning('请先选择布控设备');
           }
@@ -118,7 +117,7 @@ export default {
     },
     // 一键布控
     selControl (formName) {
-      if (this.fileList.length === 0 && !this.modelThreeForm.licensePlateNumList[0].vehicleNumber) {
+      if (this.fileListOne.length === 0 && !this.modelThreeForm.carNumberInfo[0].vehicleNumber) {
         return this.$message.warning('请选择布控人员或者车辆');
       } 
       this.$refs[formName].validate((valid) => {
@@ -142,8 +141,8 @@ export default {
     .plate_num{
       width: 25%;
       display: flex;
-      margin-top: 20px;
       padding-right: 10px;
+      padding-bottom: 10px;
       > span{
         margin: 0 3px;
       }
@@ -167,15 +166,13 @@ export default {
         padding-right: 0!important;
       }
     }
-    .license_plate_num:not(:nth-child(2)){
-      margin-top: 40px;
-    }
     .license_plate_num{
       padding-right: 10px;
+      padding-bottom: 10px;
     }
     .plate_num_btn_box{ 
       margin-bottom: 0!important;
-      padding: 40px 38px 0 0;
+      padding: 0 38px 0 0;
       &.top{
         padding-top: 20px;
       }
@@ -218,6 +215,13 @@ export default {
     cursor: pointer;
     > div{
       color: #0C70F8;
+    }
+  }
+  .sel_car{
+    height: 26px;
+    > span:nth-child(2){
+      color: #0C70F8;
+      cursor: pointer;
     }
   }
 }

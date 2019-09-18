@@ -759,7 +759,9 @@ export default {
       })
       this.map.cluster.addMarkers(curMks);
       // 传递信息给父组件
-      this.$emit("getControlDevUpdate", {self_to_data1: this.self_to_data1, self_to_data2: this.self_to_data2});
+      const devList = this.devIdList.map(m => {return {deviceId: m}})
+      const bayonetList = this.bayIdList.map(m => {return {bayonetId: m}})
+      this.$emit("getControlDevUpdate", {devList, bayonetList});
     },
     // 根据设备名称搜索设备或卡口
     searchDev () {
@@ -1014,7 +1016,9 @@ export default {
       }
 
       // 传递信息给父组件
-      this.$emit("getControlDevUpdate", {self_to_data1: this.self_to_data1, self_to_data2: this.self_to_data2});
+      const devList = this.devIdList.map(m => {return {deviceId: m}})
+      const bayonetList = this.bayIdList.map(m => {return {bayonetId: m}})
+      this.$emit("getControlDevUpdate", {devList, bayonetList});
 
       // 处理完毕取消选中
       this.$refs[fromTree].setCheckedKeys([]);
@@ -1144,7 +1148,9 @@ export default {
       }
 
       // 传递信息给父组件
-      this.$emit("getControlDevUpdate", {self_to_data1: this.self_to_data1, self_to_data2: this.self_to_data2});
+      const devList = this.devIdList.map(m => {return {deviceId: m}})
+      const bayonetList = this.bayIdList.map(m => {return {bayonetId: m}})
+      this.$emit("getControlDevUpdate", {devList, bayonetList});
 
       // 处理完毕取消选中
       this.$refs[toTree].setCheckedKeys([]);

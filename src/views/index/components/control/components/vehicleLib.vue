@@ -113,7 +113,7 @@
 import {dataList} from '@/utils/data.js';
 import {getVehicleList} from '@/views/index/api/api.control.js';
 export default {
-  props: ['groupId', 'carNumberInfo'],
+  props: ['groupId', 'fileList'],
   data () {
     return {
       libForm: {
@@ -159,7 +159,7 @@ export default {
         if (res && res.data) {
           this.carMemberList = res.data;
           this.carMemberList.list = this.carMemberList.list.map(f => {
-            if (this.carNumberInfo && this.carNumberInfo.some(s => s.vehicleNumber === f.vehicleNumber)) {
+            if (this.fileList && this.fileList.some(s => s.vehicleNumber === f.vehicleNumber)) {
               this.$set(f, 'isChecked', true);
             } else {
               this.$set(f, 'isChecked', false);
