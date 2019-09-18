@@ -185,7 +185,8 @@ export default {
         animation: fadeIn .6s ease-out both;
         .lg_logo_box {
           text-align: center;
-          margin: 28px 0px 25px 0px;
+          margin-bottom: 25px;
+          padding-top: 25px;
           .lg_logo {
             display: inline-block;
             width: 328px; height: 120px;

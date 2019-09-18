@@ -121,44 +121,50 @@
           </div>
         </div>
         <div class="vc_gcck_r_C" v-show="showType === 2">
-          <div class="gcck_rh" style="overflow: auto;" v-if="zpDeviceIdsHis && picList.length > 0">
-            <div>
-              <div class="gcck_rh_tos">
-                <el-input-number size="small" :disabled="picAutoPlayActive" v-model="picPlayTime" @change="picPlayChange" :min="1" :max="60"></el-input-number>&nbsp;秒/张&nbsp;&nbsp;&nbsp;&nbsp;
-                <el-button size="small" :disabled="picIndex === ((picPageNum - 1) * picPages + picTotal)" type="primary" @click="picAutoPlay(false)">
-                  <template v-if="picAutoPlayActive">
-                    暂停播放
-                  </template>
-                  <template v-else>
-                    自动播放
-                  </template>
-                </el-button>
-              </div>
-              <div class="gcck_rh_list" :class="{'gcck_rh_list': picShowType === 2}">
-                <ul :style="{'margin-left': (-500 * ((picIndex - 1) % picPageSize) + 'px')}">
-                  <li v-for="(item, index) in picList" :key="'p_l_' + index">
-                    <div>
-                      <p>
-                        <img class="bigImg" :title="item.plateNo" :alt="item.plateNo" :src="item.storagePath">
-                      </p>
-                      <div class="gcck_rh_ft"><i class="vl_icon vl_icon_sm_sxt"></i>{{item.deviceName}}</div>
-                      <div><i class="vl_icon vl_icon_sm_cl"></i>{{item.plateNo}} </div>
-                      <div><i class="vl_icon vl_icon_sm_sj"></i>{{item.shotTime}} </div>
+          <div class="gcck_rh" style="overflow: auto;" v-if="zpDeviceIdsHis">
+            <ul class="gcck_l">
+              <li v-for="(item, index) in aDay" :class="{'gcck_l_sed': daysList[item] && daysList[item].slider === 2}" :key="'day_list_' + index">
+                <div class="gcck_lt" @click="selRow(item)"><i class="el-icon-caret-right gcck_lt_op"></i>{{item | dayFormat}}&nbsp;<span>({{daysList[item] ? daysList[item].total : ' - '}}张)</span></div>
+                <div class="gcck_l_con">
+                  <ul class="gcck_ll" v-if="daysList[item] && daysList[item].list">
+                    <li v-for="(sitem, sindex) in daysList[item].list" :key="'dlf_' + sindex">
+                      <div class="vc_gcck_rbl">
+                        <div class="gcck_rbl_i">
+                          <div>
+                            <div @click="goToDetailHis(item, sindex)">
+                              <img :title="sitem.deviceName" :alt="sitem.deviceName" :src="sitem.subStoragePath">
+                            </div>
+                          </div>
+                        </div>
+                        <div class="gcck_rbl_t com_ellipsis" :title="sitem.plateNo" style="color: #333;"><i class="vl_icon vl_icon_sm_cl"></i>{{sitem.plateNo ? sitem.plateNo : '未知车牌'}}</div>
+                        <div class="gcck_rbl_t com_ellipsis" :title="sitem.shotTime"><i class="vl_icon vl_icon_sm_sj"></i>{{sitem.shotTime}}</div>
+                      </div>
+                    </li>
+                  </ul>
+                  <div class="gcck_ld" v-if="!daysList[item] || daysList[item].state === 1">
+                    <div><i class="el-icon-loading"></i>正在加载中，请稍后...</div>
+                  </div>
+                  <div class="gcck_ld" v-if="daysList[item] && daysList[item].state === 2 && (!daysList[item].list || daysList[item].list.length <= 0)">
+                    <div>暂无数据</div>
+                  </div>
+                  <div class="gcck_lb" v-if="daysList[item] && daysList[item].pageNum < daysList[item].pages">
+                    <span @click="doSearch(item, daysList[item].pageNum + 1)">加载更多</span>
+                  </div>
+                </div>
+              </li>
+              <!-- <li>
+                <div class="gcck_lt"><i class="el-icon-caret-right"></i>昨天&nbsp;2019-6-26&nbsp;<span>(31231张)</span></div>
+                <ul class="gcck_ll gcck_ll_hide">
+                  <li v-for="item in 10" :key="item">
+                    <div class="vc_gcck_rbl">
+                      <img src="../../../../../assets/img/temp/video_pic.png" alt="">
+                      <div><i class="vl_icon gcck_sxt"></i>环保路摄像头002</div>
+                      <div><i class="vl_icon gcck_sj"></i>18-12-24 14:12:17</div>
                     </div>
                   </li>
                 </ul>
-              </div>
-              <i @click="picPrep(true)" class="el-icon-arrow-left" :class="{'el-icon-arrow-dis': picIndex === 1}"></i>
-              <i @click="picNext(true)" class="el-icon-arrow-right" :class="{'el-icon-arrow-dis': picIndex === ((picPageNum - 1) * picPages + picTotal)}"></i>
-            </div>
-          </div>
-          <div class="vc_gcck_r" v-else-if="zpDeviceIdsHis && picList.length <= 0">
-            <div class="vc_gcck_r_empty">
-              <div class="com_trans50_lt">
-                <img src="../../../../../assets/img/null-content.png" alt="">
-                <p>暂无数据</p>
-              </div>
-            </div>
+              </li> -->
+            </ul>
           </div>
           <div class="vc_gcck_r" v-else-if="!zpDeviceIdsHis && picCKEmpty">
             <div class="vc_gcck_r_empty">
@@ -235,7 +241,23 @@ export default {
         disabledDate (d) {
           return d > new Date();
         }
+      },
+
+      aDay: [],
+      daysList: {
+        // state 1 未查询 2 查询中  3
+        // '2019-1-1': {state: 1, list: [], pageSize: 10, pageNum: 1, pages: 1, total: 100 }
+      },
+    }
+  },
+  filters: {
+    dayFormat (val) {
+      if (val === formatDate(new Date(), 'yyyy-MM-dd')) {
+        val = '今日';
+      } else if (val === formatDate(new Date() - 1000 * 60 * 60 * 24, 'yyyy-MM-dd')) {
+        val = '昨日';
       }
+      return val;
     }
   },
   mounted () {
@@ -268,6 +290,27 @@ export default {
         pageSize: 8,
         total: this.zpTotal,
         pageNum: 1
+      }
+    },
+    goToDetailHis (sday, index) {
+      if (this.daysList[sday]) {
+        let _o = this.daysList[sday];
+        let dId = this.zpDeviceIdsHis;
+        this.detailData = {
+          type: 1, // 1过车查看
+          params: {
+            where: {
+              deviceIds: dId,
+              startTime: sday + ' 00:00:00',
+              endTime: sday + ' 23:59:59',
+            }
+          }, // 查询参数
+          list: _o.list, // 列表
+          index: index, // 第几个
+          pageSize: _o.pageSize,
+          total: _o.total,
+          pageNum: _o.pageNum
+        }
       }
     },
 
@@ -422,14 +465,15 @@ export default {
 
     selectItem2 (type, item) {
       console.log(type, item);
-      this.picAutoPlay(true);
+//      this.picAutoPlay(true);
       let ids = '';
       if (type === 1) { // deviceName
         this.picShowType = 1;
         ids = item.uid;
         // this.getDeviceSnapSum(ids);
         this.zpDeviceIdsHis = ids;
-        this.getDeviceSnapPage2();
+        // this.getDeviceSnapPage2();
+        this.searchSubmit();
       } else if (type === 2) {
         getDeviceByBayonetUid({
           bayonetUid: item.uid
@@ -458,7 +502,8 @@ export default {
           }
           this.zpDeviceIdsHis = ids;
           if (this.zpDeviceIdsHis) {
-            this.getDeviceSnapPage2();
+//            this.getDeviceSnapPage2();
+            this.searchSubmit();
           }
         });
       }
@@ -510,6 +555,100 @@ export default {
         }
       });
     },
+
+    // 历史过车改成实时一样列表
+    selRow (item) {
+      if (this.daysList[item]) {
+        if (this.daysList[item].slider === 2) {
+          this.daysList[item].slider = 1;
+        } else {
+          this.daysList[item].slider = 2;
+          if (this.daysList[item].state === 1) {
+            this.doSearch (item, 1);
+          }
+        }
+      }
+    },
+
+    searchSubmit () {
+      let sT = this.searchTime2[0].getTime(), eT = this.searchTime2[1].getTime();
+      let ii = eT - sT;
+      let iD = Math.floor(ii / (1000 * 60 * 60 * 24)) + 1;
+      let aDay = [], oDayList = {};
+      for (let i = iD - 1; i >= 0; i--) {
+        let _SD = formatDate(sT + i * (1000 * 60 * 60 * 24), 'yyyy-MM-dd');
+        aDay.push(_SD);
+        oDayList[_SD] = {
+          state: 1, // 1 加载中，2加载完毕
+          slider: 1, // 1 slideUp 2 slideDown
+          list: null,
+          pageSize: 16,
+          pageNum: 0,
+          pages: 0,
+          total: 0
+        };
+      }
+      this.aDay = aDay;
+      this.daysList = oDayList;
+      console.log('this.daysList', this.daysList);
+      this.$set(this.daysList);
+      // console.log('aDay', aDay);
+      this.$nextTick(() => {
+        this.getDeviceSnapSumHis();
+        this.selRow(aDay[0]);
+        // $('.gcck_ll').first().show(300);
+      });
+    },
+    getDeviceSnapSumHis (dId) {
+      getDeviceSnapImagesSum({
+        deviceIds: this.zpDeviceIdsHis,
+        startTime: formatDate(this.searchTime2[0], 'yyyy-MM-dd 00:00:00'),
+        endTime: formatDate(this.searchTime2[1], 'yyyy-MM-dd 23:59:59'),
+      }).then(res => {
+        if (res && res.data && res.data.length > 0) {
+          for (let key in this.daysList) {
+            for (let i = 0; i < res.data.length; i++) {
+              if (key === res.data[i].snapImagesDate) {
+                this.daysList[key].total = res.data[i].snapImagesCount;
+                break;
+              }
+            }
+          }
+        }
+      });
+    },
+    doSearch (sDay, pageNum) {
+      if (!this.daysList[sDay]) {
+        this.daysList[sDay] = {
+          state: 1
+        };
+        this.$set(this.daysList);
+      }
+      let dId = this.zpDeviceIdsHis;
+      if (!pageNum) { pageNum = 1; }
+      getDeviceSnapImagesPage({
+        where: {
+          deviceIds: dId,
+          startTime: sDay + ' 00:00:00',
+          endTime: sDay + ' 23:59:59',
+        },
+        pageNum: pageNum,
+        pageSize: 16
+      }).then(res => {
+        this.daysList[sDay].state = 2;
+        if (res && res.data && res.data.list && res.data.list.length > 0) {
+          this.daysList[sDay].total = res.data.total;
+          this.daysList[sDay].pageNum = pageNum; // 当前页数
+          this.daysList[sDay].pages = res.data.pages; // 总页数
+          if (!this.daysList[sDay].list) {
+            this.daysList[sDay].list = [];
+          }
+          this.daysList[sDay].list = this.daysList[sDay].list.concat(res.data.list);
+          console.log('this.daysList', this.daysList);
+        }
+      });
+    },
+
 
     picPrep (bStopAni) {
       // bStopAni: true 关闭动画
@@ -833,6 +972,119 @@ export default {
     > .el-icon-arrow-right {
       right: 50%;
       margin-right: -270px;
+    }
+  }
+}
+.gcck_lt {
+  position: relative;
+  height: 40px; line-height: 40px;
+  padding-left: 44px; margin: 5px 10px 0 10px;
+  color: #333;
+  background-color: #fff;
+  box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
+  cursor: pointer;
+  transition: all .4s ease-out;
+  > i {
+    position: absolute; top: 10px; left: 20px;
+    font-size: 20px; color: #666; cursor: pointer;
+    transition: all .4s ease-out;
+    &.gcck_lt_op {
+      top: 10px;
+    }
+  }
+  > span { color: #999; }
+  &:hover {
+    color: #0C70F8;
+    > i {
+      color: #0C70F8;
+    }
+  }
+}
+.gcck_l {
+  > li {
+    &.gcck_l_sed {
+      > .gcck_l_con {
+        display: block;
+      }
+      .gcck_lt_op {
+        transform: rotate(90deg);
+        top: 8px;
+      }
+    }
+  }
+}
+.gcck_l_con {
+  display: none;
+  .gcck_ll {
+    display: block;
+    overflow: hidden;
+    padding: 5px;
+    > li {
+      width: 12.5%;
+      float: left;
+      padding: 5px;
+      > div {
+        width: 100%;
+        padding: 10px;
+        background-color: #fff;
+        box-shadow:0px 2px 10px 0px rgba(131,131,131,0.12);
+        > .gcck_rbl_i {
+          position: relative;
+          width: 100%; height: 0;
+          padding-top: 52%; margin-bottom: 5px;
+          > div {
+            position: absolute; top: 0; right: 0; bottom: 0; left: 0;
+            > div {
+              width: 100%; height: 100%;
+              display: flex; justify-content: center; align-items: center;
+              position: relative;
+              cursor: pointer;
+              overflow: hidden;
+              > img {
+                visibility: visible;
+                width: 100%; height: auto;
+              }
+            }
+          }
+        }
+        > .gcck_rbl_t {
+          position: relative;
+          text-align: left;
+          padding-left: 18px;
+          color: #999; font-size: 12px;
+          height: 22px; line-height: 22px;
+          > i {
+            position: absolute; top: 4px; left: 0;
+          }
+        }
+      }
+    }
+    &.gcck_ll_hide { display: none; }
+  }
+  .gcck_lb {
+    text-align: center;
+    padding-bottom: 5px;
+    > span {
+      display: inline-block;
+      background-color: #eee;
+      color: #666;
+      cursor: pointer;
+      padding: 3px 50px 5px 50px;
+      border-radius: 2px;
+    }
+  }
+  .gcck_ld {
+    position: relative;
+    height: 40px; width: 100%;
+    > div {
+      position: absolute; left: 50%; top: 0;
+      height: 40px;
+      color: #666;
+      padding-left: 25px; padding-top: 10px; margin-left: -85px;
+      > i {
+        position: absolute; top: 10px; left: 0px;
+        font-size: 20px;
+      }
     }
   }
 }

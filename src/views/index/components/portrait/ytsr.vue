@@ -34,7 +34,7 @@
           <div class="vl_jfo_event">
             <vue-scroll>
               <div class="vl_jfo_event_box clearfix">
-                <div class="vl_jfo_box_item" v-for="(item, index) in strucInfoList" :key="item.id" @click="showStrucInfo(item, index)">
+                <div class="vl_jfo_box_item" v-for="(item, index) in curStrucInfoList" :key="item.id" @click="showStrucInfo(item, index)">
                   <div class="vl_jfo_i_left"><img :src="item.photoUrl" alt=""></div>
                   <div class="vl_jfo_i_right">
                     <p>检索资料</p>
@@ -46,6 +46,15 @@
                 </div>
               </div>
             </vue-scroll>
+            <el-pagination
+                    class="cum_pagination cum_pagination_shot"
+                    @current-change="handleCurrentChange1"
+                    :current-page.sync="pagination.pageNum"
+                    :page-sizes="[100, 200, 300, 400]"
+                    :page-size="pagination.pageSize"
+                    layout="total, prev, pager, next, jumper"
+                    :total="pagination.total"
+            ></el-pagination>
           </div>
         </template>
         <template v-else>
@@ -101,7 +110,7 @@
       <div class="struc-list">
         <swiper :options="swiperOption" ref="mySwiper">
           <!-- slides -->
-          <swiper-slide v-for="(item, index) in strucInfoList" :key="item.id">
+          <swiper-slide v-for="(item, index) in curStrucInfoList" :key="item.id">
             <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
               <img style="height: .88rem;width: 50%;padding-right: .02rem;" :src="item.upPhotoUrl" alt="">
               <img style="height: .88rem;width: 50%;padding-left: .02rem;" :src="item.photoUrl" alt="">
@@ -163,7 +172,16 @@
         this.getTheList();
       }
     },
+    computed: {
+      curStrucInfoList () {
+        return this.strucInfoList.slice((this.pagination.pageNum - 1) * this.pagination.pageSize,  (this.pagination.pageNum) * this.pagination.pageSize)
+      }
+    },
     methods: {
+      handleCurrentChange1 (e) {
+        this.pagination.pageNum = e;
+
+      },
       // 获取实时
       getTheList () {
           PortraitPostByphotoRealtime(this.$route.query)
@@ -188,6 +206,7 @@
                   this.$set(res.data, 'taskWebParam', JSON.parse(res.data.taskWebParam));
                   // res.data.taskResult.push(...res.data.taskResult)
                   this.strucInfoList = res.data.taskResult;
+                  this.pagination.total = this.strucInfoList.length;
                   this.taskDetail = res.data.taskWebParam;
                   console.log(res.data)
                 }
@@ -271,17 +290,18 @@
     .vl_s_right {
       display: inline-block;
       width: calc(100% - 272px);
-      height: calc(100% - 60px);
+      height: calc(100% - 56px);
       position: relative;
       .vl_jig_right {
         width: 100%;
-        height: 100%;
+        height: calc(100% - 48px);
         padding: 0 20px;
         padding-right: 0;
+        min-height: 738px;
         .vl_jig_right_title {
           width: 100%;
-          height: 70px;
-          line-height: 70px;
+          height: 50px;
+          line-height: 50px;
           color: #999999;
           .vl_jr_t_item {
             float: left;
@@ -319,7 +339,7 @@
           }
         }
         .vl_jfo_event {
-          height: calc(100% - 70px);
+          height: calc(100% - 50px);
           min-height: 693px;
           .vl_jfo_event_box {
             width: 100%;

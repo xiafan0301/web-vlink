@@ -242,7 +242,7 @@
           content: _content
         });
         this.amap.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
-        let sConent = `<div class="cap_info_win"><p>设备名称：${data.bayonetName ? data.bayonetName : data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`
+        let sConent = `<div class="cap_info_win_dia"><p>设备名称：${data.bayonetName ? data.bayonetName : data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`
         this.infoWindow = new AMap.InfoWindow({
           map: this.amap,
           isCustom: true,
@@ -309,6 +309,22 @@
   }
 </script>
 <style lang="scss">
+  .cap_info_win_dia {
+    background: #FFFFFF;
+    padding: .18rem;
+    font-size: .14rem;
+    color: #666666;
+    position: relative;
+    &:after {
+      display: block;
+      content: '';
+      border: .1rem solid #FFFFFF;
+      border-color: #FFFFFF transparent transparent;
+      position: absolute;
+      bottom: -.2rem;
+      left: calc(50% - .05rem);
+    }
+  }
   .struc_detail_dialog_qypz {
     .el-dialog {
       max-width: 13.06rem;

@@ -59,7 +59,7 @@
               </div>
             </vue-scroll>
             <el-pagination
-              class="cum_pagination"
+              class="cum_pagination cum_pagination_shot"
               @current-change="handleCurrentChange1"
               :current-page.sync="pagination1.pageNum"
               :page-sizes="[100, 200, 300, 400]"
@@ -442,6 +442,10 @@
   }
 </script>
 <style lang="scss">
+  .cum_pagination_shot {
+    padding: 0px;
+    padding-right: 30px;
+  }
   .breadcrumb_heaer {
     background: #ffffff;
     border-bottom: 1px solid #D3D3D3;
