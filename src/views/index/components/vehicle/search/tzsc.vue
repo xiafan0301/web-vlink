@@ -322,18 +322,20 @@
                     @dragend="dragEnd"
                     draggable="true"
                     style="cursor: move;"
-                    :src="item.storagePath"
+                    :src="item.subStoragePath"
                   />
                 </div>
                 <div class="text_wrap">
-                  <h3 class="text_name">检索资料</h3>
+                  <div class="text_message" :title="item.deviceName">
+                    <i class="vl_icon vl_icon_retrieval_02"></i>
+                    {{item.deviceName}}
+                  </div>
                   <div class="text_message" :title="item.shotTime">
                     <i class="vl_icon vl_icon_retrieval_01"></i>
                     {{item.shotTime}}
                   </div>
-                  <div class="text_message" :title="item.deviceName">
-                    <i class="vl_icon vl_icon_retrieval_02"></i>
-                    {{item.deviceName}}
+                  <div class="text_message">
+                    车牌号码：{{item.plateNo ? item.plateNo : "未识别"}}
                   </div>
                 </div>
               </div>
@@ -554,7 +556,7 @@ export default {
       strucInfoList: [],
       noDataTips: "请在左侧输入查询条件",
       pageNum: 1,
-      pageSize: 10,
+      pageSize: 12,
       total: 0
       /* 检索详情弹窗变量 */
     };
@@ -1311,23 +1313,31 @@ export default {
         height: calc(100% - 19px);
         .img_item {
           cursor: pointer;
-          width: 380px;
-          padding: 20px;
-          margin: 20px 20px 0 0;
+          width: 346px;
+          padding: 11px;
+          margin: 2px 2px 0 0;
           background: #fff;
           overflow: hidden;
           float: left;
           // 图片包裹
           .img_wrap {
             width: 138px;
-            height: 138px;
+            height: 80px;
             float: left;
             position: relative;
+            background: #f2f2f2;
+            overflow: hidden;
             img {
               width: 100%;
-              height: 100%;
+              height: auto;
               display: block;
               cursor: move;
+              position: absolute;
+              top: 0;
+              left: 0;
+              bottom: 0;
+              right: 0;
+              margin: auto;
             }
           }
           // 文字的包裹
@@ -1342,7 +1352,7 @@ export default {
             }
             // 检索的资料信息
             .text_message {
-              width: 184px;
+              width: 166px;
               text-overflow: ellipsis;
               white-space: nowrap;
               overflow: hidden;

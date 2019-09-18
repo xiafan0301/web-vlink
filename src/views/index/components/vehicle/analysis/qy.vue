@@ -51,9 +51,9 @@
                         <div class="items">
                           <span @click="clickTab('cut1', searchData.length)" :class="['cut1',{'hover':hover=='cut1'}]"></span>
                           <span @click="clickTab('cut2', searchData.length)"  :class="['cut2',{'hover':hover=='cut2'}]"></span>
-                          <span @click="clickTab('cut3', searchData.length)"  :class="['cut3',{'hover':hover=='cut3'}]"></span>
+                          <!--<span @click="clickTab('cut3', searchData.length)"  :class="['cut3',{'hover':hover=='cut3'}]"></span>-->
                           <span @click="clickTab('cut4', searchData.length)"  :class="['cut4',{'hover':hover=='cut4'}]"></span>
-                          <span @click="clickTab('cut5', searchData.length)"  :class="['cut5',{'hover':hover=='cut5'}]"></span>
+                          <!--<span @click="clickTab('cut5', searchData.length)"  :class="['cut5',{'hover':hover=='cut5'}]"></span>-->
                         </div>
                       </div>
                     </div>
@@ -140,17 +140,17 @@
       width="30%">
       <span>是否要清除{{clearAll ? '全部时间和' : '该条'}}抓拍区域？</span>
       <span slot="footer" class="dialog-footer">
-    <el-button @click="delDialog = false">取 消</el-button>
-    <el-button type="primary" @click="confirmClear">确 定</el-button>
-  </span>
+        <el-button @click="delDialog = false">取 消</el-button>
+        <el-button type="primary" @click="confirmClear">确 定</el-button>
+      </span>
     </el-dialog>
   </div>
 </template>
 <script>
   import vlBreadcrumb from "@/components/common/breadcrumb.vue";
   import { mapXupuxian } from "@/config/config.js";
-  import {getAllDevice} from '../../../api/api.judge.js';
-  import {getAllBayonetList} from '../../../api/api.base.js';
+//  import {getAllDevice} from '../../../api/api.judge.js';
+  import {getAllMonitorList, getAllBayonetList} from '../../../api/api.base.js';
   import { objDeepCopy, formatDate, addCluster} from '../../../../../utils/util.js';
   export default {
     components: {vlBreadcrumb},
@@ -306,7 +306,9 @@
         //return pois
       },
       getAllDevice(){
-        getAllDevice().then(res=>{
+        getAllMonitorList({
+          ccode: mapXupuxian.adcode
+        }).then(res=>{
           if(res.data && res.data.length>0){
 //            this.allDevice=res.data
             console.log(res.data)
@@ -365,6 +367,8 @@
             if (obj.longitude > 0 && obj.latitude > 0) {
               let offSet = {0: [-15, -16],1: [-15, -16],2: [-15, -60],3: [-15, -16], 4: [-15, -16],5: [-15, -16]};
               let uContent = _this.setMarkContent(obj);
+              // 给obj设置markIndex ,为当前在marks集合中所处的位置，
+              obj['markIndex'] = _this.marks.length;
               let marker = new window.AMap.Marker({ // 添加自定义点标记
 //                map: _this.map,
                 position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
@@ -404,8 +408,8 @@
         let sDataType, uContent;
         if (obj.dataType === 0 && obj.deviceStatus !== 1) {
           sDataType = 6;
-        }else if (obj.dataType === 2) {
-          sDataType = '2' + obj.vehicleType
+        } else if (obj.dataType === 1 && !obj.isEnabled) {
+          sDataType = 9
         } else {
           sDataType = obj.dataType;
         }
@@ -456,19 +460,15 @@
             _this.createConfirmMark(e.lnglat);
 
             _this.checkout(circle,'AMap.circle');
-            // 判断如果当前curAddSearch.curMarks有数据的话，先加入点聚合
+            // 判断如果当前curAddSearch.curMarks有数据的话，恢复初始颜色
             if (_this.curAddSearch.curMarks.length) {
-              _this.pointIntoCluster(_this.curAddSearch.curMarks)
+              _this.recoverSXTcolor(_this.curAddSearch.curMarks)
             }
             _this.curAddSearch.curMarks = [];
             _this.curAddSearch.curPointData.forEach(j => {
-              _this.marks.forEach(m => {
-                if (m.getExtData() === j) {
-                  _this.curAddSearch.curMarks.push(m);
-                }
-              })
+              _this.curAddSearch.curMarks.push(_this.marks[j.markIndex]);
             })
-            _this.removeSomeCluster(_this.curAddSearch.curMarks)
+            _this.putSelectColor(_this.curAddSearch.curMarks)
           }
 
         });
@@ -488,17 +488,13 @@
           console.log(_this.curAddSearch.curPointData)
           // 判断如果当前curAddSearch.curMarks有数据的话，先加入点聚合
           if (_this.curAddSearch.curMarks.length) {
-            _this.pointIntoCluster(_this.curAddSearch.curMarks)
+            _this.recoverSXTcolor(_this.curAddSearch.curMarks)
           }
           _this.curAddSearch.curMarks = [];
           _this.curAddSearch.curPointData.forEach(j => {
-            _this.marks.forEach(m => {
-              if (m.getExtData() === j) {
-                _this.curAddSearch.curMarks.push(m);
-              }
-            })
+            _this.curAddSearch.curMarks.push(_this.marks[j.markIndex]);
           })
-          _this.removeSomeCluster(_this.curAddSearch.curMarks)
+          _this.putSelectColor(_this.curAddSearch.curMarks)
         });
       },
       // 改变右侧激活
@@ -532,14 +528,11 @@
         this.confirmIcon = m;
       },
       // 将指定mark集合移除点聚合
-      removeSomeCluster (mks) {
-        this.map.cluster.removeMarkers(mks);
-        // 把被移除的mark摄像头设置成红色
+      putSelectColor (mks) {
         mks.forEach(y => {
           let uContent = this.setMarkContent(y.getExtData(), 'error')
           y.setContent(uContent);
         })
-        this.map.add(mks);
       },
       // 画完区域完成，将数据添加到searchData,右侧列表
       addCompleteData (obj) {
@@ -556,10 +549,8 @@
         this.changeRightActive(this.searchData.length - 1)
       },
       // 删除区域之后将指定mark加入点聚合 mks当前区域的mark
-      pointIntoCluster (mks, index) {
-        console.log(mks);
+      recoverSXTcolor (mks, index) {
         // 判断这个点是不是在其他区域被选中，选中了则不处理
-        let curMks = [];
         mks.forEach(x => {
           let b = true;
           this.searchData.forEach((y, sIndex) => {
@@ -570,11 +561,8 @@
           if (b) {
             let uContent = this.setMarkContent(x.getExtData())
             x.setContent(uContent);
-            curMks.push(x);
           }
         })
-        // curMks确定要加入点聚合，并且重新设置了content
-        this.map.cluster.addMarkers(curMks);
       },
       checkout(obj , type){
         this.curAddSearch.curPointData = [];
@@ -670,7 +658,7 @@
         if (this.confirmIcon) {this.map.remove(this.confirmIcon)};
         // 先判断你选择的区域有没有设备,没有就不用做处理
         if (this.curAddSearch.curPointData.length) {
-          this.pointIntoCluster(this.curAddSearch.curMarks);
+          this.recoverSXTcolor(this.curAddSearch.curMarks);
         }
       },
       delAllArea() {
@@ -686,7 +674,7 @@
           if (x.area) {
             this.map.remove(x.area);
             x.area = null;
-            this.pointIntoCluster(x.curMarks, index);
+            this.recoverSXTcolor(x.curMarks, index);
             this.searchData[index].curPointData = [];
           }
         })
@@ -782,7 +770,7 @@
               this.changeRightActive(this.curRightActive + 1)
             }
           }
-          this.pointIntoCluster(this.searchData[this.curDrawIndex].curMarks, this.curDrawIndex)
+          this.recoverSXTcolor(this.searchData[this.curDrawIndex].curMarks, this.curDrawIndex)
           this.searchData.splice(this.curDrawIndex, 1)
         }
       },
@@ -1073,12 +1061,13 @@
               padding-top: 0px;
               span{
                 display: inline-block;
-                width: 46px;
+                width: 50px;
                 height: 46px;
                 text-align: center;
                 vertical-align: middle;
                 line-height: 46px;
                 cursor: pointer;
+                margin: 0 3px;
                 &:last-child{
                   border-right: none;
                 }

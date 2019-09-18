@@ -120,9 +120,7 @@ export default {
   data () {
     let nDate = new Date();
     return {
-
       detailData: null,
-
       formInline: {
         time: [nDate, nDate],
         lb: '',
@@ -433,7 +431,7 @@ export default {
         > .gcck_rbl_i {
           position: relative;
           width: 100%; height: 0;
-          padding-top: 100%; margin-bottom: 5px;
+          padding-top: 52%; margin-bottom: 5px;
           > div {
             position: absolute; top: 0; right: 0; bottom: 0; left: 0;
             > div {
@@ -441,9 +439,10 @@ export default {
               display: flex; justify-content: center; align-items: center;
               position: relative;
               cursor: pointer;
+              overflow: hidden;
               > img {
                 visibility: visible;
-                width: 100%; height: 100%;
+                width: 100%; height: auto;
               }
             }
           }

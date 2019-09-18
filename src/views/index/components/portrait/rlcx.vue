@@ -253,7 +253,7 @@
     <!-- 详情 -->
     <portraitDetail :detailData="detailData"></portraitDetail>
     <!-- D设备 B卡口  这里是设备和卡口 -->
-    <div is="mapSelector" :open="openMap" :clear="msClear" :showTypes="'DB'" @mapSelectorEmit="mapSelectorEmit"></div>
+    <div is="mapSelector" :activeDeviceList="activeDeviceList" :open="openMap" :clear="msClear" :showTypes="'DB'" @mapSelectorEmit="mapSelectorEmit"></div>
   </div>
 </template>
 <script>
@@ -272,6 +272,7 @@ export default {
   components: {vehicleBreadcrumb, mapSelector, vlUpload, portraitDetail, noResult},
   data () {
     return {
+      activeDeviceList: [],
       isInitPage: true,
 
       curImageUrl: '', // 当前上传的图片
@@ -499,17 +500,18 @@ export default {
         if (result.bayonetList && result.bayonetList.length > 0) {
           this.dSum += result.bayonetList.length;
         }
-        if (result.bayonetDeviceList && result.bayonetDeviceList.length > 0) {
-          this.dSum += result.bayonetDeviceList.length;
-          for (let i = 0; i < result.bayonetDeviceList.length; i++) {
-            this.dIds.push(result.bayonetDeviceList[i].uid);
-          }
-        }
+//        if (result.bayonetDeviceList && result.bayonetDeviceList.length > 0) {
+//          this.dSum += result.bayonetDeviceList.length;
+//          for (let i = 0; i < result.bayonetDeviceList.length; i++) {
+//            this.dIds.push(result.bayonetDeviceList[i].uid);
+//          }
+//        }
       }
     },
 
     areaTypeChanged (val) {
       if (val === 2) {
+        this.activeDeviceList = ['20','21','36','6JcTL9UEjyseiJIJ1BfXro', '7frZ4G4A5TuZp4DPeQk73X'];
         this.openMap = !this.openMap;
       }
     },
