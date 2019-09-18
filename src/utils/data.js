@@ -29,7 +29,7 @@ const dataList = {
   operateCompany: 43, // 运营公司
   vehicleType: 44, // 车辆类型
   numberType: 45, // 号牌种类
-  plateType: 45, // 号牌类型
+  plateType: 45, // 号牌类型  
   vehicleColor: 47, // 车身颜色
   carColor: 47, // 车辆颜色
   ownership: 48, //号牌归属

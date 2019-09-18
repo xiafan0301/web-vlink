@@ -112,7 +112,7 @@
           </div>
         </template>
         <template v-else>
-          <div is="noResult" :isInitPage="isInitPage"></div>
+          <div is="noResult" :isInitPage="isInitPage" :tipMessage="initPageMessage"></div>
         </template>
       </div>
     </div>
@@ -133,6 +133,7 @@ export default {
     return {
       isSearchLoading: false,
       isInitPage: true, // 是否是初始化页面
+      initPageMessage: '输入完整车牌并选择尾随起点，查询所选时间内一直尾随该车的车辆',
       isShowDeviceTip: false, // 显示设备列表无数据提示
       deviceStartTime: null, // 起点设备抓拍时间
       searchForm: {
@@ -258,7 +259,7 @@ export default {
       this.searchForm.deviceCode = null;
       this.deviceStartTime = null;
       const params = {
-        plateNo: this.searchForm.plateNo,
+        plateNo: this.searchForm.plateNo.trim(),
         startTime: formatDate(this.searchForm.shotTime),
         endTime: formatDate(this.searchForm.dateEnd)
       };
@@ -349,7 +350,7 @@ export default {
             deviceCode: deviceCode,
             startTime: formatDate(this.searchForm.shotTime),
             shotTime: formatDate(this.deviceStartTime),
-            plateNo: this.searchForm.plateNo,
+            plateNo: this.searchForm.plateNo.trim(),
             endTime: formatDate(this.searchForm.dateEnd),
             vehicleClass: vehicleType,
             interval: this.searchForm.interval

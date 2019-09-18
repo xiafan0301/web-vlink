@@ -168,4 +168,3 @@ export const validateSimilarity = (rule, value, callback) => {
     callback();
   }
 };
-
