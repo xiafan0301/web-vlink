@@ -74,6 +74,11 @@
         </span>
         <span class="flvplayer_bot_om" :class="{'flvplayer_bot_om_h': mini && !fullScreen}">
           <span class="flvplayer_bot_omh">
+            <!--抓拍上墙按钮，视频巡逻，视频回放，智能查看，查看标记才有-->
+            <template v-if="config.snap && fullScreen">
+              <span v-if="!openSnap" class="flvplayer_opt vl_icon vl_icon_v60" title="抓拍上墙"></span>
+              <span class="flvplayer_opt vl_icon vl_icon_v61" title="抓拍上墙" v-else></span>
+            </template>
             <!-- 标记 (更新需求：取消所有回放画面（录像回放、智能查看-视频回放）的标记功能 2019.05.05)-->
             <span v-if="config.sign && oData.type === 1" class="flvplayer_opt vl_icon vl_icon_v24 player_sign" title="标记" @click="addSign"></span>
             <!-- 录视频 回放无此功能 -->
@@ -280,7 +285,7 @@ export default {
     return {
       optionsDis: false,
       mini: false, // 主要控制播放器操作栏显示方式
-
+      openSnap: false, // 抓拍上墙
       videoLoading: true,
       videoLoadingFailed: false,
       videoLoadingTimeout: 20 * 1000,
@@ -294,6 +299,7 @@ export default {
       flvplayerId: 'flv_' + random14(),
       // 默认播放配置信息
       config: {
+        snap: false, // 是否可抓拍上墙
         pause: false, // 开始是否暂停，默认为false(播放)
         sign: true, // 是否可标记
         signEmit: false, // 标记成功后是否需要emit
