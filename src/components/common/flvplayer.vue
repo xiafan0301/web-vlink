@@ -152,7 +152,15 @@
       </el-form>
     </el-dialog>
     <!-- 截屏 dialog -->
-    <el-dialog v-if="config.cut" title="" :visible.sync="cutDialogVisible" :center="false" :append-to-body="true" width="1000px">
+    <el-dialog v-if="config.cut" title="截屏画面" class="cut_dialog" :visible.sync="cutDialogVisible" :center="false" :append-to-body="true" width="1000px">
+      <div class="skip_btn_box">
+        <el-button :disabled="isDisableSkip" @click="skipModelPage(1)">以图搜人</el-button>
+        <el-button :disabled="isDisableSkip" @click="skipModelPage(2)">以图搜车</el-button>
+        <el-button :disabled="isDisableSkip" @click="skipModelPage(3)">特征搜人</el-button>
+        <el-button :disabled="isDisableSkip" @click="skipModelPage(4)">特征搜车</el-button>
+        <el-button :disabled="isDisableSkip" @click="skipModelPage(5)">人像轨迹分析</el-button>
+        <el-button :disabled="isDisableSkip" @click="skipModelPage(6)">车辆轨迹分析</el-button>
+      </div>
       <div style="text-align: center; padding-top: 30px;">
         <canvas :id="flvplayerId + '_cut_canvas'"></canvas>
       </div>
@@ -242,7 +250,10 @@ import { apiSignContentList, apiVideoSignContent, apiVideoSign, apiVideoRecord,
   apiVideoPlay, apiVideoPlayBack, getVideoPlayRecordStart, getVideoPlayRecordEnd,
   getVideoFileDownProgressBatch, videoFileDownStartTime, addVideoDownload,
   ptzControl, getVideoLinkLogin } from "@/views/index/api/api.video.js";
-// import { getTestLive } from "@/views/index/api/api.js";
+import { handUpload } from "@/views/index/api/api.base.js";
+import { JtcPOSTAppendixInfo } from "@/views/index/api/api.judge.js";
+import { getPhotoAnalysis } from "@/views/index/api/api.analysis.js"; // 车辆特征检索接口
+
 export default {
   /** 
    * index: 视频序号（在列表页面的位置）
@@ -380,7 +391,13 @@ export default {
         para: 100,
         position: null // { cmd: , action: 1 } 正在调节的方向
       },
-      videoRelayEmpty: false
+      videoRelayEmpty: false,
+      img: null,
+      filename: null,
+      skipImgUrl: null, // 截图保存的图片路径
+      skipImgPathId: null,
+      isDisableSkip: true, // 是否禁止点击跳转页面
+      plateNoArr: [], // 截屏图片上的车牌号集合
     }
   },
   filters: {
@@ -1191,6 +1208,51 @@ export default {
     playerFullScreenTwo () {
       this.$emit('playerFullScreenTwo');
     },
+    // 截屏跳至相应模块页面
+    skipModelPage (number) {
+      let routeUrl;
+      switch(number) {
+        case 1:
+          routeUrl = this.$router.resolve({
+            name: 'cut_ytsr_moment',
+            query: {imgurl: this.skipImgUrl, isCut: true}
+          });
+          break;
+        case 2:
+          routeUrl = this.$router.resolve({
+            name: 'cut_vehicle_search_ycsc',
+            query: {imgurl: this.skipImgUrl, isCut: true}
+          });
+          break;
+        case 3:
+          routeUrl = this.$router.resolve({
+            name: 'cut_portrait_rlcx',
+            query: {imgurl: this.skipImgUrl, isCut: true}
+          });
+          break;
+        case 4:
+          routeUrl = this.$router.resolve({
+            name: 'cut_vehicle_search_tzsc',
+            query: {imgurl: this.skipImgUrl, isCut: true}
+          });
+          break;
+        case 5:
+          routeUrl = this.$router.resolve({
+            name: 'cut_portrait_gjfx',
+            query: {imgurl: this.skipImgUrl, isCut: true}
+          });
+          break;
+        case 6:
+          routeUrl = this.$router.resolve({
+            name: 'cut_vehicle_analysis_clgj', 
+            query: { isCut: true, plateNo: this.plateNoArr.join(',') }
+          });
+          break;
+        default:
+          return;
+      }
+      window.open(routeUrl .href, '_blank');
+    },
     // 截屏
     playerCut () {
       this.cutDialogVisible = true;
@@ -1214,15 +1276,17 @@ export default {
           let ctx = $canvas[0].getContext('2d');
           this.cutTime = new Date().getTime();
           ctx.drawImage($video[0], 0, 0, w, h);
+
+
+          this.handlePlayerCut();
         }
       });
     },
-    // 截屏 保存
-    playerCutSave () {
+    handlePlayerCut () {
       let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
       if ($canvas && $canvas.length > 0) {
-        let img = $canvas[0].toDataURL('image/png');
-        let filename = 'image_' + this.cutTime + '.png';
+        this.img = $canvas[0].toDataURL('image/png');
+        this.filename = 'image_' + this.cutTime + '.png';
         if('msSaveOrOpenBlob' in navigator){
           // 兼容EDGE
           let arr = img.split(',');
@@ -1237,13 +1301,81 @@ export default {
           window.navigator.msSaveOrOpenBlob(blob, filename);
           return;
         }
-        img.replace('image/png', 'image/octet-stream');
-        let saveLink = $('#' + this.flvplayerId + '_cut_a')[0];
-        saveLink.href = img;
-        saveLink.download = filename;
-        saveLink.click();
-        // console.log(base64);
+        console.log('imgff', this.img)
+
+        this.img.replace('image/png', 'image/octet-stream');
+        
+        $canvas[0].toBlob((blob) => {
+          // console.log('blob', blob)
+          let fd = new FormData();
+          let fileBlob = new File([blob], new Date().getTime() + '.png')
+          fd.append("file", fileBlob);
+          // 上传图片
+          handUpload(fd)
+            .then(res => {
+              if (res && res.data) {
+                this.setImgUid(res.data);
+              }
+              // console.log(res)
+            })
+            .catch(() => {})
+        })
       }
+    },
+    // 根据截屏图片获取车辆信息
+    getVehicleInfoByImg () {
+      if (this.skipImgUrl) {
+        getPhotoAnalysis(this.skipImgUrl)
+          .then(res => {
+            if (res && res.data) {
+              res.data.map(item => {
+                if (item.plateNo) {
+                  this.plateNoArr.push(item.plateNo);
+                }
+              })
+            }
+          })
+          .catch(() => {})
+      }
+    },
+    // 设置截屏图片信息---上传图片
+    setImgUid (oRes) {
+     let imgObj = {
+        cname: oRes.fileName, // 附件名称 ,
+        // contentUid: this.$store.state.loginUser.uid,
+        // desci: '', // 备注 ,
+        filePathName: oRes.fileName, // 附件保存名称 ,
+        fileType: 1, // 文件类型 ,
+        imgHeight: oRes.fileHeight, // 图片高存储的单位位px ,
+        imgSize: oRes.fileSize, // 图片大小存储的单位位byte ,
+        imgWidth: oRes.fileWidth, //  图片宽存储的单位位px ,
+        // otherFlag: '', // 其他标识 ,
+        path: oRes.fileFullPath, // 附件路径 ,
+        // path: oRes.path,
+        thumbnailName: oRes.thumbnailFileName, // 缩略图名称 ,
+        thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
+        // uid: '' //  附件标识
+      };
+      this.skipImgUrl = imgObj.path;
+      if (this.$store.state.loginUser && this.$store.state.loginUser.uid) {
+        imgObj.contentUid = this.$store.state.loginUser.uid;
+        JtcPOSTAppendixInfo(imgObj).then(jRes => {
+          if (jRes) {
+            this.skipImgPathId = jRes.data;
+            this.isDisableSkip = false;
+
+            this.getVehicleInfoByImg();
+            // this.picSubmit();
+          }
+        })
+      }
+    },
+    // 截屏 保存
+    playerCutSave () {
+      let saveLink = $('#' + this.flvplayerId + '_cut_a')[0];
+      saveLink.href = this.img;
+      saveLink.download = this.filename;
+      saveLink.click();
     },
     // 视频关闭事件
     playerClose () {
@@ -1382,6 +1514,20 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.cut_dialog {
+  .skip_btn_box {
+    text-align: center;
+    /deep/ .el-button {
+      background-color: #F6F8F9;
+      color: #666666;
+      border: 1px solid #D3D3D3;
+      // &:hover {
+      //   background-color: #0C70F8;
+      //   color: #ffffff;
+      // }
+    }
+  }
+}
 /* 视频接力 begin */
 .player_fit { object-fit: fill; }
 .player_relay_i {

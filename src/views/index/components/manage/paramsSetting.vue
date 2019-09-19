@@ -7,7 +7,7 @@
       </div>
       <div class="input_box">
         <span class="input_box_title">{{personTitle}}</span>
-        <el-input v-model="personSearchVal" style="width: 200px;margin:0 8px" :disabled="!isEdit"></el-input>
+        <el-input v-model="minisemblance" style="width: 200px;margin:0 8px" :disabled="!isEdit"></el-input>
         <span class="input_box_title">%</span>
       </div>
       <div class="title">
@@ -29,7 +29,7 @@
       <template v-if="isEdit === false">
         <el-button class="operation_btn" type="primary" @click="isEdit = true">修改</el-button>
       </template>
-      <template v-if="isEdit === true">
+      <template v-else>
         <el-button class="operation_btn" type="primary" @click="submitData">确定</el-button>
         <el-button class="operation_btn" @click="cancelEdit">取消</el-button>
       </template>
@@ -49,7 +49,8 @@ export default {
       stopTimeVal: null,
       initDistance: null,
       initStopTime: null,
-      personSearchVal: null, 
+      minisemblance: null, 
+      initSemblance: null
     }
   },
   created () {
@@ -66,6 +67,9 @@ export default {
 
             this.stopTimeVal = res.data.minutes;
             this.initStopTime = res.data.minutes;
+
+            this.minisemblance = res.data.minisemblance;
+            this.initSemblance = res.data.minisemblance;
           }
         })
     },
@@ -73,7 +77,8 @@ export default {
     cancelEdit () {
       this.isEdit = false;
       this.stopTimeVal = this.initStopTime;
-      this.initDistance = this.distanceVal;
+      this.distanceVal = this.initDistance;
+      this.minisemblance = this.initSemblance;
     },
     // 确认编辑
     submitData () {
@@ -84,10 +89,19 @@ export default {
         }
         return;
       }
-      if (this.stopTimeVal !== this.initStopTime || this.distanceVal !== this.initDistance) {
+      const simReg = /(^[0-9]{1}[0-9]*$)|(^[0-9]*\.[0-9]{2}$)/;
+      if (!simReg.test(this.minisemblance) || this.minisemblance > 100) {
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('只能输入0-100之间的数字，且只能输入两位小数');
+        }
+        return;
+      }
+      
+      if (this.stopTimeVal !== this.initStopTime || this.distanceVal !== this.initDistance || this.initSemblance !== this.minisemblance) {
         const params = {
           minutes : this.stopTimeVal,
-          distance: this.distanceVal
+          distance: this.distanceVal,
+          minisemblance: this.minisemblance
         };
         setLjdDistanceAndTime(params)
           .then(res => {
@@ -101,6 +115,8 @@ export default {
               this.isEdit = false;
             }
           })
+      } else {
+        this.isEdit = false;
       }
     }
   }
