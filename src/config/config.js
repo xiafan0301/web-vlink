@@ -85,7 +85,7 @@ const oDomains = {
       prod: 'https://apiprod.aorise.org/vlink-vehicle'
     },
     // 人像地址
-    vehicle: {
+    portrait: {
       // dev: 'http://10.116.64.107:8081',
       dev: 'https://apidev.aorise.org/vlink-portrait',
       test: 'https://apirel.aorise.org/vlink-portrait',
