@@ -51,22 +51,21 @@ export default {
   },
   watch: {
     open (val) {
-      console.log('val', val);
       this.dialogVisible = val;
-      console.log('asdsadasd')
     }
   },
   mounted () {
     this.dialogVisible = this.open;
-    // console.log(this.open)
-    this.$nextTick(() => {
-      this.getImgScale();
-    })
+
+    if (this.dialogVisible) {
+      this.$nextTick(() => {
+        this.getImgScale();
+      })
+    }
   },
   methods: {
     // 获取图片缩放比例
     getImgScale () {
-      // let initScale = 
       let imgWidth = $('#imgBox').outerWidth();
       let imgHeight = $('#imgBox').outerHeight();
 
@@ -94,12 +93,17 @@ export default {
     },
     // 图片选择区域的点击监听事件
     handleClickListen (id, x, y, width, height) {
+      
       let _self = this;
       let clickObj = document.getElementById(id);
 
-
-
       clickObj.addEventListener('click', function () {
+        if ($('.select_box').hasClass('active_select')) {
+          $('.select_box').removeClass('active_select');
+        }
+
+        $(clickObj).addClass('active_select');
+
         _self.createImgPath(x, y, width, height);
       })
     },
@@ -115,18 +119,12 @@ export default {
         $($canvas).attr({'width': width, 'height': height});
         let ctx = $canvas.getContext('2d');
   
-  
-        console.log('image', image)
-
         ctx.drawImage(image, x, y, width, height, 0, 0, width, height);
 
-
         $($canvas)[0].toBlob((blob) => {
-          console.log('blob', blob)
           this.fd = new FormData();
           let fileBlob = new File([blob], new Date().getTime() + '.png')
           this.fd.append("file", fileBlob);
-          console.log('fd', this.fd)
           
         })
       }
@@ -211,6 +209,10 @@ export default {
             background:rgba(255,0,0,0.2);
             border:1px solid rgba(255,0,57,1);
           }
+        }
+        .active_select {
+          background:rgba(255,0,0,0.2);
+          border:1px solid rgba(255,0,57,1);
         }
       }
     }

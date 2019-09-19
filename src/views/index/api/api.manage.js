@@ -905,4 +905,61 @@ export function getVehicleModel (brands) {
     method: 'get'
   });
 }
+
+/* --------------数据字典start------------------ */
+/**
+ * 目录树查询接口（数据字典）
+ * @param {*}
+ */
+export function getDicMenu () {
+  return request({
+    url: '/data-dict/menu',
+    method: 'get'
+  });
+}
+/**
+ * 字典数据分页查询接口（数据字典）
+ * @param {*} data
+ */
+export function getDicDatas (data) {
+  return request({
+    url: '/data-dict/datas',
+    method: 'get',
+    params: data
+  });
+}
+/**
+ * 字典数据新增接口（数据字典）
+ * @param {*} data
+ */
+export function postDicDatas (data) {
+  return request({
+    url: '/data-dict/data',
+    method: 'post',
+    data
+  });
+}
+/**
+ * 字典数据修改接口（数据字典）
+ * @param {*} data
+ */
+export function putDicDatas (data) {
+  return request({
+    url: '/data-dict/data',
+    method: 'put',
+    data
+  });
+}
+/**
+ * 字典信息分类查询接口
+ * @param {*} data
+ */
+export function getPrev (data) {
+  return request({
+    url: '/dict-service/dict-list',
+    method: 'get',
+    params: data
+  });
+}
+/* --------------数据字典end------------------ */
   

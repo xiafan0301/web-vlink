@@ -1215,43 +1215,38 @@ export default {
         case 1:
           routeUrl = this.$router.resolve({
             name: 'cut_ytsr_moment',
-            query: {imgurl: this.skipImgUrl}
+            query: {imgurl: this.skipImgUrl, isCut: true}
           });
-          // this.$router.push({name: 'cut_ytsr_moment'});
           break;
         case 2:
           routeUrl = this.$router.resolve({
             name: 'cut_vehicle_search_ycsc',
-            query: {imgurl: this.skipImgUrl}
+            query: {imgurl: this.skipImgUrl, isCut: true}
           });
-          // this.$router.push({name: 'cut_vehicle_search_ycsc'});
           break;
         case 3:
           routeUrl = this.$router.resolve({
             name: 'cut_portrait_rlcx',
-            query: {imgurl: this.skipImgUrl}
+            query: {imgurl: this.skipImgUrl, isCut: true}
           });
-          // this.$router.push({name: 'cut_portrait_rlcx'});
           break;
         case 4:
           routeUrl = this.$router.resolve({
             name: 'cut_vehicle_search_tzsc',
-            query: {imgurl: this.skipImgUrl}
+            query: {imgurl: this.skipImgUrl, isCut: true}
           });
-          // this.$router.push({name: 'cut_vehicle_search_tzsc'});
           break;
         case 5:
           routeUrl = this.$router.resolve({
             name: 'cut_portrait_gjfx',
-            query: {imgurl: this.skipImgUrl}
+            query: {imgurl: this.skipImgUrl, isCut: true}
           });
-          // this.$router.push({name: 'cut_portrait_gjfx'});
           break;
         case 6:
           routeUrl = this.$router.resolve({
-            name: 'cut_vehicle_analysis_clgj'
+            name: 'cut_vehicle_analysis_clgj', 
+            query: { isCut: true, plateNo: this.plateNoArr.join(',') }
           });
-          // this.$router.push({name: 'cut_vehicle_analysis_clgj'});
           break;
         default:
           return;

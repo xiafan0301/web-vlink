@@ -265,5 +265,17 @@ export default {
       name: 'params_setting',
       component: () => import('@/views/index/components/manage/paramsSetting.vue')
     },
+    //数据字典
+    {
+      path: 'dictionary',
+      name: 'dictionary',
+      component: () => import('@/views/index/components/manage/parameterSettings/dictionary.vue')
+    },
+    //app广告管理
+    {
+      path: 'advertisement',
+      name: 'advertisement',
+      component: () => import('@/views/index/components/manage/appManage/advertisement.vue')
+    },
   ]
 }

@@ -72,7 +72,7 @@
 
             <el-form-item v-show="searchForm.type2 === 1" style="text-align: center;">
               <div style="padding: 0 15px; height: 210px;">
-                <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit"></div>
+                <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit" :imgData="imgData"></div>
               </div>
             </el-form-item>
             <el-form-item v-show="searchForm.type2 === 1" style="text-align: center; padding: 10px 15px 0 15px;">
@@ -369,7 +369,9 @@ export default {
       },
       condition:{},
 
-      detailData: null
+      detailData: null,
+
+      imgData: {}
     }
   },
   created () {
@@ -377,11 +379,12 @@ export default {
   },
   methods: {
     emitImgData (obj) {
-      console.log('asdasdasdasd')
-      console.log(obj)
       this.isOpenImgDialog = obj.open;
       if (obj.imgPath) {
-
+        this.curImageUrl = obj.imgPath;
+        this.imgData = {
+          path: obj.imgPath
+        }
       }
     },
     // 拖拽开始
@@ -524,7 +527,6 @@ export default {
 
     areaTypeChanged (val) {
       if (val === 2) {
-        this.activeDeviceList = ['20','21','36','6JcTL9UEjyseiJIJ1BfXro', '7frZ4G4A5TuZp4DPeQk73X'];
         this.openMap = !this.openMap;
       }
     },
