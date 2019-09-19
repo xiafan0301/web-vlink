@@ -412,11 +412,11 @@
         <el-button class="operation_btn function_btn" :loading="isInterruptLoading" @click="sureInterruptTask">确认</el-button>
       </div>
     </el-dialog>
-    <div is="mapSelector" :editAble="isEditMap" v-show="selectMapType === 1 && (isShowMapAreaDialog === true)" :open="mapDialogVisible1" :showTypes="'DB'" :clear="clearMapSelect1" @mapSelectorEmit="mapPoint"></div>
-    <div is="mapSelector" :editAble="isEditMap" v-show="selectMapType === 2 && (isShowMapAreaDialog === true)" :open="mapDialogVisible2" :showTypes="'DB'" :clear="clearMapSelect2" @mapSelectorEmit="mapPoint"></div>
-    <div is="mapSelector" :editAble="isEditMap" v-show="selectMapType === 3 && (isShowMapAreaDialog === true)" :open="mapDialogVisible3" :showTypes="'DB'" :clear="clearMapSelect3" @mapSelectorEmit="mapPoint"></div>
-    <div is="mapSelector" :editAble="isEditMap" v-show="selectMapType === 4 && (isShowMapAreaDialog === true)" :open="mapDialogVisible4" :showTypes="'DB'" :clear="clearMapSelect4" @mapSelectorEmit="mapPoint"></div>
-    <div is="mapSelector" :editAble="isEditMap" v-show="selectMapType === 5 && (isShowMapAreaDialog === true)" :open="mapDialogVisible5" :showTypes="'DB'" :clear="clearMapSelect5" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :hideDBlist='false' :pointChoose="false" :singleArea="true" :editAble="isEditMap" v-show="selectMapType === 1 && (isShowMapAreaDialog === true)" :open="mapDialogVisible1" :showTypes="'DB'" :clear="clearMapSelect1" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :hideDBlist='false' :pointChoose="false" :singleArea="true" :editAble="isEditMap" v-show="selectMapType === 2 && (isShowMapAreaDialog === true)" :open="mapDialogVisible2" :showTypes="'DB'" :clear="clearMapSelect2" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :hideDBlist='false' :pointChoose="false" :singleArea="true" :editAble="isEditMap" v-show="selectMapType === 3 && (isShowMapAreaDialog === true)" :open="mapDialogVisible3" :showTypes="'DB'" :clear="clearMapSelect3" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :hideDBlist='false' :pointChoose="false" :singleArea="true" :editAble="isEditMap" v-show="selectMapType === 4 && (isShowMapAreaDialog === true)" :open="mapDialogVisible4" :showTypes="'DB'" :clear="clearMapSelect4" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :hideDBlist='false' :pointChoose="false" :singleArea="true" :editAble="isEditMap" v-show="selectMapType === 5 && (isShowMapAreaDialog === true)" :open="mapDialogVisible5" :showTypes="'DB'" :clear="clearMapSelect5" @mapSelectorEmit="mapPoint"></div>
   </div>
 </template>
 <script>

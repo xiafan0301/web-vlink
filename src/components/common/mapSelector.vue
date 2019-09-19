@@ -243,6 +243,8 @@ export default {
       this.pointC = val;
     },
     singleArea (val) {
+      console.log(val);
+      
       this.sArea = val;
     },
     editAble (val) {
