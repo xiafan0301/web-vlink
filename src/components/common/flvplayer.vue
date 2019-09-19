@@ -252,7 +252,8 @@ import { apiSignContentList, apiVideoSignContent, apiVideoSign, apiVideoRecord,
   ptzControl, getVideoLinkLogin } from "@/views/index/api/api.video.js";
 import { handUpload } from "@/views/index/api/api.base.js";
 import { JtcPOSTAppendixInfo } from "@/views/index/api/api.judge.js";
-// import { getTestLive } from "@/views/index/api/api.js";
+import { getPhotoAnalysis } from "@/views/index/api/api.analysis.js"; // 车辆特征检索接口
+
 export default {
   /** 
    * index: 视频序号（在列表页面的位置）
@@ -396,6 +397,7 @@ export default {
       skipImgUrl: null, // 截图保存的图片路径
       skipImgPathId: null,
       isDisableSkip: true, // 是否禁止点击跳转页面
+      plateNoArr: [], // 截屏图片上的车牌号集合
     }
   },
   filters: {
@@ -1309,7 +1311,7 @@ export default {
         this.img.replace('image/png', 'image/octet-stream');
         
         $canvas[0].toBlob((blob) => {
-          console.log('blob', blob)
+          // console.log('blob', blob)
           let fd = new FormData();
           let fileBlob = new File([blob], new Date().getTime() + '.png')
           fd.append("file", fileBlob);
@@ -1319,12 +1321,29 @@ export default {
               if (res && res.data) {
                 this.setImgUid(res.data);
               }
-              console.log(res)
+              // console.log(res)
             })
             .catch(() => {})
         })
       }
     },
+    // 根据截屏图片获取车辆信息
+    getVehicleInfoByImg () {
+      if (this.skipImgUrl) {
+        getPhotoAnalysis(this.skipImgUrl)
+          .then(res => {
+            if (res && res.data) {
+              res.data.map(item => {
+                if (item.plateNo) {
+                  this.plateNoArr.push(item.plateNo);
+                }
+              })
+            }
+          })
+          .catch(() => {})
+      }
+    },
+    // 设置截屏图片信息---上传图片
     setImgUid (oRes) {
      let imgObj = {
         cname: oRes.fileName, // 附件名称 ,
@@ -1349,6 +1368,8 @@ export default {
           if (jRes) {
             this.skipImgPathId = jRes.data;
             this.isDisableSkip = false;
+
+            this.getVehicleInfoByImg();
             // this.picSubmit();
           }
         })

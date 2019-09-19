@@ -5,7 +5,7 @@
     <div
       is="vlBreadcrumb"
       :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
-          {name: '以图搜车'}]"
+          {name: '以车搜车'}]"
     ></div>
     <div class="sc_content">
       <!-- 通用的左边菜单 -->
