@@ -1152,34 +1152,6 @@ export default {
     &:hover { background-image: url(../../assets/img/vehicle/cut5m.png); }
   }
 }
-.ms_marker_opt {
-  > div {
-    word-break:keep-all; white-space:nowrap;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    padding: 0 2px;
-    > span { display: inline-block; }
-    > i {
-      display: inline-block;
-      padding: 0 2px;
-      font-size: 18px;
-    }
-    > .el-icon-check {
-      display: none;
-      color: #67C23A;
-    }
-    > .el-icon-close {
-      color: #FA453A;
-    }
-    > .el-icon-edit {
-      color: #E6A23C; font-size: 18px;
-    }
-  }
-  &.ms_marker_rectang { left: 0px; bottom: 0px; }
-  &.ms_marker_circle { left: 0; top: -10px; }
-  &.ms_marker_polyline { left: -10px; top: -10px; }
-  &.ms_marker_polygon { left: -10px; top: -10px; }
-}
 </style>
 <style lang="scss">
   .map_sd_edit_false {
