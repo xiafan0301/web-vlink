@@ -17,7 +17,7 @@
         <span>{{item.vehicleNumber}}</span>
       </div>
     </div>
-    <div is="portraitLib" ref="portraitLibDialog" :fileListOne="protraitList" @getPortraitData="getPortraitData"></div>
+    <div is="portraitLib" v-if="portraitLibDialog" ref="portraitLibDialog" :fileListOne="protraitList" @getPortraitData="getPortraitData"></div>
     <div is="vehicleLib" ref="vehicleLibDialog" :fileList="vehicleList" @getVehicleData="getVehicleData"></div>
     <div is="controlDevUpdate" :modelType="4" @getControlDevUpdate="getControlDevUpdate"></div>
   </div>  
@@ -29,11 +29,28 @@ import portraitLib from './portraitLib.vue';
 import {random14, objDeepCopy, unique} from '@/utils/util.js';
 export default {
   components: {controlDevUpdate, vehicleLib, portraitLib},
+  props: ['modelList'],
   data () {
     return {
       protraitList: [],
       vehicleList: [],
-      devUpdateData: {}
+      devUpdateData: {},
+      portraitLibDialog: false
+    }
+  },
+  mounted () {
+    // 修改时回填数据
+    if (this.modelList) {
+      console.log(this.modelList, 'this.modelList')
+      // 回填嫌疑车牌
+      let [{pointDtoList: [{bayonetList, devList}], surveillanceObjectDtoList}] = this.modelList;
+  
+
+      let one = surveillanceObjectDtoList.filter(m => m.objType === 1);//回填禁入人员
+      let two = surveillanceObjectDtoList.filter(m => m.objType === 2);//回填禁入车辆
+      this.protraitList = one;
+      this.vehicleList = two;
+      this.isShowControlDev = true;
     }
   },
   methods: {
@@ -56,8 +73,11 @@ export default {
     // 从库中选择
     popSel (type) {
       if (type === 1) {
+        this.portraitLibDialog = true;
+        this.$nextTick(() => {
         this.$refs['portraitLibDialog'].portraitLibDialog = true;
         this.$refs['portraitLibDialog'].reset();
+        })
       } else {
         this.$refs['vehicleLibDialog'].vehicleLibDialog = true;
         this.$refs['vehicleLibDialog'].reset();

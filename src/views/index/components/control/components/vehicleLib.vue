@@ -122,9 +122,9 @@ export default {
         plateType: null,
         vehicleNumber: null
       },
-      vehicleColorList: this.dicFormater(dataList.carColor)[0].dictList,
-      vehicleTypeList: this.dicFormater(dataList.vehicleType)[0].dictList,
-      plateTypeList: this.dicFormater(dataList.plateType)[0].dictList,
+      vehicleColorList: [],//this.dicFormater(dataList.carColor)[0].dictList,
+      vehicleTypeList: [],//this.dicFormater(dataList.vehicleType)[0].dictList,
+      plateTypeList: [],//this.dicFormater(dataList.plateType)[0].dictList,
       vehicleLibDialog: false,
       loading: false,
       currentPage: 1,

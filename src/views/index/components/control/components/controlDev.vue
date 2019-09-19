@@ -358,6 +358,7 @@ export default {
     mapCircleTwo () {
       let _this = this;
       const lngLat = this.addressObjTwo.lnglat;
+      if (lngLat[0] === null) return;
       let circle = new window.AMap.Circle({
         center: new window.AMap.LngLat(lngLat[0], lngLat[1]), // 圆心位置
         radius: this.addressObjTwo.radius * 1000,  //半径

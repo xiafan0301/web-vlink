@@ -129,6 +129,7 @@ export default {
   mounted () {
     this.resetMap();
     // 修改时回填数据
+    console.log(this.modelList, 'this.modelList')
     if (this.modelList) {
       console.log(this.modelList, 'this.modelList')
       // 回填嫌疑车牌
@@ -141,9 +142,13 @@ export default {
       other.lostTime = new Date(other.lostTime);
       this.modelOneForm = other;
       
-      let typeTwo = surveillanceObjectDtoList.filter(m => m.objType === 2);
-      let typeOne = surveillanceObjectDtoList.filter(m => m.objType === 1 && url === m.photoUrl);
-      let typeThree = surveillanceObjectDtoList.filter(m => m.objType === 1 && url !== m.photoUrl);
+      let one = surveillanceObjectDtoList.find(m => (m.objType === 1 || m.objType === 3) && url === m.photoUrl);//回填失踪人员照片
+      let two = surveillanceObjectDtoList.filter(m => (m.objType === 1 || m.objType === 3) && url !== m.photoUrl);//回填嫌疑人照片
+      let three = surveillanceObjectDtoList.filter(m => m.objType === 2);//回填嫌疑车辆
+      this.fileListOne = [one];
+      this.fileListTwo = two;
+      this.fileListThree = three;
+      console.log(three, 'three')
 
       longitude = longitude.split(',');
       latitude = latitude.split(',');

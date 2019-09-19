@@ -12,7 +12,7 @@
     </div>
     <div :class="['create_box', {'editor': pageType !== 2}]">
       <!-- 编辑布控时出现 -->
-      <div v-if="pageType === 2" class="create_num"><span class="vl_f_666">布控编号：</span><span class="vl_f_333">{{controlDetail.surveillanceNo}}</span></div>
+      <div v-if="pageType === 2" class="create_num"><span class="vl_f_666">布控编号：</span><span class="vl_f_333">{{detail.surveillanceNo}}</span></div>
       <div class="create_content">
         <el-form ref="createForm" :label-position="labelPosition" :model="createForm" class="create_form">
           <el-form-item class="create_form_one" style="margin-bottom: 0;">
@@ -24,7 +24,7 @@
                 v-model="createForm.eventId"
                 filterable 
                 placeholder="请输入关联事件编号"
-                :disabled="($route.query.eventId ? true : false) || (controlDetail.eventId && pageType === 2)"
+                :disabled="($route.query.eventId ? true : false) || (detail.eventId && pageType === 2)"
                 >
                 <el-option
                   v-for="item in eventList"
@@ -63,9 +63,9 @@
               <el-select value-key="uid" v-model="createForm.alarmLevel" filterable placeholder="请选择">
                 <el-option
                   v-for="item in controAlarmList"
-                  :key="item.uid"
-                  :label="item.enumValue"
-                  :value="item.enumField">
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
                 </el-option>
               </el-select>
             </el-form-item>
@@ -118,8 +118,8 @@
             </el-form-item>
           </el-form-item>
           <el-form-item class="bl_box">
-            <el-form-item label="是否级联:" prop="cascadePlatform" :rules="{ required: true, message: '请选择', trigger: 'change'}">
-              <el-select value-key="uid" v-model="createForm.cascadePlatform" filterable placeholder="请选择">
+            <el-form-item label="是否级联:" prop="cascade" :rules="{ required: true, message: '请选择', trigger: 'change'}">
+              <el-select value-key="uid" v-model="createForm.cascade" filterable placeholder="请选择">
                 <el-option
                   v-for="item in cascadeList"
                   :key="item.uid"
@@ -128,10 +128,32 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="共享布控:" prop="shareDept" :rules="{ required: true, message: '请选择', trigger: 'change'}">
-              <el-select value-key="uid" v-model="createForm.shareDept" filterable placeholder="请选择">
+            <el-form-item v-if="createForm.cascade === 1" label="请选择下级平台:" prop="cascadePlatform" :rules="{ required: true, message: '请选择', trigger: 'change'}">
+              <el-select value-key="uid" multiple collapse-tags v-model="createForm.cascadePlatform" filterable placeholder="请选择">
+                <el-option
+                  v-for="item in cascadePlatformList"
+                  :key="item.uid"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-form-item>
+          <el-form-item class="bl_box">
+            <el-form-item label="共享布控:" prop="sharedControl" :rules="{ required: true, message: '请选择', trigger: 'change'}">
+              <el-select value-key="uid" v-model="createForm.sharedControl" filterable placeholder="请选择">
                 <el-option
                   v-for="item in sharedControlList"
+                  :key="item.uid"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item v-if="createForm.sharedControl === 1" label="请选择共享对象:" prop="shareDept" :rules="{ required: true, message: '请选择', trigger: 'change'}">
+              <el-select value-key="uid" multiple collapse-tags v-model="createForm.shareDept" filterable placeholder="请选择">
+                <el-option
+                  v-for="item in shareDeptList"
                   :key="item.uid"
                   :label="item.label"
                   :value="item.value">
@@ -146,7 +168,7 @@
             <span class="vl_f_666">分析模型：</span>
             <div class="create_model_box">
               <div class="model_checkbox">
-                <el-radio-group v-model="modelType">
+                <el-radio-group v-model="modelType_" @change="changeModel">
                   <el-radio :label="1">人员失踪</el-radio>
                   <el-radio :label="2">重大活动布控</el-radio>
                   <el-radio :label="3">上访人员拦截</el-radio>
@@ -156,17 +178,18 @@
                 </el-radio-group>
               </div>
               <div is="modelOne" v-if="modelType === 1" ref="model" @getModel="getModel" :modelList="modelList"></div>
-              <div is="modelTwo" v-if="modelType === 2" ref="model" @getModel="getModel"></div>
-              <div is="modelThree" v-if="modelType === 3" ref="model" @getModel="getModel"></div>
-              <div is="modelFour" v-if="modelType === 4" ref="model" @getModel="getModel"></div>
-              <div is="modelFive" v-if="modelType === 5" ref="model" @getModel="getModel"></div>
-              <div is="modelSix" v-if="modelType === 6" ref="model" @getModel="getModel"></div>
+              <div is="modelTwo" v-if="modelType === 2" ref="model" @getModel="getModel" :modelList="modelList"></div>
+              <div is="modelThree" v-if="modelType === 3" ref="model" @getModel="getModel" :modelList="modelList"></div>
+              <div is="modelFour" v-if="modelType === 4" ref="model" @getModel="getModel" :modelList="modelList"></div>
+              <div is="modelFive" v-if="modelType === 5" ref="model" @getModel="getModel" :modelList="modelList"></div>
+              <div is="modelSix" v-if="modelType === 6" ref="model" @getModel="getModel" :modelList="modelList"></div>
             </div>
           </div>
         </el-form>
       </div>
       <div class="footer_btn">
-        <el-button class="btn_100" type="primary" :loading="loadingBtn" @click="saveControl('createForm')">保存</el-button>
+        <el-button class="btn_100" v-if=" pageType !== 2" type="primary" :loading="loadingBtn" @click="saveControl('createForm')">保存</el-button>
+        <el-button class="btn_100" v-if=" pageType === 2" type="primary" :loading="loadingBtn" @click="putControl('createForm')">保存</el-button>
         <el-button  @click="toGiveUpDialog = true" class="btn_100">取消</el-button>
       </div>
     </div>
@@ -187,6 +210,7 @@
 import {modelOne,modelTwo,modelThree,modelFour,modelFive,modelSix} from './components/modelType.js';
 import {getAllMonitorList, getControlInfoByName, addControl, getControlDetailIsEditor, putControl} from '@/views/index/api/api.control.js';
 import {getEventList, getEventDetail, updateEvent} from '@/views/index/api/api.event.js';
+import {getOrganInfos} from '@/views/index/api/api.message.js';
 import {formatDate, objDeepCopy} from '@/utils/util.js';
 import {mapXupuxian} from '@/config/config.js';
 import {dataList} from '@/utils/data.js';
@@ -219,7 +243,14 @@ export default {
         {label: '长期布控', value: 2}
       ],
       //告警类型
-      controAlarmList: this.dicFormater(dataList.alarmLevel)[0].dictList,
+      // controAlarmList: this.dicFormater(dataList.alarmLevel)[0].dictList,
+      controAlarmList: [
+        {value: 1, label: '一级'},
+        {value: 2, label: '二级'},
+        {value: 3, label: '三级'},
+        {value: 4, label: '四级'},
+        {value: 5, label: '五级'}
+      ],
       // 布控表单参数
       createForm: {
         surveillanceName: null,
@@ -239,26 +270,37 @@ export default {
             mobile:  null
           }
         ],
-        cascadePlatform: null,
-        shareDept: null,
+
+        cascade: null,
+        cascadePlatform: [],//
+        
+        sharedControl: null,
+        shareDept: [],//
+
         surveillanceReason: null
       },
       eventList: [],//关联事件下拉列表
+
       cascadeList: [
-        {value: '1', label: '是'},
-        {value: '0', label: '否'}
+        {value: 1, label: '是'},
+        {value: 0, label: '否'}
       ],//是否级联下拉列表
+      cascadePlatformList: [],
+
       sharedControlList: [
-        {value: '1', label: '是'},
-        {value: '0', label: '否'}
+        {value: 1, label: '是'},
+        {value: 0, label: '否'}
       ],//是否共享布控下拉列表
+      shareDeptList: [],
+      
       modelType: null,//布控模型类型
+      modelType_: null,//布控模型类型
       // 弹出框参数
       toGiveUpDialog: false,
       loading: false,
       loadingBtn: false,
       // 布控编辑参数
-      controlDetail: {},
+      detail: {},
       // 子组件传过来的数据
       modelData: {},
       eventDetail: {},
@@ -267,34 +309,40 @@ export default {
   },
   created () {
     // 编辑页-2
-    if (this.createType) {
+    if (this.createType === 2) {
       this.pageType = parseInt(this.createType);
       if (this.pageType === 2) {
         this.getControlDetailIsEditor(this.controlId);
       }
+    // 复用页-3
+    } else if (this.$route.query.createType) {
+      this.pageType = parseInt(this.$route.query.createType);
+      this.getControlDetailIsEditor(this.$route.query.controlId);
     // 新增页-1
     } else {
       this.pageType = 1;
       this.modelType = 1;
+      this.modelType_ = 1;
       // 从车辆侦查或者人像侦查跳转过来新建布控
       // const {imgurl, modelName, plateNo} = this.$route.query;
       // this.imgurl = imgurl;
       // this.plateNo = plateNo;
-    }
-    // 复用页-3
-    if (this.$route.query.createType) {
-      this.pageType = parseInt(this.$route.query.createType);
-      this.getControlDetailIsEditor(this.$route.query.controlId);
-    }
-    // 事件管理模块通过路由跳转过来
-    if (this.$route.query.eventId) {
-      this.getEventDetail(this.$route.query.eventId);
+      // 事件管理模块通过路由跳转过来新增布控时
+      if (this.$route.query.eventId) {
+        this.getEventDetail(this.$route.query.eventId);
+      }
     }
   },
   mounted () {
     // this.getEventList();
+    this.getOrganInfos();
   },
   methods: {
+    changeModel (value) {
+      console.log(value, 'valuevalue')
+      this.modelList = null;
+      this.modelType = value;
+    },
     // 获取关联事件列表
     getEventList () {
       const params = {
@@ -335,6 +383,30 @@ export default {
         }
       })
     },
+    // 获取组织机构
+    getOrganInfos () {
+      const params = {
+        pageNum: 1,
+        pageSize: 10,
+        orderBy: null,
+        order: null,
+        'where.organName': null,
+        'where.proKey': 'd32b803de585906c0ee2f1ac81588a70',
+        'where.organLayer': null,
+        'where.organPid': null
+      }
+      getOrganInfos(params).then(res => {
+        if (res && res.data) {
+          this.shareDeptList = res.data.list;
+          this.shareDeptList = this.shareDeptList.map(m => {
+            return {
+              value: m.uid,
+              label: m.organName
+            }
+          })
+        }
+      })
+    },
     // 新增时间段
     addPeriodTime() {
       this.createForm.surveillancTimeList.push({
@@ -362,8 +434,8 @@ export default {
     // 通过布控名称获取布控信息，异步查询布控是否存在
     getControlInfoByName () {
       // 编辑布控时，只有布控名称做出改动以后才会异步判断是否存在
-      if (this.controlDetail.surveillanceName) {
-        if (this.createForm.surveillanceName === this.controlDetail.surveillanceName) {
+      if (this.detail.surveillanceName) {
+        if (this.createForm.surveillanceName === this.detail.surveillanceName) {
           return false;
         }
       }
@@ -396,8 +468,11 @@ export default {
               endTime: formatDate(m.endTime, 'HH:mm:ss')
             }
           })
-          this.modelData = {};
+          _createForm.shareDept = _createForm.shareDept && _createForm.shareDept.join(',');
+          _createForm.cascadePlatform = _createForm.cascadePlatform && _createForm.cascadePlatform.join(',');
+          this.modelData = null;
           this.$refs['model'].sendParent();
+          if (!this.modelData) return;
           console.log(this.modelData, 'this.modelData');
           let data  = {
             ..._createForm,
@@ -461,22 +536,46 @@ export default {
     getControlDetailIsEditor (controlId) {
       getControlDetailIsEditor(controlId).then(res => {
         if (res && res.data) {
-          const detail = res.data;
-          const {modelList} = detail;
-          delete detail.modelList;
-          const {surveillanceDateStart, surveillanceDateEnd} = detail;
-          detail.controlDate = [surveillanceDateStart, surveillanceDateEnd];
+          const detail = this.detail = res.data;
+          // 复用布控时
+          if (this.pageType === 3) {
+            detail.surveillanceName = '复用' + detail.surveillanceName;
+            this.$set(detail, 'controlDate', []);
+          // 编辑布控时
+          } else {
+            this.eventList = [{
+              label: detail.eventCode,
+              value: detail.eventId
+            }]
+            const {surveillanceDateStart, surveillanceDateEnd} = detail;
+            this.$set(detail, 'controlDate', [surveillanceDateStart, surveillanceDateEnd]);
+          }
           detail.surveillancTimeList = detail.surveillancTimeList.map(m => {
             return {
               startTime: new Date('2016, 9,' + m.startTime),
               endTime: new Date('2016, 9,' + m.endTime)
             }
           })
+          if (detail.shareDept) {
+            this.$set(detail, 'sharedControl', 1);
+            detail.shareDept = detail.shareDept.split(',');
+          } else {
+            this.$set(detail, 'sharedControl', 0);
+          }
+          if (detail.cascadePlatform) {
+            this.$set(detail, 'cascade', 1);
+            detail.cascadePlatform = detail.cascadePlatform.split(',');
+          } else {
+            this.$set(detail, 'cascade', 0);
+          }
+          const {modelList} = detail;
+          delete detail.modelList;
+
           this.createForm = detail;
           const [{modelType}] = modelList;
           this.modelList = modelList;
-          this.modelType = modelType;
-          
+          this.modelType_ = this.modelType = modelType;
+          console.log(this.modelList, 'modelList')
         }
       })
     },
@@ -496,15 +595,18 @@ export default {
               endTime: formatDate(m.endTime, 'HH:mm:ss')
             }
           })
-          this.modelData = {};
+          _createForm.shareDept =  _createForm.shareDept && _createForm.shareDept.join(',');
+          _createForm.cascadePlatform = _createForm.cascadePlatform && _createForm.cascadePlatform.join(',');
+          this.modelData = null;
           this.$refs['model'].sendParent();
+          if (!this.modelData) return;
           console.log(this.modelData, 'this.modelData');
           let data  = {
             ..._createForm,
             modelList: [this.modelData]
           }
           this.loadingBtn = true;
-          addControl(data).then(res => {
+          putControl(data).then(res => {
             if (res) {
               this.$message.success('编辑成功');
               this.$emit('getControlList');

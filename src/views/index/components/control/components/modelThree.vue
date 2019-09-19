@@ -42,6 +42,7 @@ import {random14, objDeepCopy, unique, imgUrls} from '@/utils/util.js';
 import {checkPlateNumber} from '@/utils/validator.js';
 export default {
   components: {uploadPic, controlDev, vehicleLib, portraitLib},
+  props: ['modelList'],
   data () {
     return {
       modelThreeForm: {
@@ -52,6 +53,27 @@ export default {
       fileListTwo: [],
       createSelDialog: false,
       isShowControlDev: false
+    }
+  },
+  mounted () {
+    // 修改时回填数据
+    if (this.modelList) {
+      console.log(this.modelList, 'this.modelList')
+      // 回填嫌疑车牌
+      let [{carNumberInfo, pointDtoList: [{bayonetList, devList}], surveillanceObjectDtoList}] = this.modelList;
+      carNumberInfo = carNumberInfo.split(',');
+      this.modelThreeForm.carNumberInfo = [];
+      carNumberInfo.forEach(f => {
+        this.modelThreeForm.carNumberInfo.push({vehicleNumber: f});
+      })
+      
+      let one = surveillanceObjectDtoList.filter(m => m.objType === 1);//回填上访人员照片
+      let two = surveillanceObjectDtoList.filter(m => m.objType === 2);//回填上访车辆信息
+      this.fileListOne = one;
+      this.fileListTwo = two;
+
+     
+      this.isShowControlDev = true;
     }
   },
   methods: {

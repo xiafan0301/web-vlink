@@ -56,6 +56,7 @@ import {mapXupuxian} from '@/config/config.js';
 import {random14, objDeepCopy, unique} from '@/utils/util.js';
 export default {
   components: {controlDev, vehicleLib, portraitLib},
+  props: ['modelList'],
   data () {
     return {
       labelPosition: 'top',
@@ -84,6 +85,22 @@ export default {
   },
   mounted () {
     this.resetMap();
+    // 修改时回填数据
+    if (this.modelList) {
+      console.log(this.modelList, 'this.modelList')
+      // 回填嫌疑车牌
+      let [{pointDtoList: [{bayonetList, devList, address, longitude, latitude, radius}], surveillanceObjectDtoList}] = this.modelList;
+      this.modelTwoForm.address = address;
+      this.addressObjTwo.radius = this.modelTwoForm.radius = radius;
+      this.addressObjTwo.lnglat = [longitude, latitude];
+
+      let one = surveillanceObjectDtoList.filter(m => m.objType === 1);//回填禁入人员
+      let two = surveillanceObjectDtoList.filter(m => m.objType === 2);//回填禁入车辆
+      this.protraitList = one;
+      this.vehicleList = two;
+      console.log(this.addressObjTwo)
+      this.isShowControlDev = true;
+    }
   },
   methods: {
     // 从布控库中获取禁入人员
@@ -104,8 +121,11 @@ export default {
           if (this.$refs['controlDev']) {
             this.$refs['controlDev'].sendParent();
 
-            this.modelTwoForm = {...this.modelTwoForm, ...this.devData}
-            this.$emit('getModel', {modelType: 2,  pointDtoList: [this.modelTwoForm], surveillanceObjectDtoList: [...this.protraitList, ...this.vehicleList]});
+            const longitude = this.addressObjTwo.lnglat[0];
+            const latitude = this.addressObjTwo.lnglat[1];
+
+            const _modelTwoForm = {...this.modelTwoForm, ...this.devData, longitude, latitude}
+            this.$emit('getModel', {modelType: 2,  pointDtoList: [_modelTwoForm], surveillanceObjectDtoList: [...this.protraitList, ...this.vehicleList]});
           } else {
             this.$message.warning('请先选择布控设备');
           }

@@ -208,6 +208,7 @@ export default {
       }, []);
       this.$emit('getPortraitData', selList);
       this.portraitLibDialog = false;
+      this.$parent.portraitLibDialog = false;
     },
     // 多选
     operateRadio () {

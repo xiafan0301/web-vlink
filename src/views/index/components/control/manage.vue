@@ -244,12 +244,14 @@ export default {
         {label: '短期布控', value: 1},
         {label: '长期布控', value: 2}
       ],
-      alarmLevelList: this.dicFormater(dataList.alarmLevel)[0].dictList.map(m => {
-        return {
-          value: parseInt(m.enumField),
-          label: m.enumValue
-        }
-      }),
+      // alarmLevelList: this.dicFormater(dataList.alarmLevel)[0].dictList,
+      alarmLevelList: [
+        {value: 1, label: '一级'},
+        {value: 2, label: '二级'},
+        {value: 3, label: '三级'},
+        {value: 4, label: '四级'},
+        {value: 5, label: '五级'}
+      ],
       // 布控管理列表数据
       manageList: [],
       // 翻页数据
@@ -324,7 +326,7 @@ export default {
     },
     // 跳转至新建布控页-复用
     skipIsCreate (uid) {
-      this.$router.push({ name: 'control_create', query: {controlId: uid, createType: 3} });
+      this.$router.push({ name: 'control_add', query: {controlId: uid, createType: 3} });
     },
     resetForm () {
       for (let key in this.manageForm) {

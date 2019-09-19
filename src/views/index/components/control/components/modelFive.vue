@@ -39,6 +39,7 @@ import {random14, objDeepCopy, unique} from '@/utils/util.js';
 import {getGroupsDevices} from '@/views/index/api/api.base.js';
 export default {
   components: {controlDev, vehicleLib},
+  props: ['modelList'],
   data () {
     return {
       modelFiveForm: {
@@ -59,6 +60,19 @@ export default {
   },
   mounted () {
     this.getTheirPlacesList();
+    // 修改时回填数据
+    if (this.modelList) {
+      console.log(this.modelList, 'this.modelList')
+      // 回填嫌疑车牌
+      let [{pointDtoList: [{bayonetList, devList, locations, stayTime}], surveillanceObjectDtoList}] = this.modelList;
+      this.modelFiveForm.locations = locations;
+      this.modelFiveForm.stayTime = stayTime;
+      this.vehicleList = surveillanceObjectDtoList;//回填布控车辆
+      this.devIdList = devList.map(m => m.deviceId);
+      this.bayIdList = bayonetList.map(m => m.bayonetId);
+
+      this.isShowControlDev = true;
+    }
   },
   methods: {
     // 从布控库中获取嫌疑车辆
