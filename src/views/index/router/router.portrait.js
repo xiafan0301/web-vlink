@@ -70,7 +70,7 @@ export default {
       component: () => import('@/views/index/components/portrait/xjpfcm.vue')
     },
     {
-      path: 'rlcx',
+      path: 'rlcx',    // 特征搜人
       name: 'portrait_rlcx',
       component: () => import('@/views/index/components/portrait/rlcx.vue')
     },
