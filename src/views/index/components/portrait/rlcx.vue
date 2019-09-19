@@ -275,7 +275,7 @@ export default {
   components: { vehicleBreadcrumb, mapSelector, vlUpload, portraitDetail, noResult, imgSelect },
   data () {
     return {
-      isOpenImgDialog: true, // 是否显示框选弹框
+      isOpenImgDialog: false, // 是否显示框选弹框
 
       activeDeviceList: [],
       isInitPage: true,
