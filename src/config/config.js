@@ -84,6 +84,13 @@ const oDomains = {
       test: 'https://apirel.aorise.org/vlink-vehicle',
       prod: 'https://apiprod.aorise.org/vlink-vehicle'
     },
+    // 人像地址
+    vehicle: {
+      // dev: 'http://10.116.64.107:8081',
+      dev: 'https://apidev.aorise.org/vlink-portrait',
+      test: 'https://apirel.aorise.org/vlink-portrait',
+      prod: 'https://apiprod.aorise.org/vlink-portrait'
+    },
     // 公共短信服务
     sms: {
       // dev: 'http://10.116.64.169:8085',
