@@ -72,7 +72,7 @@
 
             <el-form-item v-show="searchForm.type2 === 1" style="text-align: center;">
               <div style="padding: 0 15px; height: 210px;">
-                <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit"></div>
+                <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit" :imgData="imgData"></div>
               </div>
             </el-form-item>
             <el-form-item v-show="searchForm.type2 === 1" style="text-align: center; padding: 10px 15px 0 15px;">
@@ -253,11 +253,14 @@
     <!-- 详情 -->
     <portraitDetail :detailData="detailData"></portraitDetail>
     <!-- D设备 B卡口  这里是设备和卡口 -->
-    <div is="mapSelector" :open="openMap" :clear="msClear" :showTypes="'DB'" @mapSelectorEmit="mapSelectorEmit"></div>
+    <div is="mapSelector" :activeDeviceList="activeDeviceList" :open="openMap" :clear="msClear" :showTypes="'DB'" @mapSelectorEmit="mapSelectorEmit"></div>
+    <!-- 框选搜索主体弹框 -->
+    <div is="imgSelect" :open="isOpenImgDialog" @emitImgData="emitImgData"></div>
   </div>
 </template>
 <script>
 import noResult from '@/components/common/noResult.vue';
+import imgSelect from '@/components/common/imgSelect.vue';
 import { mapXupuxian } from "@/config/config.js";
 import vehicleBreadcrumb from '@/components/common/breadcrumb.vue';
 import mapSelector from '@/components/common/mapSelector.vue';
@@ -269,9 +272,12 @@ import {formatDate, dateOrigin} from '@/utils/util.js';
 import portraitDetail from './common/portraitDetail.vue';
 import {ajaxCtx} from '@/config/config';
 export default {
-  components: {vehicleBreadcrumb, mapSelector, vlUpload, portraitDetail, noResult},
+  components: { vehicleBreadcrumb, mapSelector, vlUpload, portraitDetail, noResult, imgSelect },
   data () {
     return {
+      isOpenImgDialog: false, // 是否显示框选弹框
+
+      activeDeviceList: [],
       isInitPage: true,
 
       curImageUrl: '', // 当前上传的图片
@@ -363,13 +369,24 @@ export default {
       },
       condition:{},
 
-      detailData: null
+      detailData: null,
+
+      imgData: {}
     }
   },
   created () {
     this.getMapGETmonitorList();
   },
   methods: {
+    emitImgData (obj) {
+      this.isOpenImgDialog = obj.open;
+      if (obj.imgPath) {
+        this.curImageUrl = obj.imgPath;
+        this.imgData = {
+          path: obj.imgPath
+        }
+      }
+    },
     // 拖拽开始
     dragStart (ev, item) {
       if (item && item.subStoragePath) {
@@ -499,12 +516,12 @@ export default {
         if (result.bayonetList && result.bayonetList.length > 0) {
           this.dSum += result.bayonetList.length;
         }
-        if (result.bayonetDeviceList && result.bayonetDeviceList.length > 0) {
-          this.dSum += result.bayonetDeviceList.length;
-          for (let i = 0; i < result.bayonetDeviceList.length; i++) {
-            this.dIds.push(result.bayonetDeviceList[i].uid);
-          }
-        }
+//        if (result.bayonetDeviceList && result.bayonetDeviceList.length > 0) {
+//          this.dSum += result.bayonetDeviceList.length;
+//          for (let i = 0; i < result.bayonetDeviceList.length; i++) {
+//            this.dIds.push(result.bayonetDeviceList[i].uid);
+//          }
+//        }
       }
     },
 

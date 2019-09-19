@@ -561,7 +561,7 @@ export default {
       }
     }
   },
-  mounted() {
+  created () {
     // 获取到监控人群分组
     getGroupAllList().then(res => {
       if (res) {
@@ -575,10 +575,12 @@ export default {
         })
       }
     });
+  },
+  mounted() {
 
-    setTimeout(() => {
+    // setTimeout(() => {
       this.getTaskList();
-    }, 500);
+    // }, 500);
   },
   methods: {
     // 查询方式change
@@ -611,10 +613,13 @@ export default {
           if (res && res.data) {
             this.pagination.total = res.data.total;
             
+            // console.log(this.peopleGroupOptions)
             res.data.list.map(item => {
               let personGroupIdName = [];
               item.taskWebParam = JSON.parse(item.taskWebParam);
               let personGroupId = item.taskWebParam.personGroupId.split(',');
+              // console.log('personGroupId', personGroupId);
+              
               this.peopleGroupOptions.map(val => {
                 personGroupId && personGroupId.forEach(value => {
                   if (value === val.uid) {
@@ -623,6 +628,8 @@ export default {
                 })
               })
               if (personGroupIdName.length > 0) {
+                // console.log('personGroupIdName', personGroupIdName);
+                
                 item.taskWebParam.personGroupId = personGroupIdName.join('、');
               }
             })
@@ -715,14 +722,11 @@ export default {
       this.isEditMap = true; // 是否可以编辑地图区域
 
       if (this.deleteIndexArr.length > 0) { // 判断是否删除过区域，，如果删除过，则将删除数组中的一个值赋值给selectMapType
-        // console.log('asdasdasd')
-        // console.log('deleteIndexArr', this.deleteIndexArr)
         this.selectMapType = this.deleteIndexArr[0];
       } else {
         this.selectMapType = this.selectAreaDataList.length + 1;
       }
 
-      // console.log('selectMapType', this.selectMapType)
       this.handleSelectType(this.selectMapType);
     },
     // 显示相对应的地图框选区域
@@ -786,8 +790,6 @@ export default {
     },
     // 删除某个选中的区域
     deleteSelectArea (idx, index) {
-      // console.log('nnnnnnnnnnnn', idx)
-      // console.log('mmmmm', index)
       this.selectAreaDataList.splice(idx, 1);
 
       this.deleteIndexArr.push(index);
@@ -795,8 +797,6 @@ export default {
       this.handleClearMap(index);
 
       this.isShowMapAreaDialog = false;
-
-      // console.log('delet', this.deleteIndexArr)
     },
     handleClearMap (index) {
       switch (index) {

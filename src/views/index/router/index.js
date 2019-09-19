@@ -96,7 +96,44 @@ const router = new VueRouter({
       name: 'video_relay_map',
       meta: { unrequireLogin: true },
       component: () => import('@/views/index/components/video/relay-map.vue')
-    }
+    },
+    // 截屏 跳转的页面
+    {
+      path: '/cut-ytsr-moment',  // 以图搜人
+      name: 'cut_ytsr_moment',
+      meta: { unrequireLogin: true },
+      component: () => import('@/views/index/components/portrait/ytsr-moment.vue')
+    },
+    {
+      path: '/cut-ycsc',  // 以图搜车
+      name: 'cut_vehicle_search_ycsc',
+      meta: { unrequireLogin: true },
+      component: () => import('@/views/index/components/vehicle/search/ycsc.vue')
+    },
+    {
+      path: '/cut-tzsc',  // 特征搜车
+      name: 'cut_vehicle_search_tzsc',
+      meta: { unrequireLogin: true },
+      component: () => import('@/views/index/components/vehicle/search/tzsc.vue')
+    },
+    {
+      path: '/cut-clgj',  // 车辆轨迹分析
+      name: 'cut_vehicle_analysis_clgj',
+      meta: { unrequireLogin: true },
+      component: () => import('@/views/index/components/vehicle/analysis/clgj.vue')
+    },
+    {
+      path: '/cut-rlcx',  // 特征搜人
+      name: 'cut_portrait_rlcx',
+      meta: { unrequireLogin: true },
+      component: () => import('@/views/index/components/portrait/rlcx.vue')
+    },
+    {
+      path: '/cut-gjfx',  // 人像轨迹分析
+      name: 'cut_portrait_gjfx',
+      meta: { unrequireLogin: true },
+      component: () => import('@/views/index/components/portrait/gjfx.vue')
+    },
   ]
 })
 router.beforeEach((to, from, next) => {

@@ -330,7 +330,7 @@ export default {
               this.$message.info('请设置分析起点');
             }
             return;
-          };
+          }
           let deviceCode;
           this.deviceList.map(item => {
             if (item.deviceName === this.editForm.deviceCode) {

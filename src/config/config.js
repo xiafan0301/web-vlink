@@ -46,10 +46,11 @@ const oDomains = {
     judge: {
         // dev: 'http://10.116.64.127:8082',
         // dev: 'http://10.116.64.109:8082',
-        dev: 'http://10.116.64.97:8081',
+        // dev: 'http://10.116.64.193:8082',
+        // dev: 'http://10.116.64.97:8081',
         // dev: 'http://10.116.64.231:8087',
         // dev: 'https://apidev.aorise.org/vlink-judge/',
-        // dev: 'https://apidev.aorise.org/vlink-judge/',
+        dev: 'https://apidev.aorise.org/vlink-judge/',
         test: 'https://apirel.aorise.org/vlink-judge/',
         // test: 'http://10.116.64.53:8081',
         prod: 'https://apiprod.aorise.org/vlink-judge/',
@@ -82,6 +83,13 @@ const oDomains = {
       dev: 'https://apidev.aorise.org/vlink-vehicle',
       test: 'https://apirel.aorise.org/vlink-vehicle',
       prod: 'https://apiprod.aorise.org/vlink-vehicle'
+    },
+    // 人像地址
+    portrait: {
+      // dev: 'http://10.116.64.107:8081',
+      dev: 'https://apidev.aorise.org/vlink-portrait',
+      test: 'https://apirel.aorise.org/vlink-portrait',
+      prod: 'https://apiprod.aorise.org/vlink-portrait'
     },
     // 公共短信服务
     sms: {
