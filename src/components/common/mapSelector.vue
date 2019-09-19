@@ -8,6 +8,13 @@
     width="15.10rem"
     class="public_map_selector_dialog">
     <div class="map_sd_content" :class="{'map_sd_edit_false': !bEdit}" :id="sid">
+      <div class="sd_type_tab" v-if="showDeviceList">
+        <span :class="{'active': curTabType === 0}" @click="curTabType = 0">地图选择</span>
+        <span :class="{'active': curTabType === 1}" @click="curTabType = 1">列表选择</span>
+      </div>
+      <div class="sd_type_tab" v-else>
+        <span>选择设备</span>
+      </div>
       <div class="sd_device_list" :class="{'sd_device_list_close': slideClose}">
         <div class="sdd_title" @click="slideClose = !slideClose"><span>已选设备 （{{dbNum}}）</span> <i class="el-icon-arrow-up"></i></div>
         <vue-scroll>
@@ -66,6 +73,42 @@
         <li @click="setMapStatus(2)"><i class="el-icon-minus"></i></li>
       </ul>
       <div style="width: 100%; height: 100%;" :id="sid + '_container'"></div>
+      <!--列表选择-->
+      <div class="sd_list_choose" v-show="curTabType === 1">
+        <div class="sd_list_l">
+          <div class="sd_list_lt">
+            <p>已选设备（{{dbNum}}）</p>
+            <el-checkbox :indeterminate="leftIsIndeterminate" v-model="DBleftAll" v-show="dbNum > 0">全选</el-checkbox>
+          </div>
+          <div class="sd_list_lc">
+            <vue-scroll>
+              <div v-show="dbNum > 0" :DBleftAll="DBleftAll" :inIndeterKey="'leftIsIndeterminate'" class="sd_list_l_tree" showCheckBox is="dbTreeS" :treeList="treeList" @changeAll="changeLeftAll" :showTypes="showTypes"></div>
+            </vue-scroll>
+          </div>
+        </div>
+        <div class="sd_list_m">
+          <span @click="addDB"><i class="el-icon-arrow-left"></i>添加</span>
+          <span @click="removeDB">移出<i class="el-icon-arrow-right"></i></span>
+        </div>
+        <div class="sd_list_r sd_list_l">
+          <div class="sd_list_lt">
+            <p>可选设备（{{curNum}}）</p>
+            <div class="sd_lt_search">
+              <el-input
+                      placeholder="请输入设备搜索"
+                      v-model="filterKey">
+              </el-input>
+              <i class="el-icon-search" @click="filterTree"></i>
+            </div>
+            <el-checkbox :indeterminate="rightIsIndeterminate" v-model="DBrightAll" v-show="curNum > 0">全选</el-checkbox>
+          </div>
+          <div class="sd_list_lc">
+            <vue-scroll>
+              <div v-show="curNum > 0" :DBrightAll="DBrightAll" :filterable="isFilterData" :inIndeterKey="'rightIsIndeterminate'" class="sd_list_l_tree" showCheckBox is="dbTreeS" :treeList="remainTreeList" @changeAll="changeRightAll" :showTypes="showTypes"></div>
+            </vue-scroll>
+          </div>
+        </div>
+      </div>
     </div>
     <el-dialog
             title="清除确认"
@@ -87,7 +130,7 @@
 <script>
 import {getAllMonitorList, getAllBayonetList, getDeviceByBayonetUids} from '@/views/index/api/api.base.js';
 import {mapXupuxian} from '@/config/config.js';
-import {random14, addCluster} from '@/utils/util.js';
+import {random14, addCluster, objDeepCopy} from '@/utils/util.js';
 import dbTreeS from '@/components/common/dbTree_single.vue';
 export default {
   /* 提交成功后通过在父组件 emit mapSelectorEmit 事件获取所框选的东西 */
@@ -100,11 +143,20 @@ export default {
     pointChoose 是否有点选，区域碰撞，区域徘徊，频繁出没，区域人员 没有点选
     singleArea 是否为单选，区域碰撞，区域徘徊，频繁出没，区域人员分析为单选
     activeDeviceList 打开弹窗是已经激活了的设备
+    hideDBlist 是否隐藏列表选择, 默认有
   */
-  props: ['open', 'clear', 'showTypes', 'oConfig', 'editAble', 'pointChoose', 'singleArea', 'activeDeviceList'],
+  props: ['open', 'clear', 'showTypes', 'oConfig', 'editAble', 'pointChoose', 'singleArea', 'activeDeviceList', 'hideDBlist'],
   components: {dbTreeS},
   data () {
     return {
+      isFilterData: '',
+      filterKey: '',
+      rightIsIndeterminate: false, // 列表选择右侧不确定状态
+      leftIsIndeterminate: false, // 列表选择左侧不确定状态
+      DBleftAll: false, // 列表选择左侧全选
+      DBrightAll: false, // 列表选择右侧全选
+      curTabType: 0, // 当前激活的tab
+      showDeviceList: true, // 默认显示列表选择
       activeDBList: [], // 等待初始化的设备
       delDialog: false,
       confirmIcon: null, // 选择区域之后的小弹窗
@@ -163,10 +215,16 @@ export default {
       zIndex: 50,
 
       dialogVisible: false,
-      submitLoading: false
+      submitLoading: false,
     }
   },
   watch: {
+    DBleftAll () {
+      this.leftIsIndeterminate = false;
+    },
+    DBrightAll () {
+      this.rightIsIndeterminate = false;
+    },
     activeDeviceList (val) {
       this.activeDBList = val;
     },
@@ -216,6 +274,7 @@ export default {
     }
   },
   mounted () {
+    this.showDeviceList = this.hideDBlist === undefined ? true : false;
     this.getTreeList();
   },
   computed: {
@@ -225,6 +284,9 @@ export default {
     treeList () {
       return this.operData();
     },
+    remainTreeList () {
+      return this.remainData();
+    },
     dbNum () {
       let n = 0;
       if (this.searchData.length > 0) {
@@ -233,9 +295,49 @@ export default {
         })
       }
       return this.pointSelect.curPointData.length + n;
+    },
+    curNum () {
+      return this.listBayonet.length + this.listDevice.length - this.dbNum;
     }
   },
   methods: {
+    // 过滤
+    filterTree () {
+      let curKey = this.filterKey.replace(/\s+|\s+$/g, '');
+      if (curKey) {
+        this.isFilterData = curKey;
+      } else {
+        this.isFilterData = '';
+      }
+    },
+    addDB () {
+      // 添加的时候丢进pointSelect集合，treeList自动更新
+      this.remainTreeList.forEach(x => {
+        // 判断当前右侧列表是不是搜索出来的结果,如果是通过isFilterData 过滤
+        let _ar = [];
+        _ar = x.childList.filter(y => y.checked && y.infoName.includes(this.isFilterData)).map(z => {return z.uid})
+        this.activeDBList.push(..._ar)
+      })
+      this.waitInitDB();
+    },
+    // 判断有checked的丢进delOne
+    removeDB () {
+      this.treeList.forEach(x => {
+        x.childList.filter(y => y.checked).forEach(z => this.delOne(z));
+      })
+    },
+    changeLeftAll (key, bool, allB) {
+      if (allB !== undefined) {
+        this.DBleftAll = allB;
+      }
+      this[key] = bool;
+    },
+    changeRightAll (key, bool, allB) {
+      if (allB !== undefined) {
+        this.DBrightAll = allB;
+      }
+      this[key] = bool;
+    },
     // 有需要初始化变色的设备，但需要等待mark加载完毕
     waitInitDB () {
       // 因为objSetItem的时候过滤了没有经纬度的数据，所以index就是markIndex
@@ -246,17 +348,40 @@ export default {
           this.pointSelect.curMarks.push(this.marks[index]);
         }
       })
+      this.activeDBList = [];
     },
     delOne (item) {
       this.markColorChange(item)
     },
+    // 右侧剩余数据
+    remainData () {
+      let obj = [], remainL = [], cObj = {};
+      this.mapAllList.forEach(x => {
+        let b = true;
+        for (let i = 0; i < this.treeList.length; i++) {
+          if (this.treeList[i].childList.includes(x)) {
+            b = false;
+            break;
+          }
+        }
+        if (b) {
+          remainL.push(x);
+        }
+      })
+      this.createTreeData(remainL, cObj);
+      for(let key in cObj) {
+        let _o = {}
+        _o['childList'] = cObj[key];
+        _o['areaName'] = key;
+        _o['areaUid'] = random14();
+        this.$set(_o, 'checkAll', false)
+        obj.push(_o)
+      }
+      return obj;
+    },
     // 左侧列表数据
     operData () {
-      let obj = {
-        areaName: '溆浦县',
-        areaUid: random14(),
-        childList: []
-      };
+      let obj = [];
       let cObj = {};
       if (this.pointSelect.curPointData && this.pointSelect.curPointData.length > 0) {
         this.createTreeData(this.pointSelect.curPointData, cObj);
@@ -271,12 +396,14 @@ export default {
         _o['childList'] = cObj[key];
         _o['areaName'] = key;
         _o['areaUid'] = random14();
-        obj.childList.push(_o)
+        this.$set(_o, 'checkAll', false)
+        obj.push(_o)
       }
-      return [obj];
+      return obj;
     },
     createTreeData (list, cObj) {
       list.forEach(x => {
+        this.$set(x, 'checked', false)
         if (cObj[x.areaName]) {
           cObj[x.areaName].push(x);
         }else {
@@ -1068,8 +1195,30 @@ export default {
     .map_sd_content {
       position: relative;
       width: 100%; height: 7.8rem;
+      padding-top: 40px;
+      > .sd_type_tab {
+        position: absolute;
+        top: 0;
+        height: 40px;
+        width: 100%;
+        background: #FAFAFA;
+        border-bottom: 1px solid #F2F2F2;
+        > span {
+          display: inline-block;
+          height: 40px;
+          line-height: 40px;
+          padding: 0 10px;
+          color: #333333;
+          margin-left: 20px;
+          cursor: pointer;
+        }
+        > .active {
+          color: #0C70F8;
+          border-bottom: 2px solid #0C70F8;
+        }
+      }
       > .sd_device_list {
-        position: absolute; top: 10px; left: .2rem; z-index: 1000;
+        position: absolute; top: 50px; left: .2rem; z-index: 1000;
         background-color: #fff;
         width: 2.6rem;
         height: 7rem;
@@ -1104,7 +1253,6 @@ export default {
         }
         .sdd_content {
           padding: 0 20px;
-          width: 100%;
           height: 6.1rem;
           width: 2.6rem;
         }
@@ -1123,7 +1271,7 @@ export default {
         }
       }
       > .sd_search {
-        position: absolute; top: 10px; left: 3rem; z-index: 1000;
+        position: absolute; top: 50px; left: 3rem; z-index: 1000;
         background-color: #fff;
         overflow: hidden;
         .inline-input {
@@ -1144,11 +1292,11 @@ export default {
         }
       }
       > .sd_opts {
-        position: absolute; top: 10px; left: 6.2rem; z-index: 1000;
+        position: absolute; top: 50px; left: 6.2rem; z-index: 1000;
         background-color: #fff;
       }
       .sd_checkbox {
-        position: absolute; top: 10px; left: 11.5rem; z-index: 1000;
+        position: absolute; top: 50px; left: 11.5rem; z-index: 1000;
         background: #ffffff;
         height: .5rem;
         padding: 0 .1rem;
@@ -1168,6 +1316,114 @@ export default {
           padding: 10px;
           cursor: pointer;
           > i { font-size: 20px; color: #0C70F8; }
+        }
+      }
+      // 列表选择
+      > .sd_list_choose {
+        height: calc(100% - 40px);
+        width: 100%;
+        position: absolute;
+        top: 40px;
+        z-index: 1001;
+        background: #ffffff;
+        border-bottom: 1px solid #F2F2F2;
+        display: flex;
+        > .sd_list_l {
+          width: 260px;
+          height: 100%;
+          border-right: 1px solid #f2f2f2;
+          .sd_list_lt {
+            height: 86px;
+            display: flex;
+            flex-direction: column;
+            > p {
+              height: 50px;
+              line-height: 50px;
+              border-bottom: 1px solid #f2f2f2;
+              padding-left: 20px;
+            }
+            >.el-checkbox {
+              height: 20px;
+              margin-top: 15px;
+              padding-left: 20px;
+            }
+          }
+          .sd_list_lc {
+            height: calc(100% - 100px);
+            .sd_list_l_tree {
+              width: 258px;
+              padding: 0 20px;
+            }
+          }
+        }
+        > .sd_list_m {
+          width: 68px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          > span {
+            display: block;
+            width: 52px;
+            height:24px;
+            line-height: 24px;
+            background: #F6F6F6;
+            border: 1px solid #D3D3D3;
+            color: #666666;
+            -webkit-border-radius: 4px;
+            -moz-border-radius: 4px;
+            border-radius: 4px;
+            text-align: center;
+            margin: 0 auto;
+            margin-bottom: 8px;
+            cursor: pointer;
+            i {
+              font-size: 14px;
+              color: #B2B2B2;
+            }
+            &:hover {
+              opacity: .8;
+            }
+            &:first-child {
+              background: #0C70F8;
+              border-color: #0C70F8;
+              color: #ffffff;
+              i {
+                color: #ffffff;
+              }
+            }
+          }
+        }
+        > .sd_list_r {
+          width: 260px;
+          height: 100%;
+          border-left: 1px solid #f2f2f2;
+          border-right: 1px solid #f2f2f2;
+          .sd_list_lt {
+            height: 121px;
+            .sd_lt_search {
+              position: relative;
+              display: inline-block;
+              height: 30px;
+              padding: 0 20px;
+              margin-top: 10px;
+              input {
+                height: 30px;
+              }
+              > .el-icon-search {
+                display: block;
+                position: absolute;
+                top: 8px;
+                right: 30px;
+                cursor: pointer;
+              }
+            }
+            >.el-checkbox {
+              margin-top: 10px;
+            }
+          }
+          .sd_list_lc {
+            height: calc(100% - 121px);
+          }
         }
       }
     }

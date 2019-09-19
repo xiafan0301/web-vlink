@@ -5,31 +5,48 @@
       <span :class="{'active': leftTabShow === 1}" @click="leftTabShow = 1">卡口</span>
     </div>
     <ul class="db_tree" :id="dbId">
-      <li :id="'db_area_' + item.areaUid" v-for="(item, index) in treeList" :key="'tl_' + index">
-        <i class="el-icon-arrow-right" @click="selFirstEvent(item.areaUid)"></i>
-        <span @click="selFirstEvent(item.areaUid)">{{item.areaName}}</span>
-        <ul class="db_tree_s" v-if="item.childList && item.childList.length > 0">
-          <li :id="'db_area_' + sitem.areaUid" v-for="(sitem, sindex) in item.childList" :key="'stl_' + sindex">
-            <i class="el-icon-caret-right" @click="selSecondEvent(sitem.areaUid, item.areaUid)"></i>
-            <span @click="selSecondEvent(sitem.areaUid, item.areaUid)">{{sitem.areaName}}</span>
-            <div class="db_tree_c">
-              <ul class="db_tree_cul db_tree_cd db_tree_cul_open">
-                <template v-if="sitem.childList && getCurTypeData(sitem.childList).length">
-                  <li v-for="(ditem, dindex) in getCurTypeData(sitem.childList)" :key="'dl_' + index + '_' + sindex + '_' + dindex">
-                    {{ditem.infoName}}
-                    <i @click="delOne(ditem)" class="el-icon-delete"></i>
-                  </li>
-                </template>
-                <template v-else>
-                  <li class="db_li_empty">暂无</li>
-                </template>
-              </ul>
-            </div>
-          </li>
-        </ul>
-        <ul class="db_tree_s" v-else>
-          <li><span>暂无数据</span></li>
-        </ul>
+      <!--<li :id="'db_area_' + item.areaUid" v-for="(item, index) in treeList" :key="'tl_' + index">-->
+        <!--<i class="el-icon-arrow-right" @click="selFirstEvent(item.areaUid)"></i>-->
+        <!--<span @click="selFirstEvent(item.areaUid)">{{item.areaName}}</span>-->
+        <!--<ul class="db_tree_s" v-if="item.childList && item.childList.length > 0">-->
+          <!--<li :id="'db_area_' + sitem.areaUid" v-for="(sitem, sindex) in item.childList" :key="'stl_' + sindex">-->
+            <!--<i class="el-icon-caret-right" @click="selSecondEvent(sitem.areaUid, item.areaUid)"></i>-->
+            <!--<span @click="selSecondEvent(sitem.areaUid, item.areaUid)">{{sitem.areaName}}</span>-->
+            <!--<div class="db_tree_c">-->
+              <!--<ul class="db_tree_cul db_tree_cd db_tree_cul_open">-->
+                <!--<template v-if="sitem.childList && getCurTypeData(sitem.childList).length">-->
+                  <!--<li v-for="(ditem, dindex) in getCurTypeData(sitem.childList)" :key="'dl_' + index + '_' + sindex + '_' + dindex">-->
+                    <!--{{ditem.infoName}}-->
+                    <!--<i @click="delOne(ditem)" class="el-icon-delete"></i>-->
+                  <!--</li>-->
+                <!--</template>-->
+                <!--<template v-else>-->
+                  <!--<li class="db_li_empty">暂无</li>-->
+                <!--</template>-->
+              <!--</ul>-->
+            <!--</div>-->
+          <!--</li>-->
+        <!--</ul>-->
+        <!--<ul class="db_tree_s" v-else>-->
+          <!--<li><span>暂无数据</span></li>-->
+        <!--</ul>-->
+      <!--</li>-->
+      <li :class="{'db_has_check': showCheckBox}" :id="'db_area_' + sitem.areaUid" v-for="(sitem, sindex) in treeList" :key="'stl_' + sindex">
+        <template v-if="sitem.childList && getCurTypeData(sitem.childList).length">
+          <!--checkbox-->
+          <el-checkbox  v-model="sitem.checkAll" :class="randomClass" :id="'db_ids_' + sitem.areaUid + '_' + sindex" @change="handleCheckAllChange(sitem)" v-if="showCheckBox"></el-checkbox>
+          <i class="el-icon-caret-right" @click="selSecondEvent(sitem.areaUid)"></i>
+          <span @click="selSecondEvent(sitem.areaUid)">{{sitem.areaName}}</span>
+          <div class="db_tree_c">
+            <ul class="db_tree_cul db_tree_cd db_tree_cul_open">
+              <li v-for="(ditem, dindex) in getCurTypeData(sitem.childList)" :key="'dl_' + sindex + '_' + dindex">
+                <el-checkbox v-model="ditem.checked" v-if="showCheckBox" @change="handleCheckboxChange(sitem, ditem.checked, 'db_ids_' + sitem.areaUid + '_' + sindex)"></el-checkbox>
+                {{ditem.infoName}}
+                <i @click="delOne(ditem)" class="el-icon-delete" v-if="!showCheckBox"></i>
+              </li>
+            </ul>
+          </div>
+        </template>
       </li>
     </ul>
   </div>
@@ -37,18 +54,135 @@
 <script>
   import {random14} from '@/utils/util.js';
   export default {
-    props: ['treeList', 'showTypes'],
+    props: {
+      treeList: Array,
+      showTypes: String,
+      showCheckBox: Boolean,
+      DBleftAll: Boolean,
+      inIndeterKey: String,
+      DBrightAll: Boolean,
+      filterable: String
+    },
     data () {
       return {
         dbId: 'db_tree_' + random14(),
-        leftTabShow: 0
+        leftTabShow: 0,
+        randomClass: 'db_has_checkbox' + random14()
       }
     },
     watch: {
+      DBleftAll (e) {
+        if (e) {
+          this.treeList.forEach((x, index) => {
+            if (!x.checkAll) {
+              x.checkAll = true;
+              $('.' + this.randomClass).eq(index).click();
+            }
+          })
+        } else {
+          this.treeList.forEach((x, index) => {
+            if (x.checkAll) {
+              x.checkAll = false;
+              $('.' + this.randomClass).eq(index).click();
+            }
+          })
+        }
+      },
+      DBrightAll (e) {
+        if (e) {
+          this.treeList.forEach((x, index) => {
+            if (!x.checkAll) {
+              x.checkAll = true;
+              $('.' + this.randomClass).eq(index).click();
+            }
+          })
+        } else {
+          this.treeList.forEach((x, index) => {
+            if (x.checkAll) {
+              x.checkAll = false;
+              $('.' + this.randomClass).eq(index).click();
+            }
+          })
+        }
+      }
+    },
+    mounted () {
     },
     methods: {
+      handleCheckboxChange (parent, bool, el) {
+        let _b = true;
+        if (!bool) {
+          this.$set(parent, 'checkAll', false);
+          if (this.DBleftAll || this.DBrightAll) {
+            // 说明全选要变成不确定状态
+            this.$emit('changeAll', this.inIndeterKey, true)
+          }
+        } else {
+          for (let i = 0; i < parent.childList.length; i++) {
+            if (!parent.childList[i].checked) {
+              _b = false;
+              break;
+            }
+          }
+          if (_b) {
+            this.$set(parent, 'checkAll', _b)
+//            if (!parent.hasOwnProperty('checkAll')) {
+//              console.log('233')
+//              $('#'+ el).click();
+//            } else {
+//              this.$set(parent, 'checkAll', _b)
+//            }
+          }
+          let la = true;
+          this.treeList.forEach(x => {
+            if (x.checkAll === false) {
+              la = false;
+            }
+          })
+          if (la) {
+            this.$emit('changeAll', this.inIndeterKey, false)
+          }
+        }
+      },
+      handleCheckAllChange(val) {
+        if (val.checkAll) {
+          val.childList.forEach(x => {
+            x.checked = true;
+          })
+          let la = true;
+          this.treeList.forEach(x => {
+            if (x.checkAll === false) {
+              la = false;
+            }
+          })
+          if (la) {
+            this.$emit('changeAll', this.inIndeterKey, false, true)
+          }
+        } else {
+          let la = 0;
+          this.treeList.forEach(x => {
+            if (x.checkAll === true) {
+              la += 1;
+            }
+          })
+          if (la === this.treeList.length) {
+            this.$emit('changeAll', this.inIndeterKey, false)
+          } else if (la === 0) {
+            this.$emit('changeAll', this.inIndeterKey, false, false)
+          } else {
+            this.$emit('changeAll', this.inIndeterKey, true)
+          }
+          val.childList.forEach(x => {
+            x.checked = false;
+          })
+        }
+      },
       getCurTypeData (item) {
-        return item.filter(x => x.dataType === this.leftTabShow)
+        if (this.filterable) {
+          return item.filter(x => x.dataType === this.leftTabShow && x.infoName.includes(this.filterable));
+        } else {
+          return item.filter(x => x.dataType === this.leftTabShow);
+        }
       },
       delOne (item) {
         this.$emit('delOne', item)
@@ -113,6 +247,11 @@
     width: 100%;
     > li {
       position: relative;
+      > .el-checkbox {
+        position: absolute;
+        top: 8px;
+        left: 4px;
+      }
       > span {
         display: block;
         height: 36px; line-height: 36px;
@@ -131,6 +270,14 @@
           color: #0C70F8;
           transform: rotate(90deg);
         }
+      }
+    }
+    > .db_has_check {
+      > span {
+        padding-left: 35px;
+      }
+      > i {
+        left: 20px;
       }
     }
     .db_tree_s {

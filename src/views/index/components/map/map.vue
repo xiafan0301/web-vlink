@@ -211,7 +211,7 @@
 </template>
 <script>
   import flvplayer from '@/components/common/flvplayer.vue';
-  import {formatDate, objDeepCopy, random14} from '../../../../utils/util.js';
+  import {formatDate, objDeepCopy, random14, addCluster} from '../../../../utils/util.js';
   import {MapGETmonitorList, MapGETsignList, MapDELETEmapSign, MapDELETEmapSigns, MapUPDATEEmapSign, MapPOSTmapSign, MapGetBayonetInfo} from '../../api/api.map.js';
   import {apiVideoPlay} from "@/views/index/api/api.video.js";
   import {getAlarmListByDev} from '@/views/index/api/api.control.js';
@@ -272,6 +272,7 @@
         curSignObj: {},
         delLoading: false,
         marks: [[], [], [], [], []], // 地图上的覆盖物集合
+        allDBMarks: [], // 所有设备跟卡口覆盖物集合
         // 车辆相关
         carMarks: null, // 车辆路径起点mark跟路径line集合
 
@@ -850,6 +851,7 @@
                   content: uContent
                 });
                 _this.marks[obj.dataType].push(marker);
+                // 把设备跟卡口的mark加入allDBMarks
                 // 点击地图上的摄像头播放视频
                 if (obj.dataType === 0) {
                   marker.on('click', function () {
