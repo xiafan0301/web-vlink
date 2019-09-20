@@ -2,6 +2,7 @@
   <el-dialog
   title="框选搜索主体"
   :visible.sync="dialogVisible"
+  width="1024px"
   :show-close="false"
   :close-on-press-escape="false"
   :close-on-click-modal="false"
@@ -66,20 +67,34 @@ export default {
   methods: {
     // 获取图片缩放比例
     getImgScale () {
-      let imgWidth = $('#imgBox').outerWidth();
-      let imgHeight = $('#imgBox').outerHeight();
+      let scale = this.initImgWidth / this.initImgHeight; // 原图初始比例
 
-      console.log(imgWidth + '_' + imgHeight)
+      let imgWidth = $('#imgBox').width();
+      
+      let currHeight = Math.ceil(imgWidth / scale); // 图片压缩后的height
+      $('#imgBox').css('height', currHeight + 'px');
+
+
 
       this.selectList.forEach(item => {
+        // 在页面显示的图片大小计算宽和高的比例
+        let wScale = this.initImgWidth / item.width;
+        let hScale = this.initImgHeight / item.height;
+
+
+
         let $div = document.createElement('div');
 
         $div.setAttribute('id', 'select_box' + item.uid);
 
         $div.setAttribute('class', 'select_box');
 
-        $div.style.width = item.width + 'px';
-        $div.style.height = item.height + 'px';
+        $div.style.width = Math.ceil(imgWidth / wScale) + 'px';
+        $div.style.height = Math.ceil(currHeight / hScale) + 'px';
+
+        console.log($div.style.width)
+        console.log($div.style.height)
+
         $div.style.left = item.x + 'px';
         $div.style.top = item.y + 'px';
 
@@ -193,7 +208,7 @@ export default {
     .select_body {
       .img_box {
         width: 100%;
-        height: 600px;
+        height: 100%;
         position: relative;
         >img {
           width: 100%;
