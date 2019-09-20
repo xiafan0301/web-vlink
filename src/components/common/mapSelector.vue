@@ -128,7 +128,7 @@
   </el-dialog>
 </template>
 <script>
-import {getAllMonitorList, getAllBayonetList, getDeviceByBayonetUids} from '@/views/index/api/api.base.js';
+  import {getAllMonitorList, getAllBayonetList, getDeviceByBayonetUids} from '@/views/index/api/api.base.js';
 import {mapXupuxian} from '@/config/config.js';
 import {random14, addCluster, objDeepCopy} from '@/utils/util.js';
 import dbTreeS from '@/components/common/dbTree_single.vue';

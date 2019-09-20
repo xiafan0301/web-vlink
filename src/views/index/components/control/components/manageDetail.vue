@@ -14,28 +14,36 @@
         <div class="vl_f_16 vl_f_333">基本信息</div>
         <div class="vl_f_12 vl_f_666">创建于{{controlDetail.createTime}} ；更新于{{controlDetail.updateTime}}</div>
       </div>
-      <div class="manage_d_content">
+      <div class="manage_d_content" :style="{'margin-bottom': controlState === 2 ? '80px' : '20px'}">
         <!-- 布控信息 -->
         <ul>
-          <li>
-            <div><span class="vl_f_666">布控编号：</span><span class="vl_f_333">{{controlDetail.surveillanceNo}}</span></div>
-            <div><span class="vl_f_666">布控类型：</span><span class="vl_f_333">{{controlDetail.surveillanceType}}</span></div>
-          </li>
           <li style="width: 34%;">
             <div><span class="vl_f_666">布控名称：</span><span class="vl_f_333">{{controlDetail.surveillanceName}}</span></div>
-            <div v-if="controlDetail.surveillanceType === '短期布控'"><span class="vl_f_666">布控日期：</span><span class="vl_f_333">{{controlDetail.surveillanceDateStart}} 至 {{controlDetail.surveillanceDateEnd}}</span></div>
-            <div v-else class="control_time"><span class="vl_f_666">布控时间：</span><span class="vl_f_333">{{controlDetail.time}}</span></div>
+            <div><span class="vl_f_666">有效期限：</span><span class="vl_f_333">{{controlDetail.surveillanceDateStart}} 至 {{controlDetail.surveillanceDateEnd}}</span></div>
+            <div><span class="vl_f_666">短信联动：</span><span class="vl_f_333" v-for="(item, index) in controlDetail.contactList" :key="index">{{item.contact}}&nbsp;&nbsp;{{item.mobile}}<span v-if="index + 1 < controlDetail.contactList.length">&nbsp;&nbsp;|&nbsp;&nbsp;</span></span></div>
+            <div><span class="vl_f_666">是否级联：</span><span class="vl_f_333">{{controlDetail.cascadePlatform ? '是' : '无'}}</span></div>
+            
+          </li>
+          <li style="width: 34%;">
+            <div><span class="vl_f_666">关联事件：</span><span class="vl_f_333">{{controlDetail.eventId}}</span></div>
+            <div class="control_time"><span class="vl_f_666">布控时间段：</span><span class="vl_f_333">{{controlDetail.time}}</span></div>
           </li>
           <li style="width: 34%;">
             <div><span class="vl_f_666">告警级别：</span><span class="vl_f_333">{{controlDetail.alarmLevel}}</span></div>
-            <div v-if="controlDetail.surveillanceType === '短期布控'" class="control_time"><span class="vl_f_666">布控时间：</span><span class="vl_f_333">{{controlDetail.time}}</span></div>
           </li>
+        </ul>
+        <ul>
+          <li style="width: 34%;"><div><span class="vl_f_666">共享布控：</span><span class="vl_f_333">{{controlDetail.shareDept ? '是' : '无'}}</span></div></li>
+          <li style="width: 34%;"><div><span class="vl_f_666">共享对象：</span><span class="vl_f_333">{{controlDetail.shareDept}}</span></div></li>
+        </ul>
+        <ul>
+          <li><div><span class="vl_f_666">布控原因：</span><span class="vl_f_333">{{controlDetail.surveillanceReason}}</span></div></li>
         </ul>
         <div class="manage_d_c_e" v-if="controlDetail.eventDetail">
           <div class="vl_f_666">事件内容：</div>
           <div class="vl_f_333">{{controlDetail.eventDetail}}<span @click="getEventDetail">详情</span></div>
         </div>
-        <div class="manage_d_c_o">
+        <!-- <div class="manage_d_c_o">
           <div><span class="vl_f_333">布控对象</span><span class="vl_f_333">（{{controlDetail.objectNum}}个）</span></div>
           <div>
             <div class="manage_d_c_o_i" v-for="item in controlDetail.objectList" :key="item.id">
@@ -57,249 +65,328 @@
             layout="total, prev, pager, next, jumper"
             :total="controlDetail.objectNum">
           </el-pagination>
-        </div>
+        </div> -->
         <div :class="['vl_icon con_state', controlState === 2 ? 'vl_control_s' : controlState === 1 ? 'vl_control_o' : 'vl_control_e']"></div>
-        <!-- 布控范围 -->
-        <div class="manage_d_c_scope">
-          <div class="manage_d_s_t" @click="controlArea(1)">
-            <div>布控范围</div>
-            <i class="el-icon-arrow-up" v-show="dpOne"></i>
-            <i class="el-icon-arrow-down" v-show="!dpOne"></i>
+        <h1>分析模型：</h1>
+        <div class="manage_model">
+          <div class="model_name">
+            <div>人员失踪</div>
           </div>
-          <el-collapse-transition>
-            <div class="manage_d_s_m" v-show="dpOne">
-              <div id="mapBox"></div>
-              <div class="manage_d_s_m_l">
-                <div class="manage_b" style="margin-top: 0;">
-                  <div class="vl_f_333 top">布控设备</div>
-                  <div class="dp_box">
-                    <div v-for="trackPoint in trackPointList" :key="trackPoint.uid">
-                      <div class="track_t" @click="dropdown(trackPoint)" :class="{'active': trackPoint.isDropdown}">
-                        <i class="el-icon-arrow-down" v-show="trackPoint.isDropdown"></i><i class="el-icon-arrow-right" v-show="!trackPoint.isDropdown"></i><span>{{trackPoint.address}}</span>
-                      </div>
-                      <el-collapse-transition>
-                        <div v-show="trackPoint.isDropdown">
-                          <div class="equ_m">
-                            <div @click="getEquList('0', trackPoint)" :class="{'active': trackPointId === trackPoint.uid && tabTypeByScope === '0'}">摄像头（{{trackPoint.devList ? trackPoint.devList.length : 0}}）</div>
-                            <div @click="getEquList('1', trackPoint)" :class="{'active': trackPointId === trackPoint.uid && tabTypeByScope === '1'}">卡口（{{trackPoint.bayonetList ? trackPoint.bayonetList.length : 0}}）</div>
-                          </div>
-                          <vue-scroll>
-                            <!-- 摄像头 -->
-                            <ul v-if="tabTypeByScope === '0' && trackPoint.devList && trackPoint.devList.length > 0" style="max-height: 280px;">
-                              <template v-for="equ in trackPoint.devList">
-                                <li @click="selDev(equ)" class="highlight" :class="{'active': devIdOrBayId === equ.uid}" :key="equ.uid"><span :title="equ.deviceName">{{equ.deviceName | strCutWithLen(25)}}</span><i class="vl_icon vl_icon_control_05"></i></li>
-                              </template>
-                            </ul>
-                            <ul v-if="tabTypeByScope === '0' && (!trackPoint.devList || trackPoint.devList.length === 0)">
-                              <li>范围内无设备</li>
-                            </ul>
-                            <!-- 卡口 -->
-                            <ul v-if="tabTypeByScope === '1' && trackPoint.bayonetList && trackPoint.bayonetList.length > 0" style="max-height: 280px;" class="bayonet_list">
-                              <li v-for="bayonet in trackPoint.bayonetList" :key="bayonet.uid + bayonet.bayonetName" style="padding: 0;">
-                                <div class="bayone_name highlight"  @click="dropdownBayonet(trackPoint, bayonet)" :class="{'active': bayonet.isDropdown || devIdOrBayId === bayonet.uid}" style="padding: 10px 34px;">
-                                  <i class="el-icon-arrow-down" v-show="bayonet.isDropdown"></i><i class="el-icon-arrow-right" v-show="!bayonet.isDropdown"></i><span :title="bayonet.bayonetName">{{bayonet.bayonetName | strCutWithLen(25)}}</span>
-                                </div>
-                                <el-collapse-transition>
-                                  <ul v-if="bayonet.isDropdown && bayonet.devList.length > 0">
-                                    <template v-for="(equ, index) in bayonet.devList">
-                                      <li :key="equ.uid + equ.deviceName + index">
-                                        <span style="color: #999;">{{equ.deviceName}}</span><i class="vl_icon vl_icon_control_05" style="color: #999;"></i>
-                                      </li>
-                                    </template>
-                                  </ul>
-                                  <ul v-if="bayonet.isDropdown && (!bayonet.devList || bayonet.devList.length === 0)">
-                                    <li>范围内无设备</li>
-                                  </ul>
-                                </el-collapse-transition>
-                              </li>
-                            </ul>
-                            <ul v-if="tabTypeByScope === '1' && (!trackPoint.bayonetList || trackPoint.bayonetList.length === 0)">
-                              <li>范围内无卡口</li>
-                            </ul>
-                          </vue-scroll>
+          <ul class="model_info" v-show="true">
+            <li>失踪人员信息：</li>
+            <li>
+              <span>人脸照片：</span><img :src="controlDetail.missingUrl" alt="">
+            </li>
+            <li><span>人员姓名：</span><span>{{controlDetail.name}}</span></li>
+            <li><span>人员性别：</span><span>{{controlDetail.sex}}</span></li>
+            <li><span>失踪时间：</span><span>{{controlDetail.lostTime}}</span></li>
+            <li><span>失踪地址：</span><span>{{controlDetail.lostAddress}}</span></li>
+            <li><span>家庭地址：</span><span>{{controlDetail.homeAddress}}</span></li>
+          
+            <li>
+              <span style="padding-left: 0;">嫌疑人照片：</span>
+              <template v-for="item in controlDetail.objectList">
+                <img :src="item.photoUrl" alt="" :key="item.uid" v-if="item.photoUrl !== controlDetail.missingUrl">
+              </template>
+            </li>
+            <li>
+              <span>嫌疑车辆：</span><span></span>
+            </li>
+          </ul>
+          <ul class="model_info" v-show="false">
+            <li>布防信息：</li>
+            <li><span>布防地址：</span><span>{{controlDetail.name}}</span></li>
+            <li><span>布防范围：</span><span>{{controlDetail.name}}</span></li>
+            <li>
+              <span>禁入人员：</span><img style="margin-left: 14px;" :src="controlDetail.missingUrl" alt="">
+            </li>
+            <li>
+              <span>禁入车辆：</span><span></span>
+            </li>
+          </ul>
+          <ul class="model_info" v-show="false">
+            <li>
+              <span>上访人员照片：</span><img style="margin-left: 14px;" :src="controlDetail.missingUrl" alt="">
+            </li>
+            <li>
+              <span>上访车辆信息：</span><span></span>
+            </li>
+            <li>
+              <span>车牌号码：</span><span></span>
+            </li>
+          </ul>
+          <ul class="model_info" v-show="false">
+            <li>
+              <span>禁入人员：</span><img style="margin-left: 14px;" :src="controlDetail.missingUrl" alt="">
+            </li>
+            <li>
+              <span>禁入车辆：</span><span></span>
+            </li>
+          </ul>
+          <ul class="model_info" v-show="false">
+            <li>
+              <span>布防场所：</span><span></span>
+            </li>
+            <li>
+              <span>停留时长：</span><span></span>
+            </li>
+            <li>
+              <span>布控车辆：</span><span></span>
+            </li>
+          </ul>
+          <ul class="model_info" v-show="false">
+            <li>
+              <span>布控人员信息：</span><img style="margin-left: 14px;" :src="controlDetail.missingUrl" alt="">
+            </li>
+            <li>
+              <span>布控车辆信息：</span><span></span>
+            </li>
+            <li>
+              <span>车牌号码：</span><span></span>
+            </li>
+          </ul>
+          <!-- 布控设备 -->
+          <div class="manage_d_c_scope">
+            <div class="manage_d_s_t" @click="controlArea(1)">
+              <div>布控设备</div>
+              <i class="el-icon-arrow-up" v-show="dpOne"></i>
+              <i class="el-icon-arrow-down" v-show="!dpOne"></i>
+            </div>
+            <el-collapse-transition>
+              <div class="manage_d_s_m" v-show="dpOne">
+                <div id="mapBox"></div>
+                <div class="manage_d_s_m_l">
+                  <div class="manage_b" style="margin-top: 0;">
+                    <div class="vl_f_333 top">已选设备</div>
+                    <div class="dp_box" style="padding-top: 10px;">
+                      <div v-for="trackPoint in trackPointList" :key="trackPoint.uid">
+                        <div class="equ_m">
+                          <div @click="getEquList('0', trackPoint)" :class="{'active': trackPointId === trackPoint.uid && tabTypeByScope === '0'}">摄像头（{{trackPoint.devList ? trackPoint.devList.length : 0}}）</div>
+                          <div @click="getEquList('1', trackPoint)" :class="{'active': trackPointId === trackPoint.uid && tabTypeByScope === '1'}">卡口（{{trackPoint.bayonetList ? trackPoint.bayonetList.length : 0}}）</div>
                         </div>
-                      </el-collapse-transition>
+                        <div class="track_t" @click="dropdown(trackPoint)" :class="{'active': trackPoint.isDropdown}">
+                          <i class="el-icon-arrow-down" v-show="trackPoint.isDropdown"></i><i class="el-icon-arrow-right" v-show="!trackPoint.isDropdown"></i><span>{{trackPoint.address}}</span>
+                        </div>
+                        <el-collapse-transition>
+                          <div v-show="trackPoint.isDropdown">
+                            <vue-scroll>
+                              <!-- 摄像头 -->
+                              <ul v-if="tabTypeByScope === '0' && trackPoint.devList && trackPoint.devList.length > 0" style="max-height: 280px;">
+                                <template v-for="equ in trackPoint.devList">
+                                  <li @click="selDev(equ)" class="highlight" :class="{'active': devIdOrBayId === equ.uid}" :key="equ.uid"><span :title="equ.deviceName">{{equ.deviceName | strCutWithLen(25)}}</span><i class="vl_icon vl_icon_control_05"></i></li>
+                                </template>
+                              </ul>
+                              <ul v-if="tabTypeByScope === '0' && (!trackPoint.devList || trackPoint.devList.length === 0)">
+                                <li>范围内无设备</li>
+                              </ul>
+                              <!-- 卡口 -->
+                              <ul v-if="tabTypeByScope === '1' && trackPoint.bayonetList && trackPoint.bayonetList.length > 0" style="max-height: 280px;" class="bayonet_list">
+                                <li v-for="bayonet in trackPoint.bayonetList" :key="bayonet.uid + bayonet.bayonetName" style="padding: 0;">
+                                  <div class="bayone_name highlight"  @click="dropdownBayonet(trackPoint, bayonet)" :class="{'active': bayonet.isDropdown || devIdOrBayId === bayonet.uid}" style="padding: 10px 34px;">
+                                    <i class="el-icon-arrow-down" v-show="bayonet.isDropdown"></i><i class="el-icon-arrow-right" v-show="!bayonet.isDropdown"></i><span :title="bayonet.bayonetName">{{bayonet.bayonetName | strCutWithLen(25)}}</span>
+                                  </div>
+                                  <el-collapse-transition>
+                                    <ul v-if="bayonet.isDropdown && bayonet.devList.length > 0">
+                                      <template v-for="(equ, index) in bayonet.devList">
+                                        <li :key="equ.uid + equ.deviceName + index">
+                                          <span style="color: #999;">{{equ.deviceName}}</span><i class="vl_icon vl_icon_control_05" style="color: #999;"></i>
+                                        </li>
+                                      </template>
+                                    </ul>
+                                    <ul v-if="bayonet.isDropdown && (!bayonet.devList || bayonet.devList.length === 0)">
+                                      <li>范围内无设备</li>
+                                    </ul>
+                                  </el-collapse-transition>
+                                </li>
+                              </ul>
+                              <ul v-if="tabTypeByScope === '1' && (!trackPoint.bayonetList || trackPoint.bayonetList.length === 0)">
+                                <li>范围内无卡口</li>
+                              </ul>
+                            </vue-scroll>
+                          </div>
+                        </el-collapse-transition>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div class="manage_d_s_m_r">
-                <div class="top"><i class="vl_icon vl_icon_control_23" @click="resetZoom"></i></div>
-                <ul class="bottom">
-                  <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
-                  <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
-                </ul>
-              </div>
-            </div>
-          </el-collapse-transition>
-        </div>
-        <!-- 运行情况 -->
-        <div class="manage_d_c_situ" v-if="controlState !== 2">
-          <div class="situ_title">运行情况</div>
-          <div class="situ_time">
-            <div><span>开始时间：</span><span>{{controlDetail.runningStartTime}}</span></div>
-            <div v-if="controlState === 3"><span>结束时间：</span><span>{{controlDetail.runningEndTime}}</span></div>
-            <div><span>持续时间：</span><span>{{controlDetail.duration}}</span></div>
-            <div v-if="controlDetail.terminationReason" class="termination_reason"><span>终止原因：</span><span>{{controlDetail.terminationReason}}</span></div>
-          </div>
-          <div class="situ_box" v-if="controlState === 1">
-            <div class="situ_top" @click="controlArea(2)">
-              <div>实时监控</div>
-              <i class="el-icon-arrow-down" v-show="!dpTwo"></i>
-              <i class="el-icon-arrow-up" v-show="dpTwo"></i>
-            </div>
-            <el-collapse-transition>
-              <div class="situ_content" v-show="dpTwo">
-                  <div class="situ_left">
-                    <div style="padding-left: 20px;">布控设备</div>
-                    <div class="equ_m">
-                      <div @click="tabTypeBySituation = '0'" :class="{'active': tabTypeBySituation === '0'}">摄像头（{{devNum}}）</div>
-                      <div @click="tabTypeBySituation = '1'" :class="{'active': tabTypeBySituation === '1'}">卡口（{{bayonetNum}}）</div>
-                    </div>
-                    <!-- 摄像头 -->
-                    <el-collapse-transition>
-                      <ul v-if="tabTypeBySituation === '0' && situList.length > 0">
-                        <vue-scroll>
-                          <li
-                            v-for="(item, index) in situList"
-                            :key="item.uid"
-                            @dragstart="dragstart($event, index, item)"
-                            @dragover="dragover"
-                            :draggable="true"
-                          >
-                            <span :title="item.deviceName">{{item.deviceName | strCutWithLen(25)}}</span><i class="vl_icon vl_icon_control_05"></i>
-                          </li>
-                        </vue-scroll>
-                      </ul>
-                      <ul v-if="tabTypeBySituation === '0' && situList.length === 0">
-                        <li>范围内无设备</li>
-                      </ul>
-                    </el-collapse-transition>
-                    <!-- 卡口 -->
-                    <el-collapse-transition>
-                      <div v-if="tabTypeBySituation === '1' && bayList.length > 0" class="bayone_list">
-                        <vue-scroll>
-                          <div v-for="bay in bayList" :key="bay.uid">
-                            <div class="bayone_name" :class="{'active': bay.isDropdown}" @click="dropdownBay(bay)">
-                              <i class="el-icon-arrow-down" v-show="bay.isDropdown"></i><i class="el-icon-arrow-right" v-show="!bay.isDropdown"></i><span :title="bay.bayonetName">{{bay.bayonetName | strCutWithLen(25)}}</span>
-                            </div>
-                            <el-collapse-transition>
-                              <ul style="max-height: 346px;" v-show="bay.isDropdown && bay.devList.length > 0">
-                                <li
-                                  v-for="(dev, index) in bay.devList"
-                                  :key="dev.uid"
-                                  @dragstart="dragstart($event, index, dev)"
-                                  @dragover="dragover"
-                                  :draggable="true"
-                                >
-                                  <span :title="dev.deviceName">{{dev.deviceName | strCutWithLen(25)}}</span><i class="vl_icon vl_icon_control_05"></i>
-                                </li>
-                              </ul>
-                              <ul v-show="bay.devList.length === 0">
-                                <li>卡口内无设备</li>
-                              </ul>
-                            </el-collapse-transition>
-                          </div>
-                        </vue-scroll>
-                      </div>
-                      <div v-if="tabTypeBySituation === '1' && bayList.length === 0" class="bayone_list">
-                        <ul>
-                          <li>范围内无卡口</li>
-                        </ul>
-                      </div>
-                    </el-collapse-transition>
-                  </div>
-                <div class="situ_right">
-                  <div class="situ_r_video" v-for="(item, index) in rightVideoList" :key="item.uid"
-                    @dragend="dragend"
-                    @dragover="dragover"
-                    @drop="drop($event, index)"
-                    >
-                    <div class="situ_r_box" v-if="!item.isShowVideo">
-                      <img src="../../../../../assets/img/video/vi_101.png" alt="">
-                      <div>拖拽设备列表图标至此</div>
-                    </div>
-                    <div v-if="item.isShowVideo" is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" :bResize="bResize"
-                      :oConfig="{sign: true}">
-                    </div>
-                  </div>
+                <div class="manage_d_s_m_r">
+                  <div class="top"><i class="vl_icon vl_icon_control_23" @click="resetZoom"></i></div>
+                  <ul class="bottom">
+                    <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
+                    <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
+                  </ul>
                 </div>
               </div>
             </el-collapse-transition>
           </div>
         </div>
-        <!-- 布控结果 -->
-        <div class="manage_d_c_result" v-if="controlState !== 2 ">
-          <div class="result_title">
-            <div>布控结果（{{controlResList && controlResList.total}}个）</div>
-            <div>
-              <el-date-picker
-                style="width: 230px;margin: 6px 10px 0 0;"
-                @change="getAlarmSnap"
-                placeholder="请选择起止时间"
-                v-model="controlTimeIsKey"
-                type="daterange"
-                size="small"
-                range-separator="-"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期"
-                value-format="yyyy-MM-dd"
-                :default-time="['00:00:00', '23:59:59']">
-              </el-date-picker>
-              <el-select
-                class="select_box"
-                value-key="value"
-                v-model="devNameIsKey"
-                filterable
-                remote
-                placeholder="请输入设备名搜索"
-                size="small"
-                clearable
-                @clear="devListIsKey = []"
-                @change="getAlarmSnap"
-                :remote-method="getControlDevice"
-                :loading="loading">
-                <el-option
-                  v-for="item in devListIsKey"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.label">
-                </el-option>
-              </el-select>
-            </div>
+      </div>
+      <!-- 运行情况 -->
+      <div class="manage_d_c_situ" v-if="controlState !== 2">
+        <div class="situ_title">运行情况</div>
+        <div class="situ_time">
+          <div><span>开始时间：</span><span>{{controlDetail.runningStartTime}}</span></div>
+          <div v-if="controlState === 3"><span>结束时间：</span><span>{{controlDetail.runningEndTime}}</span></div>
+          <div><span>持续时间：</span><span>{{controlDetail.duration}}</span></div>
+          <div v-if="controlDetail.terminationReason" class="termination_reason"><span>终止原因：</span><span>{{controlDetail.terminationReason}}</span></div>
+        </div>
+        <div class="situ_box" v-if="controlState === 1">
+          <div class="situ_top" @click="controlArea(2)">
+            <div>实时监控</div>
+            <i class="el-icon-arrow-down" v-show="!dpTwo"></i>
+            <i class="el-icon-arrow-up" v-show="dpTwo"></i>
           </div>
-          <div class="result_content" v-if="controlResList">
-            <div>
-              <div class="result_img_box" v-for="(item, index) in controlResList.list" :key="index">
-                <div @mouseenter="item.curVideoTool = true;" @mouseleave="item.curVideoTool = false;">
-                  <img :src="item.path" alt="" v-show="!item.isShowCurImg" @click="openBigImg(index, controlResList.list)">
-                  <video  v-show="item.isShowCurImg" :id='"controlResult" + index' :src="item.snapVideo" style="object-fit: fill;" width="100%" height="239px" @click="showLargeVideo(item, 1)"></video>
-                  <div class="result_tool" v-show="item.curVideoTool">
-                    <div>{{item.deviceName}}</div>
-                    <div>
-                      <i class="vl_icon vl_icon_judge_01" v-if="item.curVideoPlay" @click="pauseVideo(item, index)"></i>
-                      <i class="vl_icon vl_icon_control_09" v-else @click="playVideo(item, index)"></i>
-                      <a download="视频" :href="item.snapVideo" class="el-icon-download download"></a>
-                    </div>
+          <el-collapse-transition>
+            <div class="situ_content" v-show="dpTwo">
+                <div class="situ_left">
+                  <div style="padding-left: 20px;">布控设备</div>
+                  <div class="equ_m">
+                    <div @click="tabTypeBySituation = '0'" :class="{'active': tabTypeBySituation === '0'}">摄像头（{{devNum}}）</div>
+                    <div @click="tabTypeBySituation = '1'" :class="{'active': tabTypeBySituation === '1'}">卡口（{{bayonetNum}}）</div>
                   </div>
+                  <!-- 摄像头 -->
+                  <el-collapse-transition>
+                    <ul v-if="tabTypeBySituation === '0' && situList.length > 0">
+                      <vue-scroll>
+                        <li
+                          v-for="(item, index) in situList"
+                          :key="item.uid"
+                          @dragstart="dragstart($event, index, item)"
+                          @dragover="dragover"
+                          :draggable="true"
+                        >
+                          <span :title="item.deviceName">{{item.deviceName | strCutWithLen(25)}}</span><i class="vl_icon vl_icon_control_05"></i>
+                        </li>
+                      </vue-scroll>
+                    </ul>
+                    <ul v-if="tabTypeBySituation === '0' && situList.length === 0">
+                      <li>范围内无设备</li>
+                    </ul>
+                  </el-collapse-transition>
+                  <!-- 卡口 -->
+                  <el-collapse-transition>
+                    <div v-if="tabTypeBySituation === '1' && bayList.length > 0" class="bayone_list">
+                      <vue-scroll>
+                        <div v-for="bay in bayList" :key="bay.uid">
+                          <div class="bayone_name" :class="{'active': bay.isDropdown}" @click="dropdownBay(bay)">
+                            <i class="el-icon-arrow-down" v-show="bay.isDropdown"></i><i class="el-icon-arrow-right" v-show="!bay.isDropdown"></i><span :title="bay.bayonetName">{{bay.bayonetName | strCutWithLen(25)}}</span>
+                          </div>
+                          <el-collapse-transition>
+                            <ul style="max-height: 346px;" v-show="bay.isDropdown && bay.devList.length > 0">
+                              <li
+                                v-for="(dev, index) in bay.devList"
+                                :key="dev.uid"
+                                @dragstart="dragstart($event, index, dev)"
+                                @dragover="dragover"
+                                :draggable="true"
+                              >
+                                <span :title="dev.deviceName">{{dev.deviceName | strCutWithLen(25)}}</span><i class="vl_icon vl_icon_control_05"></i>
+                              </li>
+                            </ul>
+                            <ul v-show="bay.devList.length === 0">
+                              <li>卡口内无设备</li>
+                            </ul>
+                          </el-collapse-transition>
+                        </div>
+                      </vue-scroll>
+                    </div>
+                    <div v-if="tabTypeBySituation === '1' && bayList.length === 0" class="bayone_list">
+                      <ul>
+                        <li>范围内无卡口</li>
+                      </ul>
+                    </div>
+                  </el-collapse-transition>
                 </div>
-                <div>
-                  <p><i class="vl_icon vl_icon_control_26" style="margin-top: -4px;"></i><span class="vl_f_333">疑似目标：{{item.objName}}</span></p>
-                  <p><i class="vl_icon vl_icon_control_27" style="margin-top: -4px;"></i><span class="vl_f_999">{{item.snapTime}}</span></p>
+              <div class="situ_right">
+                <div class="situ_r_video" v-for="(item, index) in rightVideoList" :key="item.uid"
+                  @dragend="dragend"
+                  @dragover="dragover"
+                  @drop="drop($event, index)"
+                  >
+                  <div class="situ_r_box" v-if="!item.isShowVideo">
+                    <img src="../../../../../assets/img/video/vi_101.png" alt="">
+                    <div>拖拽设备列表图标至此</div>
+                  </div>
+                  <div v-if="item.isShowVideo" is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" :bResize="bResize"
+                    :oConfig="{sign: true}">
+                  </div>
                 </div>
               </div>
             </div>
-            <el-pagination
-              class="cum_pagination"
-              style="align-self: flex-start;"
-              @current-change="handleCurrentChangeRes"
-              :current-page="currentPage"
-              :page-sizes="[100, 200, 300, 400]"
-              :page-size="controlResList.pageSize"
-              layout="total, prev, pager, next, jumper"
-              :total="controlResList.total">
-            </el-pagination>
+          </el-collapse-transition>
+        </div>
+      </div>
+      <!-- 布控结果 -->
+      <div class="manage_d_c_result" v-if="controlState !== 2 ">
+        <div class="result_title">
+          <div>布控结果（{{controlResList && controlResList.total}}个）</div>
+          <div>
+            <el-date-picker
+              style="width: 230px;margin: 6px 10px 0 0;"
+              @change="getAlarmSnap"
+              placeholder="请选择起止时间"
+              v-model="controlTimeIsKey"
+              type="daterange"
+              size="small"
+              range-separator="-"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              value-format="yyyy-MM-dd"
+              :default-time="['00:00:00', '23:59:59']">
+            </el-date-picker>
+            <el-select
+              class="select_box"
+              value-key="value"
+              v-model="devNameIsKey"
+              filterable
+              remote
+              placeholder="请输入设备名搜索"
+              size="small"
+              clearable
+              @clear="devListIsKey = []"
+              @change="getAlarmSnap"
+              :remote-method="getControlDevice"
+              :loading="loading">
+              <el-option
+                v-for="item in devListIsKey"
+                :key="item.value"
+                :label="item.label"
+                :value="item.label">
+              </el-option>
+            </el-select>
           </div>
+        </div>
+        <div class="result_content" v-if="controlResList">
+          <div>
+            <div class="result_img_box" v-for="(item, index) in controlResList.list" :key="index">
+              <div @mouseenter="item.curVideoTool = true;" @mouseleave="item.curVideoTool = false;">
+                <img :src="item.path" alt="" v-show="!item.isShowCurImg" @click="openBigImg(index, controlResList.list)">
+                <video  v-show="item.isShowCurImg" :id='"controlResult" + index' :src="item.snapVideo" style="object-fit: fill;" width="100%" height="239px" @click="showLargeVideo(item, 1)"></video>
+                <div class="result_tool" v-show="item.curVideoTool">
+                  <div>{{item.deviceName}}</div>
+                  <div>
+                    <i class="vl_icon vl_icon_judge_01" v-if="item.curVideoPlay" @click="pauseVideo(item, index)"></i>
+                    <i class="vl_icon vl_icon_control_09" v-else @click="playVideo(item, index)"></i>
+                    <a download="视频" :href="item.snapVideo" class="el-icon-download download"></a>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <p><i class="vl_icon vl_icon_control_26" style="margin-top: -4px;"></i><span class="vl_f_333">疑似目标：{{item.objName}}</span></p>
+                <p><i class="vl_icon vl_icon_control_27" style="margin-top: -4px;"></i><span class="vl_f_999">{{item.snapTime}}</span></p>
+              </div>
+            </div>
+          </div>
+          <el-pagination
+            class="cum_pagination"
+            style="align-self: flex-start;"
+            @current-change="handleCurrentChangeRes"
+            :current-page="currentPage"
+            :page-sizes="[100, 200, 300, 400]"
+            :page-size="controlResList.pageSize"
+            layout="total, prev, pager, next, jumper"
+            :total="controlResList.total">
+          </el-pagination>
         </div>
       </div>
     </div>
@@ -953,26 +1040,26 @@ export default {
 <style lang="scss" scoped>
 .control_manage_d{
   width: 100%;
-  min-height: 100%;
+  min-height: 100vh;
   position: absolute;
   .manage_d_box{
     width: calc(100% - 40px);
     // min-height: 783px;
     margin-left: 20px;
     box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
-    background: #fff;
     border-radius:4px;
     .manage_d_title{
       display: flex;
       justify-content: space-between;
       padding: 0 20px;
       line-height: 50px;
+      background: #fff;
     }
     .manage_d_content{
       padding-left: 20px;
       padding-bottom: 20px;
-      margin-bottom: 80px;
       border-top: 1px solid #F2F2F2;
+      background: #fff;
       position: relative;
       > ul{
         display: flex;
@@ -1061,289 +1148,326 @@ export default {
         right: -1px;
         top: -2px;
       }
-      .manage_d_c_scope{
-        width:calc(100% - 20px);
-        // height:848px;
-        border-radius:4px 4px 0px 0px;
-        border:1px solid #f2f2f2;
-        margin-top: 20px;
-        .manage_d_s_t{
-          display: flex;
-          justify-content: space-between;
-          line-height: 44px;
-          padding: 0 15px;
-          background:rgba(250,250,250,1);
-          cursor: pointer;
-          > i{
-            vertical-align: middle;
-            margin-top: 10px;
-            font-size: 18px;
-          }
-        }
+      > h1{
+        margin-top: 10px;
+        color: #666666;
       }
-      .manage_d_c_situ{
-        width: calc(100% - 20px);
-        margin-top: 20px;
-        padding-bottom: 1px;
-        background:rgba(255,255,255,1);
-        box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
-        border-radius:4px;
-        .situ_title{
+      .manage_model{
+        margin-top: 4px;
+        margin-right: 20px;
+        border-radius:4px 4px 0px 0px;
+        border:1px solid rgba(211,211,211,1);
+        .model_name{
+          width: 100%;
+          height: 44px;
+          padding-left: 20px;
           line-height: 44px;
-          padding-left: 15px;
-          border-bottom: 1px solid #F2F2F2;
+          background:rgba(250,250,250,1);
+          border-radius:5px 5px 0px 0px;
         }
-        .situ_time{
-          line-height: 44px;
-          padding-left: 15px;
-          padding-bottom: 10px;
-          display: flex;
-          flex-wrap: wrap;
-          > div{
-            width: 33%;
-          }
-          .termination_reason{
-            width: 100%;
-            line-height: 20px;
+        .model_info{
+          padding: 20px 20px 0;
+          > li{
             display: flex;
+            padding-bottom: 10px;
+            > span:nth-child(1){
+              padding-left: 20px;
+              color: #666666;
+            }
             > span:nth-child(2){
               flex: 1;
+              color: #333333;
+            }
+            > img{
+              width: 104px;
+              height: 104px;
+              margin-right: 10px;
+              border-radius:4px;
+              border:1px solid rgba(211,211,211,1);
             }
           }
         }
-        .situ_box{
-          margin: 0 20px 20px 20px;
+        .manage_d_c_scope{
           border-radius:4px 4px 0px 0px;
-          border:1px solid #F2F2F2;
-          .situ_top{
+          border:1px solid #f2f2f2;
+          margin: 0 20px 20px;
+          .manage_d_s_t{
             display: flex;
             justify-content: space-between;
             line-height: 44px;
             padding: 0 15px;
-            border-bottom: 1px solid #f2f2f2;
             background:rgba(250,250,250,1);
             cursor: pointer;
-            i{
+            > i{
               vertical-align: middle;
               margin-top: 10px;
               font-size: 18px;
             }
           }
-          .situ_content{
-            display: flex;
-            flex-wrap: nowrap;
-            height: 812px;
-            .situ_left{
-              width: 258px;
-              min-width: 258px;
-              height: 100%;
-              border-right: 1px solid #F2F2F2;
-              > div{
-                height: 50px;
-                line-height: 50px;
-              }
-              .equ_m{
-                margin: 0 20px;
-                height: 28px;
-                line-height: 28px;
-                border-radius:4px;
-                border:1px solid rgba(211,211,211,1);
-                display: flex;
-                overflow: hidden;
-                >div{
-                  width: 50%;
-                  height: 100%;
-                  text-align: center;
-                  background: #fff;
-                  color: #666;
-                  cursor: pointer;
-                  &.active{
-                    background: rgba(235,239,242,1);
-                    color: #0C70F8;
-                  }
-                  &:hover{
-                    background: rgba(235,239,242,1);
-                    color: #0C70F8;
-                  }
-                }
-              }
-              ul{
-                margin-top: 6px;
-                width: 100%;
-                height: calc(100% - 82px);
-                li{
-                  width: 100%;
-                  height: 36px;
-                  line-height: 36px;
-                  display: flex;
-                  flex-wrap: nowrap;
-                  justify-content: space-between;
-                  padding: 0 15px 0 35px;
-                  color: #666666;
-                  cursor: move;
-                  > i{
-                    vertical-align: middle;
-                    margin-top: 10px;
-                  }
-                  &:hover{
-                    color: #B2B2B2;
-                  }
-                  &:active{
-                    background:rgba(250,250,250,1);
-                    color: #666666;
-                  }
-                }
-              }
-              .bayone_list{
-                height: calc(100% - 82px);
-                > li{
-                  display: block!important;
-                  > div{
-                    cursor: pointer;
-                  }
-                }
-                .bayone_name{
-                  line-height: 30px;
-                  padding-left: 22px;
-                  padding-top: 6px;
-                  cursor: pointer;
-                  &.active{
-                    i, span{
-                      color: #0C70F8;
-                    }
-                  }
-                  i{
-                    margin-right: 10px;
-                  }
-                  i, span{
-                    color: #666;
-                  } 
-                  &~ul{
-                   margin-top: 0px; 
-                  }
-                }
-              }
-            }
-            .situ_right{
-              width: calc(100% - 258px);
-              height: 100%;
-              display: flex;
-              flex-flow: row wrap;
-              align-content: space-between;
-              justify-content: space-between;
-              padding: 0.8%;
-              background: #fafafa;
-              .situ_r_video{
-                width: 49.5%;
-                height: 49.2%;
-                position: relative;
-                overflow: hidden;
-                .situ_r_box{
-                  width: 100%;
-                  height: 100%;
-                  display: flex;
-                  flex-direction: column;
-                  justify-content: center;
-                  align-items: center;
-                  background: #fff;
-                  > img{
-                    width: 50%;
-                  }
-                }
-              }
-            }
-          }
-         
         }
       }
-      .manage_d_c_result{
-        height: 100%;
-        margin: 20px 20px 20px 0;
-        background:rgba(255,255,255,1);
-        box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
-        border-radius:4px;
-        .result_title{
-          line-height: 44px;
-          padding: 0 15px;
-          border-bottom: 1px solid #F2F2F2;
+    }
+    .manage_d_c_situ{
+      margin-top: 20px;
+      padding-bottom: 1px;
+      background:rgba(255,255,255,1);
+      box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
+      border-radius:4px;
+      .situ_title{
+        line-height: 44px;
+        padding-left: 15px;
+        border-bottom: 1px solid #F2F2F2;
+      }
+      .situ_time{
+        line-height: 44px;
+        padding-left: 15px;
+        padding-bottom: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        > div{
+          width: 33%;
+        }
+        .termination_reason{
+          width: 100%;
+          line-height: 20px;
           display: flex;
-          justify-content: space-between;
-          > div:nth-child(2){
-            display: flex;
-            .el-input{
-              margin-left: 50px;
-            }
+          > span:nth-child(2){
+            flex: 1;
           }
         }
-        .result_content{
-          width: 100%;
-          height: 100%;
-          > div:nth-child(1){
-            width: 100%;
+      }
+      .situ_box{
+        margin: 0 20px 20px 20px;
+        border-radius:4px 4px 0px 0px;
+        border:1px solid #F2F2F2;
+        .situ_top{
+          display: flex;
+          justify-content: space-between;
+          line-height: 44px;
+          padding: 0 15px;
+          border-bottom: 1px solid #f2f2f2;
+          background:rgba(250,250,250,1);
+          cursor: pointer;
+          i{
+            vertical-align: middle;
+            margin-top: 10px;
+            font-size: 18px;
+          }
+        }
+        .situ_content{
+          display: flex;
+          flex-wrap: nowrap;
+          height: 812px;
+          .situ_left{
+            width: 258px;
+            min-width: 258px;
             height: 100%;
-            display: flex;
-            flex-flow: row wrap;
-            align-content: flex-start;
-            padding-top: 20px;
-            padding-right: 1%;
-            .result_img_box{
-              flex: 0 0 24%;
-              height: 100%;
-              margin-left: 1%;
-              margin-bottom: 20px;
-              position: relative;
-              overflow: hidden;
-              background:rgba(255,255,255,1);
+            border-right: 1px solid #F2F2F2;
+            > div{
+              height: 50px;
+              line-height: 50px;
+            }
+            .equ_m{
+              margin: 0 20px;
+              height: 28px;
+              line-height: 28px;
               border-radius:4px;
               border:1px solid rgba(211,211,211,1);
-              img{
-                width: 100%;
-                height: 239px;
+              display: flex;
+              overflow: hidden;
+              >div{
+                width: 50%;
+                height: 100%;
+                text-align: center;
+                background: #fff;
+                color: #666;
+                cursor: pointer;
+                &.active{
+                  background: rgba(235,239,242,1);
+                  color: #0C70F8;
+                }
+                &:hover{
+                  background: rgba(235,239,242,1);
+                  color: #0C70F8;
+                }
               }
-              video{
-                object-fit: fill;
-              }
-              .result_tool{
+            }
+            ul{
+              margin-top: 6px;
+              width: 100%;
+              height: calc(100% - 82px);
+              li{
                 width: 100%;
                 height: 36px;
                 line-height: 36px;
-                background: rgba(0,0,0,.4);
                 display: flex;
+                flex-wrap: nowrap;
                 justify-content: space-between;
-                padding-left: 15px;
-                position: absolute;
-                bottom: 48px;
-                left: 0;
-                > div{
-                  color: #fff;
+                padding: 0 15px 0 35px;
+                color: #666666;
+                cursor: move;
+                > i{
+                  vertical-align: middle;
+                  margin-top: 10px;
                 }
-                i{
-                  margin-top: 6px;
-                  margin-right: 5px;
+                &:hover{
+                  color: #B2B2B2;
+                }
+                &:active{
+                  background:rgba(250,250,250,1);
+                  color: #666666;
+                }
+              }
+            }
+            .bayone_list{
+              height: calc(100% - 82px);
+              > li{
+                display: block!important;
+                > div{
                   cursor: pointer;
                 }
-                .download{
-                  margin-top: 6px;
+              }
+              .bayone_name{
+                line-height: 30px;
+                padding-left: 22px;
+                padding-top: 6px;
+                cursor: pointer;
+                &.active{
+                  i, span{
+                    color: #0C70F8;
+                  }
+                }
+                i{
                   margin-right: 10px;
-                  text-decoration: none;
-                  color: #fff;
-                  font-size: 20px;
-                  vertical-align: top;
+                }
+                i, span{
+                  color: #666;
+                } 
+                &~ul{
+                  margin-top: 0px; 
                 }
               }
-              > div:nth-child(1){
+            }
+          }
+          .situ_right{
+            width: calc(100% - 258px);
+            height: 100%;
+            display: flex;
+            flex-flow: row wrap;
+            align-content: space-between;
+            justify-content: space-between;
+            padding: 0.8%;
+            background: #fafafa;
+            .situ_r_video{
+              width: 49.5%;
+              height: 49.2%;
+              position: relative;
+              overflow: hidden;
+              .situ_r_box{
                 width: 100%;
-                height: 239px;
-                cursor: pointer;
-                background: #000;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                background: #fff;
+                > img{
+                  width: 50%;
+                }
               }
-              > div:nth-child(2){
-                p{
-                  padding-left: 10px;
-                  line-height: 24px;
-                  i{
-                    vertical-align: middle;
-                  }
+            }
+          }
+        }
+        
+      }
+    }
+    .manage_d_c_result{
+      height: 100%;
+      margin: 20px 0 80px 0;
+      background:rgba(255,255,255,1);
+      box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
+      border-radius:4px;
+      .result_title{
+        line-height: 44px;
+        padding: 0 15px;
+        border-bottom: 1px solid #F2F2F2;
+        display: flex;
+        justify-content: space-between;
+        > div:nth-child(2){
+          display: flex;
+          .el-input{
+            margin-left: 50px;
+          }
+        }
+      }
+      .result_content{
+        width: 100%;
+        height: 100%;
+        > div:nth-child(1){
+          width: 100%;
+          height: 100%;
+          display: flex;
+          flex-flow: row wrap;
+          align-content: flex-start;
+          padding-top: 20px;
+          padding-right: 1%;
+          .result_img_box{
+            flex: 0 0 24%;
+            height: 100%;
+            margin-left: 1%;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            background:rgba(255,255,255,1);
+            border-radius:4px;
+            border:1px solid rgba(211,211,211,1);
+            img{
+              width: 100%;
+              height: 239px;
+            }
+            video{
+              object-fit: fill;
+            }
+            .result_tool{
+              width: 100%;
+              height: 36px;
+              line-height: 36px;
+              background: rgba(0,0,0,.4);
+              display: flex;
+              justify-content: space-between;
+              padding-left: 15px;
+              position: absolute;
+              bottom: 48px;
+              left: 0;
+              > div{
+                color: #fff;
+              }
+              i{
+                margin-top: 6px;
+                margin-right: 5px;
+                cursor: pointer;
+              }
+              .download{
+                margin-top: 6px;
+                margin-right: 10px;
+                text-decoration: none;
+                color: #fff;
+                font-size: 20px;
+                vertical-align: top;
+              }
+            }
+            > div:nth-child(1){
+              width: 100%;
+              height: 239px;
+              cursor: pointer;
+              background: #000;
+            }
+            > div:nth-child(2){
+              p{
+                padding-left: 10px;
+                line-height: 24px;
+                i{
+                  vertical-align: middle;
                 }
               }
             }

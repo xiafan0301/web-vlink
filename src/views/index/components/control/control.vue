@@ -95,7 +95,7 @@ export default {
             .track_t{
               display: flex;
               flex-wrap: nowrap;
-              padding: 10px;
+              padding: 10px 20px;
               cursor: pointer;
               i{
                 margin-right: 10px;
@@ -137,7 +137,7 @@ export default {
             ul{
               li{
                 width: 100%;
-                padding: 10px 34px;
+                padding: 6px 10px 6px 44px;
                 display: flex;
                 flex-wrap: nowrap;
                 justify-content: space-between;

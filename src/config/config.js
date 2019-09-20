@@ -22,8 +22,8 @@ const oDomains = {
     // 布控部分地址
     control: {
         dev: 'https://apidev.aorise.org/vlink-control',
-        test: 'http://10.116.64.127:8081',//龙志海
-        // test: 'https://apirel.aorise.org/vlink-control',
+        // test: 'http://10.116.64.127:8081',//龙志海
+        test: 'https://apirel.aorise.org/vlink-control',
         prod: 'https://apiprod.aorise.org/vlink-control'
     },
     // 消息部分地址

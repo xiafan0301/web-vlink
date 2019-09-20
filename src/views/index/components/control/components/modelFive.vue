@@ -106,6 +106,7 @@ export default {
             f.bayonetList && this.bayIdList.push(...f.bayonetList);
           })
           this.bayIdList = this.bayIdList.map(m => m.uid);
+          
           this.isShowControlDev = true;
         } else {
           return false;

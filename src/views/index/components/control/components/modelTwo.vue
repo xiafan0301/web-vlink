@@ -14,7 +14,7 @@
         </el-autocomplete>
       </el-form-item>
       <el-form-item label="布防范围:">
-        <el-select value-key="uid" v-model="modelTwoForm.radius" filterable placeholder="请选择">
+        <el-select value-key="uid" v-model="modelTwoForm.radius" filterable placeholder="请选择" @change="changeRadius">
           <el-option
             v-for="item in radiusList"
             :key="item.uid"
@@ -210,6 +210,9 @@ export default {
       this.addressObjTwo.lnglat = [e.location.lng, e.location.lat];
       this.addressObjTwo.radius = this.modelTwoForm.radius;
     },
+    changeRadius () {
+      this.addressObjTwo.radius = this.modelTwoForm.radius;
+    }
   },
   // 销毁地图实例
   isDestroyed () {
