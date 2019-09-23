@@ -87,9 +87,9 @@ const oDomains = {
     },
     // 人像地址
     portrait: {
-      test: 'http://10.116.64.97:8081',
+      // test: 'http://10.116.64.97:8081',
       dev: 'https://apidev.aorise.org/vlink-portrait',
-      // test: 'https://apirel.aorise.org/vlink-portrait',
+      test: 'https://apirel.aorise.org/vlink-portrait',
       prod: 'https://apiprod.aorise.org/vlink-portrait'
     },
     // 公共短信服务

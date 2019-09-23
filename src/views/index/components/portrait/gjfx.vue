@@ -642,22 +642,22 @@
             taskStatus: 4 // 1：处理中 2：处理成功 3：处理失败 4：处理中断
           };
           this.isInterruptLoading = true;
-          putAnalysisTask(params)
-              .then(res => {
-                if (res) {
-                  this.$message({
-                    type: 'success',
-                    message: '中断任务成功',
-                    customClass: 'request_tip'
-                  });
-                  this.interruptDialog = false;
-                  this.isInterruptLoading = false;
-                  this.getDataList();
-                } else {
-                  this.isInterruptLoading = false;
-                }
-              })
-              .catch(() => {this.isInterruptLoading = false;})
+//          putAnalysisTask(params)
+//              .then(res => {
+//                if (res) {
+//                  this.$message({
+//                    type: 'success',
+//                    message: '中断任务成功',
+//                    customClass: 'request_tip'
+//                  });
+//                  this.interruptDialog = false;
+//                  this.isInterruptLoading = false;
+//                  this.getDataList();
+//                } else {
+//                  this.isInterruptLoading = false;
+//                }
+//              })
+//              .catch(() => {this.isInterruptLoading = false;})
         }
       },
       // 确认删除任务
@@ -713,17 +713,17 @@
           order: 'desc',
           orderBy: 'create_time'
         };
-        PortraitGetStayPointTasks(params)
-            .then(res => {
-              if (res) {
-                res.data.list.forEach(item => {
-                  this.$set(item, 'taskWebParam', JSON.parse(item.taskWebParam))
-                })
-                this.list = res.data.list;
-                this.pagination.total = res.data.total;
-              }
-            })
-            .catch(() => {})
+//        PortraitGetStayPointTasks(params)
+//            .then(res => {
+//              if (res) {
+//                res.data.list.forEach(item => {
+//                  this.$set(item, 'taskWebParam', JSON.parse(item.taskWebParam))
+//                })
+//                this.list = res.data.list;
+//                this.pagination.total = res.data.total;
+//              }
+//            })
+//            .catch(() => {})
       },
       //tab切换
       selectTab (val) {
