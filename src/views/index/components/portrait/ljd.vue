@@ -6,11 +6,19 @@
         <el-breadcrumb-item>落脚点分析</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
-
     <div :class="['left',{hide:hideleft}]">
       <div class="plane">
+        <div class="ljd_left_search_type">
+          <span :class="{'active': taskType === '1'}" @click="taskType = '1'">在线查询</span>
+          <span :class="{'active': taskType === '2'}" @click="taskType = '2'">离线任务</span>
+        </div>
+        <div v-show="taskType === '2'" class="ljd_left_radio">
+          <span>任务名称：</span>
+          <span>
+            <el-input v-model="taskName" placeholder="请输入任务名称" maxlength="20"></el-input>
+          </span>
+        </div>
         <el-form
-            :rules="rules"
             :model="ruleForm"
             status-icon
             ref="ruleForm"
@@ -39,59 +47,6 @@
               class="full vl_date vl_date_end"
             ></el-date-picker>
           </el-form-item>
-          <el-form-item prop="minFootholdTimes" class="firstItem">
-            <el-row :gutter="5">
-              <el-col :span="22">
-                <div>
-                  <el-input placeholder="不小于" v-model="ruleForm.minFootholdTimes" class="insetIput">
-                    <i slot="prefix" class="inset">落脚点次数</i>
-                  </el-input>
-                </div>
-              </el-col>
-              <el-col :span="2">
-                <div class="line40">次</div>
-              </el-col>
-            </el-row>
-          </el-form-item>
-          <el-form-item class="firstItem" label="抓拍区域：" label-width="72px" prop="input5">
-            <el-radio-group v-model="ruleForm.input5">
-              <el-row :gutter="10">
-                <el-col :span="12">
-                  <el-radio label="1">列表选择</el-radio>
-                </el-col>
-                <el-col :span="12">
-                  <div @click.stop="clickTab">
-                    <el-radio label="2">地图选择</el-radio>
-                  </div>
-                </el-col>
-              </el-row>
-            </el-radio-group>
-          </el-form-item>
-          <el-form-item v-if="ruleForm.input5=='1'" prop="value1">
-            <el-select
-              v-model="ruleForm.value1"
-              multiple
-              collapse-tags
-              placeholder="请选择"
-              class="full"
-            >
-              <el-option-group
-                v-for="group in options"
-                :key="group.areaName"
-                :label="group.areaName"
-              >
-                <el-option
-                  v-for="item in group.areaTreeList"
-                  :key="item.areaId"
-                  :label="item.areaName"
-                  :value="item.areaId"
-                ></el-option>
-              </el-option-group>
-            </el-select>
-          </el-form-item>
-          <el-form-item v-if="ruleForm.input5=='2'">
-            <el-input v-model="selectValue" :disabled="true"></el-input>
-          </el-form-item>
           <el-form-item style="text-align: center;">
             <div style="padding: 0 15px; height: 210px;">
               <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit" :imgData="imgData"></div>
@@ -109,52 +64,170 @@
           </el-form-item>
         </el-form>
       </div>
-      <div class="insetLeft" @click="hideLeft"></div>
     </div>
-    <div :class="['right',{hide:!hideleft}]" id="mapBox"></div>
-    <ul class="map_rrt_u2">
-      <li  @click="resemt"><i class="el-icon-aim"></i></li>
-      <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
-      <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
-    </ul>
-    <div class="reselt" v-if="reselt">
-      <div class="plane insetPadding">
-        <h3 class="title">分析结果</h3>
-        <div class="limitBoxs">
-          <vue-scroll>
-            <el-collapse v-model="activeNames">
-              <el-collapse-item  v-for="(item,index) in evData" :key="index" :name="index">
-                <template slot="title">
-                  <span class="result_device_name" :title="item.groupName">{{item.groupName}}</span>
-                  <span>({{item.totalNum}}次)</span>
-                  <!-- <i class="header-icon el-icon-info"></i> -->
-                </template>
-                <div class="itembox" v-for="(v,d) in item.personDetailList" :key="d">
-                  <div class="imgInfo"  @click.stop="onOpenDetail(v, d, item)">
-                    <img :src="v.subStoragePath" class="img">
-                    <div>
-                      <p class="timedata"><i class="el-icon-time"></i>{{v.shotTime}}</p>
-                      <span class="subdata">
+    <div :class="['vl_ljd_right']">
+      <div class="frequent-a-content">
+        <ul class="tab-menu">
+          <li
+                  v-for="(item,index) in tabList"
+                  :key="index"
+                  :class="{'is-active': selectIndex === item.value}"
+                  @click="selectTab(item.value)"
+          >{{item.label}}</li>
+        </ul>
+        <template v-if="selectIndex === 2">
+          <div class="vl_jig_right">
+            <ul class="map_rrt_u2">
+              <li  @click="resemt"><i class="el-icon-aim"></i></li>
+              <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
+              <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
+            </ul>
+            <div class="reselt" v-if="reselt">
+              <div class="plane insetPadding">
+                <h3 class="title">分析结果</h3>
+                <div class="limitBoxs">
+                  <vue-scroll>
+                    <el-collapse v-model="activeNames">
+                      <el-collapse-item  v-for="(item,index) in evData" :key="index" :name="index">
+                        <template slot="title">
+                          <span class="result_device_name" :title="item.groupName">{{item.groupName}}</span>
+                          <span>({{item.totalNum}}次)</span>
+                          <!-- <i class="header-icon el-icon-info"></i> -->
+                        </template>
+                        <div class="itembox" v-for="(v,d) in item.personDetailList" :key="d">
+                          <div class="imgInfo"  @click.stop="onOpenDetail(v, d, item)">
+                            <img :src="v.subStoragePath" class="img">
+                            <div>
+                              <p class="timedata"><i class="el-icon-time"></i>{{v.shotTime}}</p>
+                              <span class="subdata">
                         <i class="vl_icon vl_icon_retrieval_03"></i>
                         <b v-if="v.semblance">{{(v.semblance*1).toFixed(2)}}</b>%
                       </span>
-                    </div>
-                    <i class="del_list_icon el-icon-delete" @click.stop="delItems(d,index)"></i>
-                  </div>
+                            </div>
+                            <i class="del_list_icon el-icon-delete" @click.stop="delItems(d,index)"></i>
+                          </div>
+                        </div>
+
+                      </el-collapse-item>
+
+                    </el-collapse>
+                  </vue-scroll>
                 </div>
-                
-              </el-collapse-item>
-              
-            </el-collapse>
-          </vue-scroll>
-        </div>
-        <div class="insetLeft2" @click="hideResult"></div>
+                <div class="insetLeft2" @click="hideResult"></div>
+              </div>
+            </div>
+          </div>
+        </template>
+        <template v-else>
+          <div class="search_box">
+            <el-form :inline="true" :model="taskForm" class="event_form" ref="taskForm">
+              <el-form-item label="任务名称：" prop="taskName">
+                <el-input
+                        style="width: 200px;"
+                        type="text"
+                        placeholder="请输入任务名称"
+                        v-model="taskForm.taskName"
+                />
+              </el-form-item>
+              <el-form-item label="创建时间：" prop="reportTime">
+                <el-date-picker
+                        v-model="taskForm.reportTime"
+                        type="datetimerange"
+                        value-format="yyyy-MM-dd HH:mm:ss"
+                        format="yyyy-MM-dd HH:mm:ss"
+                        range-separator="至"
+                        start-placeholder="开始日期"
+                        end-placeholder="结束日期"
+                        :default-time="['00:00:00', '23:59:59']"
+                ></el-date-picker>
+              </el-form-item>
+              <el-form-item>
+                <el-button class="select_btn" @click="selectDataList">查询</el-button>
+                <el-button class="reset_btn" @click="resetTaskForm('taskForm')">重置</el-button>
+              </el-form-item>
+            </el-form>
+            <div class="divide"></div>
+            <!--<el-button @click="skipAddTaskPage" class="th-button-export-color">新建任务</el-button>-->
+          </div>
+          <div class="content-box">
+            <div class="table_box">
+              <el-table :data="list">
+                <el-table-column label="序号" type="index" width="100"></el-table-column>
+                <el-table-column label="任务名称" prop="taskName" show-overflow-tooltip></el-table-column>
+                <el-table-column label="创建时间" prop="createTime" show-overflow-tooltip></el-table-column>
+                <el-table-column label="分析时间范围" show-overflow-tooltip>
+                  <template slot-scope="scope">
+                    {{scope.row.taskWebParam.startTime}}-{{scope.row.taskWebParam.endTime}}
+                  </template>
+                </el-table-column>
+                <el-table-column label="人群" show-overflow-tooltip>
+                  <template slot-scope="scope">
+                    {{scope.row.taskWebParam.portraitGroupName ? scope.row.taskWebParam.portraitGroupName : '不限'}}
+                  </template>
+                </el-table-column>
+                <el-table-column label="性别" show-overflow-tooltip>
+                  <template slot-scope="scope">
+                    {{scope.row.taskWebParam.sex ? scope.row.taskWebParam.sex : '不限'}}
+                  </template>
+                </el-table-column>
+                <el-table-column label="年龄段" show-overflow-tooltip>
+                  <template slot-scope="scope">
+                    {{scope.row.taskWebParam.age ? scope.row.taskWebParam.age : '不限'}}
+                  </template>
+                </el-table-column>
+                <el-table-column label="状态" v-if="selectIndex === 0" prop="taskStatus" show-overflow-tooltip>
+                  <template slot-scope="scope">
+                    <span>{{scope.row.taskStatus && scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 3 ? '失败' : '已中断'}}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="操作" fixed="right">
+                  <template slot-scope="scope">
+                  <span
+                          class="operation_btn"
+                          @click="skipResultPage(scope.row)"
+                          v-if="selectIndex === 1"
+                  >查看</span>
+                    <span
+                            class="operation_btn"
+                            @click="showInterruptDialog(scope.row)"
+                            v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 1"
+                    >中断任务</span>
+                    <span
+                            class="operation_btn"
+                            @click="recoveryOrRestart(scope.row)"
+                            v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 4"
+                    >恢复任务</span>
+                    <span
+                            class="operation_btn"
+                            @click="recoveryOrRestart(scope.row)"
+                            v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 3"
+                    >重启任务</span>
+                    <span
+                            class="operation_btn"
+                            @click="showDeleteDialog(scope.row)"
+                            v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus !== 4"
+                    >删除任务</span>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </div>
+          </div>
+          <template v-if="pagination.total > 0">
+            <el-pagination
+                    class="cum_pagination"
+                    @current-change="handleCurrentChange"
+                    :current-page.sync="pagination.pageNum"
+                    :page-sizes="[100, 200, 300, 400]"
+                    :page-size="pagination.pageSize"
+                    layout="total, prev, pager, next, jumper"
+                    :total="pagination.total"
+            ></el-pagination>
+          </template>
+        </template>
       </div>
     </div>
+    <div id="mapBox"></div>
 
-    <!-- 地图选择 -->
-    <!-- D设备 B卡口  这里是设备和卡口 -->
-    <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" @mapSelectorEmit="mapPoint" ></div>
     <!-- 人工筛选 -->
     <el-dialog
       title="人工筛选"
@@ -192,7 +265,6 @@
       </span>
     </el-dialog>
 
-    
     <!--上传记录弹窗-->
     <el-dialog
       :visible.sync="historyPicDialog"
@@ -222,48 +294,100 @@
         <el-button type="primary" @click="addHisToImg" :disabled="choosedHisPic.length === 0">确认</el-button>
       </div>
     </el-dialog>
+
+    <!--中断任务弹出框-->
+    <el-dialog
+            title="中断任务确认"
+            :visible.sync="interruptDialog"
+            width="482px"
+            :close-on-click-modal="false"
+            :close-on-press-escape="false"
+            class="dialog_comp"
+    >
+      <span style="color: #999999;">任务中断，任务的数据处理进程将中止，可以在列表中恢复任务的数据处理</span>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="interruptDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" @click="sureInterruptTask">确认</el-button>
+      </div>
+    </el-dialog>
+
+    <!--删除任务弹出框-->
+    <el-dialog
+            title="删除任务确认"
+            :visible.sync="deleteDialog"
+            width="482px"
+            :close-on-click-modal="false"
+            :close-on-press-escape="false"
+            class="dialog_comp"
+    >
+      <span style="color: #999999;">任务删除，任务的数据处理进程将被清除，任务不再可以恢复</span>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="deleteDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="sureDeleteTask">确认</el-button>
+      </div>
+    </el-dialog>
+
 <!-- 抓拍信息 -->
-     
+
     <portraitDetail :detailData="detailData"></portraitDetail>
   </div>
 </template>
 <script>
 import { ajaxCtx, mapXupuxian } from "@/config/config.js";
 import { cityCode } from "@/utils/data.js";
-import flvplayer from '@/components/common/flvplayer.vue';
 import {
-  getVehicleShot,
-  getAllDevice,
   JtcPUTAppendixsOrder,
   JtcPOSTAppendixInfo,getFoothold,JtcGETAppendixInfoList
 } from "@/views/index/api/api.judge.js";
-import { getAllBayonetList } from "@/views/index/api/api.base.js";
-import { MapGETmonitorList } from "@/views/index/api/api.map.js";
-// import mapselect from "@/views/index/components/common/mapSelect";
-import mapSelector from '@/components/common/mapSelector.vue';
+import {
+  PortraitPostStayPointRealtime,
+  PortraitPostStayPointTask,
+  PortraitPutStayPointTaskUpDate,
+  PortraitGetStayPointTaskByUid,
+  PortraitGetStayPointTasks
+} from '@/views/index/api/api.portrait.js'
 import portraitDetail from './common/portraitDetail.vue';
 import { log } from 'util';
 import {formatDate, dateOrigin} from '@/utils/util.js';
 import vlUpload from '@/components/common/upload.vue';
 export default {
   components: {
-    mapSelector,
-    flvplayer,
     vlUpload,
     portraitDetail
   },
   data() {
     return {
-      rules: {
-        minFootholdTimes: [
-          {
-            //pattern: /^[0-9]?$/,
-            pattern: /^(0|([1-9]\d{0,2}))$/,
-            trigger: "blur",
-            message: "请输入不大于999的整数值"
-          }
-        ]
+      // 任务
+      tabList: [
+        {
+          label: "已完成任务",
+          value: 1
+        },
+        {
+          label: "未完成任务",
+          value: 0
+        },
+        {
+          label: "查询结果",
+          value: 2
+        }
+      ],
+      selectIndex: 1, // 默认已完成的任务
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
+      taskForm: {
+        startTime: '',
+        endTime: '',
+        taskName: null // 任务名称
       },
+      list: [], //已完成列表
+      taskId: null, // 任务id
+      deleteDialog: false,
+      isDeleteLoading: false,
+      interruptDialog: false, //中断任务
+
+
+      taskName: '', // 左侧输入任务名称
+      taskType: "1", // 左侧任务类型，1 实时，2离线
       uploadClear: {},
       detailData:null,
       seData:null,
@@ -272,17 +396,6 @@ export default {
       showDetail:false,
       pickerOptions: {
         disabledDate (time) {
-        //   let date = new Date();
-        //   let curDate = date.getTime();
-        //   let curS = 30 * 24 * 3600 * 1000;
-        //     let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
-        //   let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
-        //   let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
-        //   let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
-        //   let start = new Date(curDate - curS).getFullYear() +
-        // "-" + _sm + "-" +_sd;
-        //   let threeMonths = new Date(start).getTime();
-        // return time.getTime() > Date.now() || time.getTime() < threeMonths;
           return time.getTime() > Date.now();
         }
       },
@@ -296,22 +409,13 @@ export default {
       historyPicDialog: false,
       loadingHis: false, // 加载效果
       imgData: null,
-      dialogVisible: false,
       amap: null,
-      allDevice: [],
-      allBayonet: [],
-      selectDevice: [],
-      selectBayonet: [],
-      selectValue: "已选设备0个",
       // select: "",
       reselt: false,
       hideleft: false,
       ruleForm: {
         data1: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)),
-        data2: new Date(),
-        minFootholdTimes: 3,
-        input5: "1",
-        value1: null
+        data2: new Date()
       },
       activeNames: [],
       activeChoose: [],
@@ -329,26 +433,148 @@ export default {
 
       this.curImageUrl= a;
     }
-    
 
-    //this.getControlMap(1);
-    // this.setDTime()
     let map = new window.AMap.Map("mapBox", {
       zoom: 10,
       center: mapXupuxian.center
     });
     map.setMapStyle("amap://styles/whitesmoke");
     this.amap = map;
-    this.getMapGETmonitorList(); //查询行政区域
-    // this.getAllDevice(); //查询所有的设备
-    // this.getAllBayonetList(); //查询所有的卡口
+
+    this.getDataList();
   },
    computed: {
     choosedHisPic() {
       return this.historyPicList.filter(x => x.checked);
     }
   },
+  watch: {
+    selectIndex (e) {
+      if (e === 2) {
+        this.randerMap();
+      }
+    }
+  },
   methods: {
+  // 离线任务相关
+    // 显示中断任务弹出框
+    showInterruptDialog (obj) {
+      this.interruptDialog = true;
+      this.taskId = obj.uid;
+    },
+    // 显示删除任务弹出框
+    showDeleteDialog (obj) {
+      this.deleteDialog = true;
+      this.taskId = obj.uid;
+    },
+    // 确认中断任务
+    sureInterruptTask () {
+      if (this.taskId) {
+        const params = {
+          uid: this.taskId,
+          taskType: 6, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
+          taskStatus: 4 // 1：处理中 2：处理成功 3：处理失败 4：处理中断
+        };
+        this.isInterruptLoading = true;
+        putAnalysisTask(params)
+            .then(res => {
+              if (res) {
+                this.$message({
+                  type: 'success',
+                  message: '中断任务成功',
+                  customClass: 'request_tip'
+                });
+                this.interruptDialog = false;
+                this.isInterruptLoading = false;
+                this.getDataList();
+              } else {
+                this.isInterruptLoading = false;
+              }
+            })
+            .catch(() => {this.isInterruptLoading = false;})
+      }
+    },
+    // 确认删除任务
+    sureDeleteTask () {
+      if (this.taskId) {
+        const params = {
+          uid: this.taskId,
+          taskType: 6, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
+          delFlag: true
+        };
+        this.isDeleteLoading = true;
+        putAnalysisTask(params)
+            .then(res => {
+              if (res) {
+                this.$message({
+                  type: 'success',
+                  message: '删除任务成功',
+                  customClass: 'request_tip'
+                });
+                this.deleteDialog = false;
+                this.isDeleteLoading = false;
+                this.getDataList();
+              } else {
+                this.isDeleteLoading = false;
+              }
+            })
+            .catch(() => {this.isDeleteLoading = false;})
+      }
+    },
+    //恢复任务,重启任务
+    recoveryOrRestart(obj) {
+      putTaskInfosResume(obj.uid).then(res => {
+        console.log(res)
+        if(res) {
+          this.getDataList();
+        }
+      }).catch(() => {})
+    },
+    // 查询任务列表数据
+    selectDataList () {
+      this.getDataList();
+    },
+    // 获取离线任务
+    getDataList () {
+      const params = {
+        'where.taskName': this.taskForm.taskName,
+        'where.taskType': 11, //  1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析 4:以图搜人 9：人员侦查报告,6重点关注, 11人像落脚点
+        'where.startTime': this.taskForm.reportTime ? this.taskForm.reportTime[0] : null,
+        'where.endTime': this.taskForm.reportTime ? this.taskForm.reportTime[1] : null,
+        'where.isFinish': this.selectIndex,   //是否完成 0:未完成(包含处理中、处理失败、处理中断) 1：已完成(处理成功)
+        pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize,
+        order: 'desc',
+        orderBy: 'create_time'
+      };
+      PortraitGetStayPointTasks(params)
+          .then(res => {
+            if (res) {
+              res.data.list.forEach(item => {
+                this.$set(item, 'taskWebParam', JSON.parse(item.taskWebParam))
+              })
+              this.list = res.data.list;
+              this.pagination.total = res.data.total;
+            }
+          })
+          .catch(() => {})
+    },
+    //tab切换
+    selectTab (val) {
+      this.selectIndex = val;
+      if(parseFloat(val) < 2) {
+        this.getDataList();
+      }
+    },
+
+
+    randerMap () {
+      this.$nextTick(() => {
+        $('.vl_jig_right').append($('#mapBox'))
+        this.amap.clearMap();
+        this.drawMarkers(this.evData);
+      })
+    },
     uploadEmit (data) {
       console.log('uploadEmit data', data);
       if (data && data.path) {
@@ -365,34 +591,6 @@ export default {
           this.amap.setZoomAndCenter(14, mapXupuxian.center);
         }
       
-    },
-    setDTime () {
-      /* let date = new Date();
-      let curDate = date.getTime();
-      let curS = 1 * 24 * 3600 * 1000;
-        let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
-      let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
-      let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
-      let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
-      
-      let _s = new Date(curDate - curS).getFullYear() +
-        "-" + _sm + "-" +_sd;
-      let _e = date.getFullYear() + "-" + _em + "-" + _ed;
-      this.ruleForm.data1 = _s
-      this.ruleForm.data2 = _s */
-    },
-    /**
-     * 弹框地图初始化
-     */
-    initMap () {
-      // this.map.setZoomAndCenter(iZoom, aCenter);
-      let map = new window.AMap.Map('container', {
-        zoom: 14, // 级别
-        center: [this.strucInfoList[0].longitude, this.strucInfoList[0].latitude], // 中心点坐标
-      });
-      map.setMapStyle('amap://styles/whitesmoke');
-      this.map = map;
-      this.drawPoint(this.strucInfoList[0])
     },
     /**
      * 地图描点
@@ -447,104 +645,80 @@ export default {
         this.reselt = true;
       }
     },
-    clickTab() {
-      //  console.log(12,this.dialogVisibles);
-      this.dialogVisible = !this.dialogVisible;
-      // if (!this.dialogVisible) {
-      //   this.dialogVisible = true;
-      //   this.dialogVisibles = !this.dialogVisibles;
-      // }
-    },
-    // hideMap() {
-    //   this.dialogVisibles = false;
-    // },
-    mapPoint(data) {
-      let v = data.deviceList;
-      let p = data.bayonetList;
-      //this.dialogVisible = false;
-      this.selectDevice = [];
-      this.selectBayonet = [];
-      //返回有效点集合
-      if (v && v.length > 0) {
-        v.forEach(element => {
-          this.selectDevice.push(element.uid);
-        });
-      }
-      if (p && p.length > 0) {
-        p.forEach(element => {
-          this.selectBayonet.push(element.uid);
-        });
-      }
-      if(p.length==0 && v.length==0){
-        if(!document.querySelector('.el-message--info')){
-           this.$message.info("选择的区域没有设备，请重新选择区域");
-        }
-        return
-      }
-      this.selectValue =
-        "已选设备" +
-        (this.selectDevice.length + this.selectBayonet.length) +
-        "个";
-      //this.selectDevice=v
-
-      // console.log(this.selectDevice);
-    },
     submitForm(v) {
-
       if (
         this.ruleForm &&
         this.ruleForm.data1 &&
         this.ruleForm.data2  &&
         this.curImageUrl
       ) {
-        let pg = {
-          startDate: formatDate(this.ruleForm.data1),
-          endDate: formatDate(this.ruleForm.data2),
-          minFootholdTimes: this.ruleForm.minFootholdTimes || 0,
+        let params = {
+          startTime: formatDate(this.ruleForm.data1),
+          endTime: formatDate(this.ruleForm.data2),
+          faceUrl: this.curImageUrl
         };
-        if (this.ruleForm.input5 == 1 && this.ruleForm.value1.length != 0) {
-          pg.areaIds = this.ruleForm.value1.join(",");
+        this.isload = true;
+        // 判断选择的是实时还是离线 taskType 1为实时，2为离线.
+        if (this.taskType === "1") {
+          PortraitPostStayPointRealtime(params).then(res => {
+            this.isload = false;
+            if (res) {
+              this.$set(res.data, 'taskResult', JSON.parse(res.data.taskResult));
+              console.log(res);
+              this.selectIndex = 2;
+              this.randerMap();
+              if (!res.data || res.data.length === 0) {
+                this.$message.info("抱歉，没有找到匹配结果");
+                this.chooseData=[]
+                this.evData=[]
+                //this.searching = false;
+                return false;
+              }else{
+                this.dialogChoose=true
+                for(let i=0; i<res.data.length;i++){
+                  this.activeChoose.push(i)
+                }
+                this.chooseData=res.data
+              }
+            }
+          })
+        } else {
+          if (!this.taskName.replace(/\s+|\s+$/g, '')) {
+            this.isload = false;
+            if (!document.querySelector('.el-message--info')) {
+              this.$message.info('任务名称不能为空');
+              return false;
+            }
+          } else {
+            params.taskName = this.taskName;
+            PortraitPostFocusTask(params).then(res => {
+              this.isload = false;
+              if (res && res.data) {
+                this.$message({
+                  type: 'success',
+                  message: '新建成功',
+                  customClass: 'request_tip'
+                })
+                this.getDataList()
+                console.log(res.data)
+              }
+            })
+          }
         }
-        if (this.ruleForm.input5 == 2) {
-          pg.cameraIds = this.selectDevice.join(",");
-          pg.bayonetIds = this.selectBayonet.join(",");
-        }
-        pg.personPicUrl = this.curImageUrl
-        this.getFoothold(pg);
       } else {
         this.$message.info("请上传图片。");
       }
     },
     resetForm(v) {
       this.curImageUrl = "";
-      this.setDTime()
       this.ruleForm.data1 = dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000));
       this.ruleForm.data2 = new Date();
-      this.ruleForm.minFootholdTimes=3 
-      this.ruleForm.input5='1'
-      this.ruleForm.value1=[];
       this.uploadClear = {};
-      this.options[0].areaTreeList.forEach(el=>{
-            this.ruleForm.value1.push(el.areaId)
-          })
-      //this.$refs[v].resetFields();
     },
-    //查询行政区域
-    getMapGETmonitorList() {
-      let d = {
-        areaUid: mapXupuxian.adcode
-      };
-      MapGETmonitorList(d).then(res => {
-        if (res && res.data) {
-          this.options.push(res.data);
-          //res.data.
-          // console.log(res.data);
-          res.data.areaTreeList.forEach(el=>{
-            this.ruleForm.value1.push(el.areaId)
-          })
-          //this.ruleForm.value1=[]
-        }
-      });
+    // 重置查询条件
+    resetTaskForm (form) {
+      this.$refs[form].resetFields();
+      this.getDataList();
     },
     compare(prop) {
       return function(obj1, obj2) {
@@ -607,7 +781,6 @@ export default {
           
     },
     getFoothold(d) {
-      this.isload=true
       getFoothold(d).then(res => {
         if (res) {
           this.isload=false
@@ -628,36 +801,9 @@ export default {
             }
              this.chooseData=res.data
           }
-          // this.evData = res.data.map(x => {
-          //   x.checked = false;
-          //   return x;
-          // });
-         
           this.amap.clearMap();
-          //this.evData.sort(this.compare("shotNum"));
-          //this.drawMarkers(this.evData);
-          //this.showEventList();
         }else{
           this.isload=false
-        }
-      });
-    },
-    //查询所有的设备
-    getAllDevice() {
-      getAllDevice().then(res => {
-        // console.log(res);
-        if (res && res.data && res.data.length > 0) {
-          this.allDevice = res.data;
-        }
-      });
-    },
-    //查询所有的卡口设备
-    getAllBayonetList() {
-      getAllBayonetList({
-        areaId: mapXupuxian.adcode
-      }).then(res => {
-        if (res && res.data && res.data.length > 0) {
-          this.allBayonet = res.data;
         }
       });
     },
@@ -871,6 +1017,131 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+  .vl_ljd_right {
+    display: inline-block;
+    width: calc(100% - 272px);
+    height: calc(100% - 59px);
+    position: relative;
+    .frequent-a-content {
+      height: calc(100% - 20px);
+      min-height: 760px;
+      margin: 20px;
+      margin-bottom: 0px;
+      background: #ffffff;
+      box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);
+      .tab-menu {
+        background-color: #fff;
+        padding-top: 8px;
+        overflow: hidden;
+        border-bottom: 1px solid #f2f2f2;
+        li {
+          float: left;
+          width: auto;
+          font-size: 16px;
+          margin: 0 20px;
+          height: 44px;
+          line-height: 44px;
+          text-align: center;
+          color: #333;
+          cursor: pointer;
+        }
+        .is-active {
+          color: #0c70f8;
+          border-bottom: 2px solid #0c70f8;
+        }
+      }
+      .search_box {
+        width: 100%;
+        padding: 20px;
+        .event_form {
+          width: 100%;
+          .select_btn,
+          .reset_btn {
+            width: 80px;
+          }
+          .select_btn {
+            background-color: #0c70f8;
+            color: #ffffff;
+          }
+          .reset_btn {
+            background-color: #ffffff;
+            color: #666666;
+            border-color: #dddddd;
+          }
+        }
+        .divide {
+          border: 1px dashed #fafafa;
+        }
+      }
+      .content-box {
+        padding: 0 20px;
+        .table_box {
+          margin-top: 10px;
+          .operation_btn {
+            display: inline-block;
+            padding: 0 10px;
+            border-right: 1px solid #f2f2f2;
+            &:last-child {
+              border-right: none;
+            }
+          }
+        }
+      }
+      .vl_jig_right {
+        width: 100%;
+        height: calc(100% - 53px);
+        position: relative;
+        #mapBox {
+          width: 100%;
+          height: 100%;
+        }
+      }
+    }
+  }
+
+.ljd_left_search_type {
+  display: flex;
+  color: #666666;
+  margin: 10px 0px;
+  span {
+    display: block;
+    width: 50%;
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
+    border: 1px solid #D3D3D3;
+    cursor: pointer;
+    &:first-child {
+      border-right: none;
+      -webkit-border-radius: 4px 0px 0px 4px;
+      -moz-border-radius: 4px 0px 0px 4px;
+      border-radius: 4px 0px 0px 4px;
+    }
+    &:last-child {
+      border-left: none;
+      -webkit-border-radius: 0px 4px 4px 0px;
+      -moz-border-radius: 0px 4px 4px 0px;
+      border-radius: 0px 4px 4px 0px;
+    }
+  }
+  .active {
+    background: #0C70F8;
+    color: #ffffff;
+    border-color: #0C70F8;
+  }
+}
+.ljd_left_radio {
+  margin: 20px 0;
+  display: flex;
+  height: 40px;
+  >span {
+    display: block;
+    &:first-child {
+      width: 108px;
+      line-height: 40px;
+    }
+  }
+}
 .el-radio__label { padding-left: 0; }
 .fz12{
   font-size: 12px;
@@ -916,17 +1187,11 @@ export default {
     padding-bottom: 12px;
   }
 }
-.left.hide {
-  margin-left: -272px;
-  transition: marginLeft 0.3s ease-in;
-  position: relative;
-  z-index: 2;
-  // animation: fadeOutLeft 0.4s ease-out 0.3s both;
-}
 .left {
   position: relative;
   width: 272px;
   height: calc(100% - 54px);
+  min-height: 763px;
   background-color: #ffffff;
   float: left;
   z-index: 1;
@@ -1003,82 +1268,7 @@ export default {
 .select_btn:hover{
    background-color: #0466de;
 }
-// 上传
-// .upload_warp {
-//   position: relative;
-//   height: 232px;
-//   max-height: 232px;
-//   overflow: hidden;
-//   cursor: pointer;
-//   -webkit-border-radius: 10px;
-//   -moz-border-radius: 10px;
-//   border-radius: 10px;
-//   &:hover {
-//     background: #2981f8;
-//     > p {
-//       display: block;
-//     }
-//     .del_icon {
-//       display: block;
-//     }
-//   }
-//   .vl_jtc_upload {
-//     width: 100%;
-//     height: 100%;
-//     background: none;
-//   }
-//   > p {
-//     display: none;
-//     position: absolute;
-//     bottom: 0;
-//     text-align: center;
-//     width: 100%;
-//     color: #ffffff;
-//     height: 40px;
-//     line-height: 40px;
-//     -webkit-border-radius: 0 0 10px 10px;
-//     -moz-border-radius: 0 0 10px 10px;
-//     border-radius: 0 0 10px 10px;
-//     background: #0c70f8;
-//   }
-//   .vl_jtc_ic_input {
-//     position: absolute;
-//     top: 0.2rem;
-//     width: 3rem;
-//     height: 0.26rem;
-//     left: 0.2rem;
-//     border: 1px solid #d3d3d3;
-//     -webkit-border-radius: 0.13rem;
-//     -moz-border-radius: 0.13rem;
-//     border-radius: 0.13rem;
-//     padding: 0 0.02rem;
-//     background: #ffffff;
-//     .el-form-item__content {
-//       height: 0.23rem;
-//       line-height: 0.23rem;
-//     }
-//     input {
-//       border: none !important;
-//       height: 0.23rem;
-//       line-height: 0.23rem;
-//     }
-//   }
-//   .del_icon {
-//     display: none;
-//     position: absolute;
-//     top: 10px;
-//     right: 10px;
-//     width: 24px;
-//     height: 24px;
-//     line-height: 24px;
-//     text-align: center;
-//     background: rgba(0, 0, 0, 0.4);
-//     -webkit-border-radius: 4px;
-//     -moz-border-radius: 4px;
-//     border-radius: 4px;
-//     color: #ffffff;
-//   }
-// }
+/*人工帅选*/
 .choose{
   height: 350px;
   padding: 0px 15px;
