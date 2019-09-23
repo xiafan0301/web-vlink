@@ -19,21 +19,33 @@
         </div>
         <vue-scroll>
           <div class="add_group">
-            <div @click="popGroupDialog()" :class="['group_title', {'active': groupIndex === -1 }]">
+            <div @click="popGroupDialogOne()" :class="['group_title', {'active': groupIndex === -1 }]">
               <i class="el-icon-circle-plus vl_f_999"></i><span class="vl_f_333">添加分组</span>
             </div>
             <!-- 人像库组列表 -->
             <div class="group_list" v-if="tabType === '1'">
               <div v-for="(item, index) in groupListPortrait" :key="item.uid"  :class="{'active': groupIndex === index }">
                 <div @click="getPortraitList(item.uid, index)"><span class="vl_f_333">{{item.groupName}}</span><span class="vl_f_666" style="margin-left: 5px;">({{item.num}})</span></div>
-                <i v-show="groupIndex === index" @click="getPortraitList(item.uid, index, '2', item.groupName)" class="vl_icon vl_icon_control_21"></i>
+                <p v-if="groupIndex === index">
+                  <template v-if="index !== 0">
+                    <i class="vl_icon vl_icon_control_25" :class="{'not_group_one': index !== 0}" @click="popGroupDialogTwo(item.uid)"></i>
+                    <i class="vl_icon vl_icon_control_24" @click="delGroupDialog = true;groupId = item.uid;"></i>
+                  </template>
+                  <i  @click="getPortraitList(item.uid, index, '2', item.groupName)" class="vl_icon vl_icon_control_21" :class="{'group_one': index === 0}"></i>
+                </p>
               </div>
             </div>
             <!-- 车像库组列表 -->
             <div class="group_list" v-else>
               <div v-for="(item, index) in groupListCar" :key="item.uid"  :class="{'active': groupIndex === index }">
                 <div @click="getVehicleList(item.uid, index)"><span class="vl_f_333">{{item.groupName}}</span><span class="vl_f_666" style="margin-left: 5px;">({{item.num}})</span></div>
-                <i v-show="groupIndex === index" @click="getVehicleList(item.uid, index, '2', item.groupName)" class="vl_icon vl_icon_control_21"></i>
+                <p v-if="groupIndex === index">
+                  <template v-if="index !== 0">
+                    <i class="vl_icon vl_icon_control_25" :class="{'not_group_one': index !== 0}" @click="popGroupDialogTwo(item.uid)"></i>
+                    <i class="vl_icon vl_icon_control_24" @click="delGroupDialog = true;groupId = item.uid;"></i>
+                  </template>
+                  <i v-show="groupIndex === index" @click="getVehicleList(item.uid, index, '2', item.groupName)" class="vl_icon vl_icon_control_21" :class="{'group_one': index === 0}"></i>
+                </p>
               </div>
             </div>
           </div>
@@ -189,8 +201,11 @@
       <div class="member_list">
         <div class="member_title">
           <div><span class="vl_f_333">布控库</span><span class="vl_f_666">({{memberNum}})</span></div>
-          <el-button v-if="tabType === '1'" class="btn_100" type="primary" @click.native="clearForm('portraitForm', '1')">新建人像</el-button>
-          <el-button v-else class="btn_100" type="primary" @click.native="clearForm('carForm', '1')">新建车像</el-button>
+          <div>
+            <el-button v-if="tabType === '1'" class="btn_100" type="primary" @click.native="importPortrait()">导入</el-button>
+            <el-button v-if="tabType === '1'" class="btn_100" type="primary" @click.native="clearForm('portraitForm', '1')">新建人像</el-button>
+            <el-button v-else class="btn_100" type="primary" @click.native="clearForm('carForm', '1')">新建车像</el-button>
+          </div>
         </div>
         <div class="list_box" v-loading="loading">
           <template v-if="tabType === '1'">
@@ -504,7 +519,9 @@
         </el-dialog>
       </div>
       <!-- 新增组 -->
-      <div is="groupDialog" operateType="1" ref="groupDialog" :tabType="tabType" @getGroupList="getGroupList()"></div>
+      <div is="groupDialog" operateType="1" ref="groupDialogOne" :tabType="tabType" @getGroupList="getGroupList"></div>
+      <!-- 修改组 -->
+      <div is="groupDialog" operateType="2" ref="groupDialogTwo" :groupId="groupId" @sendChildren="getGroupList(null)"></div>
       <!-- 确认操作 -->
       <el-dialog
         :visible.sync="toGiveUpDialog"
@@ -533,6 +550,20 @@
         <div is="customCar" v-else :tabType="tabType" :carMemberList="carMemberList" :groupId="groupId" :groupName="groupName" @getVehicleList="handleCurrentChange" :currentPage="currentPage" @changePage="changePage" :loading="loading"></div>
       </template>
     </template>
+    <!-- 删除自定义组 -->
+    <div class="del_group_dialog">
+      <el-dialog
+        :visible.sync="delGroupDialog"
+        :close-on-click-modal="false"
+        width="482px"
+        top="40vh">
+        <h1 class="vl_f_16 vl_f_333" style="margin-bottom: 4px;">是否确定删除该组？</h1>
+        <div slot="footer">
+          <el-button @click="delGroupDialog = false" class="btn_140">取消</el-button>
+          <el-button :loading="loadingBtn" class="btn_140" type="primary" @click="delVehicleGroupById">确认</el-button>
+        </div>
+      </el-dialog>
+    </div>
   </div>
 </template>
 <script>
@@ -543,7 +574,7 @@ import allPortrait from './components/allPortrait.vue';
 import customCar from './components/customCar.vue';
 import customPortrait from './components/customPortrait.vue';
 import groupDialog from './components/groupDialog.vue';
-import {getPortraitByIdNo, addPortrait, getVehicleByVehicleNumber, addVehicle, getPortraitList, getVehicleList, getPortraitById, putPortrait, getVehicleById, putVehicle, getGroupListIsPortrait, getGroupListIsVehicle} from '@/views/index/api/api.control.js';
+import {delVehicleGroupById, getPortraitByIdNo, addPortrait, getVehicleByVehicleNumber, addVehicle, getPortraitList, getVehicleList, getPortraitById, putPortrait, getVehicleById, putVehicle, getGroupListIsPortrait, getGroupListIsVehicle} from '@/views/index/api/api.control.js';
 import {objDeepCopy} from '@/utils/util.js';
 import {nationData} from '../control/testData.js';
 export default {
@@ -702,7 +733,8 @@ export default {
       fileList: [],//上传列表，用来回填
       picHeight: null,
       protraitMemberList: [],//人像成员列表数据
-      carMemberList: []//车像成员列表数据
+      carMemberList: [],//车像成员列表数据
+      delGroupDialog: false
     }
   },
   computed: {
@@ -737,6 +769,20 @@ export default {
     }
   },
   methods: {
+    // 导入人像
+    importPortrait () {
+
+    },
+    // 删除分组
+    delVehicleGroupById () {
+      delVehicleGroupById(this.groupId).then((res) => {
+        if (res) {
+          this.delGroupDialog = false;
+          this.$message.success('删除成功');
+          this.getGroupList();
+        }
+      })
+    },
     // 通过证件号模糊匹配人像列表
     getPortraitDropdownListByIdNo (query) {
       const idNo = this.Trim(query, 'g');
@@ -809,9 +855,15 @@ export default {
       this.pageType = '1';
       this.groupId = null;
     },
-    popGroupDialog () {
+    // 新增组弹窗
+    popGroupDialogOne () {
       this.groupIndex = -1;
-      this.$refs['groupDialog'].reset();
+      this.$refs['groupDialogOne'].reset();
+    },
+    // 修改组弹窗
+    popGroupDialogTwo (uid) {
+      this.groupId = uid;
+      this.$refs['groupDialogTwo'].reset();
     },
     // 重置左侧组合搜索
     reset () {
@@ -1208,7 +1260,6 @@ export default {
       this.loading = true;
       getPortraitList(params).then(res => {
         if (res && res.data) {
-          console.log(JSON.stringify(res.data), 'res.data');
           this.protraitMemberList = res.data;
           // 跳转到设置页
           if (pageType === '2') {
@@ -1246,13 +1297,11 @@ export default {
       this.loading = true;
       getVehicleList(params).then(res => {
         if (res && res.data) {
-          console.log(JSON.stringify(res.data), 'res.data');
           this.carMemberList = res.data;
           // 跳转到设置页
           if (pageType === '2') {
             this.pageType = pageType;
           }
-          console.log(this.currentPage, 'currentPage')
         }
       }).finally(() => {
         this.loading = false;
@@ -1345,18 +1394,30 @@ export default {
           height: 36px;
           line-height: 36px;
           padding-left: 40px;
-          padding-right: 10px;
+          padding-right: 2px;
           display: flex;
           flex-wrap: nowrap;
           justify-content: space-between;
           > div{
             cursor: pointer;
           }
-          i{
-            margin-top: 10px;
-            cursor: pointer;
-            &:hover{
-              background-position: -414px -346px!important;
+          > p{
+            i{
+              margin-top: 10px;
+              cursor: pointer;
+            }
+        
+            .not_group_one:hover{
+              background-position: -584px -348px!important;
+            }
+            .group_one:hover{
+              background-position: -414px -348px!important;
+            }
+            i:nth-child(2):hover{
+              background-position: -694px -348px!important;
+            }
+            i:nth-child(3):hover{
+              background-position: -414px -348px!important;
             }
           }
           &.active{

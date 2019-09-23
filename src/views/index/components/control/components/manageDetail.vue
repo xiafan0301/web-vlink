@@ -86,11 +86,14 @@
             <li>
               <span style="padding-left: 0;">嫌疑人照片：</span>
               <template v-for="item in controlDetail.objectList">
-                <img :src="item.photoUrl" alt="" :key="item.uid" v-if="item.photoUrl !== controlDetail.missingUrl">
+                <img :src="item.photoUrl" alt="" :key="item.uid" v-if="item.photoUrl !== controlDetail.missingUrl && item.type === 1">
               </template>
             </li>
             <li>
-              <span>嫌疑车辆：</span><span></span>
+              <span>嫌疑车辆：</span>
+              <template v-for="(item, index) in controlDetail.objectList.filter(f => f.type === 2)">
+                <span style="flex: none;" :key="index" v-if="item.type === 2">{{item.name}}<span v-if="index < controlDetail.objectList.filter(f => f.type === 2).length - 1">&nbsp;|&nbsp;</span></span>
+              </template>
             </li>
           </ul>
           <ul class="model_info" v-show="false">
@@ -272,7 +275,7 @@
                             <i class="el-icon-arrow-down" v-show="bay.isDropdown"></i><i class="el-icon-arrow-right" v-show="!bay.isDropdown"></i><span :title="bay.bayonetName">{{bay.bayonetName | strCutWithLen(25)}}</span>
                           </div>
                           <el-collapse-transition>
-                            <ul style="max-height: 346px;" v-show="bay.isDropdown && bay.devList.length > 0">
+                            <ul style="max-height: 346px;" v-if="bay.isDropdown && bay.devList.length > 0">
                               <li
                                 v-for="(dev, index) in bay.devList"
                                 :key="dev.uid"
@@ -283,7 +286,7 @@
                                 <span :title="dev.deviceName">{{dev.deviceName | strCutWithLen(25)}}</span><i class="vl_icon vl_icon_control_05"></i>
                               </li>
                             </ul>
-                            <ul v-show="bay.devList.length === 0">
+                            <ul v-if="bay.isDropdown && bay.devList.length === 0">
                               <li>卡口内无设备</li>
                             </ul>
                           </el-collapse-transition>

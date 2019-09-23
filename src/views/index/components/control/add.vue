@@ -16,7 +16,7 @@
       <div class="create_content">
         <el-form ref="createForm" :label-position="labelPosition" :model="createForm" class="create_form">
           <el-form-item class="create_form_one" style="margin-bottom: 0;">
-            <el-form-item label="布控名称:" prop="surveillanceName" style="width: 25%;" :rules="{required: true, message: '请输入布控名称', trigger: 'blur'}">
+            <el-form-item label="布控名称:" prop="surveillanceName" style="width: 25%;margin-bottom: 10px;" :rules="{required: true, message: '请输入布控名称', trigger: 'blur'}">
               <el-input v-model="createForm.surveillanceName" maxlength="20" @blur="getControlInfoByName"></el-input>
             </el-form-item>
             <el-form-item label="关联事件:" prop="eventId" style="width: 25%;">
@@ -70,51 +70,39 @@
               </el-select>
             </el-form-item>
           </el-form-item>
-          <el-form-item class="period_time_box" style="margin-bottom: 26px;">
-            <div v-for="(item, index) in createForm.surveillancTimeList" :key="index" style="position: relative;" class="period_time">
-              <el-form-item style="margin-bottom: 0;" :label="index === 0 ? '布控时间段（最多可设置5个时间段）:' : ''" :prop="'surveillancTimeList.' + index + '.startTime'" :rules="{ required: true, message: '请选择起始时间', trigger: 'blur'}" >
-                <el-time-picker
-                  placeholder="起始时间"
-                  v-model="item.startTime"
-                  :picker-options="{
-                    start: '00:00:00',
-                    step: '00:01:00',
-                    end: '23:59:59'
-                  }">
-                </el-time-picker>
-              </el-form-item>
-              <span class="vl_f_666">-</span>
-              <el-form-item style="margin-bottom: 0;" :prop="'surveillancTimeList.' + index + '.endTime'" :rules="{ required: true, message: '请选择结束时间', trigger: 'blur'}" >
-                <el-time-picker
-                  placeholder="结束时间"
-                  v-model="item.endTime"
-                  :picker-options="{
-                    start: '00:00:00',
-                    step: '00:01:00',
-                    end: '23:59:59',
-                    minTime: item.startTime
-                  }">
-                </el-time-picker>
-              </el-form-item>
-            </div>
+          <el-form-item class="period_time_box" style="margin-bottom: 0;" label="布控时间段（最多可设置5个时间段）" :rules="{ required: true, message: null, trigger: 'blur'}">
+            <el-form-item  v-for="(item, index) in createForm.surveillancTimeList" :key="index" :prop="'surveillancTimeList.' + index + '.times'" :rules="{ required: true, message: '请选择布控时间段', trigger: 'blur'}" >
+              <el-time-picker
+                is-range
+                arrow-control
+                :clearable="false"
+                v-model="item.times"
+                range-separator="至"
+                start-placeholder="开始时间"
+                end-placeholder="结束时间"
+                placeholder="选择时间范围">
+              </el-time-picker>
+              <i class="el-icon-remove" @click="removePeriodTime(index)"></i> 
+            </el-form-item>
             <el-form-item class="period_time_btn_box">
               <div v-if="createForm.surveillancTimeList.length < 5" class="period_time_btn" @click="addPeriodTime()"><i class="vl_icon vl_icon_control_22"></i><span>添加布控时间段</span></div>
-              <div v-if="createForm.surveillancTimeList.length > 1" class="period_time_btn" @click="removePeriodTime()"><i class="vl_icon vl_icon_control_28"></i><span>删除布控时间段</span></div>
             </el-form-item>
           </el-form-item>
-          <el-form-item class="period_time_box" style="margin-bottom: 6px;">
-            <div v-for="(item, index) in createForm.contactList" :key="index" style="position: relative;" class="period_time">
-              <el-form-item style="margin-bottom: 0;" :label="index === 0 ? '短信联动:' : ''" :prop="'contactList.' + index + '.contact'" :rules="{validator: validName, trigger: 'blur'}" >
-                <el-input v-model="item.contact" placeholder="短信接收人" maxlength="5" show-word-limit></el-input>
-              </el-form-item>
-              <span class="vl_f_666">-</span>
-              <el-form-item style="margin-bottom: 0;" :prop="'contactList.' + index + '.mobile'" :rules="{validator: validPhone, trigger: 'blur'}" >
-                <el-input v-model="item.mobile" placeholder="手机号码"></el-input>
-              </el-form-item>
+          <el-form-item class="period_time_box" style="margin-bottom: 6px;" label="短信联动:">
+            <div class="contact_list" v-for="(item, index) in createForm.contactList" :key="index">
+              <div class="contact">
+                <el-form-item style="margin-bottom: 0;" :prop="'contactList.' + index + '.contact'" :rules="{validator: validName, trigger: 'blur'}">
+                  <el-input v-model="item.contact" placeholder="短信接收人" maxlength="5"></el-input>
+                </el-form-item>
+                <span class="vl_f_666">与</span>
+                <el-form-item style="margin-bottom: 0;" :prop="'contactList.' + index + '.mobile'" :rules="{validator: validPhone, trigger: 'blur'}">
+                  <el-input v-model="item.mobile" placeholder="手机号码"></el-input>
+                </el-form-item>
+              </div>
+              <i class="el-icon-remove" @click="removeCellphoneMessages(index)"></i>
             </div>
             <el-form-item class="period_time_btn_box">
               <div v-if="createForm.contactList.length < 5" class="period_time_btn" @click="addCellphoneMessages()"><i class="vl_icon vl_icon_control_22"></i><span>添加短信联动</span></div>
-              <div v-if="createForm.contactList.length > 1" class="period_time_btn" @click="removeCellphoneMessages()"><i class="vl_icon vl_icon_control_28"></i><span>删除短信联动</span></div>
             </el-form-item>
           </el-form-item>
           <el-form-item class="bl_box">
@@ -260,8 +248,7 @@ export default {
         alarmLevel: '3',
         surveillancTimeList: [
           {
-            startTime: new Date(2019, 4, 10, 0, 0, 0),
-            endTime:  new Date(2019, 4, 10, 23, 59, 59)
+            times: [new Date(2019, 4, 10, 0, 0, 0), new Date(2019, 4, 10, 23, 59, 59)]
           }
         ],
         contactList: [
@@ -321,8 +308,8 @@ export default {
     // 新增页-1
     } else {
       this.pageType = 1;
-      this.modelType = 2;
-      this.modelType_ = 2;
+      this.modelType = 1;
+      this.modelType_ = 1;
       // 从车辆侦查或者人像侦查跳转过来新建布控
       // const {imgurl, modelName, plateNo} = this.$route.query;
       // this.imgurl = imgurl;
@@ -410,13 +397,12 @@ export default {
     // 新增时间段
     addPeriodTime() {
       this.createForm.surveillancTimeList.push({
-        startTime: null,
-        endTime: null
+        times: [new Date(2019, 4, 10, 0, 0, 0), new Date(2019, 4, 10, 23, 59, 59)]
       });
     },
     // 删除时间段
-    removePeriodTime() {
-      this.createForm.surveillancTimeList.pop();
+    removePeriodTime(index) {
+      this.createForm.surveillancTimeList.splice(index, 1);
     },
     // 添加短信联动
     addCellphoneMessages () {
@@ -428,8 +414,8 @@ export default {
       );
     },
     // 删除短信联动
-    removeCellphoneMessages () {
-      this.createForm.contactList.pop();
+    removeCellphoneMessages (index) {
+      this.createForm.contactList.splice(index, 1);
     },
     // 通过布控名称获取布控信息，异步查询布控是否存在
     getControlInfoByName () {
@@ -456,42 +442,48 @@ export default {
     saveControl (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          const _createForm = objDeepCopy(this.createForm);
-          if (_createForm.controlDate.length > 0) {
-            _createForm.surveillanceDateStart = _createForm.controlDate[0];
-            _createForm.surveillanceDateEnd = _createForm.controlDate[1];
-          }
-          delete _createForm.controlDate;
-          _createForm.surveillancTimeList = _createForm.surveillancTimeList.map(m => {
-            return {
-              startTime: formatDate(m.startTime, 'HH:mm:ss'),
-              endTime: formatDate(m.endTime, 'HH:mm:ss')
+          //验证所选时间段是否出现重叠
+          const isThrough = this.isOverlap();
+          if (!isThrough) {
+            return false;
+          } else {
+            const _createForm = objDeepCopy(this.createForm);
+            if (_createForm.controlDate.length > 0) {
+              _createForm.surveillanceDateStart = _createForm.controlDate[0];
+              _createForm.surveillanceDateEnd = _createForm.controlDate[1];
             }
-          })
-          _createForm.shareDept = _createForm.shareDept && _createForm.shareDept.join(',');
-          _createForm.cascadePlatform = _createForm.cascadePlatform && _createForm.cascadePlatform.join(',');
-          this.modelData = null;
-          this.$refs['model'].sendParent();
-          if (!this.modelData) return;
-          console.log(this.modelData, 'this.modelData');
-          let data  = {
-            ..._createForm,
-            modelList: [this.modelData]
-          }
-          this.loadingBtn = true;
-          addControl(data).then(res => {
-            if (res) {
-              this.$message.success(this.pageType === 3 ? '复用成功' : '新增成功');
-              this.$router.push({ name: 'control_manage' });
-              // // 新增布控后，状态为待开始的事件，改为进行中
-              // const obj = this.eventList.find(f => f.value === this.createForm.eventId);
-              // if (obj && obj.eventStatus === 1) {
-              //   updateEvent({uid: obj.value, type: 6});
-              // }
+            delete _createForm.controlDate;
+            _createForm.surveillancTimeList = _createForm.surveillancTimeList.map(m => {
+              return {
+                startTime: formatDate(m.times[0], 'HH:mm:ss'),
+                endTime: formatDate(m.times[1], 'HH:mm:ss')
+              }
+            })
+            _createForm.shareDept = _createForm.shareDept && _createForm.shareDept.join(',');
+            _createForm.cascadePlatform = _createForm.cascadePlatform && _createForm.cascadePlatform.join(',');
+            this.modelData = null;
+            this.$refs['model'].sendParent();
+            if (!this.modelData) return;
+            console.log(this.modelData, 'this.modelData');
+            let data  = {
+              ..._createForm,
+              modelList: [this.modelData]
             }
-          }).finally(() => {
-            this.loadingBtn = false;
-          })
+            this.loadingBtn = true;
+            addControl(data).then(res => {
+              if (res) {
+                this.$message.success(this.pageType === 3 ? '复用成功' : '新增成功');
+                this.$router.push({ name: 'control_manage' });
+                // // 新增布控后，状态为待开始的事件，改为进行中
+                // const obj = this.eventList.find(f => f.value === this.createForm.eventId);
+                // if (obj && obj.eventStatus === 1) {
+                //   updateEvent({uid: obj.value, type: 6});
+                // }
+              }
+            }).finally(() => {
+              this.loadingBtn = false;
+            })
+          }
         } else {
           return false;
         }
@@ -499,8 +491,8 @@ export default {
     },
     // 对比布控时间段是否重叠的方法
     isOverlap () {
-      let startTimeArr = this.createForm.surveillancTimeList.map(m => m.startTime);
-      let endTimeArr = this.createForm.surveillancTimeList.map(m => m.endTime);
+      let startTimeArr = this.createForm.surveillancTimeList.map(m => m.times[0]);
+      let endTimeArr = this.createForm.surveillancTimeList.map(m => m.times[1]);
       let begin = startTimeArr.sort();
       let over = endTimeArr.sort();
       if (this.createForm.surveillancTimeList.length === 1) {
@@ -552,8 +544,7 @@ export default {
           }
           detail.surveillancTimeList = detail.surveillancTimeList.map(m => {
             return {
-              startTime: new Date('2016, 9,' + m.startTime),
-              endTime: new Date('2016, 9,' + m.endTime)
+              times: [new Date('2016, 9,' + m.startTime), new Date('2016, 9,' + m.endTime)]
             }
           })
           if (detail.shareDept) {
@@ -583,37 +574,43 @@ export default {
     putControl (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          const _createForm = objDeepCopy(this.createForm);
-          if (_createForm.controlDate.length > 0) {
-            _createForm.surveillanceDateStart = _createForm.controlDate[0];
-            _createForm.surveillanceDateEnd = _createForm.controlDate[1];
-          }
-          delete _createForm.controlDate;
-          _createForm.surveillancTimeList = _createForm.surveillancTimeList.map(m => {
-            return {
-              startTime: formatDate(m.startTime, 'HH:mm:ss'),
-              endTime: formatDate(m.endTime, 'HH:mm:ss')
+          //验证所选时间段是否出现重叠
+          const isThrough = this.isOverlap();
+          if (!isThrough) {
+            return false;
+          } else {
+            const _createForm = objDeepCopy(this.createForm);
+            if (_createForm.controlDate.length > 0) {
+              _createForm.surveillanceDateStart = _createForm.controlDate[0];
+              _createForm.surveillanceDateEnd = _createForm.controlDate[1];
             }
-          })
-          _createForm.shareDept =  _createForm.shareDept && _createForm.shareDept.join(',');
-          _createForm.cascadePlatform = _createForm.cascadePlatform && _createForm.cascadePlatform.join(',');
-          this.modelData = null;
-          this.$refs['model'].sendParent();
-          if (!this.modelData) return;
-          console.log(this.modelData, 'this.modelData');
-          let data  = {
-            ..._createForm,
-            modelList: [this.modelData]
-          }
-          this.loadingBtn = true;
-          putControl(data).then(res => {
-            if (res) {
-              this.$message.success('编辑成功');
-              this.$emit('getControlList');
+            delete _createForm.controlDate;
+            _createForm.surveillancTimeList = _createForm.surveillancTimeList.map(m => {
+              return {
+                startTime: formatDate(m.times[0], 'HH:mm:ss'),
+                endTime: formatDate(m.times[1], 'HH:mm:ss')
+              }
+            })
+            _createForm.shareDept =  _createForm.shareDept && _createForm.shareDept.join(',');
+            _createForm.cascadePlatform = _createForm.cascadePlatform && _createForm.cascadePlatform.join(',');
+            this.modelData = null;
+            this.$refs['model'].sendParent();
+            if (!this.modelData) return;
+            console.log(this.modelData, 'this.modelData');
+            let data  = {
+              ..._createForm,
+              modelList: [this.modelData]
             }
-          }).finally(() => {
-            this.loadingBtn = false;
-          })
+            this.loadingBtn = true;
+            putControl(data).then(res => {
+              if (res) {
+                this.$message.success('编辑成功');
+                this.$emit('getControlList');
+              }
+            }).finally(() => {
+              this.loadingBtn = false;
+            })
+          }
         } else {
           return false;
         }
@@ -673,7 +670,7 @@ export default {
       .el-form-item__content{
         display: flex;
         flex-wrap: wrap;
-        margin-bottom: 10px;
+        margin-bottom: 0;
         .el-form-item{
           padding-right: 10px;
           .el-input__inner, .el-select{
@@ -708,68 +705,94 @@ export default {
     }
     .period_time_box .el-form-item__content{
       display: flex;
-      flex-wrap: wrap;
-      .period_time{
-        width: 25%;
-        display: flex;
-        margin-top: 20px;
-        padding-right: 10px;
-        > span{
-          margin: 0 3px;
-        }
-        > .el-form-item{
-          padding-right: 0!important;
-          & > .el-form-item__label:nth-child(1){
-            width: 330px;
-            position: absolute;
-            left: 0;
-            top: -40px;
-          }
-        }
-        .el-form-item__content{
-          .el-date-editor{
-            width: 100%!important;
-          }
-        }
-        &:nth-child(4){
-          padding-right: 0!important;
-        }
-      }
       .period_time_btn_box{ 
+        width: 25%;
         margin-bottom: 0!important;
-        padding-right: 38px!important;
-        padding-top: 20px;
-        &.top{
-          padding-top: 20px;
-        }
+        padding-right: 10px;
         .el-form-item__content{
           display: flex;
           .period_time_btn{
-            width: 164px;
+            width: 100%;
             height:40px;
             line-height:40px;
             text-align: center;
             border-radius:4px;
             border:1px dashed rgba(217,217,217,1);
+            vertical-align: middle;
+            margin-bottom: 5px;
             cursor: pointer;
-            &:nth-child(1){
-              color: #0C70F8;
-              margin-right: 10px;
-            }
-            &:nth-child(2){
-              color: #F94539;
-            }
+            color: #0C70F8;
             .vl_icon_control_22{
               vertical-align: middle;
               margin-bottom: 5px;
               margin-right: 5px;
             }
-            .vl_icon_control_28{
-              vertical-align: middle;
-              margin-bottom: 7px;
-              margin-right: 5px;
+          }
+        }
+      }
+      > .el-form-item{
+        width: 25%;
+        margin-bottom: 20px;
+        padding-right: 10px;
+        .el-form-item__content{
+          display: flex;
+          .el-date-editor{
+            width: calc(100% - 40px)!important;
+            border-radius: 4px 0 0 4px;
+          }
+          > i{
+            width: 40px;
+            height:40px;
+            background:rgba(246,246,246,1);
+            border-radius:0px 4px 4px 0px;
+            border:1px solid rgba(211,211,211,1);
+            line-height: 40px;
+            text-align: center;
+            font-size: 18px;
+            color: #F94539;
+            cursor: pointer;
+          }
+        }
+      }
+      .contact_list{
+        display: flex;
+        width: 25%;
+        padding-right: 10px;
+        margin-bottom:  10px;
+        .contact{
+          width: calc(100% - 40px);
+          height: 40px;
+          display: flex;
+          border: 1px solid #D3D3D3;
+          border-radius: 4px 0 0 4px;
+          > span{
+            margin: 0 3px;
+          }
+          > .el-form-item{
+            padding-right: 0!important;
+            & > .el-form-item__label:nth-child(1){
+              width: 330px;
+              position: absolute;
+              left: 0;
+              top: -40px;
+            }
+            .el-input__inner{
+              border: none!important;
+              height: 36px;
             }
           }
+        }
+        > i{
+          width: 40px;
+          height:40px;
+          background:rgba(246,246,246,1);
+          border-radius:0px 4px 4px 0px;
+          border:1px solid rgba(211,211,211,1);
+          line-height: 40px;
+          text-align: center;
+          font-size: 18px;
+          color: #F94539;
+          cursor: pointer;
         }
       }
     }

@@ -190,6 +190,7 @@ export default {
     },
     handleCurrentChange (page) {
       this.pageNum = page;
+      this.currentPage = page;
       this.getPortraitList();
     },
     // 确认

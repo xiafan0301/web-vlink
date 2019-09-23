@@ -32,18 +32,6 @@ export default {
       loadingBtn: false
     }
   },
-  watch: {
-    operateType (val) {
-      if (val === '2') {
-        this.getGroupsById();
-      }
-    }
-  },
-  mounted () {
-    if (this.operateType === '2') {
-      this.getGroupsById();
-    }
-  },
   methods: {
     // 新增分组
     addGroup (formName) {
@@ -95,6 +83,8 @@ export default {
       this.groupDialog = true;
       if (this.$refs['group'] && this.operateType === '1') {
         this.$refs['group'].resetFields();
+      } else if (this.operateType === '2') {
+        this.getGroupsById();
       }
     }
   }

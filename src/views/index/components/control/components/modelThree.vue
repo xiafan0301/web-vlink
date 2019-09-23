@@ -13,15 +13,16 @@
     <el-form-item class="plate_num_box">
       <div class="plate_num" v-for="item in fileListTwo" :key="item.uid">
         <el-input v-model="item.vehicleNumber" :disabled="true"></el-input>
+        <i class="el-icon-remove" @click="removeVehicleNumber(index)"></i>
       </div>
-      <div v-for="(item, index) in modelThreeForm.carNumberInfo" :key="index" style="position: relative;" class="license_plate_num">
+      <div v-for="(item, index) in modelThreeForm.carNumberInfo" :key="index" style="position: relative;" class="plate_num">
         <el-form-item :prop="'carNumberInfo.' + index + '.vehicleNumber'" :rules="{validator: validPlateNumber, trigger: 'blur'}" >
           <el-input v-model="item.vehicleNumber" placeholder="请输入车辆车牌号"></el-input>
+          <i class="el-icon-remove" @click="removeLicensePlateNum(index)"></i>
         </el-form-item>
       </div>
       <el-form-item class="plate_num_btn_box">
         <div class="period_time_btn" @click="addLicensePlateNum()"><i class="vl_icon vl_icon_control_22"></i><span>添加车牌号码</span></div>
-        <div v-if="modelThreeForm.carNumberInfo.length > 1" class="period_time_btn" @click="removeLicensePlateNum()"><i class="vl_icon vl_icon_control_28"></i><span>删除车牌号码</span></div>
       </el-form-item>
     </el-form-item>
     <el-form-item style="margin-top: 20px;" v-if="!isShowControlDev">
@@ -95,6 +96,7 @@ export default {
     uploadPicFileList (fileListOne) {
       const _list = imgUrls(fileListOne);
       this.fileListOne = this.fileListOne.concat(_list);
+      this.fileListOne = unique(this.fileListOne, 'objId');
     },
     // 从库中选择
     popSel (type) {
@@ -111,8 +113,12 @@ export default {
       this.modelThreeForm.carNumberInfo.push({vehicleNumber: null});
     },
     // 删除车牌号码
-    removeLicensePlateNum () {
-      this.modelThreeForm.carNumberInfo.pop();
+    removeLicensePlateNum (index) {
+      this.modelThreeForm.carNumberInfo.splice(index, 1);
+    },
+    // 删除从布控库中选择的车牌
+    removeVehicleNumber (index) {
+      this.fileListTwo.splice(index, 1);
     },
     // 向父组件传值
     sendParent () {
@@ -165,64 +171,51 @@ export default {
       display: flex;
       padding-right: 10px;
       padding-bottom: 10px;
-      > span{
-        margin: 0 3px;
-      }
-      > .el-form-item{
+      .el-form-item{
         width: 100%;
-        margin-bottom: 0;
-        padding-right: 0!important;
-        & > .el-form-item__label:nth-child(1){
-          width: 330px;
-          position: absolute;
-          left: 0;
-          top: -40px;
+      }
+      .el-input{
+        width: calc(100% - 40px);
+        .el-input__inner{
+          border-radius: 4px 0 0 4px;
         }
+      }
+      i{
+        width: 40px;
+        height:40px;
+        background:rgba(246,246,246,1);
+        border-radius:0px 4px 4px 0px;
+        border:1px solid rgba(211,211,211,1);
+        line-height: 40px;
+        text-align: center;
+        font-size: 18px;
+        color: #F94539;
+        cursor: pointer;
       }
       .el-form-item__content{
-        .el-date-editor{
-          width: 100%!important;
-        }
+        display: flex;
       }
-      &:nth-child(5){
-        padding-right: 0!important;
-      }
-    }
-    .license_plate_num{
-      padding-right: 10px;
-      padding-bottom: 10px;
     }
     .plate_num_btn_box{ 
+      width: 25%;
       margin-bottom: 0!important;
-      padding: 0 38px 0 0;
-      &.top{
-        padding-top: 20px;
-      }
-      .el-form-item__content{ 
+      padding-right: 10px;
+      .el-form-item__content{
         display: flex;
         .period_time_btn{
-          width: 164px;
+          width: 100%;
           height:40px;
           line-height:40px;
           text-align: center;
           border-radius:4px;
           border:1px dashed rgba(217,217,217,1);
+          vertical-align: middle;
+          margin-bottom: 5px;
           cursor: pointer;
-          &:nth-child(1){
-            color: #0C70F8;
-            margin-right: 10px;
-          }
-          &:nth-child(2){
-            color: #F94539;
-          }
+          color: #0C70F8;
           .vl_icon_control_22{
             vertical-align: middle;
             margin-bottom: 5px;
-            margin-right: 5px;
-          }
-          .vl_icon_control_28{
-            vertical-align: middle;
-            margin-bottom: 7px;
             margin-right: 5px;
           }
         }
