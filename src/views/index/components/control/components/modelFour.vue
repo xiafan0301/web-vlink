@@ -44,23 +44,21 @@ export default {
       console.log(this.modelList, 'this.modelList')
       // 回填嫌疑车牌
       let [{pointDtoList: [{bayonetList, devList}], surveillanceObjectDtoList}] = this.modelList;
-  
-
-      let one = surveillanceObjectDtoList.filter(m => m.objType === 1);//回填禁入人员
-      let two = surveillanceObjectDtoList.filter(m => m.objType === 2);//回填禁入车辆
-      this.protraitList = one;
-      this.vehicleList = two;
+      this.protraitList = surveillanceObjectDtoList.filter(m => m.objType === 1);//回填禁入人员
+      this.vehicleList = surveillanceObjectDtoList.filter(m => m.objType === 2);//回填禁入车辆
       this.isShowControlDev = true;
     }
   },
   methods: {
      // 从布控库中获取禁入人员
     getPortraitData (data) {
-      this.protraitList = data;
+      this.protraitList = this.protraitList.concat(data);
+      this.protraitList = unique(this.protraitList, 'objId');
     },
     // 从布控库中获取禁入车辆
     getVehicleData (data) {
-      this.vehicleList = data;
+      this.vehicleList = this.vehicleList.concat(data);
+      this.vehicleList = unique(this.vehicleList, 'objId');
     },
     // 删除从布控库中已选择的人员
     delPortrait (index) {
@@ -85,7 +83,11 @@ export default {
     },
     // 向父组件传值
     sendParent () {
-      this.$emit('getModel', {modelType: 4,  pointDtoList: [this.devUpdateData], surveillanceObjectDtoList: [...this.protraitList, ...this.vehicleList]});
+      if (this.devUpdateData.devList.length > 0) {
+        this.$emit('getModel', {modelType: 4,  pointDtoList: [this.devUpdateData], surveillanceObjectDtoList: [...this.protraitList, ...this.vehicleList]});
+      } else {
+        this.$message.warning('请先选择布控设备');
+      }
     },
     getControlDevUpdate (data) {
       this.devUpdateData = data;

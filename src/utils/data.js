@@ -11,7 +11,7 @@ const dataList = {
   eventStatus: 7, // 事件状态
   auditStatus: 8, // 审核状态
   autoCheck: 10, // 自动审核政务人员
-  alarmLevel: 11, //告警级别
+  alarmLevel: 1057, //告警级别
   planType: 12, // 预案类型
   rejectReason: 13, // 驳回原因
   eventType: 20, // 事件类型

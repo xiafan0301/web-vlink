@@ -58,9 +58,9 @@
           <el-select v-model="mapForm.alarmId" multiple collapse-tags placeholder="告警级别">
             <el-option
               v-for="item in alarmLevelList"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
+              :key="item.enumField"
+              :label="item.enumValue"
+              :value="item.enumField">
             </el-option>
           </el-select>
         </el-form-item>
@@ -269,12 +269,7 @@ export default {
         {label: '半球机', value: 3},
         {label: '红外', value: 4}
       ],
-      alarmLevelList: this.dicFormater(dataList.alarmLevel)[0].dictList.map(m => {
-        return {
-          value: parseInt(m.enumField),
-          label: m.enumValue
-        }
-      }),
+      alarmLevelList: this.dicFormater(dataList.alarmLevel)[0].dictList,
       // 地图参数
       map: null,
       devicesList: [], // 布控数据列表
@@ -393,12 +388,12 @@ export default {
       let surveillanceList = this.devicesList.map(m => m.surveillanceIds);
       surveillanceList = surveillanceList.length > 0 ? surveillanceList.join(',').split(',') : [];
       surveillanceList = Array.from(new Set(surveillanceList));
-      let params = {
+      let data = {
         interval: 30
       } 
-      devList.length > 0 && (params.deviceIds = devList.join(','));
-      surveillanceList.length > 0 && (params.surveillanceIds = surveillanceList.join(','));
-      getAlarmListByDev(params).then(res => {
+      devList.length > 0 && (data.deviceIds = devList.join(','));
+      surveillanceList.length > 0 && (data.surveillanceIds = surveillanceList.join(','));
+      getAlarmListByDev(data).then(res => {
         if (res && res.data) {
           this.markerAlarmList = res.data;
           if (this.markerAlarmList.length > 0 && this.devicesList.length > 0) {

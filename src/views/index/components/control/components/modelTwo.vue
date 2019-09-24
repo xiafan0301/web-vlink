@@ -94,22 +94,21 @@ export default {
       this.addressObjTwo.radius = this.modelTwoForm.radius = radius;
       this.addressObjTwo.lnglat = [longitude, latitude];
 
-      let one = surveillanceObjectDtoList.filter(m => m.objType === 1);//回填禁入人员
-      let two = surveillanceObjectDtoList.filter(m => m.objType === 2);//回填禁入车辆
-      this.protraitList = one;
-      this.vehicleList = two;
-      console.log(this.addressObjTwo)
+      this.protraitList = surveillanceObjectDtoList.filter(m => m.objType === 1);//回填禁入人员
+      this.vehicleList = surveillanceObjectDtoList.filter(m => m.objType === 2);//回填禁入车辆
       this.isShowControlDev = true;
     }
   },
   methods: {
     // 从布控库中获取禁入人员
     getPortraitData (data) { 
-      this.protraitList = data;
+      this.protraitList = this.protraitList.concat(data);
+      this.protraitList = unique(this.protraitList, 'objId');
     },
     // 从布控库中获取禁入车辆
     getVehicleData (data) {
-      this.vehicleList = data;
+      this.vehicleList = this.vehicleList.concat(data);
+      this.vehicleList = unique(this.vehicleList, 'objId');
     },
     // 向父组件传值
     sendParent () {
@@ -118,7 +117,7 @@ export default {
       }
       this.$refs['modelTwo'].validate((valid) => {
         if (valid) {
-          if (this.$refs['controlDev']) {
+          if (this.$refs['controlDev'] && this.devData.devList.length > 0) {
             this.$refs['controlDev'].sendParent();
 
             const longitude = this.addressObjTwo.lnglat[0];

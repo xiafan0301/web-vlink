@@ -177,6 +177,7 @@ export default {
     },
     handleCurrentChange (page) {
       this.pageNum = page;
+      this.currentPage = page;
       this.getVehicleList();
     },
     // 确认

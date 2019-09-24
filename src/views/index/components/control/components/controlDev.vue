@@ -69,7 +69,7 @@ import {getAllMonitorList, getAllBayonetList} from '@/views/index/api/api.base.j
 import { Promise } from 'q';
 export default {
   components: {controlDevUpdate},
-  props: ['addressObj', 'addressObjTwo', 'modelType', 'lostTime', 'devIdListSel', 'bayIdListSel'],
+  props: ['addressObj', 'addressObjTwo', 'modelType', 'lostTime', 'devIdListFive', 'bayIdListFive', 'devs', 'bays'],
   data () {
     return {
       pageType: 1,//页面类型，1为布控设备展示页面，2为修改布控设备页面
@@ -104,8 +104,8 @@ export default {
     // 传给父组件 
     sendParent () {
       if (this.pageType === 1) {
-        const devList = this.devIdList.map(m => {return {deviceId: m}})
-        const bayonetList = this.bayIdList.map(m => {return {bayonetId: m}})
+        const devList = this.devIdList.map(m => {return {deviceId: m.uid}})
+        const bayonetList = this.bayIdList.map(m => {return {bayonetId: m.uid}})
         this.$emit('getChildModel', {devList, bayonetList});
       } else {
         this.$emit('getChildModel', this.devUpdateData);
@@ -150,33 +150,22 @@ export default {
             this.addressObjTwo && this.mapCircleTwo();
             // 第3个布控模型的一键布控时所执行的
             this.modelType === 3 && this.getAllBay();
-            // 第5个布控模型的一键布控时所执行的,暂时这样写
-            if (this.devIdListSel.length > 0) {
-              let devs = [];
-              this.markerList.forEach(f => {
-                const obj = f.getExtData();
-                if (this.devIdListSel.some(s => s === obj.uid && obj.dataType === 1)) {
-                  devs.push(obj);
-                  const uContent = this.setMarkContent(obj)
-                  f.setContent(uContent);
-                }
-              })
-              this.devIdList = devs;
-              this.getTreeData(this.devIdList, 1)
-            }          
-            if (this.bayIdListSel.length > 0) {
-              let bays = [];
-              this.markerList.forEach(f => {
-                const obj = f.getExtData();
-                if (this.bayIdListSel.some(s => s === obj.uid && obj.dataType === 2)) {
-                  bays.push(obj);
-                  const uContent = this.setMarkContent(obj)
-                  f.setContent(uContent);
-                }
-              })
-              this.bayIdList = bays;
-              this.getTreeData(this.bayIdList, 2)
-            }          
+            // 第5个布控模型的一键布控时所执行的
+            // 编辑时
+            if (this.devs.length > 0) {
+              this.changeColorAndGetTreeData(this.devs, 1);
+              if (this.bays.length > 0) {
+                this.changeColorAndGetTreeData(this.bays, 2);
+              }
+            // 新增时
+            } else {
+              if (this.devIdListFive.length > 0) {
+                this.changeColorAndGetTreeData(this.devIdListFive, 1);
+              }          
+              if (this.bayIdListFive.length > 0) {
+                this.changeColorAndGetTreeData(this.bayIdListFive, 2);
+              }   
+            }       
           }
         })
     },
@@ -308,7 +297,18 @@ export default {
       circle.setMap(_this.map);
       // this.setViewingArea(circle);
       this.removeObj[type].push(circle);
-      this.getCircleDev(circle, index);
+      // 编辑时
+      // 设备
+      if (this.devs.length > 0) {
+        this.changeColorAndGetTreeData(this.devs, 1);
+        // 卡口
+        if (this._bays.length > 0) {
+          this.changeColorAndGetTreeData(this.bays, 2);
+        }
+      // 新增时
+      } else {
+        this.getCircleDev(circle, index);
+      }
     },
     // 圆形覆盖物
     mapCircleTwo () {
@@ -327,7 +327,18 @@ export default {
       })
       circle.setMap(_this.map);
       // this.setViewingArea(circle);
-      this.getCircleDev(circle);
+      // 编辑时
+      // 设备
+      if (this.devs.length > 0) {
+        this.changeColorAndGetTreeData(this.devs, 1);
+        // 卡口
+        if (this._bays.length > 0) {
+          this.changeColorAndGetTreeData(this.bays, 2);
+        }
+      // 新增时
+      } else {
+        this.getCircleDev(circle);
+      }
     },
     // 把地图的可视区域设置在选中设备或卡口的区域
     setViewingArea (obj) {
@@ -359,7 +370,20 @@ export default {
       this.getTreeData(this.devIdList, 1);//获得设备树数据
       this.getTreeData(this.bayIdList, 2);//获得卡口树数据
     },
-
+    // 新增或编辑时，点标记变色和变为树结构数据公共方法
+    changeColorAndGetTreeData (array, type) {
+      let list = [];
+      this.markerList.forEach(f => {
+        const obj = f.getExtData();
+        if (array.some(s => s === obj.uid && obj.dataType === type)) {
+          list.push(obj);
+          const uContent = this.setMarkContent(obj)
+          f.setContent(uContent);
+        }
+      })
+      type === 1 ? (this.devIdList = list) : (this.bayIdList = list);
+      this.getTreeData(list, type);
+    },
     // 改造数据成树结构公共方法
     getTreeData (data, type) {
       const hash = {};
@@ -389,17 +413,22 @@ export default {
     },
     // 获取城内所有卡口
     getAllBay () {
-      this.getTreeData(this.allBayList, 2);//获得卡口树数据
-      this.bayIdList = this.allBayList;//赋值显示卡口数量
-      // 让选中的卡口变色
-      this.markerList.forEach(f => {
-        if (this.allBayList.some(s => s.uid === f.getExtData().uid)) {
-          let uContent = this.setMarkContent(f.getExtData())
-          f.setContent(uContent);
-        }
-      })
+      // 编辑时
+      if (this.bays.length > 0) {
+        this.changeColorAndGetTreeData(this.bays, 2);
+      // 新增时
+      } else {
+        this.getTreeData(this.allBayList, 2);//获得卡口树数据
+        this.bayIdList = this.allBayList;//赋值显示卡口数量
+        // 让选中的卡口变色
+        this.markerList.forEach(f => {
+          if (this.allBayList.some(s => s.uid === f.getExtData().uid)) {
+            let uContent = this.setMarkContent(f.getExtData())
+            f.setContent(uContent);
+          }
+        })
+      }
       this.bayOrdev = 2;
-    
     },
     // 初始化缩放等级
     resetZoom () {

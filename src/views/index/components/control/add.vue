@@ -63,9 +63,9 @@
               <el-select value-key="uid" v-model="createForm.alarmLevel" filterable placeholder="请选择">
                 <el-option
                   v-for="item in controAlarmList"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value">
+                  :key="item.enumField"
+                  :label="item.enumValue"
+                  :value="item.enumField">
                 </el-option>
               </el-select>
             </el-form-item>
@@ -144,7 +144,7 @@
                   v-for="item in shareDeptList"
                   :key="item.uid"
                   :label="item.label"
-                  :value="item.value">
+                  :value="item.label">
                 </el-option>
               </el-select>
             </el-form-item>
@@ -231,14 +231,7 @@ export default {
         {label: '长期布控', value: 2}
       ],
       //告警类型
-      // controAlarmList: this.dicFormater(dataList.alarmLevel)[0].dictList,
-      controAlarmList: [
-        {value: 1, label: '一级'},
-        {value: 2, label: '二级'},
-        {value: 3, label: '三级'},
-        {value: 4, label: '四级'},
-        {value: 5, label: '五级'}
-      ],
+      controAlarmList: this.dicFormater(dataList.alarmLevel)[0].dictList,
       // 布控表单参数
       createForm: {
         surveillanceName: null,
@@ -257,13 +250,10 @@ export default {
             mobile:  null
           }
         ],
-
         cascade: null,
-        cascadePlatform: [],//
-        
+        cascadePlatform: [],
         sharedControl: null,
-        shareDept: [],//
-
+        shareDept: [],
         surveillanceReason: null
       },
       eventList: [],//关联事件下拉列表
@@ -280,15 +270,14 @@ export default {
       ],//是否共享布控下拉列表
       shareDeptList: [],
       
+      modelType_: null,//radio单选时，选中的布控模型类型（在布控编辑时，在切换之前需要先将modelList在方法changeModel里置为null，所以使用此变量）
       modelType: null,//布控模型类型
-      modelType_: null,//布控模型类型
       // 弹出框参数
       toGiveUpDialog: false,
       loading: false,
       loadingBtn: false,
-      // 布控编辑参数
-      detail: {},
-      // 子组件传过来的数据
+      detail: {},//布控回填对象
+      // 布控模型传过来的数据
       modelData: {},
       eventDetail: {},
       modelList: null
@@ -325,8 +314,8 @@ export default {
     this.getOrganInfos();
   },
   methods: {
+    // 切换布控模型类型
     changeModel (value) {
-      console.log(value, 'valuevalue')
       this.modelList = null;
       this.modelType = value;
     },
@@ -443,8 +432,7 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           //验证所选时间段是否出现重叠
-          const isThrough = this.isOverlap();
-          if (!isThrough) {
+          if (!this.isOverlap()) {
             return false;
           } else {
             const _createForm = objDeepCopy(this.createForm);
@@ -575,8 +563,7 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           //验证所选时间段是否出现重叠
-          const isThrough = this.isOverlap();
-          if (!isThrough) {
+          if (!this.isOverlap()) {
             return false;
           } else {
             const _createForm = objDeepCopy(this.createForm);

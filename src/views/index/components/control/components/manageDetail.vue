@@ -29,7 +29,7 @@
             <div class="control_time"><span class="vl_f_666">布控时间段：</span><span class="vl_f_333">{{controlDetail.time}}</span></div>
           </li>
           <li style="width: 34%;">
-            <div><span class="vl_f_666">告警级别：</span><span class="vl_f_333">{{controlDetail.alarmLevel}}</span></div>
+            <div><span class="vl_f_666">告警级别：</span><span class="vl_f_333">{{dicFormater(dataList.alarmLevel, controlDetail.alarmLevel)}}</span></div>
           </li>
         </ul>
         <ul>
@@ -70,9 +70,9 @@
         <h1>分析模型：</h1>
         <div class="manage_model">
           <div class="model_name">
-            <div>人员失踪</div>
+            <div>{{transcoding(controlDetail.modelType)}}</div>
           </div>
-          <ul class="model_info" v-show="true">
+          <ul class="model_info" v-if="controlDetail.modelType === 1">
             <li>失踪人员信息：</li>
             <li>
               <span>人脸照片：</span><img :src="controlDetail.missingUrl" alt="">
@@ -86,66 +86,68 @@
             <li>
               <span style="padding-left: 0;">嫌疑人照片：</span>
               <template v-for="item in controlDetail.objectList">
-                <img :src="item.photoUrl" alt="" :key="item.uid" v-if="item.photoUrl !== controlDetail.missingUrl && item.type === 1">
+                <img :src="item.photoUrl" alt="" :key="item.uid" v-if="item.photoUrl !== controlDetail.missingUrl && (item.type === 1 || item.type === 3)">
               </template>
             </li>
             <li>
               <span>嫌疑车辆：</span>
-              <template v-for="(item, index) in controlDetail.objectList.filter(f => f.type === 2)">
-                <span style="flex: none;" :key="index" v-if="item.type === 2">{{item.name}}<span v-if="index < controlDetail.objectList.filter(f => f.type === 2).length - 1">&nbsp;|&nbsp;</span></span>
+              <template v-for="(item, index) in filterObj(controlDetail.objectList, 2, 4)">
+                <span style="flex: none;" :key="index">{{item.name}}<span v-if="index < filterObj(controlDetail.objectList, 2, 4).length - 1">&nbsp;|&nbsp;</span></span>
               </template>
             </li>
           </ul>
-          <ul class="model_info" v-show="false">
+          <ul class="model_info" v-if="controlDetail.modelType === 2">
             <li>布防信息：</li>
-            <li><span>布防地址：</span><span>{{controlDetail.name}}</span></li>
-            <li><span>布防范围：</span><span>{{controlDetail.name}}</span></li>
+            <li><span>布防地址：</span><span>{{controlDetail.address}}</span></li>
+            <li><span>布防范围：</span><span>{{controlDetail.radius}}千米</span></li>
             <li>
-              <span>禁入人员：</span><img style="margin-left: 14px;" :src="controlDetail.missingUrl" alt="">
+              <span>禁入人员：</span><img v-for="item in filterObj(controlDetail.objectList, 1)" :key="item.uid" :src="item.photoUrl" alt="">
             </li>
             <li>
-              <span>禁入车辆：</span><span></span>
-            </li>
-          </ul>
-          <ul class="model_info" v-show="false">
-            <li>
-              <span>上访人员照片：</span><img style="margin-left: 14px;" :src="controlDetail.missingUrl" alt="">
-            </li>
-            <li>
-              <span>上访车辆信息：</span><span></span>
-            </li>
-            <li>
-              <span>车牌号码：</span><span></span>
+              <span>禁入车辆：</span><img v-for="item in filterObj(controlDetail.objectList, 2)" :key="item.uid" :src="item.photoUrl" alt="">
             </li>
           </ul>
-          <ul class="model_info" v-show="false">
+          <ul class="model_info" v-if="controlDetail.modelType === 3">
             <li>
-              <span>禁入人员：</span><img style="margin-left: 14px;" :src="controlDetail.missingUrl" alt="">
+              <span>上访人员照片：</span><img v-for="(item, index) in filterObj(controlDetail.objectList, 1, 3)" :key="index" :src="item.photoUrl" alt="">
             </li>
             <li>
-              <span>禁入车辆：</span><span></span>
-            </li>
-          </ul>
-          <ul class="model_info" v-show="false">
-            <li>
-              <span>布防场所：</span><span></span>
-            </li>
-            <li>
-              <span>停留时长：</span><span></span>
-            </li>
-            <li>
-              <span>布控车辆：</span><span></span>
+              <span>上访车辆：</span>
+              <template v-for="(item, index) in filterObj(controlDetail.objectList, 2, 4)">
+                <span style="flex: none;" :key="index">{{item.name}}<span v-if="index < filterObj(controlDetail.objectList, 2, 4).length - 1">&nbsp;|&nbsp;</span></span>
+              </template>
             </li>
           </ul>
-          <ul class="model_info" v-show="false">
+          <ul class="model_info" v-if="controlDetail.modelType === 4">
             <li>
-              <span>布控人员信息：</span><img style="margin-left: 14px;" :src="controlDetail.missingUrl" alt="">
+              <span>禁入人员：</span><img v-for="item in filterObj(controlDetail.objectList, 1)" :key="item.uid" :src="item.photoUrl" alt="">
             </li>
             <li>
-              <span>布控车辆信息：</span><span></span>
+              <span>禁入车辆：</span><img v-for="item in filterObj(controlDetail.objectList, 2)" :key="item.uid" :src="item.photoUrl" alt="">
+            </li>
+          </ul>
+          <ul class="model_info" v-if="controlDetail.modelType === 5">
+            <li>
+              <span>布防场所：</span><span>{{controlDetail.locations}}</span>
             </li>
             <li>
-              <span>车牌号码：</span><span></span>
+              <span>停留时长：</span><span>{{controlDetail.stayTime}}</span>
+            </li>
+            <li>
+              <span>布控车辆：</span>
+              <img v-for="item in filterObj(controlDetail.objectList, 2)" :key="item.uid" :src="item.photoUrl" alt="">
+            </li>
+          </ul>
+          <ul class="model_info" v-if="controlDetail.modelType === 6">
+            <li>
+              <span>布控人员信息：</span>
+              <img v-for="item in filterObj(controlDetail.objectList, 1, 3)" :key="item.uid" :src="item.photoUrl" alt="">
+            </li>
+            <li>
+              <span>布控车辆：</span>
+              <template v-for="(item, index) in filterObj(controlDetail.objectList, 2, 4)">
+                <span style="flex: none;" :key="index">{{item.name}}<span v-if="index < filterObj(controlDetail.objectList, 2, 4).length - 1">&nbsp;|&nbsp;</span></span>
+              </template>
             </li>
           </ul>
           <!-- 布控设备 -->
@@ -482,6 +484,7 @@
 <script>
 import {unique} from '@/utils/util.js';
 import delDialog from './delDialog.vue';
+import {dataList} from '@/utils/data.js';
 import stopDialog from './stopDialog.vue';
 import {conDetail} from '../testData.js';
 import flvplayer from '@/components/common/flvplayer.vue';
@@ -549,12 +552,29 @@ export default {
       largeVideoPlay: false,
       videoObj: {},
       curVideoUrl: null,
+      dataList: dataList
     }
   },
   mounted () {
     this.getControlDetail();
   },
   methods: {
+    // 布控模型类型名称转码
+    transcoding (type) {
+      const obj = {
+        1: '人员失踪',
+        2: '重大活动布防',
+        3: '上访人员拦截',
+        4: '重点区域布防',
+        5: '公务车辆监管',
+        6: '自定义'
+      }
+      return obj[type];
+    },
+    // 过滤布控对象类型
+    filterObj(list, type, _type) {
+      return list.filter(f => f.type === type || f.type === _type);
+    },
     // 关闭图片放大
     emitCloseImgDialog(value){
       this.isShowImg = value;
@@ -1185,6 +1205,7 @@ export default {
               width: 104px;
               height: 104px;
               margin-right: 10px;
+              margin-left: 14px;
               border-radius:4px;
               border:1px solid rgba(211,211,211,1);
             }

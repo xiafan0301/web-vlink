@@ -11,7 +11,7 @@
       <div class="sel_car"><span>布控车辆信息：</span><span @click="popSel(2)">从布控库中选择</span></div>
     </el-form-item>
     <el-form-item class="plate_num_box">
-      <div class="plate_num" v-for="item in fileListTwo" :key="item.uid">
+      <div class="plate_num" v-for="(item, index) in fileListTwo" :key="item.uid">
         <el-input v-model="item.vehicleNumber" :disabled="true"></el-input>
         <i class="el-icon-remove" @click="removeVehicleNumber(index)"></i>
       </div>
@@ -63,13 +63,8 @@ export default {
       carNumberInfo.forEach(f => {
         this.modelSixForm.carNumberInfo.push({vehicleNumber: f});
       })
-      
-      let one = surveillanceObjectDtoList.filter(m => m.objType === 1);//回填上访人员照片
-      let two = surveillanceObjectDtoList.filter(m => m.objType === 2);//回填上访车辆信息
-      this.fileListOne = one;
-      this.fileListTwo = two;
-
-     
+      this.fileListOne = surveillanceObjectDtoList.filter(m => m.objType === 1);//回填上访人员照片
+      this.fileListTwo = surveillanceObjectDtoList.filter(m => m.objType === 2);//回填上访车辆信息
       this.isShowControlDev = true;
     }
   },
@@ -82,7 +77,8 @@ export default {
     },
     // 从布控库中获取车辆
     getVehicleData (data) {
-      this.fileListTwo = data;
+      this.fileListTwo = this.fileListTwo.concat(data);
+      this.fileListTwo = unique(this.fileListTwo, 'objId');
     },
    // 布控人员信息的上传方法
     uploadPicDel (fileListOne) {
@@ -106,8 +102,13 @@ export default {
     },
     // 向父组件传值
     sendParent () {
+      if (this.devUpdateData.devList.length > 0) {
         const _carNumberInfo = this.modelSixForm.carNumberInfo.map(m => m.vehicleNumber).join(',');
         this.$emit('getModel', {carNumberInfo: _carNumberInfo, modelType: 6,  pointDtoList: [this.devUpdateData], surveillanceObjectDtoList: [...this.fileListOne, ...this.fileListTwo]});
+      } else {
+        this.$message.warning('请先选择布控设备');
+      }
+       
     },
     getControlDevUpdate (data) {
       this.devUpdateData = data;

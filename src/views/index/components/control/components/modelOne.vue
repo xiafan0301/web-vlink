@@ -64,7 +64,7 @@
         <el-input v-model="item.vehicleNumber" :disabled="true"></el-input>
         <i class="el-icon-remove" @click="removeVehicleNumber(index)"></i>
       </div>
-      <div v-for="(item, index) in modelOneForm.carNumberInfo" :key="index + item.vehicleNumber" style="position: relative;" class="plate_num">
+      <div v-for="(item, index) in modelOneForm.carNumberInfo" :key="index" style="position: relative;" class="plate_num">
         <el-form-item :prop="'carNumberInfo.' + index + '.vehicleNumber'" :rules="{validator: validPlateNumber, trigger: 'blur'}">
           <el-input v-model="item.vehicleNumber" placeholder="请输入车辆车牌号"></el-input>
           <i class="el-icon-remove" @click="removeLicensePlateNum(index)"></i>
@@ -77,7 +77,7 @@
     <el-form-item style="margin-top: 20px;" v-if="!isShowControlDev">
       <el-button type="primary" @click="selControl('modelOne')">一键布控</el-button>
     </el-form-item>
-    <div is="controlDev" ref="controlDev" @getChildModel="getChildModel" :lostTime="modelOneForm.lostTime" :addressObj="addressObj_" v-if="isShowControlDev"></div>
+    <div is="controlDev" ref="controlDev" @getChildModel="getChildModel" :lostTime="modelOneForm.lostTime" :addressObj="addressObj_" :devs="devs" :bays="bays" v-if="isShowControlDev"></div>
     <div is="portraitLib" ref="portraitLibDialogOne" :fileListOne="fileListOne" :imgNum="true" @getPortraitData="getPortraitDataOne"></div>
     <div is="portraitLib" ref="portraitLibDialogTwo" :fileListTwo="fileListTwo" @getPortraitData="getPortraitDataTwo"></div>
     <div is="vehicleLib" ref="vehicleLibDialog" @getVehicleData="getVehicleData" :fileList="fileListThree"></div>
@@ -106,9 +106,7 @@ export default {
         radius: null,
         url: null,
         longitude: null,
-        latitude: null,
-        bayonetList: [],
-        devList: []
+        latitude: null
       },
       validPlateNumber: checkPlateNumber,
       validName: checkName,
@@ -124,15 +122,15 @@ export default {
       fileListTwo: [],//上传的嫌疑人照片数据
       fileListThree: [],//从布控库中选择的车辆
       isShowControlDev: false,//是否显示布控设备选择部分
-      devData: {},
+      devData: {},//地图或列表中选择的设备和卡口
+      devs: [],//编辑时用来回填的设备列表
+      bays: []//编辑时用来回填的卡口列表
     }
   },
   mounted () {
     this.resetMap();
     // 修改时回填数据
-    console.log(this.modelList, 'this.modelList')
     if (this.modelList) {
-      console.log(this.modelList, 'this.modelList')
       // 回填嫌疑车牌
       let [{carNumberInfo, pointDtoList: [{bayonetList, devList, longitude, latitude, url, ...other}], surveillanceObjectDtoList}] = this.modelList;
       carNumberInfo = carNumberInfo.split(',');
@@ -141,16 +139,14 @@ export default {
         other.carNumberInfo.push({vehicleNumber: f});
       })
       other.lostTime = new Date(other.lostTime);
-      this.modelOneForm = other;
-      
-      let one = surveillanceObjectDtoList.find(m => (m.objType === 1 || m.objType === 3) && url === m.photoUrl);//回填失踪人员照片
-      let two = surveillanceObjectDtoList.filter(m => (m.objType === 1 || m.objType === 3) && url !== m.photoUrl);//回填嫌疑人照片
-      let three = surveillanceObjectDtoList.filter(m => m.objType === 2);//回填嫌疑车辆
-      this.fileListOne = [one];
-      this.fileListTwo = two;
-      this.fileListThree = three;
-      console.log(three, 'three')
+      this.modelOneForm = other;//回填表单数据
+      this.devs = devList;//回填设备
+      this.bays = bayonetList;//回填卡口
 
+      this.fileListOne = [surveillanceObjectDtoList.find(m => (m.objType === 1 || m.objType === 3) && url === m.photoUrl)];//回填失踪人员照片
+      this.fileListTwo = surveillanceObjectDtoList.filter(m => (m.objType === 1 || m.objType === 3) && url !== m.photoUrl);//回填嫌疑人照片
+      this.fileListThree = surveillanceObjectDtoList.filter(m => m.objType === 2);//回填嫌疑车辆
+      // 回填选择范围的经纬度、地址
       longitude = longitude.split(',');
       latitude = latitude.split(',');
       longitude.forEach((f, i) => {
@@ -190,7 +186,8 @@ export default {
     },
     // 从布控库中获取车像
     getVehicleData (data) {
-      this.fileListThree = data;
+      this.fileListThree = this.fileListThree.concat(data);
+      this.fileListThree = unique(this.fileListThree, 'objId');
     },
     // 一键布控
     selControl (formName) {
@@ -213,7 +210,7 @@ export default {
       } 
       this.$refs['modelOne'].validate((valid) => {
         if (valid) {
-          if (this.$refs['controlDev']) {
+          if (this.$refs['controlDev'] && this.devData.devList.length > 0) {
             this.$refs['controlDev'].sendParent();
 
             let _modelOneForm = objDeepCopy(this.modelOneForm);

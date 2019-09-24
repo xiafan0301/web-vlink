@@ -27,7 +27,7 @@
     <el-form-item style="margin-top: 20px;" v-if="!isShowControlDev">
       <el-button type="primary" @click="selControl('modelFive')">一键布控</el-button>
     </el-form-item>
-    <div is="controlDev" ref="controlDev" v-if="isShowControlDev" @getChildModel="getChildModel" :devIdListSel="devIdList" :bayIdListSel="bayIdList"></div>
+    <div is="controlDev" ref="controlDev" v-if="isShowControlDev" @getChildModel="getChildModel" :devIdListFive="devIdList" :bayIdListFive="bayIdList"></div>
     <div is="vehicleLib" ref="vehicleLibDialog" :carNumberInfo="vehicleList" @getVehicleData="getVehicleData"></div>
   </el-form>
 </template>
@@ -62,7 +62,6 @@ export default {
     this.getTheirPlacesList();
     // 修改时回填数据
     if (this.modelList) {
-      console.log(this.modelList, 'this.modelList')
       // 回填嫌疑车牌
       let [{pointDtoList: [{bayonetList, devList, locations, stayTime}], surveillanceObjectDtoList}] = this.modelList;
       this.modelFiveForm.locations = locations;
@@ -77,8 +76,8 @@ export default {
   methods: {
     // 从布控库中获取嫌疑车辆
     getVehicleData (data) {
-      console.log(data, 'datadata')
-      this.vehicleList = data;
+      this.vehicleList = this.vehicleList.concat(data);
+      this.vehicleList = unique(this.vehicleList, 'objId');
     },
     // 删除从布控库中已选择的车辆
     delVehicle (index) {
@@ -120,7 +119,7 @@ export default {
       }
       this.$refs['modelFive'].validate((valid) => {
         if (valid) {
-          if (this.$refs['controlDev']) {
+          if (this.$refs['controlDev'] && this.devData.devList.length > 0) {
             this.$refs['controlDev'].sendParent();
             
             let _modelFiveForm = {};

@@ -592,11 +592,11 @@ export function getAlarmSnap(params) {
  * getAlarmListByDev 获得设备报警列表
  * @param {object} params
  */
-export function getAlarmListByDev(params) {
+export function getAlarmListByDev(data) {
   return request({
     url: 'alarm-snaps/devices',
-    method: 'get',
-    params,
+    method: 'post',
+    data,
     mode: 'control'
   })
 }

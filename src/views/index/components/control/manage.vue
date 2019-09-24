@@ -241,13 +241,6 @@ export default {
         {label: '长期布控', value: 2}
       ],
       // alarmLevelList: this.dicFormater(dataList.alarmLevel)[0].dictList,
-      alarmLevelList: [
-        {value: 1, label: '一级'},
-        {value: 2, label: '二级'},
-        {value: 3, label: '三级'},
-        {value: 4, label: '四级'},
-        {value: 5, label: '五级'}
-      ],
       // 布控管理列表数据
       manageList: [],
       // 翻页数据
