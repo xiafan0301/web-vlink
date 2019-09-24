@@ -253,7 +253,7 @@
     <!-- 详情 -->
     <portraitDetail :detailData="detailData"></portraitDetail>
     <!-- D设备 B卡口  这里是设备和卡口 -->
-    <div is="mapSelector" :activeDeviceList="activeDeviceList" :open="openMap" :clear="msClear" :showTypes="'DB'" @mapSelectorEmit="mapSelectorEmit"></div>
+    <div is="mapSelector" :activeDeviceList="activeDeviceList"  :open="openMap" :clear="msClear" singleArea :showTypes="'DB'" @mapSelectorEmit="mapSelectorEmit"></div>
     <!-- 框选搜索主体弹框 -->
     <div is="imgSelect" :open="isOpenImgDialog" @emitImgData="emitImgData"></div>
   </div>
@@ -527,6 +527,7 @@ export default {
 
     areaTypeChanged (val) {
       if (val === 2) {
+        this.activeDeviceList = ['20','21']
         this.openMap = !this.openMap;
       }
     },

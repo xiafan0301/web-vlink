@@ -46,7 +46,7 @@ export function ScpGETportraitCmpInfo(params) {
     url: '/portrait-structures/compare',
     method: 'get',
     params: params,
-    mode: 'judge'
+    mode: 'portrait'
   })
 }
 /**

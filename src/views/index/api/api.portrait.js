@@ -75,7 +75,7 @@ export function PortraitPostPersonTrace(data) {
     url: '/person-trace/analysis',
     method: 'post',
     data,
-    mode: 'judge'
+    mode: 'portrait'
   })
 }
 /*================人脸检索 --- 轨迹分析 end=================== */
@@ -120,3 +120,72 @@ export function PortraitPostByphotoRealtime(data) {
   })
 }
 /*================人脸检索 --- 以图搜人 end=================== */
+
+
+/*================人脸检索 --- 人像落脚点 start=================== */
+
+/**
+ * 人像落脚点实时
+ * @data {object} data
+ */
+export function PortraitPostStayPointRealtime(data) {
+  return request({
+    url: '/person-stay-point/real-time',
+    method: 'post',
+    data,
+    mode: 'portrait'
+  })
+}
+
+/**
+ * 人像落脚点离线任务创建
+ * @data {object} data
+ */
+export function PortraitPostStayPointTask(data) {
+  return request({
+    url: '/person-stay-point/task',
+    method: 'post',
+    data,
+    mode: 'portrait'
+  })
+}
+
+/**
+ * 人像落脚点任务状态修改
+ * @data {object} data
+ */
+export function PortraitPutStayPointTaskUpDate(data) {
+  return request({
+    url: '/person-stay-point/task',
+    method: 'put',
+    data,
+    mode: 'portrait'
+  })
+}
+
+/**
+ * 人像落脚点任务结果接口
+ * @data {object} data
+ */
+export function PortraitGetStayPointTaskByUid(params) {
+  return request({
+    url: '/person-stay-point/task/' + params.uid,
+    method: 'get',
+    mode: 'portrait'
+  })
+}
+
+/**
+ * 人像落脚点任务分页列表查询接口
+ * @data {object} data
+ */
+export function PortraitGetStayPointTasks(params) {
+  return request({
+    url: '/person-stay-point/tasks',
+    method: 'get',
+    data: params,
+    mode: 'portrait'
+  })
+}
+
+/*================人脸检索 --- 人像落脚点 end=================== */
