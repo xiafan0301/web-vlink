@@ -11,6 +11,7 @@
     <div class="select_body">
       <div class="img_box">
         <img src="http://newfile.aorise.org:80/group1/default/20190919/15/00/2/9546310b-b254-49ca-8ff2-4b3cef487d45.png" alt="" id="imgBox">
+        
       </div>
     </div>
     <span slot="footer" class="dialog-footer">
@@ -48,6 +49,7 @@ export default {
       initImgWidth: 881, // 图片原width
       initImgHeight: 600, // 图片原height
       fd: null,
+      selectComplete: true, // 点击选择出现
     }
   },
   watch: {
@@ -117,7 +119,11 @@ export default {
           $('.select_box').removeClass('active_select');
         }
 
-        $(clickObj).addClass('active_select');
+        if ($(clickObj).hasClass('active_select')) {
+          $(clickObj).removeClass('active_select');
+        } else {
+          $(clickObj).addClass('active_select');
+        }
 
         _self.createImgPath(x, y, width, height);
       })
@@ -206,13 +212,15 @@ export default {
 <style lang="scss">
   .cut_img_select_dialog {
     .select_body {
+      height: 500px;
+      overflow-y: scroll;
       .img_box {
         width: 100%;
         height: 100%;
         position: relative;
         >img {
           width: 100%;
-          height: 100%;
+          // height: 100%;
         }
         .select_box {
           position: absolute;
