@@ -549,7 +549,7 @@ export default {
           }
           const {modelList} = detail;
           delete detail.modelList;
-
+          detail.alarmLevel = String(detail.alarmLevel);
           this.createForm = detail;
           const [{modelType}] = modelList;
           this.modelList = modelList;

@@ -27,7 +27,7 @@
     <el-form-item style="margin-top: 20px;" v-if="!isShowControlDev">
       <el-button type="primary" @click="selControl('modelFive')">一键布控</el-button>
     </el-form-item>
-    <div is="controlDev" ref="controlDev" v-if="isShowControlDev" @getChildModel="getChildModel" :devIdListFive="devIdList" :bayIdListFive="bayIdList"></div>
+    <div is="controlDev" ref="controlDev" v-if="isShowControlDev" :devs="devs" :bays="bays" @getChildModel="getChildModel" :devIdListFive="devIdList" :bayIdListFive="bayIdList"></div>
     <div is="vehicleLib" ref="vehicleLibDialog" :carNumberInfo="vehicleList" @getVehicleData="getVehicleData"></div>
   </el-form>
 </template>
@@ -55,7 +55,9 @@ export default {
       isShowControlDev: false,
       devData: {},
       devIdList: [],
-      bayIdList: []
+      bayIdList: [],
+      devs: [],
+      bays: []
     }
   },
   mounted () {
@@ -67,8 +69,8 @@ export default {
       this.modelFiveForm.locations = locations;
       this.modelFiveForm.stayTime = stayTime;
       this.vehicleList = surveillanceObjectDtoList;//回填布控车辆
-      this.devIdList = devList.map(m => m.deviceId);
-      this.bayIdList = bayonetList.map(m => m.bayonetId);
+      this.devs = devList;
+      this.bays = bayonetList;
 
       this.isShowControlDev = true;
     }
@@ -119,9 +121,9 @@ export default {
       }
       this.$refs['modelFive'].validate((valid) => {
         if (valid) {
-          if (this.$refs['controlDev'] && this.devData.devList.length > 0) {
+          if (this.$refs['controlDev']) {
             this.$refs['controlDev'].sendParent();
-            
+            if (this.devData.devList.length === 0) return this.$message.warning('请先选择布控设备');
             let _modelFiveForm = {};
             const _locations = this.modelFiveForm.locations;
             _modelFiveForm = {locations: _locations, stayTime: this.modelFiveForm.stayTime, ...this.devData}

@@ -137,7 +137,7 @@ export default {
             ul{
               li{
                 width: 100%;
-                padding: 6px 10px 6px 44px;
+                padding: 6px 10px 6px 54px;
                 display: flex;
                 flex-wrap: nowrap;
                 justify-content: space-between;
@@ -186,7 +186,7 @@ export default {
             .highlight{
               cursor: pointer;
               &:hover, &.active{
-                background: #ebeff2;
+                background: #E0F2FF;
               }
             }
           }

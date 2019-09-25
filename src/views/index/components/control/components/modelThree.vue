@@ -28,7 +28,7 @@
     <el-form-item style="margin-top: 20px;" v-if="!isShowControlDev">
       <el-button type="primary" @click="selControl('modelThree')">一键布控</el-button>
     </el-form-item>
-    <div is="controlDev" ref="controlDev" v-if="isShowControlDev" :modelType="3" @getChildModel="getChildModel"></div>
+    <div is="controlDev" ref="controlDev" v-if="isShowControlDev" :modelType="3" :devs="devs" :bays="bays" @getChildModel="getChildModel"></div>
     <div is="portraitLib" ref="portraitLibDialog" :fileListOne="fileListOne" @getPortraitData="getPortraitData"></div>
     <div is="vehicleLib" ref="vehicleLibDialog" :fileList="fileListTwo" @getVehicleData="getVehicleData"></div>
   </el-form>
@@ -53,7 +53,9 @@ export default {
       fileListOne: [],
       fileListTwo: [],
       createSelDialog: false,
-      isShowControlDev: false
+      isShowControlDev: false,
+      devs: [],
+      bays: []
     }
   },
   mounted () {
@@ -67,6 +69,8 @@ export default {
       carNumberInfo.forEach(f => {
         this.modelThreeForm.carNumberInfo.push({vehicleNumber: f});
       })
+      this.devs = devList;
+      this.bays = bayonetList;
       this.fileListOne = surveillanceObjectDtoList.filter(m => m.objType === 1);//回填上访人员照片
       this.fileListTwo = surveillanceObjectDtoList.filter(m => m.objType === 2);//回填上访车辆信息
       this.isShowControlDev = true;
@@ -123,9 +127,9 @@ export default {
       } 
       this.$refs['modelThree'].validate((valid) => {
         if (valid) {
-          if (this.$refs['controlDev'] && this.devData.bayonetList.length > 0) {
+          if (this.$refs['controlDev']) {
             this.$refs['controlDev'].sendParent();
-
+            if (this.devData.devList.length === 0) return this.$message.warning('请先选择布控卡口');
             const _carNumberInfo = this.modelThreeForm.carNumberInfo.map(m => m.vehicleNumber).join(',');
             this.$emit('getModel', {carNumberInfo: _carNumberInfo, modelType: 3,  pointDtoList: [this.devData], surveillanceObjectDtoList: [...this.fileListOne, ...this.fileListTwo]});
           } else {

@@ -29,7 +29,7 @@
             <div class="control_time"><span class="vl_f_666">布控时间段：</span><span class="vl_f_333">{{controlDetail.time}}</span></div>
           </li>
           <li style="width: 34%;">
-            <div><span class="vl_f_666">告警级别：</span><span class="vl_f_333">{{dicFormater(dataList.alarmLevel, controlDetail.alarmLevel)}}</span></div>
+            <div><span class="vl_f_666">告警级别：</span><span class="vl_f_333" v-if="controlDetail.alarmLevel">{{dicFormater(dataList_.alarmLevel, controlDetail.alarmLevel)}}</span></div>
           </li>
         </ul>
         <ul>
@@ -69,161 +69,142 @@
         <div :class="['vl_icon con_state', controlState === 2 ? 'vl_control_s' : controlState === 1 ? 'vl_control_o' : 'vl_control_e']"></div>
         <h1>分析模型：</h1>
         <div class="manage_model">
-          <div class="model_name">
+          <div class="model_name" @click="dpOne = !dpOne">
             <div>{{transcoding(controlDetail.modelType)}}</div>
+            <i class="el-icon-arrow-up" v-show="dpOne"></i>
+            <i class="el-icon-arrow-down" v-show="!dpOne"></i>
           </div>
-          <ul class="model_info" v-if="controlDetail.modelType === 1">
-            <li>失踪人员信息：</li>
-            <li>
-              <span>人脸照片：</span><img :src="controlDetail.missingUrl" alt="">
-            </li>
-            <li><span>人员姓名：</span><span>{{controlDetail.name}}</span></li>
-            <li><span>人员性别：</span><span>{{controlDetail.sex}}</span></li>
-            <li><span>失踪时间：</span><span>{{controlDetail.lostTime}}</span></li>
-            <li><span>失踪地址：</span><span>{{controlDetail.lostAddress}}</span></li>
-            <li><span>家庭地址：</span><span>{{controlDetail.homeAddress}}</span></li>
-          
-            <li>
-              <span style="padding-left: 0;">嫌疑人照片：</span>
-              <template v-for="item in controlDetail.objectList">
-                <img :src="item.photoUrl" alt="" :key="item.uid" v-if="item.photoUrl !== controlDetail.missingUrl && (item.type === 1 || item.type === 3)">
-              </template>
-            </li>
-            <li>
-              <span>嫌疑车辆：</span>
-              <template v-for="(item, index) in filterObj(controlDetail.objectList, 2, 4)">
-                <span style="flex: none;" :key="index">{{item.name}}<span v-if="index < filterObj(controlDetail.objectList, 2, 4).length - 1">&nbsp;|&nbsp;</span></span>
-              </template>
-            </li>
-          </ul>
-          <ul class="model_info" v-if="controlDetail.modelType === 2">
-            <li>布防信息：</li>
-            <li><span>布防地址：</span><span>{{controlDetail.address}}</span></li>
-            <li><span>布防范围：</span><span>{{controlDetail.radius}}千米</span></li>
-            <li>
-              <span>禁入人员：</span><img v-for="item in filterObj(controlDetail.objectList, 1)" :key="item.uid" :src="item.photoUrl" alt="">
-            </li>
-            <li>
-              <span>禁入车辆：</span><img v-for="item in filterObj(controlDetail.objectList, 2)" :key="item.uid" :src="item.photoUrl" alt="">
-            </li>
-          </ul>
-          <ul class="model_info" v-if="controlDetail.modelType === 3">
-            <li>
-              <span>上访人员照片：</span><img v-for="(item, index) in filterObj(controlDetail.objectList, 1, 3)" :key="index" :src="item.photoUrl" alt="">
-            </li>
-            <li>
-              <span>上访车辆：</span>
-              <template v-for="(item, index) in filterObj(controlDetail.objectList, 2, 4)">
-                <span style="flex: none;" :key="index">{{item.name}}<span v-if="index < filterObj(controlDetail.objectList, 2, 4).length - 1">&nbsp;|&nbsp;</span></span>
-              </template>
-            </li>
-          </ul>
-          <ul class="model_info" v-if="controlDetail.modelType === 4">
-            <li>
-              <span>禁入人员：</span><img v-for="item in filterObj(controlDetail.objectList, 1)" :key="item.uid" :src="item.photoUrl" alt="">
-            </li>
-            <li>
-              <span>禁入车辆：</span><img v-for="item in filterObj(controlDetail.objectList, 2)" :key="item.uid" :src="item.photoUrl" alt="">
-            </li>
-          </ul>
-          <ul class="model_info" v-if="controlDetail.modelType === 5">
-            <li>
-              <span>布防场所：</span><span>{{controlDetail.locations}}</span>
-            </li>
-            <li>
-              <span>停留时长：</span><span>{{controlDetail.stayTime}}</span>
-            </li>
-            <li>
-              <span>布控车辆：</span>
-              <img v-for="item in filterObj(controlDetail.objectList, 2)" :key="item.uid" :src="item.photoUrl" alt="">
-            </li>
-          </ul>
-          <ul class="model_info" v-if="controlDetail.modelType === 6">
-            <li>
-              <span>布控人员信息：</span>
-              <img v-for="item in filterObj(controlDetail.objectList, 1, 3)" :key="item.uid" :src="item.photoUrl" alt="">
-            </li>
-            <li>
-              <span>布控车辆：</span>
-              <template v-for="(item, index) in filterObj(controlDetail.objectList, 2, 4)">
-                <span style="flex: none;" :key="index">{{item.name}}<span v-if="index < filterObj(controlDetail.objectList, 2, 4).length - 1">&nbsp;|&nbsp;</span></span>
-              </template>
-            </li>
-          </ul>
-          <!-- 布控设备 -->
-          <div class="manage_d_c_scope">
-            <div class="manage_d_s_t" @click="controlArea(1)">
-              <div>布控设备</div>
-              <i class="el-icon-arrow-up" v-show="dpOne"></i>
-              <i class="el-icon-arrow-down" v-show="!dpOne"></i>
-            </div>
-            <el-collapse-transition>
-              <div class="manage_d_s_m" v-show="dpOne">
-                <div id="mapBox"></div>
-                <div class="manage_d_s_m_l">
-                  <div class="manage_b" style="margin-top: 0;">
-                    <div class="vl_f_333 top">已选设备</div>
-                    <div class="dp_box" style="padding-top: 10px;">
-                      <div v-for="trackPoint in trackPointList" :key="trackPoint.uid">
-                        <div class="equ_m">
-                          <div @click="getEquList('0', trackPoint)" :class="{'active': trackPointId === trackPoint.uid && tabTypeByScope === '0'}">摄像头（{{trackPoint.devList ? trackPoint.devList.length : 0}}）</div>
-                          <div @click="getEquList('1', trackPoint)" :class="{'active': trackPointId === trackPoint.uid && tabTypeByScope === '1'}">卡口（{{trackPoint.bayonetList ? trackPoint.bayonetList.length : 0}}）</div>
-                        </div>
-                        <div class="track_t" @click="dropdown(trackPoint)" :class="{'active': trackPoint.isDropdown}">
-                          <i class="el-icon-arrow-down" v-show="trackPoint.isDropdown"></i><i class="el-icon-arrow-right" v-show="!trackPoint.isDropdown"></i><span>{{trackPoint.address}}</span>
-                        </div>
-                        <el-collapse-transition>
-                          <div v-show="trackPoint.isDropdown">
-                            <vue-scroll>
-                              <!-- 摄像头 -->
-                              <ul v-if="tabTypeByScope === '0' && trackPoint.devList && trackPoint.devList.length > 0" style="max-height: 280px;">
-                                <template v-for="equ in trackPoint.devList">
-                                  <li @click="selDev(equ)" class="highlight" :class="{'active': devIdOrBayId === equ.uid}" :key="equ.uid"><span :title="equ.deviceName">{{equ.deviceName | strCutWithLen(25)}}</span><i class="vl_icon vl_icon_control_05"></i></li>
-                                </template>
-                              </ul>
-                              <ul v-if="tabTypeByScope === '0' && (!trackPoint.devList || trackPoint.devList.length === 0)">
-                                <li>范围内无设备</li>
-                              </ul>
-                              <!-- 卡口 -->
-                              <ul v-if="tabTypeByScope === '1' && trackPoint.bayonetList && trackPoint.bayonetList.length > 0" style="max-height: 280px;" class="bayonet_list">
-                                <li v-for="bayonet in trackPoint.bayonetList" :key="bayonet.uid + bayonet.bayonetName" style="padding: 0;">
-                                  <div class="bayone_name highlight"  @click="dropdownBayonet(trackPoint, bayonet)" :class="{'active': bayonet.isDropdown || devIdOrBayId === bayonet.uid}" style="padding: 10px 34px;">
-                                    <i class="el-icon-arrow-down" v-show="bayonet.isDropdown"></i><i class="el-icon-arrow-right" v-show="!bayonet.isDropdown"></i><span :title="bayonet.bayonetName">{{bayonet.bayonetName | strCutWithLen(25)}}</span>
-                                  </div>
-                                  <el-collapse-transition>
-                                    <ul v-if="bayonet.isDropdown && bayonet.devList.length > 0">
-                                      <template v-for="(equ, index) in bayonet.devList">
-                                        <li :key="equ.uid + equ.deviceName + index">
-                                          <span style="color: #999;">{{equ.deviceName}}</span><i class="vl_icon vl_icon_control_05" style="color: #999;"></i>
-                                        </li>
-                                      </template>
-                                    </ul>
-                                    <ul v-if="bayonet.isDropdown && (!bayonet.devList || bayonet.devList.length === 0)">
-                                      <li>范围内无设备</li>
-                                    </ul>
-                                  </el-collapse-transition>
-                                </li>
-                              </ul>
-                              <ul v-if="tabTypeByScope === '1' && (!trackPoint.bayonetList || trackPoint.bayonetList.length === 0)">
-                                <li>范围内无卡口</li>
-                              </ul>
-                            </vue-scroll>
-                          </div>
-                        </el-collapse-transition>
-                      </div>
+          <el-collapse-transition>
+            <div v-show="dpOne">
+              <ul class="model_info" v-if="controlDetail.modelType === 1">
+                <li>失踪人员信息：</li>
+                <li>
+                  <span>人脸照片：</span><img :src="controlDetail.missingUrl" alt="">
+                </li>
+                <li><span>人员姓名：</span><span>{{controlDetail.name}}</span></li>
+                <li><span>人员性别：</span><span>{{controlDetail.sex}}</span></li>
+                <li><span>失踪时间：</span><span>{{controlDetail.lostTime}}</span></li>
+                <li><span>失踪地址：</span><span>{{controlDetail.lostAddress}}</span></li>
+                <li><span>家庭地址：</span><span>{{controlDetail.homeAddress}}</span></li>
+              
+                <li>
+                  <span style="padding-left: 0;">嫌疑人照片：</span>
+                  <template v-for="item in controlDetail.objectList">
+                    <img :src="item.photoUrl" alt="" :key="item.uid" v-if="item.photoUrl !== controlDetail.missingUrl && (item.type === 1 || item.type === 3)">
+                  </template>
+                </li>
+                <li>
+                  <span>嫌疑车辆：</span>
+                  <template v-for="(item, index) in filterObj(controlDetail.objectList, 2, 4)">
+                    <span style="flex: none;" :key="index">{{item.name}}<span v-if="index < filterObj(controlDetail.objectList, 2, 4).length - 1">&nbsp;|&nbsp;</span></span>
+                  </template>
+                </li>
+              </ul>
+              <ul class="model_info" v-if="controlDetail.modelType === 2">
+                <li>布防信息：</li>
+                <li><span>布防地址：</span><span>{{controlDetail.address}}</span></li>
+                <li><span>布防范围：</span><span>{{controlDetail.radius}}千米</span></li>
+                <li>
+                  <span>禁入人员：</span><img v-for="item in filterObj(controlDetail.objectList, 1)" :key="item.uid" :src="item.photoUrl" alt="">
+                </li>
+                <li>
+                  <span>禁入车辆：</span><img v-for="item in filterObj(controlDetail.objectList, 2)" :key="item.uid" :src="item.photoUrl" alt="">
+                </li>
+              </ul>
+              <ul class="model_info" v-if="controlDetail.modelType === 3">
+                <li>
+                  <span>上访人员照片：</span><img v-for="(item, index) in filterObj(controlDetail.objectList, 1, 3)" :key="index" :src="item.photoUrl" alt="">
+                </li>
+                <li>
+                  <span>上访车辆：</span>
+                  <template v-for="(item, index) in filterObj(controlDetail.objectList, 2, 4)">
+                    <span style="flex: none;" :key="index">{{item.name}}<span v-if="index < filterObj(controlDetail.objectList, 2, 4).length - 1">&nbsp;|&nbsp;</span></span>
+                  </template>
+                </li>
+              </ul>
+              <ul class="model_info" v-if="controlDetail.modelType === 4">
+                <li>
+                  <span>禁入人员：</span><img v-for="item in filterObj(controlDetail.objectList, 1)" :key="item.uid" :src="item.photoUrl" alt="">
+                </li>
+                <li>
+                  <span>禁入车辆：</span><img v-for="item in filterObj(controlDetail.objectList, 2)" :key="item.uid" :src="item.photoUrl" alt="">
+                </li>
+              </ul>
+              <ul class="model_info" v-if="controlDetail.modelType === 5">
+                <li>
+                  <span>布防场所：</span><span>{{controlDetail.locations}}</span>
+                </li>
+                <li>
+                  <span>停留时长：</span><span>{{controlDetail.stayTime}}</span>
+                </li>
+                <li>
+                  <span>布控车辆：</span>
+                  <img v-for="item in filterObj(controlDetail.objectList, 2)" :key="item.uid" :src="item.photoUrl" alt="">
+                </li>
+              </ul>
+              <ul class="model_info" v-if="controlDetail.modelType === 6">
+                <li>
+                  <span>布控人员信息：</span>
+                  <img v-for="item in filterObj(controlDetail.objectList, 1, 3)" :key="item.uid" :src="item.photoUrl" alt="">
+                </li>
+                <li>
+                  <span>布控车辆：</span>
+                  <template v-for="(item, index) in filterObj(controlDetail.objectList, 2, 4)">
+                    <span style="flex: none;" :key="index">{{item.name}}<span v-if="index < filterObj(controlDetail.objectList, 2, 4).length - 1">&nbsp;|&nbsp;</span></span>
+                  </template>
+                </li>
+              </ul>
+              <!-- 布控设备 -->
+              <div class="dev_box">
+                <div class="tab">
+                  <span>布控设备</span>
+                </div>
+                <div class="sel_dev">
+                  <div class="title">
+                    <span>已选设备（{{bayOrdev === 1 ? devNum : bayonetNum}}）</span>
+                    <i class="el-icon-arrow-up" v-show="isShowTree" @click="isShowTree = false"></i>
+                    <i class="el-icon-arrow-down" v-show="!isShowTree" @click="isShowTree = true"></i>
+                  </div>
+                  <div v-show="isShowTree">
+                    <div class="sel_tab">
+                      <div @click="bayOrdev = 1" :class="{'active': bayOrdev === 1}">摄像头</div>
+                      <div @click="bayOrdev = 2" :class="{'active': bayOrdev === 2}">卡口</div>
                     </div>
+                    <vue-scroll style="height: 352px;">
+                      <div class="tree_box">
+                        <el-tree
+                          v-show="bayOrdev === 1"
+                          ref="to-tree1" 
+                          icon-class="el-icon-arrow-right"
+                          :data="toLeftDevList"
+                          :node-key="node_key"
+                          :props="defaultProps"
+                        >
+                        </el-tree>
+                        <el-tree
+                          v-show="bayOrdev === 2"
+                          ref="to-tree2" 
+                          icon-class="el-icon-arrow-right"
+                          :data="toLeftBayList"
+                          :node-key="node_key"
+                          :props="defaultProps"
+                        >
+                        </el-tree>
+                      </div>
+                    </vue-scroll>
                   </div>
                 </div>
-                <div class="manage_d_s_m_r">
-                  <div class="top"><i class="vl_icon vl_icon_control_23" @click="resetZoom"></i></div>
+                <div class="dev_map" id="devMap"></div>
+                <div class="map_zoom">
+                  <div class="top"><i class="el-icon-aim" @click="resetZoom()"></i></div>
                   <ul class="bottom">
                     <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
                     <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
                   </ul>
                 </div>
               </div>
-            </el-collapse-transition>
-          </div>
+            </div>
+          </el-collapse-transition>
         </div>
       </div>
       <!-- 运行情况 -->
@@ -482,7 +463,7 @@
   </div>
 </template>
 <script>
-import {unique} from '@/utils/util.js';
+import {unique, addCluster} from '@/utils/util.js';
 import delDialog from './delDialog.vue';
 import {dataList} from '@/utils/data.js';
 import stopDialog from './stopDialog.vue';
@@ -490,6 +471,7 @@ import {conDetail} from '../testData.js';
 import flvplayer from '@/components/common/flvplayer.vue';
 import {getControlDetail, getControlObjList, controlArea, getControlDevice, getAlarmSnap} from '@/views/index/api/api.control.js';
 import {getEventDetail} from '@/views/index/api/api.event.js';
+import {getAllMonitorList, getAllBayonetList} from '@/views/index/api/api.base.js';
 import {mapXupuxian} from '@/config/config.js';
 import BigImg from '@/components/common/bigImg.vue';
 export default {
@@ -507,18 +489,23 @@ export default {
       // 地图参数
       map: null,
       zoomLevel: 10,
-      // 追踪点列表数据
-      trackPointList: [],
+      // 布控设备参数
       devNum: null,//摄像头数量
       bayonetNum: null,//卡口数量
       devList: [], //设备列表
-      tabTypeByScope : '0',// 设备类型-布控范围
       tabTypeBySituation : '0',// 设备类型-运行情况
-      devIdOrBayId: null,//设备或者卡口id
-      trackPointId: null,//追踪点id
       dpOne: false,//展开布控范围
       dpTwo: false,//展开实时监控
-       // 翻页数据
+
+      isShowTree: false,
+      bayOrdev: 1,
+      toLeftDevList: [],
+      toLeftBayList: [],
+      node_key: 'uid',
+      defaultProps: { label: 'name', children: 'areaTreeList' },
+      markerList: [],
+
+      // 翻页数据
       currentPage: 1,
       pageSizeObj: 18,
       pageNumObj: 1,
@@ -552,7 +539,7 @@ export default {
       largeVideoPlay: false,
       videoObj: {},
       curVideoUrl: null,
-      dataList: dataList
+      dataList_: dataList
     }
   },
   mounted () {
@@ -681,6 +668,8 @@ export default {
           this.controlState = this.controlDetail.surveillanceStatus === '待开始' ? 2 : this.controlDetail.surveillanceStatus === '进行中' ? 1 : 3;
           this.$nextTick(() => {
             this.resetMap();
+            this.getDevAndBayList();
+            this.controlArea(1);
           })
           if (this.controlState !== 2) {
             this.getAlarmSnap();
@@ -697,7 +686,46 @@ export default {
         }
       })
     },
-    // 获取布控范围
+    // 设置marker的显示图标
+    setMarkContent (obj) {
+      const type = obj.dataType === 1 ? 0 : 1;
+      return '<div id="' + obj.uid + '" class="map_icons vl_icon vl_icon_map_sxt_in_area' + type + '"></div>'
+    },
+    // 改造数据成树结构公共方法
+    getTreeData (data, type) {
+      const hash = {};
+      data.forEach(f => {
+        if (!hash[f.areaName]) {
+          hash[f.areaName] = [];
+          hash[f.areaName].push(f);
+        } else {
+          hash[f.areaName].push(f);
+        }
+      })
+      const areaList = [];
+      for (let key in hash) {
+        areaList.push({name: key, uid: hash[key][0].areaUid, areaUid: 1, areaTreeList: hash[key]});
+      }
+      if (type === 1) {
+        this.toLeftDevList = areaList;
+      } else {
+        this.toLeftBayList = areaList;
+      }
+    },
+    // 新增或编辑时，点标记变色和变为树结构数据公共方法
+    changeColorAndGetTreeData (array, type) {
+      let list = [];
+      this.markerList.forEach(f => {
+        const obj = f.getExtData();
+        if (array.some(s => s === obj.uid && obj.dataType === type)) {
+          list.push(obj);
+          const uContent = this.setMarkContent(obj)
+          f.setContent(uContent);
+        }
+      })
+      this.getTreeData(list, type);
+    },
+    // 获取布控范围和运行情况，因为是同一接口，所以写在了一起
     controlArea (isShowType) {
       // 展开关闭布控范围
       if (isShowType === 1) {
@@ -711,23 +739,24 @@ export default {
           if (res && res.data) {
             this.devNum = res.data.devNum;
             this.bayonetNum = res.data.bayonetNum;
+            const trackingPointList = res.data.trackingPointList;
             // 布控范围
             if (isShowType === 1) {
-              this.trackPointList = res.data.trackingPointList;
-              this.trackPointList && this.trackPointList.forEach(f => {
-                this.$set(f, 'isDropdown', false);
-                if (f.bayonetList) {
-                  f.bayonetList.forEach(b => {
-                    this.$set(b, 'isDropdown', false);
-                  })
-                }
-              });
-              this.mapMark();
+              let _devList = []
+              trackingPointList.forEach(f => {
+                _devList.push(...f.devList.map(m => m.uid));
+              })
+              let _bayList = []
+              trackingPointList.forEach(f => {
+                _bayList.push(...f.bayonetList.map(m => m.uid));
+              })
+              this.changeColorAndGetTreeData(_devList, 1);
+              this.changeColorAndGetTreeData(_bayList, 2);
             // 运行情况
             } else {
               // 组装摄像头列表数据
               let devList = [];
-              res.data.trackingPointList.forEach(f => {
+              trackingPointList.forEach(f => {
                 if (f.devList) {
                   devList = devList.concat(f.devList);
                 }
@@ -736,7 +765,7 @@ export default {
               console.log(this.situList, 'situList')
               // 组装卡口列表数据
               let bayList = [];
-              res.data.trackingPointList.forEach(f => {
+              trackingPointList.forEach(f => {
                 if (f.bayonetList) {
                   bayList = bayList.concat(f.bayonetList);
                 }
@@ -752,74 +781,6 @@ export default {
           
         })
       }
-    },
-    // 切换设备类型获得设备列表数据
-    getEquList (type, data) {
-      this.tabTypeByScope = type;
-      this.trackPointId = data.uid;
-    },
-    // 展开或者闭合设备列表
-    dropdown (data) {
-      this.trackPointList.forEach(f => {
-        if (data.uid === f.uid) {
-          f.isDropdown = !f.isDropdown;
-        } else {
-          f.isDropdown = false;
-        }
-        this.getEquList('0', data);
-      })
-    },
-    // 点击左侧设备列表，地图marker高亮
-    selDev (obj) {
-      let _this = this;
-      _this.devIdOrBayId = obj.uid;
-      $(`#mapBox .vl_icon_control_34`).removeClass('vl_icon_control_34');
-      $(`#mapBox .vl_icon_control_35`).removeClass('vl_icon_control_35');
-      $(`#mapBox #${obj.uid}_sxt`).addClass('vl_icon_control_34');
-      let sContent = null, hoverWindow = null;
-      sContent = `<div class="vl_map_hover">
-        <div class="vl_map_hover_main"><ul>
-          <li><span>设备名称：</span><span>${obj.deviceName}</span></li>
-          <li><span>设备地址：</span><span>${obj.address}</span></li>
-        </ul></div>`;
-      hoverWindow = new window.AMap.InfoWindow({
-        isCustom: true,
-        closeWhenClickMap: true,
-        offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-        content: sContent
-      });
-      hoverWindow.open(_this.map, new window.AMap.LngLat(obj.longitude, obj.latitude));    
-    },
-    // 展开或者闭合卡口列表
-    dropdownBayonet (parentData, childData) {
-      this.devIdOrBayId = childData.uid;
-      let _this = this, sContent = null, hoverWindow = null;
-      _this.trackPointList.forEach(f => {
-        if (parentData.uid === f.uid) {
-          f.bayonetList.forEach(b => {
-            if (childData.uid === b.uid) {
-              b.isDropdown = !b.isDropdown;
-              // 点击左侧设备列表，地图marker高亮
-              $(`#mapBox .vl_icon_control_35`).removeClass('vl_icon_control_35');
-              $(`#mapBox .vl_icon_control_34`).removeClass('vl_icon_control_34');
-              $(`#mapBox #${childData.uid}_kk`).addClass('vl_icon_control_35');
-              sContent = `<div class="vl_map_hover">
-                <div class="vl_map_hover_main"><ul>
-                  <li><span>卡口名称：</span><span>${childData.bayonetName}</span></li>
-                </ul></div>`;
-              hoverWindow = new window.AMap.InfoWindow({
-                isCustom: true,
-                closeWhenClickMap: true,
-                offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-                content: sContent
-              });
-              hoverWindow.open(_this.map, new window.AMap.LngLat(childData.longitude, childData.latitude));
-            } else {
-              b.isDropdown = false;
-            }
-          })
-        }
-      })
     },
     dropdownBay (data) {
       this.bayList.forEach(f => {
@@ -932,35 +893,26 @@ export default {
         });
       }
     }, 
-    mapMark () {
-      let _this = this, hoverWindow = null, data = null, markerList = [];
-      if (!_this.trackPointList) {
-        return false;
-      }
-      // 组装右边点标记数据
-      let devList = [];
-      _this.trackPointList.forEach(f => {
-        if (f.devList && f.devList.length > 0) {
-          devList = [...devList, ...f.devList];
-        }
-      })
-      devList.forEach(f => f.type = 1);//设置属性type:1为摄像头，2为卡口
-      let bayonetList = [];
-      _this.trackPointList.forEach(f => {
-        if (f.bayonetList && f.bayonetList.length > 0) {
-          bayonetList = [...bayonetList, ...f.bayonetList];
-        }
-      })
-      bayonetList.forEach(f => f.type = 2);//设置属性type:1为摄像头，2为卡口
-      data = [...devList, ...bayonetList];
-      console.log(data, 'data')
-      _this.map.clearMap();
+    // 获取地图上的设备和卡口数据
+    getDevAndBayList () {
+      Promise.all([getAllMonitorList({ccode: mapXupuxian.adcode}), 
+        getAllBayonetList({areaId: mapXupuxian.adcode})])
+        .then(res => {
+          if (res) {
+            const [{data: devList}, {data: bayList}] = res;
+            devList.forEach(f => {f.dataType = 1;f.name = f.deviceName})
+            bayList.forEach(f => {f.dataType = 2;f.name = f.bayonetName})
+            this.mapMark([...devList, ...bayList]);
+          }
+        })
+    },
+    mapMark (data) {
       for (let i = 0; i < data.length; i++) {
         let obj = data[i];
         if (obj.longitude > 0 && obj.latitude > 0) {
           let offSet = [-20.5, -48];
           let _content = null;
-          if (obj.type === 1) {
+          if (obj.dataType === 1) {
             // if (obj.isNormal && obj.isSelected) {
             //   _content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_sxt"></div>';
             // } else if (obj.isNormal && !obj.isSelected) {
@@ -979,6 +931,7 @@ export default {
             // }
           }
           let marker = new window.AMap.Marker({ // 添加自定义点标记
+            map: this.map,
             position: [obj.longitude, obj.latitude],
             offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
             draggable: false, // 是否可拖动
@@ -986,48 +939,11 @@ export default {
             // 自定义点标记覆盖物内容
             content: _content
           });
-          // hover
-          marker.on('mouseover', function () {
-            let sContent = '';
-            // 摄像头
-            if (obj.type === 1) {
-              sContent = `<div class="vl_map_hover">
-                <div class="vl_map_hover_main"><ul>
-                  <li><span>设备名称：</span><span>${obj.deviceName}</span></li>
-                  <li><span>设备地址：</span><span>${obj.address}</span></li>
-                </ul></div>`;
-            // 卡口
-            } else {
-              sContent = `<div class="vl_map_hover">
-              <div class="vl_map_hover_main"><ul>
-                <li><span>卡口名称：</span><span>${obj.bayonetName}</span></li>
-              </ul></div>`;
-            }
-            hoverWindow = new window.AMap.InfoWindow({
-              isCustom: true,
-              closeWhenClickMap: true,
-              offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-              content: sContent
-            });
-            hoverWindow.open(_this.map, new window.AMap.LngLat(obj.longitude, obj.latitude));
-            // 摄像头
-            if (obj.type === 1) {
-              $(`#mapBox .vl_icon_control_34`).removeClass('vl_icon_control_34');
-              $(`#mapBox .vl_icon_control_35`).removeClass('vl_icon_control_35');
-              $(`#mapBox #${obj.uid}_sxt`).addClass('vl_icon_control_34');
-            // 卡口
-            } else {
-              $(`#mapBox .vl_icon_control_35`).removeClass('vl_icon_control_35');
-              $(`#mapBox .vl_icon_control_34`).removeClass('vl_icon_control_34');
-              $(`#mapBox #${obj.uid}_kk`).addClass('vl_icon_control_35');
-            }
-            _this.devIdOrBayId = obj.uid;//左侧列表高亮
-          });
-          markerList.push(marker);
+          this.markerList.push(marker);
         }
       }
-      _this.map.add(markerList);
-      _this.map.setFitView();
+      this.map.setFitView();
+      addCluster(this.map, this.markerList);
     },
     resetZoom () {
       if (this.map) {
@@ -1043,14 +959,12 @@ export default {
     // 初始化地图
     resetMap () {
       let _this = this;
-      let map = new window.AMap.Map('mapBox', {
+      let map = new window.AMap.Map('devMap', {
         zoom: this.zoomLevel,
         center: mapXupuxian.center
       });
-      map.setMapStyle('amap://styles/whitesmoke');
+      map.setMapStyle('amap://styles/light');
       _this.map = map;
-      // _this.mapMark();
-      _this.controlArea(1);
     }
   },
   beforeDestroy () {
@@ -1183,10 +1097,16 @@ export default {
         .model_name{
           width: 100%;
           height: 44px;
-          padding-left: 20px;
+          display: flex;
+          justify-content: space-between;
+          padding: 0 20px;
           line-height: 44px;
           background:rgba(250,250,250,1);
           border-radius:5px 5px 0px 0px;
+          cursor: pointer;
+          > i{
+            margin-top: 10px;
+          }
         }
         .model_info{
           padding: 20px 20px 0;
@@ -1211,21 +1131,113 @@ export default {
             }
           }
         }
-        .manage_d_c_scope{
+        .dev_box{
           border-radius:4px 4px 0px 0px;
-          border:1px solid #f2f2f2;
-          margin: 0 20px 20px;
-          .manage_d_s_t{
-            display: flex;
-            justify-content: space-between;
-            line-height: 44px;
-            padding: 0 15px;
-            background:rgba(250,250,250,1);
-            cursor: pointer;
-            > i{
-              vertical-align: middle;
-              margin-top: 10px;
-              font-size: 18px;
+          border:1px solid #D3D3D3;
+          position: relative;
+          margin: 0 20px;
+          .tab{
+            width: 100%;
+            height: 42px;
+            line-height: 42px;
+            padding-left: 20px;
+            background: #FAFAFA;
+            border-bottom: 1px solid #D3D3D3;
+          }
+          .dev_map{
+            width: 100%;
+            height: 500px;
+          }
+          .map_zoom{
+            position: absolute;
+            right: 20px;
+            bottom: 20px;
+            .top, .bottom > li{
+              width: 78px;
+              height: 70px;
+              line-height: 70px;
+              background: #fff;
+              text-align: center;
+              cursor: pointer;
+              i{
+                margin-top: 16px;
+                font-size: 20px;
+                color: #999999;
+              }
+              &:hover{
+                i{
+                  color: #0C70F8;
+                }
+              }
+            }
+            .top{
+              margin-bottom: 10px;
+              p.active{
+                color: #0C70F8;
+              }
+            }
+            .top, .bottom{
+              box-shadow:4px 0px 15px 0px rgba(131,131,131,0.23),0px 0px 13px 0px rgba(255,255,255,0.55);
+            }
+            .bottom > li:nth-child(1){
+              border-bottom: 1px solid #F1F1F1;
+            }
+          }
+          .sel_dev{
+            position: absolute;
+            z-index: 999;
+            left: 20px;
+            top: 62px;
+            width:260px;
+            box-shadow:0px 3px 10px 0px rgba(99,99,99,0.39),0px 0px 9px 0px rgba(255,255,255,0.55); 
+            .title{
+              width: 100%;
+              height: 40px;
+              line-height: 40px;
+              padding: 0 20px;
+              border-bottom: 1px solid #F2F2F2;
+              display: flex;
+              justify-content: space-between;
+              background: #fff;
+              > span{
+                color: #0C70F8;
+                font-size: 16px;
+              }
+              > i{
+                margin-top: 12px;
+                color: #0C70F8;
+                cursor: pointer;
+              }
+            }
+            > div:nth-child(2){
+              width: 100%;
+              height:420px;
+              padding: 20px 0;
+              background:rgba(255,255,255,1);
+              .sel_tab{
+                display: flex;
+                width:220px;
+                height:28px;
+                margin-left: 20px;
+                border-radius:4px;
+                border:1px solid rgba(211,211,211,1);
+                > div{
+                  width: 50%;
+                  text-align: center;
+                  line-height: 28px;
+                  &.active, &:hover{
+                    background: #E0F2FF;
+                    color: #0C70F8;
+                    cursor: pointer;
+                  }
+                
+                }
+              }
+              .tree_box{
+                width: 100%;
+                padding: 12px;
+                height: 352px;
+              }
             }
           }
         }
@@ -1307,11 +1319,11 @@ export default {
                 color: #666;
                 cursor: pointer;
                 &.active{
-                  background: rgba(235,239,242,1);
+                  background: #E0F2FF;
                   color: #0C70F8;
                 }
                 &:hover{
-                  background: rgba(235,239,242,1);
+                  background: #E0F2FF;
                   color: #0C70F8;
                 }
               }

@@ -386,7 +386,7 @@ export default {
         zoom: this.zoomLevel,
         center: mapXupuxian.center
       });
-      map.setMapStyle('amap://styles/whitesmoke');
+      map.setMapStyle('amap://styles/light');
       map.plugin('AMap.Autocomplete', () => {
         let autoOptions = {
           city: '溆浦县'

@@ -7,9 +7,9 @@
           style="width: 100%;"
           v-model="modelTwoForm.address"
           :trigger-on-focus="false"
-          :fetch-suggestions="autoAdress"
+          :fetch-suggestions="querySearch"
           value-key="name"
-          @select="chooseAddress($event, 1)"
+          @select="getAddress"
           placeholder="请输入地名的关键词">
         </el-autocomplete>
       </el-form-item>
@@ -43,7 +43,7 @@
     <el-form-item style="margin-top: 20px;" v-if="!isShowControlDev">
       <el-button type="primary" @click="selControl('modelTwo')">一键布控</el-button>
     </el-form-item>
-    <div is="controlDev" ref="controlDev" v-if="isShowControlDev" :addressObjTwo="addressObjTwo" @getChildModel="getChildModel"></div>
+    <div is="controlDev" ref="controlDev" v-if="isShowControlDev" :addressObjTwo="addressObjTwo" :devs="devs" :bays="bays" @getChildModel="getChildModel"></div>
     <div is="portraitLib" ref="portraitLibDialog" :fileListOne="protraitList" @getPortraitData="getPortraitData"></div>
     <div is="vehicleLib" ref="vehicleLibDialog" :fileList="vehicleList" @getVehicleData="getVehicleData"></div>
   </el-form>
@@ -64,7 +64,6 @@ export default {
         address: null,
         radius: 3
       },
-      autoComplete: null,
       radiusList: [
         {value: 3, label: '周边3公里'},
         {value: 5, label: '周边5公里'},
@@ -80,11 +79,12 @@ export default {
         lnglat: [],
         radius: null
       },
-      devData: {}
+      devData: {},
+      devs: [],
+      bays: []
     }
   },
   mounted () {
-    this.resetMap();
     // 修改时回填数据
     if (this.modelList) {
       console.log(this.modelList, 'this.modelList')
@@ -93,7 +93,8 @@ export default {
       this.modelTwoForm.address = address;
       this.addressObjTwo.radius = this.modelTwoForm.radius = radius;
       this.addressObjTwo.lnglat = [longitude, latitude];
-
+      this.devs = devList;
+      this.bays = bayonetList;
       this.protraitList = surveillanceObjectDtoList.filter(m => m.objType === 1);//回填禁入人员
       this.vehicleList = surveillanceObjectDtoList.filter(m => m.objType === 2);//回填禁入车辆
       this.isShowControlDev = true;
@@ -117,9 +118,9 @@ export default {
       }
       this.$refs['modelTwo'].validate((valid) => {
         if (valid) {
-          if (this.$refs['controlDev'] && this.devData.devList.length > 0) {
+          if (this.$refs['controlDev']) {
             this.$refs['controlDev'].sendParent();
-
+            if (this.devData.devList.length === 0) return this.$message.warning('请先选择布控设备');
             const longitude = this.addressObjTwo.lnglat[0];
             const latitude = this.addressObjTwo.lnglat[1];
 
@@ -167,41 +168,12 @@ export default {
     delVehicle (index) {
       this.vehicleList.splice(index, 1);
     },
-    // 拿到地图实列
-    resetMap () {
-      let _this = this;
-      _this.map = new window.AMap.Map(
-        'xxx', {
-          zoom: null,
-          center: null
-        }
-      );
-      _this.map.plugin('AMap.Autocomplete', () => {
-        let autoOptions = {
-          city: '溆浦县'
-        }
-        _this.autoComplete = new window.AMap.Autocomplete(autoOptions);
-      })
+    changeRadius () {
+      this.addressObjTwo.radius = this.modelTwoForm.radius;
     },
-    autoAdress (queryString, cb) {
-      if (queryString === '') {
-        cb([])
-      } else {
-        this.autoComplete.search(queryString, (status, result) => {
-          if (status === 'complete') {
-            result.tips.forEach(f => {
-              f.name = `${f.name}(${f.district})`;
-            })
-            cb(result.tips);
-          } else {
-            cb([]);
-          }
-        })
-      }
-    },
+    /* 地址下拉搜索相关方法 */
     // 获取追踪点
-    chooseAddress (e, type) {
-      console.log(e, 'eee')
+    getAddress (e) {
       if (!e.location) {
         this.$message.error('无法获取到经纬度！');
         return;
@@ -209,14 +181,33 @@ export default {
       this.addressObjTwo.lnglat = [e.location.lng, e.location.lat];
       this.addressObjTwo.radius = this.modelTwoForm.radius;
     },
-    changeRadius () {
-      this.addressObjTwo.radius = this.modelTwoForm.radius;
-    }
-  },
-  // 销毁地图实例
-  isDestroyed () {
-    if (this.map) {
-      this.map.destroy();
+    // 地图搜索选择
+    querySearch(queryString, cb) {
+      this.$nextTick(() => {
+        this.seacher(queryString).then(v => {
+          let results = queryString
+              ? v.filter(f => f.name.toLowerCase().indexOf(queryString.toLowerCase()) > -1)
+              : v;
+          cb(results);
+        });
+      });
+    },
+    seacher(v) {
+      const placeSearch = new AMap.PlaceSearch({
+        // city 指定搜索所在城市，支持传入格式有：城市名、citycode和adcode
+        city: "湖南"
+      });
+
+      if (!!v) {
+        let _this = this;
+        return new Promise((resolve, reject) => {
+          placeSearch.search(v, (status, result) => {
+            // 查询成功时，result即对应匹配的POI信息
+            let pois = result.poiList.pois;
+            resolve(pois);
+          });
+        });
+      }
     }
   }
 }

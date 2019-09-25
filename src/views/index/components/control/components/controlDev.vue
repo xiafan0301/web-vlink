@@ -122,7 +122,7 @@ export default {
         zoom: this.zoomLevel,
         center: mapXupuxian.center
       });
-      map.setMapStyle('amap://styles/whitesmoke');
+      map.setMapStyle('amap://styles/light'); 
       map.plugin('AMap.Autocomplete', () => {
         let autoOptions = {
           city: '溆浦县'
@@ -302,7 +302,7 @@ export default {
       if (this.devs.length > 0) {
         this.changeColorAndGetTreeData(this.devs, 1);
         // 卡口
-        if (this._bays.length > 0) {
+        if (this.bays.length > 0) {
           this.changeColorAndGetTreeData(this.bays, 2);
         }
       // 新增时
@@ -332,11 +332,12 @@ export default {
       if (this.devs.length > 0) {
         this.changeColorAndGetTreeData(this.devs, 1);
         // 卡口
-        if (this._bays.length > 0) {
+        if (this.bays.length > 0) {
           this.changeColorAndGetTreeData(this.bays, 2);
         }
       // 新增时
       } else {
+        
         this.getCircleDev(circle);
       }
     },
@@ -375,7 +376,8 @@ export default {
       let list = [];
       this.markerList.forEach(f => {
         const obj = f.getExtData();
-        if (array.some(s => s === obj.uid && obj.dataType === type)) {
+        const key = type === 1 ? 'deviceId' : 'bayonetId';
+        if (array.some(s => s[key] === obj.uid && obj.dataType === type)) {
           list.push(obj);
           const uContent = this.setMarkContent(obj)
           f.setContent(uContent);

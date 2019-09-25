@@ -604,11 +604,11 @@ export function getAlarmListByDev(data) {
  * getAllAlarmSnapListByDev 获得当前展示在地图上的设备抓拍列表
  * @param {object} params
  */
-export function getAllAlarmSnapListByDev(params) {
+export function getAllAlarmSnapListByDev(data) {
   return request({
     url: 'alarm-snaps/by-dev/page',
-    method: 'get',
-    params,
+    method: 'post',
+    data,
     mode: 'control'
   })
 }

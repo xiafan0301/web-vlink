@@ -301,7 +301,7 @@ export default {
       zoom: 10,
       center: mapXupuxian.center
     });
-    map.setMapStyle('amap://styles/whitesmoke');
+    map.setMapStyle('amap://styles/light');
     this.map = map;
     this.getAlarmListByDev();
   },
@@ -749,13 +749,15 @@ export default {
     },
     // 获取布控抓拍结果列表
     getAllAlarmSnapListByDev () {
-      const params = {
+      const data = {
         pageSize: 10,
         pageNum: 1,
-        'where.deviceIds': this.devicesList.map(m => m.uid).join(','),
-        'where.surveillanceIds': this.devicesList.map(m => m.surveillanceIds).join(',')
+        where: {
+          deviceIds: this.devicesList.map(m => m.uid).join(','),
+          surveillanceIds: this.devicesList.map(m => m.surveillanceIds).join(',')
+        }
       }
-      getAllAlarmSnapListByDev(params).then(res => {
+      getAllAlarmSnapListByDev(data).then(res => {
         if (res && res.data) {
           this.snapList = res.data.list;
           this.snapTotal = res.data.total;
@@ -820,20 +822,6 @@ export default {
         }
       }
       _this.map.setFitView();// 自动适配到合适视野范围
-      // 当布控状态不是进行中时，清除之前保存的定时器，并return
-      // clearInterval(_this.timer);
-      // if (this.mapForm.state !== 1) {
-      //   return;
-      // }
-      // _this.getAlarmListByDev();
-      // // 10s重新加载一次
-      // _this.timer = setInterval(() => {
-      //   _this.getAlarmListByDev();
-      // }, 11000);
-      // // 通过$once来监听定时器，在beforeDestroy钩子可以被清除。
-      // _this.$once('hook:beforeDestroy', () => {
-      //   clearInterval(_this.timer);
-      // })
     },
     // 跳转至视频回放页面
     skipIsVideo (uid, deviceName) {
