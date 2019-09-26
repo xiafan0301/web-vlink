@@ -165,7 +165,7 @@
                     <i class="el-icon-arrow-up" v-show="isShowTree" @click="isShowTree = false"></i>
                     <i class="el-icon-arrow-down" v-show="!isShowTree" @click="isShowTree = true"></i>
                   </div>
-                  <div v-show="isShowTree">
+                  <div :class="{'active': isShowTree}">
                     <div class="sel_tab">
                       <div @click="bayOrdev = 1" :class="{'active': bayOrdev === 1}">摄像头</div>
                       <div @click="bayOrdev = 2" :class="{'active': bayOrdev === 2}">卡口</div>
@@ -494,7 +494,7 @@ export default {
       bayonetNum: null,//卡口数量
       devList: [], //设备列表
       tabTypeBySituation : '0',// 设备类型-运行情况
-      dpOne: false,//展开布控范围
+      dpOne: true,//展开布控范围
       dpTwo: false,//展开实时监控
 
       isShowTree: false,
@@ -669,7 +669,6 @@ export default {
           this.$nextTick(() => {
             this.resetMap();
             this.getDevAndBayList();
-            this.controlArea(1);
           })
           if (this.controlState !== 2) {
             this.getAlarmSnap();
@@ -727,13 +726,8 @@ export default {
     },
     // 获取布控范围和运行情况，因为是同一接口，所以写在了一起
     controlArea (isShowType) {
-      // 展开关闭布控范围
-      if (isShowType === 1) {
-        this.dpOne = !this.dpOne;
       // 展开关闭运行情况
-      } else {
-        this.dpTwo = !this.dpTwo;
-      }
+      isShowType === 2 && (this.dpTwo = !this.dpTwo);
       if (this.dpOne || this.dpTwo) {
         controlArea(this.controlId).then(res => {
           if (res && res.data) {
@@ -910,7 +904,7 @@ export default {
       for (let i = 0; i < data.length; i++) {
         let obj = data[i];
         if (obj.longitude > 0 && obj.latitude > 0) {
-          let offSet = [-20.5, -48];
+          let offSet = [-20.5, -70];
           let _content = null;
           if (obj.dataType === 1) {
             // if (obj.isNormal && obj.isSelected) {
@@ -939,11 +933,35 @@ export default {
             // 自定义点标记覆盖物内容
             content: _content
           });
+          // mouseover
+          marker.on('mouseover', () => {
+            let _hoverWindow = null;
+            let _sContent = `<div class="vl_map_hover">
+              <div class="vl_map_hover_main"><ul>`;
+              if (obj.dataType === 1) {
+                _sContent += `<li><span>设备名称：</span><span>${obj.deviceName}</span></li>
+                <li><span>设备地址：</span><span>${obj.address}</span></li>`;
+              } else {
+                _sContent += `<li><span>卡口名称：</span><span>${obj.bayonetName}</span></li>
+                <li><span>卡口编号：</span><span>${obj.bayonetNo}</span></li>
+                <li><span>地理位置：</span><span>${obj.bayonetAddress}</span></li>
+                <li><span>设备数量：</span><span>${obj.devNum}</span></li>`;
+              }
+              _sContent += '</ul></div>';
+            _hoverWindow = new window.AMap.InfoWindow({
+              isCustom: true,
+              closeWhenClickMap: true,
+              offset: new window.AMap.Pixel(0, -20), // 相对于基点的偏移位置
+              content: _sContent
+            });
+            _hoverWindow.open(this.map, new window.AMap.LngLat(obj.longitude, obj.latitude));
+          });
           this.markerList.push(marker);
         }
       }
       this.map.setFitView();
       addCluster(this.map, this.markerList);
+      this.controlArea(1);//回填已选设备
     },
     resetZoom () {
       if (this.map) {
@@ -1211,14 +1229,20 @@ export default {
             }
             > div:nth-child(2){
               width: 100%;
-              height:420px;
-              padding: 20px 0;
+              height: 0;
               background:rgba(255,255,255,1);
+              transition: all .3s linear;
+              overflow: hidden;
+              &.active{
+                height: 420px;
+                padding-bottom: 20px;
+              }
               .sel_tab{
                 display: flex;
                 width:220px;
                 height:28px;
                 margin-left: 20px;
+                margin-top: 20px;
                 border-radius:4px;
                 border:1px solid rgba(211,211,211,1);
                 > div{

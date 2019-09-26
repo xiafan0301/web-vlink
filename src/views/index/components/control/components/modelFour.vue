@@ -19,23 +19,30 @@
     </div>
     <div is="portraitLib" v-if="portraitLibDialog" ref="portraitLibDialog" :fileListOne="protraitList" @getPortraitData="getPortraitData"></div>
     <div is="vehicleLib" ref="vehicleLibDialog" :fileList="vehicleList" @getVehicleData="getVehicleData"></div>
-    <div is="controlDevUpdate" :modelType="4" @getControlDevUpdate="getControlDevUpdate"></div>
+    <div 
+      is="mapSelector" 
+      ref="mapSelector" 
+      :isNotDialog="false"
+      showTypes="DB"
+      :activeDeviceList="activeDeviceList"
+      >
+    </div>
   </div>  
 </template>
 <script>
-import controlDevUpdate from './controlDevUpdate.vue';
 import vehicleLib from './vehicleLib.vue';
 import portraitLib from './portraitLib.vue';
+import mapSelector from '@/components/common/mapSelector.vue';
 import {random14, objDeepCopy, unique} from '@/utils/util.js';
 export default {
-  components: {controlDevUpdate, vehicleLib, portraitLib},
+  components: {mapSelector, vehicleLib, portraitLib},
   props: ['modelList'],
   data () {
     return {
       protraitList: [],
       vehicleList: [],
-      devUpdateData: {},
-      portraitLibDialog: false
+      portraitLibDialog: false,
+      activeDeviceList: null
     }
   },
   mounted () {
@@ -47,6 +54,10 @@ export default {
       this.protraitList = surveillanceObjectDtoList.filter(m => m.objType === 1);//回填禁入人员
       this.vehicleList = surveillanceObjectDtoList.filter(m => m.objType === 2);//回填禁入车辆
       this.isShowControlDev = true;
+
+      this.$nextTick(() => {
+        this.activeDeviceList = [...devList.map(m => m.deviceId), ...bayonetList.map(m => m.bayonetId)];
+      })
     }
   },
   methods: {
@@ -83,15 +94,20 @@ export default {
     },
     // 向父组件传值
     sendParent () {
-      if (this.devUpdateData.devList.length > 0) {
-        this.$emit('getModel', {modelType: 4,  pointDtoList: [this.devUpdateData], surveillanceObjectDtoList: [...this.protraitList, ...this.vehicleList]});
+      const devData = this.$refs['mapSelector'].getCheckedIds();
+      if (devData.deviceList.length > 0 || devData.bayonetList.length > 0) {
+        let {deviceList: devList, bayonetList} = devData;
+        devList = devList.map(m => {
+          return {deviceId: m.uid}
+        })
+        bayonetList = bayonetList.map(m => {
+          return {bayonetId: m.uid}
+        })
+        this.$emit('getModel', {modelType: 4,  pointDtoList: [{devList, bayonetList}], surveillanceObjectDtoList: [...this.protraitList, ...this.vehicleList]});
       } else {
         this.$message.warning('请先选择布控设备');
       }
-    },
-    getControlDevUpdate (data) {
-      this.devUpdateData = data;
-    },
+    }
   }
 }
 </script>

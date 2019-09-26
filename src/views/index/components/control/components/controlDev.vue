@@ -3,7 +3,7 @@
     <div class="dev_box" v-if="pageType === 1">
       <div class="tab">
         <span>布控设备</span>
-        <el-button type="info" plain @click="pageType = 2">修改布控设备</el-button>
+        <el-button type="info" plain @click="changePageType">修改布控设备</el-button>
       </div>
       <div class="sel_dev">
         <div class="title">
@@ -11,7 +11,7 @@
           <i class="el-icon-arrow-up" v-show="isShowTree" @click="isShowTree = false"></i>
           <i class="el-icon-arrow-down" v-show="!isShowTree" @click="isShowTree = true"></i>
         </div>
-        <div v-show="isShowTree">
+        <div :class="{'active': isShowTree}">
           <div class="sel_tab">
             <div @click="bayOrdev = 1" :class="{'active': bayOrdev === 1}">摄像头</div>
             <div @click="bayOrdev = 2" :class="{'active': bayOrdev === 2}">卡口</div>
@@ -49,26 +49,27 @@
         </ul>
       </div>
     </div>
-    <div v-if="pageType === 2" 
-      is="controlDevUpdate" 
-      :addressObj="addressObj"
-      :devIdListUp="devIdList"
-      :bayIdListUp="bayIdList"
-      :modelType="modelType"
-      @getControlDevUpdate="getControlDevUpdate"
-    ></div>
+    <div 
+      v-if="pageType === 2" 
+      is="mapSelector" 
+      ref="mapSelector" 
+      :isNotDialog="false"
+      showTypes="DB"
+      :activeDeviceList="activeDeviceList"
+      >
+    </div>
   </div>
 </template>
 <script>
 import {mapXupuxian} from '@/config/config.js';
 import {MapGETmonitorList} from '@/views/index/api/api.map.js';
 import {random14, objDeepCopy, addCluster} from '@/utils/util.js';
-import controlDevUpdate from './controlDevUpdate.vue';
+import mapSelector from '@/components/common/mapSelector.vue';
 import { setTimeout } from 'timers';
 import {getAllMonitorList, getAllBayonetList} from '@/views/index/api/api.base.js';
 import { Promise } from 'q';
 export default {
-  components: {controlDevUpdate},
+  components: {mapSelector},
   props: ['addressObj', 'addressObjTwo', 'modelType', 'lostTime', 'devIdListFive', 'bayIdListFive', 'devs', 'bays'],
   data () {
     return {
@@ -92,8 +93,8 @@ export default {
       removeObj: {1: [],2: []},
       isShowTree: false,
       markerList: [],
-      devUpdateData: {},
       loading: false,
+      activeDeviceList: null
     }
   },
   mounted () {
@@ -101,6 +102,13 @@ export default {
     this.getDevAndBayList();
   },
   methods: {
+    // 进入修改已选择的设备页面
+    changePageType () {
+      this.pageType = 2;
+      this.$nextTick(() => {
+        this.activeDeviceList = [...this.devIdList.map(m => m.uid), ...this.bayIdList.map(m => m.uid)];
+      })
+    },
     // 传给父组件 
     sendParent () {
       if (this.pageType === 1) {
@@ -108,11 +116,20 @@ export default {
         const bayonetList = this.bayIdList.map(m => {return {bayonetId: m.uid}})
         this.$emit('getChildModel', {devList, bayonetList});
       } else {
-        this.$emit('getChildModel', this.devUpdateData);
+        const devData = this.$refs['mapSelector'].getCheckedIds();
+        if (devData.deviceList.length > 0 || devData.bayonetList.length > 0) {
+          let {deviceList: devList, bayonetList} = devData;
+          devList = devList.map(m => {
+            return {deviceId: m.uid}
+          })
+          bayonetList = bayonetList.map(m => {
+            return {bayonetId: m.uid}
+          })
+          this.$emit('getChildModel', {devList, bayonetList});
+        } else {
+          this.$message.warning('请先选择布控设备');
+        }
       }
-    },
-    getControlDevUpdate (data) {
-      this.devUpdateData = data;
     },
     // 初始化地图
     resetMap () {
@@ -160,10 +177,10 @@ export default {
             // 新增时
             } else {
               if (this.devIdListFive.length > 0) {
-                this.changeColorAndGetTreeData(this.devIdListFive, 1);
+                this.changeColorAndGetTreeData(this.devIdListFive, 1, 'add');
               }          
               if (this.bayIdListFive.length > 0) {
-                this.changeColorAndGetTreeData(this.bayIdListFive, 2);
+                this.changeColorAndGetTreeData(this.bayIdListFive, 2, 'add');
               }   
             }       
           }
@@ -204,7 +221,7 @@ export default {
               } else {
                 _sContent += `<li><span>卡口名称：</span><span>${obj.bayonetName}</span></li>
                 <li><span>卡口编号：</span><span>${obj.bayonetNo}</span></li>
-                <li><span>地理位置：</span><span>${obj.bayonetAddress}</span></li>
+                <li><span>地理位置：</span><span>${obj.bayonetAddress}< /span></li>
                 <li><span>设备数量：</span><span>${obj.devNum}</span></li>`;
               }
               _sContent += '</ul></div>';
@@ -366,17 +383,24 @@ export default {
       })
       this.devIdList = [...this.devIdList, ..._devList];
       this.bayIdList = [...this.bayIdList, ..._bayList];
-
+      
       if (index === 0) return;//人员失踪有两个范围，两个范围内的设备和卡口累加完后再一次性添加到左边树
       this.getTreeData(this.devIdList, 1);//获得设备树数据
       this.getTreeData(this.bayIdList, 2);//获得卡口树数据
     },
     // 新增或编辑时，点标记变色和变为树结构数据公共方法
-    changeColorAndGetTreeData (array, type) {
+    changeColorAndGetTreeData (array, type, flag) {
       let list = [];
       this.markerList.forEach(f => {
         const obj = f.getExtData();
-        const key = type === 1 ? 'deviceId' : 'bayonetId';
+        let key = null;
+        // 公务车监管新增时
+        if (flag === 'add') {
+          key = 'uid'
+        // 修改时
+        } else {
+          key = type === 1 ? 'deviceId' : 'bayonetId';
+        }
         if (array.some(s => s[key] === obj.uid && obj.dataType === type)) {
           list.push(obj);
           const uContent = this.setMarkContent(obj)
@@ -534,14 +558,20 @@ export default {
       }
       > div:nth-child(2){
         width: 100%;
-        height:420px;
-        padding: 20px 0;
+        height: 0;
         background:rgba(255,255,255,1);
+        transition: all .3s linear;
+        overflow: hidden;
+        &.active{
+          height: 420px;
+          padding-bottom: 20px;
+        }
         .sel_tab{
           display: flex;
           width:220px;
           height:28px;
           margin-left: 20px;
+          margin-top: 20px;
           border-radius:4px;
           border:1px solid rgba(211,211,211,1);
           > div{

@@ -25,7 +25,14 @@
         <div class="period_time_btn" @click="addLicensePlateNum()"><i class="vl_icon vl_icon_control_22"></i><span>添加车牌号码</span></div>
       </el-form-item>
     </el-form-item>
-    <div is="controlDevUpdate" :modelType="6" @getControlDevUpdate="getControlDevUpdate"></div>
+    <div 
+      is="mapSelector" 
+      ref="mapSelector" 
+      :isNotDialog="false"
+      showTypes="DB"
+      :activeDeviceList="activeDeviceList"
+      >
+    </div>
     <div is="portraitLib" ref="portraitLibDialog" :fileListOne="fileListOne" @getPortraitData="getPortraitData"></div>
     <div is="vehicleLib" ref="vehicleLibDialog" :fileList="fileListTwo" @getVehicleData="getVehicleData"></div>
   </el-form>
@@ -34,11 +41,11 @@
 import uploadPic from './uploadPic.vue';
 import vehicleLib from './vehicleLib.vue';
 import portraitLib from './portraitLib.vue';
-import controlDevUpdate from './controlDevUpdate.vue';
+import mapSelector from '@/components/common/mapSelector.vue';
 import {checkPlateNumber} from '@/utils/validator.js';
 import {random14, objDeepCopy, unique, imgUrls} from '@/utils/util.js';
 export default {
-  components: {uploadPic, controlDevUpdate, vehicleLib, portraitLib},
+  components: {uploadPic, mapSelector, vehicleLib, portraitLib},
   props: ['modelList'],
   data () {
     return {
@@ -49,7 +56,7 @@ export default {
       fileListTwo: [],
       validPlateNumber: checkPlateNumber,
       createSelDialog: false,
-      devUpdateData: {}
+      activeDeviceList: null
     }
   },
   mounted () {
@@ -66,6 +73,10 @@ export default {
       this.fileListOne = surveillanceObjectDtoList.filter(m => m.objType === 1);//回填上访人员照片
       this.fileListTwo = surveillanceObjectDtoList.filter(m => m.objType === 2);//回填上访车辆信息
       this.isShowControlDev = true;
+
+      this.$nextTick(() => {
+        this.activeDeviceList = [...devList.map(m => m.deviceId), ...bayonetList.map(m => m.bayonetId)];
+      })
     }
   },
   methods: {
@@ -102,9 +113,17 @@ export default {
     },
     // 向父组件传值
     sendParent () {
-      if (this.devUpdateData.devList.length > 0) {
+      const devData = this.$refs['mapSelector'].getCheckedIds();
+      if (devData.deviceList.length > 0 || devData.bayonetList.length > 0) {
+        let {deviceList: devList, bayonetList} = devData;
+        devList = devList.map(m => {
+          return {deviceId: m.uid}
+        })
+        bayonetList = bayonetList.map(m => {
+          return {bayonetId: m.uid}
+        })
         const _carNumberInfo = this.modelSixForm.carNumberInfo.map(m => m.vehicleNumber).join(',');
-        this.$emit('getModel', {carNumberInfo: _carNumberInfo, modelType: 6,  pointDtoList: [this.devUpdateData], surveillanceObjectDtoList: [...this.fileListOne, ...this.fileListTwo]});
+        this.$emit('getModel', {carNumberInfo: _carNumberInfo, modelType: 6,  pointDtoList: [{devList, bayonetList}], surveillanceObjectDtoList: [...this.fileListOne, ...this.fileListTwo]});
       } else {
         this.$message.warning('请先选择布控设备');
       }
