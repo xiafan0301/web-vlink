@@ -2,42 +2,86 @@
   <div class="special_csmanage">
    <div class="special_csmanage_cot">
      <div class="special_csmanage_right">
-       <el-input size="small" suffix-icon="el-icon-search"></el-input>
+       <div style="padding: 20px; padding-bottom: 0">
+         <el-input size="small" suffix-icon="el-icon-search"></el-input>
+       </div>
        <div class="add_zu">
          <i class="vl_icon vl_icon_manage_4"></i>
          <span>新增分组</span>
        </div>
        <ul class="fen_zu">
-         <li>分组1</li>
-         <li>分组1</li>
+         <li>
+           <span>是佛教护法</span>
+           <i class="operation_btn del_btn vl_icon vl_icon_manage_8"></i>
+           <i class="operation_btn edit_btn vl_icon vl_icon_manage_7"></i>
+         </li>
+         <li v-for="(item, index) in fenzulist" :key ="index">{{item.groupName}}
+           <i class="operation_btn del_btn vl_icon vl_icon_manage_8"></i>
+           <i class="operation_btn edit_btn vl_icon vl_icon_manage_7"></i>
+         </li>
        </ul>
      </div>
-     <div class="special_csmanage_right_r special_csmanage_right">
-
+     <div class="special_csmanage_right_r special_csmanage_right" :class="{'hideResult': Result}">
+       <div v-for="(item, index) in fenzulist" :key ="index" :class="['special_csmanage_right_r_tree', 'special_csmanage_right_r_tree_'+ index]" style="height: 30px">
+         <div class="special_csmanage_right_r_tree_hd" @click="oo(item,index)" :class="{'opencolor': item.isopen }"><i :class="[{'el-icon-arrow-right': !item.isopen},{'el-icon-arrow-down':item.isopen}]"></i>{{item.deviceList[0].address}}</div>
+         <div class="special_csmanage_right_r_tree_i" v-for="(ite, inde) in item.deviceList" :key ="inde">
+           <div>{{ite.deviceName}}</div>
+         </div>
+       </div>
+       <div class="insetLeft vl_icon vl_icon_vehicle_02" @click="hideResult" :class="{'vl_icon_vehicle_03': Result}"></div>
      </div>
      <div class="map_rm" id="mapMap"></div>
    </div>
   </div>
 </template>
-
 <script>
-  export default {
-    name: "specialcsManage",
-    data() {
-      return {
-        mapCenter: [110.594419,27.908869],
-      }
+import {Jtcgettsc} from '@/views/index/api/api.judge.js';
+export default {
+  name: "specialcsManage",
+  data() {
+    return {
+      mapCenter: [110.594419,27.908869],
+      Result: false,
+      hide: false,
+      fenzulist: [],
+    }
+  },
+  created () {
+    Jtcgettsc()
+      .then(res => {
+        if (res) {
+          this.fenzulist = res.data
+          this.fenzulist.map((item)=>{
+            this.$set(item, 'isopen', false)
+            return item
+          })
+          console.log(this.fenzulist)
+        }
+      })
+  },
+  mounted() {
+    let _this = this;
+    let map = new window.AMap.Map('mapMap', {
+      zoom: 14, // 级别
+      center: _this.mapCenter, // 中心点坐标
+      // viewMode: '3D' // 使用3D视图
+    });
+    map.setMapStyle('amap://styles/whitesmoke');
+  },
+  methods: {
+    hideResult () {
+      this.Result = !this.Result
     },
-    mounted() {
-      let _this = this;
-      let map = new window.AMap.Map('mapMap', {
-        zoom: 14, // 级别
-        center: _this.mapCenter, // 中心点坐标
-        // viewMode: '3D' // 使用3D视图
-      });
-      map.setMapStyle('amap://styles/whitesmoke');
+    oo (val,index) {
+      val.isopen = !val.isopen
+      if (val.isopen) {
+        $('.special_csmanage_right_r_tree_' + index).animate({height:175}, 300, "linear")
+      } else {
+        $('.special_csmanage_right_r_tree_' + index).animate({height:30}, 300, "linear")
+      }
     }
   }
+}
 </script>
 
 <style scoped lang="scss">
@@ -51,7 +95,6 @@
       box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
       position: relative;
       .special_csmanage_right{
-        padding: 20px;
         width: 260px;
         z-index: 99;
         position: absolute;
@@ -65,6 +108,7 @@
           background-color: #F2F2F2;
         }
         .add_zu{
+          padding-left: 20px;
           padding-top: 20px;
           cursor: pointer;
           padding-bottom: 5px;
@@ -75,15 +119,75 @@
           }
         }
         .fen_zu{
-          padding-left: 25px;
           li{
+            padding-left: 48px;
             padding-bottom: 10px;
+            cursor: pointer;
+            .vl_icon_manage_7{
+              background-position: -584px -377px;
+            }
+            .vl_icon_manage_8{
+              background-position: -694px -376px;
+            }
+            &:hover{
+              background-color: #E0F2FF;
+              .operation_btn {
+                display: block;
+              }
+            }
+            .del_btn {
+              &:hover {
+                background-position: -694px -349px !important;
+              }
+            }
+            .edit_btn {
+              &:hover {
+                background-position: -584px -350px !important;
+              }
+            }
+            .operation_btn {
+              display: none;
+              float: right;
+              margin: 5px 5px 0;
+            }
           }
         }
       }
       .special_csmanage_right_r{
+        padding: 20px;
         left: 260px;
-        border-right: 0
+        border-right: 0;
+        z-index: 90;
+        transition: left linear .3s;
+        .insetLeft{
+          position: absolute;
+          left: 260px;
+          top: 50%;
+          margin-top: -89px;
+        }
+        .special_csmanage_right_r_tree{
+          cursor: pointer;
+          padding-bottom: 20px;
+          overflow: hidden;
+          .special_csmanage_right_r_tree_hd{
+          }
+          .opencolor{
+            color: #0C70F8;
+          }
+          .special_csmanage_right_r_tree_i{
+            /*padding-left: 14px;*/
+            /*padding-top: 15px;*/
+            div{
+              padding-top: 15px;
+              padding-left: 14px;
+            }
+          }
+        }
+      }
+      .hideResult{
+        left: 0;
+        z-index: 90;
+        transition: left linear .3s;
       }
       #mapMap{
         height: 100%;

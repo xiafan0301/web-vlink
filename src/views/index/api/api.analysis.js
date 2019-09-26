@@ -190,7 +190,7 @@ export function postTaskInfosPage(params) {
   return request({
     url: '/personinvestigation/showtasklist',
     method: 'post',
-    mode: 'judge',
+    mode: 'vehicle',
     params
   })
 }

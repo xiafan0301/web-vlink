@@ -80,9 +80,9 @@ const oDomains = {
     // 车辆地址
     vehicle: {
       // dev: 'http://10.116.64.107:8081',
-      dev: 'https://apidev.aorise.org/vlink-vehicle',
-      test: 'https://apirel.aorise.org/vlink-vehicle',
-      prod: 'https://apiprod.aorise.org/vlink-vehicle'
+      dev: 'https://apidev.aorise.org/vlink-voiture',
+      test: 'https://apirel.aorise.org/vlink-voiture',
+      prod: 'https://apiprod.aorise.org/vlink-voiture'
     },
     // 公共短信服务
     sms: {
