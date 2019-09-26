@@ -108,6 +108,22 @@ window.onload = function(e) {
     obj.txt = e.target.value
   })
 
+  let arr = [
+      {name: 'a', uid: 1},
+      {name: 'b', uid: 2},
+      {name: 'c', uid: 3},
+      {name: 'd', uid: 4},
+      {name: 'e', uid: 5},
+      ]
+  let br = [1,4]
+  arr = arr.reduce((prev, next) => {
+    console.log(prev, next)
+    if (br.includes(next.uid)) {
+      prev.push(next);
+    }
+    return prev;
+  }, [])
+  console.log(arr)
 </script>
 </body>
 </html>

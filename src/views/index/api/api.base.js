@@ -218,7 +218,7 @@ export function putBayonetBasisInfo (data) {
   });
 }
 /**
- * 卡口列表查询
+ * 卡口列表查询接口
  */
 export function getBayonetList (params) {
   return request({

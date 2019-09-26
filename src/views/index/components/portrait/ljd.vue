@@ -1196,8 +1196,8 @@ export default {
   float: left;
   z-index: 1;
   margin-left: 0px;
-  box-shadow: 4px 0px 10px 0px #838383;
-  box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);
+  /*box-shadow: 4px 0px 10px 0px #838383;*/
+  /*box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);*/
   animation: fadeInLeft 0.4s ease-out 0.3s both;
   transition: marginLeft 0.3s ease-in;
   .plane {
