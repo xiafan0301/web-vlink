@@ -412,8 +412,6 @@ export default {
       deleteDialog: false,
       isDeleteLoading: false,
       interruptDialog: false, //中断任务
-      addTaskDialog: false,
-      isAddLoading: false,
     }
   },
   mounted () {
@@ -445,6 +443,11 @@ export default {
     })
   },
   methods: {
+    // 重置查询条件
+    resetForm (form) {
+      this.$refs[form].resetFields();
+      this.getDataList();
+    },
     randerMap () {
       this.$nextTick(() => {
         $('.vl_jig_right').append($('#tcMap'))

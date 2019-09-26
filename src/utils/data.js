@@ -1,40 +1,40 @@
 const dataList = {
   imgId: 1, // 图片id
-  videoId: 2, // 视频id
-  eventLevel: 2, // 事件等级
-  fileId: 3, // 文件id
-  handleUnit: 3, // 处理单位
-  identity: 4, // 上报者身份
-  eventSource: 5, // 事件来源  中心端--1 app端--2
-  sourceType: 5, //资源来源
-  participateType: 6, // 参与类型
-  eventStatus: 7, // 事件状态
-  auditStatus: 8, // 审核状态
+  videoId: 1023, // 视频id
+  eventLevel: 1023, // 事件等级
+  fileId: 1035, // 文件id
+  handleUnit: 1035, // 处理单位
+  identity: 1031, // 上报者身份
+  eventSource: 1025, // 事件来源  中心端--1 app端--2
+  sourceType: 1025, //资源来源
+  participateType: 1026, // 参与类型
+  eventStatus: 1024, // 事件状态
+  auditStatus: 1030, // 审核状态
   autoCheck: 10, // 自动审核政务人员
   alarmLevel: 1057, //告警级别
   planType: 12, // 预案类型
-  rejectReason: 13, // 驳回原因
-  eventType: 20, // 事件类型
-  distanceId: 23, // 推送距离
-  taskStatus: 24, // 任务状态,
-  taskType: 25, // 任务类型
-  ctcStatus: 26, // 调度事件状态
-  deviceStatus: 33, // 设备状态
-  maxPixel: 34, // 最大像素
-  cameraType: 35, // 摄像头类型
-  manufacturer: 37, // 厂商
-  intelCharac: 38, // 智能特性
-  importantLevel: 40, // 重要级别
-  memberJob: 42, // 成员职位
-  operateCompany: 43, // 运营公司
-  vehicleType: 44, // 车辆类型
-  numberType: 45, // 号牌种类
-  plateType: 45, // 号牌类型  
-  vehicleColor: 47, // 车身颜色
-  carColor: 47, // 车辆颜色
-  ownership: 48, //号牌归属
-  plateColor: 50,     //号牌颜色
-  licensePlateColor: 50, //车牌颜色
+  rejectReason: 1032, // 驳回原因
+  eventType: 1022, // 事件类型
+  distanceId: 1055, // 推送距离
+  taskStatus: 1035, // 任务状态,
+  taskType: 1036, // 任务类型
+  ctcStatus: 1027, // 调度事件状态
+  deviceStatus: 1041, // 设备状态
+  maxPixel: 1040, // 最大像素
+  cameraType: 1043, // 摄像头类型
+  manufacturer: 1038, // 厂商
+  intelCharac: 1039, // 智能特性
+  importantLevel: 1042, // 重要级别
+  memberJob: 1058, // 成员职位
+  operateCompany: 1051, // 运营公司
+  vehicleType: 1011, // 车辆类型
+  numberType: 1009, // 号牌种类
+  plateType: 1009, // 号牌类型
+  vehicleColor: 1047, // 车身颜色
+  carColor: 1050, // 车辆颜色
+  ownership: 1052, //号牌归属
+  plateColor: 1046,     //号牌颜色
+  licensePlateColor: 1046, //车牌颜色
 }
 // 处理方式
 const handeMethods = {

@@ -436,7 +436,7 @@ export default {
           color: #333333;
           overflow: auto;
           > h2 {
-            font-weight: bold; font: 18px;
+            font-weight: bold; font-size: 18px;
             height: 50px; line-height: 50px;
           }
           > ul {

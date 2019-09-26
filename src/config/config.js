@@ -52,7 +52,7 @@ const oDomains = {
         // dev: 'https://apidev.aorise.org/vlink-judge/',
         dev: 'https://apidev.aorise.org/vlink-judge/',
         test: 'https://apirel.aorise.org/vlink-judge/',
-        // test: 'http://10.116.64.53:8081',
+        // test: 'http://10.116.64.69:8081',
         prod: 'https://apiprod.aorise.org/vlink-judge/',
     },
     // 调度和预案部分地址
@@ -80,13 +80,13 @@ const oDomains = {
     // 车辆地址
     vehicle: {
       // dev: 'http://10.116.64.107:8081',
-      dev: 'https://apidev.aorise.org/vlink-vehicle',
-      test: 'https://apirel.aorise.org/vlink-vehicle',
-      prod: 'https://apiprod.aorise.org/vlink-vehicle'
+      dev: 'https://apidev.aorise.org/vlink-voiture',
+      test: 'https://apirel.aorise.org/vlink-voiture',
+      prod: 'https://apiprod.aorise.org/vlink-voiture'
     },
     // 人像地址
     portrait: {
-      // dev: 'http://10.116.64.107:8081',
+      // test: 'http://10.116.64.97:8081',
       dev: 'https://apidev.aorise.org/vlink-portrait',
       test: 'https://apirel.aorise.org/vlink-portrait',
       prod: 'https://apiprod.aorise.org/vlink-portrait'

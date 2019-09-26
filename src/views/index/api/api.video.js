@@ -482,3 +482,27 @@ export const getVideoLinkLogin = () => {
     mode: 'live'
   })
 }
+
+/**
+*视频监控回放抓拍上墙
+* */
+export const VideoPostQueryBackSnap = (data) => {
+  return request({
+    url: '/video/query-back-snap',
+    method: 'post',
+    data,
+    mode: 'judge'
+  })
+}
+
+/**
+ *视频监控直播抓拍上墙
+ * */
+export const VideoPostQueryLiveSnap = (data) => {
+  return request({
+    url: '/video/query-live-snap',
+    method: 'post',
+    data,
+    mode: 'judge'
+  })
+}

@@ -590,7 +590,7 @@ export function getFoothold(params) {
     url: '/foothold',
     method: 'post',
     data: params,
-    mode: 'judge'
+    mode: 'portrait'
   })
 }
 

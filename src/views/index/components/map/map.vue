@@ -452,6 +452,13 @@
       this.getAlarmListByDev();
     },
     methods: {
+//      operClusterIO (bool, mark) {
+//        if (bool) {
+//          this.map.cluster.addMarker(mark)
+//        } else {
+//          this.map.cluster.removeMarker(mark)
+//        }
+//      },
       // 获取标注列表
       getMarkHistory () {
         MapGETsignList().then(res => {
@@ -854,6 +861,7 @@
                 // 把设备跟卡口的mark加入allDBMarks
                 // 点击地图上的摄像头播放视频
                 if (obj.dataType === 0) {
+                  _this.allDBMarks.push(marker)
                   marker.on('click', function () {
                     if (_this.activeType) {
                       return false;
@@ -867,6 +875,7 @@
                 }
                 // 卡口视频
                 if (obj.dataType === 1) {
+                  _this.allDBMarks.push(marker)
                   marker.on('click', function () {
                     if (_this.activeType) {
                       return false;
@@ -1025,6 +1034,7 @@
               }
             })
           }
+          addCluster(this.map, this.allDBMarks);
           if (!bool) {
             this.map.setFitView();
           }
@@ -1459,21 +1469,34 @@
       },
       // boolean 为 true时 显示, false 隐藏.  operLeft 存在的话，说明是操作了左侧地图信息树，
       operClassToEL () {
-        this.marks.forEach((elList, _index) => {
-          if (_index < 4) {
-            elList.forEach(y => {
-              let _curObj = document.getElementById('mapMark' + y.getExtData().dataType + y.getExtData().uid).classList, point = y.getPosition();
-              let b = this.updateMarkVisible(y.getExtData());
-              if (!b){
-                if (!_curObj.contains(this.hideClass)) {
-                  _curObj.add(this.hideClass)
-                }
-              } else {
-                _curObj.remove(this.hideClass)
-              }
-            })
+        this.marks[2].forEach(y => {
+          this.domClassOper(y)
+        })
+        this.marks[3].forEach(y => {
+          this.domClassOper(y)
+        })
+        let _arAdd = [], _arDel = [];
+        this.allDBMarks.forEach(y => {
+          let b = this.updateMarkVisible(y.getExtData());
+          if (b) {
+            _arAdd.push(y)
+          } else {
+            _arDel.push(y)
           }
         })
+        this.map.cluster.removeMarkers(_arDel)
+        this.map.cluster.addMarkers(_arAdd)
+      },
+      domClassOper (y) {
+        let _curObj = document.getElementById('mapMark' + y.getExtData().dataType + y.getExtData().uid).classList, point = y.getPosition();
+        let b = this.updateMarkVisible(y.getExtData());
+        if (!b){
+          if (!_curObj.contains(this.hideClass)) {
+            _curObj.add(this.hideClass)
+          }
+        } else {
+          _curObj.remove(this.hideClass)
+        }
       },
       // 找到设备当前显示状态，更新地图mark的extData里的状态
       updateMarkVisible(obj) {
@@ -1486,7 +1509,6 @@
         }
         return bool;
       },
-
       // 选择区域
       selArea () {
         this.activeType === 1 ? this.activeType = 0 : this.activeType = 1;
