@@ -1135,7 +1135,7 @@ export default {
           border-radius:4px 4px 0px 0px;
           border:1px solid #D3D3D3;
           position: relative;
-          margin: 0 20px;
+          margin: 0 20px 20px;
           .tab{
             width: 100%;
             height: 42px;
