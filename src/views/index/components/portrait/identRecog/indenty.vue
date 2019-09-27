@@ -94,7 +94,7 @@
   </div>
 </template>
 <script>  
-import { ajaxCtx } from '@/config/config.js';
+// import { ajaxCtx } from '@/config/config.js';
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import noResult from '@/components/common/noResult.vue';
 import { checkIdCard } from '@/utils/validator.js';

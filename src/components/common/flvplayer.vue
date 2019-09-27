@@ -159,7 +159,7 @@
         <el-button :disabled="isDisableSkip" @click="skipModelPage(3)">特征搜人</el-button>
         <el-button :disabled="isDisableSkip" @click="skipModelPage(4)">特征搜车</el-button>
         <el-button :disabled="isDisableSkip" @click="skipModelPage(5)">人像轨迹分析</el-button>
-        <el-button :disabled="isDisableSkip" @click="skipModelPage(6)">车辆轨迹分析</el-button>
+        <el-button :disabled="isDisableSkip || isDisabledPlateNo" @click="skipModelPage(6)">车辆轨迹分析</el-button>
       </div>
       <div style="text-align: center; padding-top: 30px;">
         <canvas :id="flvplayerId + '_cut_canvas'"></canvas>
@@ -469,8 +469,8 @@ import { apiSignContentList, apiVideoSignContent, apiVideoSign, apiVideoRecord,
   ptzControl, getVideoLinkLogin , VideoPostQueryLiveSnap, VideoPostQueryBackSnap} from "@/views/index/api/api.video.js";
 import { handUpload } from "@/views/index/api/api.base.js";
 import { JtcPOSTAppendixInfo } from "@/views/index/api/api.judge.js";
-import { getPhotoAnalysis } from "@/views/index/api/api.analysis.js"; // 车辆特征检索接口
-
+// import { getPhotoAnalysis } from "@/views/index/api/api.analysis.js"; // 车辆特征检索接口
+import { getMultiPicRecognize } from "@/views/index/api/api.structuring.js"; // 单张图片识别多个车辆目标接口
 export default {
   /** 
    * index: 视频序号（在列表页面的位置）
@@ -614,6 +614,7 @@ export default {
       skipImgUrl: null, // 截图保存的图片路径
       skipImgPathId: null,
       isDisableSkip: true, // 是否禁止点击跳转页面
+      isDisabledPlateNo: true, // 截屏生成的图片是否含有车辆信息，若没有禁止跳至车辆轨迹分析页面
       plateNoArr: [], // 截屏图片上的车牌号集合
 
       // 抓拍上墙
@@ -1699,8 +1700,13 @@ export default {
     },
     // 根据截屏图片获取车辆信息
     getVehicleInfoByImg () {
+      this.plateNoArr = [];
       if (this.skipImgUrl) {
-        getPhotoAnalysis(this.skipImgUrl)
+        const params = {
+          bussType: 'vehicle',
+          url: this.skipImgUrl
+        };
+        getMultiPicRecognize(params)
           .then(res => {
             if (res && res.data) {
               res.data.map(item => {
@@ -1708,6 +1714,11 @@ export default {
                   this.plateNoArr.push(item.plateNo);
                 }
               })
+              if (this.plateNoArr.length > 0) { // 目标图片识别出车辆信息
+                this.isDisabledPlateNo = false;
+              } else {
+                this.isDisabledPlateNo = true;
+              }
             }
           })
           .catch(() => {})
