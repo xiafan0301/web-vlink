@@ -367,3 +367,11 @@ export const addCluster = (mapObj, markers) => {
     });
   })
 }
+// 上传图片取图片的url方法，布控专用
+export const imgUrls = (arr) => {
+  return arr.map(obj => {
+    if (!obj.hasOwnProperty('response')) {return obj}
+    const {response: {data: {sysCommonImageInfo: {fileFullPath}, sysAppendixInfo: {uid: objId}}}} = obj;
+    return {photoUrl: fileFullPath, objType: 3, objId};
+  })
+}

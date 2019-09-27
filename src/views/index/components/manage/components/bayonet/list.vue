@@ -239,6 +239,7 @@ export default {
       loadingExBtn: false,
       delBayonetDialog: false,
       bayonetId: null,
+      orderObj: {},
     }
   },
   mounted () {

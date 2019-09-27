@@ -274,3 +274,16 @@ export function handUpload (file) {
     mode: baseModeName
   })
 }
+
+/**********************  特殊场所相关接口  ********************/
+/**
+ * 新增卡口
+ */
+export function getGroupsDevices (params) {
+  return request({
+    url: '/special-place/groups-devices',
+    params,
+    method: 'get',
+    mode: baseModeName
+  });
+}

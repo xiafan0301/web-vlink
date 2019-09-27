@@ -2,13 +2,13 @@
   <el-form ref="modelOne" :model="modelOneForm" class="model_one">
     <!-- 失踪人员信息上传 -->
     <el-form-item label="失踪人员信息:" :rules="{ required: true, message: '', trigger: 'blur'}" style="margin-bottom: 0;">
-      <div class="pic_format" style="left: 110px;top: -40px;">
-        <div @click="popSel">从布控库中选择</div>
+      <div class="pic_format" style="left: 105px;top: -40px;">
+        <div @click="popSel(1)">从布控库中选择</div>
       </div>
       <div is="uploadPic" :fileList="fileListOne" @uploadPicDel="uploadPicDelOne" @uploadPicFileList="uploadPicFileListOne" :maxSize="1"></div>
     </el-form-item>
-    <el-form-item label="人员姓名:" prop="personnelName" :rules="[{ required: true, message: '请输入人员姓名', trigger: 'blur'}, {validator: validName, trigger: 'blur'}]">
-      <el-input v-model="modelOneForm.personnelName"></el-input>
+    <el-form-item label="人员姓名:" prop="name" :rules="[{ required: true, message: '请输入人员姓名', trigger: 'blur'}, {validator: validName, trigger: 'blur'}]">
+      <el-input v-model="modelOneForm.name"></el-input>
     </el-form-item>
     <el-form-item label="性别:" prop="sex" :rules="{ required: true, message: '请选择人员性别', trigger: 'change'}">
       <el-select value-key="uid" v-model="modelOneForm.sex" filterable placeholder="请选择">
@@ -20,62 +20,67 @@
         </el-option>
       </el-select>  
     </el-form-item>
-    <el-form-item label="失踪时间:" prop="missingTime" :rules="{ required: true, message: '请选择失踪时间', trigger: 'blur'}">
+    <el-form-item label="失踪时间:" prop="lostTime" :rules="{ required: true, message: '请选择失踪时间', trigger: 'blur'}">
       <el-date-picker
-        v-model="modelOneForm.missingTime"
+        v-model="modelOneForm.lostTime"
         type="datetime"
         placeholder="请选择失踪时间">
       </el-date-picker>
     </el-form-item>
-    <el-form-item label="失踪地址:" prop="missingAddress" :rules="{ required: true, message: '请输入地名的关键词', trigger: 'blur'}">
+    <el-form-item label="失踪地址:" prop="address" :rules="{ required: true, message: '请输入地名的关键词', trigger: 'blur'}">
        <el-autocomplete
         style="width: 100%;"
-        v-model="modelOneForm.missingAddress"
+        v-model="modelOneForm.address"
         :trigger-on-focus="false"
-        :fetch-suggestions="autoAdress"
+        :fetch-suggestions="querySearch"
         value-key="name"
-        @select="chooseAddress($event, 1)"
+        @select="getAddress($event, 1)"
         placeholder="请输入地名的关键词">
       </el-autocomplete>
     </el-form-item>
     <el-form-item label="家庭地址:">
       <el-autocomplete
         style="width: 100%;"
-        v-model="modelOneForm.familyAddress"
+        v-model="modelOneForm.homeAddress"
         :trigger-on-focus="false"
-        :fetch-suggestions="autoAdress"
+        :fetch-suggestions="querySearch"
         value-key="name"
-        @select="chooseAddress($event, 2)"
+        @select="getAddress($event, 2)"
         placeholder="请输入地名的关键词">
       </el-autocomplete>
     </el-form-item>
     <!-- 嫌疑人照片上传 -->
-    <el-form-item label="嫌疑人照片:">
-      <div class="pic_format" style="left: 96px;top: -40px;">
-        <div @click="popSel">从布控库中选择</div>
+    <el-form-item label="嫌疑人照片:" style="margin-bottom: 0px">
+      <div class="pic_format" style="left: 80px;top: -40px;">
+        <div @click="popSel(2)">从布控库中选择</div>
       </div>
       <div is="uploadPic" :fileList="fileListTwo" @uploadPicDel="uploadPicDelTwo" @uploadPicFileList="uploadPicFileListTwo"></div>
     </el-form-item>
+    <el-form-item>
+      <div class="sel_car"><span>嫌疑车辆：</span><span @click="popSel(3)">从布控库中选择</span></div>
+    </el-form-item>
     <el-form-item class="plate_num_box">
-      <div class="pic_format" style="left: 80px;top: -20px;cursor: pointer;">
-        <div @click="popSel">从布控库中选择</div>
+      <div class="plate_num" v-for="(item, index) in fileListThree" :key="index + item.vehicleNumber">
+        <el-input v-model="item.vehicleNumber" :disabled="true"></el-input>
+        <i class="el-icon-remove" @click="removeVehicleNumber(index)"></i>
       </div>
-      <div v-for="(item, index) in modelOneForm.licensePlateNumList" :key="index" style="position: relative;" class="plate_num">
-        <el-form-item :label="index === 0 ? '嫌疑车辆:' : ''" :prop="'licensePlateNumList.' + index + '.licensePlateNum'" :rules="{validator: validPlateNumber, trigger: 'blur'}">
-          <el-input v-model="item.licensePlateNum" placeholder="请输入车辆车牌号"></el-input>
+      <div v-for="(item, index) in modelOneForm.carNumberInfo" :key="index" style="position: relative;" class="plate_num">
+        <el-form-item :prop="'carNumberInfo.' + index + '.vehicleNumber'" :rules="{validator: validPlateNumber, trigger: 'blur'}">
+          <el-input v-model="item.vehicleNumber" placeholder="请输入车辆车牌号"></el-input>
+          <i class="el-icon-remove" @click="removeLicensePlateNum(index)"></i>
         </el-form-item>
       </div>
       <el-form-item class="plate_num_btn_box">
         <div class="period_time_btn" @click="addLicensePlateNum()"><i class="vl_icon vl_icon_control_22"></i><span>添加车牌号码</span></div>
-        <div v-if="modelOneForm.licensePlateNumList.length > 1" class="period_time_btn" @click="removeLicensePlateNum()"><i class="vl_icon vl_icon_control_28"></i><span>删除车牌号码</span></div>
       </el-form-item>
     </el-form-item>
     <el-form-item style="margin-top: 20px;" v-if="!isShowControlDev">
       <el-button type="primary" @click="selControl('modelOne')">一键布控</el-button>
     </el-form-item>
-    <div is="controlDev" ref="controlDev" @getChildModel="getChildModel" :missingTime="modelOneForm.missingTime" :addressObj="addressObj_" v-if="isShowControlDev"></div>
-    <div is="vehicleLib" ref="vehicleLibDialog"></div>
-    <div is="portraitLib" ref="portraitLibDialog"></div>
+    <div is="controlDev" ref="controlDev" @getChildModel="getChildModel" :lostTime="modelOneForm.lostTime" :addressObj="addressObj_" :devs="devs" :bays="bays" v-if="isShowControlDev"></div>
+    <div is="portraitLib" ref="portraitLibDialogOne" :fileListOne="fileListOne" :imgNum="true" @getPortraitData="getPortraitDataOne"></div>
+    <div is="portraitLib" ref="portraitLibDialogTwo" :fileListTwo="fileListTwo" @getPortraitData="getPortraitDataTwo"></div>
+    <div is="vehicleLib" ref="vehicleLibDialog" @getVehicleData="getVehicleData" :fileList="fileListThree"></div>
   </el-form>
 </template>
 <script>
@@ -83,20 +88,24 @@ import uploadPic from './uploadPic.vue';
 import controlDev from './controlDev.vue';
 import vehicleLib from './vehicleLib.vue';
 import portraitLib from './portraitLib.vue';
-import {random14, objDeepCopy} from '@/utils/util.js';
+import {random14, objDeepCopy, imgUrls, unique, formatDate} from '@/utils/util.js';
 import {checkName, checkPlateNumber} from '@/utils/validator.js';
 export default {
   components: {uploadPic, controlDev, vehicleLib, portraitLib},
+  props: ['modelList'],
   data () {
     return {
-      map: null,
       modelOneForm: {
-        missingTime: new Date('2019-9-10 11:00'),
-        personnelName: null,
+        lostTime: new Date('2019-9-10 11:00'),
+        name: null,
         sex: null,
-        missingAddress: null,
-        familyAddress: null,
-        licensePlateNumList: [{licensePlateNum: null}]
+        address: null,
+        homeAddress: null,
+        carNumberInfo: [{vehicleNumber: null}],
+        radius: null,
+        url: null,
+        longitude: null,
+        latitude: null
       },
       validPlateNumber: checkPlateNumber,
       validName: checkName,
@@ -105,19 +114,78 @@ export default {
         {value: 2, label: '女'},
         {value: 3, label: '性别不限'}
       ],
-      autoComplete: null,
       addressObj: [],
       addressObj_: [],
       fileListOne: [],//上传的失踪人员信息数据
       fileListTwo: [],//上传的嫌疑人照片数据
+      fileListThree: [],//从布控库中选择的车辆
       isShowControlDev: false,//是否显示布控设备选择部分
-      devData: {}
+      devData: {},//地图或列表中选择的设备和卡口
+      devs: [],//编辑时用来回填的设备列表
+      bays: []//编辑时用来回填的卡口列表
     }
   },
   mounted () {
-    this.resetMap();
+    // 修改时回填数据
+    if (this.modelList) {
+      // 回填嫌疑车牌
+      let [{carNumberInfo, pointDtoList: [{bayonetList, devList, longitude, latitude, url, ...other}], surveillanceObjectDtoList}] = this.modelList;
+      carNumberInfo = carNumberInfo.split(',');
+      other.carNumberInfo = [];
+      carNumberInfo.forEach(f => {
+        other.carNumberInfo.push({vehicleNumber: f});
+      })
+      other.lostTime = new Date(other.lostTime);
+      this.modelOneForm = other;//回填表单数据
+      this.devs = devList;//回填设备
+      this.bays = bayonetList;//回填卡口
+
+      this.fileListOne = [surveillanceObjectDtoList.find(m => (m.objType === 1 || m.objType === 3) && url === m.photoUrl)];//回填失踪人员照片
+      this.fileListTwo = surveillanceObjectDtoList.filter(m => (m.objType === 1 || m.objType === 3) && url !== m.photoUrl);//回填嫌疑人照片
+      this.fileListThree = surveillanceObjectDtoList.filter(m => m.objType === 2);//回填嫌疑车辆
+      // 回填选择范围的经纬度、地址
+      longitude = longitude.split(',');
+      latitude = latitude.split(',');
+      longitude.forEach((f, i) => {
+        this.addressObj_.push({
+          lngLat: [longitude[i], latitude[i]],
+          address: i === 0 ? this.modelOneForm.address : this.modelOneForm.homeAddress,
+          type: i + 1
+        });
+      })
+      this.isShowControlDev = true;
+    }
   },
   methods: {
+    // 计算布控范围半径
+    scopeRadius () {
+      const minute10 = 10*60*1000;
+      const minute30 = 30*60*1000;
+      const time = new Date().getTime() - this.modelOneForm.lostTime.getTime();
+      if (time === minute10) {
+        return 10;
+      } else if (time > minute10 && time < minute30) {
+        return 60;
+      } else if (time > minute30) {
+        return 60;
+      } else {
+        return 10;
+      }
+    },
+    // 从布控库中获取失踪人像
+    getPortraitDataOne (data) {
+      this.fileListOne = data;
+    },
+    // 从布控库中获取嫌疑人像
+    getPortraitDataTwo (data) {
+      this.fileListTwo = this.fileListTwo.concat(data);
+      this.fileListTwo = unique(this.fileListTwo, 'objId');
+    },
+    // 从布控库中获取车像
+    getVehicleData (data) {
+      this.fileListThree = this.fileListThree.concat(data);
+      this.fileListThree = unique(this.fileListThree, 'objId');
+    },
     // 一键布控
     selControl (formName) {
       if (this.fileListOne.length === 0) {
@@ -139,10 +207,20 @@ export default {
       } 
       this.$refs['modelOne'].validate((valid) => {
         if (valid) {
-          console.log(111111111)
           if (this.$refs['controlDev']) {
             this.$refs['controlDev'].sendParent();
-            this.$emit('getModel', {modelOneForm: this.modelOneForm, fileListOne: this.fileListOne, fileListTwo: this.fileListTwo, ...this.devData});
+            if (this.devData.devList.length === 0) return this.$message.warning('请先选择布控设备');
+            
+            let _modelOneForm = objDeepCopy(this.modelOneForm);
+
+            _modelOneForm.carNumberInfo = _modelOneForm.carNumberInfo.map(m => m.vehicleNumber).join(',');
+            _modelOneForm.radius = this.scopeRadius();
+            _modelOneForm.url = this.fileListOne[0].photoUrl;
+            _modelOneForm.lostTime = formatDate(_modelOneForm.lostTime);
+            _modelOneForm.longitude = this.addressObj_.map(m => m.lngLat[0]).join(',');
+            _modelOneForm.latitude = this.addressObj_.map(m => m.lngLat[1]).join(',');
+            _modelOneForm = {..._modelOneForm, ...this.devData}
+            this.$emit('getModel', {carNumberInfo: _modelOneForm.carNumberInfo, modelType: 1,  pointDtoList: [_modelOneForm], surveillanceObjectDtoList: [...this.fileListOne, ...this.fileListTwo, ...this.fileListThree]});
           } else {
             this.$message.warning('请先选择布控设备');
           }
@@ -160,64 +238,51 @@ export default {
     },
     // 失踪人员信息的上传方法
     uploadPicFileListOne (fileList) {
-      this.fileListOne = fileList;
+      this.fileListOne = imgUrls(fileList);
     },
+
     // 嫌疑人照片的上传方法
     uploadPicDelTwo (fileList) {
       this.fileListTwo = fileList;
+      console.log(this.fileListTwo, 'this.fileListTwo');
+      
     },
     // 嫌疑人照片的上传方法
     uploadPicFileListTwo (fileList) {
-      this.fileListTwo = fileList;
+      let _list = imgUrls(fileList);
+      this.fileListTwo = this.fileListTwo.concat(_list);
+      this.fileListTwo = unique(this.fileListTwo, 'objId');
+      console.log(this.fileListTwo, 'this.fileListTwo');
+      
     },
     // 从库中选择
-    popSel () {
-      this.$refs['portraitLibDialog'].portraitLibDialog = true;
-      this.$refs['portraitLibDialog'].reset();
+    popSel (type) {
+      if (type === 1) {
+        this.$refs['portraitLibDialogOne'].portraitLibDialog = true;
+        this.$refs['portraitLibDialogOne'].reset();
+      } else if (type === 2) {
+        this.$refs['portraitLibDialogTwo'].portraitLibDialog = true;
+        this.$refs['portraitLibDialogTwo'].reset();
+      } else {
+        this.$refs['vehicleLibDialog'].vehicleLibDialog = true;
+        this.$refs['vehicleLibDialog'].reset();
+      }
     },
     // 添加车牌号码
     addLicensePlateNum () {
-      this.modelOneForm.licensePlateNumList.push({licensePlateNum: null});
+      this.modelOneForm.carNumberInfo.push({vehicleNumber: null});
     },
     // 删除车牌号码
-    removeLicensePlateNum () {
-      this.modelOneForm.licensePlateNumList.pop();
+    removeLicensePlateNum (index) {
+      this.modelOneForm.carNumberInfo.splice(index, 1);
     },
-    // 拿到地图实列
-    resetMap () {
-      let _this = this;
-      _this.map = new window.AMap.Map(
-        'xxx', {
-          zoom: null,
-          center: null
-        }
-      );
-      _this.map.plugin('AMap.Autocomplete', () => {
-        let autoOptions = {
-          city: '溆浦县'
-        }
-        _this.autoComplete = new window.AMap.Autocomplete(autoOptions);
-      })
+    // 删除从布控库中选择的车牌
+    removeVehicleNumber (index) {
+      this.fileListThree.splice(index, 1);
     },
-    autoAdress (queryString, cb) {
-      if (queryString === '') {
-        cb([])
-      } else {
-        this.autoComplete.search(queryString, (status, result) => {
-          if (status === 'complete') {
-            result.tips.forEach(f => {
-              f.name = `${f.name}(${f.district})`;
-            })
-            cb(result.tips);
-          } else {
-            cb([]);
-          }
-        })
-      }
-    },
+    /* 地址下拉搜索相关方法 */
     // 获取追踪点
-    chooseAddress (e, type) {
-      console.log(e, 'eee')
+    getAddress (e, type) {
       if (!e.location) {
         this.$message.error('无法获取到经纬度！');
         return;
@@ -226,23 +291,45 @@ export default {
         if (this.addressObj.some(s => s.type === 1)) this.addressObj = this.addressObj.filter(f => f.type !== 1);
         this.addressObj.push({
           lngLat: [e.location.lng, e.location.lat],
-          address: this.modelOneForm.missingAddress,
+          address: this.modelOneForm.address,
           type: 1
         });
       } else {
         if (this.addressObj.some(s => s.type === 2)) this.addressObj = this.addressObj.filter(f => f.type !== 2);
         this.addressObj.push({
           lngLat: [e.location.lng, e.location.lat],
-          address: this.modelOneForm.familyAddress,
+          address: this.modelOneForm.homeAddress,
           type: 2
         });
       }
     },
-  },
-  // 销毁地图实例
-  isDestroyed () {
-    if (this.map) {
-      this.map.destroy();
+    // 地图搜索选择
+    querySearch(queryString, cb) {
+      this.$nextTick(() => {
+        this.seacher(queryString).then(v => {
+          let results = queryString
+              ? v.filter(f => f.name.toLowerCase().indexOf(queryString.toLowerCase()) > -1)
+              : v;
+          cb(results);
+        });
+      });
+    },
+    seacher(v) {
+      const placeSearch = new AMap.PlaceSearch({
+        // city 指定搜索所在城市，支持传入格式有：城市名、citycode和adcode
+        city: "湖南"
+      });
+
+      if (!!v) {
+        let _this = this;
+        return new Promise((resolve, reject) => {
+          placeSearch.search(v, (status, result) => {
+            // 查询成功时，result即对应匹配的POI信息
+            let pois = result.poiList.pois;
+            resolve(pois);
+          });
+        });
+      }
     }
   }
 }
@@ -257,6 +344,13 @@ export default {
     position: absolute;
     z-index: 99;
     > div{
+      color: #0C70F8;
+      cursor: pointer;
+    }
+  }
+  .sel_car{
+    height: 26px;
+    > span:nth-child(2){
       color: #0C70F8;
       cursor: pointer;
     }
@@ -283,63 +377,53 @@ export default {
     .plate_num{
       width: 25%;
       display: flex;
-      margin-top: 20px;
       padding-right: 10px;
-      > span{
-        margin: 0 3px;
-      }
-      > .el-form-item{
-        width: 100%;
-        margin-bottom: 0;
-        padding-right: 0!important;
-        & > .el-form-item__label:nth-child(1){
-          width: 330px;
-          position: absolute;
-          left: 0;
-          top: -40px;
+      padding-bottom: 10px;
+      .el-input{
+        width: calc(100% - 40px);
+        .el-input__inner{
+          border-radius: 4px 0 0 4px;
         }
+      }
+      i{
+        width: 40px;
+        height:40px;
+        background:rgba(246,246,246,1);
+        border-radius:0px 4px 4px 0px;
+        border:1px solid rgba(211,211,211,1);
+        line-height: 40px;
+        text-align: center;
+        font-size: 18px;
+        color: #F94539;
+        cursor: pointer;
+      }
+      .el-form-item{
+        width: 100%;
       }
       .el-form-item__content{
-        .el-date-editor{
-          width: 100%!important;
-        }
-      }
-      &:nth-child(5){
-        padding-right: 0!important;
+        display: flex;
       }
     }
     .plate_num_btn_box{ 
+      width: 25%;
       margin-bottom: 0!important;
-      padding-right: 38px!important;
-      padding-top: 20px;
-      &.top{
-        padding-top: 20px;
-      }
-      .el-form-item__content{ 
+      padding-right: 10px;
+      .el-form-item__content{
         display: flex;
         .period_time_btn{
-          width: 164px;
+          width: 100%;
           height:40px;
           line-height:40px;
           text-align: center;
           border-radius:4px;
           border:1px dashed rgba(217,217,217,1);
+          vertical-align: middle;
+          margin-bottom: 5px;
           cursor: pointer;
-          &:nth-child(1){
-            color: #0C70F8;
-            margin-right: 10px;
-          }
-          &:nth-child(2){
-            color: #F94539;
-          }
+          color: #0C70F8;
           .vl_icon_control_22{
             vertical-align: middle;
             margin-bottom: 5px;
-            margin-right: 5px;
-          }
-          .vl_icon_control_28{
-            vertical-align: middle;
-            margin-bottom: 7px;
             margin-right: 5px;
           }
         }
