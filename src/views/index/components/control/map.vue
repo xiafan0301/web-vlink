@@ -183,7 +183,7 @@
 </template>
 <script>
 import flvplayer from '@/components/common/flvplayer.vue';
-import {random14} from '@/utils/util.js';
+import {random14, unique, addCluster} from '@/utils/util.js';
 import {getControlNameBySelect, getControlEventBySelect, getControlObjBySelect, getControlMap, getControlMapByDevice, getAlarmListByDev, getAllAlarmSnapListByDev} from '@/views/index/api/api.control.js';
 import {dataList} from '@/utils/data.js';
 import {mapXupuxian} from '@/config/config.js';
@@ -269,7 +269,7 @@ export default {
         {label: '半球机', value: 3},
         {label: '红外', value: 4}
       ],
-      alarmLevelList: this.dicFormater(dataList.alarmLevel)[0].dictList,
+      alarmLevelList: unique(this.dicFormater(dataList.alarmLevel)[0].dictList, 'enumValue'),
       // 地图参数
       map: null,
       devicesList: [], // 布控数据列表
@@ -400,23 +400,50 @@ export default {
             this.getAllAlarmSnapListByDev();
           }
           this.markerAlarmList.forEach(dev => {
-            const childDiv = '<div class="vl_icon_warning">发现可疑目标</div>';
+            // const childDiv = '<div class="vl_icon_warning">发现可疑目标</div>';
             // 给有警情的点标记追加class
-            this.$nextTick(() => {
-              $('#mapBox #' + dev.deviceId).append(childDiv);
-              $('#mapBox #' + dev.deviceId).addClass("vl_icon_alarm");
-              $('#mapBox #' + dev.deviceId).addClass("vl_icon_control_02");
-            })
+            // this.$nextTick(() => {
+              
+            //   $('#mapBox #' + dev.deviceId).append(childDiv);
+            //   $('#mapBox #' + dev.deviceId).addClass("vl_icon_alarm");
+            //   $('#mapBox #' + dev.deviceId).addClass("vl_icon_control_02");
+            // })
+
+
+              this.markerList.forEach(f => {
+                const obj = f.getExtData();
+                if (dev.deviceId === obj.uid) {
+                  this.map.cluster.removeMarker(f);
+                  const uContent = this.setMarkContent(obj, 1)
+                  f.setContent(uContent);
+                }
+              })
           })
           this.timer = setTimeout(() => {
             // 让有警情的点标记的class 12s后移除  
-            $('#mapBox .vl_icon_control_02').removeClass("vl_icon_alarm");
-            $('#mapBox .vl_icon_control_02').removeClass("vl_icon_control_02");
-            $('#mapBox .vl_icon_warning').remove();
+            // $('#mapBox .vl_icon_control_02').removeClass("vl_icon_alarm");
+            // $('#mapBox .vl_icon_control_02').removeClass("vl_icon_control_02");
+            // $('#mapBox .vl_icon_warning').remove();
+            this.markerList.forEach(f => {
+              const obj = f.getExtData();
+              if (this.markerAlarmList.some(s => s.deviceId === obj.uid)) {
+                const uContent = this.setMarkContent(obj, 2)
+                f.setContent(uContent);
+                this.map.cluster.addMarker(f);
+              }
+            })
             this.getAlarmListByDev();
           }, 12000)
         }
       })
+    },
+    // 设置marker的显示图标
+    setMarkContent (obj, type) {
+      if (type === 1) {
+        return '<div id="' + obj.uid + '" class="vl_icon vl_icon_control_01 vl_icon_control_02 vl_icon_alarm"><div class="vl_icon_warning">发现可疑目标</div></div>'
+      } else {
+        return '<div id="' + obj.uid + '" class="vl_icon vl_icon_control_01"></div>'
+      }
     },
     // 获取实时监控的布控设备
     getControlMap (flag) {
@@ -822,6 +849,7 @@ export default {
         }
       }
       _this.map.setFitView();// 自动适配到合适视野范围
+      addCluster(_this.map, _this.markerList);
     },
     // 跳转至视频回放页面
     skipIsVideo (uid, deviceName) {

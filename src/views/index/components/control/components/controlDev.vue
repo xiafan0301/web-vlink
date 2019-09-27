@@ -7,7 +7,7 @@
       </div>
       <div class="sel_dev">
         <div class="title">
-          <span>已选设备（{{bayOrdev === 1 ? devIdList.length : bayIdList.length}}）</span>
+          <span>已选设备（{{devIdList.length + bayIdList.length}}）</span>
           <i class="el-icon-arrow-up" v-show="isShowTree" @click="isShowTree = false"></i>
           <i class="el-icon-arrow-down" v-show="!isShowTree" @click="isShowTree = true"></i>
         </div>

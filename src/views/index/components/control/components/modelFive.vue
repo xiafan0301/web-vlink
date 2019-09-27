@@ -1,7 +1,7 @@
 <template>
  <el-form ref="modelFive" :model="modelFiveForm" class="model_five">
     <h1>布控信息：</h1>
-    <el-form-item label="布防场所:" :rules="{ required: true, message: '请选择布防场所', trigger: 'blur'}" style="margin-bottom: 0;">
+    <el-form-item label="布防场所:" prop="locations" :rules="{ required: true, message: '请选择布防场所', trigger: 'change'}" style="margin-bottom: 10px;">
       <el-select value-key="uid" v-model="modelFiveForm.locations" multiple collapse-tags filterable placeholder="请选择布防场所（可多选）">
         <el-option
           v-for="item in locationList"
@@ -11,11 +11,11 @@
         </el-option>
       </el-select>
     </el-form-item>
-    <el-form-item label="停留时长:" prop="stayTime" :rules="{ required: true, message: '请输入停留时长', trigger: 'blur'}" style="margin-bottom: 0;">
+    <el-form-item label="停留时长:" prop="stayTime" :rules="{ required: true, message: '请输入停留时长', trigger: 'blur'}" style="margin-bottom: 10px;">
       <el-input class="time" v-model="modelFiveForm.stayTime" filterable placeholder="请输入停留时长"></el-input>
     </el-form-item>
-    <el-form-item style="margin-bottom: 0;width: 100%;">
-      <div class="sel_lib"><span>布控车辆：</span><span @click="popSel">从公务车辆中选择</span></div>
+    <el-form-item label="布控车辆：" style="margin-bottom: 0;width: 100%;" :rules="{ required: true, message: '', trigger: 'blur'}">
+      <div class="sel_lib"><span @click="popSel">从公务车辆中选择</span></div>
       <div class="sel_img_box">
         <div class="img_box" v-for="(item, index) in vehicleList" :key="index">
           <img :src="item.photoUrl" alt="">
@@ -28,7 +28,7 @@
       <el-button type="primary" @click="selControl('modelFive')">一键布控</el-button>
     </el-form-item>
     <div is="controlDev" ref="controlDev" v-if="isShowControlDev" :devs="devs" :bays="bays" @getChildModel="getChildModel" :devIdListFive="devIdList" :bayIdListFive="bayIdList"></div>
-    <div is="vehicleLib" ref="vehicleLibDialog" :carNumberInfo="vehicleList" @getVehicleData="getVehicleData"></div>
+    <div is="vehicleLib" ref="vehicleLibDialog" :fileList="vehicleList" @getVehicleData="getVehicleData"></div>
   </el-form>
 </template>
 <script>
@@ -89,8 +89,8 @@ export default {
     selControl (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          if (!this.vehicleList) {
-            return this.$message.wraning('请选择布控车辆');
+          if (this.vehicleList.length === 0) {
+            return this.$message.warning('请选择布控车辆');
           }
           // 拿到布防场所下拉列表里对应的设备和卡口列表，传到地图上，作为已选中的
           let res = [];
@@ -114,11 +114,11 @@ export default {
     },
     // 向父组件传值
     sendParent () {
-      if (!this.vehicleList) {
-        return this.$message.wraning('请选择布控车辆');
-      }
       this.$refs['modelFive'].validate((valid) => {
         if (valid) {
+          if (this.vehicleList.length === 0) {
+            return this.$message.wraning('请选择布控车辆');
+          }
           if (this.$refs['controlDev']) {
             this.$refs['controlDev'].sendParent();
             if (this.devData.devList.length === 0) return this.$message.warning('请先选择布控设备');
@@ -170,8 +170,10 @@ export default {
     width: 25%;
   }
   .sel_lib{
-    padding-bottom: 10px;
-    > span:nth-child(2){
+    position: absolute;
+    top: -40px;
+    left: 80px;
+    > span{
       color: #0C70F8;
       cursor: pointer;
     }

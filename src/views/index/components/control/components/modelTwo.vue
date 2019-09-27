@@ -113,11 +113,11 @@ export default {
     },
     // 向父组件传值
     sendParent () {
-      if (!this.protraitList && !this.vehicleList) {
-        return this.$message.warning('禁入人员、禁入车辆至少选一种');
-      }
       this.$refs['modelTwo'].validate((valid) => {
         if (valid) {
+          if (this.protraitList.length === 0 && this.vehicleList.length === 0) {
+            return this.$message.warning('禁入人员、禁入车辆至少选一种');
+          }
           if (this.$refs['controlDev']) {
             this.$refs['controlDev'].sendParent();
             if (this.devData.devList.length === 0) return this.$message.warning('请先选择布控设备');
@@ -151,7 +151,7 @@ export default {
     selControl (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          if (!this.protraitList && !this.vehicleList) {
+          if (this.protraitList.length === 0 && this.vehicleList.length === 0) {
             return this.$message.warning('禁入人员、禁入车辆至少选一种');
           }
           this.isShowControlDev = true;

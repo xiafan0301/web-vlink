@@ -106,7 +106,7 @@
             </el-form-item>
           </el-form-item>
           <el-form-item class="bl_box">
-            <el-form-item label="是否级联:" prop="cascade" :rules="{ required: true, message: '请选择', trigger: 'change'}">
+            <el-form-item label="是否级联:">
               <el-select value-key="uid" v-model="createForm.cascade" filterable placeholder="请选择">
                 <el-option
                   v-for="item in cascadeList"
@@ -116,7 +116,7 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item v-if="createForm.cascade === 1" label="请选择下级平台:" prop="cascadePlatform" :rules="{ required: true, message: '请选择', trigger: 'change'}">
+            <el-form-item v-if="createForm.cascade === 1" label="请选择下级平台:">
               <el-select value-key="uid" multiple collapse-tags v-model="createForm.cascadePlatform" filterable placeholder="请选择">
                 <el-option
                   v-for="item in cascadePlatformList"
@@ -128,7 +128,7 @@
             </el-form-item>
           </el-form-item>
           <el-form-item class="bl_box">
-            <el-form-item label="共享布控:" prop="sharedControl" :rules="{ required: true, message: '请选择', trigger: 'change'}">
+            <el-form-item label="共享布控:">
               <el-select value-key="uid" v-model="createForm.sharedControl" filterable placeholder="请选择">
                 <el-option
                   v-for="item in sharedControlList"
@@ -138,7 +138,7 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item v-if="createForm.sharedControl === 1" label="请选择共享对象:" prop="shareDept" :rules="{ required: true, message: '请选择', trigger: 'change'}">
+            <el-form-item v-if="createForm.sharedControl === 1" label="请选择共享对象:">
               <el-select value-key="uid" multiple collapse-tags v-model="createForm.shareDept" filterable placeholder="请选择">
                 <el-option
                   v-for="item in shareDeptList"
@@ -158,9 +158,9 @@
               <div class="model_checkbox">
                 <el-radio-group v-model="modelType_" @change="changeModel">
                   <el-radio :label="1">人员失踪</el-radio>
-                  <el-radio :label="2">重大活动布控</el-radio>
+                  <el-radio :label="2">重大活动布防</el-radio>
                   <el-radio :label="3">上访人员拦截</el-radio>
-                  <el-radio :label="4">重点区域布控</el-radio>
+                  <el-radio :label="4">重点区域布防</el-radio>
                   <el-radio :label="5">公务车辆监管</el-radio>
                   <el-radio :label="6">自定义</el-radio>
                 </el-radio-group>
@@ -199,7 +199,7 @@ import {modelOne,modelTwo,modelThree,modelFour,modelFive,modelSix} from './compo
 import {getAllMonitorList, getControlInfoByName, addControl, getControlDetailIsEditor, putControl} from '@/views/index/api/api.control.js';
 import {getEventList, getEventDetail, updateEvent} from '@/views/index/api/api.event.js';
 import {getOrganInfos} from '@/views/index/api/api.message.js';
-import {formatDate, objDeepCopy} from '@/utils/util.js';
+import {formatDate, objDeepCopy, unique} from '@/utils/util.js';
 import {mapXupuxian} from '@/config/config.js';
 import {dataList} from '@/utils/data.js';
 import {checkName, validatePhone} from '@/utils/validator.js';
@@ -231,7 +231,7 @@ export default {
         {label: '长期布控', value: 2}
       ],
       //告警类型
-      controAlarmList: this.dicFormater(dataList.alarmLevel)[0].dictList,
+      controAlarmList: unique(this.dicFormater(dataList.alarmLevel)[0].dictList, 'enumValue'),
       // 布控表单参数
       createForm: {
         surveillanceName: null,
@@ -310,8 +310,9 @@ export default {
     }
   },
   mounted () {
-    // this.getEventList();
+    this.getEventList();
     this.getOrganInfos();
+    this.getTimeAfter();
   },
   methods: {
     // 切换布控模型类型
@@ -319,11 +320,24 @@ export default {
       this.modelList = null;
       this.modelType = value;
     },
+    // 获取下个月的今天
+    getTimeAfter() { 
+      var dd = new Date();
+      function checkT(s) {
+          return s < 10 ? '0' + s: s;
+      }
+      dd.setDate(dd.getDate() + 30);//获取AddDayCount天后的日期 
+      var y = dd.getFullYear(); 
+      var m = dd.getMonth()+1;//获取当前月份的日期 
+      var d = dd.getDate();
+      const date = y+"-"+checkT(m)+"-"+checkT(d);
+      this.createForm.controlDate = [formatDate(new Date(), 'yyyy-MM-dd'), date];
+    },
     // 获取关联事件列表
     getEventList () {
       const params = {
         'where.isSurveillance': false,//没有关联布控的事件
-        pageSize: 1000000,
+        pageSize: 100,
         orderBy: 'report_time',
         order: 'desc'
       }
@@ -463,10 +477,10 @@ export default {
                 this.$message.success(this.pageType === 3 ? '复用成功' : '新增成功');
                 this.$router.push({ name: 'control_manage' });
                 // // 新增布控后，状态为待开始的事件，改为进行中
-                // const obj = this.eventList.find(f => f.value === this.createForm.eventId);
-                // if (obj && obj.eventStatus === 1) {
-                //   updateEvent({uid: obj.value, type: 6});
-                // }
+                const obj = this.eventList.find(f => f.value === this.createForm.eventId);
+                if (obj && obj.eventStatus === 1) {
+                  updateEvent({uid: obj.value, type: 6});
+                }
               }
             }).finally(() => {
               this.loadingBtn = false;

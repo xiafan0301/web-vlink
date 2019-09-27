@@ -161,7 +161,7 @@
                 </div>
                 <div class="sel_dev">
                   <div class="title">
-                    <span>已选设备（{{bayOrdev === 1 ? devNum : bayonetNum}}）</span>
+                    <span>已选设备（{{devNum + bayonetNum}}）</span>
                     <i class="el-icon-arrow-up" v-show="isShowTree" @click="isShowTree = false"></i>
                     <i class="el-icon-arrow-down" v-show="!isShowTree" @click="isShowTree = true"></i>
                   </div>
@@ -738,11 +738,11 @@ export default {
             if (isShowType === 1) {
               let _devList = []
               trackingPointList.forEach(f => {
-                _devList.push(...f.devList.map(m => m.uid));
+                f.devList && _devList.push(...f.devList.map(m => m.uid));
               })
               let _bayList = []
               trackingPointList.forEach(f => {
-                _bayList.push(...f.bayonetList.map(m => m.uid));
+                f.bayonetList && _bayList.push(...f.bayonetList.map(m => m.uid));
               })
               this.changeColorAndGetTreeData(_devList, 1);
               this.changeColorAndGetTreeData(_bayList, 2);
