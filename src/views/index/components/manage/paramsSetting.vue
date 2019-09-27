@@ -44,7 +44,7 @@ export default {
       isEdit: false, // 是否修改
       stopTimeTitle: '落脚点停留时间 >',
       distanceTitle: '落脚点分析距离 <',
-      personTitle: '人像默认相似度 >',
+      personTitle: '人像默认相似度 ≥',
       distanceVal: null,
       stopTimeVal: null,
       initDistance: null,
@@ -89,8 +89,8 @@ export default {
         }
         return;
       }
-      const simReg = /(^[0-9]{1}[0-9]*$)|(^[0-9]*\.[0-9]{2}$)/;
-      if (!simReg.test(this.minisemblance) || this.minisemblance > 100) {
+      const simReg = /(^[0-9]{1}[0-9]*$)|(^[0-9]*\.[0-9]{1,2}$)/;
+      if (!simReg.test(this.minisemblance) || this.minisemblance > 100 || this.minisemblance <= 0) {
         if (!document.querySelector('.el-message--info')) {
           this.$message.info('只能输入0-100之间的数字，且只能输入两位小数');
         }

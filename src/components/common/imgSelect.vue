@@ -2,6 +2,7 @@
   <el-dialog
   title="框选搜索主体"
   :visible.sync="dialogVisible"
+  width="1024px"
   :show-close="false"
   :close-on-press-escape="false"
   :close-on-click-modal="false"
@@ -10,6 +11,7 @@
     <div class="select_body">
       <div class="img_box">
         <img src="http://newfile.aorise.org:80/group1/default/20190919/15/00/2/9546310b-b254-49ca-8ff2-4b3cef487d45.png" alt="" id="imgBox">
+        
       </div>
     </div>
     <span slot="footer" class="dialog-footer">
@@ -47,6 +49,7 @@ export default {
       initImgWidth: 881, // 图片原width
       initImgHeight: 600, // 图片原height
       fd: null,
+      selectComplete: true, // 点击选择出现
     }
   },
   watch: {
@@ -66,20 +69,34 @@ export default {
   methods: {
     // 获取图片缩放比例
     getImgScale () {
-      let imgWidth = $('#imgBox').outerWidth();
-      let imgHeight = $('#imgBox').outerHeight();
+      let scale = this.initImgWidth / this.initImgHeight; // 原图初始比例
 
-      console.log(imgWidth + '_' + imgHeight)
+      let imgWidth = $('#imgBox').width();
+      
+      let currHeight = Math.ceil(imgWidth / scale); // 图片压缩后的height
+      $('#imgBox').css('height', currHeight + 'px');
+
+
 
       this.selectList.forEach(item => {
+        // 在页面显示的图片大小计算宽和高的比例
+        let wScale = this.initImgWidth / item.width;
+        let hScale = this.initImgHeight / item.height;
+
+
+
         let $div = document.createElement('div');
 
         $div.setAttribute('id', 'select_box' + item.uid);
 
         $div.setAttribute('class', 'select_box');
 
-        $div.style.width = item.width + 'px';
-        $div.style.height = item.height + 'px';
+        $div.style.width = Math.ceil(imgWidth / wScale) + 'px';
+        $div.style.height = Math.ceil(currHeight / hScale) + 'px';
+
+        console.log($div.style.width)
+        console.log($div.style.height)
+
         $div.style.left = item.x + 'px';
         $div.style.top = item.y + 'px';
 
@@ -102,7 +119,11 @@ export default {
           $('.select_box').removeClass('active_select');
         }
 
-        $(clickObj).addClass('active_select');
+        if ($(clickObj).hasClass('active_select')) {
+          $(clickObj).removeClass('active_select');
+        } else {
+          $(clickObj).addClass('active_select');
+        }
 
         _self.createImgPath(x, y, width, height);
       })
@@ -191,13 +212,15 @@ export default {
 <style lang="scss">
   .cut_img_select_dialog {
     .select_body {
+      height: 500px;
+      overflow-y: scroll;
       .img_box {
         width: 100%;
-        height: 600px;
+        height: 100%;
         position: relative;
         >img {
           width: 100%;
-          height: 100%;
+          // height: 100%;
         }
         .select_box {
           position: absolute;
