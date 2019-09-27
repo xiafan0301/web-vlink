@@ -41,7 +41,13 @@
 import { ajaxCtx } from '@/config/config.js';
 export default {
   name: 'uploadPic',
-  props: ['flag', 'maxSize', 'fileList', 'isDisabled'],
+  /**
+   * flag: 图片视频/图片
+   * isDisabled: 是否禁止上传
+   * maxSize: 最大上传个数
+   * mode: 模块类型，布控/消息模块
+  */
+  props: ['flag', 'maxSize', 'fileList', 'isDisabled', 'mode'],
   data () {
     return {
       // 插入图片
@@ -68,8 +74,9 @@ export default {
   },
   watch: {
     fileList () {
-      this.fileList.forEach(f => f.url = f.photoUrl);
-      
+      if (this.mode !== 'message') {
+        this.fileList.forEach(f => f.url = f.photoUrl);
+      }
       if (this.fileList.some(s => s.fileType === 2)) {
         this.isShow = true;
         this.videoUrl = this.fileList[0].url;
