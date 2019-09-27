@@ -42,7 +42,7 @@
       }
     },
     mounted () {
-      this.$_showLoading('.vehicle_content')
+      this.$_showLoading({target: '.vehicle_content'})
       this.getTheList();
     },
     methods: {

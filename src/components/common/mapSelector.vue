@@ -1,134 +1,266 @@
 <template>
-  <el-dialog
-          :visible.sync="dialogVisible"
-          :append-to-body="true"
-          :close-on-click-modal="false"
-          :close-on-press-escape="false"
-          :show-close="false"
-          width="15.10rem"
-          class="public_map_selector_dialog">
-    <div class="map_sd_content" :class="{'map_sd_edit_false': !bEdit}" :id="sid">
-      <div class="sd_type_tab" v-if="showDeviceList">
-        <span :class="{'active': curTabType === 0}" @click="curTabType = 0">地图选择</span>
-        <span :class="{'active': curTabType === 1}" @click="curTabType = 1">列表选择</span>
-      </div>
-      <div class="sd_type_tab" v-else>
-        <span>选择设备</span>
-      </div>
-      <div class="sd_device_list" :class="{'sd_device_list_close': slideClose}">
-        <div class="sdd_title" @click="slideClose = !slideClose"><span>已选设备 （{{dbNum}}）</span> <i class="el-icon-arrow-up"></i></div>
-        <vue-scroll>
-          <div v-show="dbNum > 0" class="sdd_content" is="dbTreeS" :treeList="treeList" :showTypes="showTypes" @delOne="delOne"></div>
-        </vue-scroll>
-      </div>
-      <div class="sd_search">
-        <el-autocomplete
-                class="inline-input"
-                v-model="input3"
-                :fetch-suggestions="querySearch"
-                placeholder="请输入地名，快速定位地址"
-                value-key="name"
-                :trigger-on-focus="false"
-                @select="handleSelect"
-        ></el-autocomplete>
-        <el-button slot="append" icon="el-icon-search" class="select_btn" @click="setCenter()"></el-button>
-      </div>
-      <div class="sd_opts">
-        <ul>
-          <li>
-            <div title="选择矩形范围内的设备" :class="{'sd_opts_sed': drawActiveType === 1 }" @click="selDrawType(1)"><span class="sd_opts_icon sd_opts_icon1"></span>框选</div>
-          </li>
-          <li>
-            <div title="选择圆形范围内的设备" :class="{'sd_opts_sed': drawActiveType === 2 }" @click="selDrawType(2)"><span class="sd_opts_icon sd_opts_icon2"></span>圈选</div>
-          </li>
-          <!--<li>-->
-          <!--<div title="选择折线200米范围内的设备" :class="{'sd_opts_sed': drawActiveType === 3 }" @click="selDrawType(3)"><span class="sd_opts_icon sd_opts_icon3"></span></div>-->
-          <!--</li>-->
-          <li v-if="pointC">
-            <div title="点击一个设备图标选择" :class="{'sd_opts_sed': drawActiveType === 5 }" @click="selDrawType(5)"><span class="sd_opts_icon sd_opts_icon5"></span>点选</div>
-          </li>
-          <li style="width: 1.12rem;">
-            <div title="选择多边形范围内的设备" :class="{'sd_opts_sed': drawActiveType === 4 }" @click="selDrawType(4)"><span class="sd_opts_icon sd_opts_icon4"></span>自定义</div>
-          </li>
-          <li>
-            <div title="清除"  @click="delDialog = true"><span class="sd_opts_icon sd_opts_icon3"></span>清除</div>
-          </li>
-        </ul>
-        <!--<p>-->
-        <!--<span v-if="drawActiveType === 1">在地图上按住鼠标左键拖动鼠标框选，松开鼠标完成选择</span>-->
-        <!--<span v-else-if="drawActiveType === 2">在地图上按住鼠标左键选择圆心，拖动鼠标作为半径，松开鼠标完成选择</span>-->
-        <!--<span v-else-if="drawActiveType === 3">在地图上鼠标左键选择两个或两个以上点形成折线，双击或右键完成选择</span>-->
-        <!--<span v-else-if="drawActiveType === 4">在地图上鼠标左键选择三个或三个以上点形成封闭区域，双击或右键完成选择</span>-->
-        <!--<span v-else-if="drawActiveType === 5">在地图上鼠标左键选择圆心，形成10公里大小的圆形区域</span>-->
-        <!--</p>-->
-      </div>
-      <div class="sd_checkbox">
-        <el-checkbox-group v-model="checkList">
-          <el-checkbox :label="checkOptions[0].value" v-if="showTypes.indexOf('D') >= 0"><span>{{checkOptions[0].label}} {{listDevice.length | fmTenThousand}}</span></el-checkbox>
-          <el-checkbox :label="checkOptions[1].value" v-if="showTypes.indexOf('B') >= 0"><span>{{checkOptions[1].label}} {{listBayonet.length | fmTenThousand}}</span></el-checkbox>
-        </el-checkbox-group>
-      </div>
-      <ul class="sd_fs">
-        <li @click="setMapStatus(1)"><i class="el-icon-plus"></i></li>
-        <li @click="setMapStatus(2)"><i class="el-icon-minus"></i></li>
-      </ul>
-      <div style="width: 100%; height: 100%;" :id="sid + '_container'"></div>
-      <!--列表选择-->
-      <div class="sd_list_choose" v-show="curTabType === 1">
-        <div class="sd_list_l">
-          <div class="sd_list_lt">
-            <p>已选设备（{{dbNum}}）</p>
-            <el-checkbox :indeterminate="leftIsIndeterminate" v-model="DBleftAll" v-show="dbNum > 0">全选</el-checkbox>
-          </div>
-          <div class="sd_list_lc">
-            <vue-scroll>
-              <div v-show="dbNum > 0" :DBleftAll="DBleftAll" :inIndeterKey="'leftIsIndeterminate'" class="sd_list_l_tree" showCheckBox is="dbTreeS" :treeList="treeList" @changeAll="changeLeftAll" :showTypes="showTypes"></div>
-            </vue-scroll>
-          </div>
-        </div>
-        <div class="sd_list_m">
-          <span @click="addDB"><i class="el-icon-arrow-left"></i>添加</span>
-          <span @click="removeDB">移出<i class="el-icon-arrow-right"></i></span>
-        </div>
-        <div class="sd_list_r sd_list_l">
-          <div class="sd_list_lt">
-            <p>可选设备（{{curNum}}）</p>
-            <div class="sd_lt_search">
-              <el-input
-                      placeholder="请输入设备搜索"
-                      v-model="filterKey">
-              </el-input>
-              <i class="el-icon-search" @click="filterTree"></i>
-            </div>
-            <el-checkbox :indeterminate="rightIsIndeterminate" v-model="DBrightAll" v-show="curNum > 0">全选</el-checkbox>
-          </div>
-          <div class="sd_list_lc">
-            <vue-scroll>
-              <div v-show="curNum > 0" :DBrightAll="DBrightAll" :filterable="isFilterData" :inIndeterKey="'rightIsIndeterminate'" class="sd_list_l_tree" showCheckBox is="dbTreeS" :treeList="remainTreeList" @changeAll="changeRightAll" :showTypes="showTypes"></div>
-            </vue-scroll>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div>
     <el-dialog
-            title="清除确认"
-            :visible.sync="delDialog"
-            :append-to-body="true"
-            width="30%">
-      <span>是否要清除全部区域？</span>
-      <span slot="footer" class="dialog-footer">
+        v-if="isDialog"
+        :visible.sync="dialogVisible"
+        :append-to-body="true"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        :show-close="false"
+        width="15.10rem"
+        class="public_map_selector_dialog">
+      <div class="map_sd_content" :class="{'map_sd_edit_false': !bEdit}" :id="sid">
+        <div class="sd_type_tab" v-if="showDeviceList">
+          <span :class="{'active': curTabType === 0}" @click="curTabType = 0">地图选择</span>
+          <span :class="{'active': curTabType === 1}" @click="curTabType = 1">列表选择</span>
+        </div>
+        <div class="sd_type_tab" v-else>
+          <span>选择设备</span>
+        </div>
+        <div class="sd_device_list" :class="{'sd_device_list_close': slideClose}">
+          <div class="sdd_title" @click="slideClose = !slideClose"><span>已选设备 （{{dbNum}}）</span> <i class="el-icon-arrow-up"></i></div>
+          <vue-scroll>
+            <div v-show="dbNum > 0" class="sdd_content" is="dbTreeS" :treeList="treeList" :showTypes="showTypes" @delOne="delOne"></div>
+          </vue-scroll>
+        </div>
+        <div class="sd_search">
+          <el-autocomplete
+                  class="inline-input"
+                  v-model="input3"
+                  :fetch-suggestions="querySearch"
+                  placeholder="请输入地名，快速定位地址"
+                  value-key="name"
+                  :trigger-on-focus="false"
+                  @select="handleSelect"
+          ></el-autocomplete>
+          <el-button slot="append" icon="el-icon-search" class="select_btn" @click="setCenter()"></el-button>
+        </div>
+        <div class="sd_opts">
+          <ul>
+            <li>
+              <div title="选择矩形范围内的设备" :class="{'sd_opts_sed': drawActiveType === 1 }" @click="selDrawType(1)"><span class="sd_opts_icon sd_opts_icon1"></span>框选</div>
+            </li>
+            <li>
+              <div title="选择圆形范围内的设备" :class="{'sd_opts_sed': drawActiveType === 2 }" @click="selDrawType(2)"><span class="sd_opts_icon sd_opts_icon2"></span>圈选</div>
+            </li>
+            <li v-if="pointC">
+              <div title="点击一个设备图标选择" :class="{'sd_opts_sed': drawActiveType === 5 }" @click="selDrawType(5)"><span class="sd_opts_icon sd_opts_icon5"></span>点选</div>
+            </li>
+            <li style="width: 1.12rem;">
+              <div title="选择多边形范围内的设备" :class="{'sd_opts_sed': drawActiveType === 4 }" @click="selDrawType(4)"><span class="sd_opts_icon sd_opts_icon4"></span>自定义</div>
+            </li>
+            <li>
+              <div title="清除"  @click="delDialog = true"><span class="sd_opts_icon sd_opts_icon3"></span>清除</div>
+            </li>
+          </ul>
+        </div>
+        <div class="sd_checkbox">
+          <el-checkbox-group v-model="checkList">
+            <el-checkbox :label="checkOptions[0].value" v-if="showTypes.indexOf('D') >= 0"><span>{{checkOptions[0].label}} {{listDevice.length | fmTenThousand}}</span></el-checkbox>
+            <el-checkbox :label="checkOptions[1].value" v-if="showTypes.indexOf('B') >= 0"><span>{{checkOptions[1].label}} {{listBayonet.length | fmTenThousand}}</span></el-checkbox>
+          </el-checkbox-group>
+        </div>
+        <ul class="sd_fs">
+          <li @click="setMapStatus(1)"><i class="el-icon-plus"></i></li>
+          <li @click="setMapStatus(2)"><i class="el-icon-minus"></i></li>
+        </ul>
+        <div style="width: 100%; height: 100%;" :id="sid + '_container'"></div>
+        <!--列表选择-->
+        <div class="sd_list_choose" v-show="curTabType === 1">
+          <div class="sd_list_l">
+            <div class="sd_list_lt">
+              <p>已选设备（{{dbNum}}）</p>
+              <el-checkbox :indeterminate="leftIsIndeterminate" v-model="DBleftAll" v-show="dbNum > 0">全选</el-checkbox>
+            </div>
+            <div class="sd_list_lc">
+              <vue-scroll>
+                <div v-show="dbNum > 0" :DBleftAll="DBleftAll" :inIndeterKey="'leftIsIndeterminate'" class="sd_list_l_tree" showCheckBox is="dbTreeS" :treeList="treeList" @changeAll="changeLeftAll" :showTypes="showTypes"></div>
+              </vue-scroll>
+            </div>
+          </div>
+          <div class="sd_list_m">
+            <span @click="addDB"><i class="el-icon-arrow-left"></i>添加</span>
+            <span @click="removeDB">移出<i class="el-icon-arrow-right"></i></span>
+          </div>
+          <div class="sd_list_r sd_list_l">
+            <div class="sd_list_lt">
+              <p>可选设备（{{curNum}}）</p>
+              <div class="sd_lt_search">
+                <el-input
+                        placeholder="请输入设备搜索"
+                        v-model="filterKey">
+                </el-input>
+                <i class="el-icon-search" @click="filterTree"></i>
+              </div>
+              <el-checkbox :indeterminate="rightIsIndeterminate" v-model="DBrightAll" v-show="curNum > 0">全选</el-checkbox>
+            </div>
+            <div class="sd_list_lc">
+              <vue-scroll>
+                <div v-show="curNum > 0" :DBrightAll="DBrightAll" :filterable="isFilterData" :inIndeterKey="'rightIsIndeterminate'" class="sd_list_l_tree" showCheckBox is="dbTreeS" :treeList="remainTreeList" @changeAll="changeRightAll" :showTypes="showTypes"></div>
+              </vue-scroll>
+            </div>
+          </div>
+        </div>
+      </div>
+      <el-dialog
+              title="清除确认"
+              :visible.sync="delDialog"
+              :append-to-body="true"
+              width="30%">
+        <span>是否要清除全部区域？</span>
+        <span slot="footer" class="dialog-footer">
         <el-button @click="delDialog = false">取 消</el-button>
         <el-button type="primary" @click="confirmClear">确 定</el-button>
       </span>
-    </el-dialog>
-    <span slot="footer" class="dialog-footer">
+      </el-dialog>
+      <span slot="footer" class="dialog-footer">
       <el-button @click="dialogVisible = false" size="small">取 消</el-button>
-      <el-button :loading="submitLoading" :disabled="dbNum === 0" type="primary" @click="selSubmit" size="small">确 定</el-button>
+      <el-button :loading="submitLoading" :disabled="dbNum === 0" type="primary" @click="selSubmit(false)" size="small">确 定</el-button>
     </span>
-  </el-dialog>
+    </el-dialog>
+    <div class="public_map_selector_dialog" v-else>
+      <div class="map_sd_content" :class="{'map_sd_edit_false': !bEdit, 'map_sd_has_slot': hasFilter}" :id="sid">
+        <div class="sd_type_tab" v-if="showDeviceList">
+          <span :class="{'active': curTabType === 0}" @click="curTabType = 0">地图选择</span>
+          <span :class="{'active': curTabType === 1}" @click="curTabType = 1">列表选择</span>
+        </div>
+        <div class="sd_type_tab" v-else>
+          <span>选择设备</span>
+        </div>
+        <div class="rlcx_search_box" v-if="hasFilter">
+          <el-form :inline="true" :model="areaSeachForm" class="search_form" ref="areaSeachForm">
+            <el-form-item prop="intelCharac">
+              <el-select  style="width: 240px;" v-model="areaSeachForm.intelCharac" placeholder="智能特性">
+                <el-option label="全部特性" :value="0"></el-option>
+                <el-option
+                        v-for="(item, index) in intelCharacList"
+                        :key="index"
+                        :label="item.enumValue"
+                        :value="item.enumField"
+                ></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item prop="dutyOrganId">
+              <el-select style="width: 240px;" v-model="areaSeachForm.dutyOrganId" placeholder="责任部门">
+                <el-option label="全部部门" :value="0"></el-option>
+                <el-option
+                        v-for="(item, index) in allDepartmentData"
+                        :key="index"
+                        :label="item.organName"
+                        :value="item.uid"
+                ></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item>
+              <el-button class="select_btn" @click="getNewData">查询</el-button>
+              <el-button class="reset_btn" @click="resetForm('areaSeachForm')">重置</el-button>
+            </el-form-item>
+          </el-form>
+        </div>
+        <div class="sd_device_list" :class="{'sd_device_list_close': slideClose}">
+          <div class="sdd_title" @click="slideClose = !slideClose"><span>已选设备 （{{dbNum}}）</span> <i class="el-icon-arrow-up"></i></div>
+          <vue-scroll>
+            <div v-show="dbNum > 0" class="sdd_content" is="dbTreeS" :treeList="treeList" :showTypes="showTypes" @delOne="delOne"></div>
+          </vue-scroll>
+        </div>
+        <div class="sd_search">
+          <el-autocomplete
+                  class="inline-input"
+                  v-model="input3"
+                  :fetch-suggestions="querySearch"
+                  placeholder="请输入地名，快速定位地址"
+                  value-key="name"
+                  :trigger-on-focus="false"
+                  @select="handleSelect"
+          ></el-autocomplete>
+          <el-button slot="append" icon="el-icon-search" class="select_btn" @click="setCenter()"></el-button>
+        </div>
+        <div class="sd_opts">
+          <ul>
+            <li>
+              <div title="选择矩形范围内的设备" :class="{'sd_opts_sed': drawActiveType === 1 }" @click="selDrawType(1)"><span class="sd_opts_icon sd_opts_icon1"></span>框选</div>
+            </li>
+            <li>
+              <div title="选择圆形范围内的设备" :class="{'sd_opts_sed': drawActiveType === 2 }" @click="selDrawType(2)"><span class="sd_opts_icon sd_opts_icon2"></span>圈选</div>
+            </li>
+            <li v-if="pointC">
+              <div title="点击一个设备图标选择" :class="{'sd_opts_sed': drawActiveType === 5 }" @click="selDrawType(5)"><span class="sd_opts_icon sd_opts_icon5"></span>点选</div>
+            </li>
+            <li style="width: 1.12rem;">
+              <div title="选择多边形范围内的设备" :class="{'sd_opts_sed': drawActiveType === 4 }" @click="selDrawType(4)"><span class="sd_opts_icon sd_opts_icon4"></span>自定义</div>
+            </li>
+            <li>
+              <div title="清除"  @click="delDialog = true"><span class="sd_opts_icon sd_opts_icon3"></span>清除</div>
+            </li>
+          </ul>
+        </div>
+        <div class="sd_checkbox">
+          <el-checkbox-group v-model="checkList">
+            <el-checkbox :label="checkOptions[0].value" v-if="showTypes.indexOf('D') >= 0"><span>{{checkOptions[0].label}} {{listDevice.length | fmTenThousand}}</span></el-checkbox>
+            <el-checkbox :label="checkOptions[1].value" v-if="showTypes.indexOf('B') >= 0"><span>{{checkOptions[1].label}} {{listBayonet.length | fmTenThousand}}</span></el-checkbox>
+          </el-checkbox-group>
+        </div>
+        <ul class="sd_fs">
+          <li @click="setMapStatus(1)"><i class="el-icon-plus"></i></li>
+          <li @click="setMapStatus(2)"><i class="el-icon-minus"></i></li>
+        </ul>
+        <div style="width: 100%; height: 100%;" :id="sid + '_container'"></div>
+        <!--列表选择-->
+        <div class="sd_list_choose" v-show="curTabType === 1">
+          <div class="sd_list_l">
+            <div class="sd_list_lt">
+              <p>已选设备（{{dbNum}}）</p>
+              <el-checkbox :indeterminate="leftIsIndeterminate" v-model="DBleftAll" v-show="dbNum > 0">全选</el-checkbox>
+            </div>
+            <div class="sd_list_lc">
+              <vue-scroll>
+                <div v-show="dbNum > 0" :DBleftAll="DBleftAll" :inIndeterKey="'leftIsIndeterminate'" class="sd_list_l_tree" showCheckBox is="dbTreeS" :treeList="treeList" @changeAll="changeLeftAll" :showTypes="showTypes"></div>
+              </vue-scroll>
+            </div>
+          </div>
+          <div class="sd_list_m">
+            <span @click="addDB"><i class="el-icon-arrow-left"></i>添加</span>
+            <span @click="removeDB">移出<i class="el-icon-arrow-right"></i></span>
+          </div>
+          <div class="sd_list_r sd_list_l">
+            <div class="sd_list_lt">
+              <p>可选设备（{{curNum}}）</p>
+              <div class="sd_lt_search">
+                <el-input
+                        placeholder="请输入设备搜索"
+                        v-model="filterKey">
+                </el-input>
+                <i class="el-icon-search" @click="filterTree"></i>
+              </div>
+              <el-checkbox :indeterminate="rightIsIndeterminate" v-model="DBrightAll" v-show="curNum > 0">全选</el-checkbox>
+            </div>
+            <div class="sd_list_lc">
+              <vue-scroll>
+                <div v-show="curNum > 0" :DBrightAll="DBrightAll" :filterable="isFilterData" :inIndeterKey="'rightIsIndeterminate'" class="sd_list_l_tree" showCheckBox is="dbTreeS" :treeList="remainTreeList" @changeAll="changeRightAll" :showTypes="showTypes"></div>
+              </vue-scroll>
+            </div>
+          </div>
+        </div>
+      </div>
+      <el-dialog
+              title="清除确认"
+              :visible.sync="delDialog"
+              :append-to-body="true"
+              width="30%">
+        <span>是否要清除全部区域？</span>
+        <span slot="footer" class="dialog-footer">
+        <el-button @click="delDialog = false">取 消</el-button>
+        <el-button type="primary" @click="confirmClear">确 定</el-button>
+      </span>
+      </el-dialog>
+    </div>
+  </div>
 </template>
 <script>
-  import {getAllMonitorList, getAllBayonetList, getDeviceByBayonetUids} from '@/views/index/api/api.base.js';
+  import { dataList } from '@/utils/data.js';
+  import { getDiciData } from '@/views/index/api/api.js';
+  import { getDepartmentList } from '@/views/index/api/api.manage.js';
+  import {getAllMonitorList, getBayonetList, getDeviceByBayonetUids} from '@/views/index/api/api.base.js';
   import {mapXupuxian} from '@/config/config.js';
   import {random14, addCluster, objDeepCopy} from '@/utils/util.js';
   import dbTreeS from '@/components/common/dbTree_single.vue';
@@ -143,11 +275,24 @@
       singleArea 是否为单选，区域碰撞，区域徘徊，频繁出没，区域人员分析为单选, 为单选，则默认没有点选
       activeDeviceList 打开弹窗是已经激活了的设备
       hideDBlist 是否隐藏列表选择, 默认有
+      isNotDialog 是不是dialog， 默认是
+      filter 带查询过滤
+      this.$refs[yourRef].getCheckedIds() // 通过这个方法获取当前的已选设备
     */
-    props: ['open', 'clear', 'showTypes', 'oConfig', 'editAble', 'singleArea', 'activeDeviceList', 'hideDBlist'],
+    props: ['open', 'clear', 'showTypes', 'oConfig', 'editAble', 'singleArea', 'activeDeviceList', 'hideDBlist', 'isNotDialog', 'filter'],
     components: {dbTreeS},
     data () {
       return {
+        dutyUnitId: '', // 当前用来作为条件的部门id
+        intelligentCharac: '', // 当前用来作为条件的特性id
+        areaSeachForm: {
+          intelCharac: 0, // 智能特性
+          dutyOrganId: 0, // 责任部门id
+        },
+        allDepartmentData: [], // 部门列表
+        intelCharacList: [], // 智能特性列表
+        hasFilter: false,// 默认没有搜索
+
         isFilterData: '',
         filterKey: '',
         rightIsIndeterminate: false, // 列表选择右侧不确定状态
@@ -157,6 +302,7 @@
         curTabType: 0, // 当前激活的tab
         showDeviceList: true, // 默认显示列表选择
         activeDBList: [], // 等待初始化的设备
+        isDialog: true, // 是不是弹窗
         delDialog: false,
         confirmIcon: null, // 选择区域之后的小弹窗
         curAddSearch: {
@@ -257,20 +403,27 @@
       },
       clear () {
         console.log('watch clear');
-        this.drawClear();
+        this.delAllArea();
       },
       oConfig () {
         // console.log('oConfig', this.oConfig)
         setTimeout(() => {
           // this.setMap(this.oConfig);
         }, 300)
-      }
+      },
     },
     mounted () {
       this.showDeviceList = this.hideDBlist === undefined ? true : false;
       this.sArea = this.singleArea === undefined ? false : true;
       this.pointC = this.singleArea === undefined ? true : false;
+      this.isDialog = this.isNotDialog === undefined ? true : false;
+      this.hasFilter = this.filter === undefined ? false : true;
       this.getTreeList();
+      // 判断有插入查询就先获取字典数据
+      if (this.hasFilter) {
+        this.getIntelCharacList();
+        this.getAllDepartList();
+      }
     },
     computed: {
       mapAllList () {
@@ -296,6 +449,40 @@
       }
     },
     methods: {
+      // 插入的查询搜索模块
+      getNewData () {
+        this.$_showLoading({target: '.public_map_selector_dialog'})
+        this.intelligentCharac = this.areaSeachForm.intelCharac ? parseInt(this.areaSeachForm.intelCharac) : '';
+        this.dutyUnitId = this.areaSeachForm.dutyOrganId ? this.areaSeachForm.dutyOrganId : '';
+        this.getTreeList(true);
+      },
+      resetForm (form) {
+        this.$refs[form].resetFields();
+      },
+      // 获取智能特性列表
+      getIntelCharacList () {
+        const intelCharacId = dataList.intelCharac;
+        getDiciData(intelCharacId)
+            .then(res => {
+              if (res) {
+                this.intelCharacList = res.data;
+              }
+            })
+      },
+      // 获取部门列表
+      getAllDepartList () {
+        const params = {
+          'where.proKey': this.$store.state.loginUser.proKey,
+          pageSize: 0,
+        };
+        getDepartmentList(params)
+            .then(res => {
+              if (res && res.data.list) {
+                this.allDepartmentData = res.data.list;
+              }
+            })
+      },
+
       // 过滤
       filterTree () {
         let curKey = this.filterKey.replace(/\s+|\s+$/g, '');
@@ -314,6 +501,7 @@
           this.activeDBList.push(..._ar)
         })
         this.waitInitDB();
+//        this.activeDBList = [];
       },
       // 判断有checked的丢进delOne
       removeDB () {
@@ -343,7 +531,7 @@
             this.pointSelect.curMarks.push(this.marks[index]);
           }
         })
-        this.activeDBList = [];
+        // this.activeDBList = []; 暂时不清除，如果画新区域的时候再清除
       },
       delOne (item) {
         this.markColorChange(item)
@@ -428,9 +616,10 @@
           curPointData: [],
           curMarks: []
         };
-        this.pointSelect.curPointData.forEach(x => {
-          this.markColorChange(x);
-        })
+//        this.pointSelect.curPointData.forEach(x => {
+//          this.markColorChange(x);
+//        })
+        this.recoverSXTcolor(this.pointSelect.curMarks);
         this.pointSelect.curPointData = [];
         this.pointSelect.curMarks = [];
         this.searchData.forEach(x => {
@@ -634,6 +823,14 @@
           if (_this.curAddSearch.curMarks.length) {
             _this.recoverSXTcolor(_this.curAddSearch.curMarks)
           }
+          // 判断如果初始化的时候带了数据，就清除了，
+          if (_this.activeDBList.length) {
+            console.log('321')
+            _this.recoverSXTcolor(_this.pointSelect.curMarks);
+            _this.activeDBList = [];
+            _this.pointSelect.curPointData = [];
+          }
+
           _this.curAddSearch.curMarks = [];
           _this.curAddSearch.curPointData.forEach(j => {
             _this.curAddSearch.curMarks.push(_this.marks[j.markIndex]);
@@ -671,6 +868,7 @@
       mapEvents () {
         let that = this;
         $('body').on('click', '.vl_map_area_confirm', function (e) {
+          event.stopPropagation();
           if (e.target.classList.contains('el-icon-close')) {
             that.cancelAddArea();
           }
@@ -687,6 +885,7 @@
             }
           }
         })
+        this.mapEventActive = true;
       },
       // 画完区域完成，将数据添加到searchData,右侧列表
       addCompleteData (obj) {
@@ -776,13 +975,20 @@
         });
         this.zIndex += 1;
       },
-      selSubmit () {
+      // 获取当前框选的数据
+      getCheckedIds () {
+        return this.selSubmit(true);
+      },
+      // 加bool，是为了适应没有确定按钮的场景，直接获取结果无需emit。
+      selSubmit (bool) {
         // this.drawObj.circle10km
         // rectangle circle polyline polygon circle10km
         this.submitLoading = true;
         // 把pointSelect,跟searchData下的数据拿出来
         let ad = [], ab = [], abIds = [];
-        this.pointSelect.curPointData.forEach(x => {
+        this.pointSelect.curPointData.forEach((x, index) => {
+          // 直接把对应的mark放入当前对象，方面查询过滤的时候快速查找
+          x['curMark'] = this.pointSelect.curMarks[index];
           if (x.dataType === 0)  {
             ad.push(x)
           } else {
@@ -791,7 +997,8 @@
           }
         })
         this.searchData.forEach(x => {
-          x.curPointData.forEach(y => {
+          x.curPointData.forEach((y, index) => {
+            y['curMark'] = x.curMarks[index];
             if (y.dataType === 0) {
               ad.push(y)
             } else {
@@ -800,109 +1007,121 @@
             }
           })
         })
-        if (abIds && abIds.length > 0) {
-          getDeviceByBayonetUids(abIds).then(res => {
-            let bayonetDeviceList = [];
-            if (res && res.data) {
-              bayonetDeviceList = res.data;
-            }
+        // 如果是直接获取结果的就不去计算卡口里的所包含的设备id了
+        if (bool) {
+          this.submitLoading = false;
+          return { deviceList: ad, bayonetList: ab,}
+        } else {
+          if (abIds && abIds.length > 0) {
+            getDeviceByBayonetUids(abIds).then(res => {
+              let bayonetDeviceList = [];
+              if (res && res.data) {
+                bayonetDeviceList = res.data;
+              }
+              this.$emit('mapSelectorEmit', {
+                deviceList: ad,
+                bayonetList: ab,
+                bayonetDeviceList: bayonetDeviceList
+              });
+              this.submitLoading = false;
+              this.dialogVisible = false;
+            }).catch(() => {
+              this.submitLoading = false;
+            });
+          } else {
             this.$emit('mapSelectorEmit', {
               deviceList: ad,
               bayonetList: ab,
-              bayonetDeviceList: bayonetDeviceList
+              bayonetDeviceList: []
             });
             this.submitLoading = false;
             this.dialogVisible = false;
-          }).catch(() => {
-            this.submitLoading = false;
-          });
-        } else {
-          this.$emit('mapSelectorEmit', {
-            deviceList: ad,
-            bayonetList: ab,
-            bayonetDeviceList: []
-          });
-          this.submitLoading = false;
-          this.dialogVisible = false;
+          }
         }
         console.log('设备 ad', ad);
         console.log('卡口 ab', ab);
       },
-      drawClear () {
-        // 矩形
-        if (this.drawObj.rectangle) {
-          for (let k in this.drawObj.rectangle) {
-            this.drawClearDo(this.drawObj.rectangle[k]);
-          }
-          this.drawObj.rectangle = {};
+      // bool说明为查询模块调用
+      async getTreeList (bool) {
+        let curIds = {bayonetList: [], deviceList: []};
+        if (bool) {
+          curIds = this.getCheckedIds();
         }
-        // 圆形
-        if (this.drawObj.circle) {
-          for (let k in this.drawObj.circle) {
-            this.drawClearDo(this.drawObj.circle[k]);
-          }
-          this.drawObj.circle = {};
-        }
-        // 线
-        if (this.drawObj.polyline) {
-          for (let k in this.drawObj.polyline) {
-            this.drawClearDo(this.drawObj.polyline[k]);
-          }
-          this.drawObj.polyline = {};
-        }
-        // 多边形
-        if (this.drawObj.polygon) {
-          for (let k in this.drawObj.polygon) {
-            this.drawClearDo(this.drawObj.polygon[k]);
-          }
-          this.drawObj.polygon = {};
-        }
-        if (this.drawObj.circle10km) {
-          for (let k in this.drawObj.circle10km) {
-            this.drawClearDo(this.drawObj.circle10km[k]);
-          }
-          this.drawObj.circle10km = {};
-        }
-      },
-      drawClearDo (obj) {
-        if (obj.obj) {
-          this.amap.remove(obj.obj);
-          obj.obj = null;
-        }
-        if (obj.marker) {
-          this.amap.remove(obj.marker);
-          obj.marker = null;
-        }
-        if (obj.editor) {
-          obj.editor.close();
-          this.amap.remove(obj.editor);
-          obj.editor = null;
-        }
-        obj = null;
-      },
-      getTreeList () {
         if (this.showTypes.indexOf('D') >= 0) {
-          this.getListDevice();
+          await new Promise((resolve) => {
+            this.getListDevice(resolve, curIds);
+          })
         }
         if (this.showTypes.indexOf('B') >= 0) {
-          this.getListBayonet();
+          await new Promise((resolve) => {
+            this.getListBayonet(resolve, curIds);
+          })
+        }
+        // 这里执行mapMark是，查询模块查询之后更新数据
+        if (bool) {
+          this.marks = [];
+          this.originMarks
+          this.amap.cluster.clearMarkers();
+          this.mapMark(this.mapAllList);
+          this.$_hideLoading();
+        }
+        if (!this.isDialog && !this.mapEventActive) {
+          this.initMap();
+          this.mapEvents();
         }
       },
       // 设备
-      getListDevice () {
-        getAllMonitorList({ccode: mapXupuxian.adcode}).then(res => {
-          if (res && res.data.length > 0) {
-            this.listDevice = this.objSetItem(res.data, {infoName: 'deviceName', dataType: 0, areaName: 'areaCname'});
+      getListDevice (resolve, curIds) {
+        let params = {
+          ccode: mapXupuxian.adcode,
+        }
+        if (this.dutyUnitId) {
+          params.dutyOrganId = this.dutyUnitId;
+        }
+        if (this.intelligentCharac) {
+          params.intelligentCharac = this.intelligentCharac;
+        }
+        getAllMonitorList(params).then(res => {
+          if (res.data) {
+            let dList = [];
+            dList = this.objSetItem(res.data, {infoName: 'deviceName', dataType: 0, areaName: 'areaCname'});
+            dList = dList.reduce((prev, next) => {
+              if (!curIds.deviceList.find(x => x.uid === next.uid)) {
+                prev.push(next)
+              }
+              return prev;
+            }, [])
+            curIds.deviceList = this.objSetItem(curIds.deviceList, {isInChecked: true})
+            this.listDevice = dList.concat(curIds.deviceList);
           }
-        });
+          resolve();
+        }).catch(resolve);
       },
       // 卡口
-      getListBayonet () {
-        getAllBayonetList({areaId: mapXupuxian.adcode}).then(res => {
-          if (res && res.data.length > 0) {
-            this.listBayonet = this.objSetItem(res.data, {infoName: 'bayonetName', dataType: 1});
+      getListBayonet (resolve, curIds) {
+        let params = {
+          "where.areaId": mapXupuxian.adcode,
+          'where.subAreaFlag': true,
+          pageSize: 9999,
+        }
+        if (this.dutyUnitId) {
+          params['where.dutyUnitId'] = this.dutyUnitId;
+        }
+        getBayonetList(params).then(res => {
+          if (res.data) {
+            let bList = [];
+            bList = this.objSetItem(res.data.list, {infoName: 'bayonetName', dataType: 1});
+            bList = bList.reduce((prev, next) => {
+              if (!curIds.bayonetList.find(x => x.uid === next.uid)) {
+                prev.push(next)
+              }
+              return prev;
+            }, [])
+            curIds.bayonetList = this.objSetItem(curIds.bayonetList, {isInChecked: true});
+            this.listBayonet = bList.concat(curIds.bayonetList);
           }
-        });
+          resolve()
+        }).catch(resolve);
       },
       objSetItem (list, obj) {
         let result = [];
@@ -949,8 +1168,14 @@
                   _this.markColorChange(obj, marker);
                 }
               })
-              _this.marks.push(marker);
-              _this.originMarks[obj.dataType].push(marker);
+              // 判断是不是查询之后在已选设备里有了的,有就直接去取mark
+              if (obj.isInChecked) {
+                _this.marks.push(obj.curMark)
+                _this.originMarks[obj.dataType].push(obj.curMark);
+              } else {
+                _this.marks.push(marker);
+                _this.originMarks[obj.dataType].push(marker);
+              }
               // hover
               marker.on('mouseover', function () {
 //                  $('#' + obj.markSid).addClass('vl_icon_map_hover_mark' + obj.dataType)
@@ -1151,6 +1376,33 @@
   }
 </style>
 <style lang="scss">
+  .rlcx_search_box {
+    width: 100%;
+    height: 60px;
+    position: absolute;
+    top: 40px;
+    background: #FAFAFA;
+    padding-top: 10px;
+    padding-left: 20px;
+    .search_form {
+      width: 100%;
+      .select_btn, .reset_btn {
+        width: 80px;
+      }
+      .select_btn {
+        background-color: #0C70F8;
+        color: #ffffff;
+      }
+      .reset_btn {
+        background-color: #ffffff;
+        color: #666666;
+        border-color: #DDDDDD;
+      }
+    }
+    .divide {
+      border: 1px dashed #fafafa;
+    }
+  }
   .map_sd_edit_false {
     .ms_marker_opt {
       display: none;
@@ -1172,6 +1424,7 @@
         width: 100%;
         background: #FAFAFA;
         border-bottom: 1px solid #F2F2F2;
+        z-index: 2;
         > span {
           display: inline-block;
           height: 40px;
@@ -1395,6 +1648,14 @@
           }
         }
       }
+    }
+    .map_sd_has_slot {
+      padding-top: 100px;
+      > .sd_list_choose {height: calc(100% - 100px);top: 100px;}
+      > .sd_device_list {top: 110px;}
+      > .sd_search {top: 110px;}
+      > .sd_opts {top: 110px;}
+      .sd_checkbox {top: 110px;}
     }
     .el-dialog__footer { padding: 10px 0; }
   }

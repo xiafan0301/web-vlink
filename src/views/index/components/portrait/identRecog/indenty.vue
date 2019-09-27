@@ -99,7 +99,7 @@ import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import noResult from '@/components/common/noResult.vue';
 import { checkIdCard } from '@/utils/validator.js';
 import vlUpload from '@/components/common/upload.vue';
-import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcPUTAppendixsOrder, getIdNoList} from '@/views/index/api/api.judge.js';
+import { getIdNoList } from '@/views/index/api/api.judge.js';
 export default {
   components: { vlBreadcrumb, noResult, vlUpload },
   data () {

@@ -140,7 +140,7 @@
 <script>
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { mapXupuxian } from "@/config/config.js";
-import { getTailBehindDetail, getVehicleArchives } from '@/views/index/api/api.judge.js'
+import { getTailBehindDetail } from '@/views/index/api/api.judge.js'
 import { random14 } from '@/utils/util.js';
 import flvplayer from '@/components/common/flvplayer.vue';
 export default {

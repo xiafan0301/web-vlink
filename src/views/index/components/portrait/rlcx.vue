@@ -32,31 +32,12 @@
               placeholder="结束日期">
             </el-date-picker>
           </el-form-item>
-          <el-form-item label="抓拍区域:" label-width="70px" label-position="left">
-            <el-radio-group v-model="searchForm.type" @change="areaTypeChanged" style="display: inline-block; width: 100%;">
-              <el-radio style="width: 50%; margin: 0;" :label="1">列表选择</el-radio>
-              <el-radio style="width: 50%; margin: 0;" :label="2">地图选择</el-radio>
-            </el-radio-group>
+          <el-form-item v-show="searchForm.type === 0">
+            <div class="rlcx_xzsb_s" @click="areaTypeChanged">
+              <span>选择设备</span>
+              <span class="el-icon-arrow-down"></span>
+            </div>
           </el-form-item>
-            <el-form-item v-show="searchForm.type === 1">
-              <el-select style="width: 100%;" @change="handleCheckedCitiesChange" v-model="searchForm.area" multiple collapse-tags placeholder="请选择区域" class="full">
-                <!-- <el-option label="全部区域" value="all"></el-option> -->
-                <el-checkbox style="margin: 5px 0 5px 20px" :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">
-                  全部区域
-                </el-checkbox>
-                <el-option-group
-                  v-for="group in areaList"
-                  :key="group.areaName"
-                  :label="group.areaName">
-                  <el-option
-                    v-for="item in group.areaTreeList"
-                    :key="item.areaId"
-                    :label="item.areaName"
-                    :value="item.areaId">
-                  </el-option>
-                </el-option-group>
-              </el-select>
-            </el-form-item>
             <el-form-item v-show="searchForm.type === 2">
               <div class="rlcx_dtxz_rst">
                 已选<span>{{dSum}}</span>个设备<a href="javascript: void(0);" @click="openMap={}">重选</a>
@@ -220,7 +201,7 @@
         <ul class="rlcx_r_list clearfix" v-if="dataList && dataList.length > 0">
           <li v-for="(item, index) in dataList" :key="'tzsr_list_' + index" @click="goToDetail(item, index)">
             <div>
-              <img :src="item.subStoragePath" :alt="item.deviceName" 
+              <img :src="item.subStoragePath" :alt="item.deviceName"
                 @dragstart="dragStart($event, item)" @dragend="dragEnd"
                 draggable="true" style="cursor: move;">
               <div>
@@ -253,7 +234,7 @@
     <!-- 详情 -->
     <portraitDetail :detailData="detailData"></portraitDetail>
     <!-- D设备 B卡口  这里是设备和卡口 -->
-    <div is="mapSelector" :activeDeviceList="activeDeviceList"  :open="openMap" :clear="msClear" singleArea :showTypes="'DB'" @mapSelectorEmit="mapSelectorEmit"></div>
+    <div is="mapSelector" ref="rlcxSelctor" :open="openMap" :clear="msClear" :showTypes="'DB'" @mapSelectorEmit="mapSelectorEmit"></div>
     <!-- 框选搜索主体弹框 -->
     <div is="imgSelect" :open="isOpenImgDialog" @emitImgData="emitImgData"></div>
   </div>
@@ -275,9 +256,9 @@ export default {
   components: { vehicleBreadcrumb, mapSelector, vlUpload, portraitDetail, noResult, imgSelect },
   data () {
     return {
-      isOpenImgDialog: true, // 是否显示框选弹框
 
-      activeDeviceList: [],
+      isOpenImgDialog: false, // 是否显示框选弹框
+
       isInitPage: true,
 
       curImageUrl: '', // 当前上传的图片
@@ -307,7 +288,7 @@ export default {
       seData:null,
       searchForm: {
         time: [dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)), new Date()],
-        type: 1, // 1列表选择 2地图选择
+        type: 0, // 1列表选择 2地图选择
         type2: 1, // 1图片  2自定义
         area: [],
         sex: '',
@@ -376,6 +357,7 @@ export default {
   },
   created () {
     this.getMapGETmonitorList();
+
   },
   methods: {
     emitImgData (obj) {
@@ -525,25 +507,16 @@ export default {
       }
     },
 
-    areaTypeChanged (val) {
-      if (val === 2) {
-        this.activeDeviceList = ['20','21']
-        this.openMap = !this.openMap;
-      }
+    areaTypeChanged () {
+      this.searchForm.type = 2;
+      this.openMap = !this.openMap;
     },
     areaTypeChanged2 (val) {
     },
     searchAble () {
       let flag = false, msg = '';
-      if (this.searchForm.type === 1) {
-        if (!this.searchForm.area || this.searchForm.area.length <= 0) {
-          return '请选择区域';
-        }
-      }
-      if (this.searchForm.type === 2) {
-        if (this.dSum <= 0) {
-          return '请选择设备';
-        }
+      if (this.dSum <= 0) {
+        return '请选择设备';
       }
       if (this.searchForm.type2 === 1) {
         let f = false;
@@ -746,6 +719,22 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.rlcx_xzsb_s {
+  height: 40px;
+  width: 100%;
+  border-radius: 4px;
+  border: 1px solid #DCDFE6;
+  cursor: pointer;
+  color: #999999;
+  padding: 0 6px;
+  > span {
+    display: inline-block;
+    width: 50%;
+    &:last-child {
+      text-align: right;
+    }
+  }
+}
 .vc_gcck_bd {
   position: absolute; top: 0; left: 0;
   width: 100%;
@@ -784,7 +773,7 @@ export default {
     padding-left: 5px;
     color: #2580FC !important;
     text-decoration: none !important;
-    font-style: italic;
+    /*font-style: italic;*/
     cursor: pointer;
   }
 }
@@ -905,7 +894,7 @@ export default {
 @media screen and (min-width: 1801px) {.rlcx_r_list { width: 1400px; }}
 </style>
 <style lang="scss">
-.pt_rlcx_fm {
+  .pt_rlcx_fm {
   .el-form-item{
     margin-bottom: 10px;
   }

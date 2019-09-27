@@ -209,7 +209,7 @@
         <li v-for="(item, index) in videoList" :key="'video_list_' + index"
           @drop="dragDrop(item, index)" @dragover.prevent="dragOver">
           <div v-if="item && item.video">
-            <div is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" :signAble="true" :bResize="bResize"></div>
+            <div is="flvplayer" @playerClose="playerClose" :oConfig="{snap: true}" :index="index" :oData="item" :signAble="true" :bResize="bResize"></div>
           </div>
           <div class="vid_show_empty" v-else>
             <div is="videoEmpty" @btnEvent="showListEvent" :btn="true"></div>

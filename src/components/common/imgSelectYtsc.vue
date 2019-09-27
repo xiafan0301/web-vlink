@@ -41,7 +41,7 @@
           <span class="middle_step">2</span>
           <div class="img_right_box">
             <img :src="secondImgUrl" alt="" id="mapCutImageSource">
-             <div id="mapCutScreenContain" class="cut_right_box" @mousedown.stop="beginDraw($event)" @mouseup="endDraw($event)">
+             <div id="mapCutScreenContain" class="cut_right_box"  @mousedown.stop="beginDraw($event)" @mouseup="endDraw($event)">
               <span id="mapCutScreenBox" v-show="curCutBox" @mousedown.stop="moveBox($event)"  @mouseup.stop="boxMoveEnd">
                 <img :src="secondImgUrl" alt="">
                 <i v-for="item in '12345678'" :class="'move_icon' + item" :key="item.id" @mousedown.stop="changeIt(item ,$event)"  @mouseup="boxMoveEnd"></i>
@@ -221,7 +221,11 @@ export default {
     createImgPath (x, y, width, height, step) {
       let image = new Image();
       image.setAttribute("crossOrigin",'Anonymous');
-      image.src = 'http://newfile.aorise.org:80/group1/default/20190919/15/00/2/9546310b-b254-49ca-8ff2-4b3cef487d45.png';
+      if (step === 1) {
+        image.src = 'http://newfile.aorise.org:80/group1/default/20190919/15/00/2/9546310b-b254-49ca-8ff2-4b3cef487d45.png';
+      } else {
+        image.src = this.secondImgUrl;
+      }
 
       image.onload = () => {
         
@@ -337,6 +341,8 @@ export default {
       });
 
       $('#mapCutScreenContain').bind('mousemove', (event) => {
+        console.log('ooooooooooooooooo');
+        
         let curY =  event.clientY, curX =  event.clientX;
         $('#mapCutScreenBox').css({
           'width': curX - X,
@@ -347,9 +353,12 @@ export default {
     },
     // 结束截屏
     endDraw (ev) {
+      console.log('jjjjjjjjjjjjjjjjjjjjjjj');
+      
       if (this.secondCutList.length >= 6) {
         return false;
       }
+      console.log('mmmmmmmmmmmmmmmmmm');
       
       let middleRleft = $('.middle_right').offset().left;
       let middleRtop = $('.middle_right').offset().top;
@@ -362,13 +371,18 @@ export default {
         })
       // }
       this.cutComplete = true;
+      console.log('ddddddddddddddddd');
+      
       $('#mapCutScreenContain').unbind('mousemove')
 
     },
     // 移动截屏框
     moveBox (e) {},
     // 移动结束
-    boxMoveEnd () {},
+    boxMoveEnd () {
+      this.cutComplete = true;
+      $('#mapCutScreenContain').unbind('mousemove')
+    },
     changeIt (obj, e) {},
     // 取消截屏
     cancelCutScreen () {
