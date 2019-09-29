@@ -47,7 +47,7 @@
             </el-input>
           </el-form-item>
           <el-form-item>
-            <div is="uploadPic" :fileList="fileList" @uploadPicDel="uploadPicDel" @uploadPicFileList="uploadPicFileList" :maxSize="9" :flag="1"></div>
+            <div is="uploadPic" :fileList="fileList" @uploadPicDel="uploadPicDel" @uploadPicFileList="uploadPicFileList" :maxSize="9" :flag="1" mode="message"></div>
             <p class="vl_f_999" style="line-height: 20px;">(只能上传视频或图片，视频最多1个，图片最多9张)</p>
           </el-form-item>
           <el-form-item label="推送消息:">

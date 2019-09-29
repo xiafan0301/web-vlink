@@ -23,7 +23,7 @@
             </el-input>
           </el-form-item>
           <el-form-item style="width: 736px;">
-            <div is="uploadPic" :fileList="fileList" @uploadPicDel="uploadPicDel" @uploadPicSubmit="uploadPicSubmit" @uploadPicFileList="uploadPicFileList" :maxSize="9"></div>
+            <div is="uploadPic" :fileList="fileList" @uploadPicDel="uploadPicDel" @uploadPicSubmit="uploadPicSubmit" @uploadPicFileList="uploadPicFileList" :maxSize="9" mode="message"></div>
             <p class="vl_f_999" style="line-height: 20px;">(最多传9张 支持JPEG、JPG、PNG，大小不超过2M)</p>
           </el-form-item>
         </el-form>
