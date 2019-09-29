@@ -812,3 +812,17 @@ export function getLimitTaskList(params) {
     mode: 'vehicle'
   })
 }
+
+/****************************图片框选区域信息接口 ******************************** */
+/**
+ * 图片区域查询接口
+ * @param {object} params
+ */
+export function getImageAreaInfo(params) {
+  return request({
+    url: '/picture/reactInfo',
+    method: 'get',
+    params,
+    mode: 'judge'
+  })
+}

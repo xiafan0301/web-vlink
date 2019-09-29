@@ -10,8 +10,7 @@
   >
     <div class="select_body">
       <div class="img_box">
-        <img src="http://newfile.aorise.org:80/group1/default/20190919/15/00/2/9546310b-b254-49ca-8ff2-4b3cef487d45.png" alt="" id="imgBox">
-        
+        <img :src="imgInfo.url" alt="" id="imgBox">
       </div>
     </div>
     <span slot="footer" class="dialog-footer">
@@ -23,54 +22,47 @@
 <script>
 import { handUpload } from "@/views/index/api/api.base.js";
 import { JtcPOSTAppendixInfo } from "@/views/index/api/api.judge.js";
+import { setTimeout } from 'timers';
 export default {
-  props: ['open'],
+  props: ['open', 'imgDataList', 'initImageInfo'],
   data () {
     return {
-      imgPath: require('../../assets/img/temp/video_pic.png'),
       dialogVisible: false,
       submitLoading: false,
-      selectList: [
-        {
-          uid: 'x12222',
-          x: 30,
-          y: 30,
-          width: 100,
-          height: 100
-        },
-        {
-          uid: 'x12223',
-          x: 70,
-          y: 200,
-          width: 300,
-          height: 100
-        }
-      ],
-      initImgWidth: 881, // 图片原width
-      initImgHeight: 600, // 图片原height
+      selectList: [],
+      initImgWidth: 500, // 图片原width
+      initImgHeight: 341, // 图片原height
       fd: null,
       selectComplete: true, // 点击选择出现
+      imgInfo: {
+        url: null,
+        height: null,
+        width: null
+      }
     }
   },
   watch: {
     open (val) {
       this.dialogVisible = val;
-    }
-  },
-  mounted () {
-    this.dialogVisible = this.open;
+    },
+    imgDataList (val) {
+      this.selectList = val;
 
-    if (this.dialogVisible) {
-      this.$nextTick(() => {
-        this.getImgScale();
-      })
+      if (val.length > 0) {
+        setTimeout(() => {
+          this.getImgScale();
+        }, 1000)
+      }
+    },
+    initImageInfo (val) {
+      this.imgInfo = Object.assign({}, this.initImageInfo);
     }
   },
   methods: {
     // 获取图片缩放比例
     getImgScale () {
-      let scale = this.initImgWidth / this.initImgHeight; // 原图初始比例
-
+      let scale = this.imgInfo.width / this.imgInfo.height; // 原图初始比例
+      
       let imgWidth = $('#imgBox').width();
       
       let currHeight = Math.ceil(imgWidth / scale); // 图片压缩后的height
@@ -80,8 +72,8 @@ export default {
 
       this.selectList.forEach(item => {
         // 在页面显示的图片大小计算宽和高的比例
-        let wScale = this.initImgWidth / item.width;
-        let hScale = this.initImgHeight / item.height;
+        let wScale = this.imgInfo.width / item.width;
+        let hScale = this.imgInfo.height / item.height;
 
 
 
@@ -90,7 +82,7 @@ export default {
         $div.setAttribute('id', 'select_box' + item.uid);
 
         $div.setAttribute('class', 'select_box');
-
+        
         $div.style.width = Math.ceil(imgWidth / wScale) + 'px';
         $div.style.height = Math.ceil(currHeight / hScale) + 'px';
 
@@ -132,7 +124,7 @@ export default {
     createImgPath (x, y, width, height) {
       let image = new Image();
       image.setAttribute("crossOrigin",'Anonymous');
-      image.src = 'http://newfile.aorise.org:80/group1/default/20190919/15/00/2/9546310b-b254-49ca-8ff2-4b3cef487d45.png';
+      image.src = this.imgInfo.url;
 
       image.onload = () => {
         
@@ -179,6 +171,7 @@ export default {
               open: false,
               imgPath: imgObj.path
             })
+            $('.img_box div').remove();
           }
         })
       }
@@ -195,6 +188,7 @@ export default {
           })
           .catch(() => {})
       } else {
+        $('.img_box div').remove();
         this.$emit('emitImgData', {
           open: false
         })
@@ -202,6 +196,7 @@ export default {
     },
     // 取消选择
     cancelSave () {
+      $('.img_box div').remove(); // 删除添加的div元素
       this.$emit('emitImgData', {
         open: false
       })

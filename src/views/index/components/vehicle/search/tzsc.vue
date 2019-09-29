@@ -93,7 +93,7 @@
               <div v-show="selectType === 1">
                 <!-- 上传车像图片 -->
                 <div style="padding: 0 15px; height: 210px;">
-                  <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit"></div>
+                  <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit" :imgData="imgData"></div>
                 </div>
                 <!-- 检索结果 -->
                 <div class="characteristic">
@@ -365,19 +365,23 @@
     </div>
     <!--检索详情弹窗-->
     <div is="vehicleDetail" :detailData="detailData"></div>
+    <!-- 框选搜索主体弹框 -->
+    <div is="imgSelect" :initImageInfo="initImageInfo" :open="isOpenImgDialog" :imgDataList="imgDataList" @emitImgData="emitImgData"></div>
   </div>
 </template>
 <script>
 import vlUpload from "@/components/common/upload.vue";
 import vlBreadcrumb from "@/components/common/breadcrumb.vue";
 import vehicleDetail from "../common/vehicleDetail.vue";
+import imgSelect from '@/components/common/imgSelect.vue';
 
 import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入溆浦县地图
 import { formatDate, dateOrigin } from "@/utils/util.js";
 
 import {
   JtcPOSTAppendixInfo,
-  JtcGETAppendixInfoList
+  JtcGETAppendixInfoList,
+  getImageAreaInfo
 } from "../../../api/api.judge.js"; // 图片上传接口
 
 import { getVehicleList } from "../../../api/api.base.js";
@@ -392,7 +396,7 @@ import { objDeepCopy } from "../../../../../utils/util.js"; // 深拷贝方法
 import { constants } from "crypto";
 
 export default {
-  components: { vehicleDetail, vlBreadcrumb, vlUpload },
+  components: { vehicleDetail, vlBreadcrumb, vlUpload, imgSelect },
   data() {
     return {
       uploadClear: {},
@@ -557,8 +561,13 @@ export default {
       noDataTips: "请在左侧输入查询条件",
       pageNum: 1,
       pageSize: 12,
-      total: 0
+      total: 0,
       /* 检索详情弹窗变量 */
+
+      isOpenImgDialog: false, // 是否显示框选弹框
+      imgData: {},
+      imgDataList: [],
+      initImageInfo: {}
     };
   },
   computed: {
@@ -603,6 +612,38 @@ export default {
     });
   },
   methods: {
+    // 获取图片区域信息
+    getImageInfo () {
+      const params = {
+        bussType: 4, // 4---机动车  1-- 人
+        url: 'http://10.116.126.10/root/test/20190918-1635-002.jpg'
+      };
+      getImageAreaInfo(params)
+        .then(res => {
+          if (res && res.data) {
+            if (res.data.length > 0) {
+              this.isOpenImgDialog = true;
+
+              res.data.map(item => {
+                const obj = {
+                  ...item,
+                  uid: 1 + Math.random()
+                };
+                this.imgDataList.push(obj);
+              })
+            }
+          }
+        })
+    },
+    emitImgData (obj) {
+      this.isOpenImgDialog = obj.open;
+      if (obj.imgPath) {
+        this.curImageUrl = obj.imgPath;
+        this.imgData = {
+          path: obj.imgPath
+        }
+      }
+    },
     getSelectOption() {
       // 获取到自定义特征的下拉框列表数据
       this.plateClassOptions = this.dicFormater(45)[0].dictList;
@@ -1026,8 +1067,15 @@ export default {
     uploadEmit(data) {
       if (data && data.path) {
         this.curImageUrl = data.path;
+        this.initImageInfo = {
+          url: data.path,
+          width: data.imgWidth,
+          height: data.imgHeight
+        };
+        this.getImageInfo();
       } else {
         this.curImageUrl = "";
+        this.initImageInfo = {};
       }
     },
     // 拖拽开始

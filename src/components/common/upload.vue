@@ -93,12 +93,14 @@ export default {
   },
   created () {
     if (this.imgData && this.imgData.path) {
+      console.log('asasd', this.imgData);
+      
       this.currentImg = Object.assign({}, this.imgData);
     }
   },
   watch: {
     imgData (val) {
-      // console.log('imgData', val);
+      console.log('imgData', val);
       if (val && val.path) {
         this.choosedHisPic = null;
         this.currentImg = Object.assign({}, val);
