@@ -251,9 +251,9 @@ export default {
     uploadPicFileListTwo (fileList) {
       let _list = imgUrls(fileList);
       this.fileListTwo = this.fileListTwo.concat(_list);
-      this.fileListTwo = unique(this.fileListTwo, 'objId');
-      console.log(this.fileListTwo, 'this.fileListTwo');
+      console.log(this.fileListTwo);
       
+      this.fileListTwo = unique(this.fileListTwo, 'objId');
     },
     // 从库中选择
     popSel (type) {
@@ -274,6 +274,7 @@ export default {
     },
     // 删除车牌号码
     removeLicensePlateNum (index) {
+      if (this.modelOneForm.carNumberInfo.length === 1) return this.$message.warning('只剩一个不允许删除');
       this.modelOneForm.carNumberInfo.splice(index, 1);
     },
     // 删除从布控库中选择的车牌

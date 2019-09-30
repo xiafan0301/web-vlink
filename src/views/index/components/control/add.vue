@@ -88,7 +88,7 @@
               <div v-if="createForm.surveillancTimeList.length < 5" class="period_time_btn" @click="addPeriodTime()"><i class="vl_icon vl_icon_control_22"></i><span>添加布控时间段</span></div>
             </el-form-item>
           </el-form-item>
-          <el-form-item class="period_time_box" style="margin-bottom: 6px;" label="短信联动:">
+          <el-form-item class="period_time_box" style="margin-bottom: 0px;" label="短信联动:">
             <div class="contact_list" v-for="(item, index) in createForm.contactList" :key="index">
               <div class="contact">
                 <el-form-item style="margin-bottom: 0;" :prop="'contactList.' + index + '.contact'" :rules="{validator: validName, trigger: 'blur'}">
@@ -175,7 +175,7 @@
           </div>
         </el-form>
       </div>
-      <div class="footer_btn">
+      <div class="footer_btn" v-if="isShowOperateBtn">
         <el-button class="btn_100" v-if=" pageType !== 2" type="primary" :loading="loadingBtn" @click="saveControl('createForm')">保存</el-button>
         <el-button class="btn_100" v-if=" pageType === 2" type="primary" :loading="loadingBtn" @click="putControl('createForm')">保存</el-button>
         <el-button  @click="toGiveUpDialog = true" class="btn_100">取消</el-button>
@@ -280,7 +280,8 @@ export default {
       // 布控模型传过来的数据
       modelData: {},
       eventDetail: {},
-      modelList: null
+      modelList: null,
+      isShowOperateBtn: true,
     }
   },
   created () {
@@ -313,6 +314,9 @@ export default {
     this.getEventList();
     this.getOrganInfos();
     this.getTimeAfter();
+    this.Bus.$on('sendIsShowOperateBtn', bl => {
+      this.isShowOperateBtn = bl;
+    })
   },
   methods: {
     // 切换布控模型类型
@@ -405,6 +409,7 @@ export default {
     },
     // 删除时间段
     removePeriodTime(index) {
+      if (this.createForm.surveillancTimeList.length === 1) return this.$message.warning('只剩一个不允许删除');
       this.createForm.surveillancTimeList.splice(index, 1);
     },
     // 添加短信联动
@@ -418,6 +423,7 @@ export default {
     },
     // 删除短信联动
     removeCellphoneMessages (index) {
+      if (this.createForm.contactList.length === 1) return this.$message.warning('只剩一个不允许删除');
       this.createForm.contactList.splice(index, 1);
     },
     // 通过布控名称获取布控信息，异步查询布控是否存在
@@ -688,9 +694,6 @@ export default {
       }
     }
     .el-form-item{
-      &:nth-child(4){
-        padding-right: 0!important;
-      }
       .el-input__inner, .el-select{
         width: 100%!important;
       }
@@ -706,6 +709,7 @@ export default {
     }
     .period_time_box .el-form-item__content{
       display: flex;
+      flex-wrap: wrap;
       .period_time_btn_box{ 
         width: 25%;
         margin-bottom: 0!important;
@@ -733,7 +737,7 @@ export default {
       }
       > .el-form-item{
         width: 25%;
-        margin-bottom: 20px;
+        margin-bottom: 10px;
         padding-right: 10px;
         .el-form-item__content{
           display: flex;
@@ -780,6 +784,7 @@ export default {
             .el-input__inner{
               border: none!important;
               height: 36px;
+              padding: 0 0 0 4px!important;
             }
           }
         }

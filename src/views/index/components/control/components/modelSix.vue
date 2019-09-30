@@ -138,6 +138,7 @@ export default {
     },
     // 删除车牌号码
     removeLicensePlateNum (index) {
+      if (this.modelSixForm.carNumberInfo.length === 1) return this.$message.warning('只剩一个不允许删除');
       this.modelSixForm.carNumberInfo.splice(index, 1);
     },
     // 移除从布控库中选择的车牌
