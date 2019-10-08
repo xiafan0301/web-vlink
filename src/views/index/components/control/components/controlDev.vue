@@ -49,15 +49,20 @@
         </ul>
       </div>
     </div>
-    <div 
-      v-if="pageType === 2" 
-      is="mapSelector" 
-      ref="mapSelector" 
-      :isNotDialog="false"
-      showTypes="DB"
-      :activeDeviceList="activeDeviceList"
-      >
-    </div>
+    <template v-if="pageType === 2" >
+      <div 
+        is="mapSelector" 
+        ref="mapSelector" 
+        :isNotDialog="false"
+        showTypes="DB"
+        :activeDeviceList="activeDeviceList"
+        >
+      </div>
+      <div class="footer_btn">
+        <el-button class="btn_100" type="primary" @click="updateControlDev">确定</el-button>
+        <el-button class="btn_100" @click="cancelUpdateControlDev">返回</el-button>
+      </div>
+    </template>
   </div>
 </template>
 <script>
@@ -66,14 +71,14 @@ import {MapGETmonitorList} from '@/views/index/api/api.map.js';
 import {random14, objDeepCopy, addCluster} from '@/utils/util.js';
 import mapSelector from '@/components/common/mapSelector.vue';
 import { setTimeout } from 'timers';
-import {getAllMonitorList, getAllBayonetList} from '@/views/index/api/api.base.js';
+import {getAllMonitorList, getBayonetList} from '@/views/index/api/api.base.js';
 import { Promise } from 'q';
 export default {
   components: {mapSelector},
   props: ['addressObj', 'addressObjTwo', 'modelType', 'lostTime', 'devIdListFive', 'bayIdListFive', 'devs', 'bays'],
   data () {
     return {
-      pageType: 1,//页面类型，1为布控设备展示页面，2为修改布控设备页面
+      pageType: null,//页面类型，1为布控设备展示页面，2为修改布控设备页面
       // 地图参数
       zoomLevel: 12,
       map: null,
@@ -94,16 +99,62 @@ export default {
       isShowTree: false,
       markerList: [],
       loading: false,
-      activeDeviceList: null
+      activeDeviceList: null,
+      selDevs: [],
+      selBays: []
     }
   },
   mounted () {
-    this.resetMap();
-    this.getDevAndBayList();
+    this.pageType = 1;
+    this.selDevs = this.devs;
+    this.selBays = this.bays;
+    this.$nextTick(() => {
+      this.resetMap();
+      this.getDevAndBayList();
+    })
+  },
+  watch: {
+    pageType (val) {
+      if (val === 1) {
+        this.Bus.$emit('sendIsShowOperateBtn', true);
+      } else {  
+        this.Bus.$emit('sendIsShowOperateBtn', false);
+      }
+    }
   },
   methods: {
+    // 确定选择布控设备
+    updateControlDev () {
+      this.devIdList = [];
+      this.bayIdList = [];
+      this.toLeftDevList = [];
+      this.toLeftBayList = [];
+      const devData = this.$refs['mapSelector'].getCheckedIds();
+      this.selDevs = devData.deviceList;
+      this.selBays = devData.bayonetList;
+      this.pageType = 1;
+      this.$nextTick(() => {
+        this.resetMap();
+        this.operateModel();
+      })
+    },
+    // 取消选择布控设备
+    cancelUpdateControlDev () {
+      this.pageType = 1;
+      this.$nextTick(() => {
+        this.resetMap();
+        this.operateModel();
+      })
+    },
     // 进入修改已选择的设备页面
     changePageType () {
+      if (this.map) {
+        this.map.destroy();
+        this.map = null;
+      }
+      this.removeObj = {1: [],2: []};
+      this.markerList = [];
+     
       this.pageType = 2;
       this.$nextTick(() => {
         this.activeDeviceList = [...this.devIdList.map(m => m.uid), ...this.bayIdList.map(m => m.uid)];
@@ -111,24 +162,12 @@ export default {
     },
     // 传给父组件 
     sendParent () {
-      if (this.pageType === 1) {
+      if (this.devIdList.length > 0 || this.bayIdList.length > 0) {
         const devList = this.devIdList.map(m => {return {deviceId: m.uid}})
         const bayonetList = this.bayIdList.map(m => {return {bayonetId: m.uid}})
         this.$emit('getChildModel', {devList, bayonetList});
       } else {
-        const devData = this.$refs['mapSelector'].getCheckedIds();
-        if (devData.deviceList.length > 0 || devData.bayonetList.length > 0) {
-          let {deviceList: devList, bayonetList} = devData;
-          devList = devList.map(m => {
-            return {deviceId: m.uid}
-          })
-          bayonetList = bayonetList.map(m => {
-            return {bayonetId: m.uid}
-          })
-          this.$emit('getChildModel', {devList, bayonetList});
-        } else {
-          this.$message.warning('请先选择布控设备');
-        }
+        this.$message.warning('请先选择布控设备');
       }
     },
     // 初始化地图
@@ -151,40 +190,48 @@ export default {
     // 获取地图上的设备和卡口数据
     getDevAndBayList () {
       Promise.all([getAllMonitorList({ccode: mapXupuxian.adcode}), 
-        getAllBayonetList({areaId: mapXupuxian.adcode})])
-        .then(res => {
-          if (res) {
-             console.log(res, 'res')
-            const [{data: devList}, {data: bayList}] = res;
-            devList.forEach(f => {f.dataType = 1;f.name = f.deviceName})
-            bayList.forEach(f => {f.dataType = 2;f.name = f.bayonetName})
-            this.allBayList = bayList;
-            this.devList = [...devList, ...bayList];
-            this.mapMark(this.devList);
-            // 第1个布控模型的一键布控时所执行的
-            this.addressObj && this.addressMark();
-            // 第2个布控模型的一键布控时所执行的
-            this.addressObjTwo && this.mapCircleTwo();
-            // 第3个布控模型的一键布控时所执行的
-            this.modelType === 3 && this.getAllBay();
-            // 第5个布控模型的一键布控时所执行的
-            // 编辑时
-            if (this.devs.length > 0) {
-              this.changeColorAndGetTreeData(this.devs, 1);
-              if (this.bays.length > 0) {
-                this.changeColorAndGetTreeData(this.bays, 2);
-              }
-            // 新增时
-            } else {
-              if (this.devIdListFive.length > 0) {
-                this.changeColorAndGetTreeData(this.devIdListFive, 1, 'add');
-              }          
-              if (this.bayIdListFive.length > 0) {
-                this.changeColorAndGetTreeData(this.bayIdListFive, 2, 'add');
-              }   
-            }       
-          }
+        getBayonetList  ({ 
+          "where.areaId": mapXupuxian.adcode,
+          'where.subAreaFlag': true,
+          pageSize: 9999,
         })
+      ])
+      .then(res => {
+        if (res) {
+          const [{data: devList}, {data: {list: bayList}}] = res;
+          devList.forEach(f => {f.dataType = 1;f.name = f.deviceName})
+          bayList.forEach(f => {f.dataType = 2;f.name = f.bayonetName})
+          this.allBayList = bayList.filter(f => f.isEnterPoint === 1 || f.isEnterPoint === 2);
+          this.devList = [...devList, ...bayList];
+          this.operateModel();
+        }
+      })
+    },
+    // 点标记和一键布控对应操作
+    operateModel () {
+      this.mapMark(this.devList);
+      // 第1个布控模型的一键布控时所执行的
+      this.addressObj && this.addressMark();
+      // 第2个布控模型的一键布控时所执行的
+      this.addressObjTwo && this.mapCircleTwo();
+      // 第3个布控模型的一键布控时所执行的
+      this.modelType === 3 && this.getAllBay();
+      // 第5个布控模型的一键布控时所执行的
+      // 编辑时
+      if (this.selDevs.length > 0) {
+        this.changeColorAndGetTreeData(this.selDevs, 1);
+        if (this.selBays.length > 0) {
+          this.changeColorAndGetTreeData(this.selBays, 2);
+        }
+      // 新增时
+      } else {
+        if (this.devIdListFive.length > 0) {
+          this.changeColorAndGetTreeData(this.devIdListFive, 1);
+        }          
+        if (this.bayIdListFive.length > 0) {
+          this.changeColorAndGetTreeData(this.bayIdListFive, 2);
+        }   
+      }    
     },
     // 地图设备和卡口标记 data:摄像头数据/卡口数据
     mapMark (data) {
@@ -221,7 +268,7 @@ export default {
               } else {
                 _sContent += `<li><span>卡口名称：</span><span>${obj.bayonetName}</span></li>
                 <li><span>卡口编号：</span><span>${obj.bayonetNo}</span></li>
-                <li><span>地理位置：</span><span>${obj.bayonetAddress}< /span></li>
+                <li><span>地理位置：</span><span>${obj.bayonetAddress}</span></li>
                 <li><span>设备数量：</span><span>${obj.devNum}</span></li>`;
               }
               _sContent += '</ul></div>';
@@ -301,66 +348,81 @@ export default {
     },
     // 圆形覆盖物
     mapCircle (lngLat, type, index) {
-      let _this = this;
-      let circle = new window.AMap.Circle({
-        center: new window.AMap.LngLat(lngLat[0], lngLat[1]), // 圆心位置
-        radius: _this.scopeRadius(type),  //半径
-        strokeColor: "#F33",  //线颜色
-        strokeOpacity: 1,  //线透明度
-        strokeWeight: 3,  //线粗细度
-        fillColor: "#ee2200",  //填充颜色
-        fillOpacity: 0.35 //填充透明度
-      })
-      circle.setMap(_this.map);
-      // this.setViewingArea(circle);
-      this.removeObj[type].push(circle);
       // 编辑时
-      // 设备
-      if (this.devs.length > 0) {
-        this.changeColorAndGetTreeData(this.devs, 1);
-        // 卡口
-        if (this.bays.length > 0) {
-          this.changeColorAndGetTreeData(this.bays, 2);
+      if (this.selDevs.length > 0 || this.selBays.length > 0) {
+        if (this.selDevs.length > 0) {
+          this.changeColorAndGetTreeData(this.selDevs, 1);
+          this.positionMap(this.selDevs);
+        }
+        if (this.selBays.length > 0) {
+          this.changeColorAndGetTreeData(this.selBays, 2);
+          this.positionMap(this.selBays);
         }
       // 新增时
       } else {
+        let circle = new window.AMap.Circle({
+          center: new window.AMap.LngLat(lngLat[0], lngLat[1]), // 圆心位置
+          radius: this.scopeRadius(type),  //半径
+          strokeColor: "#F33",  //线颜色
+          strokeOpacity: 1,  //线透明度
+          strokeWeight: 3,  //线粗细度
+          fillColor: "#ee2200",  //填充颜色
+          fillOpacity: 0.35 //填充透明度
+        })
+        circle.setMap(this.map);
+        this.removeObj[type].push(circle);
         this.getCircleDev(circle, index);
       }
     },
     // 圆形覆盖物
     mapCircleTwo () {
-      let _this = this;
-      const lngLat = this.addressObjTwo.lnglat;
-      console.log(this.addressObjTwo.radius, 'this.addressObjTwo.radius')
-      if (lngLat[0] === null) return;
-      let circle = new window.AMap.Circle({
-        center: new window.AMap.LngLat(lngLat[0], lngLat[1]), // 圆心位置
-        radius: this.addressObjTwo.radius * 1000,  //半径
-        strokeColor: "#F33",  //线颜色
-        strokeOpacity: 1,  //线透明度
-        strokeWeight: 3,  //线粗细度
-        fillColor: "#ee2200",  //填充颜色
-        fillOpacity: 0.35 //填充透明度
-      })
-      circle.setMap(_this.map);
-      // this.setViewingArea(circle);
       // 编辑时
-      // 设备
-      if (this.devs.length > 0) {
-        this.changeColorAndGetTreeData(this.devs, 1);
-        // 卡口
-        if (this.bays.length > 0) {
-          this.changeColorAndGetTreeData(this.bays, 2);
+      if (this.selDevs.length > 0 || this.selBays.length > 0) {
+        if (this.selDevs.length > 0) {
+          this.changeColorAndGetTreeData(this.selDevs, 1);
+          this.positionMap(this.selDevs);
+        }
+        if (this.selBays.length > 0) {
+          this.changeColorAndGetTreeData(this.selBays, 2);
+          this.positionMap(this.selBays);
         }
       // 新增时
-      } else {
-        
+      } else {  
+        const lngLat = this.addressObjTwo.lnglat;
+        console.log(this.addressObjTwo.radius, 'this.addressObjTwo.radius')
+        if (lngLat[0] === null) return;
+        let circle = new window.AMap.Circle({
+          center: new window.AMap.LngLat(lngLat[0], lngLat[1]), // 圆心位置
+          radius: this.addressObjTwo.radius * 1000,  //半径
+          strokeColor: "#F33",  //线颜色
+          strokeOpacity: 1,  //线透明度
+          strokeWeight: 3,  //线粗细度
+          fillColor: "#ee2200",  //填充颜色
+          fillOpacity: 0.35 //填充透明度
+        })
+        circle.setMap(this.map);
+        this.setViewingArea(circle.getCenter());
         this.getCircleDev(circle);
       }
     },
     // 把地图的可视区域设置在选中设备或卡口的区域
     setViewingArea (obj) {
-      this.map.setCenter(obj.getCenter());
+      this.map.setZoomAndCenter(14, obj);
+    },
+    // 把地图定位到已选设备位置
+    positionMap (array) {
+      for (let item of this.markerList) {
+        const obj = item.getExtData();
+        let key = null;
+        array[0].hasOwnProperty('uid') && (key = 'uid');
+        array[0].hasOwnProperty('deviceId') && (key = 'deviceId');
+        array[0].hasOwnProperty('bayonetId') && (key = 'bayonetId');
+        if (array.some(s => s[key] === obj.uid)) {
+          console.log(item.getPosition(), 'fffffffff')
+          this.setViewingArea(item.getPosition());
+          break;
+        }
+      }
     },
     // 获取圆形覆盖物内的设备和卡口
     getCircleDev (polygon, index) {
@@ -384,23 +446,20 @@ export default {
       this.devIdList = [...this.devIdList, ..._devList];
       this.bayIdList = [...this.bayIdList, ..._bayList];
       
-      if (index === 0) return;//人员失踪有两个范围，两个范围内的设备和卡口累加完后再一次性添加到左边树
+      if (this.addressObj.length === 2 && index === 0) return;//人员失踪有两个范围，两个范围内的设备和卡口累加完后再一次性添加到左边树
       this.getTreeData(this.devIdList, 1);//获得设备树数据
       this.getTreeData(this.bayIdList, 2);//获得卡口树数据
     },
     // 新增或编辑时，点标记变色和变为树结构数据公共方法
-    changeColorAndGetTreeData (array, type, flag) {
+    changeColorAndGetTreeData (array, type) {
       let list = [];
       this.markerList.forEach(f => {
         const obj = f.getExtData();
         let key = null;
-        // 公务车监管新增时
-        if (flag === 'add') {
-          key = 'uid'
-        // 修改时
-        } else {
-          key = type === 1 ? 'deviceId' : 'bayonetId';
-        }
+        array[0].hasOwnProperty('uid') && (key = 'uid');
+        array[0].hasOwnProperty('deviceId') && (key = 'deviceId');
+        array[0].hasOwnProperty('bayonetId') && (key = 'bayonetId');
+
         if (array.some(s => s[key] === obj.uid && obj.dataType === type)) {
           list.push(obj);
           const uContent = this.setMarkContent(obj)
@@ -431,7 +490,6 @@ export default {
         this.toLeftBayList = areaList;
       }
     },
-
     // 设置marker的显示图标
     setMarkContent (obj) {
       const type = obj.dataType === 1 ? 0 : 1;
@@ -440,8 +498,8 @@ export default {
     // 获取城内所有卡口
     getAllBay () {
       // 编辑时
-      if (this.bays.length > 0) {
-        this.changeColorAndGetTreeData(this.bays, 2);
+      if (this.selBays.length > 0) {
+        this.changeColorAndGetTreeData(this.selBays, 2);
       // 新增时
       } else {
         this.getTreeData(this.allBayList, 2);//获得卡口树数据
@@ -593,6 +651,10 @@ export default {
         }
       }
     }
+  }
+  .footer_btn{
+    text-align: center;
+    padding-top: 20px;
   }
 }
 </style>

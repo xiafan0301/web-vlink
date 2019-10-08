@@ -201,7 +201,8 @@ export default {
             objId: cur.uid,
             objType: 1,
             photoUrl: cur.photoUrl,
-            name: cur.name 
+            name: cur.name,
+            sex: cur.sex
           }]
         } else {
           return next;
