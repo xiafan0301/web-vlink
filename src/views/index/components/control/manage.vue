@@ -107,9 +107,11 @@
             </el-table-column>
             <el-table-column
               label="布控范围"
-              prop="bayonetNames"
               show-overflow-tooltip
               >
+              <template slot-scope="scope">
+                {{scope.row.bayonetNames}}{{scope.row.deviceNames}}
+              </template>
             </el-table-column>
             <el-table-column
               label="布控起始时间"

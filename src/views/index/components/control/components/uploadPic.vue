@@ -75,7 +75,7 @@ export default {
   watch: {
     fileList () {
       if (this.mode !== 'message') {
-        this.fileList.forEach(f => f.url = f.photoUrl);
+        this.fileList.forEach(f => f.photoUrl && (f.url = f.photoUrl));
       }
       if (this.fileList.some(s => s.fileType === 2)) {
         this.isShow = true;

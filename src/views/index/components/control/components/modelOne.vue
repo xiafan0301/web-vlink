@@ -175,6 +175,10 @@ export default {
     // 从布控库中获取失踪人像
     getPortraitDataOne (data) {
       this.fileListOne = data;
+      // 从布控库中选择人像时，姓名、性别自动带入
+      this.modelOneForm.name = this.fileListOne[0].name;
+      this.modelOneForm.sex = this.fileListOne[0].sex;
+      console.log(data, 'data')
     },
     // 从布控库中获取嫌疑人像
     getPortraitDataTwo (data) {
@@ -220,7 +224,7 @@ export default {
             _modelOneForm.longitude = this.addressObj_.map(m => m.lngLat[0]).join(',');
             _modelOneForm.latitude = this.addressObj_.map(m => m.lngLat[1]).join(',');
             _modelOneForm = {..._modelOneForm, ...this.devData}
-            this.$emit('getModel', {carNumberInfo: _modelOneForm.carNumberInfo, modelType: 1,  pointDtoList: [_modelOneForm], surveillanceObjectDtoList: [...this.fileListOne, ...this.fileListTwo, ...this.fileListThree]});
+            this.$emit('getModel', {carNumberInfo: _modelOneForm.carNumberInfo, modelType: 1,  pointDtoList: [_modelOneForm], surveillanceObjectDtoList: [...imgUrls(this.fileListOne), ...imgUrls(this.fileListTwo), ...this.fileListThree]});
           } else {
             this.$message.warning('请先选择布控设备');
           }
@@ -235,10 +239,22 @@ export default {
     // 失踪人员信息的上传方法
     uploadPicDelOne (fileList) {
       this.fileListOne = fileList;
+      // 本地上传时，把自动带入的姓名、性别清空
+      this.modelOneForm.name = null;
+      this.modelOneForm.sex = null;
+      this.$nextTick(() => {
+        this.$refs['modelOne'].clearValidate('sex');
+      })
     },
     // 失踪人员信息的上传方法
     uploadPicFileListOne (fileList) {
-      this.fileListOne = imgUrls(fileList);
+      this.fileListOne = fileList;
+      // 本地上传时，把自动带入的姓名、性别清空
+      this.modelOneForm.name = null;
+      this.modelOneForm.sex = null;
+      this.$nextTick(() => {
+        this.$refs['modelOne'].clearValidate('sex');
+      })
     },
 
     // 嫌疑人照片的上传方法
@@ -249,10 +265,8 @@ export default {
     },
     // 嫌疑人照片的上传方法
     uploadPicFileListTwo (fileList) {
-      let _list = imgUrls(fileList);
-      this.fileListTwo = this.fileListTwo.concat(_list);
-      console.log(this.fileListTwo);
-      
+      fileList.forEach(f => !f.objId && (f.objId = f.name));//上传时，手动添加objId，用来去重
+      this.fileListTwo = this.fileListTwo.concat(fileList);
       this.fileListTwo = unique(this.fileListTwo, 'objId');
     },
     // 从库中选择

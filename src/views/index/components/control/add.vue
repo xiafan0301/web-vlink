@@ -467,6 +467,7 @@ export default {
                 endTime: formatDate(m.times[1], 'HH:mm:ss')
               }
             })
+            // _createForm.contactList
             _createForm.shareDept = _createForm.shareDept && _createForm.shareDept.join(',');
             _createForm.cascadePlatform = _createForm.cascadePlatform && _createForm.cascadePlatform.join(',');
             this.modelData = null;
@@ -541,6 +542,7 @@ export default {
           if (this.pageType === 3) {
             detail.surveillanceName = '复用' + detail.surveillanceName;
             this.$set(detail, 'controlDate', []);
+            detail.eventId = null;
           // 编辑布控时
           } else {
             this.eventList = [{
@@ -555,6 +557,10 @@ export default {
               times: [new Date('2016, 9,' + m.startTime), new Date('2016, 9,' + m.endTime)]
             }
           })
+          detail.contactList.length === 0 && (detail.contactList = [{
+            contact: null,
+            mobile:  null
+          }]);
           if (detail.shareDept) {
             this.$set(detail, 'sharedControl', 1);
             detail.shareDept = detail.shareDept.split(',');
@@ -570,7 +576,7 @@ export default {
           const {modelList} = detail;
           delete detail.modelList;
           detail.alarmLevel = String(detail.alarmLevel);
-          this.createForm = detail;
+          this.createForm = objDeepCopy(detail);
           const [{modelType}] = modelList;
           this.modelList = modelList;
           this.modelType_ = this.modelType = modelType;

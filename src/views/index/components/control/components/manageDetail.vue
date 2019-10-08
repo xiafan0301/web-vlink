@@ -25,7 +25,7 @@
             
           </li>
           <li style="width: 34%;">
-            <div><span class="vl_f_666">关联事件：</span><span class="vl_f_333">{{controlDetail.eventId}}</span></div>
+            <div><span class="vl_f_666">关联事件：</span><span class="vl_f_333">{{controlDetail.eventCode}}</span></div>
             <div class="control_time"><span class="vl_f_666">布控时间段：</span><span class="vl_f_333">{{controlDetail.time}}</span></div>
           </li>
           <li style="width: 34%;">
@@ -39,10 +39,10 @@
         <ul>
           <li><div><span class="vl_f_666">布控原因：</span><span class="vl_f_333">{{controlDetail.surveillanceReason}}</span></div></li>
         </ul>
-        <div class="manage_d_c_e" v-if="controlDetail.eventDetail">
+        <!-- <div class="manage_d_c_e" v-if="controlDetail.eventDetail">
           <div class="vl_f_666">事件内容：</div>
           <div class="vl_f_333">{{controlDetail.eventDetail}}<span @click="getEventDetail">详情</span></div>
-        </div>
+        </div> -->
         <!-- <div class="manage_d_c_o">
           <div><span class="vl_f_333">布控对象</span><span class="vl_f_333">（{{controlDetail.objectNum}}个）</span></div>
           <div>
@@ -79,7 +79,7 @@
               <ul class="model_info" v-if="controlDetail.modelType === 1">
                 <li>失踪人员信息：</li>
                 <li>
-                  <span>人脸照片：</span><img :src="controlDetail.missingUrl" alt="">
+                  <span>人脸照片：</span><img @click="openBigImg(0, [{path: controlDetail.missingUrl}])" :src="controlDetail.missingUrl" alt="">
                 </li>
                 <li><span>人员姓名：</span><span>{{controlDetail.name}}</span></li>
                 <li><span>人员性别：</span><span>{{controlDetail.sex}}</span></li>
@@ -87,11 +87,11 @@
                 <li><span>失踪地址：</span><span>{{controlDetail.lostAddress}}</span></li>
                 <li><span>家庭地址：</span><span>{{controlDetail.homeAddress}}</span></li>
               
-                <li>
+                <li class="img_list">
                   <span style="padding-left: 0;">嫌疑人照片：</span>
-                  <template v-for="item in controlDetail.objectList">
-                    <img :src="item.photoUrl" alt="" :key="item.uid" v-if="item.photoUrl !== controlDetail.missingUrl && (item.type === 1 || item.type === 3)">
-                  </template>
+                  <div>
+                    <img v-for="(item, index) in getBigImgList()" :key="index" @click="openBigImg(index, getBigImgList())" :src="item.path" alt="">
+                  </div>
                 </li>
                 <li>
                   <span>嫌疑车辆：</span>
@@ -105,15 +105,24 @@
                 <li><span>布防地址：</span><span>{{controlDetail.address}}</span></li>
                 <li><span>布防范围：</span><span>{{controlDetail.radius}}千米</span></li>
                 <li>
-                  <span>禁入人员：</span><img v-for="item in filterObj(controlDetail.objectList, 1)" :key="item.uid" :src="item.photoUrl" alt="">
+                  <span>禁入人员：</span>
+                  <div>
+                    <img @click="openBigImg(index, filterObj(controlDetail.objectList, 1))" v-for="(item, index) in filterObj(controlDetail.objectList, 1)" :key="index" :src="item.path" alt="">
+                  </div>
                 </li>
                 <li>
-                  <span>禁入车辆：</span><img v-for="item in filterObj(controlDetail.objectList, 2)" :key="item.uid" :src="item.photoUrl" alt="">
+                  <span>禁入车辆：</span>
+                  <div>
+                    <img @click="openBigImg(index, filterObj(controlDetail.objectList, 2))" v-for="(item, index) in filterObj(controlDetail.objectList, 2)" :key="index" :src="item.path" alt="">
+                  </div>
                 </li>
               </ul>
               <ul class="model_info" v-if="controlDetail.modelType === 3">
                 <li>
-                  <span>上访人员照片：</span><img v-for="(item, index) in filterObj(controlDetail.objectList, 1, 3)" :key="index" :src="item.photoUrl" alt="">
+                  <span>上访人员照片：</span>
+                  <div>
+                    <img @click="openBigImg(index, filterObj(controlDetail.objectList, 1, 3))" v-for="(item, index) in filterObj(controlDetail.objectList, 1, 3)" :key="index" :src="item.path" alt="">
+                  </div>
                 </li>
                 <li>
                   <span>上访车辆：</span>
@@ -124,10 +133,16 @@
               </ul>
               <ul class="model_info" v-if="controlDetail.modelType === 4">
                 <li>
-                  <span>禁入人员：</span><img v-for="item in filterObj(controlDetail.objectList, 1)" :key="item.uid" :src="item.photoUrl" alt="">
+                  <span>禁入人员：</span>
+                  <div>
+                    <img @click="openBigImg(index, filterObj(controlDetail.objectList, 1))" v-for="(item, index) in filterObj(controlDetail.objectList, 1)" :key="index" :src="item.path" alt="">
+                  </div>
                 </li>
                 <li>
-                  <span>禁入车辆：</span><img v-for="item in filterObj(controlDetail.objectList, 2)" :key="item.uid" :src="item.photoUrl" alt="">
+                  <span>禁入车辆：</span>
+                  <div>
+                    <img @click="openBigImg(index, filterObj(controlDetail.objectList, 2))" v-for="(item, index) in filterObj(controlDetail.objectList, 2)" :key="index" :src="item.path" alt="">
+                  </div>
                 </li>
               </ul>
               <ul class="model_info" v-if="controlDetail.modelType === 5">
@@ -139,13 +154,17 @@
                 </li>
                 <li>
                   <span>布控车辆：</span>
-                  <img v-for="item in filterObj(controlDetail.objectList, 2)" :key="item.uid" :src="item.photoUrl" alt="">
+                  <div>
+                    <img @click="openBigImg(index, filterObj(controlDetail.objectList, 2))" v-for="(item, index) in filterObj(controlDetail.objectList, 2)" :key="index" :src="item.path" alt="">
+                  </div>
                 </li>
               </ul>
               <ul class="model_info" v-if="controlDetail.modelType === 6">
                 <li>
                   <span>布控人员信息：</span>
-                  <img v-for="item in filterObj(controlDetail.objectList, 1, 3)" :key="item.uid" :src="item.photoUrl" alt="">
+                  <div>
+                    <img @click="openBigImg(index, filterObj(controlDetail.objectList, 1, 3))" v-for="(item, index) in filterObj(controlDetail.objectList, 1, 3)" :key="index" :src="item.path" alt="">
+                  </div>
                 </li>
                 <li>
                   <span>布控车辆：</span>
@@ -409,7 +428,7 @@
       <el-button class="btn_100" type="primary" @click="skipIsCreate">复用</el-button>
       <el-button class="btn_100" @click="showDialog('delDialog')">删除</el-button>
     </div>
-    <div class="event_detail_dialog" v-if="eventDetail">
+    <!-- <div class="event_detail_dialog" v-if="eventDetail">
       <el-dialog
         :visible.sync="eventDetailDialog"
         :close-on-click-modal="false"
@@ -456,7 +475,7 @@
           </div>
         </vue-scroll>
       </el-dialog>
-    </div>
+    </div> -->
     <div is="delDialog" ref="delDialog" :controlId="controlId" @getControlList="getControlList"></div>
     <div is="stopDialog" ref="stopDialog" :controlId="controlId" @getControlList="getControlList"></div>
     <BigImg :imgList="imgList" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
@@ -481,7 +500,7 @@ export default {
     return {
       controlState: null,//布控详情状态
       controlDetail: conDetail,//布控详情
-      eventDetail: null,//事件详情
+      // eventDetail: null,//事件详情
       eventVideoTool: false,
       imgList: [],
       imgIndex: null,
@@ -546,6 +565,14 @@ export default {
     this.getControlDetail();
   },
   methods: {
+    // 获取嫌疑人像列表
+    getBigImgList () {
+      return this.controlDetail.objectList.filter(f => f.photoUrl !== this.controlDetail.missingUrl && (f.type === 1 || f.type === 3)).map(m => {return {path: m.photoUrl}});
+    },
+    // 过滤布控对象类型
+    filterObj(list, type, _type) {
+      return list.filter(f => f.type === type || f.type === _type).map(m => {return {path: m.photoUrl, name: m.name}});
+    },
     // 布控模型类型名称转码
     transcoding (type) {
       const obj = {
@@ -557,10 +584,6 @@ export default {
         6: '自定义'
       }
       return obj[type];
-    },
-    // 过滤布控对象类型
-    filterObj(list, type, _type) {
-      return list.filter(f => f.type === type || f.type === _type);
     },
     // 关闭图片放大
     emitCloseImgDialog(value){
@@ -677,14 +700,14 @@ export default {
       })
     },
     // 获取事件详情
-    getEventDetail () {
-      this.eventDetailDialog = true;
-      getEventDetail(this.controlDetail.eventId).then(res => {
-        if (res && res.data) {
-          this.eventDetail = res.data;
-        }
-      })
-    },
+    // getEventDetail () {
+    //   this.eventDetailDialog = true;
+    //   getEventDetail(this.controlDetail.eventId).then(res => {
+    //     if (res && res.data) {
+    //       this.eventDetail = res.data;
+    //     }
+    //   })
+    // },
     // 设置marker的显示图标
     setMarkContent (obj) {
       const type = obj.dataType === 1 ? 0 : 1;
@@ -1139,13 +1162,23 @@ export default {
               flex: 1;
               color: #333333;
             }
-            > img{
+            img{
               width: 104px;
               height: 104px;
-              margin-right: 10px;
-              margin-left: 14px;
+              margin: 5px;
               border-radius:4px;
               border:1px solid rgba(211,211,211,1);
+              cursor: pointer;
+            }
+          }
+          .img_list{
+            > span{
+              width: 86px;
+            }
+            > div{
+              width: calc(100% - 86px);
+              display: flex;
+              flex-wrap: wrap;
             }
           }
         }
