@@ -83,8 +83,8 @@ export default {
     // 从布控库中获取布控人员信息
     getPortraitData (data) {
       console.log(data, 'datadata')
-      const _list = this.fileListOne.concat(data);
-      this.fileListOne = unique(_list, 'objId');
+      this.fileListOne = this.fileListOne.concat(data);
+      this.fileListOne = unique(this.fileListOne, 'objId');
     },
     // 从布控库中获取车辆
     getVehicleData (data) {
@@ -96,9 +96,9 @@ export default {
       this.fileListOne = fileListOne;
     },
     // 布控人员信息的上传方法
-    uploadPicFileList (fileListOne) {
-      const _list = imgUrls(fileListOne);
-      this.fileListOne = this.fileListOne.concat(_list);
+    uploadPicFileList (fileList) {
+      fileList.forEach(f => !f.objId && (f.objId = f.name));//上传时，手动添加objId，用来去重
+      this.fileListOne = this.fileListOne.concat(fileList);
       this.fileListOne = unique(this.fileListOne, 'objId');
     },
     // 从库中选择
@@ -123,7 +123,7 @@ export default {
           return {bayonetId: m.uid}
         })
         const _carNumberInfo = this.modelSixForm.carNumberInfo.map(m => m.vehicleNumber).join(',');
-        this.$emit('getModel', {carNumberInfo: _carNumberInfo, modelType: 6,  pointDtoList: [{devList, bayonetList}], surveillanceObjectDtoList: [...this.fileListOne, ...this.fileListTwo]});
+        this.$emit('getModel', {carNumberInfo: _carNumberInfo, modelType: 6,  pointDtoList: [{devList, bayonetList}], surveillanceObjectDtoList: [...imgUrls(this.fileListOne), ...this.fileListTwo]});
       } else {
         this.$message.warning('请先选择布控设备');
       }
@@ -138,6 +138,7 @@ export default {
     },
     // 删除车牌号码
     removeLicensePlateNum (index) {
+      if (this.modelSixForm.carNumberInfo.length === 1) return this.$message.warning('只剩一个不允许删除');
       this.modelSixForm.carNumberInfo.splice(index, 1);
     },
     // 移除从布控库中选择的车牌

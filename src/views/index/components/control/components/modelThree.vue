@@ -80,7 +80,7 @@ export default {
     // 从布控库中获取人像
     getPortraitData (data) {
       console.log(data, 'datadata')
-      this.fileListOne = this.fileListOne.concat(data);
+      this.fileListOne = this.fileListOne.concat(data); 
       this.fileListOne = unique(this.fileListOne, 'objId');
     },
     // 从布控库中获取车像
@@ -89,13 +89,13 @@ export default {
       this.fileListTwo = unique(this.fileListTwo, 'objId');
     },
     // 上访人员信息的上传方法
-    uploadPicDel (fileListOne) {
-      this.fileListOne = fileListOne;
+    uploadPicDel (fileList) {
+      this.fileListOne = fileList;
     },
     // 上访人员信息的上传方法
-    uploadPicFileList (fileListOne) {
-      const _list = imgUrls(fileListOne);
-      this.fileListOne = this.fileListOne.concat(_list);
+    uploadPicFileList (fileList) {
+      fileList.forEach(f => !f.objId && (f.objId = f.name));//上传时，手动添加objId，用来去重
+      this.fileListOne = this.fileListOne.concat(fileList);
       this.fileListOne = unique(this.fileListOne, 'objId');
     },
     // 从库中选择
@@ -114,6 +114,7 @@ export default {
     },
     // 删除车牌号码
     removeLicensePlateNum (index) {
+      if (this.modelThreeForm.carNumberInfo.length === 1) return this.$message.warning('只剩一个不允许删除');
       this.modelThreeForm.carNumberInfo.splice(index, 1);
     },
     // 删除从布控库中选择的车牌
@@ -131,7 +132,7 @@ export default {
             this.$refs['controlDev'].sendParent();
             if (this.devData.devList.length === 0) return this.$message.warning('请先选择布控卡口');
             const _carNumberInfo = this.modelThreeForm.carNumberInfo.map(m => m.vehicleNumber).join(',');
-            this.$emit('getModel', {carNumberInfo: _carNumberInfo, modelType: 3,  pointDtoList: [this.devData], surveillanceObjectDtoList: [...this.fileListOne, ...this.fileListTwo]});
+            this.$emit('getModel', {carNumberInfo: _carNumberInfo, modelType: 3,  pointDtoList: [this.devData], surveillanceObjectDtoList: [...imgUrls(this.fileListOne), ...this.fileListTwo]});
           } else {
             this.$message.warning('请先选择布控卡口');
           }
