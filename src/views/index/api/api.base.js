@@ -287,3 +287,15 @@ export function getGroupsDevices (params) {
     mode: baseModeName
   });
 }
+
+/**********************  级联配置服务  ********************/
+/**
+ * 根据级联平台类型cascadeType查询级联配置
+*/
+export function getCascadeTypeList (type) {
+  return request({
+    url: '/cascades/cascadeType/' + type,
+    method: 'get',
+    mode: baseModeName
+  });
+}

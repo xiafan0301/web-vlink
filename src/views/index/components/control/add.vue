@@ -199,6 +199,7 @@ import {modelOne,modelTwo,modelThree,modelFour,modelFive,modelSix} from './compo
 import {getAllMonitorList, getControlInfoByName, addControl, getControlDetailIsEditor, putControl} from '@/views/index/api/api.control.js';
 import {getEventList, getEventDetail, updateEvent} from '@/views/index/api/api.event.js';
 import {getOrganInfos} from '@/views/index/api/api.message.js';
+import {getCascadeTypeList} from '@/views/index/api/api.base.js';
 import {formatDate, objDeepCopy, unique} from '@/utils/util.js';
 import {mapXupuxian} from '@/config/config.js';
 import {dataList} from '@/utils/data.js';
@@ -312,6 +313,7 @@ export default {
   },
   mounted () {
     this.getEventList();
+    this.getCascadeTypeList();
     this.getOrganInfos();
     this.getTimeAfter();
     this.Bus.$on('sendIsShowOperateBtn', bl => {
@@ -374,6 +376,19 @@ export default {
             value: this.eventDetail.uid
           }]
           this.createForm.eventId = this.eventDetail.uid;
+        }
+      })
+    },
+    // 获取下级平台列表
+    getCascadeTypeList () {
+      getCascadeTypeList(2).then(res => {
+        if (res && res.data) {
+          this.cascadePlatformList = res.data.map(m => {
+            return {
+              value: m.uid,
+              label: m.cascadeName
+            }
+          });
         }
       })
     },
