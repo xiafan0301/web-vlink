@@ -158,7 +158,6 @@ export default {
         display: flex;
         flex-wrap: wrap;
         align-items: flex-start;
-        overflow-y: auto;
         .list_info{
           margin: 0 0.5%;
           width: 32%;

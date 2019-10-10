@@ -218,7 +218,7 @@ export default {
         time: null,
         controlObj: {},
         name: null,
-        deviceId: null
+        // deviceId: null
       },
       lastManageForm: {
         type: null,
@@ -227,7 +227,7 @@ export default {
         time: null,
         controlObj: {},
         name: null,
-        deviceId: null
+        // deviceId: null
       },//用来记录之前的搜索参数，对比是否需要置为第一页
       loading: false,
       loadingBtn: false,
@@ -270,7 +270,7 @@ export default {
       this.$nextTick(() => {
         // this.getControlDevice();
         this.manageForm.state = parseInt(data.state);
-        this.manageForm.deviceId = data.deviceId;
+        // this.manageForm.deviceId = data.deviceId;
         this.getControlList();
       })
     }
@@ -421,8 +421,9 @@ export default {
   padding: 20px;
   .control_manage_box{
     width: 100%;
-    height: 100%;
-    padding: 20px;
+    // height: 100%;
+    padding: 20px 20px 0;
+    margin-bottom: 20px;
     box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
     border-radius:4px;
     background: #fff;

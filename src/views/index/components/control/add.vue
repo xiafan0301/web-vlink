@@ -232,7 +232,7 @@ export default {
         {label: '长期布控', value: 2}
       ],
       //告警类型
-      controAlarmList: unique(this.dicFormater(dataList.alarmLevel)[0].dictList, 'enumValue'),
+      controAlarmList: this.dicFormater(dataList.alarmLevel)[0].dictList,
       // 布控表单参数
       createForm: {
         surveillanceName: null,
