@@ -387,6 +387,8 @@
         this.rightIsIndeterminate = false;
       },
       activeDeviceList (val) {
+        console.log('val', val);
+        
         this.activeDBList = val;
       },
       checkList (newValue, oldValue) {

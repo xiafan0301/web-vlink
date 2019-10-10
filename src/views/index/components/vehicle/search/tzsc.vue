@@ -516,16 +516,6 @@ export default {
           {name: 'safetyBelt', disabled: true, label: '安全带状态'}, // 安全带状态
           {name: 'calling', disabled: true, label: '打电话状态'}, // 打电话状态
       ],
-      options: [
-        {
-          value: "选项1",
-          label: "黄金糕"
-        },
-        {
-          value: "选项2",
-          label: "双皮奶"
-        }
-      ],
       /* 上传图片变量 */
       uploadAcion: ajaxCtx.base + "/new", //上传路径
       uploading: false, // 是否上传中

@@ -41,10 +41,10 @@
           <span class="middle_step">2</span>
           <div class="img_right_box">
             <img :src="secondImgUrl" alt="" id="mapCutImageSource">
-             <div id="mapCutScreenContain" class="cut_right_box"  @mousedown.stop="beginDraw($event)" @mouseup="endDraw($event)">
-              <span id="mapCutScreenBox" v-show="curCutBox" @mousedown.stop="moveBox($event)"  @mouseup.stop="boxMoveEnd">
+             <div id="mapCutScreenContain" v-show="showCutContainer" class="cut_right_box" @mousedown.stop="beginDraw($event)" @mouseup="endDraw($event)">
+              <span id="mapCutScreenBox" v-show="curCutBox">
                 <img :src="secondImgUrl" alt="">
-                <i v-for="item in '12345678'" :class="'move_icon' + item" :key="item.id" @mousedown.stop="changeIt(item ,$event)"  @mouseup="boxMoveEnd"></i>
+                <i v-for="item in '12345678'" :class="'move_icon' + item" :key="item.id"></i>
               </span>
               <div class="cut_end" id="mapSureCutComplete" v-show="cutComplete">
                 <span @click.stop="cancelCutScreen"><i class="el-icon-close"></i></span>
@@ -56,7 +56,7 @@
       </div>
       <div class="divide"></div>
       <div class="bottom">
-        <div class="item_list" v-for="(item, index) in imgDataList" :key="index">
+        <div class="item_list" v-for="(item, index) in imgBDataList" :key="index">
           <p class="close_btn" v-if="item.src" @click="deleteBottomImg(item, index)">
             <i class="el-icon-close"></i>
           </p>
@@ -72,11 +72,13 @@ import { handUpload } from "@/views/index/api/api.base.js";
 import { JtcPOSTAppendixInfo } from "@/views/index/api/api.judge.js";
 
 export default {
+  // props: ['open', 'imgDataList', 'initImageInfo'],
   data () {
     return {
       tabStep: 1, // 导航栏选择
       dialogVisible: true,
       selectComplete: false,
+      showCutContainer: false,
       cutComplete: false,
       curCutBox: false,
       selectList: [
@@ -103,13 +105,43 @@ export default {
       currentY: 0, // 当前选择车体的y
       currentWidth: 0, // 当前选择车体的width
       currentHeight: 0,  // 当前选择车体的height
-      imgDataList: [
+      imgBDataList: [
         {
-          uid: null,
+          fileName: null,
           src: null
         }
       ],
       secondCutList: [], // 第二步截屏的div
+      imgInfo: {
+        url: null,
+        height: null,
+        width: null
+      }, // 原始图片信息
+    }
+  },
+  watch: {
+    // open (val) {
+    //   this.dialogVisible = val;
+    // },
+    // imgDataList (val) {
+    //   this.selectList = val;
+
+    //   if (val.length > 0) {
+    //     setTimeout(() => {
+    //       this.getImgScale();
+    //     }, 1000)
+    //   }
+    // },
+    // initImageInfo (val) {
+    //   this.imgInfo = Object.assign({}, this.initImageInfo);
+    // },
+    imgBDataList (val) {
+      // if (val.length === 6) {
+      //   this.curCutBox = false;
+      //   this.cutComplete = false;
+      // } else {
+      //   this.curCutBox = true;
+      // }
     }
   },
   mounted () {
@@ -122,6 +154,10 @@ export default {
     cancelSelectCut () {
       this.dialogVisible = false;
       this.tabStep = 1;
+      // this.$emit('emitImgData', {
+      //   open: false,
+      //   imgBDataList: []
+      // })
     },
     // 上一步
     prev () {
@@ -129,6 +165,10 @@ export default {
     },
     // 确定
     sureSelectCut () {
+      // this.$emit('emitImgData', {
+      //   open: false,
+      //   imgBDataList: this.imgBDataList
+      // })
       this.dialogVisible = false;
     },
     // 取消选择车体
@@ -143,18 +183,34 @@ export default {
       let x = this.currentX, y = this.currentY, width = this.currentWidth, height = this.currentHeight;
       if (width > 0 && height > 0) {
         this.tabStep = 2;
+        this.imgBDataList = [{
+          fileName: null,
+          src: null
+        }];
+
+        this.secondCutList.map(item => {
+          const $imgDiv = document.getElementById('second_select_box_' + item.fileName);
+          console.log($imgDiv);
+          
+          $('.img_right_box')[0].removeChild($imgDiv);
+        });
+
+        this.secondCutList = [];
         this.createImgPath(x, y, width, height, 1);
       }
     },
     // 获取图片缩放比例
     getImgScale () {
-      let scale = this.initImgWidth / this.initImgHeight; // 原图初始比例
 
       let imgWidth = $('#imgBox').width();
-      
-      let currHeight = Math.ceil(imgWidth / scale); // 图片压缩后的height
-      // $('#imgBox').css('height', currHeight + 'px');
+      let imgHeight = $('#imgBox').height();
 
+      let scaleWidth = this.initImgWidth / imgWidth;
+      let scaleHeight = this.initImgHeight / imgHeight;
+      
+
+      console.log(scaleWidth + '____' + scaleHeight);
+      
       this.selectList.forEach(item => {
         // 在页面显示的图片大小计算宽和高的比例
         let wScale = this.initImgWidth / item.width;
@@ -165,7 +221,8 @@ export default {
         $div.setAttribute('id', 'select_box' + item.uid);
 
         $div.setAttribute('class', 'select_box');
-
+        
+        let currHeight = 500;
         $div.style.width = Math.ceil(imgWidth / wScale) + 'px';
         $div.style.height = Math.ceil(currHeight / hScale) + 'px';
 
@@ -244,6 +301,32 @@ export default {
           handUpload(this.fd)
             .then(res => {
               if (res && res.data) {
+                console.log('vvvvv', res.data);
+                
+                if (step === 2) {
+                  const obj = {
+                    x, y, width, height,
+                    fileName: res.data.fileName
+                  };
+                  this.secondCutList.push(obj);
+
+                  let $div = document.createElement('div');
+  
+                  $div.setAttribute('id', 'second_select_box_' + res.data.fileName);
+  
+                  $div.setAttribute('class', 'second_select_box');
+  
+                  $div.style.width = width + 'px';
+                  $div.style.height = height + 'px';
+  
+                  $div.style.left = x + 'px';
+                  $div.style.top = y + 'px';
+  
+                  $('.img_right_box')[0].appendChild($div);
+  
+                  let $id = 'second_select_box_' + res.data.fileName;
+                }
+
                 this.setImgUid(res.data, step);
               }
             })
@@ -279,30 +362,27 @@ export default {
             // this.dialogVisible = false;
             if (step === 1) {
               this.secondImgUrl = imgObj.path;
+              this.showCutContainer = true;
+
               this.selectComplete = false;
               if ($('.select_box').hasClass('active_select')) {
                 $('.select_box').removeClass('active_select');
               }
             } else {
               if (this.secondCutList.length === 1) {
-                this.imgDataList = [{
-                  uid: imgObj.contentUid,
+                this.imgBDataList = [{
+                  fileName: imgObj.cname,
                   src: imgObj.path
                 }]
               } else {
                 const params = {
-                  uid: imgObj.contentUid,
+                  fileName: imgObj.cname,
                   src: imgObj.path
                 };
-                this.imgDataList.push(params);
+                this.imgBDataList.push(params);
               }
 
-              console.log(this.imgDataList)
             }
-            // this.$emit('emitImgData', {
-            //   open: false,
-            //   imgPath: imgObj.path
-            // })
           }
         })
       }
@@ -319,8 +399,6 @@ export default {
         return false;
       }
 
-      console.log('6666666666');
-      
       let middleRleft = $('.middle_right').offset().left;
       let middleRtop = $('.middle_right').offset().top;
 
@@ -341,7 +419,6 @@ export default {
       });
 
       $('#mapCutScreenContain').bind('mousemove', (event) => {
-        console.log('ooooooooooooooooo');
         
         let curY =  event.clientY, curX =  event.clientX;
         $('#mapCutScreenBox').css({
@@ -353,37 +430,28 @@ export default {
     },
     // 结束截屏
     endDraw (ev) {
-      console.log('jjjjjjjjjjjjjjjjjjjjjjj');
-      
       if (this.secondCutList.length >= 6) {
         return false;
       }
-      console.log('mmmmmmmmmmmmmmmmmm');
       
       let middleRleft = $('.middle_right').offset().left;
       let middleRtop = $('.middle_right').offset().top;
 
       let Y =  ev.clientY, X =  ev.clientX;
-      // if (!this.curTapIndex) {
-        $('#mapSureCutComplete').css({
-          'top': (Y - middleRtop) + 20,
-          'left': (X - middleRleft) - 100,
-        })
-      // }
+      $('#mapSureCutComplete').css({
+        'top': (Y - middleRtop) + 20,
+        'left': (X - middleRleft) - 100,
+      })
       this.cutComplete = true;
-      console.log('ddddddddddddddddd');
       
-      $('#mapCutScreenContain').unbind('mousemove')
+      $('#mapCutScreenContain').unbind('mousemove');
 
     },
-    // 移动截屏框
-    moveBox (e) {},
     // 移动结束
     boxMoveEnd () {
       this.cutComplete = true;
-      $('#mapCutScreenContain').unbind('mousemove')
+      $('#mapCutScreenContain').unbind('mousemove');
     },
-    changeIt (obj, e) {},
     // 取消截屏
     cancelCutScreen () {
       this.curCutBox = false;
@@ -396,47 +464,32 @@ export default {
       console.log(w + 'g' + h)
       console.log(x + 'h' + y)
 
-      const obj = {
-        x, y, w, h
-      };
-      this.secondCutList.push(obj);
-
-      // this.secondCutList.map((item, index) => {
-      let $div = document.createElement('div');
-
-      $div.setAttribute('id', 'second_select_box_' + this.secondCutList.length);
-
-      $div.setAttribute('class', 'second_select_box');
-
-      $div.style.width = w + 'px';
-      $div.style.height = h + 'px';
-
-      $div.style.left = x + 'px';
-      $div.style.top = y + 'px';
-
-      $('.img_right_box')[0].appendChild($div);
-
-      let $id = 'second_select_box_' + this.secondCutList.length;
-
       this.curCutBox = false;
       this.cutComplete = false;
 
-      // });
       this.createImgPath(x, y, w, h, 2);
 
     },
     // 底部删除所框选的图片
     deleteBottomImg (obj, index) {
-      if (this.imgDataList.length <= 1) {
-        this.imgDataList = [{
-          uid: null,
+      if (this.tabStep === 1) {
+        return false;
+      }
+      if (this.imgBDataList.length <= 1) {
+        this.imgBDataList = [{
+          fileName: null,
           src: null
         }]
+        this.curCutBox = false;
       } else {
-        this.imgDataList.splice(index, 1);
+        this.imgBDataList.splice(index, 1);
       }
-      const $imgDiv = document.getElementById('second_select_box_' + (index + 1));
-      console.log($imgDiv);
+      this.secondCutList.map((item, idx) => {
+        if (item.fileName === obj.fileName) {
+          this.secondCutList.splice(idx, 1);
+        }
+      })
+      const $imgDiv = document.getElementById('second_select_box_' + obj.fileName);
       
       $('.img_right_box')[0].removeChild($imgDiv);
       

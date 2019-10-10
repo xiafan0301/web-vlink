@@ -22,7 +22,6 @@
 <script>
 import { handUpload } from "@/views/index/api/api.base.js";
 import { JtcPOSTAppendixInfo } from "@/views/index/api/api.judge.js";
-import { setTimeout } from 'timers';
 export default {
   props: ['open', 'imgDataList', 'initImageInfo'],
   data () {

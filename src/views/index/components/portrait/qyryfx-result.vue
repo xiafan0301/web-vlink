@@ -136,7 +136,7 @@
                     <div class="area_list_title">
                       <span>区域{{index + 1}}</span>
                       <div class="area_list_btn">
-                        <i class="vl_icon vl_icon_position_1" @click="showCurrentMapArea(item.index)"></i>
+                        <i class="vl_icon vl_icon_position_1" @click="showCurrentMapArea(item)"></i>
                         <i class="vl_icon vl_icon_manage_8" @click="deleteSelectArea(index, item.index)"></i>
                       </div>
                     </div>
@@ -270,11 +270,11 @@
         </div>
       </div>
     </div>
-    <div is="mapSelector" :editAble="isEditMap" v-show="selectMapType === 1 && (isShowMapAreaDialog === true)" :open="mapDialogVisible1" :showTypes="'DB'" :clear="clearMapSelect1" @mapSelectorEmit="mapPoint"></div>
-    <div is="mapSelector" :editAble="isEditMap" v-show="selectMapType === 2 && (isShowMapAreaDialog === true)" :open="mapDialogVisible2" :showTypes="'DB'" :clear="clearMapSelect2" @mapSelectorEmit="mapPoint"></div>
-    <div is="mapSelector" :editAble="isEditMap" v-show="selectMapType === 3 && (isShowMapAreaDialog === true)" :open="mapDialogVisible3" :showTypes="'DB'" :clear="clearMapSelect3" @mapSelectorEmit="mapPoint"></div>
-    <div is="mapSelector" :editAble="isEditMap" v-show="selectMapType === 4 && (isShowMapAreaDialog === true)" :open="mapDialogVisible4" :showTypes="'DB'" :clear="clearMapSelect4" @mapSelectorEmit="mapPoint"></div>
-    <div is="mapSelector" :editAble="isEditMap" v-show="selectMapType === 5 && (isShowMapAreaDialog === true)" :open="mapDialogVisible5" :showTypes="'DB'" :clear="clearMapSelect5" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :activeDeviceList="activeDeviceList1" :hideDBlist='false' :pointChoose="false" :singleArea="true" :editAble="isEditMap" v-show="selectMapType === 1 && (isShowMapAreaDialog === true)" :open="mapDialogVisible1" :showTypes="'DB'" :clear="clearMapSelect1" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :activeDeviceList="activeDeviceList2" :hideDBlist='false' :pointChoose="false" :singleArea="true" :editAble="isEditMap" v-show="selectMapType === 2 && (isShowMapAreaDialog === true)" :open="mapDialogVisible2" :showTypes="'DB'" :clear="clearMapSelect2" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :activeDeviceList="activeDeviceList3" :hideDBlist='false' :pointChoose="false" :singleArea="true" :editAble="isEditMap" v-show="selectMapType === 3 && (isShowMapAreaDialog === true)" :open="mapDialogVisible3" :showTypes="'DB'" :clear="clearMapSelect3" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :activeDeviceList="activeDeviceList4" :hideDBlist='false' :pointChoose="false" :singleArea="true" :editAble="isEditMap" v-show="selectMapType === 4 && (isShowMapAreaDialog === true)" :open="mapDialogVisible4" :showTypes="'DB'" :clear="clearMapSelect4" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :activeDeviceList="activeDeviceList5" :hideDBlist='false' :pointChoose="false" :singleArea="true" :editAble="isEditMap" v-show="selectMapType === 5 && (isShowMapAreaDialog === true)" :open="mapDialogVisible5" :showTypes="'DB'" :clear="clearMapSelect5" @mapSelectorEmit="mapPoint"></div>
   </div>
 </template>
 <script>
@@ -283,6 +283,7 @@ import vlBreadcrumb from "@/components/common/breadcrumb.vue";
 import { mapXupuxian } from "@/config/config.js";
 import { getGroupAllList } from "@/views/index/api/api.control.js";
 import { getTaskInfosDetail } from '@/views/index/api/api.analysis.js';
+import { updateAreaPersonTask } from "@/views/index/api/api.judge.js";
 import { objDeepCopy, formatDate, dateOrigin } from "@/utils/util.js";
 export default {
   components: { vlBreadcrumb, mapSelector },
@@ -290,7 +291,6 @@ export default {
     return {
       taskDetail: {},
       amap: null, // 地图对象
-      peopleGroupOptions: [], // 关注人群数据列表
       infoRightShow: false, // 右边菜单状态
       showTypes: "DB", //设备类型
       selectedDevice: {}, // 当前选中的设备信息
@@ -364,6 +364,11 @@ export default {
       clearMapSelect3: null, // 清除地图选择
       clearMapSelect4: null, // 清除地图选择
       clearMapSelect5: null, // 清除地图选择
+      activeDeviceList1: [], // 已有的设备
+      activeDeviceList2: [], // 已有的设备
+      activeDeviceList3: [], // 已有的设备
+      activeDeviceList4: [], // 已有的设备
+      activeDeviceList5: [], // 已有的设备
       selectMapType: 0, // 选择的第几个地图区域
       isEditMap: true, // 地图区域选择是否可以编辑
     }
@@ -415,7 +420,7 @@ export default {
               }
               this.initMap(this.taskDetail.taskResult);
 
-              console.log(this.taskDetail.taskWebParam)
+              console.log('taskWebParam', this.taskDetail.taskWebParam)
             }
           })
       }
@@ -562,36 +567,68 @@ export default {
       this.handleSelectType(this.selectMapType);
     },
     // 显示相对应的地图框选区域
-    showCurrentMapArea (index) {
+    showCurrentMapArea (obj) {
       this.isEditMap = false;
       this.isShowMapAreaDialog = true;
       let zIndex;
-      if (this.selectMapType === index) { // 这个因为删除过区域，所以显示的是之前删除过的区域
+      if (this.selectMapType === obj.index) { // 这个因为删除过区域，所以显示的是之前删除过的区域
         zIndex = this.selectMapType;
       } else {
-        zIndex = index;
+        zIndex = obj.index;
+      }
+      let activeDeviceList = [];
+      if (!obj.isNew) {
+        activeDeviceList = [
+          ...obj.bayonetList,
+          ...obj.deviceList
+        ]; // 将已有的设备传到地图选择组件高亮显示
       }
       if (this.isShowMapAreaDialog) {
         switch (zIndex) {
           case 1:
             this.selectMapType = 1;
             this.mapDialogVisible1 = !this.mapDialogVisible1;
+            if (!obj.isNew) {
+              this.activeDeviceList1 = activeDeviceList;
+            } else {
+              this.activeDeviceList1 = [];
+            }
             break;
           case 2:
             this.selectMapType = 2;
             this.mapDialogVisible2 = !this.mapDialogVisible2;
+            if (!obj.isNew) {
+              this.activeDeviceList2 = activeDeviceList;
+            } else {
+              this.activeDeviceList2 = [];
+            }
             break;
           case 3:
             this.selectMapType = 3;
             this.mapDialogVisible3 = !this.mapDialogVisible3;
+            if (!obj.isNew) {
+              this.activeDeviceList3 = activeDeviceList;
+            } else {
+              this.activeDeviceList3 = [];
+            }
             break;
           case 4:
             this.selectMapType = 4;
             this.mapDialogVisible4 = !this.mapDialogVisible4;
+            if (!obj.isNew) {
+              this.activeDeviceList4 = activeDeviceList;
+            } else {
+              this.activeDeviceList4 = [];
+            }
             break;
           case 5:
             this.selectMapType = 5;
             this.mapDialogVisible5 = !this.mapDialogVisible5;
+            if (!obj.isNew) {
+              this.activeDeviceList5 = activeDeviceList;
+            } else {
+              this.activeDeviceList5 = [];
+            }
             break;
           default:
             this.selectMapType = 0;
@@ -656,23 +693,26 @@ export default {
     mapPoint (data) {
       if (data) {
 
-        let allDeviceNameList = [];
+        let allDeviceNameList = [], deviceList = [], bayonetList = [];
         if (data.deviceList.length > 0) {
           data.deviceList.map(item => {
             allDeviceNameList.push(item.deviceName);
+            deviceList.push(item.uid);
           })
         }
         if (data.bayonetList.length > 0) {
           data.bayonetList.map(item => {
             allDeviceNameList.push(item.bayonetName);
+            bayonetList.push(item.uid);
           })
         }
         const obj = { 
           index: this.deleteIndexArr.length > 0 ? this.selectMapType : this.selectAreaDataList.length + 1,
           startTime: formatDate(this.qyryfxFrom.startTime),
           endTime: formatDate(this.qyryfxFrom.endTime),
-          deviceList: data.deviceList,
-          bayonetList: data.bayonetList,
+          isNew: true,
+          deviceList,
+          bayonetList,
           allDeviceNameList: allDeviceNameList.length > 0 ? allDeviceNameList : null
         };
 
@@ -690,14 +730,17 @@ export default {
 
       this.qyryfxFrom.taskName = detail.taskName;
       this.qyryfxFrom.sex = detail.sex;
-      this.qyryfxFrom.age = detail.age;
-      this.qyryfxFrom.sex = detail.sex && detail.sex ? detail.sex.split(',') : '';
+      this.qyryfxFrom.age = detail.age && detail.age ? detail.age.split(',') : '';
       this.qyryfxFrom.personGroupId = detail.personGroupId.split(',');
 
       detail.deviceAndTimeList.map((item, index) => {
         const obj = {
-          ...item,
           index: index + 1,
+          startTime: item.startTime,
+          endTime: item.endTime,
+          deviceList: item.deviceIds.split(','),
+          bayonetList: item.bayonetIds.split(','),
+          isNew: false, // 是否是新增的区域
           allDeviceNameList: item.deviceNames && item.deviceNames ? item.deviceNames.split('、'): ''
         };
         this.selectAreaDataList.push(obj);
@@ -708,10 +751,59 @@ export default {
       this.isUpdateTask = false;
       this.selectAreaDataList = [];
     },
-    // 确认修改
+    // 确认修改任务
     submitData (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
+          let deviceAndTimeList = [];
+          
+          this.selectAreaDataList.map((item, index) => {
+            if (item.deviceList.length <= 0 && item.bayonetList.length <= 0) {
+               this.$message.warning(
+                `您在第${index + 1}个选择区域未选中设备，请您重新选择`
+              );
+              return;
+            } else {
+              deviceAndTimeList = [
+                ...deviceAndTimeList,
+                {
+                  deviceIds: item.deviceList.join(),
+                  bayonetIds: item.bayonetList.join(),
+                  deviceNames: item.allDeviceNameList.join('、'),
+                  startTime: item.startTime,
+                  endTime: item.endTime
+                }
+              ];
+            }
+          });
+          const queryParams = {
+            uid: this.$route.query.taskId,
+            sex: this.qyryfxFrom.sex,
+            age: this.qyryfxFrom.age !== "" ? this.qyryfxFrom.age.join() : "",
+            personGroupId:
+              this.qyryfxFrom.personGroupId !== ""
+                ? this.qyryfxFrom.personGroupId.join()
+                : "",
+            deviceAndTimeList: deviceAndTimeList,
+            taskName: this.qyryfxFrom.taskName
+          };
+
+          this.submitLoading = true; // 打开加载效果
+          updateAreaPersonTask(queryParams)
+            .then(res => {
+              if (res.data) {
+                this.$message({
+                  type: 'success',
+                  message: '修改成功',
+                  customClass: 'request_tip'
+                });
+                this.submitLoading = false;
+                this.$router.push({name: 'portrait_qyryfx'});
+              } else {
+                this.submitLoading = false;
+              }
+            })
+            .catch(() => {this.submitLoading = false;})
         }
       })
     }

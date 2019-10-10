@@ -749,6 +749,18 @@ export function addAreaPersonTask(params) {
     mode: 'portrait'
   })
 }
+/**
+ * 区域人员修改离线任务接口
+ * @param {object} params
+ */
+export function updateAreaPersonTask(params) {
+  return request({
+    url: '/portrait/shot-num/area/updatetask/web',
+    method: 'put',
+    data: params,
+    mode: 'portrait'
+  })
+}
 
 
 /****************************车辆限行接口 ******************************** */
