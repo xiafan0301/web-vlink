@@ -646,7 +646,7 @@ export default {
             }
           }
           // 布控已结束
-          if (this.mapForm.state === 3) {
+          if (_this.mapForm.state === 3) {
             // 一个摄像头只有一个布控时
             if (_this.controlObjList.num === 1) {
               sContent = `
