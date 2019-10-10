@@ -1,6 +1,6 @@
 <template>
   <div class="data_dictionary">
-    <div class="reset_bread" is="vlBreadcrumb" :breadcrumbData="[{name: '系统管理'},{name: '数据字典'}]"></div>
+    <!-- <div class="reset_bread" is="vlBreadcrumb" :breadcrumbData="[{name: '系统管理'},{name: '数据字典'}]"></div> -->
     <div class="dic_content">
       <vue-scroll>
         <p class="dic_top">字典类别</p>
@@ -90,7 +90,7 @@
       >
         <el-form-item label=" " class="label_name">
             <span>所属类别：</span>
-            <span>{{selectData.label}}</span>
+            <span>{{selectData.no}} {{selectData.label}}</span>
         </el-form-item>
         <el-form-item label=" " prop="num">
           <el-input v-model="dicForm.num" placeholder="请输入最长20位编号"></el-input>
@@ -100,9 +100,9 @@
         </el-form-item>
         <el-form-item label=" " class="label_name">
             <span>上级类别：</span>
-            <span>{{selectData.parentTypeName || '无'}}</span>
+            <span v-if="selectData.typeKey">{{selectData.typeKey}} </span><span>{{selectData.parentTypeName || '无'}}</span>
         </el-form-item>
-        <el-form-item label=" " prop="prevNum" v-if="selectData.typeKey">
+        <el-form-item label=" " prop="prevNum" v-if="selectData.typeKey && prevNumList && prevNumList.length > 0">
           <div class="prev_num">
             <ul class="prev_num_info">
               <li class="input_name">
@@ -249,6 +249,14 @@ export default {
     addDic() {
       this.dicDialog = true;
       this.title = "添加";
+      this.$refs.dicForm.resetFields();
+      this.dicForm = {
+        num: "",
+        name: "",
+        prevNum: "",
+        prevName: "关联上级编号",
+        desc: ""
+      }
     },
     //编辑
     editDic(val) {
@@ -273,6 +281,7 @@ export default {
       //获取到选择的数组，赋值给formData.lastDepart
       let sData = this.$refs.dicTree.getCheckedNodes(false,true)
       this.selectData = data
+      console.log("0999999999999999",this.selectData)
       this.getDicDatasList()
       if(this.selectData.typeKey) {
         this.getPrevList()
@@ -280,7 +289,8 @@ export default {
       if(sData && sData.length > 1) {
           this.$set(this.selectData, 'parentId', sData[sData.length -2].id)
           this.$set(this.selectData, 'parentName', sData[sData.length -2].label)
-          this.$set(this.dicRules, 'prevNum', [{ required: true, message: "请选择关联上级编号", trigger: "change" }])
+          /* this.$set(this.dicRules, 'prevNum', [{ required: true, message: "请选择关联上级编号", trigger: "change" }]) */
+          this.$set(this.dicRules, 'prevNum', [])
       }else {
           this.$set(this.dicRules, 'prevNum', [])
       }
@@ -319,7 +329,7 @@ export default {
                 .then(res => {
                     if (res && res.data) {
                     this.$nextTick(() => {
-                        this.$message.success("修改平台权限成功");
+                        this.$message.success("修改数据字典成功");
                         this.dicDialog = false;
                         this.getDicDatasList();
                     });
@@ -347,7 +357,7 @@ export default {
                 .then(res => {
                     if (res && res.data) {
                     this.$nextTick(() => {
-                        this.$message.success("创建平台权限成功");
+                        this.$message.success("创建数据字典成功");
                         this.dicDialog = false;
                         this.$refs[formName].resetFields();
                         this.getDicDatasList();
@@ -383,7 +393,7 @@ export default {
   .dic_content {
     height: calc(100% - 80px);
     background-color: #fff;
-    margin: 0 20px;
+    margin: 20px 20px 0;
     box-shadow: 5px 0px 16px 0px rgba(169, 169, 169, 0.2);
     border-radius: 4px;
     .dic_top {

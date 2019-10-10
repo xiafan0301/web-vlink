@@ -274,3 +274,15 @@ export function handUpload (file) {
     mode: baseModeName
   })
 }
+/* ----------区域信息服务-------------- */
+/**
+ * 根据区域id（多个以逗号隔开）查询区域下（不包含子区域）设备和卡口信息
+ */
+export function getCaBa (params) {
+  return request({
+    url: '/area-service/device-and-bayonet',
+    params,
+    method: 'get',
+    mode: baseModeName
+  });
+}

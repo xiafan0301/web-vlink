@@ -52,10 +52,10 @@
                   <span>{{sturcDetail.address}}</span>
                 </p>
               </div> -->
-              <div class="struc_cdi_line" v-if="sturcDetail.sex">
+              <div class="struc_cdi_line" v-if="sturcDetail.gender">
                 <p>
                   <b>性别</b>
-                  <span>{{sturcDetail.sex}}</span>
+                  <span>{{sturcDetail.gender}}</span>
                 </p>
               </div>
               <div class="struc_cdi_line" v-if="sturcDetail.age">
@@ -82,16 +82,16 @@
                   <span>{{sturcDetail.mask}}</span>
                 </p>
               </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.hair">
+              <div class="struc_cdi_line" v-if="sturcDetail.hairStyleDesc">
                 <p>
                   <b>发型</b>
-                  <span>{{sturcDetail.hair}}</span>
+                  <span>{{sturcDetail.hairStyleDesc}}</span>
                 </p>
               </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.upperType">
+              <div class="struc_cdi_line" v-if="sturcDetail.coatLengthDesc">
                 <p>
                   <b>上身款式</b>
-                  <span>{{sturcDetail.upperType}}</span>
+                  <span>{{sturcDetail.coatLengthDesc}}</span>
                 </p>
               </div>
               <div class="struc_cdi_line" v-if="sturcDetail.upperColor">
@@ -100,7 +100,7 @@
                   <span>{{sturcDetail.upperColor}}</span>
                 </p>
               </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.bottomType">
+              <!-- <div class="struc_cdi_line" v-if="sturcDetail.bottomType">
                 <p>
                   <b>下身款式</b>
                   <span>{{sturcDetail.bottomType}}</span>
@@ -123,7 +123,7 @@
                   <b>拎东西</b>
                   <span>{{sturcDetail.bag}}</span>
                 </p>
-              </div>
+              </div> -->
            
               <!-- <div class="struc_cdi_line">
                 <p v-if="sturcDetail.features">
