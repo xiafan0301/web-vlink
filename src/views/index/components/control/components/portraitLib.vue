@@ -7,7 +7,7 @@
     title="人像布控库">
     <el-form ref="libForm" :model="libForm">
       <el-form-item label="" prop="sex">
-        <el-select value-key="value" v-model="libForm.sex" filterable placeholder="请选择">
+        <el-select value-key="value" v-model="libForm.sex" filterable placeholder="性别不限">
           <el-option
             v-for="item in sexList"
             :key="item.value"
@@ -17,7 +17,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="" prop="nation">
-        <el-select value-key="value" v-model="libForm.nation" filterable placeholder="请选择">
+        <el-select value-key="value" v-model="libForm.nation" filterable placeholder="民族不限">
           <el-option
             v-for="item in nationList"
             :key="item.value"

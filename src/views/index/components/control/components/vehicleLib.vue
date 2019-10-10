@@ -7,7 +7,7 @@
     title="车辆布控库">
     <el-form ref="libForm" :model="libForm">
       <el-form-item label="" prop="vehicleColor">
-        <el-select value-key="enumField" v-model="libForm.vehicleColor" filterable placeholder="请选择">
+        <el-select value-key="enumField" v-model="libForm.vehicleColor" filterable placeholder="车身颜色不限">
           <el-option
             v-for="item in vehicleColorList"
             :key="item.enumField"
@@ -17,7 +17,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="" prop="vehicleType">
-        <el-select value-key="enumField" v-model="libForm.vehicleType" filterable placeholder="请选择">
+        <el-select value-key="enumField" v-model="libForm.vehicleType" filterable placeholder="车辆类型不限">
           <el-option
             v-for="item in vehicleTypeList"
             :key="item.enumField"
@@ -27,7 +27,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="" prop="plateType">
-        <el-select value-key="enumField" v-model="libForm.plateType" filterable placeholder="请选择">
+        <el-select value-key="enumField" v-model="libForm.plateType" filterable placeholder="号牌类型不限">
           <el-option
             v-for="item in plateTypeList"
             :key="item.enumField"
@@ -122,9 +122,9 @@ export default {
         plateType: null,
         vehicleNumber: null
       },
-      vehicleColorList: [],//this.dicFormater(dataList.carColor)[0].dictList,
-      vehicleTypeList: [],//this.dicFormater(dataList.vehicleType)[0].dictList,
-      plateTypeList: [],//this.dicFormater(dataList.plateType)[0].dictList,
+      vehicleColorList: this.dicFormater(dataList.carColor)[0].dictList,
+      vehicleTypeList: this.dicFormater(dataList.vehicleType)[0].dictList,
+      plateTypeList: this.dicFormater(dataList.plateType)[0].dictList,
       vehicleLibDialog: false,
       loading: false,
       currentPage: 1,
