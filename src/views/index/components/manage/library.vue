@@ -672,7 +672,7 @@ export default {
       ],//号牌颜色列表
       // 翻页数据
       currentPage: 1,
-      pageSize: 9,
+      pageSize: 6,
       pageNum: 1,
       // dialog
       addPortraitDialog: false,
@@ -1317,6 +1317,7 @@ export default {
   position: relative;
   display: flex;
   flex-wrap: nowrap;
+  overflow-y: auto;
   .search_box{
     position: absolute;
     left: 20px;
@@ -1452,7 +1453,6 @@ export default {
       display: flex;
       flex-wrap: wrap;
       align-items: flex-start;
-      overflow-y: auto;
       .list_info{
         margin: 0 0.5%;
         width: 32%;

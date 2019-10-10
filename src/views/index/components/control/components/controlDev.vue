@@ -226,6 +226,7 @@ export default {
       // 新增时
       } else {
         if (this.devIdListFive.length > 0) {
+          console.log(this.devIdListFive, 'this.devIdListFive')
           this.changeColorAndGetTreeData(this.devIdListFive, 1);
         }          
         if (this.bayIdListFive.length > 0) {
@@ -445,21 +446,19 @@ export default {
       })
       this.devIdList = [...this.devIdList, ..._devList];
       this.bayIdList = [...this.bayIdList, ..._bayList];
-      
-      if (this.addressObj.length === 2 && index === 0) return;//人员失踪有两个范围，两个范围内的设备和卡口累加完后再一次性添加到左边树
+      if (this.addressObj && this.addressObj.length === 2 && index === 0) return;//人员失踪有两个范围，两个范围内的设备和卡口累加完后再一次性添加到左边树      
       this.getTreeData(this.devIdList, 1);//获得设备树数据
       this.getTreeData(this.bayIdList, 2);//获得卡口树数据
     },
-    // 新增或编辑时，点标记变色和变为树结构数据公共方法
+    // 新增或编辑时，点标记变色和变为树结构数据公共方法,array-数据,type-设备/卡口
     changeColorAndGetTreeData (array, type) {
       let list = [];
       this.markerList.forEach(f => {
         const obj = f.getExtData();
         let key = null;
-        array[0].hasOwnProperty('uid') && (key = 'uid');
         array[0].hasOwnProperty('deviceId') && (key = 'deviceId');
         array[0].hasOwnProperty('bayonetId') && (key = 'bayonetId');
-
+        array[0].hasOwnProperty('uid') && (key = 'uid');
         if (array.some(s => s[key] === obj.uid && obj.dataType === type)) {
           list.push(obj);
           const uContent = this.setMarkContent(obj)

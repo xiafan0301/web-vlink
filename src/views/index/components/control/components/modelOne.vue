@@ -110,9 +110,9 @@ export default {
       validPlateNumber: checkPlateNumber,
       validName: checkName,
       sexList: [
-        {value: 1, label: '男'},
-        {value: 2, label: '女'},
-        {value: 3, label: '性别不限'}
+        {label: '未知', value: 0},
+        {label: '男', value: 1},
+        {label: '女', value: 2}
       ],
       addressObj: [],
       addressObj_: [],
@@ -176,9 +176,13 @@ export default {
     getPortraitDataOne (data) {
       this.fileListOne = data;
       // 从布控库中选择人像时，姓名、性别自动带入
+      const sexObj = {
+        '未知': 0,
+        '男': 1,
+        '女': 2
+      };
       this.modelOneForm.name = this.fileListOne[0].name;
-      this.modelOneForm.sex = this.fileListOne[0].sex;
-      console.log(data, 'data')
+      this.modelOneForm.sex = sexObj[this.fileListOne[0].sex];
     },
     // 从布控库中获取嫌疑人像
     getPortraitDataTwo (data) {

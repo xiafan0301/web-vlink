@@ -45,8 +45,8 @@
         <div class="table_box">
               <el-table :data="dataList">
                 <el-table-column type="index" width="50" label="序号"></el-table-column>
-                <el-table-column label="广告标题" prop="name" show-overflow-tooltip></el-table-column>
-                <el-table-column label="跳转链接" prop="path" show-overflow-tooltip></el-table-column>
+                <el-table-column label="广告标题" prop="adTitle" show-overflow-tooltip></el-table-column>
+                <el-table-column label="跳转链接" prop="jumpUrl" show-overflow-tooltip></el-table-column>
                 <el-table-column label="操作" width="150" align="center">
                   <template slot-scope="scope">
                     <span class="operation_btn" @click="editAdv(scope.row)">编辑</span>
@@ -56,16 +56,6 @@
                 </el-table-column>
               </el-table>
             </div>
-            <template v-if="pagination.total > 0">
-              <el-pagination
-                @current-change="onPageChange"
-                :current-page.sync="pagination.pageNum"
-                :page-size="pagination.pageSize"
-                layout="total, prev, pager, next, jumper"
-                :total="pagination.total"
-                class="cum_pagination"
-              ></el-pagination>
-            </template>
       </div>
     </div>
     <!--创建/编辑广告弹出框-->
@@ -87,16 +77,17 @@
         <el-form-item label=" " prop="name">
           <el-input v-model="adForm.name" placeholder="请输入20字以内的广告标题"></el-input>
         </el-form-item>
-        <el-form-item label=" " prop="files" class="upload_file">
+        <el-form-item label=" " class="upload_file">
           <div class="main_content">
               <el-upload
                 ref="deviceImport"
+                :action="uploadUrl"
                 accept=".jpg, .png, .jpeg, .gif, .ico, .tif, tiff"
-                :auto-upload="false"
-                :action="importUrl"
                 :on-change="handleChange"
                 :before-remove="beforeRemove"
                 :on-remove="handleRemove"
+                :on-exceed="handleExceed"
+                :on-success='handleSuccess'
                 :file-list="fileList"
                 :limit="1"
               >
@@ -109,7 +100,7 @@
               </el-upload>
             </div>
         </el-form-item>
-        <el-form-item label=" " prop="desc">
+        <el-form-item label=" " prop="path">
           <el-input v-model="adForm.path" placeholder="请输入跳转路径"></el-input>
         </el-form-item>
       </el-form>
@@ -130,7 +121,7 @@
       <p>删除后不可恢复，确认要删除该数据吗？</p>
       <div slot="footer" class="dialog-footer footer_btn">
         <el-button @click="delDialog = false">取 消</el-button>
-        <el-button type="primary" :loading="isLoading" @click="delDialog = false">确 定</el-button>
+        <el-button type="primary" :loading="isLoading" @click="deleteItem">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -139,6 +130,7 @@
 <script>
 import vlBreadcrumb from "@/components/common/breadcrumb.vue";
 import { ajaxCtx } from '@/config/config.js';
+import { getAllAd, getCountSpeed, postAd, putAd, putCountSpeed, deleteAd } from '@/views/index/api/api.manage.js';
 export default {
   components: { vlBreadcrumb },
   data() {
@@ -163,79 +155,64 @@ export default {
         {
           value: "5",
           label: "5"
+        },
+        {
+          value: "6",
+          label: "6"
+        },
+        {
+          value: "7",
+          label: "7"
+        },
+        {
+          value: "8",
+          label: "8"
+        },
+        {
+          value: "9",
+          label: "9"
+        },
+        {
+          value: "10",
+          label: "10"
         }
       ],
       timeList: [
         {
-          value: "1",
+          value: "5",
           label: "5秒"
         },
         {
-          value: "2",
+          value: "10",
           label: "10秒"
         },
         {
-          value: "3",
+          value: "15",
           label: "15秒"
         },
         {
-          value: "4",
+          value: "20",
           label: "20秒"
         },
         {
-          value: "5",
+          value: "25",
           label: "25秒"
+        },
+        {
+          value: "30",
+          label: "30秒"
         }
       ],
       displaySetting: {
           num: '1',
-          time: '1'
+          time: '5'
       },
-      dataList: [
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          path: "http:www.baidu.com",
-          fileList: [{name: 'food.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}, {name: 'food2.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}]
-        },
-        {
-          date: "2016-05-04",
-          name: "王小虎",
-          path: "http:www.baidu.com"
-        },
-        {
-          date: "2016-05-01",
-          name: "王小虎",
-          path: "http:www.baidu.com"
-        },
-        {
-          date: "2016-05-03",
-          name: "王小虎",
-          path: "http:www.baidu.com"
-        },
-        {
-          date: "2016-05-03",
-          name: "王小虎",
-          path: "http:www.baidu.com"
-        },
-        {
-          date: "2016-05-03",
-          name: "王小虎",
-          path: "http:www.baidu.com"
-        },
-        {
-          date: "2016-05-03",
-          name: "王小虎",
-          path: "http:www.baidu.com"
-        }
-      ],
-      pagination: { total: 20, pageSize: 10, pageNum: 1 },
+      dataList: [],
       title: "添加",
       adDialog: false,
       adForm: {
         name: "",
         path: "",
-        files: "1",
       },
       adRules: {
         name: [
@@ -245,23 +222,67 @@ export default {
         path: [
           { min: 0, max: 100, message: "有效长度为0-100", trigger: "blur" }
         ],
-        files: [{ required: true, message: "请上传广告图片", trigger: "change" }],
       },
       isLoading: false,
-      importUrl: ajaxCtx.base + '/device-service/import', // 导入请求地址
+      uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
       fileList: [],
       isShow: false,
       delDialog: false,
       delItem: {},
+      adLogoUrl: '',
     };
   },
+  mounted() {
+    this.getAllAdList()
+    this.getDisplaySetting()
+  },
   methods: {
+    // 删除
+    deleteItem() {
+      let params = {
+        uid: this.delItem.uid
+      }
+      this.isLoading = true
+      deleteAd(params).then(res => {
+        if(res) {
+          this.delDialog = false
+          this.$MyMessage("删除广告成功！", 'success');
+          this.getAllAdList()
+        }
+        this.$nextTick(() => {
+          this.isLoading = false
+        })
+      }).catch(() => {
+        this.isLoading = false
+      })
+    },
+    // 广告位【查询所有】接口
+    getAllAdList() {
+      getAllAd().then(res => {
+        if(res && res.data) {
+          this.dataList = res.data
+        }
+      })
+    },
+    // 展示数量和轮换速度【查询】接口
+    getDisplaySetting() {
+      getCountSpeed().then(res => {
+        if(res && res.data) {
+          this.$set(this.displaySetting, 'num', res.data.showCount)
+          this.$set(this.displaySetting, 'time', res.data.rollSpeed)
+        }
+      })
+    },
     save() {
-      /* this.$message({
-          message: '警告哦，这是一条警告消息',
-          type: 'info',
-          duration: 0
-        }); */
+      let params = {
+        showCount: this.displaySetting.num,
+        rollSpeed: this.displaySetting.time
+      }
+      putCountSpeed(params).then(res => {
+        if(res) {
+          this.$MyMessage("保存成功！", 'success');
+        }
+      })
     },
     //删除
     delAdv(val) {
@@ -274,18 +295,28 @@ export default {
       this.adDialog = true;
       this.title = "修改";
       let editForm = {
-          name: val.name,
-          id: val.id,
-          path: val.path,
+          name: val.adTitle,
+          uid: val.uid,
+          path: val.jumpUrl,
       }
       this.adForm = Object.assign({}, editForm);
-      this.fileList = val.fileList
+      this.fileList = [{name: val.adTitle, url: val.adLogoUrl}]
+      this.adLogoUrl = val.adLogoUrl
     },
     //新增
     addAdv() {
       this.adDialog = true;
       this.title = "添加";
       this.isShow = false
+      this.$refs.adForm.resetFields();
+      this.fileList = [];
+      this.adLogoUrl = '';
+    },
+    // 文件上传成功
+    handleSuccess (res) {
+      if (res && res.data) {
+        this.adLogoUrl = res.data.fileFullPath
+      }
     },
     handleRemove(file, fileList) {
        console.log(file, fileList);
@@ -295,6 +326,9 @@ export default {
        }else {
            this.isShow = true
        }
+    },
+    handleExceed(files, fileList) {
+      this.$message.warning(`当前限制选择 1 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
     },
     beforeRemove(file, fileList) {
        return this.$confirm(`确定移除 ${ file.name }？`);
@@ -318,76 +352,72 @@ export default {
          this.isShow = false
       }else {
          this.isShow = true
+         return false;
       }
       this.$refs[formName].validate(valid => {
         if (valid) {
-          console.log("=============", this.adForm);
+          console.log("=============", this.adForm,this.fileList);
           this.isLoading = true;
-          /* if (this.newAuth.permissionId) {
-                //编辑平台权限
+          if (this.adForm.uid) {
+                //编辑广告
                 let params = {
-                    permissionName: this.newAuth.permissionName,
-                    path: this.newAuth.uniPath,
-                    permissionType: this.newAuth.permissionType,
-                    description: this.newAuth.description,
-                    permissionMethod: this.newAuth.permissionMethod
+                  "adTitle": this.adForm.name,
+                  "jumpUrl": this.adForm.path,
+                  "adLogoUrl": this.adLogoUrl,
+                  "uid": this.adForm.uid,
                 };
-                putPermissions(this.platformId, this.newAuth.permissionId, params)
+                putAd(params)
                 .then(res => {
                     if (res && res.data) {
                     this.$nextTick(() => {
-                        this.$message.success("修改平台权限成功");
-                        this.newAuthDialog = false;
-                        this.getPermissionsDetail();
+                        this.$MyMessage("修改广告成功", 'success');
+                        this.adDialog = false;
+                        this.$refs[formName].resetFields();
+                        this.fileList = [];
+                        this.adLogoUrl = '';
+                        this.getAllAdList();
                     });
                     }
                     this.$nextTick(() => {
-                    this.isLoading = false;
+                      this.isLoading = false;
                     });
                 })
                 .catch(() => {
                     this.isLoading = false;
                 });
             } else {
-                //新增平台权限
+                //新增广告
                 let params = {
-                permissionName: this.newAuth.permissionName,
-                path: this.newAuth.uniPath,
-                permissionType: this.newAuth.permissionType,
-                description: this.newAuth.description,
-                permgroupId: this.authGroupItem.permgroupId,
-                permissionMethod: this.newAuth.permissionMethod,
-                groupPathNum: this.groupPathNum
+                  "adTitle": this.adForm.name,
+                  "jumpUrl": this.adForm.path,
+                  "adLogoUrl": this.adLogoUrl,
                 };
-                postPermissions(this.platformId, params)
+                postAd(params)
                 .then(res => {
                     if (res && res.data) {
                     this.$nextTick(() => {
-                        this.$message.success("创建平台权限成功");
-                        this.newAuthDialog = false;
+                        this.$MyMessage("广告添加成功", 'success');
+                        this.adDialog = false;
                         this.$refs[formName].resetFields();
-                        this.isWrite = true;
-                        this.getAuthList();
+                        this.fileList = [];
+                        this.adLogoUrl = '';
+                        this.getAllAdList();
                     });
                     }
                     this.$nextTick(() => {
-                    this.isLoading = false;
+                      this.isLoading = false;
                     });
                 })
                 .catch(() => {
                     this.isLoading = false;
                 });
-            } */
+            }
         } else {
           console.log("error submit!!");
           return false;
         }
       });
     },
-    //分页
-    onPageChange(page) {
-      this.pagination.pageNum = page;
-    }
   }
 };
 </script>
@@ -403,8 +433,6 @@ export default {
     line-height: 60px;
   }
   .ad_content {
-    box-shadow: 5px 0px 16px 0px rgba(169, 169, 169, 0.2);
-    border-radius: 4px;
     @mixin h54 {
       height: 54px;
       line-height: 54px;
@@ -437,6 +465,7 @@ export default {
     //广告列表
     .ad_list {
          @include setting;
+         padding-bottom: 20px;
         .ad_top {
             @include h54;
         }
