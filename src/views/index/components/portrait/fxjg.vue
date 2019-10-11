@@ -343,14 +343,24 @@ export default {
               this.cameraIds.length > 0 &&
               (params["deviceIds"] = this.cameraIds.join(","));
           } else {
-            params["deviceIds"] = this.analysisObj.taskParam.deviceIds;
+            if(this.analysisObj.taskParam.deviceIds) {
+              params["deviceIds"] = this.analysisObj.taskParam.deviceIds;
+            }
+            if(this.analysisObj.taskParam.areaIds) {
+              params["areaIds"] = this.analysisObj.taskParam.areaIds;
+            }
           }
           if (this.bayonetIds && this.bayonetIds.length > 0) {
             this.bayonetIds &&
               this.bayonetIds.length > 0 &&
               (params["bayonetIds"] = this.bayonetIds.join(","));
           } else {
-            params["bayonetIds"] = this.analysisObj.taskParam.bayonetIds;
+            if(this.analysisObj.taskParam.bayonetIds) {
+              params["bayonetIds"] = this.analysisObj.taskParam.bayonetIds;
+            }
+            if(this.analysisObj.taskParam.areaIds) {
+              params["areaIds"] = this.analysisObj.taskParam.areaIds;
+            }
           }
           let ids = {
             id: this.uid
@@ -417,16 +427,17 @@ export default {
         let deviceIds = this.analysisObj.taskParam.deviceIds.split(",")
         this.activeDeviceList = [...bayonetIds, ...deviceIds]
       }else if(this.analysisObj.taskParam.areaIds) {
-        getCaBa(this.analysisObj.taskParam.areaIds).then(res => {
+        getCaBa({areaIds:this.analysisObj.taskParam.areaIds}).then(res => {
           if(res && res.data) {
             let bayonetList = [], deviceList = []
             if(res.data.bayonetList && res.data.bayonetList.length > 0) {
-              bayonetList = res.data.bayonetList.filter(key => key.uid)
+              bayonetList = res.data.bayonetList.map(key => key.uid)
             }
             if(res.data.deviceList && res.data.deviceList.length > 0) {
-              deviceList = res.data.deviceList.filter(key => key.uid)
+              deviceList = res.data.deviceList.map(key => key.uid)
             }
             this.activeDeviceList = [...bayonetList, ...deviceList]
+            this.dSum = this.activeDeviceList.length
           }
         })
       }
