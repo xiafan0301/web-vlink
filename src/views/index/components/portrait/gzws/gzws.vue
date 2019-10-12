@@ -606,13 +606,13 @@ export default {
   height: 100%;
   overflow: hidden;
   .pt_breadcrumb {
-    display: flex;
-    justify-content: space-between;
-    height: 50px; width: 100%;
-    align-items: center;
-    border-bottom: 1px solid #f6f6f6;
-    box-shadow: 0 0 5px #ddd;
-    background-color: #fff;
+    // display: flex;
+    // justify-content: space-between;
+    // height: 50px; width: 100%;
+    // align-items: center;
+    // border-bottom: 1px solid #f6f6f6;
+    // box-shadow: 0 0 5px #ddd;
+    // background-color: #fff;
     .vc_gcck_bd {
       width: 100%;
     }

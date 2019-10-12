@@ -688,6 +688,8 @@ export default {
   .content_box {
     margin: 0 20px;
     background-color: #ffffff;
+    box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
+    border-radius:4px;
     .btn_box {
       padding: 20px;
       display: flex;
@@ -771,7 +773,7 @@ export default {
           color: #ffffff;
         }
         .disabled_btn {
-          background-color: #D3D3D3;
+          background-color: #f2f2f2;
           color: #B2B2B2;
           cursor: default;
         }

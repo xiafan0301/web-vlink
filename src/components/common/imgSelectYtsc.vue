@@ -45,7 +45,7 @@
               <span id="mapCutScreenBox" v-show="curCutBox">
                 <img :src="secondImgUrl" alt="">
                 <i v-for="item in '12345678'" :class="'move_icon' + item" :key="item.id"></i>
-              </span>
+              </span>d
               <div class="cut_end" id="mapSureCutComplete" v-show="cutComplete">
                 <span @click.stop="cancelCutScreen"><i class="el-icon-close"></i></span>
                 <span @click.stop="finishCut"><i class="el-icon-check"></i>完成</span>
@@ -135,14 +135,6 @@ export default {
     // initImageInfo (val) {
     //   this.imgInfo = Object.assign({}, this.initImageInfo);
     // },
-    imgBDataList (val) {
-      // if (val.length === 6) {
-      //   this.curCutBox = false;
-      //   this.cutComplete = false;
-      // } else {
-      //   this.curCutBox = true;
-      // }
-    }
   },
   mounted () {
     this.$nextTick(() => {
@@ -324,7 +316,7 @@ export default {
   
                   $('.img_right_box')[0].appendChild($div);
   
-                  let $id = 'second_select_box_' + res.data.fileName;
+                  // let $id = 'second_select_box_' + res.data.fileName;
                 }
 
                 this.setImgUid(res.data, step);

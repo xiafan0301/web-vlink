@@ -132,6 +132,8 @@ export default {
     background-color: #ffffff;
     margin: 20px;
     padding: 20px;
+    box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
+    border-radius:4px;
     .title {
       color: #333333;
       span:first-child {

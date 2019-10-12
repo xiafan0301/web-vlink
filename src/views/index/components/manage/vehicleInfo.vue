@@ -979,7 +979,7 @@ export default {
           }
         }
         .disabled_btn {
-          background-color: #D3D3D3;
+          background-color: #f2f2f2;
           color: #B2B2B2;
           cursor: default;
         }
