@@ -11,18 +11,18 @@
     <div class="select_body">
       <div class="top">
         <div class="tab_list">
-          <p :class="{active_tab: tabStep === 1}">
+          <p :class="{active_tab: tabStep === 1}" @click="tabStep = 1">
             <span class="number">1</span>
             <span class="text">选择车体</span>
           </p>
-          <p :class="{active_tab: tabStep === 2}">
+          <p :class="{active_tab: tabStep === 2}" @click="tabStep = 2">
             <span class="number">2</span>
             <span class="text">框选特征</span>
           </p>
         </div>
         <div class="btn_box">
           <el-button class="nosure_btn" size="small" @click="cancelSelectCut">取消</el-button>
-          <el-button class="nosure_btn" size="small" @click="prev">上一步</el-button>
+          <!-- <el-button class="nosure_btn" size="small" @click="prev">上一步</el-button> -->
           <el-button class="sure_btn" size="small" @click="sureSelectCut">确定</el-button>
         </div>
       </div>
@@ -42,9 +42,9 @@
           <div class="img_right_box">
             <img :src="secondImgUrl" alt="" id="mapCutImageSource">
              <div id="mapCutScreenContain" v-show="showCutContainer" class="cut_right_box" @mousedown.stop="beginDraw($event)" @mouseup="endDraw($event)">
-              <span id="mapCutScreenBox" v-show="curCutBox">
+              <span id="mapCutScreenBox" v-show="curCutBox" @mousedown.stop="moveBox($event)"  @mouseup.stop="boxMoveEnd($event)">
                 <img :src="secondImgUrl" alt="">
-                <i v-for="item in '12345678'" :class="'move_icon' + item" :key="item.id"></i>
+                <i v-for="item in '12345678'" :class="'move_icon' + item" :key="item.id" @mousedown.stop="changeIt(item ,$event)"  @mouseup="boxMoveEnd"></i>
               </span>d
               <div class="cut_end" id="mapSureCutComplete" v-show="cutComplete">
                 <span @click.stop="cancelCutScreen"><i class="el-icon-close"></i></span>
@@ -83,28 +83,31 @@ export default {
       curCutBox: false,
       selectList: [
         {
-          uid: 'x12222',
           x: 30,
           y: 30,
           width: 100,
           height: 100
         },
         {
-          uid: 'x12223',
           x: 70,
           y: 100,
           width: 200,
           height: 150
         }
-      ],
+      ],  
       secondImgUrl: null, // 第二步选择车体的图片地址
-      initImgWidth: 881, // 图片原width
-      initImgHeight: 600, // 图片原height
+      initImgWidth: 920, // 图片原width
+      initImgHeight: 419, // 图片原height
       fd: null,
+      currentId: null, // 第一步选择车体标识
       currentX: 0, // 当前选择车体的x
       currentY: 0, // 当前选择车体的y
       currentWidth: 0, // 当前选择车体的width
       currentHeight: 0,  // 当前选择车体的height
+      secondCurrWidth: 0, // 第二步框选车体--当前框选车体的width
+      secondCurrHeight: 0, // 第二步框选车体--当前框选车体的height
+      secondCurrX: 0, // 第二步框选车体--当前框选车体的x
+      secondCurrY: 0, // 第二步框选车体--当前框选车体的y
       imgBDataList: [
         {
           fileName: null,
@@ -163,14 +166,14 @@ export default {
       // })
       this.dialogVisible = false;
     },
-    // 取消选择车体
+    // 第一步---取消选择车体
     cancelSelect () {
       if ($('.select_box').hasClass('active_select')) {
         $('.select_box').removeClass('active_select');
       }
       this.selectComplete = false;
     },
-    // 确认选择车体
+    // 第一步---- 确认选择车体
     finishSelect () {
       let x = this.currentX, y = this.currentY, width = this.currentWidth, height = this.currentHeight;
       if (width > 0 && height > 0) {
@@ -182,7 +185,6 @@ export default {
 
         this.secondCutList.map(item => {
           const $imgDiv = document.getElementById('second_select_box_' + item.fileName);
-          console.log($imgDiv);
           
           $('.img_right_box')[0].removeChild($imgDiv);
         });
@@ -193,41 +195,36 @@ export default {
     },
     // 获取图片缩放比例
     getImgScale () {
+      let imgWidth = $('#imgBox').width(); // 获取图片的宽度
+      let scale = this.initImgWidth / imgWidth;
 
-      let imgWidth = $('#imgBox').width();
-      let imgHeight = $('#imgBox').height();
-
-      let scaleWidth = this.initImgWidth / imgWidth;
-      let scaleHeight = this.initImgHeight / imgHeight;
       
-
-      console.log(scaleWidth + '____' + scaleHeight);
-      
-      this.selectList.forEach(item => {
+      this.selectList.forEach((item, index) => {
         // 在页面显示的图片大小计算宽和高的比例
-        let wScale = this.initImgWidth / item.width;
-        let hScale = this.initImgHeight / item.height;
+        let newItem = {};
+        for (let key in item) { // 根据图片的缩放比例计算车体的缩放后的各数据的大小
+          newItem[key] = Math.ceil(item[key] / scale);
+        }
+        console.log(item)
 
         let $div = document.createElement('div');
+        let $id = 'select_box_' + index;
 
-        $div.setAttribute('id', 'select_box' + item.uid);
+        $div.setAttribute('id', $id);
 
         $div.setAttribute('class', 'select_box');
-        
-        let currHeight = 500;
-        $div.style.width = Math.ceil(imgWidth / wScale) + 'px';
-        $div.style.height = Math.ceil(currHeight / hScale) + 'px';
 
-        $div.style.left = item.x + 'px';
-        $div.style.top = item.y + 'px';
+        $div.style.width = newItem.width + 'px';
+        $div.style.height = newItem.height + 'px';
+
+      
+        $div.style.left = newItem.x + 'px';
+        $div.style.top = newItem.y + 'px';
 
         $('.img_box')[0].appendChild($div);
 
-        let $id = 'select_box' + item.uid;
-
         this.handleClickListen($id, item.x, item.y, item.width, item.height);
       })
-     
     },
     // 图片选择区域的点击监听事件
     handleClickListen (id, x, y, width, height) {
@@ -262,12 +259,14 @@ export default {
         _self.currentY = y;
         _self.currentWidth = width;
         _self.currentHeight = height;
+        _self.currentId = id; // 第一步选择的车体对象标识
 
         // _self.createImgPath(x, y, width, height);
       })
     },
     // 创建一个canvas，生成图片
     createImgPath (x, y, width, height, step) {
+      console.log(x, y, width, height)
       let image = new Image();
       image.setAttribute("crossOrigin",'Anonymous');
       if (step === 1) {
@@ -308,15 +307,14 @@ export default {
   
                   $div.setAttribute('class', 'second_select_box');
   
-                  $div.style.width = width + 'px';
-                  $div.style.height = height + 'px';
+                  $div.style.width = this.secondCurrWidth + 'px';
+                  $div.style.height = this.secondCurrHeight + 'px';
   
-                  $div.style.left = x + 'px';
-                  $div.style.top = y + 'px';
+                  $div.style.left = this.secondCurrX + 'px';
+                  $div.style.top = this.secondCurrY + 'px';
   
                   $('.img_right_box')[0].appendChild($div);
   
-                  // let $id = 'second_select_box_' + res.data.fileName;
                 }
 
                 this.setImgUid(res.data, step);
@@ -379,6 +377,116 @@ export default {
         })
       }
     },
+    // 第二步---自动生成一个预设框选体
+    getAutoCutBox () {
+      
+    },
+    changeIt (index, ev) {
+      let middleRleft = $('.middle_right').offset().left;
+      let middleRtop = $('.middle_right').offset().top;
+
+      let X = ev.clientX, Y = ev.clientY, originW = $('#mapCutScreenBox').width(), orginH = $('#mapCutScreenBox').height();
+      // this.curTapIndex = index;
+      console.log(X + '+++++++++++++' + X);
+      
+      console.log(originW + '______________' + orginH);
+      
+      this.cutComplete = false;
+      $('#mapCutScreenContain').bind('mousemove', (event) => {
+        // 阻止默认行为
+        if(event.preventDefault){event.preventDefault();}else{window.event.returnValue == false;}
+        let curY = event.clientY - Y, curX = event.clientX - X;
+        
+        switch(index) {
+          case '1':
+            this.setPosition($('#mapCutScreenBox'), {
+              'top': event.clientY - middleRtop,
+              'left': event.clientX - middleRleft,
+              'width': originW - curX,
+              'height': orginH - curY
+            })
+            this.setPosition($('#mapCutScreenBox img').eq(0), {
+              'top': -event.clientY,
+              'left': -event.clientX
+            })
+            break;
+          case '2':
+            this.setPosition($('#mapCutScreenBox'), {
+              'top': event.clientY - middleRtop,
+              'height': orginH - curY
+            })
+            this.setPosition($('#mapCutScreenBox img').eq(0), {
+              'top': -event.clientY
+            })
+            break;
+          case '3':
+            this.setPosition($('#mapCutScreenBox'), {
+              'top': event.clientY - middleRtop,
+              'width': originW + curX,
+              'height': orginH - curY
+            })
+            this.setPosition($('#mapCutScreenBox img').eq(0), {
+              'top': -event.clientY,
+            })
+            this.setPosition($('#mapCutComplete'), {
+              'top': event.clientY + 10 + $('#mapCutScreenBox').height(),
+              'left': event.clientX - 100,
+            })
+            break;
+          case '4':
+            this.setPosition($('#mapCutScreenBox'), {
+              'left': event.clientX - middleRleft,
+              'width': originW - curX,
+            })
+            this.setPosition($('#mapCutScreenBox img').eq(0), {
+              'left': -event.clientX
+            })
+            break;
+          case '5':
+            this.setPosition($('#mapCutScreenBox'), {
+              'width': originW + curX
+            })
+            this.setPosition($('#mapCutComplete'), {
+              'left': event.clientX - 100
+            })
+            break;
+          case '6':
+            this.setPosition($('#mapCutScreenBox'), {
+              'left': event.clientX - middleRleft,
+              'width': originW - curX,
+              'height': orginH + curY
+            })
+            this.setPosition($('#mapCutScreenBox img').eq(0), {
+              'left': -event.clientX
+            })
+            this.setPosition($('#mapCutComplete'), {
+              'top': event.clientY + 10
+            })
+            break;
+          case '7':
+            this.setPosition($('#mapCutScreenBox'), {
+              'height': orginH + curY
+            })
+            this.setPosition($('#mapCutComplete'), {
+              'top': event.clientY + 10,
+            })
+            break;
+          case '8':
+            this.setPosition($('#mapCutScreenBox'), {
+              'width': originW + curX,
+              'height': orginH + curY
+            })
+            this.setPosition($('#mapCutComplete'), {
+              'top': event.clientY + 10,
+              'left': event.clientX - 100,
+            })
+            break;
+        }
+      })
+    },
+    setPosition (el, options) {
+      el.css(options);
+    },
     // 开始截图
     beginDraw (e) {
       console.log('this.secondCutList', this.secondCutList)
@@ -439,8 +547,33 @@ export default {
       $('#mapCutScreenContain').unbind('mousemove');
 
     },
+    moveBox (ev) {
+      
+      let Y = ev.clientY - ev.target.offsetTop, X = ev.clientX - ev.target.offsetLeft;
+      $('#mapCutScreenContain').bind('mousemove', (event) => {
+        let curY =  event.clientY - Y, curX =  event.clientX - X;
+        $('#mapCutScreenBox').css({
+          'top': curY,
+          'left': curX,
+        })
+        $('#mapCutScreenBox img').eq(0).css({
+          'top': -curY,
+          'left': -curX
+        })
+        $('#mapCutComplete').css({
+          'top': curY + ev.target.clientHeight + 10,
+          'left': curX + ev.target.clientWidth - 100,
+        })
+      })
+    },
     // 移动结束
-    boxMoveEnd () {
+    boxMoveEnd (ev) {
+      let middleRleft = $('.middle_right').offset().left;
+      let middleRtop = $('.middle_right').offset().top;
+      $('#mapSureCutComplete').css({
+        'top': (ev.clientY - middleRtop) + 50,
+        'left': (ev.clientX - middleRleft) - 50,
+      })
       this.cutComplete = true;
       $('#mapCutScreenContain').unbind('mousemove');
     },
@@ -451,8 +584,19 @@ export default {
     },
     // 确定截屏
     finishCut () {
+      let bigDom = document.getElementById('mapCutScreenContain');
       let dom = document.getElementById('mapCutScreenBox');
-      let w = dom.clientWidth, h = dom.clientHeight, x = dom.offsetLeft, y = dom.offsetTop;
+
+      let currentId = this.currentId.split('_');
+      let _scale = bigDom.clientWidth / this.selectList[parseInt(currentId[2])].width; // 计算缩放比例
+      
+      this.secondCurrWidth = dom.clientWidth;
+      this.secondCurrHeight = dom.clientHeight;
+      this.secondCurrX = dom.offsetLeft;
+      this.secondCurrY = dom.offsetTop;
+
+      let w = Math.ceil(dom.clientWidth / _scale), h = Math.ceil(dom.clientHeight / _scale), x = Math.ceil(dom.offsetLeft / _scale), y = Math.ceil(dom.offsetTop / _scale);
+      console.log(_scale)
       console.log(w + 'g' + h)
       console.log(x + 'h' + y)
 
@@ -501,6 +645,7 @@ export default {
       .tab_list {
         display: flex;
         >p {
+          cursor: pointer;
           padding-bottom: 10px;
           margin-right: 20px;
           color: #666666;
@@ -525,6 +670,8 @@ export default {
         }
       }
       .btn_box {
+        text-align: right;
+        padding-right: 30px;
         .nosure_btn, .sure_btn {
           width: 110px;
           border-radius:2px;
@@ -545,14 +692,16 @@ export default {
       height: 300px;
       .middle_left, .middle_right {
         position: relative;
+        overflow-y: scroll;
         width: 48%;
         .img_box, .img_right_box {
           width: 100%;
           height: 100%;
+          // max-height: 300px;
           position: relative;
           >img {
             width: 100%;
-            height: 100%;
+            height: auto;
             background-color: #EAEAEA;
           }
           .select_box, .second_select_box {
