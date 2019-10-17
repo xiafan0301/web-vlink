@@ -117,6 +117,7 @@
               label="布控起始时间"
               prop="surveillanceDateStart"
               show-overflow-tooltip
+              width="120"
               >
             </el-table-column>
             <el-table-column
