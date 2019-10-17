@@ -43,9 +43,9 @@
             <img :src="secondImgUrl" alt="" id="mapCutImageSource">
              <div id="mapCutScreenContain" v-show="showCutContainer" class="cut_right_box" @mousedown.stop="beginDraw($event)" @mouseup="endDraw($event)">
               <span id="mapCutScreenBox" v-show="curCutBox" @mousedown.stop="moveBox($event)"  @mouseup.stop="boxMoveEnd($event)">
-                <img :src="secondImgUrl" alt="">
+                <!-- <img :src="secondImgUrl" alt=""> -->
                 <i v-for="item in '12345678'" :class="'move_icon' + item" :key="item.id" @mousedown.stop="changeIt(item ,$event)"  @mouseup="boxMoveEnd"></i>
-              </span>d
+              </span>
               <div class="cut_end" id="mapSureCutComplete" v-show="cutComplete">
                 <span @click.stop="cancelCutScreen"><i class="el-icon-close"></i></span>
                 <span @click.stop="finishCut"><i class="el-icon-check"></i>完成</span>
@@ -190,6 +190,8 @@ export default {
         });
 
         this.secondCutList = [];
+
+    
         this.createImgPath(x, y, width, height, 1);
       }
     },
@@ -314,9 +316,11 @@ export default {
                   $div.style.top = this.secondCurrY + 'px';
   
                   $('.img_right_box')[0].appendChild($div);
-  
-                }
 
+                }
+                if (this.secondCutList.length < 6) {
+                  this.getAutoCutBox();
+                }
                 this.setImgUid(res.data, step);
               }
             })
@@ -349,7 +353,6 @@ export default {
         JtcPOSTAppendixInfo(imgObj).then(jRes => {
           if (jRes) {
             
-            // this.dialogVisible = false;
             if (step === 1) {
               this.secondImgUrl = imgObj.path;
               this.showCutContainer = true;
@@ -358,6 +361,9 @@ export default {
               if ($('.select_box').hasClass('active_select')) {
                 $('.select_box').removeClass('active_select');
               }
+
+              
+
             } else {
               if (this.secondCutList.length === 1) {
                 this.imgBDataList = [{
@@ -371,7 +377,6 @@ export default {
                 };
                 this.imgBDataList.push(params);
               }
-
             }
           }
         })
@@ -379,7 +384,27 @@ export default {
     },
     // 第二步---自动生成一个预设框选体
     getAutoCutBox () {
+      console.log('444444zsdaddasd444444444');
+      this.showCutContainer = true;
+      let middleRleft = $('.middle_right').offset().left;
+      let middleRtop = $('.middle_right').offset().top;
+
+      let x = 100 + Math.random() * 100, y = 100 + Math.random() * 100;
+
+      this.cutComplete = true;
+      this.curCutBox = true;
+
+      $('#mapCutScreenBox').css({
+        'top': y,
+        'left': x,
+        'width': '100px',
+        'height': '100px'
+      });
       
+      $('#mapSureCutComplete').css({
+        'top': y + 120,
+        'left': x + 50,
+      })
     },
     changeIt (index, ev) {
       let middleRleft = $('.middle_right').offset().left;
@@ -489,7 +514,9 @@ export default {
     },
     // 开始截图
     beginDraw (e) {
-      console.log('this.secondCutList', this.secondCutList)
+      let imgHeight = $('#mapCutImageSource').height();
+      $('#mapCutScreenContain').css('height', (imgHeight + 8) + 'px'); // 设置截屏容器的高度
+
       if (e.preventDefault) {
         e.preventDefault();
       } else {
@@ -501,13 +528,14 @@ export default {
 
       let middleRleft = $('.middle_right').offset().left;
       let middleRtop = $('.middle_right').offset().top;
+      let scrollTop = $('.middle_right').scrollTop();
 
       let X = e.clientX, Y = e.clientY;
 
       this.curCutBox = true;
 
       $('#mapCutScreenBox').css({
-        'top': Y - middleRtop,
+        'top': Y - middleRtop + scrollTop,
         'left': X - middleRleft,
         'width': '10px',
         'height': '10px'
@@ -608,6 +636,7 @@ export default {
     },
     // 底部删除所框选的图片
     deleteBottomImg (obj, index) {
+      
       if (this.tabStep === 1) {
         return false;
       }
@@ -628,7 +657,10 @@ export default {
       const $imgDiv = document.getElementById('second_select_box_' + obj.fileName);
       
       $('.img_right_box')[0].removeChild($imgDiv);
-      
+
+      if (this.secondCutList.length < 6) {
+        this.getAutoCutBox();
+      }
     }
   }
 }
@@ -697,7 +729,6 @@ export default {
         .img_box, .img_right_box {
           width: 100%;
           height: 100%;
-          // max-height: 300px;
           position: relative;
           >img {
             width: 100%;
@@ -753,10 +784,11 @@ export default {
           .cut_right_box {
             position: absolute;
             width: 100%;
-            height: 100%;
+            height: auto;
             top: 0;
             // background: rgba(0, 0, 0, .4);
             cursor: crosshair;
+            // overflow: scroll;
             >span {
               display: block;
               overflow: hidden;
