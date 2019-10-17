@@ -94,6 +94,7 @@ export default {
   created () {
     if (this.imgData && this.imgData.path) {
       this.currentImg = Object.assign({}, this.imgData);
+      this.picSubmit();
     }
   },
   watch: {

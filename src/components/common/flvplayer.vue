@@ -285,18 +285,18 @@
           <div class="struc_c_d_info">
             <h2>分析结果：</h2>
             <ul>
-              <li v-if="snapSturcObj.sturcDetail.sex"><span>性别</span><span>{{snapSturcObj.sturcDetail.sex}}</span></li>
-              <li v-if="snapSturcObj.sturcDetail.age"><span>年龄段</span><span>{{snapSturcObj.sturcDetail.age}}</span></li>
-              <li v-if="snapSturcObj.sturcDetail.hair"><span>发型</span><span>{{snapSturcObj.sturcDetail.hair}}</span></li>
-              <li v-if="snapSturcObj.sturcDetail.glasses"><span>戴眼镜</span><span>{{snapSturcObj.sturcDetail.glasses}}</span></li>
-              <li v-if="snapSturcObj.sturcDetail.hat"><span>戴帽子</span><span>{{snapSturcObj.sturcDetail.hat}}</span></li>
-              <li v-if="snapSturcObj.sturcDetail.mask"><span>戴口罩</span><span>{{snapSturcObj.sturcDetail.mask}}</span></li>
-              <li v-if="snapSturcObj.sturcDetail.baby"><span>抱小孩</span><span>{{snapSturcObj.sturcDetail.baby}}</span></li>
-              <li v-if="snapSturcObj.sturcDetail.bag"><span>拎东西</span><span>{{snapSturcObj.sturcDetail.bag}}</span></li>
-              <li v-if="snapSturcObj.sturcDetail.upperType"><span>上身款式</span><span>{{snapSturcObj.sturcDetail.upperType}}</span></li>
-              <li v-if="snapSturcObj.sturcDetail.upperColor"><span>上身颜色</span><span>{{snapSturcObj.sturcDetail.upperColor}}</span></li>
-              <li v-if="snapSturcObj.sturcDetail.bottomType"><span>下身款式</span><span>{{snapSturcObj.sturcDetail.bottomType}}</span></li>
-              <li v-if="snapSturcObj.sturcDetail.bottomColor"><span>下身颜色</span><span>{{snapSturcObj.sturcDetail.bottomColor}}</span></li>
+              <li><span>性别</span><span>{{sturcDetail.sex ? sturcDetail.sex : '未识别'}}</span></li>
+              <li><span>年龄段</span><span>{{sturcDetail.age ? sturcDetail.age : '未识别'}}</span></li>
+              <li><span>发型</span><span>{{sturcDetail.hair ? sturcDetail.hair : '未识别'}}</span></li>
+              <li><span>戴眼镜</span><span>{{sturcDetail.glasses ? sturcDetail.glasses : '未识别'}}</span></li>
+              <li><span>戴帽子</span><span>{{sturcDetail.hat ? sturcDetail.hat : '未识别'}}</span></li>
+              <li><span>戴口罩</span><span>{{sturcDetail.mask ? sturcDetail.mask : '未识别'}}</span></li>
+              <li><span>抱小孩</span><span>{{sturcDetail.baby ? sturcDetail.baby : '未识别'}}</span></li>
+              <li><span>拎东西</span><span>{{sturcDetail.bag ? sturcDetail.bag : '未识别'}}</span></li>
+              <li><span>上身款式</span><span>{{sturcDetail.upperType ? sturcDetail.upperType : '未识别'}}</span></li>
+              <li><span>上身颜色</span><span>{{sturcDetail.upperColor ? sturcDetail.upperColor : '未识别'}}</span></li>
+              <li><span>下身款式</span><span>{{sturcDetail.bottomType ? sturcDetail.bottomType : '未识别'}}</span></li>
+              <li><span>下身颜色</span><span>{{sturcDetail.bottomColor ? sturcDetail.bottomColor : '未识别'}}</span></li>
             </ul>
           </div>
         </div>
@@ -396,18 +396,18 @@
               <div class="struc_c_d_info">
                 <h2>分析结果：</h2>
                 <ul>
-                  <li v-if="snapSturcObj.sturcDetail.sex"><span>性别</span><span>{{snapSturcObj.sturcDetail.sex}}</span></li>
-                  <li v-if="snapSturcObj.sturcDetail.age"><span>年龄段</span><span>{{snapSturcObj.sturcDetail.age}}</span></li>
-                  <li v-if="snapSturcObj.sturcDetail.hair"><span>发型</span><span>{{snapSturcObj.sturcDetail.hair}}</span></li>
-                  <li v-if="snapSturcObj.sturcDetail.glasses"><span>戴眼镜</span><span>{{snapSturcObj.sturcDetail.glasses}}</span></li>
-                  <li v-if="snapSturcObj.sturcDetail.hat"><span>戴帽子</span><span>{{snapSturcObj.sturcDetail.hat}}</span></li>
-                  <li v-if="snapSturcObj.sturcDetail.mask"><span>戴口罩</span><span>{{snapSturcObj.sturcDetail.mask}}</span></li>
-                  <li v-if="snapSturcObj.sturcDetail.baby"><span>抱小孩</span><span>{{snapSturcObj.sturcDetail.baby}}</span></li>
-                  <li v-if="snapSturcObj.sturcDetail.bag"><span>拎东西</span><span>{{snapSturcObj.sturcDetail.bag}}</span></li>
-                  <li v-if="snapSturcObj.sturcDetail.upperType"><span>上身款式</span><span>{{snapSturcObj.sturcDetail.upperType}}</span></li>
-                  <li v-if="snapSturcObj.sturcDetail.upperColor"><span>上身颜色</span><span>{{snapSturcObj.sturcDetail.upperColor}}</span></li>
-                  <li v-if="snapSturcObj.sturcDetail.bottomType"><span>下身款式</span><span>{{snapSturcObj.sturcDetail.bottomType}}</span></li>
-                  <li v-if="snapSturcObj.sturcDetail.bottomColor"><span>下身颜色</span><span>{{snapSturcObj.sturcDetail.bottomColor}}</span></li>
+                  <li><span>性别</span><span>{{sturcDetail.sex ? sturcDetail.sex : '未识别'}}</span></li>
+                  <li><span>年龄段</span><span>{{sturcDetail.age ? sturcDetail.age : '未识别'}}</span></li>
+                  <li><span>发型</span><span>{{sturcDetail.hair ? sturcDetail.hair : '未识别'}}</span></li>
+                  <li><span>戴眼镜</span><span>{{sturcDetail.glasses ? sturcDetail.glasses : '未识别'}}</span></li>
+                  <li><span>戴帽子</span><span>{{sturcDetail.hat ? sturcDetail.hat : '未识别'}}</span></li>
+                  <li><span>戴口罩</span><span>{{sturcDetail.mask ? sturcDetail.mask : '未识别'}}</span></li>
+                  <li><span>抱小孩</span><span>{{sturcDetail.baby ? sturcDetail.baby : '未识别'}}</span></li>
+                  <li><span>拎东西</span><span>{{sturcDetail.bag ? sturcDetail.bag : '未识别'}}</span></li>
+                  <li><span>上身款式</span><span>{{sturcDetail.upperType ? sturcDetail.upperType : '未识别'}}</span></li>
+                  <li><span>上身颜色</span><span>{{sturcDetail.upperColor ? sturcDetail.upperColor : '未识别'}}</span></li>
+                  <li><span>下身款式</span><span>{{sturcDetail.bottomType ? sturcDetail.bottomType : '未识别'}}</span></li>
+                  <li><span>下身颜色</span><span>{{sturcDetail.bottomColor ? sturcDetail.bottomColor : '未识别'}}</span></li>
                 </ul>
               </div>
             </div>

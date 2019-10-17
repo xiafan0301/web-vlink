@@ -1,10 +1,8 @@
 <template>
   <div class="ljd point">
-    <div class="breadcrumb_heaer">
-      <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像侦查</el-breadcrumb-item>
-        <el-breadcrumb-item>落脚点分析</el-breadcrumb-item>
-      </el-breadcrumb>
+    <div is="vlBreadcrumb"
+     :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
+        {name: '落脚点分析'}]">
     </div>
     <div :class="['left',{hide:hideleft}]">
       <div class="plane">
@@ -335,6 +333,7 @@
 <script>
 import { ajaxCtx, mapXupuxian } from "@/config/config.js";
 import { cityCode } from "@/utils/data.js";
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import {
   JtcPUTAppendixsOrder,
   JtcPOSTAppendixInfo,getFoothold,JtcGETAppendixInfoList
@@ -352,6 +351,7 @@ import {formatDate, dateOrigin} from '@/utils/util.js';
 import vlUpload from '@/components/common/upload.vue';
 export default {
   components: {
+    vlBreadcrumb,
     vlUpload,
     portraitDetail
   },
@@ -691,7 +691,7 @@ export default {
             }
           } else {
             params.taskName = this.taskName;
-            PortraitPostFocusTask(params).then(res => {
+            PortraitPostStayPointTask(params).then(res => {
               this.isload = false;
               if (res && res.data) {
                 this.$message({

@@ -110,7 +110,7 @@ export function getVagueSearch(data) {
   return request({
     url: '/vehicle-investigate/vague-search',
     method: 'post',
-    mode: 'judge',
+    mode: 'vehicle',
     data
   })
 }
@@ -292,7 +292,7 @@ export function postPeopleTask(data) {
   return request({
     url: '/person/peer-analysis',
     method: 'post',
-    mode: 'judge',
+    mode: 'portrait',
     data
   })
 }

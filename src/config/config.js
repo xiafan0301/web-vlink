@@ -53,7 +53,7 @@ const oDomains = {
         // dev: 'https://apidev.aorise.org/vlink-judge/',
         dev: 'https://apidev.aorise.org/vlink-judge/',
         test: 'https://apirel.aorise.org/vlink-judge/',
-        // test: 'http://10.116.64.69:8081',
+        // test: 'http://10.116.64.78:8083',
         prod: 'https://apiprod.aorise.org/vlink-judge/',
     },
     // 调度和预案部分地址
@@ -87,7 +87,7 @@ const oDomains = {
     },
     // 人像地址
     portrait: {
-      // test: 'http://10.116.64.97:8081',
+      // test: 'http://10.116.64.64:8081',
       dev: 'https://apidev.aorise.org/vlink-portrait',
       test: 'https://apirel.aorise.org/vlink-portrait',
       prod: 'https://apiprod.aorise.org/vlink-portrait'

@@ -632,7 +632,9 @@
         })
         this.searchData = [];
         this.drawActiveType = 0;
-        this.mouseTool.close(false);
+        if (this.mouseTool) {
+          this.mouseTool.close(false);
+        }
       },
       showInfoMes(mes) {
         if (!document.querySelector('.el-message--info')) {

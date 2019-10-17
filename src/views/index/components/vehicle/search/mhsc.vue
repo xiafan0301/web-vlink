@@ -261,6 +261,7 @@ import { getGroupsByType } from "@/views/index/api/api.js";
 import { getVagueSearch } from "../../../api/api.analysis.js"; // 根据图检索接口
 import { MapGETmonitorList } from "../../../api/api.map.js"; // 获取到设备树的接口
 import { objDeepCopy } from "../../../../../utils/util.js"; // 深拷贝方法
+import { dataList } from "@/utils/data.js";
 import vehicleDetail from "../common/vehicleDetail.vue";
 export default {
   components: { vehicleDetail, vlBreadcrumb },
@@ -390,7 +391,7 @@ export default {
   mounted() {
     this.getMonitorList();
     this.setDTime();
-    this.vehicleBelongOptions = this.dicFormater(48)[0].dictList; // 获取车辆归属地
+    this.vehicleBelongOptions = this.dicFormater(dataList.ownership)[0].dictList; // 获取车辆归属地
     // 获取到车辆类别
     getGroupsByType({ groupType: 9 }).then(res => {
       if (res.data) {

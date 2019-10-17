@@ -33,18 +33,18 @@
           <div class="struc_c_d_info">
             <h2>分析结果：</h2>
             <ul>
-              <li v-if="sturcDetail.sex"><span>性别</span><span>{{sturcDetail.sex}}</span></li>
-              <li v-if="sturcDetail.age"><span>年龄段</span><span>{{sturcDetail.age}}</span></li>
-              <li v-if="sturcDetail.hair"><span>发型</span><span>{{sturcDetail.hair}}</span></li>
-              <li v-if="sturcDetail.glasses"><span>戴眼镜</span><span>{{sturcDetail.glasses}}</span></li>
-              <li v-if="sturcDetail.hat"><span>戴帽子</span><span>{{sturcDetail.hat}}</span></li>
-              <li v-if="sturcDetail.mask"><span>戴口罩</span><span>{{sturcDetail.mask}}</span></li>
-              <li v-if="sturcDetail.baby"><span>抱小孩</span><span>{{sturcDetail.baby}}</span></li>
-              <li v-if="sturcDetail.bag"><span>拎东西</span><span>{{sturcDetail.bag}}</span></li>
-              <li v-if="sturcDetail.upperType"><span>上身款式</span><span>{{sturcDetail.upperType}}</span></li>
-              <li v-if="sturcDetail.upperColor"><span>上身颜色</span><span>{{sturcDetail.upperColor}}</span></li>
-              <li v-if="sturcDetail.bottomType"><span>下身款式</span><span>{{sturcDetail.bottomType}}</span></li>
-              <li v-if="sturcDetail.bottomColor"><span>下身颜色</span><span>{{sturcDetail.bottomColor}}</span></li>
+              <li><span>性别</span><span>{{sturcDetail.sex ? sturcDetail.sex : '未识别'}}</span></li>
+              <li><span>年龄段</span><span>{{sturcDetail.age ? sturcDetail.age : '未识别'}}</span></li>
+              <li><span>发型</span><span>{{sturcDetail.hair ? sturcDetail.hair : '未识别'}}</span></li>
+              <li><span>戴眼镜</span><span>{{sturcDetail.glasses ? sturcDetail.glasses : '未识别'}}</span></li>
+              <li><span>戴帽子</span><span>{{sturcDetail.hat ? sturcDetail.hat : '未识别'}}</span></li>
+              <li><span>戴口罩</span><span>{{sturcDetail.mask ? sturcDetail.mask : '未识别'}}</span></li>
+              <li><span>抱小孩</span><span>{{sturcDetail.baby ? sturcDetail.baby : '未识别'}}</span></li>
+              <li><span>拎东西</span><span>{{sturcDetail.bag ? sturcDetail.bag : '未识别'}}</span></li>
+              <li><span>上身款式</span><span>{{sturcDetail.upperType ? sturcDetail.upperType : '未识别'}}</span></li>
+              <li><span>上身颜色</span><span>{{sturcDetail.upperColor ? sturcDetail.upperColor : '未识别'}}</span></li>
+              <li><span>下身款式</span><span>{{sturcDetail.bottomType ? sturcDetail.bottomType : '未识别'}}</span></li>
+              <li><span>下身颜色</span><span>{{sturcDetail.bottomColor ? sturcDetail.bottomColor : '未识别'}}</span></li>
             </ul>
              <!--  <span class='tz' v-if="sturcDetail.features"><b>特征码：</b>{{sturcDetail.features}}</span> -->
           </div>
