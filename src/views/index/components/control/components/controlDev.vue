@@ -141,6 +141,8 @@ export default {
     // 取消选择布控设备
     cancelUpdateControlDev () {
       this.pageType = 1;
+      this.devIdList = [];
+      this.bayIdList = [];
       this.$nextTick(() => {
         this.resetMap();
         this.operateModel();
@@ -225,11 +227,11 @@ export default {
         }
       // 新增时
       } else {
-        if (this.devIdListFive.length > 0) {
+        if (this.devIdListFive && this.devIdListFive.length > 0) {
           console.log(this.devIdListFive, 'this.devIdListFive')
           this.changeColorAndGetTreeData(this.devIdListFive, 1);
         }          
-        if (this.bayIdListFive.length > 0) {
+        if (this.bayIdListFive && this.bayIdListFive.length > 0) {
           this.changeColorAndGetTreeData(this.bayIdListFive, 2);
         }   
       }    

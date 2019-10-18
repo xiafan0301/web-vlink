@@ -24,9 +24,9 @@
           <el-option value="" label="全部类型"></el-option>
           <el-option
             v-for="item in carTypeList"
-            :key="item.value"
-            :label="item.label"
-            :value="item.label">
+            :key="item.enumField"
+            :label="item.enumValue"
+            :value="item.enumField">
           </el-option>
         </el-select>
         <!-- <el-select v-model="queryForm.lane" placeholder="选择车道">
@@ -171,12 +171,7 @@ export default {
       },
       listBayonet: [],
       tabIndex: 2,
-      carTypeList: this.dicFormater(dataList.vehicleType)[0].dictList.map(m => {
-        return {
-          value: parseInt(m.enumField),
-          label: m.enumValue
-        }
-      }),
+      carTypeList: this.dicFormater(dataList.vehicleType)[0],
       statementTitle: null,
       // laneList: [],
       statementTypeList: [

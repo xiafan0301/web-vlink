@@ -21,8 +21,6 @@
             <div><span class="vl_f_666">布控名称：</span><span class="vl_f_333">{{controlDetail.surveillanceName}}</span></div>
             <div><span class="vl_f_666">有效期限：</span><span class="vl_f_333">{{controlDetail.surveillanceDateStart}} 至 {{controlDetail.surveillanceDateEnd}}</span></div>
             <div><span class="vl_f_666">短信联动：</span><span class="vl_f_333" v-for="(item, index) in controlDetail.contactList" :key="index">{{item.contact}}&nbsp;&nbsp;{{item.mobile}}<span v-if="index + 1 < controlDetail.contactList.length">&nbsp;&nbsp;|&nbsp;&nbsp;</span></span></div>
-            <div><span class="vl_f_666">是否级联：</span><span class="vl_f_333">{{controlDetail.cascadePlatform ? '是' : '无'}}</span></div>
-            
           </li>
           <li style="width: 34%;">
             <div><span class="vl_f_666">关联事件：</span><span class="vl_f_333">{{controlDetail.eventCode}}</span></div>
@@ -32,9 +30,13 @@
             <div><span class="vl_f_666">告警级别：</span><span class="vl_f_333" v-if="controlDetail.alarmLevel">{{dicFormater(dataList_.alarmLevel, controlDetail.alarmLevel)}}</span></div>
           </li>
         </ul>
+        <ul style="padding-top: 14px;">
+          <li style="width: 34%;"><span class="vl_f_666">是否级联：</span><span class="vl_f_333">{{controlDetail.cascadePlatform ? '是' : '无'}}</span></li>
+          <li style="width: 34%;" v-if="controlDetail.cascadePlatform"><span class="vl_f_666">级联对象：</span><span class="vl_f_333">{{controlDetail.cascadePlatform}}</span></li>
+        </ul>
         <ul>
           <li style="width: 34%;"><div><span class="vl_f_666">共享布控：</span><span class="vl_f_333">{{controlDetail.shareDept ? '是' : '无'}}</span></div></li>
-          <li style="width: 34%;"><div><span class="vl_f_666">共享对象：</span><span class="vl_f_333">{{controlDetail.shareDept}}</span></div></li>
+          <li style="width: 34%;" v-if="controlDetail.shareDept"><div><span class="vl_f_666">共享对象：</span><span class="vl_f_333">{{controlDetail.shareDept}}</span></div></li>
         </ul>
         <ul>
           <li><div><span class="vl_f_666">布控原因：</span><span class="vl_f_333">{{controlDetail.surveillanceReason}}</span></div></li>

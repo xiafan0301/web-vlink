@@ -85,7 +85,6 @@
             <span @click="skipPortraitSearch">查看更多></span>
           </div>
           <div class="face_snap_form">
-            <div ref="devSelect" is="devSelect" :flag="1" @sendSelectData="getSelectData" @allSelectLength="allSelectLength"></div>
             <!-- @change="validationDate(faceSnapForm)" -->
             <el-date-picker
               class="vl_date"
@@ -100,6 +99,13 @@
               value-format="yyyy-MM-dd"
             >
             </el-date-picker>
+            <div class="rlcx_xzsb_s" @click="areaTypeChanged" v-show="faceSnapForm.type === 0">
+              <span>选择设备</span>
+              <span class="el-icon-arrow-down"></span>
+            </div>
+            <div class="rlcx_dtxz_rst" v-show="faceSnapForm.type === 2">
+              已选<span>{{dSum}}</span>个设备<a href="javascript: void(0);" @click="openMap={}">重选</a>
+            </div>
             <div>
               <el-button class="reset_btn" @click="resetFaceSnapForm">重置</el-button>
               <el-button class="select_btn" type="primary" @click="getFaceSnapSta" :loading="loadingBtn1">统计</el-button>
@@ -177,6 +183,7 @@
         </div>
       </div>
     </div>
+    <div is="mapSelector" ref="mapSelector" :open="openMap" :clear="msClear" :showTypes="'DB'" @mapSelectorEmit="mapSelectorEmit"></div>
   </div>
 </template>
 <script>
@@ -186,21 +193,24 @@ import {formatDate, dateOrigin} from '@/utils/util.js';
 let startTime = formatDate(dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)), 'yyyy-MM-dd');
 let endTime = formatDate(dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)), 'yyyy-MM-dd');
 import vehicleBreadcrumb from './breadcrumb.vue';
-import devSelect from '@/components/common/devSelect.vue';
 import G2 from '@antv/g2';
 import { View } from '@antv/data-set';
+import mapSelector from '@/components/common/mapSelector.vue';
 import {apiFaceTotal, apiFaceSnap, apiFaceWarning} from '@/views/index/api/api.portrait.js';
 export default {
-  components: {vehicleBreadcrumb, devSelect},
+  components: {vehicleBreadcrumb, mapSelector},
   data () {
     return {
       faceSnapForm: {
-        devIdData:  {
-          selSelectedData1: [],
-          selSelectedData2: []
-        },
+        type: 0,
         queryDate: [startTime, endTime]
       },
+      dSum: 0,
+      dIds: [],
+      bIds: [],
+      msClear: {},
+      openMap: {},
+
       faceControlQueryDate: [startTime, endTime],
       devList: [],//人脸抓拍统计设备列表
       // 图表参数
@@ -255,14 +265,6 @@ export default {
     // 进入页面滚动条保持在最顶部
     document.getElementById('rlsjfxBox').scrollTop = 0;
   },
-  watch: {
-    selectLength () {
-      // 设备和卡口全选后才获取抓拍人脸数统计
-      if (this.selectLength === (this.faceSnapForm.devIdData.selSelectedData1.length + this.faceSnapForm.devIdData.selSelectedData2.length)) {
-        this.getFaceSnapSta();
-      }
-    }
-  },
   methods: {
     // 查看更多
     skipControlLibrary () {
@@ -296,19 +298,38 @@ export default {
         }
       }
     },
-    // 获取子组件传过来的设备和卡口总是
-    allSelectLength (num) {
-      this.selectLength = num;
+    areaTypeChanged () {
+      this.faceSnapForm.type = 2;
+      this.openMap = !this.openMap;
     },
-    // 获得选择设备组件传过来的数据
-    getSelectData (data) {
-      this.faceSnapForm.devIdData = data;
+    // 选择设备弹窗点击确定方法
+    mapSelectorEmit (result) {
+       if (result) {
+        console.log(result, 'result');
+        this.dSum = 0;
+        this.dIds = [];
+        this.bIds = [];
+        if (result.deviceList) {
+          this.dSum = result.deviceList.length;
+          for (let i = 0; i < result.deviceList.length; i++) {
+            this.dIds.push(result.deviceList[i].uid);
+          }
+        }
+        if (result.bayonetList && result.bayonetList.length > 0) {
+          this.dSum += result.bayonetList.length;
+          for (let i = 0; i < result.bayonetList.length; i++) {
+            this.bIds.push(result.bayonetList[i].uid);
+          }
+        }
+      }
     },
     // 重置人脸抓拍统计表单
     resetFaceSnapForm () {     
-      this.faceSnapForm.queryDate = [startTime, endTime]
-      // 设备全选
-      this.$refs['devSelect'].checkedAll();
+      this.faceSnapForm.queryDate = [startTime, endTime];
+      this.msClear = {};
+      this.dSum = 0;      
+      this.dIds = [];
+      this.bIds = [];
     },
     // 重置人脸布控告警数据分析表单
     resetFaceControlDate () {
@@ -326,8 +347,8 @@ export default {
     // 获取人脸抓拍统计
     getFaceSnapSta () {
       const params = {
-        deviceIds: this.faceSnapForm.devIdData.selSelectedData1.map(m => m.id).join(','),
-        bayonetIds: this.faceSnapForm.devIdData.selSelectedData2.map(m => m.id).join(','),
+        deviceIds: this.dIds.join(','),
+        bayonetIds: this.bIds.join(','),
         startTime: this.faceSnapForm.queryDate[0] + ' 00:00:00',
         endTime: this.faceSnapForm.queryDate[1] + ' 23:59:59'
       }
@@ -568,6 +589,46 @@ export default {
           > div:nth-child(1){
             width: 33%;
             position: relative;
+          }
+          .rlcx_xzsb_s {
+            height: 40px;
+            width: 33%;
+            line-height:40px;
+            border-radius: 4px;
+            border: 1px solid #DCDFE6;
+            cursor: pointer;
+            color: #999999;
+            padding: 0 6px;
+            > span {
+              display: inline-block;
+              width: 50%;
+              &:last-child {
+                text-align: right;
+              }
+            }
+          }
+          .rlcx_dtxz_rst {
+            width: 33%;
+            height: 40px;
+            line-height: 40px;
+            padding: 0 15px;
+            background-color: #F5F7FA;
+            color: #C0C4CC;
+            border: 1px solid #DCDFE6;
+            border-radius: 4px;
+            > span {
+              display: inline-block;
+              padding: 0 3px;
+              color: #333;
+            }
+            > a {
+              display: inline-block;
+              padding-left: 5px;
+              color: #2580FC !important;
+              text-decoration: none !important;
+              /*font-style: italic;*/
+              cursor: pointer;
+            }
           }
         }
         .title{
