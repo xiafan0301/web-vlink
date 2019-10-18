@@ -45,7 +45,7 @@ export function apiOutCityStatistics(data) {
     url: '/vehicle-investigate/out-city-statistics',
     method: 'post',
     data,
-    mode: 'judge'
+    mode: 'vehicle'
   })
 }
 /**

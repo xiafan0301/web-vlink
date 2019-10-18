@@ -113,7 +113,7 @@
 import {dataList} from '@/utils/data.js';
 import {getVehicleList} from '@/views/index/api/api.control.js';
 export default {
-  props: ['groupId', 'fileList'],
+  props: ['groupIds', 'fileList'],
   data () {
     return {
       libForm: {
@@ -150,9 +150,9 @@ export default {
         order: null,
         'where.vehicleColor': this.libForm.vehicleColor,
         'where.vehicleType': this.libForm.vehicleType,
-        'where.numberType': this.libForm.numberType,
-        'where.groupId': this.groupId
+        'where.numberType': this.libForm.numberType
       }
+      this.groupIds && (params['where.groupId'] = this.groupIds);
       this.libForm.vehicleNumber && (params['where.vehicleNumber'] = this.libForm.vehicleNumber);
       this.loading = true;
       getVehicleList(params).then(res => {

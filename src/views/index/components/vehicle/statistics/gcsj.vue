@@ -8,7 +8,13 @@
     </div>
     <div class="con_box">
       <div class="con_left">
-        <div ref="devSelect" is="devSelect" @sendSelectData="getSelectData" @allSelectLength="allSelectLength"></div>
+        <div class="rlcx_xzsb_s" @click="areaTypeChanged" v-show="queryForm.type === 0">
+          <span>选择设备</span>
+          <span class="el-icon-arrow-down"></span>
+        </div>
+        <div class="rlcx_dtxz_rst" v-show="queryForm.type === 2">
+          已选<span>{{dSum}}</span>个设备<a href="javascript: void(0);" @click="openMap={}">重选</a>
+        </div>
         <div class="left_start">
           <el-date-picker
             :clearable="false"
@@ -120,6 +126,7 @@
         </div>
       </div>
     </div>
+    <div is="mapSelector" ref="mapSelector" :open="openMap" :clear="msClear" :showTypes="'DB'" @mapSelectorEmit="mapSelectorEmit"></div>
   </div>
 </template>
 <script>
@@ -128,20 +135,22 @@
 import G2 from '@antv/g2';
 import { View } from '@antv/data-set';
 import {apiPassingCarSta} from '@/views/index/api/api.vehicle.js';
-import devSelect from '@/components/common/devSelect.vue';
+import mapSelector from '@/components/common/mapSelector.vue';
 import {formatDate, dateOrigin} from '@/utils/util.js';
 export default {
-  components: {devSelect},
+  components: {mapSelector},
   data () {
     return {
       queryForm: {
         startTime: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)),
         endTime: new Date(),
-        devIdData: {
-          selSelectedData1: [],
-          selSelectedData2: []
-        }
+        type: 0
       },
+      dSum: 0,
+      dIds: [],
+      bIds: [],
+      msClear: {},
+      openMap: {},
       pickerOptions: {
         disabledDate: time => {
           return time > new Date();
@@ -177,7 +186,8 @@ export default {
         carNums: '',
         fieldCarNums: ''
       },
-      selectLength: null
+    
+      // selectLength: null
     }
   },
   watch: {
@@ -186,12 +196,15 @@ export default {
     //   const endTime = new Date(this.queryForm.startTime).getTime() + threeDays;
     //   this.queryForm.endTime = formatDate(endTime, 'yyyy-MM-dd');
     // },
-    selectLength () {
-      // 设备和卡口全选后才获取过车数据统计
-      if (this.selectLength === (this.queryForm.devIdData.selSelectedData1.length + this.queryForm.devIdData.selSelectedData2.length)) {
-        this.getCarBeforeSta();
-      }
-    }
+    // selectLength () {
+    //   // 设备和卡口全选后才获取过车数据统计
+    //   if (this.selectLength === (this.queryForm.devData.selSelectedData1.length + this.queryForm.devData.selSelectedData2.length)) {
+    //     this.getCarBeforeSta();
+    //   }
+    // }
+  },
+  mounted () {
+    
   },
   methods: {
     // getEndTime(time) {
@@ -203,12 +216,16 @@ export default {
     //   }
     // },
     // 获取子组件传过来的设备和卡口总是
-    allSelectLength (num) {
-      this.selectLength = num;
-    },
+    // allSelectLength (num) {
+    //   this.selectLength = num;
+    // },
     // 获得选择设备组件传过来的数据
-    getSelectData (data) {
-      this.queryForm.devIdData = data;
+    // getSelectData (data) {
+    //   this.queryForm.devData = data;
+    // },
+    areaTypeChanged () {
+      this.queryForm.type = 2;
+      this.openMap = !this.openMap;
     },
     drawChart2 () {
       let _this = this, chart = null;
@@ -403,19 +420,42 @@ export default {
     resetQueryForm () {
       this.queryForm.startTime = dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000));
       this.queryForm.endTime = new Date();
-      // 设备全选
-      this.$refs['devSelect'].checkedAll();
+      this.msClear = {};
+      this.dSum = 0;      
+      this.dIds = [];
+      this.bIds = [];
     },
     //查询
     search() {
       this.loadingBtn = true;
       this.getCarBeforeSta();
     },
+    // 选择设备弹窗点击确定方法
+    mapSelectorEmit (result) {
+       if (result) {
+        console.log(result, 'result');
+        this.dSum = 0;
+        this.dIds = [];
+        this.bIds = [];
+        if (result.deviceList) {
+          this.dSum = result.deviceList.length;
+          for (let i = 0; i < result.deviceList.length; i++) {
+            this.dIds.push(result.deviceList[i].uid);
+          }
+        }
+        if (result.bayonetList && result.bayonetList.length > 0) {
+          this.dSum += result.bayonetList.length;
+          for (let i = 0; i < result.bayonetList.length; i++) {
+            this.bIds.push(result.bayonetList[i].uid);
+          }
+        }
+      }
+    },
     // 获取过车数据统计
     getCarBeforeSta () {
       const params = {  
-        deviceIds: this.queryForm.devIdData.selSelectedData1.map(m => m.id).join(','),
-        bayonetIds: this.queryForm.devIdData.selSelectedData2.map(m => m.id).join(','),
+        deviceIds: this.dIds.join(','),
+        bayonetIds: this.bIds.join(','),
         startTime: formatDate(this.queryForm.startTime),
         endTime: formatDate(this.queryForm.endTime)
       }
@@ -493,6 +533,46 @@ export default {
         padding-top: 10px;
         .select_btn, .reset_btn {
           width: 110px;
+        }
+      }
+      .rlcx_xzsb_s {
+        height: 40px;
+        width: 100%;
+        line-height:40px;
+        border-radius: 4px;
+        border: 1px solid #DCDFE6;
+        cursor: pointer;
+        color: #999999;
+        padding: 0 6px;
+        > span {
+          display: inline-block;
+          width: 50%;
+          &:last-child {
+            text-align: right;
+          }
+        }
+      }
+      .rlcx_dtxz_rst {
+        width: 100%;
+        height: 40px;
+        line-height: 40px;
+        padding: 0 15px;
+        background-color: #F5F7FA;
+        color: #C0C4CC;
+        border: 1px solid #DCDFE6;
+        border-radius: 4px;
+        > span {
+          display: inline-block;
+          padding: 0 3px;
+          color: #333;
+        }
+        > a {
+          display: inline-block;
+          padding-left: 5px;
+          color: #2580FC !important;
+          text-decoration: none !important;
+          /*font-style: italic;*/
+          cursor: pointer;
         }
       }
     }
