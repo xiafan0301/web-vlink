@@ -53,47 +53,44 @@ export default {
         }, 1000)
       }
     },
-    initImageInfo (val) {
+    initImageInfo () {
       this.imgInfo = Object.assign({}, this.initImageInfo);
     }
   },
   methods: {
     // 获取图片缩放比例
     getImgScale () {
-      let scale = this.imgInfo.width / this.imgInfo.height; // 原图初始比例
-      
       let imgWidth = $('#imgBox').width();
+      let scale = this.imgInfo.width / imgWidth; // 原图初始比例
       
-      let currHeight = Math.ceil(imgWidth / scale); // 图片压缩后的height
-      $('#imgBox').css('height', currHeight + 'px');
+      
+      // let currHeight = Math.ceil(imgWidth / scale); // 图片压缩后的height
+      // $('#imgBox').css('height', currHeight + 'px');
 
+      this.selectList.forEach((item, index) => {
 
-
-      this.selectList.forEach(item => {
         // 在页面显示的图片大小计算宽和高的比例
-        let wScale = this.imgInfo.width / item.width;
-        let hScale = this.imgInfo.height / item.height;
-
-
+        let newItem = {};
+        for (let key in item) { // 根据图片的缩放比例计算车体的缩放后的各数据的大小
+          newItem[key] = Math.ceil(item[key] / scale);
+        }
 
         let $div = document.createElement('div');
 
-        $div.setAttribute('id', 'select_box' + item.uid);
+        let $id = 'select_box_' + index;
+
+        $div.setAttribute('id', $id);
 
         $div.setAttribute('class', 'select_box');
         
-        $div.style.width = Math.ceil(imgWidth / wScale) + 'px';
-        $div.style.height = Math.ceil(currHeight / hScale) + 'px';
+        $div.style.width = newItem.width + 'px';
+        $div.style.height = newItem.height + 'px';
 
-        console.log($div.style.width)
-        console.log($div.style.height)
 
-        $div.style.left = item.x + 'px';
-        $div.style.top = item.y + 'px';
+        $div.style.left = newItem.x + 'px';
+        $div.style.top = newItem.y + 'px';
 
         $('.img_box')[0].appendChild($div);
-
-        let $id = 'select_box' + item.uid;
 
         this.handleClickListen($id, item.x, item.y, item.width, item.height);
       })
@@ -101,7 +98,6 @@ export default {
     },
     // 图片选择区域的点击监听事件
     handleClickListen (id, x, y, width, height) {
-      
       let _self = this;
       let clickObj = document.getElementById(id);
 

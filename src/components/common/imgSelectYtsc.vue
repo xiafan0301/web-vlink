@@ -30,7 +30,7 @@
         <div class="middle_left">
           <span class="middle_step">1</span>
           <div class="img_box" >
-            <img id="imgBox" src="http://newfile.aorise.org:80/group1/default/20190919/15/00/2/9546310b-b254-49ca-8ff2-4b3cef487d45.png" alt="">
+            <img id="imgBox" :src="imgInfo.url" alt="">
             <div class="cut_end" id="mapCutComplete" v-show="selectComplete">
               <span @click.stop="cancelSelect"><i class="el-icon-close"></i></span>
               <span @click.stop="finishSelect"><i class="el-icon-check"></i>确定</span>
@@ -72,29 +72,22 @@ import { handUpload } from "@/views/index/api/api.base.js";
 import { JtcPOSTAppendixInfo } from "@/views/index/api/api.judge.js";
 
 export default {
-  // props: ['open', 'imgDataList', 'initImageInfo'],
+  props: ['open', 'imgDataList', 'initImageInfo'],
+  /**
+   * open: false;  是否打开框选弹框
+   * imgDataList：[];  图片可框选的车体数据信息列表
+   * initImageInfo：{}; 原始图片信息
+   * imgBDataList: []; 传至父组件的框选的车体信息
+   */
   data () {
     return {
       tabStep: 1, // 导航栏选择
-      dialogVisible: true,
+      dialogVisible: false,
       selectComplete: false,
       showCutContainer: false,
       cutComplete: false,
       curCutBox: false,
-      selectList: [
-        {
-          x: 30,
-          y: 30,
-          width: 100,
-          height: 100
-        },
-        {
-          x: 70,
-          y: 100,
-          width: 200,
-          height: 150
-        }
-      ],  
+      selectList: [],  
       secondImgUrl: null, // 第二步选择车体的图片地址
       initImgWidth: 920, // 图片原width
       initImgHeight: 419, // 图片原height
@@ -123,36 +116,36 @@ export default {
     }
   },
   watch: {
-    // open (val) {
-    //   this.dialogVisible = val;
-    // },
-    // imgDataList (val) {
-    //   this.selectList = val;
+    open (val) {
+      this.dialogVisible = val;
+    },
+    imgDataList (val) {
+      this.selectList = val;
 
-    //   if (val.length > 0) {
-    //     setTimeout(() => {
-    //       this.getImgScale();
-    //     }, 1000)
-    //   }
-    // },
-    // initImageInfo (val) {
-    //   this.imgInfo = Object.assign({}, this.initImageInfo);
-    // },
+      if (val.length > 0) {
+        setTimeout(() => {
+          this.getImgScale();
+        }, 1000)
+      }
+    },
+    initImageInfo () {
+      this.imgInfo = Object.assign({}, this.initImageInfo);
+    },
   },
   mounted () {
-    this.$nextTick(() => {
-      this.getImgScale();
-    })
+    // this.$nextTick(() => {
+    //   this.getImgScale();
+    // })
   },
   methods: {
     // 取消
     cancelSelectCut () {
-      this.dialogVisible = false;
+      // this.dialogVisible = false;
       this.tabStep = 1;
-      // this.$emit('emitImgData', {
-      //   open: false,
-      //   imgBDataList: []
-      // })
+      this.$emit('emitImgData', {
+        open: false,
+        imgBDataList: []
+      })
     },
     // 上一步
     prev () {
@@ -160,11 +153,11 @@ export default {
     },
     // 确定
     sureSelectCut () {
-      // this.$emit('emitImgData', {
-      //   open: false,
-      //   imgBDataList: this.imgBDataList
-      // })
-      this.dialogVisible = false;
+      this.$emit('emitImgData', {
+        open: false,
+        imgBDataList: this.imgBDataList
+      })
+      // this.dialogVisible = false;
     },
     // 第一步---取消选择车体
     cancelSelect () {
@@ -190,7 +183,6 @@ export default {
         });
 
         this.secondCutList = [];
-
     
         this.createImgPath(x, y, width, height, 1);
       }
@@ -272,7 +264,7 @@ export default {
       let image = new Image();
       image.setAttribute("crossOrigin",'Anonymous');
       if (step === 1) {
-        image.src = 'http://newfile.aorise.org:80/group1/default/20190919/15/00/2/9546310b-b254-49ca-8ff2-4b3cef487d45.png';
+        image.src = this.imgInfo.url;
       } else {
         image.src = this.secondImgUrl;
       }
@@ -294,8 +286,6 @@ export default {
           handUpload(this.fd)
             .then(res => {
               if (res && res.data) {
-                console.log('vvvvv', res.data);
-                
                 if (step === 2) {
                   const obj = {
                     x, y, width, height,
@@ -361,9 +351,6 @@ export default {
               if ($('.select_box').hasClass('active_select')) {
                 $('.select_box').removeClass('active_select');
               }
-
-              
-
             } else {
               if (this.secondCutList.length === 1) {
                 this.imgBDataList = [{
@@ -384,10 +371,7 @@ export default {
     },
     // 第二步---自动生成一个预设框选体
     getAutoCutBox () {
-      console.log('444444zsdaddasd444444444');
       this.showCutContainer = true;
-      let middleRleft = $('.middle_right').offset().left;
-      let middleRtop = $('.middle_right').offset().top;
 
       let x = 100 + Math.random() * 100, y = 100 + Math.random() * 100;
 
@@ -573,10 +557,8 @@ export default {
       this.cutComplete = true;
       
       $('#mapCutScreenContain').unbind('mousemove');
-
     },
     moveBox (ev) {
-      
       let Y = ev.clientY - ev.target.offsetTop, X = ev.clientX - ev.target.offsetLeft;
       $('#mapCutScreenContain').bind('mousemove', (event) => {
         let curY =  event.clientY - Y, curX =  event.clientX - X;
@@ -624,9 +606,6 @@ export default {
       this.secondCurrY = dom.offsetTop;
 
       let w = Math.ceil(dom.clientWidth / _scale), h = Math.ceil(dom.clientHeight / _scale), x = Math.ceil(dom.offsetLeft / _scale), y = Math.ceil(dom.offsetTop / _scale);
-      console.log(_scale)
-      console.log(w + 'g' + h)
-      console.log(x + 'h' + y)
 
       this.curCutBox = false;
       this.cutComplete = false;

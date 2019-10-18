@@ -606,7 +606,8 @@ export default {
     getImageInfo () {
       const params = {
         bussType: 4, // 4---机动车  1-- 人
-        url: 'http://10.116.126.10/root/test/20190918-1635-002.jpg'
+        url: this.curImageUrl
+        // url: 'http://10.116.126.10/root/test/20190918-1635-002.jpg'
       };
       getImageAreaInfo(params)
         .then(res => {
@@ -617,7 +618,7 @@ export default {
               res.data.map(item => {
                 const obj = {
                   ...item,
-                  uid: 1 + Math.random()
+                  // uid: 1 + Math.random()
                 };
                 this.imgDataList.push(obj);
               })
