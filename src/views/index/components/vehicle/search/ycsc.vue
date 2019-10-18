@@ -221,7 +221,9 @@
     <!--检索详情弹窗-->
     <div is="vehicleDetail" :detailData="detailData"></div>
 
-    <div is="imgSelectYtsc"></div>
+    <div is="imgSelect" :initImageInfo="initImageInfo" :open="isOpenImgDialog" :imgDataList="imgDataList" @emitImgData="emitImgData"></div>
+
+    <!-- <div is="imgSelectYtsc" :initImageInfo="initImageInfo" :open="isOpenImgDialog" :imgDataList="imgDataList" @emitImgData="emitImgData"></div> -->
   </div>
 </template>
 <script>
@@ -233,15 +235,17 @@ import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入一个地图的
 import { formatDate, dateOrigin } from "@/utils/util.js";
 import {
   JtcPOSTAppendixInfo,
-  JtcGETAppendixInfoList
+  JtcGETAppendixInfoList,
+  getImageAreaInfo
 } from "../../../api/api.judge.js"; // 图片上传接口
 import { getPhotoSearch } from "../../../api/api.analysis.js"; // 根据图检索接口
 import { MapGETmonitorList } from "../../../api/api.map.js"; // 获取到设备树的接口
 import { objDeepCopy } from "../../../../../utils/util.js"; // 深拷贝方法
 
-import imgSelectYtsc from '@/components/common/imgSelectYtsc.vue';
+import imgSelect from '@/components/common/imgSelect.vue';
+// import imgSelectYtsc from '@/components/common/imgSelectYtsc.vue';
 export default {
-  components: { vlBreadcrumb, vehicleDetail, vlUpload, imgSelectYtsc },
+  components: { vlBreadcrumb, vehicleDetail, vlUpload, imgSelect },
   data() {
     return {
       uploadClear: {},
@@ -303,16 +307,6 @@ export default {
           return time.getTime() > Date.now() || time.getTime() < threeMonths;
         }
       },
-      options: [
-        {
-          value: "选项1",
-          label: "黄金糕"
-        },
-        {
-          value: "选项2",
-          label: "双皮奶"
-        }
-      ],
       /* 上传图片变量 */
       uploadAcion: ajaxCtx.base + "/new", //上传路径
       uploading: false, // 是否上传中
@@ -349,7 +343,12 @@ export default {
       isInit: true, // 是否是页面初始化状态
       pageNum: 1,
       pageSize: 12,
-      total: 0
+      total: 0,
+      isOpenImgDialog: false, // 是否显示框选弹框
+      imgData: {},
+      imgDataList: [], // 上传图片的可框选车体信息
+      initImageInfo: {}, // 上传图片的原始信息
+      // imgCutDataList: [], // 车体特征图片列表
     };
   },
   mounted() {
@@ -367,6 +366,49 @@ export default {
     }
   },
   methods: {
+    // 获取图片区域信息
+    getImageInfo () {
+      const params = {
+        bussType: 4, // 4---机动车  1-- 人
+        url: this.curImageUrl
+        // url: 'http://10.116.126.10/root/test/20190918-1635-002.jpg'
+      };
+      getImageAreaInfo(params)
+        .then(res => {
+          if (res && res.data) {
+            if (res.data.length === 0) {
+              this.isOpenImgDialog = true;
+
+              res.data.map(item => {
+                const obj = {
+                  ...item,
+                  // uid: 1 + Math.random()
+                };
+                this.imgDataList.push(obj);
+              })
+            }
+          }
+        })
+    },
+    emitImgData (obj) {
+      this.isOpenImgDialog = obj.open;
+      if (obj.imgPath) {
+        this.curImageUrl = obj.imgPath;
+        this.imgData = {
+          path: obj.imgPath
+        }
+      }
+    },
+    // emitImgData (obj) {
+    //   this.isOpenImgDialog = obj.open;
+    //   if (obj.imgBDataList.length > 0) {
+    //     this.imgCutDataList = obj.imgCutDataList;
+    //     // this.curImageUrl = obj.imgPath;
+    //     // this.imgData = {
+    //     //   path: obj.imgPath
+    //     // }
+    //   }
+    // },
     /*重置菜单的数据 */
     resetMenu() {
       this.uploadClear = {};
@@ -658,8 +700,15 @@ export default {
     uploadEmit(data) {
       if (data && data.path) {
         this.curImageUrl = data.path;
+        this.initImageInfo = {
+          url: data.path,
+          width: data.imgWidth,
+          height: data.imgHeight
+        };
+        this.getImageInfo();
       } else {
         this.curImageUrl = "";
+        this.initImageInfo = {};
       }
     },
     // 拖拽开始

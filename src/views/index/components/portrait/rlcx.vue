@@ -236,7 +236,7 @@
     <!-- D设备 B卡口  这里是设备和卡口 -->
     <div is="mapSelector" ref="rlcxSelctor" :open="openMap" :clear="msClear" :showTypes="'DB'" @mapSelectorEmit="mapSelectorEmit"></div>
     <!-- 框选搜索主体弹框 -->
-    <div is="imgSelect" :open="isOpenImgDialog" @emitImgData="emitImgData"></div>
+    <div is="imgSelect" :initImageInfo="initImageInfo" :open="isOpenImgDialog" :imgDataList="imgDataList" @emitImgData="emitImgData"></div>
   </div>
 </template>
 <script>
@@ -246,7 +246,7 @@ import { mapXupuxian } from "@/config/config.js";
 import vehicleBreadcrumb from '@/components/common/breadcrumb.vue';
 import mapSelector from '@/components/common/mapSelector.vue';
 import vlUpload from '@/components/common/upload.vue';
-import {getFaceRetrievalPerson, JtcGETAppendixInfoList} from '../../api/api.judge.js';
+import {getFaceRetrievalPerson, JtcGETAppendixInfoList, getImageAreaInfo} from '../../api/api.judge.js';
 import {getPicRecognize} from '../../api/api.structuring.js';
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import {formatDate, dateOrigin} from '@/utils/util.js';
@@ -352,14 +352,40 @@ export default {
 
       detailData: null,
 
-      imgData: {}
+      imgData: {},
+      imgDataList: [],
+      initImageInfo: {}
     }
   },
   created () {
     this.getMapGETmonitorList();
-
+    // this.getImageInfo();
   },
   methods: {
+    // 获取图片区域信息
+    getImageInfo () {
+      const params = {
+        bussType: 1, // 4---机动车  1-- 人
+        url: this.curImageUrl
+        // url: 'http://10.116.126.10/root/test/20190918-1635-002.jpg'
+      };
+      getImageAreaInfo(params)
+        .then(res => {
+          if (res && res.data) {
+            if (res.data.length > 0) {
+              this.isOpenImgDialog = true;
+
+              res.data.map(item => {
+                const obj = {
+                  ...item,
+                  // uid: 1 + Math.random()
+                };
+                this.imgDataList.push(obj);
+              })
+            }
+          }
+        })
+    },
     emitImgData (obj) {
       this.isOpenImgDialog = obj.open;
       if (obj.imgPath) {
@@ -385,10 +411,18 @@ export default {
       console.log('uploadEmit data', data);
       if (data && data.path) {
         this.curImageUrl = data.path;
+
+        this.initImageInfo = {
+          url: data.path,
+          width: data.imgWidth,
+          height: data.imgHeight
+        };
+        this.getImageInfo();
       } else {
         this.curImageUrl = null;
         this.hqtzLoading = false;
         this.uploadTZObj = {};
+        this.initImageInfo = {};
       }
     },
     // 获取特征

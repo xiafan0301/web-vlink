@@ -1284,6 +1284,8 @@ export default {
   height: 100%;
   width: 100%;
   display: flex;
+  box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
+  border-radius:4px;
   .vehicle_left {
     width: 260px;
     height: 100%;

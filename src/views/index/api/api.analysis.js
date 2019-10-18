@@ -226,47 +226,47 @@ export function getdetailbg(params) {
 }
 
 /*-------------------------- 区域人员分析start -------------------------------*/
-/**
- * postShotNumArea
- * 区域人员抓拍统计接口
- * @param {object} data
- */
-export function postShotNumArea(data) {
-  return request({
-    url: '/portrait/shot-num/area',
-    method: 'post',
-    mode: 'judge',
-    data
-  })
-}
+// /**
+//  * postShotNumArea
+//  * 区域人员抓拍统计接口
+//  * @param {object} data
+//  */
+// export function postShotNumArea(data) {
+//   return request({
+//     url: '/portrait/shot-num/area',
+//     method: 'post',
+//     mode: 'judge',
+//     data
+//   })
+// }
 
-/**
- * postShotNumAreaDetail
- * 区域人员抓拍详情接口
- * @param {object} data
- */
-export function getShotNumAreaDetail(data) {
-  return request({
-    url: '/portrait/shot-num/area/detail',
-    method: 'post',
-    mode: 'judge',
-    data
-  })
-}
+// /**
+//  * postShotNumAreaDetail
+//  * 区域人员抓拍详情接口
+//  * @param {object} data
+//  */
+// export function getShotNumAreaDetail(data) {
+//   return request({
+//     url: '/portrait/shot-num/area/detail',
+//     method: 'post',
+//     mode: 'judge',
+//     data
+//   })
+// }
 
-/**
- * dispatchRealtime
- * 区域分析实时/离线判断接口(web)
- * @param {object} data
- */
-export function dispatchRealtime(data) {
-  return request({
-    url: '/portrait/shot-num/area/dispatch/web',
-    method: 'post',
-    mode: 'judge',
-    data
-  })
-}
+// /**
+//  * dispatchRealtime
+//  * 区域分析实时/离线判断接口(web)
+//  * @param {object} data
+//  */
+// export function dispatchRealtime(data) {
+//   return request({
+//     url: '/portrait/shot-num/area/dispatch/web',
+//     method: 'post',
+//     mode: 'judge',
+//     data
+//   })
+// }
 
 /**
  * getPortraitRealtime
@@ -277,7 +277,7 @@ export function getPortraitRealtime(data) {
   return request({
     url: '/portrait/shot-num/area/real-time/web',
     method: 'post',
-    mode: 'judge',
+    mode: 'portrait',
     data
   })
 }
@@ -291,11 +291,22 @@ export function addOffLineTask(data) {
   return request({
     url: '/portrait/shot-num/area/task/web',
     method: 'post',
-    mode: 'judge',
+    mode: 'portrait',
     data
   })
 }
-
+/**
+ * addOffLineTask
+ * 区域分析重启-恢复任务接口(Web)
+ * @param {object} data
+ */
+export function restartAreaTask(uid) {
+  return request({
+    url: '/portrait/shot-num/area/reload/' + uid,
+    method: 'post',
+    mode: 'portrait',
+  })
+}
 /*-------------------------- 区域人员分析end -------------------------------*/
 /**
  * postPeopleTask

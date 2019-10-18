@@ -188,6 +188,8 @@ export default {
 </script>
 <style lang="scss" scoped>
 .custom_group {
+  // box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
+  // border-radius:4px;
   background-color: #ffffff;
   height: 100%;
   display: flex;
