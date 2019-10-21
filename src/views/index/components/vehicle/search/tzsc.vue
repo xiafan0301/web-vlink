@@ -548,7 +548,7 @@ export default {
       },
       /* 检索结果变量 */
       strucInfoList: [],
-      noDataTips: "请在左侧输入查询条件",
+      noDataTips: "选择车辆特征，查询具有相同特征车辆的抓拍记录",
       pageNum: 1,
       pageSize: 12,
       total: 0,
@@ -776,7 +776,7 @@ export default {
           getFeatureSearch(queryParams)
             .then(res => {
               this.getStrucInfoLoading = false; // 关闭加载效果
-              this.noDataTips = "暂无搜索结果";
+              this.noDataTips = "抱歉，没有相关的结果!";
               if (res.data && res.data.list) {
                 if (res.data.list.length > 0) {
                   this.strucInfoList = res.data.list;
@@ -794,7 +794,7 @@ export default {
               this.getStrucInfoLoading = false; // 关闭加载效果
               this.strucInfoList = []; // 清空搜索结果
               this.total = 0;
-              this.noDataTips = "暂无搜索结果";
+              this.noDataTips = "抱歉，没有相关的结果!";
             });
         } else {
           return false;

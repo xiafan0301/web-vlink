@@ -272,6 +272,8 @@ export default {
 .authority_info {
   height: 100%;
   padding: 20px 20px 0;
+  border-radius: 4px;
+  box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
   .title {
     background-color: #ffffff;
     color: #333333;

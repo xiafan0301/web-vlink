@@ -27,12 +27,13 @@ export default {
 .video_setting_main {
   padding: 20px;
   height: 100%;
-  
   > .ar-tab-nav {
     background-color: #ffffff;
     padding-top: 8px;
     overflow: hidden;
     border-bottom: 1px solid #F2F2F2;
+    border-radius: 4px;
+    box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
     > div {
         float: left;
         width: auto;

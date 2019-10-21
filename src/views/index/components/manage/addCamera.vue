@@ -1020,6 +1020,8 @@ export default {
     width: 98%;
     height: calc(100% - 80px - 65px);
     background-color: #ffffff;
+    border-radius: 4px;
+    box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
     margin: 0 20px;
     .tab_p {
       width: 100%;
@@ -1030,16 +1032,6 @@ export default {
       font-size: 16px;
       font-weight: bold;
       padding: 0 15px;
-      // >li {
-      //   margin: 0 15px;
-      //   color: #333333;
-      //   font-size: 16px;
-      //   cursor: pointer;
-      // }
-      // .is_active {
-      //   color: #0C70F8;
-      //   border-bottom: 2px solid #0C70F8;
-      // }
     }
     .basic_info {
       height: calc(100% - 55px);
