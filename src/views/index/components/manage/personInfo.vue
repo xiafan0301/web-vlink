@@ -854,6 +854,8 @@ export default {
   background-color: #ffffff;
   height: 100%;
   display: flex;
+  border-radius: 4px;
+  box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
   .basic_info_left {
     width: 260px;
     height: 100%;

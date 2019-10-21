@@ -83,7 +83,7 @@
             </el-table>
           </div>
         </div>
-        <div is="noResult" v-else :isInitPage="isInitPage"></div>
+        <div is="noResult" v-else :isInitPage="isInitPage" :tipMessage="tipMessage"></div>
       </div>
     </div>
   </div>
@@ -102,6 +102,7 @@ export default {
   data () {
     return {
       isInitPage: true,
+      tipMessage: '选择多个卡口，对比所选卡口在指定时间段的过车数量',
       queryForm: {
         carType: null,
         bayonetIds: [],

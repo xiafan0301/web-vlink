@@ -403,8 +403,8 @@ export default {
 <style lang="scss" scoped>
 .tirotation_setting {
   width: 100%;
-  // box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
-  // border-radius:4px;
+  box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
+  border-radius:4px;
   background-color: #ffffff;
   padding: 20px;
   .search_box {
