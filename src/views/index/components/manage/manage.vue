@@ -98,9 +98,17 @@ export default {
             }
             > i{
               margin-left: 10px;
-              color: #186DFB;
+              margin-bottom: 4px;
+              vertical-align: middle;
               cursor: pointer;
             }
+            > i:nth-child(2):hover{
+              background-position: -584px -348px!important;
+            }
+            > i:nth-child(3):hover{
+              background-position: -694px -348px!important;
+            }
+      
           }
           > div:nth-child(2){
             > span{
@@ -150,7 +158,6 @@ export default {
         display: flex;
         flex-wrap: wrap;
         align-items: flex-start;
-        overflow-y: auto;
         .list_info{
           margin: 0 0.5%;
           width: 32%;

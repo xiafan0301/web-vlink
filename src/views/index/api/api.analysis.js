@@ -161,9 +161,9 @@ export function putAnalysisTask(data) {
  */
 export function putTaskInfosResume(uid) {
   return request({
-    url: '/analysisTaskInfos/resume/' + uid,
-    method: 'put',
-    mode: 'judge',
+    url: '/face-retrieval/frequently-haunt-reload/' + uid,
+    method: 'post',
+    mode: 'portrait',
   })
 }
 /**
@@ -175,8 +175,22 @@ export function postTaskAnalysis(data) {
   return request({
     url: '/face-retrieval/add-frequently-haunt-job',
     method: 'post',
-    mode: 'judge',
+    mode: 'portrait',
     data
+  })
+}
+/**
+ * postModifyTaskAnalysis
+ * 频繁出没修改任务接口
+ * @param {object} data
+ */
+export function postModifyTaskAnalysis(data, ids) {
+  return request({
+    url: '/face-retrieval/modify-frequently-haunt-job',
+    method: 'post',
+    mode: 'portrait',
+    data,
+    params: ids
   })
 }
 

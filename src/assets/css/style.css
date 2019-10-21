@@ -206,11 +206,11 @@
 .vl_icon_control_18{width: 20px; height: 20px; background-position: -654px -346px;}
 .vl_icon_control_19{width: 20px; height: 21px; background-position: -694px -371px;}
 .vl_icon_control_20{width: 20px; height: 20px; background-position: -584px -374px;}
-.vl_icon_control_21{width: 20px; height: 20px; background-position: -414px -374px;}
+.vl_icon_control_21{width: 20px; height: 20px; background-position: -414px -376px;}
 .vl_icon_control_22{width: 20px; height: 20px; background-position: -500px -347px;}
 .vl_icon_control_23{width: 39px; height: 38px; background-position: -636px -128px;}
-.vl_icon_control_24{width: 20px; height: 20px; background-position: -694px -345px;}
-.vl_icon_control_25{width: 20px; height: 20px; background-position: -584px -345px;}
+.vl_icon_control_24{width: 20px; height: 20px; background-position: -694px -376px;}
+.vl_icon_control_25{width: 20px; height: 20px; background-position: -584px -376px;}
 .vl_icon_control_26{width: 20px; height: 20px; background-position: -755px -374px;}
 .vl_icon_control_27{width: 20px; height: 20px; background-position: -786px -374px;}
 .vl_icon_control_28{width: 20px; height: 20px; background-position: -902px -374px;}
@@ -394,6 +394,8 @@
 .vl_icon2_027:hover { background-position: -1397px -417px; }
 .vl_icon2_028 { background-position: -305px -815px; }
 .vl_icon2_028:hover { background-position: -304px -936px; }
+.vl_icon2_029 { background-position: -442px -815px; }
+.vl_icon2_029:hover { background-position: -441px -932px; }
 /**人像检索**/
 .vl_icon2_101 { background-position: -23px -566px; }
 .vl_icon2_101:hover { background-position: -22px -683px; }

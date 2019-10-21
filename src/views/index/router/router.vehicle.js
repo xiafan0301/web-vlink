@@ -25,9 +25,13 @@ export default {
       name: 'vehicle_search_tzsc',
       component: () => import('@/views/index/components/vehicle/search/tzsc.vue')
     }, {
-      path: 'ycsc', // 以图搜车
+      path: 'ycsc', // 以车搜车
       name: 'vehicle_search_ycsc',
       component: () => import('@/views/index/components/vehicle/search/ycsc.vue')
+    }, {
+      path: 'ytsc', // 以图搜车
+      name: 'vehicle_search_ytsc',
+      component: () => import('@/views/index/components/vehicle/search/ytsc.vue')
     },
        {
       path: 'mhsc', // 模糊搜车

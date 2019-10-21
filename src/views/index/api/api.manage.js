@@ -962,4 +962,82 @@ export function getPrev (data) {
   });
 }
 /* --------------数据字典end------------------ */
+
+/* --------------广告位管理start------------------ */
+/**
+ * 广告位【查询所有】接口
+ * @param {*}
+ */
+export function getAllAd () {
+  return request({
+    url: '/ad-space/get-all',
+    method: 'get'
+  });
+}
+/**
+ * 广告位【查询】接口
+ * @param {*} data
+ */
+export function getAdItem (data) {
+  return request({
+    url: '/ad-space/get',
+    method: 'get',
+    params: data
+  });
+}
+/**
+ * 展示数量和轮换速度【查询】接口
+ * @param {*} data
+ */
+export function getCountSpeed (data) {
+  return request({
+    url: '/ad-space/get-count-speed',
+    method: 'get',
+  });
+}
+/**
+ * 广告位【新增】接口
+ * @param {*} data
+ */
+export function postAd (data) {
+  return request({
+    url: '/ad-space/add',
+    method: 'post',
+    data
+  });
+}
+/**
+ * 广告位【修改】接口
+ * @param {*} data
+ */
+export function putAd (data) {
+  return request({
+    url: '/ad-space/update',
+    method: 'put',
+    data
+  });
+}
+/**
+ * 展示数量和轮换速度【修改】接口
+ * @param {*} data
+ */
+export function putCountSpeed (data) {
+  return request({
+    url: '/ad-space/update-count-speed',
+    method: 'put',
+    data
+  });
+}
+/**
+ * 广告位【删除】接口
+ * @param {*} data
+ */
+export function deleteAd (data) {
+  return request({
+    url: '/ad-space/delete',
+    method: 'delete',
+    params: data
+  });
+}
+/* --------------广告位管理end------------------ */
   

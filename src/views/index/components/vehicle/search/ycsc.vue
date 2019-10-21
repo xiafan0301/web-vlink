@@ -220,6 +220,8 @@
 
     <!--检索详情弹窗-->
     <div is="vehicleDetail" :detailData="detailData"></div>
+
+    <div is="imgSelectYtsc"></div>
   </div>
 </template>
 <script>
@@ -237,8 +239,9 @@ import { getPhotoSearch } from "../../../api/api.analysis.js"; // 根据图检�
 import { MapGETmonitorList } from "../../../api/api.map.js"; // 获取到设备树的接口
 import { objDeepCopy } from "../../../../../utils/util.js"; // 深拷贝方法
 
+import imgSelectYtsc from '@/components/common/imgSelectYtsc.vue';
 export default {
-  components: { vlBreadcrumb, vehicleDetail, vlUpload },
+  components: { vlBreadcrumb, vehicleDetail, vlUpload, imgSelectYtsc },
   data() {
     return {
       uploadClear: {},

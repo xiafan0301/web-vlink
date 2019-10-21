@@ -140,6 +140,18 @@
                 ></el-option>
               </el-select>
             </el-form-item>
+            <el-form-item prop="groupId" v-if="hasGroupFilter">
+              <el-select  style="width: 240px;" v-model="areaSeachForm.groupId" placeholder="自定义组">
+                <el-option label="全部分组" :value="0"></el-option>
+                <el-option
+                  v-for="(item, index) in groupsList"
+                  :key="index"
+                  :label="item.groupName"
+                  :value="item.uid"
+                >
+                </el-option>
+              </el-select>
+            </el-form-item>
             <el-form-item prop="dutyOrganId">
               <el-select style="width: 240px;" v-model="areaSeachForm.dutyOrganId" placeholder="责任部门">
                 <el-option label="全部部门" :value="0"></el-option>
@@ -259,7 +271,7 @@
 <script>
   import { dataList } from '@/utils/data.js';
   import { getDiciData } from '@/views/index/api/api.js';
-  import { getDepartmentList } from '@/views/index/api/api.manage.js';
+  import { getDepartmentList, getCusGroup } from '@/views/index/api/api.manage.js';
   import {getAllMonitorList, getBayonetList, getDeviceByBayonetUids} from '@/views/index/api/api.base.js';
   import {mapXupuxian} from '@/config/config.js';
   import {random14, addCluster, objDeepCopy} from '@/utils/util.js';
@@ -276,7 +288,7 @@
       activeDeviceList 打开弹窗是已经激活了的设备
       hideDBlist 是否隐藏列表选择, 默认有
       isNotDialog 是不是dialog， 默认是
-      filter 带查询过滤
+      filter 带查询过滤 1--有自定义分组的查询条件  2---没有自定义分组的查询条件
       this.$refs[yourRef].getCheckedIds() // 通过这个方法获取当前的已选设备
     */
     props: ['open', 'clear', 'showTypes', 'oConfig', 'editAble', 'singleArea', 'activeDeviceList', 'hideDBlist', 'isNotDialog', 'filter'],
@@ -285,13 +297,17 @@
       return {
         dutyUnitId: '', // 当前用来作为条件的部门id
         intelligentCharac: '', // 当前用来作为条件的特性id
+        groupId: '', // 当前用来作为条件的自定义分组id
         areaSeachForm: {
           intelCharac: 0, // 智能特性
           dutyOrganId: 0, // 责任部门id
+          groupId: 0, // 自定义分组id
         },
         allDepartmentData: [], // 部门列表
         intelCharacList: [], // 智能特性列表
+        groupsList: [], // 自定义分组列表
         hasFilter: false,// 默认没有搜索
+        hasGroupFilter: false, // 默认没有自定义分组的搜索
 
         isFilterData: '',
         filterKey: '',
@@ -413,16 +429,25 @@
       },
     },
     mounted () {
+      
       this.showDeviceList = this.hideDBlist === undefined ? true : false;
       this.sArea = this.singleArea === undefined ? false : true;
       this.pointC = this.singleArea === undefined ? true : false;
       this.isDialog = this.isNotDialog === undefined ? true : false;
       this.hasFilter = this.filter === undefined ? false : true;
+      if (this.filter === 1) {
+        this.hasGroupFilter = true;
+      } else if (this.filter === 2) {
+        this.hasGroupFilter = false;
+      }
       this.getTreeList();
       // 判断有插入查询就先获取字典数据
       if (this.hasFilter) {
         this.getIntelCharacList();
         this.getAllDepartList();
+      }
+      if (this.hasGroupFilter) {
+        this.getGroups();
       }
     },
     computed: {
@@ -454,10 +479,21 @@
         this.$_showLoading({target: '.public_map_selector_dialog'})
         this.intelligentCharac = this.areaSeachForm.intelCharac ? parseInt(this.areaSeachForm.intelCharac) : '';
         this.dutyUnitId = this.areaSeachForm.dutyOrganId ? this.areaSeachForm.dutyOrganId : '';
+        this.groupId = this.areaSeachForm.groupId ? this.areaSeachForm.groupId : '';
         this.getTreeList(true);
       },
       resetForm (form) {
         this.$refs[form].resetFields();
+      },
+      // 获取所有的分组
+      getGroups () {
+        getCusGroup()
+          .then(res => {
+            if (res) {
+              this.groupsList = res.data;
+            }
+          })
+          .catch(() => {})
       },
       // 获取智能特性列表
       getIntelCharacList () {
@@ -1083,6 +1119,9 @@
         if (this.intelligentCharac) {
           params.intelligentCharac = this.intelligentCharac;
         }
+        if (this.groupId) {
+          params.groupId = this.groupId;
+        }
         getAllMonitorList(params).then(res => {
           if (res.data) {
             let dList = [];
@@ -1445,7 +1484,7 @@
         position: absolute; top: 50px; left: .2rem; z-index: 1000;
         background-color: #fff;
         width: 2.6rem;
-        height: 7rem;
+        height: 6rem;
         -webkit-transition: height .3s ease-in;
         -moz-transition: height .3s ease-in;
         -ms-transition: height .3s ease-in;

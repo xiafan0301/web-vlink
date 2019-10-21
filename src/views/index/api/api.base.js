@@ -274,3 +274,39 @@ export function handUpload (file) {
     mode: baseModeName
   })
 }
+
+/**********************  特殊场所相关接口  ********************/
+/**
+ * 新增卡口
+ */
+export function getGroupsDevices (params) {
+  return request({
+    url: '/special-place/groups-devices',
+    params,
+    method: 'get',
+    mode: baseModeName
+  });
+}
+/* ----------区域信息服务-------------- */
+/**
+ * 根据区域id（多个以逗号隔开）查询区域下（不包含子区域）设备和卡口信息
+ */
+export function getCaBa (params) {
+  return request({
+    url: '/area-service/device-and-bayonet',
+    params,
+    method: 'get',
+    mode: baseModeName
+  });
+}
+/**********************  级联配置服务  ********************/
+/**
+ * 根据级联平台类型cascadeType查询级联配置
+*/
+export function getCascadeTypeList (type) {
+  return request({
+    url: '/cascades/cascadeType/' + type,
+    method: 'get',
+    mode: baseModeName
+  });
+}

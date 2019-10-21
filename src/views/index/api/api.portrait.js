@@ -36,6 +36,15 @@ export const apiFaceWarning = (params) => {
     mode: 'judge'
   });
 }
+/*================ 车流量对比 start=================== */
+export const apiCarFlowCompa = (data) => {
+  return request({
+    url: '/analysis/car-flow-compa',
+    method: 'post',
+    data,
+    mode: 'judge'
+  });
+}
 
 /*================人脸检索 --- 跟踪尾随 start=================== */
 /**
