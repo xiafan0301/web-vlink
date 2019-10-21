@@ -28,7 +28,7 @@
       <el-button type="primary" @click="selControl('modelFive')">一键布控</el-button>
     </el-form-item>
     <div is="controlDev" ref="controlDev" v-if="isShowControlDev" :devs="devs" :bays="bays" @getChildModel="getChildModel" :devIdListFive="devIdList" :bayIdListFive="bayIdList"></div>
-    <div is="vehicleLib" ref="vehicleLibDialog" :fileList="vehicleList" @getVehicleData="getVehicleData"></div>
+    <div is="vehicleLib" ref="vehicleLibDialog" :fileList="vehicleList" @getVehicleData="getVehicleData" :groupIds="modelFiveForm.locations.join(',')"></div>
   </el-form>
 </template>
 <script>
@@ -121,7 +121,7 @@ export default {
           }
           if (this.$refs['controlDev']) {
             this.$refs['controlDev'].sendParent();
-            if (this.devData.devList.length === 0) return this.$message.warning('请先选择布控设备');
+            if (this.devData.devList.length === 0 && this.devData.bayonetList.length === 0) return this.$message.warning('请先选择布控设备');
             let _modelFiveForm = {};
             const _locations = this.modelFiveForm.locations;
             _modelFiveForm = {locations: _locations, stayTime: this.modelFiveForm.stayTime, ...this.devData}

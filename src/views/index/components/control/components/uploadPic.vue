@@ -111,7 +111,7 @@ export default {
     },
     handlePictureCardPreview (file) {
       console.log(file, 'file')
-      this.dialogImageUrl = file.photoUrl;
+      this.dialogImageUrl = file.url;
       this.dialogVisible = true;
       console.log(this.dialogImageUrl, 'this.dialogImageUrl')
     },

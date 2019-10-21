@@ -76,7 +76,8 @@
         <div class="right_box table_box" v-if="bkclccList && bkclccList.list && bkclccList.list.length > 0">
           <el-table
             v-loading="loading"
-            :data="bkclccList.list "
+            :data="bkclccList.list"
+            @sort-change="plateNoSort"
             >
             <el-table-column
               type="index"
@@ -86,8 +87,9 @@
             </el-table-column>
             <el-table-column
               label="车牌号码"
-              prop="plateNo"
+              prop="PlateNo"
               show-overflow-tooltip
+              sortable="custom"
               >
             </el-table-column>
             <el-table-column
@@ -113,7 +115,7 @@
             </el-table-column>
             <el-table-column
               label="车辆类型"
-              prop="vehicleClass"
+              prop="vehicleClassDesc"
               show-overflow-tooltip
               >
             </el-table-column>
@@ -200,6 +202,7 @@ export default {
       },
       // 
       detailData: {},// 抓拍详情数据
+      orderObj: {}
     }
   },
   created () {
@@ -212,6 +215,25 @@ export default {
     // this.getControlCarSta();
   },
   methods: { 
+    // 车牌号码排序
+    plateNoSort (data) {
+      if (data.order) {
+        this.orderObj = data;
+      } else {
+        this.orderObj = null
+      }
+      let order = null;
+      if (this.orderObj) {
+        if (this.orderObj.order === 'ascending') {
+          order = 'asc';
+        } else {
+          order = 'desc';
+        }
+        this.getControlCarSta({orderBy: 'plateNo', order});
+      } else {
+        this.getControlCarSta();
+      }
+    },
     // 获取到车辆类别
     getGroupsByType () {
       getGroupsByType({ groupType: 9 }).then(res => {
@@ -271,9 +293,9 @@ export default {
       this.getControlCarSta();
     },
     // 获取布控车辆出城统计
-    getControlCarSta () {
+    getControlCarSta (_data = {}) {
       this.currentPage = 1;
-      const data = {
+      let data = {
         'startTime': formatDate(this.queryForm.startTime),
         'endTime': formatDate(this.queryForm.endTime),
         'vehicleNumber': this.queryForm.province + this.queryForm.provinceName,
@@ -286,6 +308,7 @@ export default {
       if(this.queryForm.carType && this.queryForm.carType.length > 0) {
         data['vehicleType'] = this.queryForm.carType.join(',')
       }
+      data = {...data, ..._data};
       console.log(JSON.stringify(data))
       this.loadingBtn = true;
       apiOutCityStatistics(data).then(res => {
