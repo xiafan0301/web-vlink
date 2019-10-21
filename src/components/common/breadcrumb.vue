@@ -41,7 +41,7 @@ export default {
 .vl_breadcrumb {
   height: 49px; line-height: 49px;
   padding-left: 20px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #d3d3d3;
   background-color: #fff;
 }
 </style>

@@ -217,7 +217,7 @@ export default {
         if (valid) {
           if (this.$refs['controlDev']) {
             this.$refs['controlDev'].sendParent();
-            if (this.devData.devList.length === 0) return this.$message.warning('请先选择布控设备');
+            if (this.devData.devList.length === 0 && this.devData.bayonetList.length === 0) return this.$message.warning('请先选择布控设备');
             
             let _modelOneForm = objDeepCopy(this.modelOneForm);
 

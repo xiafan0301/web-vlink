@@ -524,7 +524,9 @@ export default {
 </script>
 <style lang="scss" scoped>
 .role-manage {
-  padding: 20px;
+  margin: 20px;
+  box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
+  border-radius:4px;
   .header {
     background-color: #ffffff;
     padding: 20px 10px;

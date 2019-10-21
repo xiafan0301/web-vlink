@@ -56,7 +56,7 @@ export const getPersonShotDev = (params) => {
     url: '/person/shot-dev',
     method: 'post',
     data: params,
-    mode: 'judge'
+    mode: 'portrait'
   });
 }
 /**
@@ -68,7 +68,7 @@ export const getPersonFollowing = (params) => {
     url: '/person/trace-following',
     method: 'post',
     data: params,
-    mode: 'judge'
+    mode: 'portrait'
   });
 }
 /*================人脸检索 --- 跟踪尾随 end=================== */

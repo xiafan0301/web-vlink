@@ -130,11 +130,11 @@ export default {
         if (valid) {
           if (this.$refs['controlDev']) {
             this.$refs['controlDev'].sendParent();
-            if (this.devData.devList.length === 0) return this.$message.warning('请先选择布控卡口');
+            if (this.devData.devList.length === 0 && this.devData.bayonetList.length === 0) return this.$message.warning('请先选择布控设备');
             const _carNumberInfo = this.modelThreeForm.carNumberInfo.map(m => m.vehicleNumber).join(',');
             this.$emit('getModel', {carNumberInfo: _carNumberInfo, modelType: 3,  pointDtoList: [this.devData], surveillanceObjectDtoList: [...imgUrls(this.fileListOne), ...this.fileListTwo]});
           } else {
-            this.$message.warning('请先选择布控卡口');
+            this.$message.warning('请先选择布控设备');
           }
         } else {
           return false;

@@ -749,6 +749,18 @@ export function addAreaPersonTask(params) {
     mode: 'portrait'
   })
 }
+/**
+ * 区域人员修改离线任务接口
+ * @param {object} params
+ */
+export function updateAreaPersonTask(params) {
+  return request({
+    url: '/portrait/shot-num/area/updatetask/web',
+    method: 'put',
+    data: params,
+    mode: 'portrait'
+  })
+}
 
 
 /****************************车辆限行接口 ******************************** */
@@ -810,5 +822,19 @@ export function getLimitTaskList(params) {
     method: 'get',
     params,
     mode: 'vehicle'
+  })
+}
+
+/****************************图片框选区域信息接口 ******************************** */
+/**
+ * 图片区域查询接口
+ * @param {object} params
+ */
+export function getImageAreaInfo(params) {
+  return request({
+    url: '/picture/reactInfo',
+    method: 'get',
+    params,
+    mode: 'judge'
   })
 }

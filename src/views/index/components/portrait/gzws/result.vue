@@ -338,7 +338,7 @@ export default {
             }
           })
           const params = {
-            uid: this.editForm.uid,
+            uid: this.$route.query.id,
             targetPicUrl: this.dialogImageUrl,
             deviceId: deviceCode,
             deviceName: this.editForm.deviceName,

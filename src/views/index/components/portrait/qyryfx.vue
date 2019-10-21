@@ -352,7 +352,7 @@
                       >恢复任务</span>
                       <span
                         class="operation_btn"
-                        @click="recoveryTask(scope.row)"  
+                        @click="recoveryTask(scope.row)" 
                         v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 3"
                       >重启任务</span>
                       <span
@@ -430,7 +430,7 @@ import {
   getAreaRealTimeData,
   addAreaPersonTask
 } from "@/views/index/api/api.judge.js";
-import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
+import { getTaskInfosPage, putAnalysisTask, restartAreaTask } from '@/views/index/api/api.analysis.js';
 import { getGroupAllList } from "@/views/index/api/api.control.js";
 import { objDeepCopy } from "@/utils/util.js";
 
@@ -705,7 +705,7 @@ export default {
     // 恢复任务 --- 重启任务
     recoveryTask (obj) {
       if (obj.uid) {
-        putTaskInfosResume(obj.uid)
+        restartAreaTask(obj.uid)
           .then(res => {
             if (res) {
               this.getTaskList();
@@ -1260,7 +1260,7 @@ export default {
   }
   .qyryfx_content {
     position: relative;
-    border-top: 1px solid #d3d3d3;
+    // border-top: 1px solid #d3d3d3;
     height: 100%;
     // height: calc(100% - 60px);
     overflow: hidden;
