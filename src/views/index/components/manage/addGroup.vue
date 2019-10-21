@@ -319,6 +319,8 @@ export default {
     width: 98%;
     background-color: #ffffff;
     margin: 0 20px 60px 20px;
+    border-radius: 4px;
+    box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
     padding-bottom: 5px;
     .content_new_group {
       padding: 20px;

@@ -146,7 +146,7 @@
       <div v-else class="fnull">
         <div v-if="isInit">
           <img src="../../../../../assets/img/null-content.png" alt />
-          <span>请在左侧输入查询条件</span>
+          <span>上传车辆图片，查询图中车辆的抓拍记录</span>
         </div>
         <div v-else>
           <img src="../../../../../assets/img/not-content.png" alt />

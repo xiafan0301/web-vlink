@@ -595,6 +595,8 @@ export default {
     background-color: #ffffff;
     margin: 0 20px 80px 20px;
     padding-bottom: 5px;
+    border-radius: 4px;
+    box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
     .content_alert {
       margin: 0 20px;
       padding: 15px 0 0;

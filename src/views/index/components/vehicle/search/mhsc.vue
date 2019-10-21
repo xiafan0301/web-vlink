@@ -175,7 +175,7 @@
       <div v-else class="fnull">
         <div v-if="isInit">
           <img src="../../../../../assets/img/null-content.png" alt />
-          <span>请在左侧输入查询条件</span>
+          <span>选择特定类别，查询该类车辆的行车情况</span>
         </div>
         <div v-else>
           <img src="../../../../../assets/img/not-content.png" alt />

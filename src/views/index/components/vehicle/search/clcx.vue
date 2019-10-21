@@ -175,9 +175,11 @@
         </div>
       </div>
       <div v-if="isNull" class="fnull">
-        <div><img src="../../../../../assets/img/null-content.png" alt="">
-        请在左侧输入查询条件</div>
-  
+        <div>
+          <img src="../../../../../assets/img/null-content.png" alt="">
+          选择设备和车辆类别，查询特定时间段内该类别车辆在所选设备的过车情况
+        </div>
+
       </div>
       <el-pagination
         v-show="pagination.total > 0"

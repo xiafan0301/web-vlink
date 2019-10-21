@@ -115,7 +115,7 @@
             <div class="vc_gcck_r_empty">
               <div class="com_trans50_lt">
                 <img src="../../../../../assets/img/null-content.png" alt="">
-                <p>选择左侧的摄像头或卡口进行查看</p>
+                <p>选择抓拍设备，查看该设备的实时过车和历史过车情况</p>
               </div>
             </div>
           </div>
