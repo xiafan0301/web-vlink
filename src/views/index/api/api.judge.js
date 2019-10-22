@@ -366,7 +366,7 @@ export function getSnapList(params) {
     url: '/vehicle/snap',
     method: 'post',
     data:params,
-    mode: 'judge'
+    mode: 'vehicle'
   });
 }
 
@@ -396,7 +396,7 @@ export function QyphGetAreaWander(data) {
     url: '/vehicle-analysis/area-wander',
     method: 'post',
     data,
-    mode: 'judge'
+    mode: 'vehicle'
   });
 }
 /*--------------------------  区域徘徊碰撞end  ---------------------------------*/
@@ -540,7 +540,7 @@ export function getFocusList(params) {
     url: '/portrait/shot-num/focus',
     method: 'post',
     data: params,
-    mode: 'judge'
+    mode: 'portrait'
   })
 }
 /**
@@ -552,7 +552,7 @@ export function PortraitPostFocusRealTime(data, extData) {
     url: '/portrait/shot-num/focus/real-time',
     method: 'post',
     data,
-    mode: 'judge',
+    mode: 'portrait',
     extData: extData
   })
 }
@@ -565,7 +565,7 @@ export function PortraitPostFocusTask(data) {
     url: '/portrait/shot-num/focus/task',
     method: 'post',
     data,
-    mode: 'judge'
+    mode: 'portrait'
   })
 }
 /*--------------------------  导入导出  ---------------------------------*/
@@ -615,7 +615,7 @@ export function getFaceRetrievalPerson(params, extData) {
     url: '/face-retrieval/query-person',
     method: 'post',
     data: params,
-    mode: 'judge',
+    mode: 'portrait',
     extData: extData
   })
 }

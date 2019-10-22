@@ -96,6 +96,7 @@ export default {
       console.log('asasd', this.imgData);
       
       this.currentImg = Object.assign({}, this.imgData);
+      this.picSubmit();
     }
   },
   watch: {

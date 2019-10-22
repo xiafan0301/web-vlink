@@ -43,76 +43,12 @@
                   </el-form-item>
                 </div>
                 <!-- 选择设备 -->
-                <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
-                <div class="selected_device" @click="treeTabShow = true;">
-                  <!-- 箭头icon -->
-                  <i class="el-icon-arrow-down" v-show="!treeTabShow"></i>
-                  <i class="el-icon-arrow-up" v-show="treeTabShow"></i>
-                  <div class="device_list" v-if="selectDeviceArr.length > 0 && !checkAllTree">
-                    <span>{{ selectDeviceArr[0]['label'] }}</span>
-                    <span
-                      v-show="selectDeviceArr.length > 1"
-                      title="展开选中的设备"
-                      class="device_count"
-                    >+{{ selectDeviceArr.length - 1 }}</span>
-                  </div>
-                  <div class="no_device" v-else-if="selectDeviceArr.length > 0 && checkAllTree">全部设备</div>
-                  <div class="no_device" v-else>选择设备</div>
-                  <!-- 树tab页面 -->
-                  <div class="device_tree_tab" v-show="treeTabShow">
-                    <!-- <div style="overflow: hidden;">
-                  <div
-                    class="tab_title"
-                    :class="{ 'current_title': index === selectedTreeTab }"
-                    @click="selectedTreeTab = index;"
-                    v-for="(item, index) in treeTabArr"
-                    :key="'tab_title' + index"
-                  >{{ item.name }}</div>
-                    </div>-->
-                    <!-- 视频树 -->
-                    <div class="tree_content">
-                      <vue-scroll>
-                        <div class="checked_all">
-                          <el-checkbox
-                            :indeterminate="isIndeterminate"
-                            v-model="checkAllTree"
-                            @change="handleCheckedAll"
-                          >全选</el-checkbox>
-                        </div>
-                        <el-tree
-                          @check="listenChecked"
-                          :data="cameraTree"
-                          show-checkbox
-                          default-expand-all
-                          node-key="label"
-                          ref="cameraTree"
-                          highlight-current
-                          :props="defaultProps"
-                        ></el-tree>
-                      </vue-scroll>
-                    </div>
-                    <!-- <div class="tree_content" v-show="selectedTreeTab === 1">
-                  <vue-scroll>
-                    <div class="checked_all">
-                      <el-checkbox
-                        :indeterminate="isIndeterminateBay"
-                        v-model="checkAllTreeBay"
-                        @change="handleCheckedAllBay"
-                      >全选</el-checkbox>
-                    </div>
-                    <el-tree
-                        @check="listenCheckedBay"
-                        :data="bayonetTree"
-                        show-checkbox
-                        default-expand-all
-                        node-key="id"
-                        ref="bayonetTree"
-                        highlight-current
-                        :props="defaultProps"
-                      ></el-tree>
-                  </vue-scroll>
-                    </div>-->
-                  </div>
+                <div class="mhsc_xzsb_s"  v-show="selectAreaType === 0" @click="areaTypeChanged">
+                  <span>选择设备</span>
+                  <span class="el-icon-arrow-down"></span>
+                </div>
+                <div class="mhsc_dtxz_rst"  v-show="selectAreaType === 2">
+                  已选<span>{{dSum}}</span>个设备<a href="javascript: void(0);" @click="openMap={}">重选</a>
                 </div>
                 <el-form-item label prop="carType">
                   <el-select
@@ -249,6 +185,14 @@
     </div>
     <!--检索详情弹窗-->
     <div is="vehicleDetail" :detailData="detailData"></div>
+    <!-- D设备 B卡口  这里是设备和卡口 -->
+    <div
+            is="mapSelector"
+            :open="openMap"
+            :clear="msClear"
+            :showTypes="'DB'"
+            @mapSelectorEmit="mapSelectorEmit">
+    </div>
   </div>
 </template>
 <script>
@@ -259,15 +203,22 @@ import { formatDate, dateOrigin } from "@/utils/util.js";
 
 import { getGroupsByType } from "@/views/index/api/api.js";
 import { getVagueSearch } from "../../../api/api.analysis.js"; // 根据图检索接口
-import { MapGETmonitorList } from "../../../api/api.map.js"; // 获取到设备树的接口
 import { objDeepCopy } from "../../../../../utils/util.js"; // 深拷贝方法
+import mapSelector from '@/components/common/mapSelector.vue';
+import { dataList } from "@/utils/data.js";
 import vehicleDetail from "../common/vehicleDetail.vue";
 export default {
-  components: { vehicleDetail, vlBreadcrumb },
+  components: { vehicleDetail, vlBreadcrumb, mapSelector },
   data() {
     return {
-      detailData: null,
+      dSum: 0, // 设备总数
+      openMap: false,
+      msClear: {},
+      selectAreaType: 0,
+      selectCameraArr: [], // 选中的摄像头数组
+      selectBayonetArr: [], // 选中的卡口数组
 
+      detailData: null,
       selectType: 1,
       sortType: 1, // 1为时间排序， 2为监控排序
       timeSortType: true, // true为时间降序， false为时间升序
@@ -351,32 +302,6 @@ export default {
         }
       ],
       stucOrder: 2, // 1升序，2降序，3监控，4相似度
-      /* 选择设备变量 */
-      treeTabShow: false,
-      selectDeviceArr: [], // 选中的设备数组
-      selectCameraArr: [], // 选中的摄像头数组
-      selectBayonetArr: [], // 选中的卡口数组
-      selectedTreeTab: 0, // 当前选中的
-      treeTabArr: [
-        {
-          name: "摄像头"
-        },
-        {
-          name: "卡口"
-        }
-      ],
-      isIndeterminate: false, // 是否处于全选与全不选之间
-      isIndeterminateBay: false, //卡口
-      checkAllTree: false, // 树是否全选
-      checkAllTreeBay: false,
-      bayonetTree: [], // 卡口树
-      cameraTree: [],
-      videoTreeNodeCount: 0, // 摄像头节点数量
-      bayonetTreeNodeCount: 0, // 卡口节点数量
-      defaultProps: {
-        children: "children",
-        label: "label"
-      },
       /* 检索结果变量 */
       strucInfoList: [],
       strucInfoListAll: [],
@@ -388,9 +313,8 @@ export default {
     };
   },
   mounted() {
-    this.getMonitorList();
     this.setDTime();
-    this.vehicleBelongOptions = this.dicFormater(48)[0].dictList; // 获取车辆归属地
+    this.vehicleBelongOptions = this.dicFormater(dataList.ownership)[0].dictList; // 获取车辆归属地
     // 获取到车辆类别
     getGroupsByType({ groupType: 9 }).then(res => {
       if (res.data) {
@@ -407,6 +331,36 @@ export default {
     });
   },
   methods: {
+    areaTypeChanged () {
+      this.selectAreaType = 2;
+      this.openMap = !this.openMap;
+    },
+    mapSelectorEmit (result) {
+      console.log(result)
+      if (result) {
+        // bayonetList deviceList
+        this.dSum = 0;
+        if (result.deviceList) {
+          this.dSum = result.deviceList.length;
+          for (let i = 0; i < result.deviceList.length; i++) {
+            this.selectCameraArr.push(result.deviceList[i].uid);
+          }
+        }
+        if (result.bayonetList && result.bayonetList.length > 0) {
+          for (let i = 0; i < result.bayonetList.length; i++) {
+            this.selectBayonetArr.push(result.bayonetList[i].uid);
+          }
+          this.dSum += result.bayonetList.length;
+        }
+//        if (result.bayonetDeviceList && result.bayonetDeviceList.length > 0) {
+//          this.dSum += result.bayonetDeviceList.length;
+//          for (let i = 0; i < result.bayonetDeviceList.length; i++) {
+//            this.dIds.push(result.bayonetDeviceList[i].uid);
+//          }
+//        }
+      }
+    },
+
     getStrucInfo(isClick = false) {
       // 根据特征数组来获取到检索的结果
       this.$refs.mhscMenuForm.validate(valid => {
@@ -421,12 +375,8 @@ export default {
             return;
           }
           // 处理设备UID
-          let deviceUidArr = this.selectCameraArr.map(item => {
-            return item.id;
-          });
-          let bayonetUidArr = this.selectBayonetArr.map(item => {
-            return item.id;
-          });
+          let deviceUidArr = this.selectCameraArr;
+          let bayonetUidArr = this.selectBayonetArr;
           // if (
           //   (!this.mhscMenuForm.provice && this.mhscMenuForm.carNumber) ||
           //   (this.mhscMenuForm.provice && !this.mhscMenuForm.carNumber)
@@ -514,7 +464,8 @@ export default {
     resetMenu() {
       // 置空数据数量
       this.total = 0;
-      this.selectDeviceArr = []; // 清空选中的设备列表
+      this.dSum = 0;
+      this.msClear = {};
       this.selectCameraArr = []; // 清空选中的摄像头与卡口列表
       this.selectBayonetArr = [];
       this.strucInfoList = []; // 清空检索结果数据
@@ -522,7 +473,6 @@ export default {
         this.$refs.mhscMenuForm.resetFields();
       }
       this.setDTime(); // 重置时间
-      this.initCheckTree(); // 初始化全选树节点
     },
     /*选择日期的方法 */
     setDTime() {
@@ -554,163 +504,6 @@ export default {
         this.getStrucInfo();
       }
     },
-    /*选择设备的方法*/
-    initCheckTree() {
-      // 一进入页面就全选设备
-      this.$nextTick(() => {
-        this.checkAllTree = true;
-        this.handleCheckedAll(true);
-        // this.getStrucInfo();
-      });
-    },
-    getMonitorList() {
-      let params = {
-        areaUid: mapXupuxian.adcode
-      };
-      MapGETmonitorList(params).then(res => {
-        if (res && res.data) {
-          let camera = objDeepCopy(res.data.areaTreeList);
-          let bayonet = objDeepCopy(res.data.areaTreeList);
-          this.cameraTree = this.getTreeList(camera);
-          this.getLeafCountTree(this.cameraTree);
-          this.initCheckTree(); // 初始化全选设备
-        }
-      });
-    },
-    //获取摄像头数据
-    getTreeList(data) {
-      for (let item of data) {
-        item["id"] = item.areaId;
-        item["label"] = item.areaName;
-        let children = [],
-          deviceBasic = [],
-          bayonet = [];
-        if (item.deviceBasicList && item.deviceBasicList.length > 0) {
-          deviceBasic = item.deviceBasicList;
-          for (let key of deviceBasic) {
-            key["label"] = key.deviceName;
-            key["id"] = key.uid;
-            key["treeType"] = 1;
-          }
-          delete item.deviceBasicList;
-        }
-        if (item.bayonetList && item.bayonetList.length > 0) {
-          bayonet = item.bayonetList;
-          for (let key of bayonet) {
-            key["label"] = key.bayonetName;
-            key["id"] = key.uid;
-            key["treeType"] = 2;
-          }
-          delete item.bayonetList;
-        }
-        children.push(...deviceBasic, ...bayonet);
-        item["children"] = children;
-      }
-      return data;
-    },
-    //获取卡口数据
-    /* getBayTreeList(data) {
-      for(let item of data) {
-        item['id'] = item.areaId
-        item['label'] = item.areaName
-        if(item.bayonetList && item.bayonetList.length > 0) {
-          item['children'] = item.bayonetList
-          delete(item.bayonetList)
-          for(let key of item['children']) {
-            key['label'] = key.bayonetName
-            key['id'] = key.uid
-            key['treeType'] = 2
-          }
-        }
-      }
-      return data;
-    }, */
-    // tab的方法
-    chooseDevice() {
-      // 选择了树的设备
-      this.treeTabShow = false;
-    },
-    // 处理摄像头树全选时间
-    handleCheckedAll(val) {
-      this.isIndeterminate = false;
-      if (val) {
-        this.$refs.cameraTree.setCheckedNodes(this.cameraTree);
-      } else {
-        this.$refs.cameraTree.setCheckedNodes([]);
-      }
-      this.selectDeviceArr = this.$refs.cameraTree.getCheckedNodes(true);
-      this.handleData();
-    },
-    getLeafCountTree(json) {
-      // 获取树节点的数量
-      for (let i = 0; i < json.length; i++) {
-        if (json[i].hasOwnProperty("id")) {
-          this.videoTreeNodeCount++;
-        }
-        if (json[i].hasOwnProperty("children")) {
-          this.getLeafCountTree(json[i].children);
-        } else {
-          continue;
-        }
-      }
-    },
-    //摄像头
-    listenChecked(val, val1) {
-      this.selectDeviceArr = this.$refs.cameraTree.getCheckedNodes(true);
-      this.handleData();
-      if (val1.checkedNodes.length === this.videoTreeNodeCount) {
-        this.isIndeterminate = false;
-        this.checkAllTree = true;
-      } else if (
-        val1.checkedNodes.length < this.videoTreeNodeCount &&
-        val1.checkedNodes.length > 0
-      ) {
-        this.checkAllTree = false;
-        this.isIndeterminate = true;
-      } else if (val1.checkedNodes.length === 0) {
-        this.checkAllTree = false;
-        this.isIndeterminate = false;
-      }
-    },
-    // 处理卡口树全选时间
-    /* handleCheckedAllBay(val) {
-      this.isIndeterminateBay = false;
-      if (val) {
-        this.$refs.bayonetTree.setCheckedNodes(this.bayonetTree);
-      } else {
-        this.$refs.bayonetTree.setCheckedNodes([]);
-      }
-      this.selectBayonetArr = this.$refs.bayonetTree.getCheckedNodes(true);
-      this.handleData();
-    },
-    //卡口
-    listenCheckedBay(val, val1) {
-      this.selectBayonetArr = this.$refs.bayonetTree.getCheckedNodes(true);
-      this.handleData();
-      if (val1.checkedNodes.length === this.videoTreeNodeCount) {
-        this.isIndeterminateBay = false;
-        this.checkAllTreeBay = true;
-      } else if (val1.checkedNodes.length < this.videoTreeNodeCount && val1.checkedNodes.length > 0) {
-        this.checkAllTreeBay = false;
-        this.isIndeterminateBay = true;
-      } else if (val1.checkedNodes.length === 0) {
-        this.checkAllTreeBay = false;
-        this.isIndeterminateBay = false;
-      }
-    }, */
-    // 选中的设备数量处理
-    handleData() {
-      /* this.selectDeviceArr = [...this.selectCameraArr, ...this.selectBayonetArr].filter(key => key.treeType); */
-      this.selectDeviceArr = [...this.selectDeviceArr].filter(
-        key => key.treeType
-      );
-      this.selectCameraArr = [...this.selectDeviceArr].filter(
-        key => key.treeType === 1
-      );
-      this.selectBayonetArr = [...this.selectDeviceArr].filter(
-        key => key.treeType === 2
-      );
-    },
     showStrucInfo(data, index) {
       this.detailData = {
         type: 6, // 6模糊搜车
@@ -726,6 +519,48 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+  .mhsc_xzsb_s {
+    height: 40px;
+    line-height: 40px;
+    width: 100%;
+    border-radius: 4px;
+    border: 1px solid #DCDFE6;
+    cursor: pointer;
+    color: #999999;
+    padding: 0 6px;
+    margin-bottom: 10px;
+    > span {
+      display: inline-block;
+      width: 50%;
+      &:last-child {
+        text-align: right;
+      }
+    }
+  }
+  .mhsc_dtxz_rst {
+    width: 100%;
+    line-height: 40px;
+    padding: 0px 15px; margin-top: 5px;
+    background-color: #F5F7FA;
+    color: #C0C4CC;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    > span {
+      display: inline-block;
+      padding: 0 3px;
+      color: #333;
+    }
+    > a {
+      display: inline-block;
+      padding-left: 5px;
+      color: #2580FC !important;
+      text-decoration: none !important;
+      /*font-style: italic;*/
+      cursor: pointer;
+    }
+  }
+  
 .mhsc_wrap {
   height: 100%;
   position: relative;

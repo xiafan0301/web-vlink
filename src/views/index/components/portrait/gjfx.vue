@@ -20,6 +20,14 @@
           label-width="0px"
           class="demo-ruleForm"
           >
+          <el-form-item prop="taskName" v-show="taskType === '2'">
+            <div  class="ytsr_left_radio">
+              <span>任务名称：</span>
+              <span>
+                <el-input v-model="taskName" placeholder="请输入任务名称" maxlength="20"></el-input>
+              </span>
+            </div>
+          </el-form-item>
           <el-form-item class="" prop="data1">
             <el-date-picker
                     v-model="ruleForm.data1"
@@ -121,6 +129,7 @@
                 <div class="insetLeft2 vl_icon vl_icon_vehicle_02" :class="{'vl_icon_vehicle_03': hideleft}" @click="hideResult"></div>
               </div>
             </div>
+            <div class="insetLeft vl_icon vl_icon_vehicle_03" v-show="hideleft" @click="showResult"></div>
           </div>
         </template>
         <template v-else>
@@ -165,22 +174,12 @@
                     {{scope.row.taskWebParam.startTime}}-{{scope.row.taskWebParam.endTime}}
                   </template>
                 </el-table-column>
-                <el-table-column label="人群" show-overflow-tooltip>
+                <el-table-column label="结果数"  v-if="selectIndex === 1" show-overflow-tooltip>
                   <template slot-scope="scope">
-                    {{scope.row.taskWebParam.portraitGroupName ? scope.row.taskWebParam.portraitGroupName : '不限'}}
+                    {{scope.row.resultNum}}
                   </template>
                 </el-table-column>
-                <el-table-column label="性别" show-overflow-tooltip>
-                  <template slot-scope="scope">
-                    {{scope.row.taskWebParam.sex ? scope.row.taskWebParam.sex : '不限'}}
-                  </template>
-                </el-table-column>
-                <el-table-column label="年龄段" show-overflow-tooltip>
-                  <template slot-scope="scope">
-                    {{scope.row.taskWebParam.age ? scope.row.taskWebParam.age : '不限'}}
-                  </template>
-                </el-table-column>
-                <el-table-column label="状态" v-if="selectIndex === 0" prop="taskStatus" show-overflow-tooltip>
+                <el-table-column label="状态" v-if="selectIndex === 0" show-overflow-tooltip>
                   <template slot-scope="scope">
                     <span>{{scope.row.taskStatus && scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 3 ? '失败' : '已中断'}}</span>
                   </template>
@@ -262,92 +261,22 @@
             </div>
             <div class="struc_c_d_info">
               <h2>分析结果</h2>
-              <!--<div class="struc_cdi_line">-->
-                <!--<span><font>抓拍时间</font>{{sturcDetail.shotTime}}</span>-->
-              <!--</div>-->
-              <!--<div class="struc_cdi_line">-->
-                <!--<span><font>抓拍设备</font>{{sturcDetail.deviceName}}</span>-->
-              <!--</div>-->
-              <!--<div class="struc_cdi_line">-->
-                <!--<span><font>抓拍地址</font>{{sturcDetail.address}}</span>-->
-              <!--</div>-->
-              <!--<div class="struc_cdi_line">-->
-                <!--<span class="tz"><font>特征</font><p>{{sturcDetail.sex+" "+(sturcDetail.age || "")+ " "+ (sturcDetail.baby || "")+ " " + (sturcDetail.bag || "")+ " " + (sturcDetail.bottomColor || "") +(sturcDetail.bottomType || "")+ " " + (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+ " "+(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")}}</p></span>-->
-              <!--</div>-->
               <div class="struc_cd_info_main">
                 <vue-scroll>
-                  <div class="struc_cdi_line" v-if="sturcDetail.sex">
-                    <p>
-                      <b>性别</b>
-                      <span>{{sturcDetail.sex}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.age">
-                    <p>
-                      <b>年龄段</b>
-                      <span>{{sturcDetail.age}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.glasses">
-                    <p>
-                      <b>眼镜</b>
-                      <span>{{sturcDetail.glasses}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.hat">
-                    <p>
-                      <b>帽子</b>
-                      <span>{{sturcDetail.hat}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.mask">
-                    <p>
-                      <b>口罩</b>
-                      <span>{{sturcDetail.mask}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.hair">
-                    <p>
-                      <b>发型</b>
-                      <span>{{sturcDetail.hair}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.upperType">
-                    <p>
-                      <b>上身款式</b>
-                      <span>{{sturcDetail.upperType}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.upperColor">
-                    <p>
-                      <b>上身颜色</b>
-                      <span>{{sturcDetail.upperColor}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.bottomType">
-                    <p>
-                      <b>下身款式</b>
-                      <span>{{sturcDetail.bottomType}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.bottomColor">
-                    <p>
-                      <b>下身颜色</b>
-                      <span>{{sturcDetail.bottomColor}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.baby">
-                    <p>
-                      <b>抱小孩</b>
-                      <span>{{sturcDetail.baby}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.bag">
-                    <p>
-                      <b>拎东西</b>
-                      <span>{{sturcDetail.bag}}</span>
-                    </p>
-                  </div>
+                  <ul>
+                    <li><span>性别</span><span>{{sturcDetail.sex ? sturcDetail.sex : '未识别'}}</span></li>
+                    <li><span>年龄段</span><span>{{sturcDetail.age ? sturcDetail.age : '未识别'}}</span></li>
+                    <li><span>发型</span><span>{{sturcDetail.hair ? sturcDetail.hair : '未识别'}}</span></li>
+                    <li><span>戴眼镜</span><span>{{sturcDetail.glasses ? sturcDetail.glasses : '未识别'}}</span></li>
+                    <li><span>戴帽子</span><span>{{sturcDetail.hat ? sturcDetail.hat : '未识别'}}</span></li>
+                    <li><span>戴口罩</span><span>{{sturcDetail.mask ? sturcDetail.mask : '未识别'}}</span></li>
+                    <li><span>抱小孩</span><span>{{sturcDetail.baby ? sturcDetail.baby : '未识别'}}</span></li>
+                    <li><span>拎东西</span><span>{{sturcDetail.bag ? sturcDetail.bag : '未识别'}}</span></li>
+                    <li><span>上身款式</span><span>{{sturcDetail.upperType ? sturcDetail.upperType : '未识别'}}</span></li>
+                    <li><span>上身颜色</span><span>{{sturcDetail.upperColor ? sturcDetail.upperColor : '未识别'}}</span></li>
+                    <li><span>下身款式</span><span>{{sturcDetail.bottomType ? sturcDetail.bottomType : '未识别'}}</span></li>
+                    <li><span>下身颜色</span><span>{{sturcDetail.bottomColor ? sturcDetail.bottomColor : '未识别'}}</span></li>
+                  </ul>
                 </vue-scroll>
               </div>
             </div>
@@ -479,8 +408,9 @@
   import { mapXupuxian,ajaxCtx } from "@/config/config.js";
   import { objDeepCopy, random14, formatDate, dateOrigin } from "@/utils/util.js";
   import { cityCode } from "@/utils/data.js";
-  import {PortraitPostPersonTrace} from "@/views/index/api/api.portrait.js";
+  import {PortraitPostPersonTrace, PersonTracePostRealTime} from "@/views/index/api/api.portrait.js";
   import { MapGETmonitorList } from "@/views/index/api/api.map.js";
+  import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
   import { getAllBayonetList } from "@/views/index/api/api.base.js";
   export default {
     components: {vlBreadcrumb, flvplayer, vlUpload},
@@ -504,8 +434,7 @@
         selectIndex: 1, // 默认已完成的任务
         pagination: { total: 0, pageSize: 10, pageNum: 1 },
         taskForm: {
-          startTime: '',
-          endTime: '',
+          reportTime: '',
           taskName: null // 任务名称
         },
         list: [], //已完成列表
@@ -613,6 +542,7 @@
         this.ruleForm.input3 = this.$route.query.imgurl;
         this.imgData = {path: this.$route.query.imgurl}
       }
+      this.getDataList();
     },
     watch: {
       selectIndex (e) {
@@ -622,7 +552,14 @@
       }
     },
     methods: {
+      skipResultPage (obj) {
+        this.$router.push({name: 'portrait_gjfx_jg', query: {uid: obj.uid}})
+      },
       // 离线任务相关
+      handleCurrentChange (e) {
+        this.pagination.pageNum = e;
+        this.getDataList();
+      },
       // 显示中断任务弹出框
       showInterruptDialog (obj) {
         this.interruptDialog = true;
@@ -700,11 +637,16 @@
       selectDataList () {
         this.getDataList();
       },
+      // 重置查询条件
+      resetTaskForm (form) {
+        this.$refs[form].resetFields();
+        this.getDataList();
+      },
       // 获取离线任务
       getDataList () {
         const params = {
           'where.taskName': this.taskForm.taskName,
-          'where.taskType': 11, //  1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析 4:以图搜人 9：人员侦查报告,6重点关注, 11人像落脚点
+          'where.taskType': 12, //  1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析 4:以图搜人 9：人员侦查报告,6重点关注, 11人像落脚点， 12人像轨迹分析
           'where.startTime': this.taskForm.reportTime ? this.taskForm.reportTime[0] : null,
           'where.endTime': this.taskForm.reportTime ? this.taskForm.reportTime[1] : null,
           'where.isFinish': this.selectIndex,   //是否完成 0:未完成(包含处理中、处理失败、处理中断) 1：已完成(处理成功)
@@ -713,17 +655,17 @@
           order: 'desc',
           orderBy: 'create_time'
         };
-//        PortraitGetStayPointTasks(params)
-//            .then(res => {
-//              if (res) {
-//                res.data.list.forEach(item => {
-//                  this.$set(item, 'taskWebParam', JSON.parse(item.taskWebParam))
-//                })
-//                this.list = res.data.list;
-//                this.pagination.total = res.data.total;
-//              }
-//            })
-//            .catch(() => {})
+        getTaskInfosPage(params)
+            .then(res => {
+              if (res) {
+                res.data.list.forEach(item => {
+                  this.$set(item, 'taskWebParam', JSON.parse(item.taskWebParam))
+                })
+                this.list = res.data.list;
+                this.pagination.total = res.data.total;
+              }
+            })
+            .catch(() => {})
       },
       //tab切换
       selectTab (val) {
@@ -787,33 +729,19 @@
       },
       hideResult() {
         this.reselt = false;
-        this.hideLeft();
+        this.hideleft = true;
       },
-      hideLeft() {
-        this.hideleft = !this.hideleft;
-        if (!this.hideleft && this.evData.length > 0) {
-          this.reselt = true;
-        }
+      showResult (){
+        this.reselt = true;
+        this.hideleft = false;
       },
       submitForm(v) {
         if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data2 && this.ruleForm.input3){
           let pg = {
           }
-//          if (this.pointData.bayonetList.length === 0 && this.pointData.deviceList.length === 0) {
-//            this.$message.info('选择的区域没有设备，请重新选择区域');
-//            return false;
-//          }
           pg['startTime'] = formatDate(this.ruleForm.data1);
           pg['endTime'] = formatDate(this.ruleForm.data2);
-//          pg['imageUrl'] = 'http://file.aorise.org/vlink/image/18c70cc3-424a-43fc-92ee-a6c6de4248f2.jpg';
-          pg['imageUrl'] = this.ruleForm.input3;
-//          if(this.ruleForm.input5 == "1"){
-//            pg['areaIds']=this.ruleForm.value1.join(",")
-//          }
-//          if(this.ruleForm.input5 == "2"){
-//            pg['bayonetIds'] = this.pointData.bayonetList.map(y => {return y.uid}).join(',');
-//            pg['cameraIds'] = this.pointData.deviceList.map(y => {return y.uid}).join(',');
-//          }
+          pg['uploadImgUrls'] = this.ruleForm.input3;
           this.storeParam = objDeepCopy(pg);
           this.getVehicleShot(pg);
         }else{
@@ -861,37 +789,56 @@
       },
       getVehicleShot(d) {
         this.searchLoading = true;
-        this.count = 3;
-        PortraitPostPersonTrace(d).then(res => {
-          this.searchLoading = false;
-          if (res) {
-            if (!res.data || res.data.length === 0) {
-              this.$message.info("抱歉，没有找到匹配结果");
-              this.amap.clearMap();
-              return false;
-            }
-            this.reselt = true;
-            this.evData = res.data.list;
-            this.evData.forEach(x => {
-              if (x.bayonetName) {
-                x.deviceID = x.bayonetName;
+        if (this.taskType === '1') {
+          this.count = 3;
+          PersonTracePostRealTime(d).then(res => {
+            this.searchLoading = false;
+            if (res) {
+              if (!res.data || res.data.length === 0) {
+                this.$message.info("抱歉，没有找到匹配结果");
+                this.amap.clearMap();
+                return false;
               }
-            })
-            this.evData.sort(this.compare("shotTime", this.timeOrder ? false : true));
-            this.shotAddressAndTimes(this.evData)
+              this.$set(res.data, 'taskResult', JSON.parse(res.data.taskResult));
+              this.selectIndex = 2;
+              this.reselt = true;
+              this.evData = res.data.taskResult;
+              this.evData.forEach(x => {
+                if (x.bayonetName) {
+                  x.DeviceID = x.bayonetName;
+                }
+              })
+              this.evData.sort(this.compare("shotTime", this.timeOrder ? false : true));
+              this.shotAddressAndTimes(this.evData)
 
-            //  重组数据，给左边列表使用
-            this.operData(true);
-            if (this.evData.length) {
-              this.filterDialog = true;
-            } else {
-              this.$message.info('抱歉，没有找到匹配结果')
+              //  重组数据，给左边列表使用
+              this.operData(true);
+              if (this.evData.length) {
+                this.filterDialog = true;
+              } else {
+                this.$message.info('抱歉，没有找到匹配结果')
+              }
+              this.amap.clearMap();
             }
-            this.amap.clearMap();
+          }).catch(() => {
+            this.searchLoading = false;
+          });
+        } else {
+          if (!this.taskName.replace(/\s+|\s+$/g, '')) {
+            this.searchLoading = false;
+            this.$message.info('任务名称不能为空');
+            return false;
           }
-        }).catch(() => {
-          this.searchLoading = false;
-        });
+          d['taskOperateType'] = 1;
+          PortraitPostPersonTrace(d).then(res => {
+            this.searchLoading = false;
+            if (res && res.data) {
+              this.$message.info('新建成功')
+            }
+          }).catch(() => {
+            this.searchLoading = false;
+          });
+        }
       },
       shotAddressAndTimes (data) {
         this.totalMapNum = data.length;
@@ -899,9 +846,9 @@
         let dvIds = [];
         this.totalAddressNum = 0;
         data.forEach(x => {
-          if(!dvIds.includes(x.deviceID)) {
+          if(!dvIds.includes(x.DeviceID)) {
             this.totalAddressNum += 1;
-            dvIds.push(x.deviceID);
+            dvIds.push(x.DeviceID);
           }
         })
       },
@@ -1032,7 +979,7 @@
       fitlerSXT (oData) {
         let data = objDeepCopy(oData), _arr = [];
         data.forEach(x => {
-          let _i = _arr.findIndex(y => y.deviceID === x.deviceID);
+          let _i = _arr.findIndex(y => y.DeviceID === x.DeviceID);
           if (_i === -1) {
             _arr.push(x)
           } else {
@@ -1201,7 +1148,7 @@
         width: 100%;
         height: calc(100% - 53px);
         position: relative;
-        #mapBox {
+        #rightMap {
           width: 100%;
           height: 100%;
         }
@@ -1330,10 +1277,10 @@
   }
   .reselt {
     width: 290px;
-    height: calc(100% - 54px);
+    height: 100%;
     background-color: #ffffff;
     position: absolute;
-    left: 229px;
+    left: 0px;
     z-index: 2;
     /*box-shadow: 4px 0px 10px 0px #838383;*/
     /*box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);*/
@@ -1413,13 +1360,14 @@
   }
   .insetLeft {
     position: absolute;
-    right: -28px;
-    width: 25px;
+    left: 0px;
+    width: 28px;
     height: 178px;
     top: 50%;
     margin-top: -89px;
     display: inline-block;
     cursor: pointer;
+    z-index: 5;
   }
   .hide {
   }
@@ -1686,33 +1634,8 @@
   }
 </style>
 <style lang="scss">
-  #rightMap {
-    .vl_icon {
-      width: 47px;
-      position: relative;
-      > .vl_map_mark_time {
-        position: absolute; top: 10px; left: 98%;
-        width: 130px;
-        word-break:keep-all;
-        font-size: 12px; color: #fff;
-        background-color: rgba(0, 0, 0, 0.4);
-        border-radius: 2px;
-        padding: 2px 5px;
-        span{
-          display: block;
-        }
-      }
-    }
-  }
   .clgj_map_show_pic {
     .vl_jtc_mk { display: block !important; }
-    &#rightMap {
-      .vl_icon.vl_icon_sxt {
-        > p {
-          display: none;
-        }
-      }
-    }
   }
   .demo-ruleForm {
     .quyu {
@@ -1722,6 +1645,18 @@
       }
       .el-radio__label {
         padding: 0;
+      }
+    }
+    .ytsr_left_radio {
+      margin-top: 10px;
+      display: flex;
+      height: 40px;
+      >span {
+        display: block;
+        &:first-child {
+          width: 90px;
+          line-height: 40px;
+        }
       }
     }
   }
@@ -1923,40 +1858,75 @@
             }
             .struc_cd_info_main {
               height: 2.75rem;
-            }
-            .struc_cdi_line {
-              flex: none;
-              width: 50%;
-              display: inline-block;
-              p {
-                max-width: 100%;
+              ul {
                 overflow: hidden;
-                display: table;
-                min-height: 30px;
-                margin-bottom: 0.08rem;
-                padding-right: 10px;
-                margin-right: 0.08rem;
-                border: 1px solid #f2f2f2;
-                border-radius: 3px;
-                font-size: 12px;
-                > b {
-                  width: 70px;
-                  background: #fafafa;
-                  color: #999;
-                  font-weight: normal;
-                  padding-right: 10px;
-                  padding-left: 10px;
-                  display: table-cell;
-                  vertical-align: middle;
-                  border-right: 1px solid #f2f2f2;
-                }
-                >span {
-                  display: table-cell;
-                  vertical-align: middle;
-                  padding-left: 5px;
+                > li {
+                  float: left;
+                  width: 50%;
+                  overflow: hidden;
+                  margin-bottom: 15px;
+                  display: flex;
+                  > span {
+                    line-height: 26px; height: 28px;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    float: left;
+                    overflow: hidden;
+                    font-size: 14px;
+                    &:first-child {
+                      width: 68px;
+                      background-color: #FAFAFA;
+                      text-align: center;
+                      border: 1px solid #f2f2f2;
+                      border-radius: 4px 0 0 4px;
+                      color: #999;
+                    }
+                    &:last-child {
+                      max-width: 94px;
+                      border: 1px solid #f2f2f2;
+                      border-left: 0;
+                      background-color: #fff;
+                      padding: 0 9px 0 9px;
+                      border-radius: 0 4px 4px 0;
+                      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; word-break: break-all;
+                    }
+                  }
                 }
               }
             }
+            /*.struc_cdi_line {*/
+              /*flex: none;*/
+              /*width: 50%;*/
+              /*display: inline-block;*/
+              /*p {*/
+                /*max-width: 100%;*/
+                /*overflow: hidden;*/
+                /*display: table;*/
+                /*min-height: 30px;*/
+                /*margin-bottom: 0.08rem;*/
+                /*padding-right: 10px;*/
+                /*margin-right: 0.08rem;*/
+                /*border: 1px solid #f2f2f2;*/
+                /*border-radius: 3px;*/
+                /*font-size: 12px;*/
+                /*> b {*/
+                  /*width: 70px;*/
+                  /*background: #fafafa;*/
+                  /*color: #999;*/
+                  /*font-weight: normal;*/
+                  /*padding-right: 10px;*/
+                  /*padding-left: 10px;*/
+                  /*display: table-cell;*/
+                  /*vertical-align: middle;*/
+                  /*border-right: 1px solid #f2f2f2;*/
+                /*}*/
+                /*>span {*/
+                  /*display: table-cell;*/
+                  /*vertical-align: middle;*/
+                  /*padding-left: 5px;*/
+                /*}*/
+              /*}*/
+            /*}*/
           }
           &:before {
             display: block;

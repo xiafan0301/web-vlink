@@ -28,10 +28,11 @@
         <span>查询范围：</span>
         <span>
           <el-radio v-model="radio" label="1">基础信息库</el-radio>
-          <el-radio v-model="radio" label="2">抓拍视图库</el-radio>
+          <el-radio style="display:block;" v-model="radio" label="2">抓拍视图库</el-radio>
+          <el-radio style="display: block;" v-model="radio" label="3">布控库</el-radio>
         </span>
       </div>
-      <div class="ytsr_left_search" v-show="radio === '1'">
+      <div class="ytsr_left_search" v-show="radio === '1' || radio === '3'">
         <el-select
                 v-model="searchData.portraitGroupId"
                 placeholder="全部人像"
@@ -71,55 +72,12 @@
                   placeholder="选择日期时间">
           </el-date-picker>
         </div>
-        <!-- 设备搜索 -->
-        <div class="device-comp">
-          <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
-          <div class="selected_device" @click="treeTabShow = true;">
-            <i class="el-icon-arrow-down"></i>
-            <!-- <i class="el-icon-arrow-up"></i> -->
-            <div class="device_list" v-if="selectDeviceArr.length > 0">
-              <template v-if="checkAllTree">
-                <span>全部设备</span>
-              </template>
-              <template v-else>
-                <span>{{ selectDeviceArr[0].label }}</span>
-                <span
-                        v-show="selectDeviceArr.length > 1"
-                        title="展开选中的设备"
-                        class="device_count"
-                >+{{ selectDeviceArr.length - 1 }}</span>
-              </template>
-            </div>
-            <div class="no_device" v-else>选择设备</div>
-            <!-- 树tab页面 -->
-            <div class="device_tree_tab" v-show="treeTabShow">
-              <div style="overflow: hidden;">
-              </div>
-              <!-- 摄像头树 -->
-              <div class="tree_content">
-                <vue-scroll>
-                  <div class="checked_all">
-                    <el-checkbox
-                            :indeterminate="isIndeterminate"
-                            v-model="checkAllTree"
-                            @change="handleCheckedAll"
-                    >全选</el-checkbox>
-                  </div>
-                  <el-tree
-                          @check="listenChecked"
-                          :data="cameraTree"
-                          show-checkbox
-                          default-expand-all
-                          node-key="label"
-                          ref="cameraTree"
-                          highlight-current
-                          :props="defaultProps"
-                  ></el-tree>
-                </vue-scroll>
-              </div>
-            </div>
-          </div>
-          <p class="error-tip" :class="{'is-show': isDeviceTrue}">{{messageDevTip}}</p>
+        <div class="ytsr_xzsb_s" @click="areaTypeChanged" v-if="chooseType === 1">
+          <span>选择设备</span>
+          <span class="el-icon-arrow-down"></span>
+        </div>
+        <div class="ytsr_dtxz_rst" v-else>
+          已选<span>{{dSum}}</span>个设备<a href="javascript: void(0);" @click="openMap={}">重选</a>
         </div>
       </div>
       <div class="vl_jtc_search">
@@ -310,6 +268,14 @@
         </template>
       </div>
     </div>
+    <!-- D设备 B卡口  这里是设备和卡口 -->
+    <div
+      is="mapSelector"
+      :open="openMap"
+      :clear="msClear"
+      :showTypes="'DB'"
+      @mapSelectorEmit="mapSelectorEmit">
+    </div>
     <!--中断任务弹出框-->
     <el-dialog
             title="中断任务确认"
@@ -384,7 +350,7 @@
         </ul>
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.personStoragePath" alt="">
+            <img :src="sturcDetail.PersonStoragePath" alt="">
             <span>上传图</span>
           </div>
           <div class="struc_c_d_box">
@@ -397,78 +363,20 @@
               <h2>分析结果<div class="vl_jfo_sim" ><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? (sturcDetail.semblance*1).toFixed(2) : '0.00'}}<span style="font-size: 12px;">%</span></div></h2>
               <div class="struc_cd_info_main">
                 <vue-scroll>
-                  <div class="struc_cdi_line" v-if="sturcDetail.sex">
-                    <p>
-                      <b>性别</b>
-                      <span>{{sturcDetail.sex}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.age">
-                    <p>
-                      <b>年龄段</b>
-                      <span>{{sturcDetail.age}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.glasses">
-                    <p>
-                      <b>眼镜</b>
-                      <span>{{sturcDetail.glasses}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.hat">
-                    <p>
-                      <b>帽子</b>
-                      <span>{{sturcDetail.hat}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.mask">
-                    <p>
-                      <b>口罩</b>
-                      <span>{{sturcDetail.mask}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.hair">
-                    <p>
-                      <b>发型</b>
-                      <span>{{sturcDetail.hair}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.upperType">
-                    <p>
-                      <b>上身款式</b>
-                      <span>{{sturcDetail.upperType}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.upperColor">
-                    <p>
-                      <b>上身颜色</b>
-                      <span>{{sturcDetail.upperColor}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.bottomType">
-                    <p>
-                      <b>下身款式</b>
-                      <span>{{sturcDetail.bottomType}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.bottomColor">
-                    <p>
-                      <b>下身颜色</b>
-                      <span>{{sturcDetail.bottomColor}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.baby">
-                    <p>
-                      <b>抱小孩</b>
-                      <span>{{sturcDetail.baby}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.bag">
-                    <p>
-                      <b>拎东西</b>
-                      <span>{{sturcDetail.bag}}</span>
-                    </p>
-                  </div>
+                  <ul>
+                    <li><span>性别</span><span>{{sturcDetail.sex ? sturcDetail.sex : '未识别'}}</span></li>
+                    <li><span>年龄段</span><span>{{sturcDetail.age ? sturcDetail.age : '未识别'}}</span></li>
+                    <li><span>发型</span><span>{{sturcDetail.hair ? sturcDetail.hair : '未识别'}}</span></li>
+                    <li><span>戴眼镜</span><span>{{sturcDetail.glasses ? sturcDetail.glasses : '未识别'}}</span></li>
+                    <li><span>戴帽子</span><span>{{sturcDetail.hat ? sturcDetail.hat : '未识别'}}</span></li>
+                    <li><span>戴口罩</span><span>{{sturcDetail.mask ? sturcDetail.mask : '未识别'}}</span></li>
+                    <li><span>抱小孩</span><span>{{sturcDetail.baby ? sturcDetail.baby : '未识别'}}</span></li>
+                    <li><span>拎东西</span><span>{{sturcDetail.bag ? sturcDetail.bag : '未识别'}}</span></li>
+                    <li><span>上身款式</span><span>{{sturcDetail.upperType ? sturcDetail.upperType : '未识别'}}</span></li>
+                    <li><span>上身颜色</span><span>{{sturcDetail.upperColor ? sturcDetail.upperColor : '未识别'}}</span></li>
+                    <li><span>下身款式</span><span>{{sturcDetail.bottomType ? sturcDetail.bottomType : '未识别'}}</span></li>
+                    <li><span>下身颜色</span><span>{{sturcDetail.bottomColor ? sturcDetail.bottomColor : '未识别'}}</span></li>
+                  </ul>
                 </vue-scroll>
               </div>
             </div>
@@ -539,7 +447,7 @@
           <swiper-slide v-for="(item, index) in curStrucInfoList" :key="item.id">
             <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
               <template v-if="isBase === 2">
-                <img style="height: .88rem;width: 50%;padding-right: .02rem;" :src="item.personStoragePath" alt="">
+                <img style="height: .88rem;width: 50%;padding-right: .02rem;" :src="item.PersonStoragePath" alt="">
                 <img style="height: .88rem;width: 50%;padding-left: .02rem;" :src="item.subStoragePath" alt="">
               </template>
               <template v-else>
@@ -558,6 +466,7 @@
   </div>
 </template>
 <script>
+  import mapSelector from '@/components/common/mapSelector.vue';
   import vlUpload from '@/components/common/upload.vue';
   import vlBreadcrumb from '@/components/common/breadcrumb.vue';
   import { PortraitPostByphotoTask, PortraitPostByphotoRealtime, PortraitGetDispatch } from '@/views/index/api/api.portrait.js';
@@ -568,14 +477,20 @@
   import {getGroups} from '../../api/api.judge.js';
   import noResult from '@/components/common/noResult.vue';
   import flvplayer from '@/components/common/flvplayer.vue';
-  import { ajaxCtx, mapXupuxian } from '@/config/config.js';
+  import { ajaxCtx, mapXupuxian, onlineOutTime } from '@/config/config.js';
   import { MapGETmonitorList } from "@/views/index/api/api.map.js";
   import { objDeepCopy, formatDate } from "@/utils/util.js";
   export default {
-    components: {vlBreadcrumb, noResult, flvplayer, vlUpload},
+    components: {vlBreadcrumb, noResult, flvplayer, vlUpload, mapSelector},
     data() {
       return {
-        rotateNum: 0, // 当前旋转基数
+        chooseType: 1, // 选择设备装备，1是刚进入，2是已选择
+        openMap: false,
+        msClear: {},
+
+        dSum: 0, // 设备总数
+        dIds: [], // 设备IDS
+
         showShotImg: true, // true展示抓拍，false,展示全景
         map: null,
         playerData: null,
@@ -584,17 +499,11 @@
         cameraTree: [],
         videoTreeNodeCount: 0, // 摄像头节点数量
         bayonetTreeNodeCount: 0, // 卡口节点数量
-        defaultProps: {
-          children: "children",
-          label: "label"
-        },
         pickerOptions: {
           disabledDate (time) {
             return time > new Date();
           }
         },
-        messageDevTip: "",
-        isDeviceTrue: false,
         isIndeterminate: false, // 是否处于全选与全不选之间
         checkAllTree: true, // 树是否全选
         portraitGroupList: [],
@@ -620,8 +529,7 @@
         pagination: { total: 0, pageSize: 10, pageNum: 1 },
         pagination1: { total: 0, pageSize: 12, pageNum: 1 },
         taskForm: {
-          startTime: '',
-          endTime: '',
+          reportTime: '',
           taskName: null // 任务名称
         },
         list: [], //已完成列表
@@ -674,6 +582,7 @@
       }
     },
     mounted () {
+      this.getDataList();
       // 弹窗地图
       let supMap = new AMap.Map('capMap', {
         center: mapXupuxian.center,
@@ -707,11 +616,36 @@
 //          })
         }
       })
-      this.getMonitorList();
-      this.getDataList();
       this.setDTime();
     },
     methods: {
+      areaTypeChanged () {
+        this.chooseType = 2;
+        this.openMap = {};
+      },
+      // 选择设备回调
+      mapSelectorEmit (result) {
+        if (result) {
+          // bayonetList deviceList
+          this.dSum = 0;
+          this.dIds = [];
+          if (result.deviceList) {
+            this.dSum = result.deviceList.length;
+            for (let i = 0; i < result.deviceList.length; i++) {
+              this.dIds.push(result.deviceList[i].uid);
+            }
+          }
+          if (result.bayonetList && result.bayonetList.length > 0) {
+            this.dSum += result.bayonetList.length;
+          }
+//        if (result.bayonetDeviceList && result.bayonetDeviceList.length > 0) {
+//          this.dSum += result.bayonetDeviceList.length;
+//          for (let i = 0; i < result.bayonetDeviceList.length; i++) {
+//            this.dIds.push(result.bayonetDeviceList[i].uid);
+//          }
+//        }
+        }
+      },
       uploadEmit (data) {
         console.log('uploadEmit data', data);
         if (data && data.path) {
@@ -759,134 +693,8 @@
         this.searchData.startTime = new Date(_s).getTime();
         this.searchData.endTime = curDate;
       },
-      //获取摄像头卡口信息列表
-      getMonitorList() {
-        let params = {
-          areaUid: mapXupuxian.adcode
-        };
-        MapGETmonitorList(params).then(res => {
-          if (res && res.data) {
-            let camera = objDeepCopy(res.data.areaTreeList);
-            /* let bayonet = objDeepCopy(res.data.areaTreeList); */
-            this.cameraTree = this.getTreeList(camera);
-            /* this.bayonetTree = this.getBayTreeList(bayonet); */
-            this.getLeafCountTree(this.cameraTree);
-            /* this.getLeafCountTree(this.cameraTree, 'camera');
-            this.getLeafCountTree(this.bayonetTree, 'bayonet'); */
-            this.$nextTick(() => {
-              this.checkAllTree = true;
-              this.handleCheckedAll(true);
-            });
-          }
-        });
-      },
-      //获取摄像头数据
-      getTreeList(data) {
-        for (let item of data) {
-          item["id"] = item.areaId;
-          item["label"] = item.areaName;
-          let children = [],
-              deviceBasic = [],
-              bayonet = [];
-          if (item.deviceBasicList && item.deviceBasicList.length > 0) {
-            deviceBasic = item.deviceBasicList;
-            for (let key of deviceBasic) {
-              key["label"] = key.deviceName;
-              key["id"] = key.uid;
-              key["treeType"] = 1;
-            }
-            delete item.deviceBasicList;
-          }
-          if (item.bayonetList && item.bayonetList.length > 0) {
-            bayonet = item.bayonetList;
-            for (let key of bayonet) {
-              key["label"] = key.bayonetName;
-              key["id"] = key.uid;
-              key["treeType"] = 2;
-            }
-            delete item.bayonetList;
-          }
-          children.push(...deviceBasic, ...bayonet);
-          item["children"] = children;
-        }
-        return data;
-      },
       //获取卡口数据
-      // tab的方法
-      chooseDevice() {
-        // 选择了树的设备
-        this.treeTabShow = false;
-        if(this.selectDeviceArr &&
-            this.selectDeviceArr.length > 0) {
-          this.isDeviceTrue = false;
-          this.messageDevTip = "";
-        }else {
-          this.isDeviceTrue = true;
-          this.messageDevTip = "请选择设备";
-        }
-      },
-      // 处理摄像头树全选时间
-      handleCheckedAll(val) {
-        this.isIndeterminate = false;
-        if (val) {
-          this.$refs.cameraTree.setCheckedNodes(this.cameraTree);
-        } else {
-          this.$refs.cameraTree.setCheckedNodes([]);
-        }
-        this.selectDeviceArr = this.$refs.cameraTree.getCheckedNodes(true);
-        this.handleData();
-      },
-      getLeafCountTree(json) {
-        // 获取树节点的数量
-        for (let i = 0; i < json.length; i++) {
-          if (json[i].hasOwnProperty("id")) {
-            this.videoTreeNodeCount++;
-          }
-          if (json[i].hasOwnProperty("children")) {
-            this.getLeafCountTree(json[i].children);
-          } else {
-            continue;
-          }
-        }
-        console.log('videoTreeNodeCount', this.videoTreeNodeCount)
-      },
-      //摄像头
-      listenChecked(val, val1) {
-        this.selectDeviceArr = this.$refs.cameraTree.getCheckedNodes(true);
-        this.handleData();
-        if (val1.checkedNodes.length === this.videoTreeNodeCount) {
-          this.isIndeterminate = false;
-          this.checkAllTree = true;
-        } else if (
-            val1.checkedNodes.length < this.videoTreeNodeCount &&
-            val1.checkedNodes.length > 0
-        ) {
-          this.checkAllTree = false;
-          this.isIndeterminate = true;
-        } else if (val1.checkedNodes.length === 0) {
-          this.checkAllTree = false;
-          this.isIndeterminate = false;
-        }
-      },
-      // 选中的设备数量处理
-      handleData() {
-        /* this.selectDeviceArr = [...this.selectCameraArr, ...this.selectBayonetArr].filter(key => key.treeType); */
-        this.selectDeviceArr = [...this.selectDeviceArr].filter(
-            key => key.treeType
-        );
-        this.selectCameraArr = [...this.selectDeviceArr].filter(
-            key => key.treeType === 1
-        );
-        this.selectBayonetArr = [...this.selectDeviceArr].filter(
-            key => key.treeType === 2
-        );
-        console.log(
-            "选中的数据",
-            this.selectDeviceArr,
-            this.selectBayonetArr,
-            this.selectCameraArr
-        );
-      },
+
       // 获取离线任务
       getDataList () {
         const params = {
@@ -920,20 +728,11 @@
         }
       },
       skipResultPage (obj) {
-        if (obj.taskWebParam.origin === 1) {
-          this.$router.push({name: 'portrait_ytsr', query: {uid: obj.uid}})
-        } else {
+        if (obj.taskWebParam.origin === 2) {
           this.$router.push({name: 'portrait_ytsr_shot', query: {uid: obj.uid}})
+        } else {
+          this.$router.push({name: 'portrait_ytsr', query: {uid: obj.uid}})
         }
-//        if (obj.taskResult) {
-//          if (obj.taskWebParam.origin === 1) {
-//            this.$router.push({name: 'portrait_ytsr', query: {uid: obj.uid}})
-//          } else {
-//            this.$router.push({name: 'portrait_ytsr_shot', query: {uid: obj.uid}})
-//          }
-//        } else {
-//          this.$message.info('抱歉，没有找到匹配结果');
-//        }
       },
       // 显示中断任务弹出框
       showInterruptDialog (obj) {
@@ -1018,19 +817,18 @@
         this.imgList = '';
         this.radio = '1';
         this.searchData.portraitGroupId= [];
-        this.$nextTick(() => {
-          this.checkAllTree = true;
-          this.handleCheckedAll(true);
-        });
+        this.msClear = {};
         this.uploadClear = {};
         this.setDTime();
       },
       tcDiscuss (boolean) {
         let p1 = {
           origin: this.radio,
+          taskOperateType: 1,
         };
         let params = {
           origin: this.radio,
+          taskOperateType: 1,
         }
         if (!this.imgList) {
           if (!document.querySelector('.el-message--info')) {
@@ -1067,7 +865,8 @@
             params['deviceNames'] = dNameList.join(',')
           }
           p1['deviceIds'] = this.selectCameraArr.map(res => res.id).join(',');
-          params['deviceIds'] = this.selectCameraArr.map(res => res.id).join(',');
+          params['deviceIds'] = "5DTxZRNGOZuLsl07jcNO09";
+//          params['deviceIds'] = this.selectCameraArr.map(res => res.id).join(',');
           p1['bayonetIds'] = this.selectBayonetArr.map(res => res.id).join(',');
           params['bayonetIds'] = this.selectBayonetArr.map(res => res.id).join(',');
           p1['startTime'] = formatDate(this.searchData.startTime, 'yyyy-MM-dd HH:mm:ss');
@@ -1081,8 +880,10 @@
         // 判断选择的是实时还是离线 taskType 1为实时，2为离线.
         if (this.taskType === "1") {
           this.searching = true;
-          PortraitPostByphotoRealtime(params)
-              .then(sRes => {
+          PortraitPostByphotoRealtime(params, {
+            errorMsg: '因数据量过大导致查询超时，建议进行离线分析',
+            timeout: onlineOutTime
+          }).then(sRes => {
                 this.searching = false;
                 this.pagination1.total = 0;
                 this.pagination1.pageNum = 1;
@@ -1112,6 +913,7 @@
           } else {
             this.searching = true;
             params.taskName = this.taskName;
+            params.taskOperateType = 1;
             PortraitPostByphotoTask(params).then(res => {
               this.searching = false;
               this.resetSearch();
@@ -1248,6 +1050,46 @@
   }
 </script>
 <style lang="scss" scoped="scoped">
+  .ytsr_xzsb_s {
+    height: 40px;
+    line-height: 40px;
+    width: 100%;
+    border-radius: 4px;
+    border: 1px solid #DCDFE6;
+    cursor: pointer;
+    color: #999999;
+    padding: 0 6px;
+    > span {
+      display: inline-block;
+      width: 50%;
+      &:last-child {
+        text-align: right;
+      }
+    }
+  }
+  .ytsr_dtxz_rst {
+    width: 100%;
+    line-height: 40px;
+    padding: 0px 15px; margin-top: 5px;
+    background-color: #F5F7FA;
+    color: #C0C4CC;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    > span {
+      display: inline-block;
+      padding: 0 3px;
+      color: #333;
+    }
+    > a {
+      display: inline-block;
+      padding-left: 5px;
+      color: #2580FC !important;
+      text-decoration: none !important;
+      /*font-style: italic;*/
+      cursor: pointer;
+    }
+  }
+  
   .cum_pagination {
     padding-bottom: 0px;
   }
@@ -2066,6 +1908,41 @@
               }
               .struc_cd_info_main {
                 height: 2.75rem;
+                ul {
+                  overflow: hidden;
+                  > li {
+                    float: left;
+                    width: 50%;
+                    overflow: hidden;
+                    margin-bottom: 15px;
+                    display: flex;
+                    > span {
+                      line-height: 26px; height: 28px;
+                      border: 1px solid #ddd;
+                      border-radius: 4px;
+                      float: left;
+                      overflow: hidden;
+                      font-size: 14px;
+                      &:first-child {
+                        width: 68px;
+                        background-color: #FAFAFA;
+                        text-align: center;
+                        border: 1px solid #f2f2f2;
+                        border-radius: 4px 0 0 4px;
+                        color: #999;
+                      }
+                      &:last-child {
+                        max-width: 94px;
+                        border: 1px solid #f2f2f2;
+                        border-left: 0;
+                        background-color: #fff;
+                        padding: 0 9px 0 9px;
+                        border-radius: 0 4px 4px 0;
+                        overflow: hidden; text-overflow: ellipsis; white-space: nowrap; word-break: break-all;
+                      }
+                    }
+                  }
+                }
               }
               .struc_cdi_line {
                 flex: none;
