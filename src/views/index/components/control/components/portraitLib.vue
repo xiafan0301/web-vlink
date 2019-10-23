@@ -4,10 +4,10 @@
     :visible.sync="portraitLibDialog"
     :close-on-click-modal="false"
     width="1200px"
-    title="人辆布控库">
+    title="人像布控库">
     <el-form ref="libForm" :model="libForm">
       <el-form-item label="" prop="sex">
-        <el-select value-key="value" v-model="libForm.sex" filterable placeholder="请选择">
+        <el-select value-key="value" v-model="libForm.sex" filterable placeholder="性别不限">
           <el-option
             v-for="item in sexList"
             :key="item.value"
@@ -17,7 +17,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="" prop="nation">
-        <el-select value-key="value" v-model="libForm.nation" filterable placeholder="请选择">
+        <el-select value-key="value" v-model="libForm.nation" filterable placeholder="民族不限">
           <el-option
             v-for="item in nationList"
             :key="item.value"
@@ -26,21 +26,21 @@
           </el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="" prop="idNum" style="padding-right:10px!important;">
-        <el-input v-model="libForm.idNum" placeholder="请输入证件号码搜索"></el-input>
+      <el-form-item label="" prop="idNo" style="padding-right:10px!important;">
+        <el-input v-model="libForm.idNo" placeholder="请输入证件号码搜索"></el-input>
       </el-form-item>
       <el-form-item label="">
-        <el-button type="primary">查询</el-button>
+        <el-button type="primary" @click="search">查询</el-button>
         <el-button @click="reset">重置</el-button>
       </el-form-item>
     </el-form>
     <div class="list_box" v-loading="loading">
-      <div class="list_info" v-for="item in memberList.list" :key="item.uid">
+      <div class="list_info" v-for="item in protraitMemberList.list" :key="item.uid">
         <div class="list_img"><img :src="item.photoUrl" alt="" style="width: 100%;height: 100%;"></div>
         <div class="list_data">
           <div class="data_title">
             <span class="vl_f_999">详情资料</span>
-            <el-checkbox v-model="item.isChecked" @change="operateRadio()"></el-checkbox>
+            <el-checkbox v-model="item.isChecked" :disabled="item.disabled" @change="operateRadio()"></el-checkbox>
           </div>
           <div class="data_list">
             <span :title="item.name">{{item.name}}</span>
@@ -76,17 +76,15 @@
           </div>
         </div>
       </div>
-      <div style="width: 100%;">
-        <el-pagination
-          style="text-align: center;"
-          background
-          @current-change="handleCurrentChange"
-          :current-page="currentPage"
-          :page-size="memberList.pageSize"
-          layout="prev, pager, next"
-          :total="memberList.total">
-        </el-pagination>
-      </div>
+      <el-pagination
+        class="cum_pagination"
+        @current-change="handleCurrentChange"
+        :current-page="currentPage"
+        :page-sizes="[100, 200, 300, 400]"
+        :page-size="protraitMemberList.pageSize"
+        layout="total, prev, pager, next, jumper"
+        :total="protraitMemberList.total">
+      </el-pagination>
     </div>
     <div slot="footer">
       <el-button @click="portraitLibDialog = false" class="btn_140">取消</el-button>
@@ -97,44 +95,132 @@
 <script>
 import {dataList} from '@/utils/data.js';
 import {nationData} from '../testData.js';
+import {getPortraitList} from '@/views/index/api/api.control.js';
 export default {
+  props: ['fileListOne', 'fileListTwo', 'imgNum'],
   data () {
     return {
       libForm: {
         sex: null,
         nation: null,
-        idNum: null
+        idNo: null
       },
       sexList: [
-        {value: 1, label: '男'},
-        {value: 2, label: '女'},
-        {value: 3, label: '性别不限'}
+        {label: '未知', value: 0},
+        {label: '男', value: 1},
+        {label: '女', value: 2}
       ],
       nationList: nationData,
       portraitLibDialog: false,
       loading: false,
       currentPage: 1,
-
-      memberList: {"total":68,"list":[{"uid":"6o0FXxfhszDHzOjujxT2sT","sex":"女","nation":"汉族","idNo":"430481199011235729","name":"自动化许号联必","photoUrl":"https://apirel.aorise.org/medical-his/image/a24f4ecb-9252-4067-8c97-fa33e66ae056.jpg","remarks":"采中量数给本会术京党图厂传没进查增半千格有设议式车处单行十进真处需厂深角正革领路完部争称细列半想江利","origin":2,"groupNames":null},{"uid":"6TD3VnKe19f9z0EzU9907R","sex":"男","nation":"汉族","idNo":"440232196309230017","name":"邓喜潮","photoUrl":"http://newfile.aorise.org:80/group1/default/20190903/16/20/1/451b41c9-b8fc-4452-b103-d0e40cc4310d.jpg","remarks":"","origin":2,"groupNames":"在逃人员"},{"uid":"1jnaWLGzztr3d9fAkcZorg","sex":"未知","nation":"汉族","idNo":"432822197502078293","name":"廖相俭","photoUrl":"http://newfile.aorise.org:80/group1/default/20190903/16/20/1/50243007-894d-4837-aea7-2364c44b9615.jpg","remarks":"","origin":2,"groupNames":"在逃人员"},{"uid":"5hj5q9TfgRzWFmESMblSOo","sex":"男","nation":"汉族","idNo":"432923198002183616","name":"蒋结万","photoUrl":"http://newfile.aorise.org:80/group1/default/20190903/16/20/2/71728104-b4ef-4a96-a3fc-6fae4e8d1c44.jpg","remarks":"","origin":2,"groupNames":"在逃人员"},{"uid":"2Yi470rxBcap4t45t7fsdG","sex":"男","nation":"汉族","idNo":"432524198805160033","name":"刘志斌","photoUrl":"http://newfile.aorise.org:80/group1/default/20190903/16/19/1/fc6a7c43-0544-49e2-a729-6a96ae314986.jpg","remarks":"","origin":2,"groupNames":"在逃人员"},{"uid":"3c2bgfQqlkhGOt0DXqzcoM","sex":"男","nation":"汉族","idNo":"342128196203036214","name":"陈新华","photoUrl":"http://newfile.aorise.org:80/group1/default/20190903/16/19/2/548790ad-af47-4a4a-8407-ff54d5bfe0a2.jpg","remarks":"","origin":2,"groupNames":"在逃人员"},{"uid":"3PmdKgN6ATAh9kv7BGwbzh","sex":"男","nation":"汉族","idNo":"632122198501102814","name":"赵存福","photoUrl":"http://newfile.aorise.org:80/group1/default/20190903/16/18/1/b9c20394-60ef-4487-848f-73acd8f2dd80.jpg","remarks":"","origin":2,"groupNames":null},{"uid":"47nzZOa8Chx0XvNG7AawD3","sex":"男","nation":"回族","idNo":"371422196603104039","name":"卢洪河","photoUrl":"http://newfile.aorise.org:80/group1/default/20190903/16/18/1/09f4563a-0403-4573-98d5-018a3c0cd60e.jpg","remarks":"涉嫌故意杀人犯罪","origin":2,"groupNames":"在逃人员"},{"uid":"41IoQdXtarcRM2AoOuPW6q","sex":"男","nation":"汉族","idNo":"352228197210152514","name":"陈孝朵","photoUrl":"http://newfile.aorise.org:80/group1/default/20190903/16/09/1/c52c032e-8031-440a-8250-ce993514f675.jpg","remarks":"","origin":2,"groupNames":"在逃人员"}],"pageNum":1,"pageSize":9,"size":9,"startRow":1,"endRow":9,"pages":8,"prePage":0,"nextPage":2,"isFirstPage":true,"isLastPage":false,"hasPreviousPage":false,"hasNextPage":true,"navigatePages":8,"navigatepageNums":[1,2,3,4,5,6,7,8],"navigateFirstPage":1,"navigateLastPage":8,"firstPage":1,"lastPage":8},
+      pageNum: 1,
+      pageSize: 6,
+      protraitMemberList: {}
     }
 
   },
+  watch: {
+    'protraitMemberList.list': {
+      handler (val) {
+        if (this.imgNum) {
+          let uid = null;
+          if (val.some(s => {if (s.isChecked) {uid = s.uid;return true;}})) {
+            val.forEach(f => {
+              if (f.uid !== uid) {
+                f.disabled = true
+              }
+            })
+          } else {
+            val.forEach(f => {
+              f.disabled = false
+            })
+          }
+        }
+      },
+      deep: true
+    }
+  },
+  mounted () {
+    this.getPortraitList();
+  },
   methods: {
+    // 查询
+    search () {
+      this.pageNum = 1;
+      this.currentPage = 1;
+      this.getPortraitList();
+    },
+    // 获取全部人像列表，或者根据组id获取人像列表
+    getPortraitList () {
+      let params = {
+        pageNum: this.pageNum,
+        pageSize: this.pageSize,
+        orderBy: null,
+        order: null,
+        'where.sex': this.libForm.sex,
+        'where.nation': this.libForm.nation
+      }
+      this.libForm.idNo && (params['where.idNo'] = this.libForm.idNo);
+      this.loading = true;
+      getPortraitList(params).then(res => {
+        if (res && res.data) {
+          this.protraitMemberList = res.data;
+           this.protraitMemberList.list = this.protraitMemberList.list.map(f => {
+            if (this.fileListOne && this.fileListOne.some(s => s.objId === f.uid)) {
+              this.$set(f, 'isChecked', true);
+            } else if (this.fileListTwo && this.fileListTwo.some(s => s.objId === f.uid)) {
+              this.$set(f, 'isChecked', true);
+            } else {
+              this.$set(f, 'isChecked', false);
+            }
+            if (this.imgNum) {
+              this.$set(f, 'disabled', false);
+            }
+            const {photoUrl, ...other} = f;
+            return {
+              photoUrl: photoUrl,
+              ...other
+            }
+          })
+        }
+      }).finally(() => {
+        this.loading = false;
+      })
+    },
     handleCurrentChange (page) {
-
+      this.pageNum = page;
+      this.currentPage = page;
+      this.getPortraitList();
     },
     // 确认
     selControlLibMember () {
+      let selList = this.protraitMemberList.list.reduce((next, cur) => {
+        if (cur.isChecked) {
+          return [...next, {
+            objId: cur.uid,
+            objType: 1,
+            photoUrl: cur.photoUrl,
+            name: cur.name,
+            sex: cur.sex
+          }]
+        } else {
+          return next;
+        }
+      }, []);
+      this.$emit('getPortraitData', selList);
       this.portraitLibDialog = false;
+      this.$parent.portraitLibDialog = false;
     },
     // 多选
     operateRadio () {
-
+      console.log(this.protraitMemberList, 'this.protraitMemberList')
     },
     // 重置
     reset () {
       this.$nextTick(() => {
         this.$refs['libForm'].resetFields();
+        this.search();
       })
     },
   }
@@ -231,6 +317,12 @@ export default {
         width: 100%;
       }
     }
+  }
+  .el-dialog__wrapper .el-dialog__footer {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
   }
 }
 </style>

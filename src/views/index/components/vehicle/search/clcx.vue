@@ -59,39 +59,14 @@
           </el-form-item>
           
       
-          <el-form-item label="抓拍区域：" label-width="72px" class="firstItem">
-            <!-- <el-radio-group v-model="input5" @change="changeTab"> -->
-            <el-radio-group v-model="input5" @change="changeTab">
-               <el-row :gutter="10">
-                <el-col :span="12">
-                  <el-radio label="1">列表选择</el-radio>
-                </el-col>
-                <el-col :span="12" >
-                  <div @click="clickTab"><el-radio label="2">地图选择</el-radio></div>
-                  
-                </el-col>
-              </el-row>
-               
-            </el-radio-group>
-          </el-form-item>
-          <el-form-item v-if="input5=='2'" >
-            <el-input  v-model="selectValue" :disabled="true">
-            </el-input>
-          </el-form-item>
-          <el-form-item v-if="input5=='1'">
-            <el-select v-model="value1" multiple collapse-tags placeholder="请选择" class="full">
-            <el-option-group
-              v-for="group in options"
-              :key="group.areaName"
-              :label="group.areaName">
-              <el-option
-                v-for="item in group.areaTreeList"
-                :key="item.areaId"
-                :label="item.areaName"
-                :value="item.areaId">
-              </el-option>
-            </el-option-group>
-          </el-select>
+          <el-form-item class="firstItem">
+            <div class="ytsr_xzsb_s" @click="clickTab" v-if="chooseType === 1">
+              <span>选择设备</span>
+              <span class="el-icon-arrow-down"></span>
+            </div>
+            <div class="ytsr_dtxz_rst" v-else>
+              已选<span>{{dSum}}</span>个设备<a href="javascript: void(0);" @click="dialogVisible={}">重选</a>
+            </div>
           </el-form-item>
           <el-form-item prop="plateNo" class="plate_no">
             <p class="carCold">车牌：<el-checkbox style="float: right;" v-model="ruleForm._include">排除</el-checkbox></p>
@@ -132,28 +107,47 @@
       </div>
     </div>
     <div class="right">
+      <p class="r_o_tab" v-show="!isNull">
+        <span  class="is_tuwen" :class="{'active': isList}" @click="isList = true;"></span>
+        <span  class="is_list" :class="{'active': !isList}" @click="isList = false;"></span>
+        <el-button type="primary" size="small" :loading="isDao" @click="exportList" class="fright">导出</el-button>
+      </p>
       <div v-if="!isNull">
-      <h3 class="title">查询结果 
-        <el-button type="primary" size="small" :loading="isDao" @click="exportList" class="select_btn  fright">导出</el-button>
-      </h3>
-      <el-table
-      :data="tableData"
-      style="width: 100%; padding:20px;">
+        <h3 class="title">查询结果</h3>
+        <el-table
+        v-show="isList"
+        :data="tableData"
+        style="width: 100%; padding:20px;">
        <el-table-column  type="index" :show-overflow-tooltip="true" label="序号"  width="80"></el-table-column>
       <el-table-column
-        prop="plateNo"
-        label="车牌号码"
-        width="180">
+        prop="PlateNo"
+        label="车牌号码">
       </el-table-column>
       <el-table-column
-        prop="snapNum"
+        prop="plateColorDesc"
         sortable
-        label="抓拍次数">
+        label="号牌颜色">
       </el-table-column>
       <el-table-column
-        prop="vehicleGroup"
-        label="车辆分组">
+        prop="deviceName"
+        label="设备名称">
       </el-table-column>
+      <el-table-column
+        prop="shotTime"
+        label="过车时间">
+      </el-table-column>
+        <el-table-column
+          prop="vehicleClassDesc"
+          label="车辆类型">
+        </el-table-column>
+        <el-table-column
+          prop="vehicleBrandDesc"
+          label="品牌">
+        </el-table-column>
+        <el-table-column
+                prop="vehicleGroup"
+                label="所属分组">
+        </el-table-column>
       <el-table-column
         label="是否是布控车辆">
         <template slot-scope="scope">
@@ -161,49 +155,60 @@
           <span v-else>否</span>
         </template>
       </el-table-column>
-      <el-table-column
-        prop="vehicleClass"
-        label="车辆类型">
-      </el-table-column>
       <el-table-column label="操作">
         <template slot-scope="scope">
-        <el-button @click="handleClick(scope.row)" type="text" size="small">抓拍详情</el-button>
+          <el-button @click="handleClick(scope.row)" type="text" size="small">抓拍详情</el-button>
         </template>
       </el-table-column>
     </el-table>
-    </div>
-    <div v-if="isNull" class="fnull">
-      <div><img src="../../../../../assets/img/null-content.png" alt="">
-      请在左侧输入查询条件</div>
-       
-    </div>
-    <el-pagination
-      v-show="pagination.total > 0"
-      class="cum_pagination"
-      @size-change="handleSizeChange"
-      @current-change="onPageChange"
-      :current-page.sync="pagination.pageNum"
-      :page-sizes="[100, 200, 300, 400]"
-      :page-size="pagination.pageSize"
-      layout="total, prev, pager, next"
-      :total="pagination.total">
-    </el-pagination>
+        <div class="right_tw_list" v-show="!isList">
+          <div class="r_tw_l_item" v-for="item in tableData" @click="handleClick(item)">
+            <div class="r_tw_l_img">
+              <img :src="item.StorageUrl1" alt="">
+            </div>
+            <p><span>车牌号：</span>{{item.PlateNo}}</p>
+            <p><span>设备名称：</span>{{item.deviceName}}</p>
+            <p><span>过车时间：</span>{{item.shotTime}}</p>
+            <p><span>所属分组：</span>{{item.vehicleGroup}}</p>
+            <p><span>是否是布控车辆：</span>{{item.isSurveillance ? '是' : '否'}}</p>
+          </div>
+        </div>
+      </div>
+      <div v-if="isNull" class="fnull">
+        <div>
+          <img src="../../../../../assets/img/null-content.png" alt="">
+          选择设备和车辆类别，查询特定时间段内该类别车辆在所选设备的过车情况
+        </div>
+
+      </div>
+      <el-pagination
+        v-show="pagination.total > 0"
+        class="cum_pagination"
+        style="background-color: #fff;"
+        @size-change="handleSizeChange"
+        @current-change="onPageChange"
+        :current-page.sync="pagination.pageNum"
+        :page-sizes="[100, 200, 300, 400]"
+        :page-size="pagination.pageSize"
+        layout="total, prev, pager, next"
+        :total="pagination.total">
+      </el-pagination>
     </div>
      <!-- 地图选择 -->
     <!-- <el-dialog :visible.sync="dialogVisible" width="80%">
         <mapselect @selectMap="mapPoint" @closeMap="hideMap" :allPoints="allDevice"></mapselect>
     </el-dialog> -->
     <!-- D设备 B卡口  这里是设备和卡口 -->
-    <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :open="dialogVisible" :clear="msClear" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div>
     
     <div is="vehicleDetail" :detailData="detailData"></div>
   </div>
 </template>
 <script>
-import vehicleDetail from '../common/vl-dialog.vue';
+import vehicleDetail from '../common/vehicleDetail.vue';
 import { mapXupuxian } from "@/config/config.js";
 import { cityCode, dataList } from "@/utils/data.js";
-import { getVehicleShot,getAllDevice,getGroups,getSnapList,exportNightVehicle,getSnapDetail} from "@/views/index/api/api.judge.js";
+import { getVehicleShot,getAllDevice,getGroups,getSnapList,exportNightVehicle} from "@/views/index/api/api.judge.js";
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 // import mapselect from "@/views/index/components/common/mapSelect";
 import mapSelector from '@/components/common/mapSelector.vue';
@@ -212,6 +217,11 @@ export default {
   components: { mapSelector, vehicleDetail },
   data () {
     return {
+      dSum: 0,
+      chooseType: 1,
+      msClear: {},
+      isList: true, // 列表展示形式
+
       detailData: null,
       amap:null,
       markerPoint: null, // 地图点集合
@@ -233,16 +243,14 @@ export default {
             return time.getTime() > Date.now() ;
           }
         },
-        isNull:true,
-        isDao:false,
+      isNull:true,
+      isDao:false,
       pricecode: this.dicFormater(dataList.ownership)[0].dictList,
-      input5: "1",
       dialogVisible: false,
       strucDetailDialog: false,
       isload: false,
       value1: null,
       select: '',
-      selectValue:"已选设备0个",
       ruleForm: {
         dateStart: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)),
         dateEnd: new Date(),
@@ -259,7 +267,6 @@ export default {
       selectBayonet:[],
       tableData: [],
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
-      options: [],
       vehicleOptions: [],
       grounpOptions: [
         
@@ -298,7 +305,6 @@ export default {
 },
   mounted() {
     this.setDTime()
-    this.getMapGETmonitorList()//查询行政区域
     this.getGroups()
     let dic=this.dicFormater(dataList.vehicleType);
     this.vehicleOptions= [...dic[0].dictList]
@@ -337,40 +343,11 @@ export default {
       this.sturcDetail = data;
       this.drawPoint(data); // 重新绘制地图
     },
-    getSnapDetail(data){
-      
-      getSnapDetail(data).then(res=>{
-        if(res && res.data && res.data.snapDtoList && res.data.snapDtoList.length > 0){
-         /*  this.strucDetailDialog = true 
-          this.sturcDetail=res.data.snapDtoList[0]
-          if(res.data.snapDtoList && res.data.snapDtoList.length>0){
-            this.strucInfoList = res.data.snapDtoList;
-          } */
-          let _d = res.data.snapDtoList;
-          this.detailData = {
-            list: _d, // 列表
-            index: 0 // 第几个
-          }
-          
-          //this.snapObj=res.data.snapDtoList[0]
-         
-          
-        }else{
-
-        }
-      })
-    },
     //导出
     exportList(){
       this.isDao=true
-      if(this.input5==1){
-        this.ruleForm.areaIds =this.value1?this.value1.join(","):''
-      }else{
-        /*   this.selectDevice=[]
-      this.selectBayonet=[] */
-        this.ruleForm.deviceIds  = this.selectDevice?this.selectDevice.join(","):''
-        this.ruleForm.bayonetIds = this.selectBayonet?this.selectBayonet.join(","):''
-      }
+      this.ruleForm.deviceIds  = this.selectDevice?this.selectDevice.join(","):''
+      this.ruleForm.bayonetIds = this.selectBayonet?this.selectBayonet.join(","):''
       this.ruleForm.vehicleGroup = this.ruleForm._vehicleGroup?this.ruleForm._vehicleGroup.join(","):''
       this.ruleForm.dateStart = formatDate(this.ruleForm.dateStart);
       this.ruleForm.dateEnd = formatDate(this.ruleForm.dateEnd);
@@ -378,7 +355,7 @@ export default {
       this.ruleForm.pageNum =this.pagination.pageNum
       let d = JSON.stringify(this.ruleForm)
       d = JSON.parse(d)
-      d.plateNo= this.ruleForm.plateNo;
+      d.plateNo = this.select + this.ruleForm.plateNo;
       if(!d.plateNo){
         d.include=null
       }
@@ -414,20 +391,6 @@ export default {
     //设置默认时间
     setDTime() {
     },
-    //查询行政区域
-    getMapGETmonitorList(){
-      let d={
-        areaUid:mapXupuxian.adcode
-      }
-      MapGETmonitorList(d).then(res=>{
-        if(res && res.data){
-          this.options.push(res.data)
-          // res.data.areaTreeList.forEach(el=>{
-          //   this.value1.push(el.areaId)
-          // })
-        }
-      })
-    },
     //查询所有的设备
     getAllDevice(){
       getAllDevice().then(res=>{
@@ -435,7 +398,7 @@ export default {
           if(res.data && res.data.length>0){
             this.allDevice=res.data
           }
-          
+
       })
     },
     //查询特殊组
@@ -459,14 +422,8 @@ export default {
           }
         return
       }
-      if(this.input5==1){
-        this.ruleForm.areaIds =this.value1?this.value1.join(","):''
-      }else{
-        /*   this.selectDevice=[]
-      this.selectBayonet=[] */
-        this.ruleForm.deviceIds  = this.selectDevice?this.selectDevice.join(","):''
-        this.ruleForm.bayonetIds = this.selectBayonet?this.selectBayonet.join(","):''
-      }
+      this.ruleForm.deviceIds  = this.selectDevice?this.selectDevice.join(","):''
+      this.ruleForm.bayonetIds = this.selectBayonet?this.selectBayonet.join(","):''
       this.ruleForm.vehicleGroup = this.ruleForm._vehicleGroup?this.ruleForm._vehicleGroup.join(","):''
       this.ruleForm.dateStart = formatDate(this.ruleForm.dateStart);
       this.ruleForm.dateEnd = formatDate(this.ruleForm.dateEnd);
@@ -534,13 +491,8 @@ export default {
           this.selectBayonet.push(element.uid)
         });
       }
-      if(p.length==0 && v.length==0){
-        if(!document.querySelector('.el-message--info')){
-           this.$message.info("选择的区域没有设备，请重新选择区域");
-        }
-        return
-      }
-      this.selectValue="已选设备"+(this.selectDevice.length+this.selectBayonet.length)+"个"
+
+      this.dSum = this.selectDevice.length + this.selectBayonet.length;
       //this.selectDevice=v
 
       // console.log(this.selectDevice);
@@ -549,36 +501,21 @@ export default {
   
     clickTab(){
       this.dialogVisible = !this.dialogVisible;
+      this.chooseType = 2;
     },
     handleClick(v){
-      //  this.strucDetailDialog = true 
-        this.sturcDetail={}
-        this.strucInfoList = [];
-      // console.log(v);
-      v.dateStart = formatDate(this.ruleForm.dateStart)
-      v.dateEnd = formatDate(this.ruleForm.dateEnd)
-      //this.strucDetailDialog = true 
-      let d={
-        dateStart:formatDate(this.ruleForm.dateStart),
-        dateEnd:formatDate(this.ruleForm.dateEnd),
-        devIds:'',
-        plateNo:v.plateNo,
-        hasPlate:v.plateNo?'1':'0'
-      }
-      this.getSnapDetail(d)
-      // this.$router.push({name: 'vehicle_search_clcxdetail', query: v});
-    },
-    changeTab(v) {
-      //console.log(v);
-      // if (v == "2") {
-      //   this.dialogVisible = true;
-      // } else {
-      //   this.dialogVisible = false;
-      // }
+      this.detailData = {
+        type: 11, // 11车辆查询
+        params: {}, // 查询参数
+        list: this.tableData, // 列表
+        index: this.tableData.findIndex(x => x === v), // 第几个
+        pageSize: this.tableData.length,
+        total: this.tableData.length,
+        pageNum: 1
+      };
     },
     resetForm (){
-      this.value1=null
-      this.selectValue="已选设备0个",
+      this.value1=null;
       // this.select=""
       this.ruleForm._vehicleGroup="" 
       this.ruleForm.vehicleClass="" 
@@ -591,6 +528,8 @@ export default {
       this.pagination.total = 0;
       this.tableData = [];
       this.isNull = true;
+      this.msClear = {};
+      this.dSum = 0;
     },
     submitForm(){
       this.ruleForm.include=this.ruleForm._include?0:1
@@ -619,6 +558,78 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.right_tw_list {
+  width: 100%;
+  padding: 20px 20px 0 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  .r_tw_l_item {
+    width: 290px;
+    border: 1px solid #D3D3D3;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    .r_tw_l_img {
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+      img {
+        width: 100%;
+        height: auto;
+      }
+    }
+    p {
+      padding-left: 20px;
+      color: #333333;
+      line-height: 24px;
+      span {
+        color: #666666;
+      }
+    }
+  }
+}
+.ytsr_xzsb_s {
+  height: 40px;
+  line-height: 40px;
+  width: 100%;
+  border-radius: 4px;
+  border: 1px solid #DCDFE6;
+  cursor: pointer;
+  color: #999999;
+  padding: 0 6px;
+  > span {
+    display: inline-block;
+    width: 50%;
+    &:last-child {
+      text-align: right;
+    }
+  }
+}
+.ytsr_dtxz_rst {
+  width: 100%;
+  line-height: 40px;
+  padding: 0px 15px; margin-top: 5px;
+  background-color: #F5F7FA;
+  color: #C0C4CC;
+  border: 1px solid #DCDFE6;
+  border-radius: 4px;
+  > span {
+    display: inline-block;
+    padding: 0 3px;
+    color: #333;
+  }
+  > a {
+    display: inline-block;
+    padding-left: 5px;
+    color: #2580FC !important;
+    text-decoration: none !important;
+    /*font-style: italic;*/
+    cursor: pointer;
+  }
+}
 .carCold{
   justify-content: space-between;
     display: flex;
@@ -655,21 +666,53 @@ export default {
   width: 100%;
 }
 .title {
-  padding: 20px 20px;
+  padding-left: 20px;
+  height: 50px;
+  line-height: 50px;
   border-bottom: solid 1px #dddddd;
   font-size: 16px;
   font-weight: bold;
 }
 
 .right {
-  width: calc(100% - 300px);
+  width: calc(100% - 292px);
   height: calc(100% - 80px);
   float: right;
-  background: #ffffff;
-  margin-top: 20px;
+  /*background: #ffffff;*/
+  /*margin-top: 20px;*/
   overflow: auto;
   overflow-x: hidden;
   overflow-y: auto;
+  > div {
+    background: #ffffff;
+  }
+  .r_o_tab {
+    height: 60px;
+    padding-top: 12px;
+    padding-right: 20px;
+    > span {
+      color: #999999;
+      font-size: 24px;
+      cursor: pointer;
+      display: inline-block;
+      margin-right: 20px;
+      width: 38px;
+      height: 38px;
+      background: url("../../../../../assets/img/icons.png") no-repeat;
+    }
+    .is_list {
+      background-position: -1096px -259px;
+    }
+    .is_list.active {
+      background-position: -1046px -259px;
+    }
+    .is_tuwen {
+      background-position: -1197px -259px;
+    }
+    .is_tuwen.active {
+      background-position: -1146px -259px;
+    }
+  }
 }
 
 .left {

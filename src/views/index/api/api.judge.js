@@ -248,7 +248,7 @@ export function getShotDevice(params) {
     url: '/vehicle/shot-dev',
     method: 'get',
     params,
-    mode: 'judge'
+    mode: 'vehicle'
   });
 }
 /**
@@ -260,7 +260,7 @@ export function getTailBehindList(params) {
     url: '/vehicle/tail-behind/list',
     method: 'get',
     params,
-    mode: 'judge'
+    mode: 'vehicle'
   });
 }
 /**
@@ -272,21 +272,21 @@ export function getTailBehindDetail(params) {
     url: '/vehicle/tail-behind/detail',
     method: 'get',
     params,
-    mode: 'judge'
+    mode: 'vehicle'
   });
 }
 /**
  * 根据车牌号码查询车辆详情接口
  * @param {object} params
  */
-export function getVehicleArchives(params) {
-  return request({
-    url: '/vehicle/archives',
-    method: 'get',
-    params,
-    mode: 'judge'
-  });
-}
+// export function getVehicleArchives(params) {
+//   return request({
+//     url: '/vehicle/archives',
+//     method: 'get',
+//     params,
+//     mode: 'judge'
+//   });
+// }
 /*--------------------------  车辆侦查--尾随分析end  ---------------------------------*/
 
 /*--------------------------  人脸检索--身份核实start  ---------------------------------*/
@@ -299,7 +299,7 @@ export function getIdNoList(params) {
     url: '/portrait/identify',
     method: 'get',
     params,
-    mode: 'judge'
+    mode: 'portrait'
   });
 }
 /*--------------------------  车辆侦查--尾随分析end  ---------------------------------*/
@@ -341,8 +341,8 @@ export function getSnapDetail(params) {
   return request({
     url: '/vehicle/snap-detail',
     method: 'post',
-    data:params,
-    mode: 'judge'
+    data: params,
+    mode: 'vehicle'
   });
 }
 /**
@@ -390,7 +390,7 @@ export function getSnapList(params) {
     url: '/vehicle/snap',
     method: 'post',
     data:params,
-    mode: 'judge'
+    mode: 'vehicle'
   });
 }
 
@@ -420,7 +420,7 @@ export function QyphGetAreaWander(data) {
     url: '/vehicle-analysis/area-wander',
     method: 'post',
     data,
-    mode: 'judge'
+    mode: 'vehicle'
   });
 }
 /*--------------------------  区域徘徊碰撞end  ---------------------------------*/
@@ -497,7 +497,7 @@ export function getMultiVehicleList(params) {
     url: '/multi-vehicle-peer',
     method: 'post',
     data: params,
-    mode: 'judge'
+    mode: 'vehicle'
   })
 }
 /**
@@ -509,7 +509,7 @@ export function getBaseVehicleList(params) {
     url: '/base-vehicle-check',
     method: 'get',
     params,
-    mode: 'judge'
+    mode: 'vehicle'
   })
 }
 /*--------------------------  车辆侦查--多车同行分析end  ---------------------------------*/
@@ -524,7 +524,7 @@ export function getNightVehicleList(params) {
     url: '/night-driving-vehicle',
     method: 'post',
     data: params,
-    mode: 'judge'
+    mode: 'vehicle'
   })
 }
 /**
@@ -536,7 +536,7 @@ export function getNightVehicleRecordList(params) {
     url: '/night-driving-vehicle/records',
     method: 'post',
     data: params,
-    mode: 'judge'
+    mode: 'vehicle'
   })
 }
 /*--------------------------  车辆侦查--夜间行车分析end  ---------------------------------*/
@@ -564,7 +564,7 @@ export function getFocusList(params) {
     url: '/portrait/shot-num/focus',
     method: 'post',
     data: params,
-    mode: 'judge'
+    mode: 'portrait'
   })
 }
 /**
@@ -576,7 +576,7 @@ export function PortraitPostFocusRealTime(data, extData) {
     url: '/portrait/shot-num/focus/real-time',
     method: 'post',
     data,
-    mode: 'judge',
+    mode: 'portrait',
     extData: extData
   })
 }
@@ -589,7 +589,7 @@ export function PortraitPostFocusTask(data) {
     url: '/portrait/shot-num/focus/task',
     method: 'post',
     data,
-    mode: 'judge'
+    mode: 'portrait'
   })
 }
 /*--------------------------  导入导出  ---------------------------------*/
@@ -602,7 +602,7 @@ export function exportNightVehicle(params) {
     url: '/export',
     method: 'post',
     data: params,
-    mode: 'judge'
+    mode: 'vehicle'
   })
 }
 /**
@@ -639,7 +639,7 @@ export function getFaceRetrievalPerson(params, extData) {
     url: '/face-retrieval/query-person',
     method: 'post',
     data: params,
-    mode: 'judge',
+    mode: 'portrait',
     extData: extData
   })
 }
@@ -757,7 +757,7 @@ export function getAreaRealTimeData(params, extData) {
     url: '/portrait/shot-num/area/real-time/web',
     method: 'post',
     data: params,
-    mode: 'judge',
+    mode: 'portrait',
     extData: extData
   })
 }
@@ -770,7 +770,19 @@ export function addAreaPersonTask(params) {
     url: '/portrait/shot-num/area/task/web',
     method: 'post',
     data: params,
-    mode: 'judge'
+    mode: 'portrait'
+  })
+}
+/**
+ * 区域人员修改离线任务接口
+ * @param {object} params
+ */
+export function updateAreaPersonTask(params) {
+  return request({
+    url: '/portrait/shot-num/area/updatetask/web',
+    method: 'put',
+    data: params,
+    mode: 'portrait'
   })
 }
 
@@ -785,7 +797,7 @@ export function addLimitTask(params) {
     url: '/limit-task',
     method: 'post',
     data: params,
-    mode: 'judge'
+    mode: 'vehicle'
   })
 }
 /**
@@ -797,7 +809,7 @@ export function getLimitTaskDetail(params) {
     url: '/limit-task/detail',
     data: params,
     method: 'post',
-    mode: 'judge'
+    mode: 'vehicle'
   })
 }
 /**
@@ -809,7 +821,7 @@ export function getLimitShotRecord(params) {
     url: '/limit-task/shot-records',
     method: 'get',
     params,
-    mode: 'judge'
+    mode: 'vehicle'
   })
 }
 /**
@@ -821,7 +833,7 @@ export function updateLimitTaskStatus(params) {
     url: '/limit-task/status',
     method: 'put',
     data: params,
-    mode: 'judge'
+    mode: 'vehicle'
   })
 }
 /**
@@ -831,6 +843,20 @@ export function updateLimitTaskStatus(params) {
 export function getLimitTaskList(params) {
   return request({
     url: '/limit-tasks',
+    method: 'get',
+    params,
+    mode: 'vehicle'
+  })
+}
+
+/****************************图片框选区域信息接口 ******************************** */
+/**
+ * 图片区域查询接口
+ * @param {object} params
+ */
+export function getImageAreaInfo(params) {
+  return request({
+    url: '/picture/reactInfo',
     method: 'get',
     params,
     mode: 'judge'

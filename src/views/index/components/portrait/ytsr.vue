@@ -1,5 +1,5 @@
 <template>
-  <div class="vl_judge_tc">
+  <div class="vl_judge_tc_ytsr">
     <div class="">
       <div is="vlBreadcrumb"
            :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
@@ -8,20 +8,146 @@
       </div>
     </div>
     <div class="vl_j_left">
-      <img :src="taskDetail.uploadImgUrls" alt="">
-      <!--<img src="http://file.aorise.org/vlink/image/447e505b-03f9-4775-8416-68ca3f9e6ee5.jpg" alt="">-->
-      <div class="vl_ytsr_left_line" v-show="taskDetail.taskName">
-        <span>任务名称：</span>{{taskDetail.taskName}}
-      </div>
-      <div class="vl_ytsr_left_line">
-        <span>相似度：</span>≥{{taskDetail ? taskDetail.minSemblance : 0}}%
-      </div>
-      <div class="vl_ytsr_left_line">
-        <span>基础信息库：</span>
-        <span>
-          <p v-for="item in taskDetail.portraitGroupName" :key="item.id">{{item}}</p>
+      <template v-if="showNewTask">
+        <div class="vl_jtc_img_box">
+          <div style="padding: 0 25px; height: 210px;">
+            <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit" :imgData="imgData"></div>
+          </div>
+        </div>
+        <div class="per_semblance_ytsr"><span>相似度：≥</span><el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100" placeholder="填写相似度数字" v-model="searchData.minSemblance"></el-input>%</div>
+        <!--查询范围-->
+        <div class="ytsr_left_radio">
+          <span>查询范围：</span>
+          <span>
+          <el-radio v-model="radio" label="1">基础信息库</el-radio>
+          <el-radio style="display:block;" v-model="radio" label="2">抓拍视图库</el-radio>
+          <el-radio style="display: block;" v-model="radio" label="3">布控库</el-radio>
         </span>
-      </div>
+        </div>
+        <div class="ytsr_left_search" v-show="radio === '1' || radio === '3'">
+          <el-select
+                  v-model="searchData.portraitGroupId"
+                  placeholder="全部人像"
+                  multiple
+                  collapse-tags
+          >
+            <el-option
+                    v-for="item in portraitGroupList"
+                    :key="item.id"
+                    :label="item.groupName"
+                    :value="item.uid">
+            </el-option>
+          </el-select>
+        </div>
+        <div class="ytsr_left_search"  v-show="radio === '2'">
+          <div class="left_time">
+            <el-date-picker
+                    v-model="searchData.startTime"
+                    style="width: 100%;margin-bottom: 20px;"
+                    class="vl_date"
+                    type="datetime"
+                    :time-arrow-control="true"
+                    @change="chooseStartTime"
+                    :picker-options="pickerOptions"
+                    value-format="timestamp"
+                    placeholder="选择日期时间">
+            </el-date-picker>
+            <el-date-picker
+                    style="width: 100%;"
+                    class="vl_date vl_date_end"
+                    v-model="searchData.endTime"
+                    @change="chooseEndTime"
+                    :picker-options="pickerOptions"
+                    :time-arrow-control="true"
+                    value-format="timestamp"
+                    type="datetime"
+                    placeholder="选择日期时间">
+            </el-date-picker>
+          </div>
+          <!-- 设备搜索 -->
+          <!--<div class="device-comp">-->
+          <!--<div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>-->
+          <!--<div class="selected_device" @click="treeTabShow = true;">-->
+          <!--<i class="el-icon-arrow-down"></i>-->
+          <!--&lt;!&ndash; <i class="el-icon-arrow-up"></i> &ndash;&gt;-->
+          <!--<div class="device_list" v-if="selectDeviceArr.length > 0">-->
+          <!--<template v-if="checkAllTree">-->
+          <!--<span>全部设备</span>-->
+          <!--</template>-->
+          <!--<template v-else>-->
+          <!--<span>{{ selectDeviceArr[0].label }}</span>-->
+          <!--<span-->
+          <!--v-show="selectDeviceArr.length > 1"-->
+          <!--title="展开选中的设备"-->
+          <!--class="device_count"-->
+          <!--&gt;+{{ selectDeviceArr.length - 1 }}</span>-->
+          <!--</template>-->
+          <!--</div>-->
+          <!--<div class="no_device" v-else>选择设备</div>-->
+          <!--&lt;!&ndash; 树tab页面 &ndash;&gt;-->
+          <!--<div class="device_tree_tab" v-show="treeTabShow">-->
+          <!--<div style="overflow: hidden;">-->
+          <!--</div>-->
+          <!--&lt;!&ndash; 摄像头树 &ndash;&gt;-->
+          <!--<div class="tree_content">-->
+          <!--<vue-scroll>-->
+          <!--<div class="checked_all">-->
+          <!--<el-checkbox-->
+          <!--:indeterminate="isIndeterminate"-->
+          <!--v-model="checkAllTree"-->
+          <!--@change="handleCheckedAll"-->
+          <!--&gt;全选</el-checkbox>-->
+          <!--</div>-->
+          <!--<el-tree-->
+          <!--@check="listenChecked"-->
+          <!--:data="cameraTree"-->
+          <!--show-checkbox-->
+          <!--default-expand-all-->
+          <!--node-key="label"-->
+          <!--ref="cameraTree"-->
+          <!--highlight-current-->
+          <!--:props="defaultProps"-->
+          <!--&gt;</el-tree>-->
+          <!--</vue-scroll>-->
+          <!--</div>-->
+          <!--</div>-->
+          <!--</div>-->
+          <!--<p class="error-tip" :class="{'is-show': isDeviceTrue}">{{messageDevTip}}</p>-->
+          <!--</div>-->
+          <div class="ytsr_xzsb_s" @click="areaTypeChanged" v-if="chooseType === 1">
+            <span>选择设备</span>
+            <span class="el-icon-arrow-down"></span>
+          </div>
+          <div class="ytsr_dtxz_rst" v-else>
+            已选<span>{{dSum}}</span>个设备<a href="javascript: void(0);" @click="openMap={}">重选</a>
+          </div>
+        </div>
+        <div class="vl_jtc_search">
+          <div style="text-align: center;margin-bottom: 0px;">
+            <el-button @click="resetSearch">取消</el-button>
+            <el-button type="primary" :loading="searching" @click="tcDiscuss(false)">确定</el-button>
+          </div>
+        </div>
+      </template>
+      <template v-else>
+        <img :src="taskDetail.uploadImgUrls" alt="">
+        <!--<img src="http://file.aorise.org/vlink/image/447e505b-03f9-4775-8416-68ca3f9e6ee5.jpg" alt="">-->
+        <div class="vl_ytsr_left_line" v-show="taskDetail.taskName">
+          <span>任务名称：</span>{{taskDetail.taskName}}
+        </div>
+        <div class="vl_ytsr_left_line">
+          <span>相似度：</span>≥{{taskDetail ? taskDetail.minSemblance : 0}}%
+        </div>
+        <div class="vl_ytsr_left_line">
+          <span>基础信息库：</span>
+          <span>
+            <p v-for="item in taskDetail.portraitGroupName" :key="item.id">{{item}}</p>
+          </span>
+        </div>
+        <div class="update_task">
+          <el-button type="primary" @click="showNewTask = true;">修改任务</el-button>
+        </div>
+      </template>
     </div>
     <div class="vl_s_right">
       <div class="vl_jig_right">
@@ -122,19 +248,63 @@
         </swiper>
       </div>
     </el-dialog>
+    <!-- D设备 B卡口  这里是设备和卡口 -->
+    <div
+        is="mapSelector"
+        :open="openMap"
+        :clear="msClear"
+        :showTypes="'DB'"
+        @mapSelectorEmit="mapSelectorEmit">
+    </div>
   </div>
 </template>
 <script>
   import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+  import mapSelector from '@/components/common/mapSelector.vue';
+  import vlUpload from '@/components/common/upload.vue';
   import { formatDate } from "@/utils/util.js";
   import noResult from '@/components/common/noResult.vue';
   import { getPeopleTaskDetail } from '@/views/index/api/api.analysis.js';
-  import { PortraitPostByphotoRealtime} from '@/views/index/api/api.portrait.js';
+  import { PortraitPostByphotoRealtime, PortraitPostByphotoTask} from '@/views/index/api/api.portrait.js';
+  import {getGroups} from '../../api/api.judge.js';
   let AMap = window.AMap;
   export default {
-    components: {vlBreadcrumb, noResult},
+    components: {vlBreadcrumb, noResult, vlUpload, mapSelector},
     data() {
       return {
+        // 修改任务相关
+        imgData:null,
+        imgList: null,
+        portraitGroupList: [],
+        uploadClear: {},
+        searchData: {
+          minSemblance: 85, // 最小相似度
+          portraitGroupId: [],
+          startTime: '',
+          endTime: ''
+        },
+        radio: "1",
+        dSum: 0, // 设备总数
+        dIds: [], // 设备IDS
+        chooseType: 1, // 选择设备装备，1是刚进入，2是已选择
+        showNewTask: false, // 展示修改任务
+        searchData: {
+          portraitGroupId: null,  // 人员组
+          sex: null, // 1男，2女
+          ageGroup: null, // 年龄段
+          time1: null,
+          time2: null
+        },
+        searching: false,
+        openMap: false,
+        msClear: {},
+        pickerOptions: {
+          disabledDate (time) {
+            return time > new Date();
+          }
+        },
+
+
         swiperOption: {
           slidesPerView: 5,
           spaceBetween: 10,
@@ -171,6 +341,14 @@
       } else {
         this.getTheList();
       }
+
+      // 获取人员组，跟车辆组列表, 修改任务相关
+      getGroups({groupType: 4}).then(res => {
+        if (res) {
+          this.portraitGroupList = res.data;
+        }
+      })
+      this.setDTime();
     },
     computed: {
       curStrucInfoList () {
@@ -178,6 +356,145 @@
       }
     },
     methods: {
+      // 修改任务相关
+      resetSearch () {
+        this.taskName = '';
+        this.searchData.minSemblance = 85;
+        this.imgList = '';
+        this.radio = '1';
+        this.searchData.portraitGroupId= [];
+        this.msClear = {};
+        this.uploadClear = {};
+        this.setDTime();
+        this.showNewTask = false;
+      },
+      tcDiscuss (boolean) {
+        let p1 = {
+          origin: this.radio,
+          taskOperateType: 1,
+        };
+        let params = {
+          origin: this.radio,
+          taskOperateType: 1,
+        }
+        if (!this.imgList) {
+          if (!document.querySelector('.el-message--info')) {
+            this.$message.info('请上传图片')
+          }
+          return false;
+        } else {
+          params['appendixIds'] = this.imgList.uid ? this.imgList.uid : null;
+          params['uploadImgUrls'] = this.imgList.path;
+        }
+        if (this.searchData.minSemblance) {
+          params['minSemblance'] = this.searchData.minSemblance;
+        } else {
+          params['minSemblance'] = 0;
+        }
+        if (this.radio === '1') {
+          p1['portraitGroupId'] = this.searchData.portraitGroupId.join(',');
+          params['portraitGroupId'] = this.searchData.portraitGroupId.join(',');
+          let pNameList = []
+          this.searchData.portraitGroupId.forEach(x => {
+            pNameList.push(this.portraitGroupList.find(y => y.uid === x).groupName)
+          })
+          params['portraitGroupName'] = pNameList;
+        } else {
+          let dNameList = [];
+          let dList = this.selectCameraArr.map(res =>  res.deviceName);
+          let bList = this.selectBayonetArr.map(res => res.bayonetName);
+          dNameList = dList.concat(bList);
+          if (dNameList.length > 3) {
+            params['deviceNames'] = dNameList.splice(0, 2);
+            params['deviceNames'].push('等' + dNameList.length + '个设备');
+            params['deviceNames'] =  params['deviceNames'].join(',')
+          } else {
+            params['deviceNames'] = dNameList.join(',')
+          }
+          p1['deviceIds'] = this.selectCameraArr.map(res => res.id).join(',');
+          params['deviceIds'] = "5DTxZRNGOZuLsl07jcNO09";
+//          params['deviceIds'] = this.selectCameraArr.map(res => res.id).join(',');
+          p1['bayonetIds'] = this.selectBayonetArr.map(res => res.id).join(',');
+          params['bayonetIds'] = this.selectBayonetArr.map(res => res.id).join(',');
+          p1['startTime'] = formatDate(this.searchData.startTime, 'yyyy-MM-dd HH:mm:ss');
+          params['startTime'] = formatDate(this.searchData.startTime, 'yyyy-MM-dd HH:mm:ss');
+          p1['endTime'] = formatDate(this.searchData.endTime, 'yyyy-MM-dd HH:mm:ss');
+          params['endTime'] = formatDate(this.searchData.endTime, 'yyyy-MM-dd HH:mm:ss');
+        }
+        if (!boolean) {
+          this.searching = true;
+        }
+        this.searching = true;
+        params.taskOperateType = 1;
+        params.taskId = this.$route.query.uid;
+        PortraitPostByphotoTask(params).then(res => {
+          this.searching = false;
+          if (res && res.data) {
+            this.$message({
+              type: 'success',
+              message: '修改成功',
+              customClass: 'request_tip'
+            })
+            this.$router.push({name: 'portrait_ytsr_moment'})
+          }
+        })
+      },
+      chooseEndTime (e) {
+        if (e < this.searchData.startTime) {
+          this.$message.info('结束时间必须大于开始时间才会有结果')
+        }
+      },
+      chooseStartTime (e) {
+        if (e > this.searchData.endTime) {
+          this.$message.info('结束时间必须大于开始时间才会有结果')
+        }
+      },
+      setDTime() {
+        let date = new Date();
+        let curDate = date.getTime();
+        let curS = 1 * 24 * 3600 * 1000;
+        let _sDate = new Date(curDate - curS);
+        let _s = _sDate.getFullYear()+ '-' + (_sDate.getMonth() + 1) + '-' + _sDate.getDate() + ' 00:00:00' ;
+        this.searchData.startTime = new Date(_s).getTime();
+        this.searchData.endTime = curDate;
+      },
+      uploadEmit (data) {
+        console.log('uploadEmit data', data);
+        if (data && data.path) {
+          this.imgList = data;
+        } else {
+          this.imgList = null;
+        }
+      },
+      // 选择设备回调
+      mapSelectorEmit (result) {
+        if (result) {
+          // bayonetList deviceList
+          this.dSum = 0;
+          this.dIds = [];
+          if (result.deviceList) {
+            this.dSum = result.deviceList.length;
+            for (let i = 0; i < result.deviceList.length; i++) {
+              this.dIds.push(result.deviceList[i].uid);
+            }
+          }
+          if (result.bayonetList && result.bayonetList.length > 0) {
+            this.dSum += result.bayonetList.length;
+          }
+//        if (result.bayonetDeviceList && result.bayonetDeviceList.length > 0) {
+//          this.dSum += result.bayonetDeviceList.length;
+//          for (let i = 0; i < result.bayonetDeviceList.length; i++) {
+//            this.dIds.push(result.bayonetDeviceList[i].uid);
+//          }
+//        }
+        }
+      },
+      areaTypeChanged () {
+        this.chooseType = 2;
+        this.openMap = {};
+      },
+
+
       handleCurrentChange1 (e) {
         this.pagination.pageNum = e;
 
@@ -209,6 +526,11 @@
                   this.pagination.total = this.strucInfoList.length;
                   this.taskDetail = res.data.taskWebParam;
                   console.log(res.data)
+                  this.imgData = {
+                    cname: '带图' + Math.random(),
+                    filePathName: '带图' + Math.random(),
+                    path: this.taskDetail.uploadImgUrls
+                  }
                 }
               })
         }
@@ -227,6 +549,10 @@
   }
 </script>
 <style lang="scss">
+  .cum_pagination_shot {
+    padding: 0px;
+    padding-right: 30px;
+  }
   .breadcrumb_heaer {
     background: #ffffff;
     border-bottom: 1px solid #D3D3D3;
@@ -247,14 +573,14 @@
       left: calc(50% - .05rem);
     }
   }
-  .vl_judge_tc {
+  .vl_judge_tc_ytsr {
     width: 100%;
     height: 100%;
     .vl_j_left {
       float: left;
       width: 272px;
       padding-top: 20px;
-      padding-left: 20px;
+      /*padding-left: 20px;*/
       height: calc(100% - 56px);
       min-height: 788px;
       background: #ffffff;
@@ -267,10 +593,12 @@
         -moz-border-radius: 4px;
         border-radius: 4px;
         margin-bottom: 30px;
+        margin-left: 20px;
       }
       .vl_ytsr_left_line {
         color: #555555;
         margin-bottom: 20px;
+        margin-left: 20px;
         display: flex;
         span {
           /*width: 70px;*/
@@ -285,6 +613,9 @@
             width: 85px;
           }
         }
+      }
+      .update_task {
+        text-align: center;
       }
     }
     .vl_s_right {

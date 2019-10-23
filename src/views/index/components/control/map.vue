@@ -58,9 +58,9 @@
           <el-select v-model="mapForm.alarmId" multiple collapse-tags placeholder="告警级别">
             <el-option
               v-for="item in alarmLevelList"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
+              :key="item.enumField"
+              :label="item.enumValue"
+              :value="item.enumField">
             </el-option>
           </el-select>
         </el-form-item>
@@ -183,7 +183,7 @@
 </template>
 <script>
 import flvplayer from '@/components/common/flvplayer.vue';
-import {random14} from '@/utils/util.js';
+import {random14, unique, addCluster} from '@/utils/util.js';
 import {getControlNameBySelect, getControlEventBySelect, getControlObjBySelect, getControlMap, getControlMapByDevice, getAlarmListByDev, getAllAlarmSnapListByDev} from '@/views/index/api/api.control.js';
 import {dataList} from '@/utils/data.js';
 import {mapXupuxian} from '@/config/config.js';
@@ -258,8 +258,8 @@ export default {
       eventList: [],
       controlObjDropdownList: [],
       stateList: [
-        {label: '待开始', value: 2},
         {label: '进行中', value: 1},
+        {label: '待开始', value: 2},
         {label: '已结束', value: 3}
       ],
       typeList: [
@@ -269,12 +269,7 @@ export default {
         {label: '半球机', value: 3},
         {label: '红外', value: 4}
       ],
-      alarmLevelList: this.dicFormater(dataList.alarmLevel)[0].dictList.map(m => {
-        return {
-          value: parseInt(m.enumField),
-          label: m.enumValue
-        }
-      }),
+      alarmLevelList: this.dicFormater(dataList.alarmLevel)[0].dictList,
       // 地图参数
       map: null,
       devicesList: [], // 布控数据列表
@@ -306,7 +301,7 @@ export default {
       zoom: 10,
       center: mapXupuxian.center
     });
-    map.setMapStyle('amap://styles/whitesmoke');
+    map.setMapStyle('amap://styles/light');
     this.map = map;
     this.getAlarmListByDev();
   },
@@ -393,35 +388,62 @@ export default {
       let surveillanceList = this.devicesList.map(m => m.surveillanceIds);
       surveillanceList = surveillanceList.length > 0 ? surveillanceList.join(',').split(',') : [];
       surveillanceList = Array.from(new Set(surveillanceList));
-      let params = {
+      let data = {
         interval: 30
       } 
-      devList.length > 0 && (params.deviceIds = devList.join(','));
-      surveillanceList.length > 0 && (params.surveillanceIds = surveillanceList.join(','));
-      getAlarmListByDev(params).then(res => {
+      devList.length > 0 && (data.deviceIds = devList.join(','));
+      surveillanceList.length > 0 && (data.surveillanceIds = surveillanceList.join(','));
+      getAlarmListByDev(data).then(res => {
         if (res && res.data) {
           this.markerAlarmList = res.data;
           if (this.markerAlarmList.length > 0 && this.devicesList.length > 0) {
             this.getAllAlarmSnapListByDev();
           }
           this.markerAlarmList.forEach(dev => {
-            const childDiv = '<div class="vl_icon_warning">发现可疑目标</div>';
+            // const childDiv = '<div class="vl_icon_warning">发现可疑目标</div>';
             // 给有警情的点标记追加class
-            this.$nextTick(() => {
-              $('#mapBox #' + dev.deviceId).append(childDiv);
-              $('#mapBox #' + dev.deviceId).addClass("vl_icon_alarm");
-              $('#mapBox #' + dev.deviceId).addClass("vl_icon_control_02");
-            })
+            // this.$nextTick(() => {
+              
+            //   $('#mapBox #' + dev.deviceId).append(childDiv);
+            //   $('#mapBox #' + dev.deviceId).addClass("vl_icon_alarm");
+            //   $('#mapBox #' + dev.deviceId).addClass("vl_icon_control_02");
+            // })
+
+
+              this.markerList.forEach(f => {
+                const obj = f.getExtData();
+                if (dev.deviceId === obj.uid) {
+                  this.map.cluster.removeMarker(f);
+                  const uContent = this.setMarkContent(obj, 1)
+                  f.setContent(uContent);
+                }
+              })
           })
           this.timer = setTimeout(() => {
             // 让有警情的点标记的class 12s后移除  
-            $('#mapBox .vl_icon_control_02').removeClass("vl_icon_alarm");
-            $('#mapBox .vl_icon_control_02').removeClass("vl_icon_control_02");
-            $('#mapBox .vl_icon_warning').remove();
+            // $('#mapBox .vl_icon_control_02').removeClass("vl_icon_alarm");
+            // $('#mapBox .vl_icon_control_02').removeClass("vl_icon_control_02");
+            // $('#mapBox .vl_icon_warning').remove();
+            this.markerList.forEach(f => {
+              const obj = f.getExtData();
+              if (this.markerAlarmList.some(s => s.deviceId === obj.uid)) {
+                const uContent = this.setMarkContent(obj, 2)
+                f.setContent(uContent);
+                this.map.cluster.addMarker(f);
+              }
+            })
             this.getAlarmListByDev();
           }, 12000)
         }
       })
+    },
+    // 设置marker的显示图标
+    setMarkContent (obj, type) {
+      if (type === 1) {
+        return '<div id="' + obj.uid + '" class="vl_icon vl_icon_control_01 vl_icon_control_02 vl_icon_alarm"><div class="vl_icon_warning">发现可疑目标</div></div>'
+      } else {
+        return '<div id="' + obj.uid + '" class="vl_icon vl_icon_control_01"></div>'
+      }
     },
     // 获取实时监控的布控设备
     getControlMap (flag) {
@@ -445,7 +467,7 @@ export default {
       this.loadingBtn = true;
       getControlMap(params).then(res => {
         if (res && res.data) {
-          if (res.data.length === 0) {
+          if (res.data.devList.length === 0) {
             this.devicesList = [];
             if (this.map) {
               this.map.remove(this.markerList);
@@ -463,13 +485,7 @@ export default {
             }
             return;
           }
-          let data = [];
-          res.data.forEach(f => {
-            f.devList.forEach(d => {
-              data.push(d);
-            })
-          })
-          this.devicesList = data;
+          this.devicesList = res.data.devList;
         }
       }).then(() => {
         // 没有获取到布控设备时，清除之前保存的定时器，并return
@@ -489,7 +505,7 @@ export default {
         deviceName: obj.deviceName,
         uid: obj.uid,
         surveillanceIds: obj.surveillanceIds,
-        surveillanceStatus: obj.surveillanceStatus
+        surveillanceStatus: this.mapForm.state
       }
       getControlMapByDevice(params).then(res => {
         if (res && res.data) {
@@ -500,7 +516,7 @@ export default {
           _this.controlObjList = res.data;
           let sContent = '', clickWindow = null, vlMapVideo = '', vlMapObj = '', vlMapObjList = '';
           _this.domId = obj.uid + '_' + random14()
-          if (obj.surveillanceStatus === 1) {
+          if (_this.mapForm.state === 1) {
             vlMapVideo = `
               <div class="vl_map_close vl_icon vl_icon_control_04"></div>
               <div class="vl_map_click_main">
@@ -522,7 +538,7 @@ export default {
               if (_this.controlObjList.list[0].eventDetail) {
                 vlMapObj += `<div><span>事件预览：</span><span title="${_this.controlObjList.list[0].eventDetail}">${_this.strCutWithLen(_this.controlObjList.list[0].eventDetail, 120)}</span></div>`;
               }
-              if (obj.surveillanceStatus === 3) {
+              if (_this.mapForm.state === 3) {
                 vlMapObj += `<div><span>布控结果：</span><span>${_this.controlObjList.list[0].snapNum}张抓拍图片</span></div>`;
               }
               vlMapObj += `
@@ -564,7 +580,7 @@ export default {
                 if (item.eventDetail) {
                   vlMapObjList += `<div><span>事件预览：</span><span title="${item.eventDetail}">${_this.strCutWithLen(item.eventDetail, 120)}</span></div>`;
                 }
-                if (obj.surveillanceStatus === 3) {
+                if (_this.mapForm.state === 3) {
                   vlMapObjList += `<div><span>布控结果：</span><span>${item.snapNum}张抓拍图片</span></div>`;
                 }
               vlMapObjList += `</div>`;
@@ -572,7 +588,7 @@ export default {
           }
 
           // 布控进行中
-          if (obj.surveillanceStatus === 1) {
+          if (_this.mapForm.state === 1) {
             // 一个摄像头只有一个布控时
             if (_this.controlObjList.num === 1) {
               sContent = `
@@ -597,7 +613,7 @@ export default {
             }
           }
           // 布控待开始
-          if (obj.surveillanceStatus === 2) {
+          if (_this.mapForm.state === 2) {
             // 一个摄像头只有一个布控时
             if (_this.controlObjList.num === 1) {
               sContent = `
@@ -630,7 +646,7 @@ export default {
             }
           }
           // 布控已结束
-          if (obj.surveillanceStatus === 3) {
+          if (_this.mapForm.state === 3) {
             // 一个摄像头只有一个布控时
             if (_this.controlObjList.num === 1) {
               sContent = `
@@ -683,10 +699,10 @@ export default {
           $('#mapBox').on('click', '.vl_map_name', function (e) {
             // const { href } = _this.$router.resolve({
             //   name: 'control_manage',
-            //   query: {pageType: 2, state: obj.surveillanceStatus, controlId: e.currentTarget.id }
+            //   query: {pageType: 2, state: this.mapForm.state, controlId: e.currentTarget.id }
             // })
             // window.open(href, '_blank', 'toolbar=no,location=no,width=1300,height=900')
-            _this.$router.push({name: 'control_manage', query: {pageType: 2, state: obj.surveillanceStatus, controlId: e.currentTarget.id }});
+            _this.$router.push({name: 'control_manage', query: {pageType: 2, state: _this.mapForm.state, controlId: e.currentTarget.id }});
           })
           // 跳转至视频回放页面
           $('#mapBox').on('click', '.vl_map_btn', function () {
@@ -731,7 +747,7 @@ export default {
             }
           })
           // 获得布控进行中直播视频
-          if (obj.surveillanceStatus === 1) {
+          if (_this.mapForm.state === 1) {
             _this.videoObj = {
               type: 1,
               title: obj.deviceName,
@@ -747,20 +763,22 @@ export default {
           }
           // 当布控列表数据超过10条时，点击查看更多跳转到布控列表
           $('#mapBox').on('click', '.control_more', function () {
-            _this.$router.push({ name: 'control_manage', query: {deviceId: obj.uid, state: obj.surveillanceStatus} })
+            _this.$router.push({ name: 'control_manage', query: {state: _this.mapForm.state} })
           })
         }
       })
     },
     // 获取布控抓拍结果列表
     getAllAlarmSnapListByDev () {
-      const params = {
+      const data = {
         pageSize: 10,
         pageNum: 1,
-        'where.deviceIds': this.devicesList.map(m => m.uid).join(','),
-        'where.surveillanceIds': this.devicesList.map(m => m.surveillanceIds).join(',')
+        where: {
+          deviceIds: this.devicesList.map(m => m.uid).join(','),
+          surveillanceIds: this.devicesList.map(m => m.surveillanceIds).join(',')
+        }
       }
-      getAllAlarmSnapListByDev(params).then(res => {
+      getAllAlarmSnapListByDev(data).then(res => {
         if (res && res.data) {
           this.snapList = res.data.list;
           this.snapTotal = res.data.total;
@@ -825,20 +843,7 @@ export default {
         }
       }
       _this.map.setFitView();// 自动适配到合适视野范围
-      // 当布控状态不是进行中时，清除之前保存的定时器，并return
-      // clearInterval(_this.timer);
-      // if (this.mapForm.state !== 1) {
-      //   return;
-      // }
-      // _this.getAlarmListByDev();
-      // // 10s重新加载一次
-      // _this.timer = setInterval(() => {
-      //   _this.getAlarmListByDev();
-      // }, 11000);
-      // // 通过$once来监听定时器，在beforeDestroy钩子可以被清除。
-      // _this.$once('hook:beforeDestroy', () => {
-      //   clearInterval(_this.timer);
-      // })
+      addCluster(_this.map, _this.markerList);
     },
     // 跳转至视频回放页面
     skipIsVideo (uid, deviceName) {

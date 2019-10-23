@@ -6,7 +6,7 @@ const oDomains = {
     // 默认ajax地址
     base: {
       // dev: 'https://apidev.aorise.org/vlink-base',
-      // dev: 'http://10.116.64.231:8081',
+      // dev: 'http://10.116.64.163:8081',
       dev: 'https://apidev.aorise.org/vlink-base',
       // dev: 'http://10.116.64.97:8081',//向
       test: 'https://apirel.aorise.org/vlink-base',
@@ -22,8 +22,7 @@ const oDomains = {
     // 布控部分地址
     control: {
         dev: 'https://apidev.aorise.org/vlink-control',
-        // test: 'http://10.116.64.98:8081',//钟赞
-        // dev: 'http://10.116.64.127:8081',//龙志海
+        // test: 'http://10.116.64.127:8081',//龙志海
         test: 'https://apirel.aorise.org/vlink-control',
         prod: 'https://apiprod.aorise.org/vlink-control'
     },
@@ -50,8 +49,9 @@ const oDomains = {
         // dev: 'http://10.116.64.193:8082',
         // dev: 'http://10.116.64.97:8081',
         // dev: 'http://10.116.64.231:8087',
-        // dev: 'https://apidev.aorise.org/vlink-judge/',
+        // dev: 'http://10.116.65.64:8081',
         dev: 'https://apidev.aorise.org/vlink-judge/',
+        // dev: 'https://apidev.aorise.org/vlink-judge/',
         test: 'https://apirel.aorise.org/vlink-judge/',
         // test: 'http://10.116.64.69:8081',
         prod: 'https://apiprod.aorise.org/vlink-judge/',
@@ -87,6 +87,7 @@ const oDomains = {
     },
     // 人像地址
     portrait: {
+      // dev: 'http://10.116.65.64:8081',
       // test: 'http://10.116.64.97:8081',
       dev: 'https://apidev.aorise.org/vlink-portrait',
       test: 'https://apirel.aorise.org/vlink-portrait',

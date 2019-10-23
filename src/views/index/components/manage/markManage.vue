@@ -412,6 +412,8 @@ export default {
 <style lang="scss" scoped>
 .mark_manage {
   background-color: #ffffff;
+  border-radius: 4px;
+  box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
   .search_box {
     width: 100%;
     padding: 20px;

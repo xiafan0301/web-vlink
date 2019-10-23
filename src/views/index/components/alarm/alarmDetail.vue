@@ -148,10 +148,10 @@
                 <template v-if="sturcDetail.alarmFeature">
                 <div v-if="sturcDetail.alarmFeature.featureName == '人脸特征值'" class="struc_box">
                   <vue-scroll>
-                <div class="struc_cdu_line another_line" v-if="sturcDetail.alarmFeature.featureValue.sex">
+                <div class="struc_cdu_line another_line" v-if="sturcDetail.alarmFeature.featureValue.gender">
                   <p>
                     <b>性别</b>
-                    <span>{{sturcDetail.alarmFeature.featureValue.sex}}</span>
+                    <span>{{sturcDetail.alarmFeature.featureValue.gender}}</span>
                   </p>
                 </div>
                 <div class="struc_cdu_line another_line" v-if="sturcDetail.alarmFeature.featureValue.age">
@@ -178,16 +178,16 @@
                     <span>{{sturcDetail.alarmFeature.featureValue.mask}}</span>
                   </p>
                 </div>
-                <div class="struc_cdu_line another_line" v-if="sturcDetail.alarmFeature.featureValue.hair">
+                <div class="struc_cdu_line another_line" v-if="sturcDetail.alarmFeature.featureValue.hairStyleDesc">
                   <p>
                     <b>发型</b>
-                    <span>{{sturcDetail.alarmFeature.featureValue.hair}}</span>
+                    <span>{{sturcDetail.alarmFeature.featureValue.hairStyleDesc}}</span>
                   </p>
                 </div>
-                <div class="struc_cdu_line another_line" v-if="sturcDetail.alarmFeature.featureValue.upperType">
+                <div class="struc_cdu_line another_line" v-if="sturcDetail.alarmFeature.featureValue.coatLengthDesc">
                   <p>
                     <b>上身款式</b>
-                    <span>{{sturcDetail.alarmFeature.featureValue.upperType}}</span>
+                    <span>{{sturcDetail.alarmFeature.featureValue.coatLengthDesc}}</span>
                   </p>
                 </div>
                 <div class="struc_cdu_line another_line" v-if="sturcDetail.alarmFeature.featureValue.upperColor">
@@ -196,7 +196,7 @@
                     <span>{{sturcDetail.alarmFeature.featureValue.upperColor}}</span>
                   </p>
                 </div>
-                <div class="struc_cdu_line another_line" v-if="sturcDetail.alarmFeature.featureValue.bottomType">
+                <!-- <div class="struc_cdu_line another_line" v-if="sturcDetail.alarmFeature.featureValue.bottomType">
                   <p>
                     <b>下身款式</b>
                     <span>{{sturcDetail.alarmFeature.featureValue.bottomType}}</span>
@@ -219,7 +219,7 @@
                     <b>拎东西</b>
                     <span>{{sturcDetail.alarmFeature.featureValue.bag}}</span>
                   </p>
-                </div>
+                </div> -->
                 </vue-scroll>
                 </div>
 

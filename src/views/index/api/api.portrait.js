@@ -36,6 +36,15 @@ export const apiFaceWarning = (params) => {
     mode: 'judge'
   });
 }
+/*================ 车流量对比 start=================== */
+export const apiCarFlowCompa = (data) => {
+  return request({
+    url: '/analysis/car-flow-compa',
+    method: 'post',
+    data,
+    mode: 'judge'
+  });
+}
 
 /*================人脸检索 --- 跟踪尾随 start=================== */
 /**
@@ -47,7 +56,7 @@ export const getPersonShotDev = (params) => {
     url: '/person/shot-dev',
     method: 'post',
     data: params,
-    mode: 'judge'
+    mode: 'portrait'
   });
 }
 /**
@@ -59,7 +68,7 @@ export const getPersonFollowing = (params) => {
     url: '/person/trace-following',
     method: 'post',
     data: params,
-    mode: 'judge'
+    mode: 'portrait'
   });
 }
 /*================人脸检索 --- 跟踪尾随 end=================== */
@@ -67,12 +76,24 @@ export const getPersonFollowing = (params) => {
 /*================人脸检索 --- 轨迹分析 start=================== */
 
 /**
- * 轨迹分析
+ * 轨迹分析离线任务
  * @data {object} data
  */
 export function PortraitPostPersonTrace(data) {
   return request({
-    url: '/person-trace/analysis',
+    url: '/person-trace/analysis/task',
+    method: 'post',
+    data,
+    mode: 'portrait'
+  })
+}
+/**
+ * 轨迹分析实时查询
+ * @data {object} data
+ */
+export function PersonTracePostRealTime(data) {
+  return request({
+    url: '/person-trace/analysis/real-time',
     method: 'post',
     data,
     mode: 'portrait'
@@ -103,7 +124,7 @@ export function PortraitPostByphotoTask(data) {
     url: '/portrait/by-photo/task',
     method: 'post',
     data,
-    mode: 'judge'
+    mode: 'portrait'
   })
 }
 
@@ -111,12 +132,13 @@ export function PortraitPostByphotoTask(data) {
  * 以图搜人实时
  * @data {object} data
  */
-export function PortraitPostByphotoRealtime(data) {
+export function PortraitPostByphotoRealtime(data, extData) {
   return request({
     url: '/portrait/by-photo/real-time',
     method: 'post',
     data,
-    mode: 'judge'
+    mode: 'portrait',
+    extData: extData
   })
 }
 /*================人脸检索 --- 以图搜人 end=================== */
@@ -189,3 +211,21 @@ export function PortraitGetStayPointTasks(params) {
 }
 
 /*================人脸检索 --- 人像落脚点 end=================== */
+
+/*================人脸检索 --- 重点关注 start=================== */
+/**
+ * FocusPostReloadtask
+ * 重点人群关注离线分析任务接口--重启任务
+ * @param {object} uid
+ */
+export function FocusPostReloadtask(data) {
+  return request({
+    url: '/portrait/shot-num/focus/reloadtask',
+    method: 'post',
+    mode: 'portrait',
+    data
+  })
+}
+/**
+/*================人脸检索 --- 重点关注 end=================== */
+

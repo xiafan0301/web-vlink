@@ -300,7 +300,7 @@
         </div>
         <div v-if="isNull" class="fnull">
           <div><img src="../../../../../assets/img/null-content.png" alt="">
-          请在左侧输入查询条件</div>
+          选择车辆特征，查询具有相同特征车辆的连续违章记录</div>
           
         </div>
       </div>

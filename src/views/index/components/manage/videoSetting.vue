@@ -1,5 +1,5 @@
 <template>
-  <div class="main">
+  <div class="video_setting_main">
     <div class="ar-tab-nav">
       <div><router-link :to="{ name: 'custom_group'}" @click.native = "state = 1">自定义组</router-link></div>
       <div><router-link :to="{ name: 'tirotation_setting'}" @click.native = "state = 2">轮巡设置</router-link></div>
@@ -24,7 +24,7 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-.main {
+.video_setting_main {
   padding: 20px;
   height: 100%;
   > .ar-tab-nav {
@@ -32,6 +32,8 @@ export default {
     padding-top: 8px;
     overflow: hidden;
     border-bottom: 1px solid #F2F2F2;
+    border-radius: 4px;
+    box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
     > div {
         float: left;
         width: auto;

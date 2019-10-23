@@ -20,6 +20,7 @@ Vue.prototype.$MyMessage = function (msg, type) {
     });
   }
 }
+Vue.prototype.Bus = new Vue();
 /*
  * 获取字符串长度
  * @param {string} str 字符串

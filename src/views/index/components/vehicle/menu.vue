@@ -44,11 +44,11 @@
               <i class="vl_icon2 vl_icon2_015"></i><span>套牌车查询</span>
             </router-link>
           </li>
-          <!-- <li>
-            <router-link :to="{name: 'vehicle_search_pfgc'}">
-              <i class="vl_icon2 vl_icon2_007"></i><span>频繁过车</span>
+          <li>
+            <router-link :to="{name: 'vehicle_search_ytsc'}">
+              <i class="vl_icon2 vl_icon2_029"></i><span>以图搜车</span>
             </router-link>
-          </li> -->
+          </li>
         </ul>
       </li>
       <li>
@@ -79,11 +79,11 @@
               <i class="vl_icon2 vl_icon2_015"></i><span>套牌车分析</span>
             </router-link>
           </li>
-          <!-- <li>
+          <li>
             <router-link :to="{name: 'vehicle_search_txcl'}">
               <i class="vl_icon2 vl_icon2_016"></i><span>同行车辆分析</span>
             </router-link>
-          </li> -->
+          </li>
           <li>
             <router-link :to="{name: 'vehicle_search_ws'}">
               <i class="vl_icon2 vl_icon2_017"></i><span>尾随分析</span>

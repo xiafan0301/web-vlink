@@ -211,7 +211,7 @@
       </div>
     </el-dialog>
 
-    <div is="mapSelector" :open="mapDialogVisible" :showTypes="'DB'" :clear="clearMapSelect" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :hideDBlist='false' :open="mapDialogVisible" :showTypes="'DB'" :clear="clearMapSelect" @mapSelectorEmit="mapPoint"></div>
   </div>
 </template>
 <script>

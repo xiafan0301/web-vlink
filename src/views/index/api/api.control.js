@@ -592,11 +592,11 @@ export function getAlarmSnap(params) {
  * getAlarmListByDev 获得设备报警列表
  * @param {object} params
  */
-export function getAlarmListByDev(params) {
+export function getAlarmListByDev(data) {
   return request({
     url: 'alarm-snaps/devices',
-    method: 'get',
-    params,
+    method: 'post',
+    data,
     mode: 'control'
   })
 }
@@ -604,11 +604,11 @@ export function getAlarmListByDev(params) {
  * getAllAlarmSnapListByDev 获得当前展示在地图上的设备抓拍列表
  * @param {object} params
  */
-export function getAllAlarmSnapListByDev(params) {
+export function getAllAlarmSnapListByDev(data) {
   return request({
     url: 'alarm-snaps/by-dev/page',
-    method: 'get',
-    params,
+    method: 'post',
+    data,
     mode: 'control'
   })
 }

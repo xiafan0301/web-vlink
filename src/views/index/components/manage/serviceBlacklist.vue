@@ -156,6 +156,7 @@ export default {
   left: 1%;
   background: #ffffff;
   box-shadow: 4px 0px 10px 0px rgba(131,131,131,0.28);
+  border-radius: 4px;
   .search_box {
     width: 100%;
     padding: 20px;

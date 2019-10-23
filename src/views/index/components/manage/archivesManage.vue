@@ -718,6 +718,8 @@ export default {
   padding: 20px;
   height: 100%;
   width: 100%;
+  border-radius: 4px;
+  box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
   display: flex;
   .archives_left {
     width: 260px;
