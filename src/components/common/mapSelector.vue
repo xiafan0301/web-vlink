@@ -537,10 +537,13 @@
         }
       },
       addDB () {
+        this.DBleftAll = false;
+        this.DBrightAll =false;
         // 添加的时候丢进pointSelect集合，treeList自动更新
+        let _ar = [];
         this.remainTreeList.forEach(x => {
           // 判断当前右侧列表是不是搜索出来的结果,如果是通过isFilterData 过滤
-          let _ar = [];
+          _ar = [];
           _ar = x.childList.filter(y => y.checked && y.infoName.includes(this.isFilterData)).map(z => {return z.uid})
           this.activeDBList.push(..._ar)
         })
@@ -549,6 +552,8 @@
       },
       // 判断有checked的丢进delOne
       removeDB () {
+        this.DBleftAll = false;
+        this.DBrightAll =false;
         this.treeList.forEach(x => {
           x.childList.filter(y => y.checked).forEach(z => this.delOne(z));
         })
@@ -578,6 +583,7 @@
           }
         })
         // this.activeDBList = []; 暂时不清除，如果画新区域的时候再清除
+        this.activeDBList = [];
       },
       delOne (item) {
         this.markColorChange(item)
@@ -650,7 +656,6 @@
             this.curAddSearch.curMarks = this.curAddSearch.curMarks.concat(this.curAddSearchWait.curMarks)
             this.curAddSearchWait.curMarks = [];
           } else {// 说明现在已经点了完成按钮，或者已经重新画区域了，把curAddSearchWait里的数据重置，放入地图
-            console.log('重置放入地图');
             this.curAddSearchWait.curPointData = this.objSetItem(this.curAddSearchWait.curPointData, {isChecked: false});
             this.curAddSearchWait.curPointData = [];
             this.recoverSXTcolor(this.curAddSearchWait.curMarks)
