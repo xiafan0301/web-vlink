@@ -76,8 +76,8 @@
           <span class="flvplayer_bot_omh">
             <!--抓拍上墙按钮，视频巡逻，视频回放，智能查看，查看标记才有-->
             <template v-if="config.snap && fullScreen">
-              <span v-if="!openSnap" class="flvplayer_opt vl_icon vl_icon_v60" title="抓拍上墙"></span>
-              <span class="flvplayer_opt vl_icon vl_icon_v61" title="抓拍上墙" v-else></span>
+              <span v-if="!openSnap" @click="snapStart" class="flvplayer_opt vl_icon vl_icon_v60" title="抓拍上墙"></span>
+              <span @click="snapEnd" class="flvplayer_opt vl_icon vl_icon_v61" title="抓拍上墙" v-else></span>
             </template>
             <!-- 标记 (更新需求：取消所有回放画面（录像回放、智能查看-视频回放）的标记功能 2019.05.05)-->
             <span v-if="config.sign && oData.type === 1" class="flvplayer_opt vl_icon vl_icon_v24 player_sign" title="标记" @click="addSign"></span>
@@ -152,7 +152,15 @@
       </el-form>
     </el-dialog>
     <!-- 截屏 dialog -->
-    <el-dialog v-if="config.cut" title="" :visible.sync="cutDialogVisible" :center="false" :append-to-body="true" width="1000px">
+    <el-dialog v-if="config.cut" title="截屏画面" class="cut_dialog" :visible.sync="cutDialogVisible" :center="false" :append-to-body="true" width="1000px">
+      <div class="skip_btn_box">
+        <el-button :disabled="isDisableSkip" @click="skipModelPage(1)">以图搜人</el-button>
+        <el-button :disabled="isDisableSkip" @click="skipModelPage(2)">以图搜车</el-button>
+        <el-button :disabled="isDisableSkip" @click="skipModelPage(3)">特征搜人</el-button>
+        <el-button :disabled="isDisableSkip" @click="skipModelPage(4)">特征搜车</el-button>
+        <el-button :disabled="isDisableSkip" @click="skipModelPage(5)">人像轨迹分析</el-button>
+        <el-button :disabled="isDisableSkip" @click="skipModelPage(6)">车辆轨迹分析</el-button>
+      </div>
       <div style="text-align: center; padding-top: 30px;">
         <canvas :id="flvplayerId + '_cut_canvas'"></canvas>
       </div>
@@ -234,6 +242,223 @@
         </div>
       </div>
     </el-dialog>
+    <!--抓拍上墙 抓拍列表-->
+    <div class="flvSnap_list" v-show="openSnap && fullScreen">
+      <div class="flv_sl_top">
+        <p class="sl_title">抓拍上墙</p>
+        <span class="sl_del_icon el-icon-close" @click="snapEnd"></span>
+      </div>
+      <div class="flv_sl_content">
+        <vue-scroll>
+          <div class="flv_sl_box">
+            <div class="flv_sl_item" :class="{'active': snapActiveIndex === index}" @click="flvSnapTap(index, item.dtoType, item[item._key])" v-for="(item, index) in filterSnapList" :key="'fl_sl_item' + index">
+              <div class="sl_item_left">
+                <img :src="item.vehicleDto ? item.vehicleDto.storagePath : ''" alt="">
+              </div>
+              <div class="sl_item_right">
+                <h5>检测目标：{{item.target}}</h5>
+                <p>{{item._info}}</p>
+                <p>{{item[item._key].shotTime}}</p>
+              </div>
+            </div>
+          </div>
+        </vue-scroll>
+      </div>
+      <div class="flv_sl_bottom">
+        <span v-show="querySnapTotal > 8" @click="showSnapPage">查看更多</span>
+      </div>
+      <!--加载中-->
+      <div class="flv_sl_loading" v-show="snapLoading">
+        <p>加载中...</p>
+      </div>
+    </div>
+    <!--抓拍上墙单张假弹窗-->
+    <div class="flv_sl_single_info" v-if="snapActiveIndex !== -1">
+      <ul>
+        <!-- <li><span>抓拍设备：{{snapSturcObj.sturcDetail.deviceName}}</span></li> -->
+        <li><span>抓拍地址：{{snapSturcObj.sturcDetail.address}}</span></li>
+        <li style="color: #999;">{{snapSturcObj.sturcDetail.shotTime}}</li>
+        <span class="el-icon-close" @click="closeSingleInfo"></span>
+      </ul>
+      <template v-if="snapSturcObj.type === '1'">
+        <div class="struc_c_d_box">
+          <div class="struc_c_d_info">
+            <h2>分析结果：</h2>
+            <ul>
+              <li v-if="snapSturcObj.sturcDetail.sex"><span>性别</span><span>{{snapSturcObj.sturcDetail.sex}}</span></li>
+              <li v-if="snapSturcObj.sturcDetail.age"><span>年龄段</span><span>{{snapSturcObj.sturcDetail.age}}</span></li>
+              <li v-if="snapSturcObj.sturcDetail.hair"><span>发型</span><span>{{snapSturcObj.sturcDetail.hair}}</span></li>
+              <li v-if="snapSturcObj.sturcDetail.glasses"><span>戴眼镜</span><span>{{snapSturcObj.sturcDetail.glasses}}</span></li>
+              <li v-if="snapSturcObj.sturcDetail.hat"><span>戴帽子</span><span>{{snapSturcObj.sturcDetail.hat}}</span></li>
+              <li v-if="snapSturcObj.sturcDetail.mask"><span>戴口罩</span><span>{{snapSturcObj.sturcDetail.mask}}</span></li>
+              <li v-if="snapSturcObj.sturcDetail.baby"><span>抱小孩</span><span>{{snapSturcObj.sturcDetail.baby}}</span></li>
+              <li v-if="snapSturcObj.sturcDetail.bag"><span>拎东西</span><span>{{snapSturcObj.sturcDetail.bag}}</span></li>
+              <li v-if="snapSturcObj.sturcDetail.upperType"><span>上身款式</span><span>{{snapSturcObj.sturcDetail.upperType}}</span></li>
+              <li v-if="snapSturcObj.sturcDetail.upperColor"><span>上身颜色</span><span>{{snapSturcObj.sturcDetail.upperColor}}</span></li>
+              <li v-if="snapSturcObj.sturcDetail.bottomType"><span>下身款式</span><span>{{snapSturcObj.sturcDetail.bottomType}}</span></li>
+              <li v-if="snapSturcObj.sturcDetail.bottomColor"><span>下身颜色</span><span>{{snapSturcObj.sturcDetail.bottomColor}}</span></li>
+            </ul>
+          </div>
+        </div>
+      </template>
+      <template v-else>
+        <div class="struc_c_d_box">
+          <div class="struc_c_d_img struc_c_d_img_green">
+            <img :src="snapSturcObj.sturcDetail.subStoragePath" class="bigImg" title="点击放大图片" alt />
+            <span>抓拍图</span>
+          </div>
+          <div class="struc_c_d_info">
+            <h2>分析结果</h2>
+            <ul>
+              <li><span>有无车牌</span><span :title="snapSturcObj.sturcDetail.hasPlate">{{snapSturcObj.sturcDetail.hasPlate ? snapSturcObj.sturcDetail.hasPlate : '未识别'}}</span></li>
+              <li >
+                <span>号牌类型</span>
+                <span :title="dicFormater(45, snapSturcObj.sturcDetail.plateClass)">{{dicFormater(45, snapSturcObj.sturcDetail.plateClass)}}</span>
+              </li>
+              <li><span>车牌颜色</span><span :title="snapSturcObj.sturcDetail.plateColor">{{snapSturcObj.sturcDetail.plateColor ? snapSturcObj.sturcDetail.plateColor : '未识别'}}</span></li>
+              <li><span>车牌号码</span><span :title="snapSturcObj.sturcDetail.plateNo">{{snapSturcObj.sturcDetail.plateNo ? snapSturcObj.sturcDetail.plateNo : '未识别'}}</span></li>
+              <!--<li><span>车辆分组</span><span :title="snapSturcObj.sturcDetail.vehicleType">{{(snapSturcObj.sturcDetail.vehicleType && snapSturcObj.sturcDetail.vehicleType.length > 0) ? snapSturcObj.sturcDetail.vehicleType.join(',') : '&#45;&#45;'}}</span></li>-->
+              <!-- <li v-if="type === 3 && snapSturcObj.sturcDetail.shotTime"><span>入城时间</span><span :title="snapSturcObj.sturcDetail.shotTime">{{snapSturcObj.sturcDetail.shotTime}}</span></li>
+              <li v-if="type === 3 && snapSturcObj.sturcDetail.bayonetName"><span>入城卡口</span><span :title="snapSturcObj.sturcDetail.bayonetName">{{snapSturcObj.sturcDetail.bayonetName}}</span></li> -->
+              <!--<li v-if="type === 3 && snapSturcObj.sturcDetail.firstEnterFlag"><span>初次入城</span><span>是</span></li>-->
+              <li ><span>车辆类型</span><span :title="snapSturcObj.sturcDetail.vehicleClass">{{snapSturcObj.sturcDetail.vehicleClass ? snapSturcObj.sturcDetail.vehicleClass : '未识别'}}</span></li>
+              <li ><span>车辆品牌</span><span :title="snapSturcObj.sturcDetail.vehicleBrand">{{snapSturcObj.sturcDetail.vehicleBrand ? snapSturcObj.sturcDetail.vehicleBrand : '未识别'}}</span></li>
+              <li ><span>车辆型号</span><span :title="snapSturcObj.sturcDetail.vehicleModel">{{snapSturcObj.sturcDetail.vehicleModel ? snapSturcObj.sturcDetail.vehicleModel : '未识别'}}</span></li>
+              <li ><span>车辆年款</span><span :title="snapSturcObj.sturcDetail.vehicleStyles">{{snapSturcObj.sturcDetail.vehicleStyles ? snapSturcObj.sturcDetail.vehicleStyles : '未识别'}}</span></li>
+              <li ><span>车辆颜色</span><span :title="snapSturcObj.sturcDetail.vehicleColor">{{snapSturcObj.sturcDetail.vehicleColor ? snapSturcObj.sturcDetail.vehicleColor : '未识别'}}</span></li>
+              <li ><span>车顶天窗</span><span :title="snapSturcObj.sturcDetail.vehicleRoof">{{snapSturcObj.sturcDetail.vehicleRoof ? snapSturcObj.sturcDetail.vehicleRoof : '未识别'}}</span></li>
+              <li ><span>有无撞痕</span><span :title="snapSturcObj.sturcDetail.hitMarkInfo">{{snapSturcObj.sturcDetail.hitMarkInfo ? snapSturcObj.sturcDetail.hitMarkInfo : '未识别'}}</span></li>
+              <li ><span>车前物品</span><span :title="snapSturcObj.sturcDetail.descOfFrontItem">{{snapSturcObj.sturcDetail.descOfFrontItem ? snapSturcObj.sturcDetail.descOfFrontItem : '未识别'}}</span></li>
+              <li ><span>车后物品</span><span :title="snapSturcObj.sturcDetail.descOfRearItem">{{snapSturcObj.sturcDetail.descOfRearItem ? snapSturcObj.sturcDetail.descOfRearItem : '未识别'}}</span></li>
+              <li ><span>遮阳板状态</span><span :title="snapSturcObj.sturcDetail.sunvisor">{{snapSturcObj.sturcDetail.sunvisor ? snapSturcObj.sturcDetail.sunvisor : '未识别'}}</span></li>
+              <li ><span>安全带状态</span><span :title="snapSturcObj.sturcDetail.safetyBelt">{{snapSturcObj.sturcDetail.safetyBelt ? snapSturcObj.sturcDetail.safetyBelt : '未识别'}}</span></li>
+              <li ><span>打电话状态</span><span :title="snapSturcObj.sturcDetail.calling">{{snapSturcObj.sturcDetail.calling ? snapSturcObj.sturcDetail.calling : '未识别'}}</span></li>
+
+              <!-- <li v-if="type === 3 && snapSturcObj.sturcDetail.vehicleType"><span>车辆分组</span><span :title="snapSturcObj.sturcDetail.vehicleType">{{(snapSturcObj.sturcDetail.vehicleType && snapSturcObj.sturcDetail.vehicleType.length > 0) ? snapSturcObj.sturcDetail.vehicleType.join(',') : '--'}}</span></li> -->
+              <!-- 套牌依据 -->
+              <!-- li v-if="type === 5"><span>号牌颜色：</span><span>{{snapSturcObj.sturcDetail.plateColor}}</span></<!-->
+              <!--<li v-if="type === 5"><span>套牌依据</span><span :title="snapSturcObj.sturcDetail.fakeReason">{{snapSturcObj.sturcDetail.fakeReason}}</span></li>-->
+            </ul>
+            <!--  <span class='tz' v-if="snapSturcObj.sturcDetail.features"><b>特征码：</b>{{snapSturcObj.sturcDetail.features}}</span> -->
+          </div>
+        </div>
+      </template>
+    </div>
+    <!--抓拍上墙回放 dialog-->
+    <el-dialog
+      v-if="config.snap && oData.type === 2"
+      :visible.sync="snapBackDialog"
+      class="flv_snap_back_page"
+      title="抓拍上墙记录"
+      :close-on-click-modal="false"
+      :append-to-body="true"
+      width="100%">
+      <vue-scroll>
+        <div class="flv_snap_bp_content">
+          <div class="flv_snap_bp_list">
+            <div class="flv_sl_item" :class="{'active': snapBackActiveIndex === index}" @click="flvSnapTap(index, item.dtoType, item[item._key])" v-for="(item, index) in querySnapList" :key="'fl_sl_back_item' + index">
+              <div class="sl_item_left">
+                <img :src="item.vehicleDto ? item.vehicleDto.storagePath : ''" alt="">
+              </div>
+              <div class="sl_item_right">
+                <h5>检测目标：{{item.target}}</h5>
+                <p>{{item._info}}</p>
+                <p>{{item[item._key].shotTime}}</p>
+              </div>
+            </div>
+          </div>
+          <el-pagination
+                  v-if="pagination.total > 20"
+                  class="cum_pagination"
+                  @current-change="handleCurrentChange"
+                  :current-page.sync="pagination.pageNum"
+                  :page-sizes="[100, 200, 300, 400]"
+                  :page-size="pagination.pageSize"
+                  layout="total, prev, pager, next, jumper"
+                  :total="pagination.total"
+          ></el-pagination>
+        </div>
+      </vue-scroll>
+      <el-dialog
+          width="9.2rem"
+          :visible.sync="snapBackInnerDialog"
+          :close-on-click-modal="false"
+          append-to-body>
+        <div class="flv_sl_single_info flv_sl_single_bInfo">
+          <ul>
+            <!-- <li><span>抓拍设备：{{snapSturcObj.sturcDetail.deviceName}}</span></li> -->
+            <li><span>抓拍地址：{{snapSturcObj.sturcDetail.address}}</span></li>
+            <li style="color: #999;">{{snapSturcObj.sturcDetail.shotTime}}</li>
+            <span class="el-icon-close" @click="closeSingleBackInfo"></span>
+          </ul>
+          <template v-if="snapSturcObj.type === '1'">
+            <div class="struc_c_d_box">
+              <div class="struc_c_d_info">
+                <h2>分析结果：</h2>
+                <ul>
+                  <li v-if="snapSturcObj.sturcDetail.sex"><span>性别</span><span>{{snapSturcObj.sturcDetail.sex}}</span></li>
+                  <li v-if="snapSturcObj.sturcDetail.age"><span>年龄段</span><span>{{snapSturcObj.sturcDetail.age}}</span></li>
+                  <li v-if="snapSturcObj.sturcDetail.hair"><span>发型</span><span>{{snapSturcObj.sturcDetail.hair}}</span></li>
+                  <li v-if="snapSturcObj.sturcDetail.glasses"><span>戴眼镜</span><span>{{snapSturcObj.sturcDetail.glasses}}</span></li>
+                  <li v-if="snapSturcObj.sturcDetail.hat"><span>戴帽子</span><span>{{snapSturcObj.sturcDetail.hat}}</span></li>
+                  <li v-if="snapSturcObj.sturcDetail.mask"><span>戴口罩</span><span>{{snapSturcObj.sturcDetail.mask}}</span></li>
+                  <li v-if="snapSturcObj.sturcDetail.baby"><span>抱小孩</span><span>{{snapSturcObj.sturcDetail.baby}}</span></li>
+                  <li v-if="snapSturcObj.sturcDetail.bag"><span>拎东西</span><span>{{snapSturcObj.sturcDetail.bag}}</span></li>
+                  <li v-if="snapSturcObj.sturcDetail.upperType"><span>上身款式</span><span>{{snapSturcObj.sturcDetail.upperType}}</span></li>
+                  <li v-if="snapSturcObj.sturcDetail.upperColor"><span>上身颜色</span><span>{{snapSturcObj.sturcDetail.upperColor}}</span></li>
+                  <li v-if="snapSturcObj.sturcDetail.bottomType"><span>下身款式</span><span>{{snapSturcObj.sturcDetail.bottomType}}</span></li>
+                  <li v-if="snapSturcObj.sturcDetail.bottomColor"><span>下身颜色</span><span>{{snapSturcObj.sturcDetail.bottomColor}}</span></li>
+                </ul>
+              </div>
+            </div>
+          </template>
+          <template v-else>
+            <div class="struc_c_d_box">
+              <div class="struc_c_d_img struc_c_d_img_green">
+                <img :src="snapSturcObj.sturcDetail.subStoragePath" class="bigImg" title="点击放大图片" alt />
+                <span>抓拍图</span>
+              </div>
+              <div class="struc_c_d_info">
+                <h2>分析结果</h2>
+                <ul>
+                  <li><span>有无车牌</span><span :title="snapSturcObj.sturcDetail.hasPlate">{{snapSturcObj.sturcDetail.hasPlate ? snapSturcObj.sturcDetail.hasPlate : '未识别'}}</span></li>
+                  <li >
+                    <span>号牌类型</span>
+                    <span :title="dicFormater(45, snapSturcObj.sturcDetail.plateClass)">{{dicFormater(45, snapSturcObj.sturcDetail.plateClass)}}</span>
+                  </li>
+                  <li><span>车牌颜色</span><span :title="snapSturcObj.sturcDetail.plateColor">{{snapSturcObj.sturcDetail.plateColor ? snapSturcObj.sturcDetail.plateColor : '未识别'}}</span></li>
+                  <li><span>车牌号码</span><span :title="snapSturcObj.sturcDetail.plateNo">{{snapSturcObj.sturcDetail.plateNo ? snapSturcObj.sturcDetail.plateNo : '未识别'}}</span></li>
+                  <!--<li><span>车辆分组</span><span :title="snapSturcObj.sturcDetail.vehicleType">{{(snapSturcObj.sturcDetail.vehicleType && snapSturcObj.sturcDetail.vehicleType.length > 0) ? snapSturcObj.sturcDetail.vehicleType.join(',') : '&#45;&#45;'}}</span></li>-->
+                  <!-- <li v-if="type === 3 && snapSturcObj.sturcDetail.shotTime"><span>入城时间</span><span :title="snapSturcObj.sturcDetail.shotTime">{{snapSturcObj.sturcDetail.shotTime}}</span></li>
+                  <li v-if="type === 3 && snapSturcObj.sturcDetail.bayonetName"><span>入城卡口</span><span :title="snapSturcObj.sturcDetail.bayonetName">{{snapSturcObj.sturcDetail.bayonetName}}</span></li> -->
+                  <!--<li v-if="type === 3 && snapSturcObj.sturcDetail.firstEnterFlag"><span>初次入城</span><span>是</span></li>-->
+                  <li ><span>车辆类型</span><span :title="snapSturcObj.sturcDetail.vehicleClass">{{snapSturcObj.sturcDetail.vehicleClass ? snapSturcObj.sturcDetail.vehicleClass : '未识别'}}</span></li>
+                  <li ><span>车辆品牌</span><span :title="snapSturcObj.sturcDetail.vehicleBrand">{{snapSturcObj.sturcDetail.vehicleBrand ? snapSturcObj.sturcDetail.vehicleBrand : '未识别'}}</span></li>
+                  <li ><span>车辆型号</span><span :title="snapSturcObj.sturcDetail.vehicleModel">{{snapSturcObj.sturcDetail.vehicleModel ? snapSturcObj.sturcDetail.vehicleModel : '未识别'}}</span></li>
+                  <li ><span>车辆年款</span><span :title="snapSturcObj.sturcDetail.vehicleStyles">{{snapSturcObj.sturcDetail.vehicleStyles ? snapSturcObj.sturcDetail.vehicleStyles : '未识别'}}</span></li>
+                  <li ><span>车辆颜色</span><span :title="snapSturcObj.sturcDetail.vehicleColor">{{snapSturcObj.sturcDetail.vehicleColor ? snapSturcObj.sturcDetail.vehicleColor : '未识别'}}</span></li>
+                  <li ><span>车顶天窗</span><span :title="snapSturcObj.sturcDetail.vehicleRoof">{{snapSturcObj.sturcDetail.vehicleRoof ? snapSturcObj.sturcDetail.vehicleRoof : '未识别'}}</span></li>
+                  <li ><span>有无撞痕</span><span :title="snapSturcObj.sturcDetail.hitMarkInfo">{{snapSturcObj.sturcDetail.hitMarkInfo ? snapSturcObj.sturcDetail.hitMarkInfo : '未识别'}}</span></li>
+                  <li ><span>车前物品</span><span :title="snapSturcObj.sturcDetail.descOfFrontItem">{{snapSturcObj.sturcDetail.descOfFrontItem ? snapSturcObj.sturcDetail.descOfFrontItem : '未识别'}}</span></li>
+                  <li ><span>车后物品</span><span :title="snapSturcObj.sturcDetail.descOfRearItem">{{snapSturcObj.sturcDetail.descOfRearItem ? snapSturcObj.sturcDetail.descOfRearItem : '未识别'}}</span></li>
+                  <li ><span>遮阳板状态</span><span :title="snapSturcObj.sturcDetail.sunvisor">{{snapSturcObj.sturcDetail.sunvisor ? snapSturcObj.sturcDetail.sunvisor : '未识别'}}</span></li>
+                  <li ><span>安全带状态</span><span :title="snapSturcObj.sturcDetail.safetyBelt">{{snapSturcObj.sturcDetail.safetyBelt ? snapSturcObj.sturcDetail.safetyBelt : '未识别'}}</span></li>
+                  <li ><span>打电话状态</span><span :title="snapSturcObj.sturcDetail.calling">{{snapSturcObj.sturcDetail.calling ? snapSturcObj.sturcDetail.calling : '未识别'}}</span></li>
+
+                  <!-- <li v-if="type === 3 && snapSturcObj.sturcDetail.vehicleType"><span>车辆分组</span><span :title="snapSturcObj.sturcDetail.vehicleType">{{(snapSturcObj.sturcDetail.vehicleType && snapSturcObj.sturcDetail.vehicleType.length > 0) ? snapSturcObj.sturcDetail.vehicleType.join(',') : '--'}}</span></li> -->
+                  <!-- 套牌依据 -->
+                  <!-- li v-if="type === 5"><span>号牌颜色：</span><span>{{snapSturcObj.sturcDetail.plateColor}}</span></<!-->
+                  <!--<li v-if="type === 5"><span>套牌依据</span><span :title="snapSturcObj.sturcDetail.fakeReason">{{snapSturcObj.sturcDetail.fakeReason}}</span></li>-->
+                </ul>
+                <!--  <span class='tz' v-if="snapSturcObj.sturcDetail.features"><b>特征码：</b>{{snapSturcObj.sturcDetail.features}}</span> -->
+              </div>
+            </div>
+          </template>
+          <span class="sl_back_btn el-icon-arrow-left" :class="{'back_btn_disabled': snapBackActiveIndex === 0}" @click="nextBackSingle(false)"></span>
+          <span class="sl_back_btn el-icon-arrow-right" :class="{'back_btn_disabled': snapBackActiveIndex === 19}" @click="nextBackSingle(true)"></span>
+        </div>
+      </el-dialog>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -241,8 +466,11 @@ import {random14, formatDate, getDate} from '@/utils/util.js';
 import { apiSignContentList, apiVideoSignContent, apiVideoSign, apiVideoRecord,
   apiVideoPlay, apiVideoPlayBack, getVideoPlayRecordStart, getVideoPlayRecordEnd,
   getVideoFileDownProgressBatch, videoFileDownStartTime, addVideoDownload,
-  ptzControl, getVideoLinkLogin } from "@/views/index/api/api.video.js";
-// import { getTestLive } from "@/views/index/api/api.js";
+  ptzControl, getVideoLinkLogin , VideoPostQueryLiveSnap, VideoPostQueryBackSnap} from "@/views/index/api/api.video.js";
+import { handUpload } from "@/views/index/api/api.base.js";
+import { JtcPOSTAppendixInfo } from "@/views/index/api/api.judge.js";
+import { getPhotoAnalysis } from "@/views/index/api/api.analysis.js"; // 车辆特征检索接口
+
 export default {
   /** 
    * index: 视频序号（在列表页面的位置）
@@ -255,6 +483,7 @@ export default {
    *    record: 为true时 则生成放历史记录
    *  },
    * oConfig: { 播放配置信息
+   *    snap: false, // 是否可抓拍上墙
    *    pause: 开始是否暂停，默认为false
    *    sign: 是否可标记，默认为true
    *    signEmit: 标记成功后是否需要emit，默认为false
@@ -275,7 +504,6 @@ export default {
     return {
       optionsDis: false,
       mini: false, // 主要控制播放器操作栏显示方式
-      openSnap: false, // 抓拍上墙
       videoLoading: true,
       videoLoadingFailed: false,
       videoLoadingTimeout: 20 * 1000,
@@ -380,7 +608,30 @@ export default {
         para: 100,
         position: null // { cmd: , action: 1 } 正在调节的方向
       },
-      videoRelayEmpty: false
+      videoRelayEmpty: false,
+      img: null,
+      filename: null,
+      skipImgUrl: null, // 截图保存的图片路径
+      skipImgPathId: null,
+      isDisableSkip: true, // 是否禁止点击跳转页面
+      plateNoArr: [], // 截屏图片上的车牌号集合
+
+      // 抓拍上墙
+      openSnap: false, // 抓拍上墙
+      snapLoading: false, // 抓拍上墙Loading
+      snapTimer: null, // 抓拍上墙定时器
+      querySnapList: [], // 抓拍上墙列表数据
+      querySnapTotal: 0, // 回放抓拍总数
+      snapLoading: false, // 抓拍上墙loading
+      snapActiveIndex: -1, // 抓拍上墙active
+      snapBackDialog: false, // 抓拍上墙回放，分页
+      snapSturcObj: {
+        type: "1",
+        sturcDetail: {}
+      },// 当前展示的单张抓拍详情
+      snapBackActiveIndex: -1,
+      pagination: {pageNum: 1, pageSize: 20, total: 0},
+      snapBackInnerDialog: false,
     }
   },
   filters: {
@@ -433,6 +684,19 @@ export default {
       window.setTimeout(() => {
         this.sizeHandler();
       }, 400);
+    },
+    snapBackDialog () {
+      this.snapBackActiveIndex = -1;
+      if (this.pagination.pageNum !== 1) {
+        this.pagination.pageNum = 1;
+        this.querySnapInterval(this.oData.video.uid);
+      }
+    },
+    snapBackActiveIndex (e) {
+      if (e !== -1) {
+        this.snapSturcObj.type = this.querySnapList[e].dtoType;
+        this.snapSturcObj.sturcDetail = this.querySnapList[e][this.querySnapList[e]._key];
+      }
     }
   },
   computed: {
@@ -449,6 +713,10 @@ export default {
         }
       }
       return flag;
+    },
+    // 过滤抓拍上墙数据，只剩8条
+    filterSnapList () {
+      return this.querySnapList.length >= 8 ? this.querySnapList.splice(0, 8) : this.querySnapList;
     }
   },
   mounted () {
@@ -464,6 +732,7 @@ export default {
     }, 300);
   },
   methods: {
+
     // sizeHandler
     sizeHandler () {
       // console.log('miniHandler_' + this.index + '_' + $('#' + this.flvplayerId + '_container').width());
@@ -745,6 +1014,128 @@ export default {
       this.initPlayer();
     },
     /***** 视频事件 *****/
+    /* 抓拍上墙 */
+    snapStart () {
+      this.openSnap = true;
+      this.querySnapInterval(this.oData.video.uid);
+    },
+    snapEnd () {
+      this.querySnapInterval();
+      this.querySnapList = [];
+      this.openSnap = false;
+      this.snapActiveIndex = -1;
+    },
+    querySnapInterval (dId) {
+      if (this.snapTimer) {
+        window.clearInterval(this.snapTimer);
+      }
+      if (dId) {
+        this.snapLoading = true;
+        this.querySnapGetData(dId);
+        if (this.oData.type === 1) {
+          this.snapTimer = window.setInterval(() => {
+            this.querySnapGetData(dId)
+          }, 5 * 1000);
+        }
+      }
+    },
+    querySnapGetData (dId) {
+      // 1是直播，2是回放
+      let params = {
+        "pageNum": this.pagination.pageNum,
+        "pageSize": this.pagination.pageSize,
+        "orderBy": "shotTime",
+        "order": "desc",
+        "where": {
+//              "deviceId": dId
+//              "deviceId": "5DTxZRNGOZuLsl07jcNO09"
+          "deviceId": "9"
+        }
+      };
+
+      if (this.oData.type === 1) {
+        VideoPostQueryLiveSnap(params).then(res =>{
+          if (res) {
+            console.log(res);
+            // 处理当前需要的key
+            this.querySnapList = res.data.list.map(x => {
+              if (x.dtoType === "1") {
+                x["_key"] = 'personDto';
+                x['target'] = '行人';
+                x.personDto.gender ? x.personDto.gender : '未识别';
+              } else {
+                x['_key'] = 'vehicleDto';
+                x['target'] = '车辆';
+                x.vehicleDto.plateNo ? x.vehicleDto.plateNo : '未识别';
+              }
+              console.log(x)
+              return x;
+            });
+            this.snapLoading = false;
+          }
+        })
+      } else {
+        params.where["startTime"] = formatDate(this.oData.startTime, 'yyyy-MM-dd HH:mm:ss');
+        params.where["endTime"] = formatDate(this.oData.endTime, 'yyyy-MM-dd HH:mm:ss');
+        VideoPostQueryBackSnap(params).then(res =>{
+          if (res) {
+            console.log(res);
+            // 处理当前需要的key
+            this.querySnapList = res.data.list.map(x => {
+              if (x.dtoType === "1") {
+                x["_key"] = 'personDto';
+                x['target'] = '行人';
+                x['_info'] = '性别：'+ (x.personDto.gender ? x.personDto.gender : '未识别');
+              } else {
+                x['_key'] = 'vehicleDto';
+                x['target'] = '车辆';
+                x['_info'] = '车牌：' + (x.vehicleDto.plateNo ? x.vehicleDto.plateNo : '未识别');
+              }
+              return x;
+            });
+            this.querySnapTotal = res.data.total;
+            this.pagination.total = res.data.total;
+            this.snapLoading = false;
+          }
+        })
+      }
+    },
+    flvSnapTap (index, type, item) {
+      if (this.snapBackDialog) {
+        this.snapBackInnerDialog = true;
+        this.snapBackActiveIndex = index;
+      } else {
+        this.snapActiveIndex = index;
+        this.snapSturcObj.type = type;
+        this.snapSturcObj.sturcDetail = item;
+      }
+    },
+    closeSingleInfo () {
+      this.snapActiveIndex = -1;
+      this.snapBackActiveIndex = -1;
+    },
+    closeSingleBackInfo () {
+      this.snapBackActiveIndex = -1;
+      this.snapBackInnerDialog = false;
+    },
+    showSnapPage () {
+      this.snapBackDialog = true;
+      this.snapActiveIndex = -1;
+    },
+    handleCurrentChange (page) {
+      this.pagination.pageNum = page;
+      this.querySnapInterval(this.oData.video.uid);
+    },
+    nextBackSingle (bool) {
+      if (bool) {
+        if (this.snapBackActiveIndex < 19) {
+          this.snapBackActiveIndex += 1;
+        }
+      } else if (this.snapBackActiveIndex > 0) {
+        this.snapBackActiveIndex -= 1;
+      }
+    },
+
     /* 云台控制 */
     // 开启云台控制
     ptzHandler (flag) {
@@ -1183,6 +1574,7 @@ export default {
       if (this.config.fullscreen2) {
         this.playerFullScreenTwo();
       } else {
+        this.openSnap = false;
         this.fullScreen = flag;
         this.playerEnlarge(false);
         this.ptzHandler(false);
@@ -1190,6 +1582,51 @@ export default {
     },
     playerFullScreenTwo () {
       this.$emit('playerFullScreenTwo');
+    },
+    // 截屏跳至相应模块页面
+    skipModelPage (number) {
+      let routeUrl;
+      switch(number) {
+        case 1:
+          routeUrl = this.$router.resolve({
+            name: 'cut_ytsr_moment',
+            query: {imgurl: this.skipImgUrl, isCut: true}
+          });
+          break;
+        case 2:
+          routeUrl = this.$router.resolve({
+            name: 'cut_vehicle_search_ycsc',
+            query: {imgurl: this.skipImgUrl, isCut: true}
+          });
+          break;
+        case 3:
+          routeUrl = this.$router.resolve({
+            name: 'cut_portrait_rlcx',
+            query: {imgurl: this.skipImgUrl, isCut: true}
+          });
+          break;
+        case 4:
+          routeUrl = this.$router.resolve({
+            name: 'cut_vehicle_search_tzsc',
+            query: {imgurl: this.skipImgUrl, isCut: true}
+          });
+          break;
+        case 5:
+          routeUrl = this.$router.resolve({
+            name: 'cut_portrait_gjfx',
+            query: {imgurl: this.skipImgUrl, isCut: true}
+          });
+          break;
+        case 6:
+          routeUrl = this.$router.resolve({
+            name: 'cut_vehicle_analysis_clgj', 
+            query: { isCut: true, plateNo: this.plateNoArr.join(',') }
+          });
+          break;
+        default:
+          return;
+      }
+      window.open(routeUrl .href, '_blank');
     },
     // 截屏
     playerCut () {
@@ -1214,15 +1651,17 @@ export default {
           let ctx = $canvas[0].getContext('2d');
           this.cutTime = new Date().getTime();
           ctx.drawImage($video[0], 0, 0, w, h);
+
+
+          this.handlePlayerCut();
         }
       });
     },
-    // 截屏 保存
-    playerCutSave () {
+    handlePlayerCut () {
       let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
       if ($canvas && $canvas.length > 0) {
-        let img = $canvas[0].toDataURL('image/png');
-        let filename = 'image_' + this.cutTime + '.png';
+        this.img = $canvas[0].toDataURL('image/png');
+        this.filename = 'image_' + this.cutTime + '.png';
         if('msSaveOrOpenBlob' in navigator){
           // 兼容EDGE
           let arr = img.split(',');
@@ -1237,13 +1676,81 @@ export default {
           window.navigator.msSaveOrOpenBlob(blob, filename);
           return;
         }
-        img.replace('image/png', 'image/octet-stream');
-        let saveLink = $('#' + this.flvplayerId + '_cut_a')[0];
-        saveLink.href = img;
-        saveLink.download = filename;
-        saveLink.click();
-        // console.log(base64);
+        console.log('imgff', this.img)
+
+        this.img.replace('image/png', 'image/octet-stream');
+        
+        $canvas[0].toBlob((blob) => {
+          // console.log('blob', blob)
+          let fd = new FormData();
+          let fileBlob = new File([blob], new Date().getTime() + '.png')
+          fd.append("file", fileBlob);
+          // 上传图片
+          handUpload(fd)
+            .then(res => {
+              if (res && res.data) {
+                this.setImgUid(res.data);
+              }
+              // console.log(res)
+            })
+            .catch(() => {})
+        })
       }
+    },
+    // 根据截屏图片获取车辆信息
+    getVehicleInfoByImg () {
+      if (this.skipImgUrl) {
+        getPhotoAnalysis(this.skipImgUrl)
+          .then(res => {
+            if (res && res.data) {
+              res.data.map(item => {
+                if (item.plateNo) {
+                  this.plateNoArr.push(item.plateNo);
+                }
+              })
+            }
+          })
+          .catch(() => {})
+      }
+    },
+    // 设置截屏图片信息---上传图片
+    setImgUid (oRes) {
+     let imgObj = {
+        cname: oRes.fileName, // 附件名称 ,
+        // contentUid: this.$store.state.loginUser.uid,
+        // desci: '', // 备注 ,
+        filePathName: oRes.fileName, // 附件保存名称 ,
+        fileType: 1, // 文件类型 ,
+        imgHeight: oRes.fileHeight, // 图片高存储的单位位px ,
+        imgSize: oRes.fileSize, // 图片大小存储的单位位byte ,
+        imgWidth: oRes.fileWidth, //  图片宽存储的单位位px ,
+        // otherFlag: '', // 其他标识 ,
+        path: oRes.fileFullPath, // 附件路径 ,
+        // path: oRes.path,
+        thumbnailName: oRes.thumbnailFileName, // 缩略图名称 ,
+        thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
+        // uid: '' //  附件标识
+      };
+      this.skipImgUrl = imgObj.path;
+      if (this.$store.state.loginUser && this.$store.state.loginUser.uid) {
+        imgObj.contentUid = this.$store.state.loginUser.uid;
+        JtcPOSTAppendixInfo(imgObj).then(jRes => {
+          if (jRes) {
+            this.skipImgPathId = jRes.data;
+            this.isDisableSkip = false;
+
+            this.getVehicleInfoByImg();
+            // this.picSubmit();
+          }
+        })
+      }
+    },
+    // 截屏 保存
+    playerCutSave () {
+      let saveLink = $('#' + this.flvplayerId + '_cut_a')[0];
+      saveLink.href = this.img;
+      saveLink.download = this.filename;
+      saveLink.click();
     },
     // 视频关闭事件
     playerClose () {
@@ -1378,10 +1885,213 @@ export default {
       window.clearInterval(this.tape.tapeTimeInval);
     }
     // $(window).off('unload', this.videoUnloadSave);
+    this.querySnapInterval();
   }
 }
 </script>
 <style lang="scss" scoped>
+.flv_sl_single_info {
+  width: 9.2rem;
+  height: 4.9rem;
+  /*overflow: hidden;*/
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  margin: auto;
+  background: #1B1B1B;
+  padding: .1rem .5rem .5rem .5rem;
+  > ul {
+    height: .7rem;
+    position: relative;
+    > li {
+      padding-bottom: .05rem;
+      color: #ffffff;
+    }
+    > span {
+      font-size: 16px;
+      color: #ffffff;
+      position: absolute;
+      top: 10px;
+      right: 0;
+      cursor: pointer;
+    }
+  }
+  > div {
+    float: left;
+  }
+  // 默认为蓝色
+  .struc_c_d_img {
+    position: relative;
+    width: 3.6rem; height: 3.6rem;
+    overflow: hidden;
+    background: #eaeaea;
+    img {
+      width: 100%; height: auto; max-height: 100%;
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      margin: auto;
+    }
+    i {
+      display: block;
+      position: absolute; top: 0.1rem; right: 0.1rem;
+      height: 0.26rem; line-height: 0.26rem;
+      padding: 0 0.1rem;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 0.13rem;
+      font-style: normal; color: #0c70f8; font-size: 12px;
+    }
+  }
+  // 绿色标签
+  .struc_c_d_img_green {
+    &:before {
+      display: block;
+      content: "";
+      position: absolute; top: -40px; left: -40px; z-index: 9;
+      transform: rotate(-45deg);
+      border: 40px solid #50cc62;
+      border-color: transparent transparent #50cc62;
+    }
+    span {
+      display: block;
+      position: absolute; top: 5px; left: 5px; z-index: 99;
+      width: 50px; height: 50px;
+      text-align: center;
+      color: #ffffff; font-size: 12px;
+      -webkit-transform: rotate(-45deg);
+      -moz-transform: rotate(-45deg);
+      -ms-transform: rotate(-45deg);
+      -o-transform: rotate(-45deg);
+      transform: rotate(-45deg);
+    }
+    i {
+      color: #50cc62;
+    }
+  }
+  .struc_c_d_box {
+    background: #333333;
+    border-radius: 1px;
+    position: relative;
+    overflow: hidden;
+    > div {
+      float: left;
+    }
+    .struc_c_d_info {
+      width: 4.6rem; height: 3.6rem;
+      padding: 0 5px 0 .2rem;
+      color: #333333;
+      overflow: auto;
+      > h2 {
+        font-weight: bold; font-size: 18px;
+        color: #ffffff;
+        height: 50px; line-height: 50px;
+      }
+      > ul {
+        overflow: hidden;
+        > li {
+          float: left;
+          width: 50%;
+          overflow: hidden;
+          margin-bottom: 15px;
+          > span {
+            line-height: 26px; height: 28px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            float: left;
+            overflow: hidden;
+            font-size: 14px;
+            &:first-child {
+              width: .68rem;
+              background-color: #444444;
+              text-align: center;
+              border: 1px solid #444444;
+              border-radius: 4px 0 0 4px;
+              color: #999;
+            }
+            &:last-child {
+              max-width: 94px;
+              border: 1px solid #3F3F3F;
+              border-left: 0;
+              background-color: #3F3F3F;
+              padding: 0 9px 0 9px;
+              border-radius: 0 4px 4px 0;
+              color: #ffffff;
+              overflow: hidden; text-overflow: ellipsis; white-space: nowrap; word-break: break-all;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+.flv_sl_single_bInfo {
+  /*overflow-x: auto;*/
+  background: #ffffff;
+  .struc_c_d_box {
+    background: #ffffff;
+    box-shadow: 0px 5px 16px 0px rgba(169, 169, 169, 0.2);
+    .struc_c_d_info {
+      > h2 {
+        color: #333333;
+      }
+      > ul {
+        overflow: hidden;
+        > li {
+          > span {
+            border: 1px solid #f2f2f2;
+            &:first-child {
+              background-color: #FAFAFA;
+              border: 1px solid #FAFAFA;
+            }
+            &:last-child {
+              border: 1px solid #f2f2f2;
+              background-color: #ffffff;
+              color: #333333;
+            }
+          }
+        }
+      }
+    }
+  }
+  > ul {
+    > li {
+      color: #333333;
+    }
+    > span {
+      color: #999999;
+    }
+  }
+  >.sl_back_btn {
+    position: absolute;
+    left: -100px;
+    top: 48%;
+    font-size: 50px;
+    color: #ffffff;
+    cursor: pointer;
+  }
+  > .back_btn_disabled {
+    cursor: not-allowed;
+    color: #999999;
+  }
+  > .el-icon-arrow-right {
+    right: -100px;
+    left: auto;
+  }
+}
+.cut_dialog {
+  .skip_btn_box {
+    text-align: center;
+    /deep/ .el-button {
+      background-color: #F6F8F9;
+      color: #666666;
+      border: 1px solid #D3D3D3;
+      // &:hover {
+      //   background-color: #0C70F8;
+      //   color: #ffffff;
+      // }
+    }
+  }
+}
 /* 视频接力 begin */
 .player_fit { object-fit: fill; }
 .player_relay_i {
@@ -1511,8 +2221,103 @@ export default {
       padding-top: 12px; padding-right: 20px;
     }
   }
+  > .flvSnap_list {
+    position: absolute;
+    width: 340px;
+    height: 100%;
+    right: 0;
+    top: 0;
+    z-index: 99;
+    background: rgba(27, 27, 27, .95);
+    transition: height 0.4s ease-out;
+    .flv_sl_top {
+      position: relative;
+      height: 50px;
+      line-height: 50px;
+      color: #ffffff;
+      p {
+        font-size: 20px;
+        padding-left: 33px;
+      }
+      >span {
+        position: absolute;
+        top: 16px;
+        right: 30px;
+        font-size: 20px;
+        cursor: pointer;
+      }
+    }
+    .flv_sl_content {
+      height: calc(100% - 100px);
+      border-bottom: 1px solid #313233;
+      border-top: 1px solid #313233;
+      .flv_sl_box {
+        .flv_sl_item {
+          height: 90px;
+          display: flex;
+          padding-left: 33px;
+          margin-top: 20px;
+          cursor: pointer;
+          .sl_item_left {
+            width: 90px;
+            height: 90px;
+            overflow-y: hidden;
+            margin-right: 10px;
+            img {
+              width: 100%;
+              height: auto;
+            }
+          }
+          .sl_item_right {
+            h5 {
+              color: #ffffff;
+            }
+            p {
+              color: #B2B2B2;
+            }
+          }
+        }
+        > .active {
+          .sl_item_left {
+            border: 1px solid #0C70F8;
+          }
+          .sl_item_right {
+            h5 {
+              color: #0C70F8;
+            }
+            p {
+              color: #0C70F8;
+            }
+          }
+        }
+      }
+    }
+    .flv_sl_bottom {
+      height: 50px;
+      line-height: 50px;
+      text-align: center;
+      span {
+        color: #ffffff;
+        cursor: pointer;
+      }
+    }
+    .flv_sl_loading {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      color: #ffffff;
+      text-align: center;
+      font-size: 20px;
+    }
+  }
   &:hover {
     > .flvplayer_bot { bottom: 0; }
+    > .flvSnap_list {height: calc(100% - 48px)}
   }
 }
 .flvplayer_bot_o {
@@ -1627,7 +2432,91 @@ export default {
   100%{ opacity: 0; }
 }
 </style>
-<style>
+<style lang="scss">
+.flv_snap_back_page {
+  >.el-dialog {
+    height: 100%;
+    background: #fafafa;
+    .el-dialog__header {
+      background: #0C70F8;
+      .el-dialog__title{
+        color: #ffffff;
+        font-size: 14px;
+      }
+      button {
+        i {
+          color: #ffffff;
+        }
+      }
+    }
+    .el-dialog__body {
+      padding: 0px;
+      height: calc(100% - 54px);
+    }
+    .flv_snap_bp_content {
+      width: 100%;
+      .flv_snap_bp_list {
+        width: 100%;
+        .flv_sl_item {
+          width: 360px;
+          height: 180px;
+          padding: 20px;
+          margin-top: 20px;
+          margin-left: 20px;
+          cursor: pointer;
+          background: #ffffff;
+          display: inline-block;
+          box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
+          .sl_item_left {
+            width: 140px;
+            height: 140px;
+            overflow-y: hidden;
+            margin-right: 10px;
+            display: inline-block;
+            vertical-align: top;
+            img {
+              width: 100%;
+              height: auto;
+            }
+          }
+          .sl_item_right {
+            display: inline-block;
+            width: 170px;
+            color: #333333;
+            h5 {
+              color: #333333;
+              height: 30px;
+              line-height: 30px;
+            }
+            p {
+              height: 26px;
+              line-height: 26px;
+              background: #FAFAFA;
+              border:1px solid #F2F2F2;
+              border-radius:3px;
+              margin-top: 8px;
+              display: inline-block;
+              padding: 0 8px;
+            }
+          }
+        }
+        > .active {
+          .sl_item_left {
+            border: 1px solid #0C70F8;
+          }
+          .sl_item_right {
+            h5 {
+              color: #0C70F8;
+            }
+            p {
+              color: #0C70F8;
+            }
+          }
+        }
+      }
+    }
+  }
+}
 .player_box {
   position: absolute;
   border: 1px solid red;

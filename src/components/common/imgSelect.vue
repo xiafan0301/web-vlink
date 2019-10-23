@@ -1,0 +1,220 @@
+<template>
+  <el-dialog
+  title="框选搜索主体"
+  :visible.sync="dialogVisible"
+  :show-close="false"
+  :close-on-press-escape="false"
+  :close-on-click-modal="false"
+  custom-class="cut_img_select_dialog"
+  >
+    <div class="select_body">
+      <div class="img_box">
+        <img src="http://newfile.aorise.org:80/group1/default/20190919/15/00/2/9546310b-b254-49ca-8ff2-4b3cef487d45.png" alt="" id="imgBox">
+      </div>
+    </div>
+    <span slot="footer" class="dialog-footer">
+      <el-button @click="cancelSave" size="small">取 消</el-button>
+      <el-button :loading="submitLoading" type="primary" @click="saveCutImg" size="small">保 存</el-button>
+    </span>
+  </el-dialog>
+</template>
+<script>
+import { handUpload } from "@/views/index/api/api.base.js";
+import { JtcPOSTAppendixInfo } from "@/views/index/api/api.judge.js";
+export default {
+  props: ['open'],
+  data () {
+    return {
+      imgPath: require('../../assets/img/temp/video_pic.png'),
+      dialogVisible: false,
+      submitLoading: false,
+      selectList: [
+        {
+          uid: 'x12222',
+          x: 30,
+          y: 30,
+          width: 100,
+          height: 100
+        },
+        {
+          uid: 'x12223',
+          x: 70,
+          y: 200,
+          width: 300,
+          height: 100
+        }
+      ],
+      initImgWidth: 881, // 图片原width
+      initImgHeight: 600, // 图片原height
+      fd: null,
+    }
+  },
+  watch: {
+    open (val) {
+      this.dialogVisible = val;
+    }
+  },
+  mounted () {
+    this.dialogVisible = this.open;
+
+    if (this.dialogVisible) {
+      this.$nextTick(() => {
+        this.getImgScale();
+      })
+    }
+  },
+  methods: {
+    // 获取图片缩放比例
+    getImgScale () {
+      let imgWidth = $('#imgBox').outerWidth();
+      let imgHeight = $('#imgBox').outerHeight();
+
+      console.log(imgWidth + '_' + imgHeight)
+
+      this.selectList.forEach(item => {
+        let $div = document.createElement('div');
+
+        $div.setAttribute('id', 'select_box' + item.uid);
+
+        $div.setAttribute('class', 'select_box');
+
+        $div.style.width = item.width + 'px';
+        $div.style.height = item.height + 'px';
+        $div.style.left = item.x + 'px';
+        $div.style.top = item.y + 'px';
+
+        $('.img_box')[0].appendChild($div);
+
+        let $id = 'select_box' + item.uid;
+
+        this.handleClickListen($id, item.x, item.y, item.width, item.height);
+      })
+     
+    },
+    // 图片选择区域的点击监听事件
+    handleClickListen (id, x, y, width, height) {
+      
+      let _self = this;
+      let clickObj = document.getElementById(id);
+
+      clickObj.addEventListener('click', function () {
+        if ($('.select_box').hasClass('active_select')) {
+          $('.select_box').removeClass('active_select');
+        }
+
+        $(clickObj).addClass('active_select');
+
+        _self.createImgPath(x, y, width, height);
+      })
+    },
+    // 创建一个canvas，生成图片
+    createImgPath (x, y, width, height) {
+      let image = new Image();
+      image.setAttribute("crossOrigin",'Anonymous');
+      image.src = 'http://newfile.aorise.org:80/group1/default/20190919/15/00/2/9546310b-b254-49ca-8ff2-4b3cef487d45.png';
+
+      image.onload = () => {
+        
+        let $canvas = document.createElement('canvas');
+        $($canvas).attr({'width': width, 'height': height});
+        let ctx = $canvas.getContext('2d');
+  
+        ctx.drawImage(image, x, y, width, height, 0, 0, width, height);
+
+        $($canvas)[0].toBlob((blob) => {
+          this.fd = new FormData();
+          let fileBlob = new File([blob], new Date().getTime() + '.png')
+          this.fd.append("file", fileBlob);
+          
+        })
+      }
+    },
+    // 设置截屏图片信息---上传图片
+    setImgUid (oRes) {
+     let imgObj = {
+        cname: oRes.fileName, // 附件名称 ,
+        // contentUid: this.$store.state.loginUser.uid,
+        // desci: '', // 备注 ,
+        filePathName: oRes.fileName, // 附件保存名称 ,
+        fileType: 1, // 文件类型 ,
+        imgHeight: oRes.fileHeight, // 图片高存储的单位位px ,
+        imgSize: oRes.fileSize, // 图片大小存储的单位位byte ,
+        imgWidth: oRes.fileWidth, //  图片宽存储的单位位px ,
+        // otherFlag: '', // 其他标识 ,
+        path: oRes.fileFullPath, // 附件路径 ,
+        // path: oRes.path,
+        thumbnailName: oRes.thumbnailFileName, // 缩略图名称 ,
+        thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
+        // uid: '' //  附件标识
+      };
+      // this.skipImgUrl = imgObj.path;
+      if (this.$store.state.loginUser && this.$store.state.loginUser.uid) {
+        imgObj.contentUid = this.$store.state.loginUser.uid;
+        JtcPOSTAppendixInfo(imgObj).then(jRes => {
+          if (jRes) {
+            this.dialogVisible = false;
+
+            this.$emit('emitImgData', {
+              open: false,
+              imgPath: imgObj.path
+            })
+          }
+        })
+      }
+    },
+    // 保存确认选择的图片
+    saveCutImg () {
+      if (this.fd) {
+        // 上传图片
+        handUpload(this.fd)
+          .then(res => {
+            if (res && res.data) {
+              this.setImgUid(res.data);
+            }
+          })
+          .catch(() => {})
+      } else {
+        this.$emit('emitImgData', {
+          open: false
+        })
+      }
+    },
+    // 取消选择
+    cancelSave () {
+      this.$emit('emitImgData', {
+        open: false
+      })
+    }
+  }
+}
+</script>
+<style lang="scss">
+  .cut_img_select_dialog {
+    .select_body {
+      .img_box {
+        width: 100%;
+        height: 600px;
+        position: relative;
+        >img {
+          width: 100%;
+          height: 100%;
+        }
+        .select_box {
+          position: absolute;
+          background:rgba(12,112,248,0.1);
+          border:1px solid rgba(18,100,248,1);
+          opacity: 0.4;
+          cursor: pointer;
+          &:hover {
+            background:rgba(255,0,0,0.2);
+            border:1px solid rgba(255,0,57,1);
+          }
+        }
+        .active_select {
+          background:rgba(255,0,0,0.2);
+          border:1px solid rgba(255,0,57,1);
+        }
+      }
+    }
+  }
+</style>

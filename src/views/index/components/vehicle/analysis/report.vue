@@ -260,6 +260,40 @@
                 </div>
               </div>
             </div>
+            <!-- 落脚点 showType 8 -->
+            <div class="vc_rep_cl" id="report_showtype_8">
+              <div>
+                <h2>8、落脚点分析</h2>
+                <div>
+                  <div class="rep_map">
+                    <div class="rep_map_c" id="map_report_yjcm1" style="border:1px solid rgba(211,211,211,1);"></div>
+                    <ul class="rep_map_o">
+                      <li><i class="el-icon-aim" @click="mapChangeState('yjcm1', 1)"></i></li>
+                      <li><i class="el-icon-plus" @click="mapChangeState('yjcm1', 2)"></i></li>
+                      <li>
+                        <i class="el-icon-minus" @click="mapChangeState('yjcm1', 3)"></i>
+                      </li>
+                    </ul>
+                    <div class="rep_map_sk rep_map_sk1">
+                      <h2 style="border-bottom: 0">分析结果</h2>
+                      <div>
+                        <div>
+                          <span>序号</span>
+                          <span>落脚地点位置</span>
+                          <span>停留时长</span>
+                        </div>
+                        <ul>
+                          <li v-for="(item, index) in stopOverRecordList" :key="index">
+                            <span style="padding-left: 10px">{{index + 1}}</span><span style="padding-left: 5px">{{item.address}}</span>
+                            <span>{{item.stopOverTime}}分钟</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             <!-- 同行车辆分析 showType 8 -->
             <!-- <div class="vc_rep_cl" id="report_showtype_8">
               <div>
@@ -333,12 +367,14 @@ export default {
       tpcList: [], // 套牌车
 
       clgjList: [], // 车辆轨迹
+      stopOverRecordList: [],
 
       showType: 1,
 
       zoom: 11,
       yjcmMap: null,
       clgjMap: null,
+      yjcmMap1: null,
 
       pickerOptions: {
         disabledDate (d) {
@@ -350,26 +386,27 @@ export default {
   mounted () {
     this.initClgjMap();
     this.initYjcmMap();
+    this.initYjcmMap1();
     if (this.$route.query.pn && this.$route.query.st && this.$route.query.et) {
       this.searchForm.plateNo = this.$route.query.pn;
       this.searchForm.time = [getDate(this.$route.query.st), getDate(this.$route.query.et)];
       this.searchSubmit();
-    } 
+    }
   },
   methods: {
-    goToQypz () {
-        // vehicle_search_qy
-      this.$store.commit('setBreadcrumbData', {
-        breadcrumbData: [
-          {name: '车辆侦查', routerName: 'vehicle'},
-          {name: '车辆综合分析报告', routerName: 'vehicle_report', query: {pn: this.searchForm.plateNo, st: formatDate(this.searchForm.time[0], 'yyyy-MM-dd'), et: formatDate(this.searchForm.time[1], 'yyyy-MM-dd')}},
-          {name: '区域碰撞'}
-        ]
-      });
-      this.$router.push({name: 'vehicle_search_qy', query: {
-        breadcrumb: 2
-      }});
-    },
+    // goToQypz () {
+    //     // vehicle_search_qy
+    //   this.$store.commit('setBreadcrumbData', {
+    //     breadcrumbData: [
+    //       {name: '车辆侦查', routerName: 'vehicle'},
+    //       {name: '车辆综合分析报告', routerName: 'vehicle_report', query: {pn: this.searchForm.plateNo, st: formatDate(this.searchForm.time[0], 'yyyy-MM-dd'), et: formatDate(this.searchForm.time[1], 'yyyy-MM-dd')}},
+    //       {name: '区域碰撞'}
+    //     ]
+    //   });
+    //   this.$router.push({name: 'vehicle_search_qy', query: {
+    //     breadcrumb: 2
+    //   }});
+    // },
     // 湘AN8888 2019-07-01 00:00:00 2019-07-04 00:00:00
     searchSubmit () {
       this.searchLoading = true;
@@ -392,8 +429,10 @@ export default {
           this.tpcList = data.fakePlateResultDtoList;
           this.txclList =  data.tailBehindListForReportList; // 同行车
           this.clgjList = data.struVehicleDtoList;
+          this.stopOverRecordList = data.stopOverRecordList;
           this.setMapMarkerForYjcm(); // 夜间出没
           this.setMapMarkerForClgj(); // 车辆轨迹
+          this.setMapMarkerForYjcm1(); // 夜间出没
          
         } else {
           this.clInfo = null;
@@ -408,6 +447,7 @@ export default {
           this.clgjList = [];
           this.setMapMarkerForYjcm(); // 夜间出没
           this.setMapMarkerForClgj(); // 车辆轨迹
+          this.setMapMarkerForYjcm1(); // 夜间出没
           // #/vehicle-report-save
         }
         this.searchLoading = false;
@@ -453,6 +493,44 @@ export default {
           }
         }
         this.yjcmMap.setFitView();
+      }
+    },
+    setMapMarkerForYjcm1 () {
+      this.yjcmMap1.clearMap();
+      if (this.yjcmList && this.yjcmList.allRecords && this.yjcmList.allRecords.length > 0) {
+        let _this = this;
+        let oList = {};
+        for (let i = 0; i < this.yjcmList.allRecords.length; i++) {
+          let _o = this.yjcmList.allRecords[i];
+          if (!oList[_o.deviceId]) {
+            oList[_o.deviceId] = Object.assign({}, _o, {
+              CM_shotTimes: [_o.shotTime]
+            });
+          } else {
+            oList[_o.deviceId].CM_shotTimes.push(_o.shotTime);
+          }
+        }
+        // console.log('oList', oList);
+        for (let key in oList) {
+          let _oo = oList[key];
+          if (_oo.longitude > 0 && _oo.latitude > 0) {
+            // console.log('_oo', _oo);
+            new window.AMap.Marker({ // 添加自定义点标记
+              map: _this.yjcmMap1,
+              position: [_oo.longitude, _oo.latitude], // 基点位置 [116.397428, 39.90923]
+              offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
+              draggable: false, // 是否可拖动
+              // extData: obj,
+              // 自定义点标记覆盖物内容
+              content: '<div class="map_icons vl_icon vl_icon_cl cl_report_cm">' +
+                '<div class="cl_report_hw"><div>' +
+                '<p>' + _oo.deviceName + '</p>' +
+                '<h3>' + _oo.CM_shotTimes.length + '次</h3>' +
+                '</div></div></div>'
+            });
+          }
+        }
+        this.yjcmMap1.setFitView();
       }
     },
     setMapMarkerForClgj () {
@@ -543,11 +621,25 @@ export default {
       // console.log('_config', _config)
       this.yjcmMap = map;
     },
+    initYjcmMap1 () {
+      // 初始化地图
+      let map = new window.AMap.Map('map_report_yjcm1', {
+        zoom: 11,
+        center: mapXupuxian.center,
+        zooms: [2, 18],
+        scrollWheel: false
+      });
+      map.setMapStyle('amap://styles/light');
+      // map.setMapStyle('amap://styles/a00b8c5653a6454dd8a6ec3b604ec50c');
+      // console.log('_config', _config)
+      this.yjcmMap1 = map;
+    },
     cktxjlEvent () {
     },
     mapChangeState (type, state) {
       let _map = this.yjcmMap;
       if (type === 'clgj') { _map = this.clgjMap; }
+      if (type === 'yjcm1') { _map = this.yjcmMap1; }
       if (state === 1) {
         _map.setFitView();
         // _map.setZoomAndCenter(this.zoom, mapXupuxian.center);
@@ -809,6 +901,23 @@ export default {
             }
           }
         }
+      }
+    }
+    .rep_map_sk1{
+      top: 1px; left: 1px; bottom: 22px;
+      box-shadow: none;
+      border-radius:4px 0px 0px 4px;
+      span:nth-of-type(1){
+        width: 40px !important;
+      }
+      span:nth-of-type(2){
+        width: 100px !important;
+      }
+      span:nth-of-type(3){
+        width: 80px !important;
+      }
+      ul{
+        max-height: 398px !important;
       }
     }
   }

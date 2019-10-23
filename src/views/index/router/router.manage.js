@@ -17,6 +17,11 @@ export default {
       component: () => import('@/views/index/components/manage/specialcsManage.vue')
     },
     {
+      path: 'specialcsManageadd',
+      name: 'special_csmanageadd',
+      component: () => import('@/views/index/components/manage/specialcsManageadd.vue')
+    },
+    {
       path: 'user',
       name: 'user',
       component: () => import('@/views/index/components/manage/user.vue'),
@@ -269,6 +274,18 @@ export default {
       path: 'paramsSetting',
       name: 'params_setting',
       component: () => import('@/views/index/components/manage/paramsSetting.vue')
+    },
+    //数据字典
+    {
+      path: 'dictionary',
+      name: 'dictionary',
+      component: () => import('@/views/index/components/manage/parameterSettings/dictionary.vue')
+    },
+    //app广告管理
+    {
+      path: 'advertisement',
+      name: 'advertisement',
+      component: () => import('@/views/index/components/manage/appManage/advertisement.vue')
     },
   ]
 }

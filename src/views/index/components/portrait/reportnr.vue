@@ -11,12 +11,51 @@
     <div class="vehicle_content_nr_box" v-loading="dataloading">
       <div style="height: 100%; overflow: hidden" >
         <div class="vehicle_content_nr_box_left">
-          <div class="img">
-            <img :src="taskWebParam.targetPicUrl" height="232" width="232" class="bigImg" title="点击放大图片" />
+          <div v-show = "showpost">
+            <div class="img">
+              <img :src="taskWebParam.targetPicUrl" height="232" width="232" class="bigImg" title="点击放大图片" />
+            </div>
+            <div style="color: #333333; font-size: 18px; font-weight: bold; padding: 16px 0">{{taskWebParam.taskName}}</div>
+            <div style="color: #333333; padding-bottom: 8px"><span style="color: #999999">从</span> {{taskWebParam.startTime}}</div>
+            <div style="color: #333333"><span style="color: #999999">至</span> {{taskWebParam.endTime}}</div>
+            <div style="margin-top: 30px;"><el-button type="primary" @click="showpost = false">修改任务</el-button></div>
           </div>
-          <div style="color: #333333; font-size: 18px; font-weight: bold; padding: 16px 0">{{taskWebParam.taskName}}</div>
-          <div style="color: #333333; padding-bottom: 8px"><span style="color: #999999">从</span> {{taskWebParam.startTime}}</div>
-          <div style="color: #333333"><span style="color: #999999">至</span> {{taskWebParam.endTime}}</div>
+          <div v-show="!showpost">
+            <el-form label-position="left" :model="formLabelAlign">
+              <el-form-item>
+                <el-input v-model="formLabelAlign.name" placeholder="请输入任务名称"></el-input>
+              </el-form-item>
+              <el-form-item >
+                <el-date-picker
+                    v-model="formLabelAlign.value1"
+                    value-format="yyyy-MM-dd HH:mm:ss"
+                    format="yyyy-MM-dd HH:mm:ss"
+                    class="full vl_date"
+                    style="width: 100%; vertical-align: top"
+                    default-time="00:00:00"
+                    type="datetime"
+                    placeholder="请选择开始时间">
+                </el-date-picker>
+              </el-form-item>
+              <el-form-item>
+                <el-date-picker
+                    v-model="formLabelAlign.value2"
+                    value-format="yyyy-MM-dd HH:mm:ss"
+                    format="yyyy-MM-dd HH:mm:ss"
+                    style=" width: 100%; vertical-align: top"
+                    class="full vl_date vl_date_end"
+                    type="datetime"
+                    default-time="23:59:59"
+                    placeholder="请选择结束时间">
+                </el-date-picker>
+              </el-form-item>
+            </el-form>
+            <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit" style="width: 232px; height: 232px"></div>
+            <div style="margin-top: 20px; text-align: center">
+              <el-button type="primary" style=" width: 110px" @click="sure" :loading="searchLoading">确定</el-button>
+              <el-button @click="showpost = true" style="width: 110px">取消</el-button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="vehicle_content_nr_box_right">
@@ -336,16 +375,26 @@
   </div>
 </template>
 <script>
+import vlUpload from '@/components/common/upload.vue';
 import vehicleBreadcrumb from './breadcrumb.vue';
 import reportnrsave from './reportnrsave.vue';
 import { mapXupuxian,ajaxCtx } from "@/config/config.js";
-import { objDeepCopy } from "@/utils/util.js";
-import { getdetailbg } from "../../api/api.analysis.js";
+import { objDeepCopy ,formatDate } from "@/utils/util.js";
+import { getdetailbg, postdetailbg } from "../../api/api.analysis.js";
 import flvplayer from '@/components/common/flvplayer.vue';
 export default {
-  components: {vehicleBreadcrumb, flvplayer,reportnrsave},
+  components: {vehicleBreadcrumb, flvplayer,reportnrsave, vlUpload},
   data () {
     return {
+      formLabelAlign: {
+        name: '',
+        value2: '',
+        value1: ''
+      },
+      searchLoading: false,
+      curImageUrl: '',
+      showpost: true,
+      uploadClear: {},
       evData: [],
       dataloading: false,
       value1: '',
@@ -423,10 +472,60 @@ export default {
     this.userInfo = this.$store.state.loginUser;
   },
   mounted () {
+    this.setDTime()
     this.getdetailbgg()
     console.log(this.$route.query.uid,this.$route.query.targetUrl, this.$route.query.startTime)
   },
   methods: {
+    setDTime () {
+      let date = new Date();
+      let curDate = date.getTime();
+      let curS = 1 * 24 * 3600 * 1000;
+      let sM = '', sD = '';
+      if ((new Date(curDate - curS).getMonth() + 1) < 10 ) {
+        sM = '0' + (new Date(curDate - curS).getMonth() + 1);
+      } else {
+        sM = (new Date(curDate - curS).getMonth() + 1)
+      }
+      if ( new Date(curDate - curS).getDate() < 10 ) {
+        sD = '0' +  new Date(curDate - curS).getDate();
+      } else {
+        sD =  new Date(curDate - curS).getDate()
+      }
+      let _s = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD + ' 00:00:00';
+      // let _e = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD + ' 23:59:59';
+      this.formLabelAlign.value1 = new Date(_s)
+      this.formLabelAlign.value2 = new Date(curDate)
+    },
+    sure () {
+      this.searchLoading = true
+      if (this.formLabelAlign.name == '') {
+        this.$message.info("请输入任务名称");
+        return false
+      }
+      let params = {
+        uid: this.analysisTaskInfoWithBLOBsList[0].uid,
+        startTime: formatDate(this.formLabelAlign.value1),
+        endTime: formatDate(this.formLabelAlign.value2),
+        taskName: this.formLabelAlign.name,
+        targetPicUrl: this.curImageUrl
+      }
+      postdetailbg(params).then(res=> {
+        if (res.data) {
+          this.$message.success("修改成功");
+          this.showpost = true
+          this.searchLoading = false
+        }
+      }).catch(error => {
+        this.searchLoading = false
+      })
+    },
+    uploadEmit (data) {
+      console.log('uploadEmit data', data);
+      if (data && data.path) {
+        this.curImageUrl = data.path;
+      }
+    },
     getdetailbgg () {
       let params = {
         uid: this.$route.query.uid,
@@ -715,6 +814,9 @@ export default {
       height: calc(100% - 50px);
       display: flex;
       .vehicle_content_nr_box_left{
+        .el-form-item{
+          margin-bottom: 10px;
+        }
         height: 100%;
         width: 272px;
         /*margin-right: 10px;*/

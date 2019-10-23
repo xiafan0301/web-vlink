@@ -120,7 +120,7 @@
           @drop="dragDrop(item, index)" @dragover.prevent="dragOver">
           <div v-if="item && item.video">
             <div is="flvplayer" @playerClose="playerClose" :index="index" :oData="item"
-              :oConfig="{signEmit: true}" @signEmit="signEmit"></div>
+              :oConfig="{signEmit: true, snap: true}" @signEmit="signEmit"></div>
           </div>
           <div class="vid_show_empty" v-else>
             <div is="videoEmpty" :tipMsg="tipMsg"></div>

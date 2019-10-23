@@ -218,7 +218,7 @@ export function putBayonetBasisInfo (data) {
   });
 }
 /**
- * 卡口列表查询
+ * 卡口列表查询接口
  */
 export function getBayonetList (params) {
   return request({
@@ -247,6 +247,50 @@ export function getBayonetDetail (params) {
     url: '/bayonet-service/bayonet-info',
     params,
     method: 'get',
+    mode: baseModeName
+  });
+}
+/**
+ * 特殊场所新建分组
+ */
+export function postfezu (params) {
+  return request({
+    url: '/special-place/group-info',
+    params,
+    method: 'post',
+    mode: baseModeName
+  });
+}
+/**
+ * 特殊场所新建分组
+ */
+export function getfezu (params) {
+  return request({
+    url: '/special-place/devices',
+    params,
+    method: 'get',
+    mode: baseModeName
+  });
+}
+/**
+ * 特殊场所修改分组
+ */
+export function putfezu (data) {
+  return request({
+    url: '/special-place/group-info',
+    data,
+    method: 'put',
+    mode: baseModeName
+  });
+}
+/**
+ * 特殊场所删除分组
+ */
+export function delfezu (data) {
+  return request({
+    url: '/special-place/group-info',
+    data,
+    method: 'DELETE',
     mode: baseModeName
   });
 }

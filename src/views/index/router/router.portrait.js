@@ -70,7 +70,7 @@ export default {
       component: () => import('@/views/index/components/portrait/xjpfcm.vue')
     },
     {
-      path: 'rlcx',
+      path: 'rlcx',    // 特征搜人
       name: 'portrait_rlcx',
       component: () => import('@/views/index/components/portrait/rlcx.vue')
     },
@@ -98,7 +98,13 @@ export default {
       path: 'gjfx', // 轨迹分析
       name: 'portrait_gjfx',
       component: () => import('@/views/index/components/portrait/gjfx.vue')
-    }, {
+    },
+    {
+      path: 'gjfx_jg', // 轨迹分析结果
+      name: 'portrait_gjfx_jg',
+      component: () => import('@/views/index/components/portrait/gjfx-jg.vue')
+    },
+    {
       path: 'rlsjfx',
       name: 'portrait_rlsjfx',
       component: () => import('@/views/index/components/portrait/rlsjfx.vue')
@@ -114,10 +120,14 @@ export default {
       component: () => import('@/views/index/components/portrait/zdgz-jg.vue')
     },
     {
-
       path: 'ljd', // 落脚点分析
       name: 'portrait_ljd',
       component: () => import('@/views/index/components/portrait/ljd.vue')
+    },
+    {
+      path: 'ljd_jg', // 落脚点分析
+      name: 'portrait_ljd_jg',
+      component: () => import('@/views/index/components/portrait/ljd-jg.vue')
     },
     {
       path: 'fxjg',    //分析结果
