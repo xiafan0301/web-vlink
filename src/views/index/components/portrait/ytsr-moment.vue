@@ -489,7 +489,6 @@
         msClear: {},
 
         dSum: 0, // 设备总数
-        dIds: [], // 设备IDS
 
         showShotImg: true, // true展示抓拍，false,展示全景
         map: null,
@@ -508,7 +507,6 @@
         checkAllTree: true, // 树是否全选
         portraitGroupList: [],
         treeTabShow: false,
-        selectDeviceArr: [], // 选中的设备数组
         selectCameraArr: [], // 选中的摄像头数组
         selectBayonetArr: [], // 选中的卡口数组
         tabList: [
@@ -628,14 +626,14 @@
         if (result) {
           // bayonetList deviceList
           this.dSum = 0;
-          this.dIds = [];
+          this.selectCameraArr = [];
+          this.selectBayonetArr = [];
           if (result.deviceList) {
             this.dSum = result.deviceList.length;
-            for (let i = 0; i < result.deviceList.length; i++) {
-              this.dIds.push(result.deviceList[i].uid);
-            }
+            this.selectCameraArr = result.deviceList;
           }
           if (result.bayonetList && result.bayonetList.length > 0) {
+            this.selectBayonetArr = result.bayonetList;
             this.dSum += result.bayonetList.length;
           }
 //        if (result.bayonetDeviceList && result.bayonetDeviceList.length > 0) {
@@ -853,6 +851,10 @@
           })
           params['portraitGroupName'] = pNameList;
         } else {
+          if (this.dSum === 0) {
+            this.$MyMessage('请选择设备')
+            return false;
+          }
           let dNameList = [];
           let dList = this.selectCameraArr.map(res =>  res.deviceName);
           let bList = this.selectBayonetArr.map(res => res.bayonetName);
@@ -864,11 +866,11 @@
           } else {
             params['deviceNames'] = dNameList.join(',')
           }
-          p1['deviceIds'] = this.selectCameraArr.map(res => res.id).join(',');
-          params['deviceIds'] = "5DTxZRNGOZuLsl07jcNO09";
-//          params['deviceIds'] = this.selectCameraArr.map(res => res.id).join(',');
-          p1['bayonetIds'] = this.selectBayonetArr.map(res => res.id).join(',');
-          params['bayonetIds'] = this.selectBayonetArr.map(res => res.id).join(',');
+          p1['deviceIds'] = this.selectCameraArr.map(res => res.uid).join(',');
+//          params['deviceIds'] = "5DTxZRNGOZuLsl07jcNO09";
+          params['deviceIds'] = this.selectCameraArr.map(res => res.uid).join(',');
+          p1['bayonetIds'] = this.selectBayonetArr.map(res => res.uid).join(',');
+          params['bayonetIds'] = this.selectBayonetArr.map(res => res.uid).join(',');
           p1['startTime'] = formatDate(this.searchData.startTime, 'yyyy-MM-dd HH:mm:ss');
           params['startTime'] = formatDate(this.searchData.startTime, 'yyyy-MM-dd HH:mm:ss');
           p1['endTime'] = formatDate(this.searchData.endTime, 'yyyy-MM-dd HH:mm:ss');

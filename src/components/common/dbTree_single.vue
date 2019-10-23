@@ -73,35 +73,35 @@
     watch: {
       DBleftAll (e) {
         if (e) {
-          this.treeList.forEach((x, index) => {
-            if (!x.checkAll) {
-              x.checkAll = true;
-              $('.' + this.randomClass).eq(index).click();
-            }
+          this.treeList.forEach((x) => {
+            x.checkAll = true;
+            x.childList.forEach(y => {
+              y.checked = true;
+            })
           })
         } else {
           this.treeList.forEach((x, index) => {
-            if (x.checkAll) {
-              x.checkAll = false;
-              $('.' + this.randomClass).eq(index).click();
-            }
+            x.checkAll = false;
+            x.childList.forEach(y => {
+              y.checked = false;
+            })
           })
         }
       },
       DBrightAll (e) {
         if (e) {
-          this.treeList.forEach((x, index) => {
-            if (!x.checkAll) {
-              x.checkAll = true;
-              $('.' + this.randomClass).eq(index).click();
-            }
+          this.treeList.forEach((x) => {
+            x.checkAll = true;
+            x.childList.forEach(y => {
+              y.checked = true;
+            })
           })
         } else {
           this.treeList.forEach((x, index) => {
-            if (x.checkAll) {
-              x.checkAll = false;
-              $('.' + this.randomClass).eq(index).click();
-            }
+            x.checkAll = false;
+            x.childList.forEach(y => {
+              y.checked = false;
+            })
           })
         }
       }

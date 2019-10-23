@@ -32,24 +32,24 @@
             <div class="struc_cd_info_main">
               <vue-scroll>
                 <div class="scroll_box">
-                  <div class="struc_cdi_line"><span>有无车牌</span><span :title="sturcDetail.hasPlate">{{sturcDetail.hasPlate ? sturcDetail.hasPlate : '未识别'}}</span></div>
+                  <div class="struc_cdi_line"><span>有无车牌</span><span :title="sturcDetail.HasPlate">{{sturcDetail.HasPlate === '1' ? '有车牌' : '未识别'}}</span></div>
                   <div class="struc_cdi_line">
                     <span>号牌类型</span>
-                    <span :title="dicFormater(45, sturcDetail.plateClass)">{{dicFormater(45, sturcDetail.plateClass)}}</span>
+                    <span :title="sturcDetail.plateClassDesc">{{sturcDetail.plateClassDesc ? sturcDetail.plateClassDesc : '未识别'}}</span>
                   </div>
-                  <div class="struc_cdi_line"><span>车牌颜色</span><span :title="sturcDetail.plateColor">{{sturcDetail.plateColor ? sturcDetail.plateColor : '未识别'}}</span></div>
-                  <div class="struc_cdi_line"><span>车牌号码</span><span :title="sturcDetail.plateNo">{{sturcDetail.plateNo ? sturcDetail.plateNo : '未识别'}}</span></div>
+                  <div class="struc_cdi_line"><span>车牌颜色</span><span :title="sturcDetail.plateColorDesc">{{sturcDetail.plateColorDesc ? sturcDetail.plateColorDesc : '未识别'}}</span></div>
+                  <div class="struc_cdi_line"><span>车牌号码</span><span :title="sturcDetail.PlateNo">{{sturcDetail.PlateNo ? sturcDetail.PlateNo : '未识别'}}</span></div>
                   <!--<div><span>车辆分组</span><span :title="sturcDetail.vehicleType">{{(sturcDetail.vehicleType && sturcDetail.vehicleType.length > 0) ? sturcDetail.vehicleType.join(',') : '&#45;&#45;'}}</span></div>-->
                   <!-- <div v-if="type === 3 && sturcDetail.shotTime"><span>入城时间</span><span :title="sturcDetail.shotTime">{{sturcDetail.shotTime}}</span></div>
                   <div v-if="type === 3 && sturcDetail.bayonetName"><span>入城卡口</span><span :title="sturcDetail.bayonetName">{{sturcDetail.bayonetName}}</span></div> -->
                   <!--<div v-if="type === 3 && sturcDetail.firstEnterFlag"><span>初次入城</span><span>是</span></div>-->
-                  <div class="struc_cdi_line"><span>车辆类型</span><span :title="sturcDetail.vehicleClass">{{sturcDetail.vehicleClass ? sturcDetail.vehicleClass : '未识别'}}</span></div>
-                  <div class="struc_cdi_line"><span>车辆品牌</span><span :title="sturcDetail.vehicleBrand">{{sturcDetail.vehicleBrand ? sturcDetail.vehicleBrand : '未识别'}}</span></div>
-                  <div class="struc_cdi_line"><span>车辆型号</span><span :title="sturcDetail.vehicleModel">{{sturcDetail.vehicleModel ? sturcDetail.vehicleModel : '未识别'}}</span></div>
-                  <div class="struc_cdi_line"><span>车辆年款</span><span :title="sturcDetail.vehicleStyles">{{sturcDetail.vehicleStyles ? sturcDetail.vehicleStyles : '未识别'}}</span></div>
-                  <div class="struc_cdi_line"><span>车辆颜色</span><span :title="sturcDetail.vehicleColor">{{sturcDetail.vehicleColor ? sturcDetail.vehicleColor : '未识别'}}</span></div>
-                  <div class="struc_cdi_line"><span>车顶天窗</span><span :title="sturcDetail.vehicleRoof">{{sturcDetail.vehicleRoof ? sturcDetail.vehicleRoof : '未识别'}}</span></div>
-                  <div class="struc_cdi_line"><span>有无撞痕</span><span :title="sturcDetail.hitMarkInfo">{{sturcDetail.hitMarkInfo ? sturcDetail.hitMarkInfo : '未识别'}}</span></div>
+                  <div class="struc_cdi_line"><span>车辆类型</span><span :title="sturcDetail.vehicleClassDesc">{{sturcDetail.vehicleClassDesc ? sturcDetail.vehicleClassDesc : '未识别'}}</span></div>
+                  <div class="struc_cdi_line"><span>车辆品牌</span><span :title="sturcDetail.vehicleBrandDesc">{{sturcDetail.vehicleBrandDesc ? sturcDetail.vehicleBrandDesc : '未识别'}}</span></div>
+                  <div class="struc_cdi_line"><span>车辆型号</span><span :title="sturcDetail.VehicleModel">{{sturcDetail.VehicleModel ? sturcDetail.VehicleModel : '未识别'}}</span></div>
+                  <div class="struc_cdi_line"><span>车辆年款</span><span :title="sturcDetail.VehicleStyles">{{sturcDetail.VehicleStyles ? sturcDetail.VehicleStyles : '未识别'}}</span></div>
+                  <div class="struc_cdi_line"><span>车辆颜色</span><span :title="sturcDetail.vehicleColorDesc">{{sturcDetail.vehicleColorDesc ? sturcDetail.vehicleColorDesc : '未识别'}}</span></div>
+                  <div class="struc_cdi_line"><span>车顶天窗</span><span :title="sturcDetail.VehicleRoof">{{sturcDetail.VehicleRoof ? sturcDetail.VehicleRoof : '未识别'}}</span></div>
+                  <div class="struc_cdi_line"><span>有无撞痕</span><span :title="sturcDetail.HitMarkInfo">{{sturcDetail.HitMarkInfo ? sturcDetail.HitMarkInfo : '未识别'}}</span></div>
                   <div class="struc_cdi_line"><span>车前物品</span><span :title="sturcDetail.descOfFrontItem">{{sturcDetail.descOfFrontItem ? sturcDetail.descOfFrontItem : '未识别'}}</span></div>
                   <div class="struc_cdi_line"><span>车后物品</span><span :title="sturcDetail.descOfRearItem">{{sturcDetail.descOfRearItem ? sturcDetail.descOfRearItem : '未识别'}}</span></div>
                   <div class="struc_cdi_line"><span>遮阳板状态</span><span :title="sturcDetail.sunvisor">{{sturcDetail.sunvisor ? sturcDetail.sunvisor : '未识别'}}</span></div>
@@ -138,7 +138,7 @@
         default: () => {
           return {
             name: '抓拍图',
-            imgKey: 'subStoragePath'
+            imgKey: 'StorageUrl1'
           }
         }
       },
@@ -147,7 +147,7 @@
         default: () => {
           return {
             name: '全景图',
-            imgKey: 'storagePath'
+            imgKey: 'StorageUrl3'
           }
         }
       },
@@ -155,7 +155,7 @@
         type: Object,
         default: () => {
           return {
-            imgKey: 'subStoragePath'
+            imgKey: 'StorageUrl1'
           }
         }
       }
