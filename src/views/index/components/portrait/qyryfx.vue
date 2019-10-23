@@ -964,7 +964,8 @@ export default {
                 ? this.qyryfxFrom.personGroupId.join()
                 : "",
             deviceAndTimeList: deviceAndTimeList,
-            taskName: this.qyryfxFrom.taskName
+            taskName: this.qyryfxFrom.taskName,
+            taskOperationType: 1 // 1--创建
           };
 
           this.submitLoading = true; // 打开加载效果
@@ -992,7 +993,6 @@ export default {
                   }
                 } else {
                   this.clearMarkList(); // 清除地图标记
-                  // this.setMarks();
                   this.isInitPage = false;
                   this.submitLoading = false; // 关闭加载效果
                 }
@@ -1082,8 +1082,6 @@ export default {
     },
     // 地图标记
     doMark(device, sClass) {
-      // console.log('obj', obj)
-      // console.log('obj', device)
       let marker;
       if (device.shotNum > 0) {
         // 非初始化的状态
@@ -1119,18 +1117,6 @@ export default {
           _this.clickGetCameraData(device.areaListWeb);
         });
         this.markerList = [...this.markerList, marker];
-      } else {
-        // marker = new window.AMap.Marker({
-        //   // 添加自定义点标记
-        //   map: this.amap,
-        //   position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
-        //   offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
-        //   draggable: false, // 是否可拖动
-        //   // extData: obj,
-        //   // 自定义点标记覆盖物内容
-        //   content: `<div style="cursor:not-allowed;" class="map_icons ${sClass}"></div>`
-        // });
-        // this.markerList = [...this.markerList, marker];
       }
       this.amap.setFitView();
     },

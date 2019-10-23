@@ -10,7 +10,7 @@
       <div class="left">
         <vue-scroll>
           <ul class="result_ul">
-            <li>
+            <li class="time_li">
               <span>任务名称：</span>
               <p>{{taskDetail.taskName}}</p>
             </li>
@@ -201,10 +201,10 @@ export default {
         }
         .time_li {
           >span {
-            width: 80px;
+            width: 70px;
           }
           >p {
-            width: calc(100% - 80px);
+            width: calc(100% - 70px);
             >span {
               display: inline-block;
             }

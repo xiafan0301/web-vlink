@@ -375,7 +375,7 @@ export default {
                   if (a.plateNo === _arr[_i].plateNo) {
                     
                     _arr[_i]['shotTime'] += ',' + a.shotTime;
-                    console.log('_arr[_i]', _arr[_i]['shotTime'])
+                    // console.log('_arr[_i]', _arr[_i]['shotTime'])
                   } else {
                     a['simLength'] += 1;
                     _arr.splice(_i, 1, a);

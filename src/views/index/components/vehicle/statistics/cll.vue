@@ -109,7 +109,7 @@
             </el-table>
           </div>
         </div>
-        <div is="noResult" v-else :isInitPage="isInitPage"></div>
+        <div is="noResult" v-else :isInitPage="isInitPage" :tipMessage="tipMessage"></div>
       </div>
     </div>
   </div>
@@ -129,6 +129,8 @@ export default {
   data () {
     return {
       isInitPage: true,
+      tipMessage: '选择一个卡口，统计所选卡口的过车数量',
+
       queryForm: {
         // radio: 1,
         carType: "",
