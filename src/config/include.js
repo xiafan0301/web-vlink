@@ -18,6 +18,8 @@ import '@/utils/filter.js';
 import '@/utils/method.js';
 // import 自定义shape for AntV/g2
 import '@/utils/antv.shape.js';
+// import 全局指令
+import '@/utils/directives.js';
 // 混入
 import '@/utils/mixins.js';
 // import '@/utils/extendBig.js';

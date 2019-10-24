@@ -447,6 +447,7 @@ export default {
     },
     // 获取实时监控的布控设备
     getControlMap (flag) {
+      this.$_showLoading();
       if (this.mapForm.state !== 1) {
         this.isShowSnapList = false;
       } else {
@@ -844,6 +845,7 @@ export default {
       }
       _this.map.setFitView();// 自动适配到合适视野范围
       addCluster(_this.map, _this.markerList);
+      this.$_hideLoading();
     },
     // 跳转至视频回放页面
     skipIsVideo (uid, deviceName) {

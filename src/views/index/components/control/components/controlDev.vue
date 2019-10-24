@@ -150,17 +150,21 @@ export default {
     },
     // 进入修改已选择的设备页面
     changePageType () {
+      this.$_showLoading();
       if (this.map) {
         this.map.destroy();
         this.map = null;
       }
       this.removeObj = {1: [],2: []};
       this.markerList = [];
-     
+    
       this.pageType = 2;
       this.$nextTick(() => {
         this.activeDeviceList = [...this.devIdList.map(m => m.uid), ...this.bayIdList.map(m => m.uid)];
       })
+      setTimeout(() => {
+        this.$_hideLoading();
+      }, 1500);
     },
     // 传给父组件 
     sendParent () {
@@ -191,6 +195,7 @@ export default {
     },
     // 获取地图上的设备和卡口数据
     getDevAndBayList () {
+      this.$_showLoading();
       Promise.all([getAllMonitorList({ccode: mapXupuxian.adcode}), 
         getBayonetList  ({ 
           "where.areaId": mapXupuxian.adcode,
@@ -292,6 +297,7 @@ export default {
       }
       _this.map.setFitView();
       addCluster(_this.map, _this.markerList);
+      this.$_hideLoading();
     },
     // 人员失踪位置和家庭位置标记
     addressMark () {

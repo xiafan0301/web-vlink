@@ -46,19 +46,23 @@ export default {
     }
   },
   mounted () {
-    // 修改时回填数据
-    if (this.modelList) {
-      console.log(this.modelList, 'this.modelList')
-      // 回填嫌疑车牌
-      let [{pointDtoList: [{bayonetList, devList}], surveillanceObjectDtoList}] = this.modelList;
-      this.protraitList = surveillanceObjectDtoList.filter(m => m.objType === 1);//回填禁入人员
-      this.vehicleList = surveillanceObjectDtoList.filter(m => m.objType === 2);//回填禁入车辆
-      this.isShowControlDev = true;
+    this.$_showLoading();
+    setTimeout(() => {
+      // 修改时回填数据
+      if (this.modelList) {
+        console.log(this.modelList, 'this.modelList')
+        // 回填嫌疑车牌
+        let [{pointDtoList: [{bayonetList, devList}], surveillanceObjectDtoList}] = this.modelList;
+        this.protraitList = surveillanceObjectDtoList.filter(m => m.objType === 1);//回填禁入人员
+        this.vehicleList = surveillanceObjectDtoList.filter(m => m.objType === 2);//回填禁入车辆
+        this.isShowControlDev = true;
 
-      this.$nextTick(() => {
-        this.activeDeviceList = [...devList.map(m => m.deviceId), ...bayonetList.map(m => m.bayonetId)];
-      })
-    }
+        this.$nextTick(() => {
+          this.activeDeviceList = [...devList.map(m => m.deviceId), ...bayonetList.map(m => m.bayonetId)];
+        })
+      }
+      this.$_hideLoading();
+    }, 1500);
   },
   methods: {
      // 从布控库中获取禁入人员

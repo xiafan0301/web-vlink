@@ -22,6 +22,7 @@
             <el-form-item label="关联事件:" prop="eventId" style="width: 25%;">
               <el-select 
                 v-model="createForm.eventId"
+                v-loadmore="loadMore"
                 filterable 
                 placeholder="请输入关联事件编号"
                 :disabled="($route.query.eventId ? true : false) || (detail.eventId && pageType === 2)"
@@ -283,6 +284,9 @@ export default {
       eventDetail: {},
       modelList: null,
       isShowOperateBtn: true,
+      // 关联事件下拉列表分页
+      pageNum: 1,
+      pageSize: 50
     }
   },
   created () {
@@ -339,18 +343,25 @@ export default {
       const date = y+"-"+checkT(m)+"-"+checkT(d);
       this.createForm.controlDate = [formatDate(new Date(), 'yyyy-MM-dd'), date];
     },
+    // 布控事件下拉列表滚动加载方法
+    loadMore () {
+      console.log(111111111);
+      this.pageNum++;
+      this.getEventList();
+    },
     // 获取关联事件列表
     getEventList () {
       const params = {
         'where.isSurveillance': false,//没有关联布控的事件
-        pageSize: 100,
+        pageSize: this.pageSize,
+        pageNum: this.pageNum,
         orderBy: 'report_time',
         order: 'desc'
       }
       getEventList(params).then(res => {
         if (res && res.data) {
           // 过滤掉事件状态为已结束的关联事件和eventCode为null的
-          this.eventList = res.data.list.reduce((arr, item) => {
+          this.eventList.push(...res.data.list.reduce((arr, item) => {
             if (item.eventStatus !== 3 && item.eventCode) {
               const _item = {
                 label: item.eventCode,
@@ -362,7 +373,7 @@ export default {
             } else {
               return arr;
             }
-          }, [])
+          }, []))
         }
       })
     },
@@ -550,6 +561,7 @@ export default {
     },
     // 根据布控id获取布控详情，用于回填数据
     getControlDetailIsEditor (controlId) {
+      this.$_showLoading();
       getControlDetailIsEditor(controlId).then(res => {
         if (res && res.data) {
           const detail = this.detail = res.data;
@@ -596,6 +608,7 @@ export default {
           this.modelList = modelList;
           this.modelType_ = this.modelType = modelType;
           console.log(this.modelList, 'modelList')
+          this.$_hideLoading();
         }
       })
     },

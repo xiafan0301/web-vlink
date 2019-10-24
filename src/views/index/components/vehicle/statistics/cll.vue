@@ -101,7 +101,7 @@
           </div>
           <div class="main_box" v-show="tabIndex === 3">
             <el-table :data="bodyList">
-              <el-table-column :label="name" v-for="(name, key) in headerList" :key="name">
+              <el-table-column :label="name" v-for="(name, key) in headerList" :key="name" show-overflow-tooltip width="110px">
                 <template>
                   <span :style="{'color': parseInt(bodyList[0][key]) > parseInt(queryForm.warningNum) ? 'red' : '#555'}">{{bodyList[0][key]}}</span>
                 </template>
@@ -171,7 +171,7 @@ export default {
       },
       listBayonet: [],
       tabIndex: 2,
-      carTypeList: this.dicFormater(dataList.vehicleType)[0],
+      carTypeList: this.dicFormater(dataList.vehicleType)[0].dictList,
       statementTitle: null,
       // laneList: [],
       statementTypeList: [
