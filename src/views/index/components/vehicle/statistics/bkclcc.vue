@@ -138,7 +138,7 @@
             :total="bkclccList.total">
           </el-pagination>
         </div>
-        <div is="noResult" v-else :isInitPage="isInitPage"></div>
+        <div is="noResult" v-else :isInitPage="isInitPage" :tipMessage="tipMessage"></div>
       </div>
     </div>
     <!-- 抓拍详情弹窗 -->
@@ -161,6 +161,7 @@ export default {
   data () {
     return {
       isInitPage: true,
+      tipMessage: '选择一个或多个出城卡口，查询从所选卡口出城的车辆记录',
       queryForm: {
         startTime: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)),
         endTime: new Date(),

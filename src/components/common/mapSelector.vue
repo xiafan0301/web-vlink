@@ -278,6 +278,7 @@
   import dbTreeS from '@/components/common/dbTree_single.vue';
   export default {
     /* 提交成功后通过在父组件 emit mapSelectorEmit 事件获取所框选的东西 */
+    /*里面用到isInChecked表示使用查询模块更新地图记录已选的。checked表示checkbox已选，isChecked表示当前为已选，避免重复选择*/
     /*
       open  改变open值则打开窗口
       showTypes  需要操作的东西 D设备 B卡口
@@ -326,6 +327,11 @@
           curPointData: [],
           curMarks: []
         }, // 单选区域时使用
+        curAddSearchWait: {
+          area: null, // 需要对比area，判断当前的区域还是不是勾选前的区域
+          curPointData: [],
+          curMarks: []
+        },// 选择区域未点完成时，用户点了摄像头，卡口的checkbox，从curAddSearch里抽离出对象。
         searchData: [], // 多选区域时使用
         pointSelect: {
           curPointData: [],
@@ -531,10 +537,13 @@
         }
       },
       addDB () {
+        this.DBleftAll = false;
+        this.DBrightAll =false;
         // 添加的时候丢进pointSelect集合，treeList自动更新
+        let _ar = [];
         this.remainTreeList.forEach(x => {
           // 判断当前右侧列表是不是搜索出来的结果,如果是通过isFilterData 过滤
-          let _ar = [];
+          _ar = [];
           _ar = x.childList.filter(y => y.checked && y.infoName.includes(this.isFilterData)).map(z => {return z.uid})
           this.activeDBList.push(..._ar)
         })
@@ -543,6 +552,8 @@
       },
       // 判断有checked的丢进delOne
       removeDB () {
+        this.DBleftAll = false;
+        this.DBrightAll =false;
         this.treeList.forEach(x => {
           x.childList.filter(y => y.checked).forEach(z => this.delOne(z));
         })
@@ -564,12 +575,15 @@
         // 因为objSetItem的时候过滤了没有经纬度的数据，所以index就是markIndex
         this.mapAllList.forEach((x, index) => {
           if (this.activeDBList.includes(x.uid)) {
+            // 给默认已选择的加上isChecked
+            x['isChecked'] = true;
             this.putSelectColor([this.marks[index]]);
             this.pointSelect.curPointData.push(x);
             this.pointSelect.curMarks.push(this.marks[index]);
           }
         })
         // this.activeDBList = []; 暂时不清除，如果画新区域的时候再清除
+        this.activeDBList = [];
       },
       delOne (item) {
         this.markColorChange(item)
@@ -634,9 +648,27 @@
         })
       },
       operClusterIO (bool, index) {
+        // 需要判断下当前是不是有未完成的区域选择，做相应的应对。
         if (bool) {
+          if (this.curAddSearch.area && this.curAddSearchWait.area === this.curAddSearch.area) {
+            this.curAddSearch.curPointData = this.curAddSearch.curPointData.concat(this.curAddSearchWait.curPointData)
+            this.curAddSearchWait.curPointData = [];
+            this.curAddSearch.curMarks = this.curAddSearch.curMarks.concat(this.curAddSearchWait.curMarks)
+            this.curAddSearchWait.curMarks = [];
+          } else {// 说明现在已经点了完成按钮，或者已经重新画区域了，把curAddSearchWait里的数据重置，放入地图
+            this.curAddSearchWait.curPointData = this.objSetItem(this.curAddSearchWait.curPointData, {isChecked: false});
+            this.curAddSearchWait.curPointData = [];
+            this.recoverSXTcolor(this.curAddSearchWait.curMarks)
+          }
           this.amap.cluster.addMarkers(this.originMarks[index])
         } else {
+          if (this.curAddSearch.curPointData.length) {
+            this.curAddSearchWait.curPointData = this.curAddSearch.curPointData.filter(x => x.dataType === index);
+            this.curAddSearchWait.curMarks = this.curAddSearch.curMarks.filter(x => x.getExtData().dataType === index);
+            this.curAddSearch.curPointData = this.curAddSearch.curPointData.filter(x => x.dataType !== index);
+            this.curAddSearch.curMarks = this.curAddSearch.curMarks.filter(x => x.getExtData().dataType !== index);
+            this.curAddSearchWait.area = this.curAddSearch.area;
+          }
           this.amap.cluster.removeMarkers(this.originMarks[index])
         }
       },
@@ -658,6 +690,7 @@
 //          this.markColorChange(x);
 //        })
         this.recoverSXTcolor(this.pointSelect.curMarks);
+        this.pointSelect.curPointData = this.objSetItem(this.pointSelect.curPointData, {isChecked: false})
         this.pointSelect.curPointData = [];
         this.pointSelect.curMarks = [];
         this.searchData.forEach(x => {
@@ -665,12 +698,15 @@
             this.amap.remove(x.area);
             x.area = null;
             this.recoverSXTcolor(x.curMarks);
+            x.curPointData = this.objSetItem(x.curPointData, {isChecked: false})
             x.curPointData = [];
           }
         })
         this.searchData = [];
         this.drawActiveType = 0;
-        this.mouseTool.close(false);
+        if (this.mouseTool) {
+          this.mouseTool.close(false);
+        }
       },
       showInfoMes(mes) {
         if (!document.querySelector('.el-message--info')) {
@@ -684,7 +720,9 @@
         if (this.curAddSearch.curPointData.length) {
           this.recoverSXTcolor(this.curAddSearch.curMarks);
         }
+        this.curAddSearch.area = null;
         this.curAddSearch.curMarks = [];
+        this.curAddSearch.curPointData = this.objSetItem(this.curAddSearch.curPointData, {isChecked: false});
         this.curAddSearch.curPointData = [];
       },
       // 摄像头恢复原始颜色
@@ -861,13 +899,12 @@
           if (_this.curAddSearch.curMarks.length) {
             _this.recoverSXTcolor(_this.curAddSearch.curMarks)
           }
-          // 判断如果初始化的时候带了数据，就清除了，
-          if (_this.activeDBList.length) {
-            console.log('321')
-            _this.recoverSXTcolor(_this.pointSelect.curMarks);
-            _this.activeDBList = [];
-            _this.pointSelect.curPointData = [];
-          }
+          // 判断如果初始化的时候带了数据，就清除了， 暂时取消清除，看后面需求
+//          if (_this.activeDBList.length) {
+//            _this.recoverSXTcolor(_this.pointSelect.curMarks);
+//            _this.activeDBList = [];
+//            _this.pointSelect.curPointData = [];
+//          }
 
           _this.curAddSearch.curMarks = [];
           _this.curAddSearch.curPointData.forEach(j => {
@@ -890,7 +927,9 @@
             // console.log(marker.getPosition());
             if(isPointInRing){
               let id = this.curAddSearch.curPointData.findIndex(item=>item.uid==el.uid)
-              if(id == -1){
+              if(id == -1 && !el['isChecked']){
+                // 判断el是不是在pointSelect或者searchData里。没有则加入curAddSearch
+                el['isChecked'] = true;
                 this.curAddSearch.curPointData.push(el)
               }
             }
@@ -919,7 +958,7 @@
               that.addCompleteData(addObj);
               that.amap.remove(that.confirmIcon);
             } else {
-              that.showInfoMes('所选区域没有设备信息')
+              that.showInfoMes('所选区域没有设备信息或者所选区域设备全都已选了')
             }
           }
         })
@@ -1023,10 +1062,11 @@
         // rectangle circle polyline polygon circle10km
         this.submitLoading = true;
         // 把pointSelect,跟searchData下的数据拿出来
-        let ad = [], ab = [], abIds = [];
+        let ad = [], ab = [], abIds = [], dNames = [], deviceNames = [];
         this.pointSelect.curPointData.forEach((x, index) => {
           // 直接把对应的mark放入当前对象，方面查询过滤的时候快速查找
           x['curMark'] = this.pointSelect.curMarks[index];
+          dNames.push(x['infoName'])
           if (x.dataType === 0)  {
             ad.push(x)
           } else {
@@ -1036,6 +1076,7 @@
         })
         this.searchData.forEach(x => {
           x.curPointData.forEach((y, index) => {
+            dNames.push(x['infoName'])
             y['curMark'] = x.curMarks[index];
             if (y.dataType === 0) {
               ad.push(y)
@@ -1045,10 +1086,19 @@
             }
           })
         })
+        // 返回当前选中设备集合的缩略名称；
+        if (dNames.length > 3) {
+          deviceNames = dNames.splice(0, 2);
+          deviceNames.push('等' + dNames.length + '个设备');
+          deviceNames =  deviceNames.join(',')
+        } else {
+          deviceNames = dNames.join(',')
+        }
+
         // 如果是直接获取结果的就不去计算卡口里的所包含的设备id了
         if (bool) {
           this.submitLoading = false;
-          return { deviceList: ad, bayonetList: ab,}
+          return { deviceList: ad, bayonetList: ab,deviceNames: deviceNames}
         } else {
           if (abIds && abIds.length > 0) {
             getDeviceByBayonetUids(abIds).then(res => {
@@ -1059,7 +1109,8 @@
               this.$emit('mapSelectorEmit', {
                 deviceList: ad,
                 bayonetList: ab,
-                bayonetDeviceList: bayonetDeviceList
+                bayonetDeviceList: bayonetDeviceList,
+                deviceNames: deviceNames
               });
               this.submitLoading = false;
               this.dialogVisible = false;
@@ -1070,7 +1121,8 @@
             this.$emit('mapSelectorEmit', {
               deviceList: ad,
               bayonetList: ab,
-              bayonetDeviceList: []
+              bayonetDeviceList: [],
+              deviceNames: deviceNames
             });
             this.submitLoading = false;
             this.dialogVisible = false;
@@ -1098,7 +1150,7 @@
         // 这里执行mapMark是，查询模块查询之后更新数据
         if (bool) {
           this.marks = [];
-          this.originMarks
+//          this.originMarks
           this.amap.cluster.clearMarkers();
           this.mapMark(this.mapAllList);
           this.$_hideLoading();
@@ -1245,6 +1297,7 @@
         let $class = document.getElementById(obj.markSid);
         let _this = this;
         if ($class === null || $class.classList.contains('vl_icon_map_sxt_in_area' + obj.dataType)) {
+          obj['isChecked'] = false;
           // 先查找pointSelect集合，这个集合比较小，速度快l
           let _l = _this.pointSelect.curPointData;
           if (_l.includes(obj)) {
@@ -1266,6 +1319,7 @@
             }
           }
         } else {
+          obj['isChecked'] = true;
           // 当前是未选中状态，直接加入pointSelect集合
           $class.classList.add('vl_icon_map_sxt_in_area' + obj.dataType);
           _this.pointSelect.curPointData.push(obj);

@@ -193,7 +193,7 @@ export default {
       detailData: null,
 
       value1: '',
-      nodata: '请在左侧输入查询条件',
+      nodata: '选择分析时间段，查询这段时间内的全部套牌车记录',
       showimgnull: true,
       pickerOptions: {
       },
@@ -330,7 +330,7 @@ export default {
           this.regulationsList = res.data.list
           this.pagination.total = res.data.total
           if (this.regulationsList.length === 0) {
-            this.nodata = "抱歉，没有相关结果"
+            this.nodata = "抱歉，没有相关结果!"
             this.showimgnull = false
           }
         }

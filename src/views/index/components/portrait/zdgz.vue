@@ -62,35 +62,13 @@
             :value="item.value">
           </el-option>
         </el-select>
-        <el-radio-group v-model="input5" @change="changeTab">
-            <el-row :gutter="10">
-            <!--<el-col :span="12">-->
-              <!--<el-radio label="1">列表选择</el-radio>-->
-            <!--</el-col>-->
-            <el-col :span="12">
-              <div @click="clickTab">
-                <el-radio label="2">地图选择</el-radio>
-              </div>
-            </el-col>
-          </el-row>
-        </el-radio-group>
-        <!--<div v-if="input5==2" >-->
-          <!--<el-input  v-model="selectValue" :disabled="true">-->
-          <!--</el-input>-->
-        <!--</div>-->
-        <!--<el-select-->
-          <!--v-model="areaIds"-->
-          <!--class="camera-select full"-->
-          <!--multiple-->
-          <!--collapse-tags-->
-          <!--placeholder="关注范围" v-if="input5==1">-->
-          <!--<el-option-->
-            <!--v-for="item in eventAreas"-->
-            <!--:key="item.id"-->
-            <!--:label="item.areaName"-->
-            <!--:value="item.areaId">-->
-          <!--</el-option>-->
-        <!--</el-select>-->
+        <div class="zdgz_xzsb_s" @click="clickTab" v-if="mapSelectType === 0">
+          <span>选择设备</span>
+          <span class="el-icon-arrow-down"></span>
+        </div>
+        <div class="zdgz_dtxz_rst" v-else>
+          已选<span>{{dSum}}</span>个设备<a href="javascript: void(0);" @click="dialogVisible={}">重选</a>
+        </div>
         <div>
           <el-row :gutter="10">
             <el-col :span="12">
@@ -223,7 +201,7 @@
                     >恢复任务</span>
                     <span
                             class="operation_btn"
-                            @click="recoveryOrRestart(scope.row)"
+                            @click="restartTask(scope.row)"
                             v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 3"
                     >重启任务</span>
                     <span
@@ -292,9 +270,9 @@
 let AMap = window.AMap;
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import {PortraitPostFocusRealTime, PortraitPostFocusTask, newGETAlarmSnapList, JfoGETEventList,getAllDevice } from "@/views/index/api/api.judge.js";
-import {MapGETmonitorList} from '../../api/api.map.js';
-import {getGroupListIsPortrait, getGroupListIsVehicle} from '../../api/api.control.js';
+import {getGroupListIsPortrait} from '../../api/api.control.js';
 import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
+import {FocusPostReloadtask} from '@/views/index/api/api.portrait.js';
 import mapSelector from '@/components/common/mapSelector.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 import { random14, formatDate } from '@/utils/util.js';
@@ -307,13 +285,12 @@ export default {
   },
   data() {
     return {
+      dSum: 0, // 设备总数
+      mapSelectType: 0,
       taskName: '', // 左侧输入任务名称
       taskType: "1", // 左侧任务类型，1 实时，2离线
       flvplayerId: 'flv_' + random14(),
-      clearMapSelect: null, // 清除地图选择
-      input5:"1",
-      areaIds: [],
-      eventAreas: [],
+      clearMapSelect: false, // 清除地图选择
       pagination: {
         currentPage: 1,
         pageSize: 6,
@@ -321,7 +298,6 @@ export default {
       },
       evData: [],
       searchData: {
-        type: 1, // 1：人， 2： 车,0 不限
         portraitGroupId: null,  // 人员组
         sex: null, // 1男，2女
         ageGroup: null, // 年龄段
@@ -333,7 +309,6 @@ export default {
         {value: '女', label: '女'}
       ],
       portraitGroupList: [],
-      vehicleGroupList: [],
       ageGroupList: [
         // {value: null, label: '不限'},
         {value: '儿童', label: '儿童'},
@@ -381,10 +356,8 @@ export default {
       surveillanceIds: [], // 布控ids.
       eventList: [],
       dialogVisible:false,
-      allDevice:[],
       selectDevice:[],
       selectBayonet:[],
-      selectValue:"已选设备0个",
       // 任务
       tabList: [
         {
@@ -423,7 +396,6 @@ export default {
     });
     map.setMapStyle('amap://styles/whitesmoke');
     this.amap = map;
-    this.getAllAreas();
     // this.getAllDevice()
     // 获取人员组，跟车辆组列表
     getGroupListIsPortrait().then(res => {
@@ -434,11 +406,6 @@ export default {
             this.searchData.portraitGroupId = item.uid;
           }
         })
-      }
-    })
-    getGroupListIsVehicle().then(res => {
-      if (res) {
-        this.vehicleGroupList = res.data;
       }
     })
   },
@@ -554,9 +521,22 @@ export default {
             .catch(() => {this.isDeleteLoading = false;})
       }
     },
-    //恢复任务,重启任务
+    //恢复任务,
     recoveryOrRestart(obj) {
       putTaskInfosResume(obj.uid).then(res => {
+        console.log(res)
+        if(res) {
+          this.getDataList();
+        }
+      }).catch(() => {})
+    },
+    // 重启任务
+    restartTask (obj) {
+      let params = {
+        taskId: obj.uid,
+        taskOperationType: '3'
+      }
+      FocusPostReloadtask(params).then(res => {
         console.log(res)
         if(res) {
           this.getDataList();
@@ -581,45 +561,15 @@ export default {
         this.amap.setZoomAndCenter(14, mapXupuxian.center);
       }
     },
-    changeTab(v) {
-     
-    },
     clickTab() {
         this.dialogVisible = !this.dialogVisible;
+        this.mapSelectType = 1;
     },
     mapPoint(data){
       this.selectDevice = data.deviceList;
       this.selectBayonet = data.bayonetList;
-      //返回有效点集合
-      this.selectValue =
-        "已选设备" +
-        (this.selectDevice.length + this.selectBayonet.length) +
-        "个";
-      
-    },
-    //查询所有的设备
-    getAllDevice(){
-      getAllDevice().then(res=>{
-          // console.log(res);
-          if(res.data && res.data.length>0){
-            this.allDevice=res.data
-          }
-          
-      })
-    },
-    getAllAreas () {
-      let params = {
-        areaUid: '431224'
-      }
-      MapGETmonitorList(params)
-          .then(res => {
-            if (res) {
-              this.eventAreas = res.data.areaTreeList;
-              this.eventAreas.map(item => {
-                this.areaIds.push(item.areaId);
-              })
-            }
-          })
+      this.dSum = 0;
+      this.dSum = data.bayonetList.length + data.deviceList.length;
     },
     setDTime () {
       let date = new Date();
@@ -633,21 +583,12 @@ export default {
     resetSearch () {
       this.setDTime()
       this.taskName = '';
-      this.searchData.type = null;
       this.searchData.portraitGroupId = null;
       this.searchData.sex = null;
-      this.searchData.vehicleColor = null;
       this.searchData.ageGroup = null;
-      this.searchData.vehicleGroupId = '';
-      this.searchData.plateType = null;
       this.selectDevice = [];
       this.selectBayonet = [];
-      this.selectValue = "已选设备0个";
-      
-      this.areaIds = [];
-      this.eventAreas.map(item => {
-        this.areaIds.push(item.areaId);
-      });
+      this.dSum = 0;
 
       this.clearMapSelect = !this.clearMapSelect; // 清除地图选择
 
@@ -699,9 +640,6 @@ export default {
       } else {
         params['deviceNames'] = dNameList.join(',')
       }
-//      if (this.input5 === '1' && this.areaIds.length) {
-//        params['areaIds'] = this.areaIds.join(',');
-//      }
       if (this.selectBayonet.length) {
         params['bayonetIds'] = this.selectBayonet.map(res => res.uid).join(',');
       }
@@ -719,10 +657,14 @@ export default {
               if (res) {
                 this.$set(res.data, 'taskResult', JSON.parse(res.data.taskResult));
                 console.log(res);
-                this.evData = res.data.taskResult.map(x => {
-                  x.checked = false;
-                  return x;
-                })
+                if (res.data.taskResult) {
+                  this.evData = res.data.taskResult.map(x => {
+                    x.checked = false;
+                    return x;
+                  })
+                } else {
+                  this.evData = []
+                }
                 this.selectIndex = 2;
                 this.randerMap();
               }
@@ -736,6 +678,7 @@ export default {
           }
         } else {
           params.taskName = this.taskName;
+          params.taskOperationType = '1';
           PortraitPostFocusTask(params).then(res => {
             this.searching = false;
             if (res && res.data) {
@@ -893,6 +836,46 @@ export default {
 }
 </script>
 <style lang="scss">
+  .zdgz_xzsb_s {
+    height: 40px;
+    line-height: 40px;
+    width: 100%;
+    border-radius: 4px;
+    border: 1px solid #DCDFE6;
+    cursor: pointer;
+    color: #999999;
+    padding: 0 6px;
+    > span {
+      display: inline-block;
+      width: 50%;
+      &:last-child {
+        text-align: right;
+      }
+    }
+  }
+  .zdgz_dtxz_rst {
+    width: 100%;
+    line-height: 40px;
+    padding: 0px 15px; margin-top: 5px;
+    background-color: #F5F7FA;
+    color: #C0C4CC;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    > span {
+      display: inline-block;
+      padding: 0 3px;
+      color: #333;
+    }
+    > a {
+      display: inline-block;
+      padding-left: 5px;
+      color: #2580FC !important;
+      text-decoration: none !important;
+      /*font-style: italic;*/
+      cursor: pointer;
+    }
+  }
+
   .vl_jtc_mk_img {
     width: 98px;
     height: 98px;

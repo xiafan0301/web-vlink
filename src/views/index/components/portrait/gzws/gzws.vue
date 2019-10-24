@@ -605,18 +605,11 @@ export default {
 .gzws_container {
   height: 100%;
   overflow: hidden;
-  .pt_breadcrumb {
-    // display: flex;
-    // justify-content: space-between;
-    // height: 50px; width: 100%;
-    // align-items: center;
-    // border-bottom: 1px solid #f6f6f6;
-    // box-shadow: 0 0 5px #ddd;
-    // background-color: #fff;
-    .vc_gcck_bd {
-      width: 100%;
-    }
-  }
+  // .pt_breadcrumb {
+  //   .vc_gcck_bd {
+  //     width: 100%;
+  //   }
+  // }
   .gzws_content_box {
     display: flex;
     height: 100%;
@@ -624,7 +617,7 @@ export default {
       width: 272px;
       height: 100%;
       padding-bottom: 50px;
-      box-shadow: 4px 0px 10px 0px rgba(131,131,131,0.28);
+      box-shadow: 2px 3px 10px 0px rgba(131, 131, 131, 0.28);
       background-color: #ffffff;
       .left_form {
         width: 100%;

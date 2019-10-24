@@ -212,7 +212,7 @@
             </div>
           </li>
         </ul>
-        <div style="height: calc(100% - 100px);" is="noResult" :isInitPage="isInitPage" v-else></div>
+        <div style="height: calc(100% - 100px);" is="noResult" :tipMessage="tipMessage" :isInitPage="isInitPage" v-else></div>
         <!-- <ul class="rlcx_r_list clearfix" v-else>
           <li style="padding: 30px 0 0 0; width: auto; float: none; text-align: center; color: #999;">
             暂无数据
@@ -234,7 +234,13 @@
     <!-- 详情 -->
     <portraitDetail :detailData="detailData"></portraitDetail>
     <!-- D设备 B卡口  这里是设备和卡口 -->
-    <div is="mapSelector" ref="rlcxSelctor" :open="openMap" :clear="msClear" :showTypes="'DB'" @mapSelectorEmit="mapSelectorEmit"></div>
+    <div
+      is="mapSelector"
+      :open="openMap"
+      :clear="msClear"
+      :showTypes="'DB'"
+      @mapSelectorEmit="mapSelectorEmit">
+    </div>
     <!-- 框选搜索主体弹框 -->
     <div is="imgSelect" :initImageInfo="initImageInfo" :open="isOpenImgDialog" :imgDataList="imgDataList" @emitImgData="emitImgData"></div>
   </div>
@@ -256,10 +262,10 @@ export default {
   components: { vehicleBreadcrumb, mapSelector, vlUpload, portraitDetail, noResult, imgSelect },
   data () {
     return {
-
       isOpenImgDialog: false, // 是否显示框选弹框
 
       isInitPage: true,
+      tipMessage: '选择人像特征，查询具有相同特征人像的抓拍记录',
 
       curImageUrl: '', // 当前上传的图片
       uploadClear: {},
@@ -519,6 +525,7 @@ export default {
       })
     },
     mapSelectorEmit (result) {
+      console.log(result)
       if (result) {
         // bayonetList deviceList
         this.dSum = 0;
@@ -792,7 +799,7 @@ export default {
 }
 .rlcx_dtxz_rst {
   width: 100%;
-  padding: 2px 15px; margin-top: 5px;
+  padding: 0px 15px; margin-top: 5px;
   background-color: #F5F7FA;
   color: #C0C4CC;
   border: 1px solid #DCDFE6;

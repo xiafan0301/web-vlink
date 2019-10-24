@@ -10,38 +10,89 @@
     </div>
     <div class="the-bottom">
       <div class="the-left-search">
-       <ul>
-          <li v-if="taskDetail.taskWebParam && taskDetail.taskWebParam.targetPicUrl">
-            <img :src="taskDetail.taskWebParam.targetPicUrl" alt="">
-          </li>
-          <li v-else>
-            <img src="../../../../assets/img/temp/vis-eg.png" alt="">
-          </li>
-          <li>
-            <span>任务名称：</span>
-            <span>{{taskDetail.taskName ? taskDetail.taskName : '无'}}</span>
-          </li>
-          <li>
-            <span>已选设备：</span>
-            <span>{{deviceStr ? deviceStr : '无'}}</span>
-          </li>
-          <li>
-            <span>分析时间：</span>
-            <span>
+        <template v-if="showNewTask">
+          <div class="vl_jtc_img_box">
+            <div style="padding: 0 25px; height: 210px;">
+              <div is="vlUpload" :clear="uploadClear" :imgData="imgData" @uploadEmit="uploadEmit"></div>
+            </div>
+          </div>
+          <div class="per_semblance_ytsr"><span>同行次数：</span><el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100; if(value&&value <2)value = 2;" placeholder="填写同行次数" v-model="searchData.minSemblance"></el-input>(2-100)</div>
+          <!--查询范围-->
+          <div class="per_left_time">
+            <div class="left_time">
+              <el-date-picker
+                      v-model="searchData.startTime"
+                      style="width: 100%;margin-bottom: 20px;"
+                      class="vl_date"
+                      type="datetime"
+                      :time-arrow-control="true"
+                      @change="chooseStartTime"
+                      value-format="timestamp"
+                      placeholder="选择日期时间">
+              </el-date-picker>
+              <el-date-picker
+                      style="width: 100%;"
+                      class="vl_date vl_date_end"
+                      v-model="searchData.endTime"
+                      @change="chooseEndTime"
+                      :time-arrow-control="true"
+                      value-format="timestamp"
+                      type="datetime"
+                      placeholder="选择日期时间">
+              </el-date-picker>
+            </div>
+          </div>
+          <div class="peer_xzsb_s" @click="areaTypeChanged" v-if="chooseType === 1">
+            <span>选择设备</span>
+            <span class="el-icon-arrow-down"></span>
+          </div>
+          <div class="peer_dtxz_rst" v-else>
+            已选<span>{{dSum}}</span>个设备<a href="javascript: void(0);" @click="openMap={}">重选</a>
+          </div>
+          <div class="vl_jtc_search">
+            <div style="text-align: center;margin-bottom: 0px;">
+              <el-button @click="resetSearch">取消</el-button>
+              <el-button type="primary" :loading="searching" @click="tcDiscuss()">确定</el-button>
+            </div>
+          </div>
+        </template>
+        <template v-else>
+          <ul>
+            <li v-if="taskDetail.taskWebParam && taskDetail.taskWebParam.targetPicUrl">
+              <img :src="taskDetail.taskWebParam.targetPicUrl" alt="">
+            </li>
+            <li v-else>
+              <img src="../../../../assets/img/temp/vis-eg.png" alt="">
+            </li>
+            <li>
+              <span>任务名称：</span>
+              <span>{{taskDetail.taskName ? taskDetail.taskName : '无'}}</span>
+            </li>
+            <li>
+              <span>已选设备：</span>
+              <span>{{deviceStr ? deviceStr : '无'}}</span>
+            </li>
+            <li>
+              <span>分析时间：</span>
+              <span>
               <p>从{{taskDetail.taskWebParam && taskDetail.taskWebParam.startTime ? taskDetail.taskWebParam.startTime : '无'}}</p>
               <p>至{{taskDetail.taskWebParam && taskDetail.taskWebParam.endTime ? taskDetail.taskWebParam.endTime : '无'}}</p>
             </span>
-          </li>
-          <li>
-            <span>同行次数：</span>
-            <span v-if="taskDetail.taskWebParam && taskDetail.taskWebParam.number">不少于{{ taskDetail.taskWebParam.number}}次</span>
-            <span v-else>无</span>
-          </li>
-          <li>
-            <span>创建时间：</span>
-            <span>{{taskDetail.createTime ? taskDetail.createTime : '无'}}</span>
-          </li>
-        </ul>
+            </li>
+            <li>
+              <span>同行次数：</span>
+              <span v-if="taskDetail.taskWebParam && taskDetail.taskWebParam.number">不少于{{ taskDetail.taskWebParam.number}}次</span>
+              <span v-else>无</span>
+            </li>
+            <li>
+              <span>创建时间：</span>
+              <span>{{taskDetail.createTime ? taskDetail.createTime : '无'}}</span>
+            </li>
+          </ul>
+          <div class="update_task">
+            <el-button type="primary" @click="showNewTask = true;">修改任务</el-button>
+          </div>
+        </template>
       </div>
       <div class="the-right-result">
         <template v-if="pagination.total !== 0">
@@ -88,19 +139,48 @@
         </template>
       </div>
     </div>
-    <!-- <el-dialog :visible.sync="dialogVisible">
-      <img width="100%" :src="dialogImageUrl" alt="">
-    </el-dialog>                         -->
+
+    <!-- D设备 B卡口  这里是设备和卡口 -->
+    <div
+            is="mapSelector"
+            :open="openMap"
+            :clear="msClear"
+            :showTypes="'DB'"
+            @mapSelectorEmit="mapSelectorEmit">
+    </div>
   </div>
 </template>
 
 <script>
-import { getPeopleTaskDetail } from '@/views/index/api/api.analysis.js';
+import { getPeopleTaskDetail, postPeopleTask } from '@/views/index/api/api.analysis.js';
 import { mapXupuxian } from '@/config/config.js';
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
+import { formatDate } from "@/utils/util.js";
+import vlUpload from "@/components/common/upload.vue";
+import mapSelector from '@/components/common/mapSelector.vue';
 export default {
+  components: {vlUpload, mapSelector},
   data () {
     return {
+      imgData:null,
+      uploadClear: {},
+      imgList: null,
+      openMap: false,
+      dSum: 0,
+      chooseType: 1,
+      msClear: {},
+      selectCameraArr: [],
+      selectBayonetArr: [],
+      showNewTask: false,
+      searchData: {
+        minSemblance: 5, // 最小相似度
+        portraitGroupId: [],
+        startTime: '',
+        endTime: ''
+      },
+      searching: false,
+
+
       pagination: {
         total: 0,
         pageSize: 12,
@@ -117,8 +197,104 @@ export default {
     this.getMonitorList().then(() => {
       this.getDetail()
     })
+    this.setDTime();
   },
   methods: {
+    uploadEmit(data) {
+      if (data && data.path) {
+        this.imgList = data;
+      } else {
+        this.imgList = null;
+      }
+    },
+    resetSearch () {
+      this.searchData.minSemblance = 5;
+      this.uploadClear = {}
+      this.msClear = {};
+      this.showNewTask = false;
+      this.dSum = 0;
+      this.setDTime();
+    },
+    tcDiscuss () {
+      let params = {
+      }
+      if (!this.imgList) {
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('请上传图片')
+        }
+        return false;
+      } else {
+        params['targetPicUrl'] = this.imgList.path;
+      }
+      if (this.searchData.minSemblance) {
+        params['number'] = this.searchData.minSemblance;
+      } else {
+        params['number'] = 2;
+      }
+      params['deviceId'] = this.selectCameraArr.join(',');
+      params['bayonetIds'] = this.selectBayonetArr.join(',');
+      params['startTime'] = formatDate(this.searchData.startTime, 'yyyy-MM-dd HH:mm:ss');
+      params['endTime'] = formatDate(this.searchData.endTime, 'yyyy-MM-dd HH:mm:ss');
+      params['uid'] = this.$route.query.uid;
+      postPeopleTask(params).then(res => {
+        this.searching = false;
+        if (res && res.data) {
+          this.$message({
+            type: 'success',
+            message: '修改成功',
+            customClass: 'request_tip'
+          })
+          this.$router.push({name: "peer_analysis_list"})
+        }
+      })
+    },
+    setDTime() {
+      let date = new Date();
+      let curDate = date.getTime();
+      let curS = 1 * 24 * 3600 * 1000;
+      let _sDate = new Date(curDate - curS);
+      let _s = _sDate.getFullYear()+ '-' + (_sDate.getMonth() + 1) + '-' + _sDate.getDate() + ' 00:00:00' ;
+      this.searchData.startTime = new Date(_s).getTime();
+      this.searchData.endTime = curDate;
+    },
+    chooseEndTime (e) {
+      if (e < this.searchData.startTime) {
+        this.$message.info('结束时间必须大于开始时间才会有结果')
+      }
+    },
+    chooseStartTime (e) {
+      if (e > this.searchData.endTime) {
+        this.$message.info('结束时间必须大于开始时间才会有结果')
+      }
+    },
+    areaTypeChanged () {
+      this.chooseType = 2;
+      this.openMap = {};
+    },
+    mapSelectorEmit (result) {
+      if (result) {
+        // bayonetList deviceList
+        this.dSum = 0;
+        if (result.deviceList && result.deviceList.length > 0) {
+          this.dSum = result.deviceList.length;
+          for (let i = 0; i < result.deviceList.length; i++) {
+            this.selectCameraArr.push(result.deviceList[i].uid);
+          }
+        } else {
+          this.selectCameraArr = [];
+        }
+        if (result.bayonetList && result.bayonetList.length > 0) {
+          for (let i = 0; i < result.bayonetList.length; i++) {
+            this.selectBayonetArr.push(result.bayonetList[i].uid);
+          }
+          this.dSum += result.bayonetList.length;
+        } else {
+          this.selectBayonetArr = [];
+        }
+      }
+    },
+
+
     // 获取离线任务详情
     getDetail () {
       const id = this.$route.query.uid
@@ -130,7 +306,6 @@ export default {
               this.$set(res.data, 'taskWebParam', JSON.parse(res.data.taskWebParam))
               // console.log(res.data)
               let arr = res.data.taskWebParam.deviceId.split(',')
-              // let arr = ['1', '2', '3']
               let arr1 = []
               if (arr && arr.length > 0) {
                 arr.forEach(item => {
@@ -140,7 +315,6 @@ export default {
                   }
                 })
               }
-              // this.deviceStr = arr1.join(',')
               if (arr1.length > 1 && arr1.length < this.deviceList.length) {
                 this.deviceStr = `${arr1[0]}等${arr1.length - 1}个设备`
               } else if (arr1.length === 1) {
@@ -156,7 +330,12 @@ export default {
               this.boxList = [...res.data.taskResult.slice(0, 12)]
               this.boxList.sort((a, b) => {return b.peerNumber - a.peerNumber})
 
-              this.taskDetail = res.data
+              this.taskDetail = res.data;
+              this.imgData = {
+                cname: '带图' + Math.random(),
+                filePathName: '带图' + Math.random(),
+                path: res.data.taskWebParam.targetPicUrl
+              }
             }
           })
       }
@@ -198,6 +377,47 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+  .peer_xzsb_s {
+    height: 40px;
+    line-height: 40px;
+    width: calc(100% - 40px);
+    border-radius: 4px;
+    border: 1px solid #DCDFE6;
+    cursor: pointer;
+    color: #999999;
+    padding: 0 6px;
+    margin-left: 20px;
+    > span {
+      display: inline-block;
+      width: 50%;
+      &:last-child {
+        text-align: right;
+      }
+    }
+  }
+  .peer_dtxz_rst {
+    width: calc(100% - 40px);
+    line-height: 40px;
+    padding: 0px 15px; margin-top: 5px;
+    margin-left: 20px;
+    background-color: #F5F7FA;
+    color: #C0C4CC;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    > span {
+      display: inline-block;
+      padding: 0 3px;
+      color: #333;
+    }
+    > a {
+      display: inline-block;
+      padding-left: 5px;
+      color: #2580FC !important;
+      text-decoration: none !important;
+      /*font-style: italic;*/
+      cursor: pointer;
+    }
+  }
 .peer-analysis {
   width: 100%; height: 100%;
   .the-bottom {
@@ -206,13 +426,16 @@ export default {
     position: relative;
     .the-left-search {
       width: 272px;height: 100%;
+      min-height: 600px;
       background: #fff;
       box-shadow: 5px 0 10px #E5E7E7;
       animation: fadeInLeft .4s ease-out .3s both;
-      padding: 20px 15px;
+      padding-top: 20px;
       position: relative;
       > ul {
-        width: 100%;height: 100%;
+        width: 100%;
+        margin-bottom: 20px;
+        padding-left: 20px;
         li:nth-child(1) {
           img {
             display: inline-block;
@@ -232,6 +455,152 @@ export default {
             display: inline-block;
             width: calc(100% - 75px);
             color: #555;
+          }
+        }
+      }
+      .update_task{
+        text-align: center;
+      }
+      .vl_jtc_img_box {
+        width: 100%;
+        height: auto;
+        border-bottom: 1px solid #D3D3D3;
+        padding-bottom: 30px;
+        margin-bottom: 30px;
+        .vl_jtc_img_list {
+          width: 100%;
+          margin-top: 10px;
+          text-align: center;
+          .middle_img {
+            display: inline-block;
+          }
+          > div {
+            width: 30%;
+            padding-top: 30%;
+            border: 1px dashed #D3D3D3;
+            position: relative;
+            &:hover {
+              .del_mask {
+                display: block;
+              }
+            }
+            &:last-child {
+              float: right;
+            }
+            &:first-child {
+              float: left;
+            }
+            .del_mask {
+              display: none;
+              position: absolute;
+              width: 100%;
+              height: 100%;
+              background: rgba(0, 0, 0, .2);
+              top: 0;
+              > i {
+                cursor: pointer;
+                display: block;
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                margin: auto;
+                color: #ffffff;
+                width: 16px;
+                height: 16px;
+                text-align: center;
+              }
+            }
+            > img {
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+            }
+          }
+        }
+      }
+      .vl_jtc_search {
+        width: 100%;
+        height: auto;
+        padding: 30px 0 20px 0;
+        .el-input__inner {
+          height: 40px!important;
+          line-height: 40px!important;
+        }
+        .el-input__icon {
+          height: 40px!important;
+          line-height: 40px!important;
+        }
+        .el-range-editor {
+          width: 100%;
+          /*padding: 0;*/
+          > .el-range__close-icon {
+            display: none;
+          }
+          > input {
+            width: 50%;
+          }
+          /*.el-range-separator {*/
+          /*height: 40px;*/
+          /*line-height: 40px;*/
+          /*width: 10px;*/
+          /*padding: 0;*/
+          /*}*/
+        }
+        button {
+          width: 110px;
+          height: 40px;
+          line-height: 40px;
+          padding: 0 12px;
+        }
+        .el-select {
+          margin-bottom: 10px;
+        }
+        > div {
+          margin-bottom: 10px;
+        }
+        .vl_jtc_search_item {
+          height: 217px;
+          .camera-tree {
+            border: 1px solid #e4e7ed;
+            border-radius: 4px;
+            background-color: #fff;
+            -webkit-box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+            box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+            -webkit-box-sizing: border-box;
+          }
+        }
+      }
+      .ytsr_left_radio {
+        padding-left: 20px;
+        margin: 20px 0;
+        display: flex;
+        height: 40px;
+        >span {
+          display: block;
+          &:first-child {
+            width: 90px;
+            line-height: 40px;
+          }
+        }
+      }
+      .per_left_time {
+        margin-left: 20px;
+        width: 232px;
+        .el-select {
+          width: 100%;
+        }
+        .left_time {
+          width: 100%;
+          margin: 20px 0;
+          .el-date-editor {
+            width: 100%;
+          }
+          .el-range__close-icon {
+            display: none;
           }
         }
       }
@@ -312,4 +681,34 @@ export default {
 </style>
 
 <style lang="scss">
+  .per_semblance_ytsr {
+    position: relative;
+    padding-left: 20px;
+    >span {
+      position: absolute;
+      left: 20px;
+      display: block;
+      height: 40px;
+      line-height: 40px;
+      z-index: 9;
+      color: #999999;
+      width: 82px;
+      padding-left: 12px;
+    }
+    >i {
+      display: inline-block;
+      width: 20px;
+      height: 1px;
+      background: #999;
+      margin: 19px 16px;
+      vertical-align: middle;
+    }
+    .el-input {
+      width: 185px;
+      margin-right: 10px;
+      input{
+        text-indent: 69px;
+      }
+    }
+  }
 </style>

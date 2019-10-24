@@ -9,40 +9,116 @@
       </div>
 
       <div :class="['vl_j_left']">
-        <div class="vl_ytsr_left_line" v-show="taskDetail.taskName">
-          <span>任务名称：</span>{{taskDetail.taskName}}
-        </div>
-        <div class="vl_ytsr_left_line">
-          <span>所选时间：</span>
-          <span>
+        <template v-if="showNewTask">
+          <div class="vl_jtc_search" style="padding-top: 0;">
+            <!--<div class="zdgz_left_radio">-->
+              <!--<span>任务名称：</span>-->
+              <!--<span>-->
+                <!--<el-input v-model="taskName" placeholder="请输入任务名称" maxlength="20"></el-input>-->
+              <!--</span>-->
+            <!--</div>-->
+            <el-date-picker
+                    v-model="searchData.time1"
+                    type="datetime"
+                    placeholder="开始时间"
+                    :time-arrow-control="true"
+                    class="full vl_date"
+                    :clearable="false"
+                    value-format="timestamp"
+            ></el-date-picker>
+            <el-date-picker
+                    v-model="searchData.time2"
+                    type="datetime"
+                    :clearable="false"
+                    :time-arrow-control="true"
+                    placeholder="结束时间"
+                    class="full vl_date vl_date_end"
+                    value-format="timestamp"
+            ></el-date-picker>
+            <el-select class="full" v-model="searchData.portraitGroupId" placeholder="关注人群">
+              <el-option
+                      v-for="item in portraitGroupList"
+                      :key="item.id"
+                      :label="item.groupName"
+                      :value="item.uid">
+              </el-option>
+            </el-select>
+            <el-select class="full" v-model="searchData.sex" placeholder="请选择性别" clearable>
+              <el-option
+                      v-for="item in sexList"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value">
+              </el-option>
+            </el-select>
+            <el-select class="full" v-model="searchData.ageGroup" placeholder="请选择年龄段" clearable>
+              <el-option
+                      v-for="item in ageGroupList"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value">
+              </el-option>
+            </el-select>
+            <div class="zdgz_xzsb_s" @click="clickTab" v-if="mapSelectType === 0">
+              <span>选择设备</span>
+              <span class="el-icon-arrow-down"></span>
+            </div>
+            <div class="zdgz_dtxz_rst" v-else>
+              已选<span>{{dSum}}</span>个设备<a href="javascript: void(0);" @click="dialogVisible={}">重选</a>
+            </div>
+            <div>
+              <el-row :gutter="10">
+                <el-col :span="12">
+                  <el-button  @click="resetSearch" class="full">取消</el-button>
+                </el-col>
+                <el-col :span="12">
+                  <el-button  :loading="searching" type="primary" @click="beginSearch"
+                              class="select_btn full"
+                  >确定</el-button>
+                </el-col>
+              </el-row>
+            </div>
+          </div>
+        </template>
+        <template v-else>
+          <div class="vl_ytsr_left_line" v-show="taskDetail.taskName">
+            <span>任务名称：</span>{{taskDetail.taskName}}
+          </div>
+          <div class="vl_ytsr_left_line">
+            <span>所选时间：</span>
+            <span>
             <p>{{taskDetail.startTime}}</p>
             <p>{{taskDetail.endTime}}</p>
           </span>
-        </div>
-        <div class="vl_ytsr_left_line">
-          <span>所选人群：</span>
-          <span>
+          </div>
+          <div class="vl_ytsr_left_line">
+            <span>所选人群：</span>
+            <span>
             <p>{{taskDetail.portraitGroupName}}</p>
           </span>
-        </div>
-        <div class="vl_ytsr_left_line">
-          <span>性别：</span>
-          <span>
+          </div>
+          <div class="vl_ytsr_left_line">
+            <span>性别：</span>
+            <span>
             <p>{{taskDetail.sex ? taskDetial.sex : '不限'}}</p>
           </span>
-        </div>
-        <div class="vl_ytsr_left_line">
-          <span>年龄段：</span>
-          <span>
+          </div>
+          <div class="vl_ytsr_left_line">
+            <span>年龄段：</span>
+            <span>
             <p>{{taskDetail.age ? taskDetial.age : '不限'}}</p>
           </span>
-        </div>
-        <div class="vl_ytsr_left_line">
-          <span>抓拍设备：</span>
-          <span>
+          </div>
+          <div class="vl_ytsr_left_line">
+            <span>抓拍设备：</span>
+            <span>
            <p v-for="item in taskDetail.deviceNames" :key="item.id">{{item}}</p>
         </span>
-        </div>
+          </div>
+          <div class="update_task">
+            <el-button type="primary" @click="showNewTask = true;">修改任务</el-button>
+          </div>
+        </template>
       </div>
       <div :class="['vl_j_right']">
         <div id="tcMap"></div>
@@ -71,22 +147,59 @@
         </div>
       </div>
     </div>
+    <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" :clear="clearMapSelect" @mapSelectorEmit="mapPoint"></div>
   </div>
 </template>
 <script>
   let AMap = window.AMap;
+  import mapSelector from '@/components/common/mapSelector.vue';
   import vlBreadcrumb from '@/components/common/breadcrumb.vue';
   import { getPeopleTaskDetail } from '@/views/index/api/api.analysis.js';
+  import {PortraitPostFocusTask} from "@/views/index/api/api.judge.js";
   import { random14, formatDate } from '@/utils/util.js';
   import { mapXupuxian } from "@/config/config.js";
   import flvplayer from '@/components/common/flvplayer.vue';
+  import {getGroupListIsPortrait} from '../../api/api.control.js';
   export default {
     components: {
+      mapSelector,
       vlBreadcrumb,
       flvplayer
     },
     data() {
       return {
+        sexList: [
+          {value: '男', label: '男'},
+          {value: '女', label: '女'}
+        ],
+        portraitGroupList: [],
+        ageGroupList: [
+          // {value: null, label: '不限'},
+          {value: '儿童', label: '儿童'},
+          {value: '少年', label: '少年'},
+          {value: '青年', label: '青年'},
+          {value: '中年', label: '中年'},
+          {value: '老年', label: '老年'},
+          // {value: 6, label: '50-70'},
+          // {value: 7, label: '70-'}
+        ],
+        selectDevice:[],
+        selectBayonet:[],
+        dSum: 0, // 设备总数
+        mapSelectType: 0,
+        showNewTask: false, // 展示修改任务
+        searchData: {
+          portraitGroupId: null,  // 人员组
+          sex: null, // 1男，2女
+          ageGroup: null, // 年龄段
+          time1: null,
+          time2: null
+        },
+        searching: false,
+        dialogVisible: false,
+        clearMapSelect: null, // 清除地图选择
+
+
         taskDetail: {},
         evData: [],
         amap: null, // 地图实例
@@ -111,11 +224,125 @@
       });
       map.setMapStyle('amap://styles/whitesmoke');
       this.amap = map;
-
+      this.setDTime();
       ///新的
       this.getDetail();
+      // 获取人员组，跟车辆组列表
+      getGroupListIsPortrait().then(res => {
+        if (res) {
+          this.portraitGroupList = res.data;
+          this.portraitGroupList.map(item => {
+            if (!item.uid) {
+              this.searchData.portraitGroupId = item.uid;
+            }
+          })
+        }
+      })
     },
     methods: {
+      setDTime () {
+        let date = new Date();
+        let curDate = date.getTime();
+        let curS = 1 * 24 * 3600 * 1000;
+        let _sDate = new Date(curDate - curS);
+        let _s = _sDate.getFullYear()+ '-' + (_sDate.getMonth() + 1) + '-' + _sDate.getDate() + ' 00:00:00' ;
+        this.searchData.time1 = new Date(_s).getTime();
+        this.searchData.time2 = curDate;
+      },
+      resetSearch () {
+        this.setDTime()
+//        this.taskName = '';
+        this.searchData.portraitGroupId = null;
+        this.searchData.sex = null;
+        this.searchData.ageGroup = null;
+        this.selectDevice = [];
+        this.selectBayonet = [];
+        this.dSum = 0;
+        this.showNewTask = false;
+
+        this.clearMapSelect = !this.clearMapSelect; // 清除地图选择
+
+      },
+      clickTab() {
+        this.dialogVisible = !this.dialogVisible;
+        this.mapSelectType = 1;
+      },
+      mapPoint(data){
+        this.selectDevice = data.deviceList;
+        this.selectBayonet = data.bayonetList;
+        this.dSum = 0;
+        this.dSum = data.bayonetList.length + data.deviceList.length;
+      },
+      beginSearch () {
+        let _todo = false;
+        if(this.selectBayonet.length === 0 && this.selectDevice.length === 0) {
+          if (!document.querySelector('.el-message--info')) {
+            this.$message.info('请至少选择一个设备')
+          }
+          return false;
+        }
+        for (let key in this.searchData) {
+          if (this.searchData[key] && key !== 'time1') {
+            _todo = true;
+          }
+        }
+        if (!_todo) {
+          this.$message.warning('请至少输入一个搜索条件');
+          return false;
+        }
+        this.searching = true;
+        this.surveillanceIds = [];
+        let params = {
+          startTime: formatDate(this.searchData.time1, 'yyyy-MM-dd HH:mm:ss'),
+          endTime: formatDate(this.searchData.time2, 'yyyy-MM-dd HH:mm:ss'),
+          personGroupId: this.searchData.portraitGroupId || "" ,
+//        personGroupId: '1lwx3mJIbdF4c4vEgpyLk0' ,
+          // sex: this.searchData.sex || "",
+          // age: this.searchData.ageGroup || "" ,
+        }
+        console.log(this.searchData.ageGroup);
+
+        if(this.searchData.sex){
+          params.sex=this.searchData.sex
+        }
+        if(this.searchData.ageGroup){
+          params.age=this.searchData.ageGroup
+        }
+        let dNameList = [];
+        let dList = this.selectDevice.map(res =>  res.deviceName);
+        let bList = this.selectBayonet.map(res => res.bayonetName);
+        dNameList = dList.concat(bList);
+        console.log(dNameList, this.selectDevice)
+        if (dNameList.length > 3) {
+          params['deviceNames'] = dNameList.splice(0, 2);
+          params['deviceNames'].push('等' + dNameList.length + '个设备');
+          params['deviceNames'] =  params['deviceNames'].join(',')
+        } else {
+          params['deviceNames'] = dNameList.join(',')
+        }
+        if (this.selectBayonet.length) {
+          params['bayonetIds'] = this.selectBayonet.map(res => res.uid).join(',');
+        }
+        if (this.selectDevice.length) {
+          params['deviceIds'] = this.selectDevice.map(res => res.uid).join(',');
+        }
+        params['portraitGroupName'] = this.portraitGroupList.find(y => y.uid === this.searchData.portraitGroupId).groupName;
+        params.taskId = this.$route.query.uid;
+        params.taskOperationType = '2';
+        PortraitPostFocusTask(params).then(res => {
+          this.searching = false;
+          if (res && res.data) {
+            this.$message({
+              type: 'success',
+              message: '修改成功',
+              customClass: 'request_tip'
+            })
+            this.$router.push({name: 'portrait_zdgz'})
+          }
+        })
+      },
+
+
       randerMap () {
         this.$nextTick(() => {
           this.amap.clearMap();
@@ -446,6 +673,9 @@
             width: 85px;
           }
         }
+      }
+      .update_task {
+        text-align: center;
       }
     }
     .vl_j_right {

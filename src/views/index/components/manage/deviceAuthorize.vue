@@ -413,6 +413,8 @@ export default {
 </script>
 <style lang="scss" scoped>
 .device_authorize {
+  border-radius: 4px;
+  box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
   background-color: #ffffff;
   display: flex;
   height: 100%;
