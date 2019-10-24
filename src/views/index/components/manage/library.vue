@@ -885,20 +885,20 @@ export default {
       this.$message.success('上传成功！');
     },
     uploadPicError () {
-      this.$message.error('上传失败！');
+      this.$message.info('上传失败！');
     },
     uploadPicExceed () {
-      this.$message.warning('最多一次可上传1张图片,不能上传非图片文件');
+      this.$message.info('最多一次可上传1张图片,不能上传非图片文件');
     },
     beforeAvatarUpload (file) {
       const isJPG = file.type === 'image/jpeg' || file.type === 'image/jpg' || file.type === 'image/png';
       const isLt4M = file.size / 1024 / 1024 < 4;
 
       if (!isJPG) {
-        this.$message.error('上传图片只能是 jpeg、jpg、png 格式!');
+        this.$message.info('上传图片只能是 jpeg、jpg、png 格式!');
       }
       if (!isLt4M) {
-        this.$message.error('上传图片大小不能超过 4MB!');
+        this.$message.info('上传图片大小不能超过 4MB!');
       }
       return isJPG && isLt4M;
     },
@@ -998,7 +998,7 @@ export default {
               this.portraitForm = protraitInfo;
             } else {
               this.isAddDisabled = false;
-              this.$message.warning('布控库已存在，请修改证件号码');
+              this.$message.info('布控库已存在，请修改证件号码');
             }
             // if (this.$refs['portraitForm']) {
             //   this.$refs['portraitForm'].resetFields();
@@ -1022,7 +1022,7 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           if (!this.dialogImageUrl) {
-            this.$message.error('请上传人像');
+            this.$message.info('请上传人像');
             return;
           }
           this.loadingBtn = true;
@@ -1083,7 +1083,7 @@ export default {
               this.carForm = carInfo;
             } else {
               this.isAddDisabled = false;
-              this.$message.warning('布控库已存在，请修改车牌号码');
+              this.$message.info('布控库已存在，请修改车牌号码');
             }
           // 不存在车像
           } else {
@@ -1097,7 +1097,7 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           if (!this.dialogImageUrl) {
-            this.$message.error('请上传车像');
+            this.$message.info('请上传车像');
             return;
           }
           this.loadingBtn = true;
@@ -1154,7 +1154,7 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           if (!this.dialogImageUrl) {
-            this.$message.error('请上传人像');
+            this.$message.info('请上传人像');
             return;
           }
           this.loadingBtn = true;
@@ -1207,7 +1207,7 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           if (!this.dialogImageUrl) {
-            this.$message.error('请上传车像');
+            this.$message.info('请上传车像');
             return;
           }
           this.loadingBtn = true;

@@ -314,7 +314,7 @@ export default {
       this.hideleft = !this.hideleft;
     },
     skipIsCreateControl () {
-      this.$router.push({name: 'control_create'});
+      this.$router.push({name: 'control_add'});
     },
     sikpISalarmToday () {
       this.$router.push({ name: 'today_alarm' });
@@ -400,30 +400,19 @@ export default {
             this.getAllAlarmSnapListByDev();
           }
           this.markerAlarmList.forEach(dev => {
-            // const childDiv = '<div class="vl_icon_warning">发现可疑目标</div>';
-            // 给有警情的点标记追加class
-            // this.$nextTick(() => {
-              
-            //   $('#mapBox #' + dev.deviceId).append(childDiv);
-            //   $('#mapBox #' + dev.deviceId).addClass("vl_icon_alarm");
-            //   $('#mapBox #' + dev.deviceId).addClass("vl_icon_control_02");
-            // })
-
-
-              this.markerList.forEach(f => {
-                const obj = f.getExtData();
-                if (dev.deviceId === obj.uid) {
-                  this.map.cluster.removeMarker(f);
-                  const uContent = this.setMarkContent(obj, 1)
-                  f.setContent(uContent);
-                }
-              })
+            this.markerList.forEach(f => {
+              const obj = f.getExtData();
+              if (dev.deviceId === obj.uid) {
+                this.map.cluster.removeMarker(f);
+                const uContent = this.setMarkContent(obj, 1)
+                f.setContent(uContent);
+                this.map.remove(f)
+                this.map.add(f)
+              }
+            })
           })
           this.timer = setTimeout(() => {
             // 让有警情的点标记的class 12s后移除  
-            // $('#mapBox .vl_icon_control_02').removeClass("vl_icon_alarm");
-            // $('#mapBox .vl_icon_control_02').removeClass("vl_icon_control_02");
-            // $('#mapBox .vl_icon_warning').remove();
             this.markerList.forEach(f => {
               const obj = f.getExtData();
               if (this.markerAlarmList.some(s => s.deviceId === obj.uid)) {
@@ -502,13 +491,14 @@ export default {
     },
     // 获取设备下布控列表
     getControlMapByDevice (obj) {
-      const params = {
+      this.$_showLoading();
+      const data = {
         deviceName: obj.deviceName,
         uid: obj.uid,
         surveillanceIds: obj.surveillanceIds,
         surveillanceStatus: this.mapForm.state
       }
-      getControlMapByDevice(params).then(res => {
+      getControlMapByDevice(data, obj.uid).then(res => {
         if (res && res.data) {
           let _this = this;
 
@@ -766,6 +756,7 @@ export default {
           $('#mapBox').on('click', '.control_more', function () {
             _this.$router.push({ name: 'control_manage', query: {state: _this.mapForm.state} })
           })
+          this.$_hideLoading();
         }
       })
     },
@@ -820,7 +811,6 @@ export default {
             // 点击切换告警闪烁图标
             if (_this.markerAlarmList.some(s => s.deviceId === marker.getExtData().uid)) {
               if (!$('#' + marker.getExtData().uid).hasClass('vl_icon_control_02')) {
-                // $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
                 $('#mapBox .vl_icon_control_03').removeClass(" vl_icon_control_03");
                 $('#' + marker.getExtData().uid).addClass("vl_icon_control_03");
               } else {
@@ -828,15 +818,12 @@ export default {
                 $('#' + marker.getExtData().uid + '> .vl_icon_warning').remove();
                 $('#' + marker.getExtData().uid).removeClass("vl_icon_control_02");
                 $('#' + marker.getExtData().uid).addClass("vl_icon_control_03");
-                // $(`#mapBox .vl_icon_control_03:not(#${e.target.C.extData.uid})`).addClass("vl_icon_control_01");
                 $(`#mapBox .vl_icon_control_03:not(#${marker.getExtData().uid})`).removeClass("vl_icon_control_03");
               }
             } else {
               // 点击切换普通点标记图标
-              // $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
               $('#mapBox .vl_icon_control_03').removeClass("vl_icon_control_03");
               $('#' + marker.getExtData().uid).addClass("vl_icon_control_03");
-              // $('#' + e.target.C.extData.uid).removeClass("vl_icon_control_01");
             }
             _this.getControlMapByDevice(marker.getExtData());
           })

@@ -163,7 +163,7 @@
                   <el-radio :label="3">上访人员拦截</el-radio>
                   <el-radio :label="4">重点区域布防</el-radio>
                   <el-radio :label="5">公务车辆监管</el-radio>
-                  <el-radio :label="6">自定义</el-radio>
+                  <el-radio :label="9">自定义</el-radio>
                 </el-radio-group>
               </div>
               <div is="modelOne" v-if="modelType === 1" ref="model" @getModel="getModel" :modelList="modelList"></div>
@@ -171,7 +171,7 @@
               <div is="modelThree" v-if="modelType === 3" ref="model" @getModel="getModel" :modelList="modelList"></div>
               <div is="modelFour" v-if="modelType === 4" ref="model" @getModel="getModel" :modelList="modelList"></div>
               <div is="modelFive" v-if="modelType === 5" ref="model" @getModel="getModel" :modelList="modelList"></div>
-              <div is="modelSix" v-if="modelType === 6" ref="model" @getModel="getModel" :modelList="modelList"></div>
+              <div is="modelSix" v-if="modelType === 9" ref="model" @getModel="getModel" :modelList="modelList"></div>
             </div>
           </div>
         </el-form>
@@ -435,7 +435,7 @@ export default {
     },
     // 删除时间段
     removePeriodTime(index) {
-      if (this.createForm.surveillancTimeList.length === 1) return this.$message.warning('只剩一个不允许删除');
+      if (this.createForm.surveillancTimeList.length === 1) return this.$message.info('只剩一个不允许删除');
       this.createForm.surveillancTimeList.splice(index, 1);
     },
     // 添加短信联动
@@ -449,7 +449,7 @@ export default {
     },
     // 删除短信联动
     removeCellphoneMessages (index) {
-      if (this.createForm.contactList.length === 1) return this.$message.warning('只剩一个不允许删除');
+      if (this.createForm.contactList.length === 1) return this.$message.info('只剩一个不允许删除');
       this.createForm.contactList.splice(index, 1);
     },
     // 通过布控名称获取布控信息，异步查询布控是否存在
@@ -464,7 +464,7 @@ export default {
       if (name) {
         getControlInfoByName({name}).then(res => {
           if (res && res.data) {
-            this.$message.error('布控名称已存在');
+            this.$message.info('布控名称已存在');
           }
         })
       }
@@ -535,7 +535,7 @@ export default {
       } else {
         for (let k = 1; k < begin.length; k++) {
           if (begin[k] < over[k-1]) {
-            this.$message.error('所选的时间段出现重叠现象，请重新选取！');
+            this.$message.info('所选的时间段出现重叠现象，请重新选取！');
             return false;
           } else if (k === begin.length - 1) {
             return true;

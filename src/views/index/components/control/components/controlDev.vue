@@ -173,7 +173,7 @@ export default {
         const bayonetList = this.bayIdList.map(m => {return {bayonetId: m.uid}})
         this.$emit('getChildModel', {devList, bayonetList});
       } else {
-        this.$message.warning('请先选择布控设备');
+        this.$message.info('请先选择布控设备');
       }
     },
     // 初始化地图
@@ -208,7 +208,7 @@ export default {
           const [{data: devList}, {data: {list: bayList}}] = res;
           devList.forEach(f => {f.dataType = 1;f.name = f.deviceName})
           bayList.forEach(f => {f.dataType = 2;f.name = f.bayonetName})
-          this.allBayList = bayList.filter(f => f.isEnterPoint === 1 || f.isEnterPoint === 2);
+          this.allBayList = bayList.filter(f => f.isEnterPoint === 1 || f.isEnterPoint === 2);//筛选出入城卡口
           this.devList = [...devList, ...bayList];
           this.operateModel();
         }

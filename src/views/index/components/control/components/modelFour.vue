@@ -98,6 +98,9 @@ export default {
     },
     // 向父组件传值
     sendParent () {
+      if (this.protraitList.length === 0 && this.vehicleList.length === 0) {
+        return this.$message.info('请选择布控人员或者车辆');
+      } 
       const devData = this.$refs['mapSelector'].getCheckedIds();
       if (devData.deviceList.length > 0 || devData.bayonetList.length > 0) {
         let {deviceList: devList, bayonetList} = devData;
@@ -109,7 +112,7 @@ export default {
         })
         this.$emit('getModel', {modelType: 4,  pointDtoList: [{devList, bayonetList}], surveillanceObjectDtoList: [...this.protraitList, ...this.vehicleList]});
       } else {
-        this.$message.warning('请先选择布控设备');
+        this.$message.info('请先选择布控设备');
       }
     }
   }

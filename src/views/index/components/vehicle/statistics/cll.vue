@@ -224,7 +224,7 @@ export default {
     validationWarningNum () {
       const reg = /^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$/;
       if (this.queryForm.warningNum !== '' && !reg.test(this.queryForm.warningNum)) {
-        this.$message.warning('输入的警戒数值必须大于0');
+        this.$message.info('输入的警戒数值必须大于0');
         this.queryForm.warningNum = '';
       }
     },
@@ -529,7 +529,7 @@ export default {
             this.tabIndex = 2;
             this.isShowChart = false;
             this.isInitPage = false;
-            // this.$message.warning('没有相关卡口的统计数据');
+            // this.$message.info('没有相关卡口的统计数据');
           } 
           
         }

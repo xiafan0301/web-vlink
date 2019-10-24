@@ -304,7 +304,7 @@ export default {
         _endTime = new Date(obj[1]).getTime();
       }
       if ((_endTime - _startTime) > 3 * 3600 * 24 * 1000) {
-        this.$message.warning('所选时间间隔不能超过三天');
+        this.$message.info('所选时间间隔不能超过三天');
         if ('queryDate' in obj) {
           obj.queryDate = [startTime, endTime];
         } else {

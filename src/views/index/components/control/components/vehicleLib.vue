@@ -113,7 +113,8 @@
 import {dataList} from '@/utils/data.js';
 import {getVehicleList} from '@/views/index/api/api.control.js';
 export default {
-  props: ['groupIds', 'fileList'],
+  // model : 把公务车辆区别出来，单独处理
+  props: ['model', 'fileList'],
   data () {
     return {
       libForm: {
@@ -152,7 +153,7 @@ export default {
         'where.vehicleType': this.libForm.vehicleType,
         'where.numberType': this.libForm.numberType
       }
-      this.groupIds && (params['where.groupId'] = this.groupIds);
+      // this.groupIds && (params['where.groupId'] = this.groupIds);
       this.libForm.vehicleNumber && (params['where.vehicleNumber'] = this.libForm.vehicleNumber);
       this.loading = true;
       getVehicleList(params).then(res => {

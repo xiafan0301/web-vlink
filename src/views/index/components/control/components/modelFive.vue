@@ -12,7 +12,7 @@
       </el-select>
     </el-form-item>
     <el-form-item label="停留时长:" prop="stayTime" :rules="{ required: true, message: '请输入停留时长', trigger: 'blur'}" style="margin-bottom: 10px;">
-      <el-input class="time" v-model="modelFiveForm.stayTime" filterable placeholder="请输入停留时长"></el-input>
+      <el-input class="time" v-model="modelFiveForm.stayTime" filterable placeholder="请输入停留时长" @blur="validationStayTime"></el-input>
     </el-form-item>
     <el-form-item label="布控车辆：" style="margin-bottom: 0;width: 100%;" :rules="{ required: true, message: '', trigger: 'blur'}">
       <div class="sel_lib"><span @click="popSel">从公务车辆中选择</span></div>
@@ -28,7 +28,7 @@
       <el-button type="primary" @click="selControl('modelFive')">一键布控</el-button>
     </el-form-item>
     <div is="controlDev" ref="controlDev" v-if="isShowControlDev" :devs="devs" :bays="bays" @getChildModel="getChildModel" :devIdListFive="devIdList" :bayIdListFive="bayIdList"></div>
-    <div is="vehicleLib" ref="vehicleLibDialog" :fileList="vehicleList" @getVehicleData="getVehicleData" :groupIds="modelFiveForm.locations.join(',')"></div>
+    <div is="vehicleLib" ref="vehicleLibDialog" :fileList="vehicleList" @getVehicleData="getVehicleData" model="gwcl"></div>
   </el-form>
 </template>
 <script>
@@ -76,6 +76,13 @@ export default {
     }
   },
   methods: {
+    // 验证停留时长
+    validationStayTime () {
+      if (this.modelFiveForm.stayTime && this.modelFiveForm.stayTime <= 0) {
+        this.$message.info('不能输入小于0的数');
+        this.modelFiveForm.stayTime = null;
+      }
+    },
     // 从布控库中获取嫌疑车辆
     getVehicleData (data) {
       this.vehicleList = this.vehicleList.concat(data);
@@ -90,7 +97,7 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           if (this.vehicleList.length === 0) {
-            return this.$message.warning('请选择布控车辆');
+            return this.$message.info('请选择布控车辆');
           }
           // 拿到布防场所下拉列表里对应的设备和卡口列表，传到地图上，作为已选中的
           let res = [];

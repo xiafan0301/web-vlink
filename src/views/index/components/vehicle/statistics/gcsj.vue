@@ -454,11 +454,6 @@ export default {
     },
     // 获取过车数据统计
     getCarBeforeSta () {
-      this.gcsjDetail = {};
-      this.chartData1 = [];
-      this.chartData2 = [];
-      this.chartData3 = [];
-      this.chartData4 = [];
       const params = {  
         startTime: formatDate(this.queryForm.startTime),
         endTime: formatDate(this.queryForm.endTime)
@@ -472,6 +467,12 @@ export default {
           this.chartData2 = res.data.brandDto;
           this.chartData3 = res.data.timeDto;
           this.chartData4 = res.data.carTypeDto;
+        } else {
+          this.gcsjDetail = {};
+          this.chartData1 = [];
+          this.chartData2 = [];
+          this.chartData3 = [];
+          this.chartData4 = [];
         }
       }).finally(() => {
         this.loadingBtn = false;
