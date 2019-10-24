@@ -215,6 +215,11 @@ export default {
       deviceList: []
     }
   },
+  beforeDestroy () {
+    if (this.map) {
+      this.map.destroy();
+    }
+  },
   methods: {
     // 基准车辆失焦
     judgeBaseVehicle () {
@@ -335,7 +340,7 @@ export default {
               // console.log('aaaa', a)
               // 判断同一个卡口是否出现多次，，若出现，则只显示一个卡口
               if (a.bayonetName) {
-                a.deviceID = a.bayonetName;
+                a.DeviceID = a.bayonetName;
               }
               // 是否显示抓拍时间
               if (index === this.isCheckedVehicle) {
@@ -366,13 +371,13 @@ export default {
   
               }
   
-              let _i = _arr.findIndex(y => y.deviceID === a.deviceID);
+              let _i = _arr.findIndex(y => y.DeviceID === a.DeviceID);
               if (_i === -1) {
                 _arr.push(a);
               } else {
                 if (this.isCheckedVehicle === index) { // 选中的轨迹
                   // 判断是否重复出现在同一个设备点
-                  if (a.plateNo === _arr[_i].plateNo) {
+                  if (a.PlateNo === _arr[_i].PlateNo) {
                     
                     _arr[_i]['shotTime'] += ',' + a.shotTime;
                     // console.log('_arr[_i]', _arr[_i]['shotTime'])
@@ -381,7 +386,7 @@ export default {
                     _arr.splice(_i, 1, a);
                   }
                 } else {
-                  if (a.plateNo === _arr[_i].plateNo) {
+                  if (a.PlateNo === _arr[_i].PlateNo) {
                     _arr[_i]['shotTime'] += ',' + a.shotTime;
                   } else {
                     _arr[_i]['simLength'] += 1;
@@ -411,7 +416,7 @@ export default {
 
             let offSet = [-20.5, -50];
 
-            let $id = 'mapMark' + obj.deviceType + obj.uid;
+            let $id = 'mapMark' + obj.deviceType + obj.rowKey;
             let _time = '', isStartEnd = false;
             if (obj.showTime) {
               _time = '<p class="shot_time_p">';
@@ -431,14 +436,14 @@ export default {
             let curList = _this.deviceList[_this.isCheckedVehicle].pathRecords;
             if (curList.length > 0) {
 
-              if (obj.deviceID === curList[curList.length - 1].deviceID) {
+              if (obj.DeviceID === curList[curList.length - 1].DeviceID) {
                  content = '<div id="'+ $id +'" class="icon_box vl_icon vl_icon_map_mark_start">'+
                     '<div class="device_box"><p>设备名称：'+ obj.detailDeviceName +'</p>'+
                     '<p>设备地址：'+ obj.detailShotAddress +'</p></div>'+ _time +'</div>';
   
                 isStartEnd = true;
               }
-              if (obj.deviceID === curList[0].deviceID) {
+              if (obj.DeviceID === curList[0].DeviceID) {
                 content = '<div id="'+ $id +'" class="icon_box vl_icon mark_span vl_icon_map_mark_end">'+
                     '<div class="device_box"><p>设备名称：'+ obj.detailDeviceName +'</p>'+
                     '<p>设备地址：'+ obj.detailShotAddress +'</p></div>'+ _time +'</div>';
@@ -541,14 +546,18 @@ export default {
       if (this.searchForm.peerVehicleNumber) {
         vehicleNumberList.push(this.searchForm.peerVehicleNumber.trim());
       }
+      let isSameVehicleNo = false;
       vehicleNumberList.map(item => {
         if (item === this.searchForm.basicVehicleNumber) {
-          if (!document.querySelector('.el-message--info')) {
-            this.$message.info('同行车辆车牌号不能和基准车辆车牌号一致');
-          }
-          return;
+          isSameVehicleNo = true;
         }
       });
+      if (isSameVehicleNo) {
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('同行车辆车牌号不能和基准车辆车牌号一致');
+        }
+        return;
+      }
       const params = {
         startTime: formatDate(this.searchForm.startTime),
         endTime: formatDate(this.searchForm.endTime),

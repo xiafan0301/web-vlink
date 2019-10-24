@@ -28,7 +28,7 @@
         </div>
         <div class="list-box">
           <div class="list-item" v-for="(item, index) in dataList" :key="item.uid" @click="onOpenDetail(item, index)">
-            <img :src="item.subStoragePath" alt="">
+            <img :src="item.StorageUrl1" alt="">
             <p class="time"><i></i>{{item.shotTime}}</p>
             <p class="address"><i></i>抓拍设备:{{item.deviceName}}</p>
           </div>
@@ -213,8 +213,7 @@ export default {
         pageNum: this.pagination.pageNum,
         list: this.allDataList
       }
-     
-    },
+    }
   }
 }
 </script>

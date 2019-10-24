@@ -79,27 +79,27 @@
         </el-form>
       </div>
       <div class="right">
-        <template v-if="dataList && dataList.length > 0">
+        <template v-if="dataRecordList && dataRecordList.length > 0">
           <div class="content_top">
             <p>
               <span>查询结果</span>
-              <span>（{{dataList.length}}）</span>
+              <span>（{{dataRecordList.length}}）</span>
             </p>
           </div>
           <div class="result_detail">
             <ul class="clearfix">
-              <li v-for="(item, index) in dataList" :key="index">
+              <li v-for="(item, index) in dataRecordList" :key="index">
                 <div class="de_left">
-                  <img :src="item.subStoragePath" alt="">
+                  <img :src="item.StorageUrl1" alt="">
                 </div>
                 <div class="de_right">
                   <span class="title">查询资料</span>
                   <p>
                     <span>
                       <i class="vl_icon_tail_2 vl_icon"></i>
-                      {{item.plateNo}}
+                      {{item.PlateNo}}
                     </span>
-                    <span class="vehicle_type">{{item.vehicleClass}}</span>
+                    <span class="vehicle_type">{{item.VehicleClass}}</span>
                   </p>
                   <p>
                     <i class="vl_icon_tail_1 vl_icon"></i>
@@ -169,16 +169,9 @@ export default {
       },
       deviceList: [], // 抓拍设备列表
       vehicleTypeList: [], // 车辆类型列表
-      dataList: [], // 查询的抓拍结果列表
+      dataRecordList: [], // 查询的抓拍结果列表
+      searchTimer: null
     }
-  },
-  watch: {
-    // 'searchForm.shotTime' () {
-    //   let _this = this;
-    //   const threeDays = 2 * 3600 * 24 * 1000;
-    //   const endTime = new Date(_this.searchForm.shotTime).getTime() + threeDays;
-    //   _this.searchForm.dateEnd = formatDate(endTime);
-    // }
   },
   mounted () {
     this.getVehicleTypeList();
@@ -198,9 +191,15 @@ export default {
         this.searchForm.vehicleClass = this.$route.query.vehicleClass.join(',');
       }
       this.getDeviceList();
-      setTimeout(() => {
+      this.searchTimer = setTimeout(() => {
         this.searchData('searchForm');
       }, 1000)
+    }
+  },
+  beforeDestroy () {
+    if (this.searchTimer) {
+      window.clearTimeout(this.searchTimer);
+      this.searchTimer = null;
     }
   },
   methods: {
@@ -306,7 +305,7 @@ export default {
         dateStart: formatDate(this.deviceStartTime),
         dateEnd: formatDate(this.searchForm.dateEnd),
         searchStartTime: formatDate(this.searchForm.shotTime),
-        plateNoTb: obj.plateNo,
+        plateNoTb: obj.PlateNo,
         vehicleClass: this.searchForm.vehicleClass.join(',') || null,
         interval: this.searchForm.interval,
         deviceCode: this.searchForm.deviceCode,
@@ -318,11 +317,10 @@ export default {
       this.isInitPage = false;
       this.isShowDeviceTip = false;
       this.$refs[form].resetFields();
-      this.dataList = [];
+      this.dataRecordList = [];
     },
     // 搜索数据
     searchData (form) {
-      
       this.$refs[form].validate(valid => {
         if (valid) {
           if (!this.searchForm.plateNo) {
@@ -360,15 +358,11 @@ export default {
             .then(res => {
               if (res && res.data ) {
                 if (res.data.length > 0) {
-                  this.dataList = res.data;
+                  this.dataRecordList = res.data;
                   this.isSearchLoading = false;
-                } else {
-                  // this.dataList = [];
-                  // this.isInitPage = false;
-                  // this.isSearchLoading = false;
                 }
               } else {
-                this.dataList = [];
+                this.dataRecordList = [];
                 this.isInitPage = false;
                 this.isSearchLoading = false;
               }

@@ -37,7 +37,7 @@
             <ul class="result_list_ul">
               <li v-for="(item, index) in dataList" :key="index" @click="onOpenDetail(item, index)">
                 <div class="img_box">
-                  <img :src="item.subStoragePath" alt="">
+                  <img :src="item.StorageUrl1" alt="">
                 </div>
                 <div class="snap_detail">
                   <p class="time">{{item.shotTime}}</p>
@@ -256,9 +256,10 @@ export default {
           .img_box {
             width: 90%;
             margin: 10px 5%;
+            height: calc(438px - 118px);
             img {
               width: 100%;
-              height: calc(438px - 118px);
+              height: 100%;
             }
           }
           .snap_detail {
