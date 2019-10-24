@@ -812,14 +812,14 @@
         };
       },
       seacher(v) {
-        var placeSearch = new AMap.PlaceSearch({
+        var placeSearch = new window.AMap.PlaceSearch({
           // city 指定搜索所在城市，支持传入格式有：城市名、citycode和adcode
           city: "湖南"
         });
 
         if (!!v) {
           let _this = this;
-          return new Promise((resolve, reject) => {
+          return new Promise((resolve) => {
             placeSearch.search(v, (status, result) => {
               // 查询成功时，result即对应匹配的POI信息
               let pois = result.poiList.pois;
@@ -833,7 +833,7 @@
       setCenter(){
         var _this=this
         // console.log(this.input3);
-        var placeSearch = new AMap.PlaceSearch({
+        var placeSearch = new window.AMap.PlaceSearch({
           // city 指定搜索所在城市，支持传入格式有：城市名、citycode和adcode
           city: '021'
         })
@@ -916,12 +916,12 @@
 
         _this.mapMark(this.mapAllList);
       },
-      checkout(obj , type){
+      checkout(obj){
         this.curAddSearch.curPointData = [];
         this.mapAllList.forEach(el=>{
           // 先判断checkbox是否有勾选
           if (this.checkList.includes(el.dataType)) {
-            let myLngLat=new AMap.LngLat(el.longitude,el.latitude);
+            let myLngLat=new window.AMap.LngLat(el.longitude,el.latitude);
             //  var isPointInRing = window.AMap.GeometryUtil.isPointInRing(myLngLat,obj.C.path);
             let isPointInRing = obj.contains(myLngLat);
             // console.log(marker.getPosition());
@@ -1241,7 +1241,7 @@
           let _this = this;
           data.forEach((obj, _index) => {
             if (obj.longitude > 0 && obj.latitude > 0) {
-              let offSet = {0: [-15, -16],1: [-15, -16],2: [-15, -60],3: [-15, -16], 4: [-15, -16],5: [-15, -16]}, sDataType;
+              let offSet = {0: [-15, -16],1: [-15, -16],2: [-15, -60],3: [-15, -16], 4: [-15, -16],5: [-15, -16]};
               let uContent = _this.setMarkContent(obj);
               // 给obj设置markIndex ,为当前在marks集合中所处的位置，
 //            obj['markIndex'] = _this.marks.length;

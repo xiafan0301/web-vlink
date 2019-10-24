@@ -47,7 +47,7 @@
               </el-row> 
             </el-radio-group>
           </el-form-item>
-          <el-form-item prop="areaId" v-if="selectAreaType === 1" style="margin-bottom:0">
+          <el-form-item prop="areaId" v-show="selectAreaType === 1" style="margin-bottom:0">
             <el-select v-model="addForm.areaId" placeholder="请选择限行区域" style="width: 100%" multiple collapse-tags>
               <el-option-group
                 v-for="group in areaDataList"
@@ -62,9 +62,10 @@
               </el-option-group>
             </el-select>
           </el-form-item>
-          <el-form-item v-if="selectAreaType === 2" style="margin-bottom:0" prop="selectDeviceNumber">
-            <el-input v-model="selectDeviceNumber" :disabled="true">
-            </el-input>
+          <el-form-item v-show="selectAreaType === 2" style="margin-bottom:0">
+            <div class="tzsc_dtxz_rst">
+              已选<span>{{dSum}}</span>个设备<a href="javascript: void(0);" @click="openMapDialog">重选</a>
+            </div>
           </el-form-item>
           <el-form-item style="margin-bottom:0" prop="tailNumbers">
             <el-checkbox v-model="addForm.isTailNumberLimit" @change="handleTailNumber">按照车牌尾号限行</el-checkbox>
@@ -211,7 +212,13 @@
       </div>
     </el-dialog>
 
-    <div is="mapSelector" :hideDBlist='false' :open="mapDialogVisible" :showTypes="'DB'" :clear="clearMapSelect" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector"
+      :hideDBlist='false'
+      :open="mapDialogVisible"
+      :showTypes="'DB'"
+      :clear="clearMapSelect"
+      @mapSelectorEmit="mapPoint"
+    ></div>
   </div>
 </template>
 <script>
@@ -228,17 +235,17 @@ export default {
   components: { vlBreadcrumb, mapSelector },
   data () {
     return {
+      dSum: 0, // 选中的设备总数
       mapDialogVisible: false,
       clearMapSelect: {},
       cancelDialog: false, // 取消任务弹出框
       isChangeStatusLoading: false, // 取消--结束任务加载中
       endDialog: false, // 结束任务弹出框
       tailNumberOptions: [0,1,2,3,4,5,6,7,8,9], // 车辆尾号列表
-      selectVedioArr: [], // 选中的摄像头数组
+      selectCameraArr: [], // 选中的摄像头数组
       selectBayonetArr: [], // 选中的卡口数组
       selectAreaType: 1, // 限行区域选择方式
       isSearchLoading: false,
-      selectDeviceNumber: '已选设备0个', // 地图选择选择的设备数量
       addForm: {
         startTime: new Date(), // 开始时间
         endTime: dateOrigin(true, new Date(overStartTime)), // 结束时间
@@ -293,17 +300,28 @@ export default {
     },
     // 限行区域change
     clickMapSelect () {
+      this.dSum = 0;
+      this.mapDialogVisible = !this.mapDialogVisible;
+      this.clearMapSelect = {};
+    },
+    openMapDialog () {
       this.mapDialogVisible = !this.mapDialogVisible;
     },
     // 获取地图选择的数据
-    mapPoint (data) {
-      if (data) {
-        this.selectDeviceNumber = '已选设备' + (data.bayonetList.length + data.deviceList.length) + '个';
-        if (data.bayonetList.length > 0) {
-          this.selectBayonetArr = data.bayonetList;
+    mapPoint (result) {
+      if (result) {
+        this.dSum = 0;
+        if (result.deviceList) {
+          this.dSum = result.deviceList.length;
+          for (let i = 0; i < result.deviceList.length; i++) {
+            this.selectCameraArr.push(result.deviceList[i].uid);
+          }
         }
-        if (data.deviceList.length > 0) {
-          this.selectCameraArr = data.deviceList;
+        if (result.bayonetList && result.bayonetList.length > 0) {
+          for (let i = 0; i < result.bayonetList.length; i++) {
+            this.selectBayonetArr.push(result.bayonetList[i].uid);
+          }
+          this.dSum += result.bayonetList.length;
         }
       }
     },
@@ -338,13 +356,13 @@ export default {
     // 重置查询条件
     resetData (form) {
       this.$refs[form].resetFields();
-
+      
       this.selectAreaType = 1;
 
-      this.selectDeviceNumber = '已选设备0个';
+      this.clearMapSelect = {};
+
       this.selectCameraArr = [];
       this.selectBayonetArr = [];
-      this.clearMapSelect = {};
 
       this.addForm.isVehicleTypeLimit = false;
       this.addForm.isTailNumberLimit = false;
@@ -381,14 +399,12 @@ export default {
               return;
             }
           }
-
+          
           if (this.selectCameraArr && this.selectCameraArr.length > 0) {
-            let cameraIds = this.selectCameraArr.map(res => res.uid);
-            this.addForm.devIds = cameraIds.join(",");
+            this.addForm.devIds = this.selectCameraArr.join(",");
           }
           if (this.selectBayonetArr && this.selectBayonetArr.length > 0) {
-            let bayonentIds = this.selectBayonetArr.map(res => res.uid);
-            this.addForm.bayonetIds = bayonentIds.join(",");
+            this.addForm.bayonetIds = this.selectBayonetArr.join(",");
           }
 
           if (this.selectAreaType === 2) {
@@ -527,6 +543,29 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.tzsc_dtxz_rst {
+  width: 100%;
+  line-height: 40px;
+  padding: 0px 15px; margin-top: 5px;
+  background-color: #F5F7FA;
+  color: #C0C4CC;
+  border: 1px solid #DCDFE6;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  > span {
+    display: inline-block;
+    padding: 0 3px;
+    color: #333;
+  }
+  > a {
+    display: inline-block;
+    padding-left: 5px;
+    color: #2580FC !important;
+    text-decoration: none !important;
+    /*font-style: italic;*/
+    cursor: pointer;
+  }
+}
 .restrict_driving {
   width: 100%;
   height: 100%;

@@ -785,7 +785,8 @@ export default {
                 ? this.qyryfxFrom.personGroupId.join()
                 : "",
             deviceAndTimeList: deviceAndTimeList,
-            taskName: this.qyryfxFrom.taskName
+            taskName: this.qyryfxFrom.taskName,
+            taskOperationType: 2 // 2--修改
           };
 
           this.submitLoading = true; // 打开加载效果
