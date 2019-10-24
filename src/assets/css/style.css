@@ -510,11 +510,11 @@
   overflow-x: hidden;
   overflow-y: auto;
 }
-.vl_smenu > li {
+.vl_smenu  li {
   height: 60px; line-height: 60px;
   text-align: center;
 }
-.vl_smenu > li > a {
+.vl_smenu  li  a {
   display: block;
   width: 100%; height: 100%;
   padding-right: 10px;
@@ -524,13 +524,13 @@
   transition: all .4s ease-out;
   cursor: pointer;
 }
-.vl_smenu > li > a.router-link-active {
+.vl_smenu  li  a.router-link-active {
   color: #0C70F8;
   border-color: #0C70F8;
   background-color: #E0F3FF;
   cursor: default;
 }
-.vl_smenu > li > a:hover {
+.vl_smenu  li  a:hover {
   color: #0C70F8;
 }
 .vl_smenu .vl_smenu_dis {

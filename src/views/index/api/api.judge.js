@@ -22,7 +22,31 @@ export function JtcPOSTAppendtpInfo(data) {
     url: '/fake-plate-vehicle',
     method: 'post',
     data,
-    mode: 'judge'
+    mode: 'vehicle'
+  })
+}
+/**
+ * JtcPOSTAppendixInfo 套牌车查询接（分页）
+ * @param {object} params
+ */
+export function JtcPOSTAppendtpInfos(data) {
+  return request({
+    url: '/fake-plate-vehicles',
+    method: 'post',
+    data,
+    mode: 'vehicle'
+  })
+}
+/**
+ * JtcPOSTAppendixInfo 特殊场所
+ * @param {object} params
+ */
+export function Jtcgettsc(data) {
+  return request({
+    url: '/special-place/groups-devices',
+    method: 'get',
+    params: data,
+    mode: 'base'
   })
 }
 /**
@@ -526,7 +550,7 @@ export function getVehicleInvestigationReport(params) {
     url: '/report-service/vehicle-report',
     method: 'post',
     data: params,
-    mode: 'judge'
+    mode: 'vehicle'
   })
 }
 
