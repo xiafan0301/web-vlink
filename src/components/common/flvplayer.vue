@@ -623,7 +623,6 @@ export default {
       snapTimer: null, // 抓拍上墙定时器
       querySnapList: [], // 抓拍上墙列表数据
       querySnapTotal: 0, // 回放抓拍总数
-      snapLoading: false, // 抓拍上墙loading
       snapActiveIndex: -1, // 抓拍上墙active
       snapBackDialog: false, // 抓拍上墙回放，分页
       snapSturcObj: {
@@ -1677,7 +1676,6 @@ export default {
           window.navigator.msSaveOrOpenBlob(blob, filename);
           return;
         }
-        console.log('imgff', this.img)
 
         this.img.replace('image/png', 'image/octet-stream');
         

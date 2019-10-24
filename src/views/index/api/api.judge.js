@@ -292,7 +292,7 @@ export function getVehicleShot(data) {
     url: '/vehicle/shot-num',
     method: 'post',
     data,
-    mode: 'judge'
+    mode: 'vehicle'
   });
 }
 /**
@@ -409,7 +409,7 @@ export function QypzGetAreaCross(data) {
     url: '/vehicle-analysis/area-cross',
     method: 'post',
     data,
-    mode: 'judge'
+    mode: 'vehicle'
   });
 }
 /*--------------------------  车辆侦查-车辆轨迹start  ---------------------------------*/
@@ -422,7 +422,7 @@ export function InvestigateGetTrace(data) {
     url: '/vehicle-investigate/trace',
     method: 'post',
     data,
-    mode: 'judge'
+    mode: 'vehicle'
   })
 }
 /*--------------------------  车辆轨迹end  ---------------------------------*/
