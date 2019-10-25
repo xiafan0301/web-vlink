@@ -325,11 +325,11 @@
     </el-dialog>
     <!--检索详情弹窗-->
     <el-dialog
-            :visible.sync="strucDetailDialog"
-            class="struc_detail_dialog_ytsr_shot"
-            :close-on-click-modal="false"
-            top="4vh"
-            :show-close="false">
+      :visible.sync="strucDetailDialog"
+      class="struc_detail_dialog_ytsr_shot"
+      :close-on-click-modal="false"
+      top="4vh"
+      :show-close="false">
       <div class="struc_tab_shot" v-if="isBase === 2">
         <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">检索详情</span>
         <span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>
@@ -364,18 +364,18 @@
               <div class="struc_cd_info_main">
                 <vue-scroll>
                   <ul>
-                    <li><span>性别</span><span>{{sturcDetail.sex ? sturcDetail.sex : '未识别'}}</span></li>
+                    <li><span>性别</span><span>{{sturcDetail.gender ? sturcDetail.gender : '未识别'}}</span></li>
                     <li><span>年龄段</span><span>{{sturcDetail.age ? sturcDetail.age : '未识别'}}</span></li>
-                    <li><span>发型</span><span>{{sturcDetail.hair ? sturcDetail.hair : '未识别'}}</span></li>
+                    <li><span>发型</span><span>{{sturcDetail.hairStyleDesc ? sturcDetail.hairStyleDesc : '未识别'}}</span></li>
                     <li><span>戴眼镜</span><span>{{sturcDetail.glasses ? sturcDetail.glasses : '未识别'}}</span></li>
                     <li><span>戴帽子</span><span>{{sturcDetail.hat ? sturcDetail.hat : '未识别'}}</span></li>
                     <li><span>戴口罩</span><span>{{sturcDetail.mask ? sturcDetail.mask : '未识别'}}</span></li>
                     <li><span>抱小孩</span><span>{{sturcDetail.baby ? sturcDetail.baby : '未识别'}}</span></li>
                     <li><span>拎东西</span><span>{{sturcDetail.bag ? sturcDetail.bag : '未识别'}}</span></li>
-                    <li><span>上身款式</span><span>{{sturcDetail.upperType ? sturcDetail.upperType : '未识别'}}</span></li>
-                    <li><span>上身颜色</span><span>{{sturcDetail.upperColor ? sturcDetail.upperColor : '未识别'}}</span></li>
-                    <li><span>下身款式</span><span>{{sturcDetail.bottomType ? sturcDetail.bottomType : '未识别'}}</span></li>
-                    <li><span>下身颜色</span><span>{{sturcDetail.bottomColor ? sturcDetail.bottomColor : '未识别'}}</span></li>
+                    <li><span>上身款式</span><span>{{sturcDetail.coatLengthDesc ? sturcDetail.coatLengthDesc : '未识别'}}</span></li>
+                    <li><span>上身颜色</span><span>{{sturcDetail.coatColorDesc ? sturcDetail.coatColorDesc : '未识别'}}</span></li>
+                    <li><span>下身款式</span><span>{{sturcDetail.trousersLenDesc ? sturcDetail.trousersLenDesc : '未识别'}}</span></li>
+                    <li><span>下身颜色</span><span>{{sturcDetail.trousersColorDesc ? sturcDetail.trousersColorDesc : '未识别'}}</span></li>
                   </ul>
                 </vue-scroll>
               </div>
@@ -558,7 +558,6 @@
         curImgIndex: 0,
         sturcDetail: {},
         strucDetailDialog: false,
-        devicePinYin: 'abcdefghijklmnopqrstuvwxyz',
         videoUrl: '', // 弹窗视频回放里的视频
         swiperOption: {
           slidesPerView: 5,
@@ -842,7 +841,7 @@
         } else {
           params['minSemblance'] = 0;
         }
-        if (this.radio === '1') {
+        if (this.radio === '1' || this.radio === '3') {
           p1['portraitGroupId'] = this.searchData.portraitGroupId.join(',');
           params['portraitGroupId'] = this.searchData.portraitGroupId.join(',');
           let pNameList = []
@@ -892,9 +891,9 @@
                 if (sRes) {
                   this.selectIndex = 2;
                   this.$set(sRes.data, 'taskResult', JSON.parse(sRes.data.taskResult));
-                  this.strucInfoList = sRes.data.taskResult;
+                  this.strucInfoList = sRes.data.taskResult ? sRes.data.taskResult : [];
                   this.pagination1.total = this.strucInfoList.length;
-                  if (this.radio === "1") {
+                  if (this.radio === "1" || this.radio === "3") {
                     this.isBase = 1;
                   } else {
                     this.isBase = 2;
@@ -987,7 +986,7 @@
             break;
           case 3:
             this.curStrucInfoList.sort((a, b) => {
-              return this.devicePinYin.indexOf(b.deviceNamePinyin.toLowerCase()[0]) - this.devicePinYin.indexOf(a.deviceNamePinyin.toLowerCase()[0]);
+              return a.localeCompare(b, 'zh');
             })
             break;
           case 4:
@@ -1537,6 +1536,7 @@
                   float: left;
                   width: 163px;
                   height: 163px;
+                  background: #999999;
                   >img {
                     width: 100%;
                     height: 100%;
