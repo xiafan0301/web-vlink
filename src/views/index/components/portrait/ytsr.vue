@@ -1,5 +1,5 @@
 <template>
-  <div class="vl_judge_tc_ytsr">
+  <div class="vl_judge_tc_ytsr_base">
     <div class="">
       <div is="vlBreadcrumb"
            :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
@@ -33,7 +33,7 @@
           >
             <el-option
                     v-for="item in portraitGroupList"
-                    :key="item.id"
+                    :key="item.uid"
                     :label="item.groupName"
                     :value="item.uid">
             </el-option>
@@ -47,7 +47,6 @@
                     class="vl_date"
                     type="datetime"
                     :time-arrow-control="true"
-                    @change="chooseStartTime"
                     :picker-options="pickerOptions"
                     value-format="timestamp"
                     placeholder="选择日期时间">
@@ -56,7 +55,6 @@
                     style="width: 100%;"
                     class="vl_date vl_date_end"
                     v-model="searchData.endTime"
-                    @change="chooseEndTime"
                     :picker-options="pickerOptions"
                     :time-arrow-control="true"
                     value-format="timestamp"
@@ -64,56 +62,6 @@
                     placeholder="选择日期时间">
             </el-date-picker>
           </div>
-          <!-- 设备搜索 -->
-          <!--<div class="device-comp">-->
-          <!--<div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>-->
-          <!--<div class="selected_device" @click="treeTabShow = true;">-->
-          <!--<i class="el-icon-arrow-down"></i>-->
-          <!--&lt;!&ndash; <i class="el-icon-arrow-up"></i> &ndash;&gt;-->
-          <!--<div class="device_list" v-if="selectDeviceArr.length > 0">-->
-          <!--<template v-if="checkAllTree">-->
-          <!--<span>全部设备</span>-->
-          <!--</template>-->
-          <!--<template v-else>-->
-          <!--<span>{{ selectDeviceArr[0].label }}</span>-->
-          <!--<span-->
-          <!--v-show="selectDeviceArr.length > 1"-->
-          <!--title="展开选中的设备"-->
-          <!--class="device_count"-->
-          <!--&gt;+{{ selectDeviceArr.length - 1 }}</span>-->
-          <!--</template>-->
-          <!--</div>-->
-          <!--<div class="no_device" v-else>选择设备</div>-->
-          <!--&lt;!&ndash; 树tab页面 &ndash;&gt;-->
-          <!--<div class="device_tree_tab" v-show="treeTabShow">-->
-          <!--<div style="overflow: hidden;">-->
-          <!--</div>-->
-          <!--&lt;!&ndash; 摄像头树 &ndash;&gt;-->
-          <!--<div class="tree_content">-->
-          <!--<vue-scroll>-->
-          <!--<div class="checked_all">-->
-          <!--<el-checkbox-->
-          <!--:indeterminate="isIndeterminate"-->
-          <!--v-model="checkAllTree"-->
-          <!--@change="handleCheckedAll"-->
-          <!--&gt;全选</el-checkbox>-->
-          <!--</div>-->
-          <!--<el-tree-->
-          <!--@check="listenChecked"-->
-          <!--:data="cameraTree"-->
-          <!--show-checkbox-->
-          <!--default-expand-all-->
-          <!--node-key="label"-->
-          <!--ref="cameraTree"-->
-          <!--highlight-current-->
-          <!--:props="defaultProps"-->
-          <!--&gt;</el-tree>-->
-          <!--</vue-scroll>-->
-          <!--</div>-->
-          <!--</div>-->
-          <!--</div>-->
-          <!--<p class="error-tip" :class="{'is-show': isDeviceTrue}">{{messageDevTip}}</p>-->
-          <!--</div>-->
           <div class="ytsr_xzsb_s" @click="areaTypeChanged" v-if="chooseType === 1">
             <span>选择设备</span>
             <span class="el-icon-arrow-down"></span>
@@ -285,16 +233,10 @@
         },
         radio: "1",
         dSum: 0, // 设备总数
-        dIds: [], // 设备IDS
+        selectCameraArr: [],
+        selectBayonetArr: [],
         chooseType: 1, // 选择设备装备，1是刚进入，2是已选择
         showNewTask: false, // 展示修改任务
-        searchData: {
-          portraitGroupId: null,  // 人员组
-          sex: null, // 1男，2女
-          ageGroup: null, // 年龄段
-          time1: null,
-          time2: null
-        },
         searching: false,
         openMap: false,
         msClear: {},
@@ -372,10 +314,12 @@
         let p1 = {
           origin: this.radio,
           taskOperateType: 1,
+          taskName: this.taskDetail.taskName
         };
         let params = {
           origin: this.radio,
           taskOperateType: 1,
+          taskName: this.taskDetail.taskName
         }
         if (!this.imgList) {
           if (!document.querySelector('.el-message--info')) {
@@ -391,7 +335,7 @@
         } else {
           params['minSemblance'] = 0;
         }
-        if (this.radio === '1') {
+        if (this.radio === '1' || this.radio === '3') {
           p1['portraitGroupId'] = this.searchData.portraitGroupId.join(',');
           params['portraitGroupId'] = this.searchData.portraitGroupId.join(',');
           let pNameList = []
@@ -411,11 +355,11 @@
           } else {
             params['deviceNames'] = dNameList.join(',')
           }
-          p1['deviceIds'] = this.selectCameraArr.map(res => res.id).join(',');
-          params['deviceIds'] = "5DTxZRNGOZuLsl07jcNO09";
-//          params['deviceIds'] = this.selectCameraArr.map(res => res.id).join(',');
-          p1['bayonetIds'] = this.selectBayonetArr.map(res => res.id).join(',');
-          params['bayonetIds'] = this.selectBayonetArr.map(res => res.id).join(',');
+          p1['deviceIds'] = this.selectCameraArr.map(res => res.uid).join(',');
+//          params['deviceIds'] = "5DTxZRNGOZuLsl07jcNO09";
+          params['deviceIds'] = this.selectCameraArr.map(res => res.uid).join(',');
+          p1['bayonetIds'] = this.selectBayonetArr.map(res => res.uid).join(',');
+          params['bayonetIds'] = this.selectBayonetArr.map(res => res.uid).join(',');
           p1['startTime'] = formatDate(this.searchData.startTime, 'yyyy-MM-dd HH:mm:ss');
           params['startTime'] = formatDate(this.searchData.startTime, 'yyyy-MM-dd HH:mm:ss');
           p1['endTime'] = formatDate(this.searchData.endTime, 'yyyy-MM-dd HH:mm:ss');
@@ -439,16 +383,6 @@
           }
         })
       },
-      chooseEndTime (e) {
-        if (e < this.searchData.startTime) {
-          this.$message.info('结束时间必须大于开始时间才会有结果')
-        }
-      },
-      chooseStartTime (e) {
-        if (e > this.searchData.endTime) {
-          this.$message.info('结束时间必须大于开始时间才会有结果')
-        }
-      },
       setDTime() {
         let date = new Date();
         let curDate = date.getTime();
@@ -471,22 +405,16 @@
         if (result) {
           // bayonetList deviceList
           this.dSum = 0;
-          this.dIds = [];
+          this.selectCameraArr = [];
+          this.selectBayonetArr = [];
           if (result.deviceList) {
             this.dSum = result.deviceList.length;
-            for (let i = 0; i < result.deviceList.length; i++) {
-              this.dIds.push(result.deviceList[i].uid);
-            }
+            this.selectCameraArr = result.deviceList;
           }
           if (result.bayonetList && result.bayonetList.length > 0) {
             this.dSum += result.bayonetList.length;
+            this.selectBayonetArr = result.bayonetList;
           }
-//        if (result.bayonetDeviceList && result.bayonetDeviceList.length > 0) {
-//          this.dSum += result.bayonetDeviceList.length;
-//          for (let i = 0; i < result.bayonetDeviceList.length; i++) {
-//            this.dIds.push(result.bayonetDeviceList[i].uid);
-//          }
-//        }
         }
       },
       areaTypeChanged () {
@@ -548,6 +476,47 @@
     }
   }
 </script>
+<style lang="scss" scoped="scoped">
+  .ytsr_xzsb_s {
+    height: 40px;
+    line-height: 40px;
+    width: 100%;
+    border-radius: 4px;
+    border: 1px solid #DCDFE6;
+    cursor: pointer;
+    color: #999999;
+    padding: 0 6px;
+    > span {
+      display: inline-block;
+      width: 50%;
+      &:last-child {
+        text-align: right;
+      }
+    }
+  }
+  .ytsr_dtxz_rst {
+    width: 100%;
+    line-height: 40px;
+    padding: 0px 15px; margin-top: 5px;
+    background-color: #F5F7FA;
+    color: #C0C4CC;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    > span {
+      display: inline-block;
+      padding: 0 3px;
+      color: #333;
+    }
+    > a {
+      display: inline-block;
+      padding-left: 5px;
+      color: #2580FC !important;
+      text-decoration: none !important;
+      /*font-style: italic;*/
+      cursor: pointer;
+    }
+  }
+</style>
 <style lang="scss">
   .cum_pagination_shot {
     padding: 0px;
@@ -573,7 +542,7 @@
       left: calc(50% - .05rem);
     }
   }
-  .vl_judge_tc_ytsr {
+  .vl_judge_tc_ytsr_base {
     width: 100%;
     height: 100%;
     .vl_j_left {

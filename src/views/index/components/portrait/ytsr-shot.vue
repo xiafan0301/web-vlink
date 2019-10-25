@@ -1,5 +1,5 @@
 <template>
-  <div class="vl_judge_tc_ytsr">
+  <div class="vl_judge_tc_ytsr_shot">
     <div class="">
       <div is="vlBreadcrumb"
            :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
@@ -64,56 +64,6 @@
                     placeholder="选择日期时间">
             </el-date-picker>
           </div>
-          <!-- 设备搜索 -->
-          <!--<div class="device-comp">-->
-          <!--<div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>-->
-          <!--<div class="selected_device" @click="treeTabShow = true;">-->
-          <!--<i class="el-icon-arrow-down"></i>-->
-          <!--&lt;!&ndash; <i class="el-icon-arrow-up"></i> &ndash;&gt;-->
-          <!--<div class="device_list" v-if="selectDeviceArr.length > 0">-->
-          <!--<template v-if="checkAllTree">-->
-          <!--<span>全部设备</span>-->
-          <!--</template>-->
-          <!--<template v-else>-->
-          <!--<span>{{ selectDeviceArr[0].label }}</span>-->
-          <!--<span-->
-          <!--v-show="selectDeviceArr.length > 1"-->
-          <!--title="展开选中的设备"-->
-          <!--class="device_count"-->
-          <!--&gt;+{{ selectDeviceArr.length - 1 }}</span>-->
-          <!--</template>-->
-          <!--</div>-->
-          <!--<div class="no_device" v-else>选择设备</div>-->
-          <!--&lt;!&ndash; 树tab页面 &ndash;&gt;-->
-          <!--<div class="device_tree_tab" v-show="treeTabShow">-->
-          <!--<div style="overflow: hidden;">-->
-          <!--</div>-->
-          <!--&lt;!&ndash; 摄像头树 &ndash;&gt;-->
-          <!--<div class="tree_content">-->
-          <!--<vue-scroll>-->
-          <!--<div class="checked_all">-->
-          <!--<el-checkbox-->
-          <!--:indeterminate="isIndeterminate"-->
-          <!--v-model="checkAllTree"-->
-          <!--@change="handleCheckedAll"-->
-          <!--&gt;全选</el-checkbox>-->
-          <!--</div>-->
-          <!--<el-tree-->
-          <!--@check="listenChecked"-->
-          <!--:data="cameraTree"-->
-          <!--show-checkbox-->
-          <!--default-expand-all-->
-          <!--node-key="label"-->
-          <!--ref="cameraTree"-->
-          <!--highlight-current-->
-          <!--:props="defaultProps"-->
-          <!--&gt;</el-tree>-->
-          <!--</vue-scroll>-->
-          <!--</div>-->
-          <!--</div>-->
-          <!--</div>-->
-          <!--<p class="error-tip" :class="{'is-show': isDeviceTrue}">{{messageDevTip}}</p>-->
-          <!--</div>-->
           <div class="ytsr_xzsb_s" @click="areaTypeChanged" v-if="chooseType === 1">
             <span>选择设备</span>
             <span class="el-icon-arrow-down"></span>
@@ -125,7 +75,7 @@
         <div class="vl_jtc_search">
           <div style="text-align: center;margin-bottom: 0px;">
             <el-button @click="resetSearch">取消</el-button>
-            <el-button type="primary" :loading="searching" @click="tcDiscuss(false)">确定</el-button>
+            <el-button type="primary" :loading="searching" @click="tcDiscuss()">确定</el-button>
           </div>
         </div>
       </template>
@@ -221,7 +171,7 @@
         </ul>
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.personStoragePath" alt="">
+            <img :src="sturcDetail.PersonStoragePath" alt="">
             <span>上传图</span>
           </div>
           <div class="struc_c_d_box">
@@ -235,18 +185,18 @@
               <div class="struc_cd_info_main">
                 <vue-scroll>
                   <ul>
-                    <li><span>性别</span><span>{{sturcDetail.sex ? sturcDetail.sex : '未识别'}}</span></li>
+                    <li><span>性别</span><span>{{sturcDetail.gender ? sturcDetail.gender : '未识别'}}</span></li>
                     <li><span>年龄段</span><span>{{sturcDetail.age ? sturcDetail.age : '未识别'}}</span></li>
-                    <li><span>发型</span><span>{{sturcDetail.hair ? sturcDetail.hair : '未识别'}}</span></li>
+                    <li><span>发型</span><span>{{sturcDetail.hairStyleDesc ? sturcDetail.hairStyleDesc : '未识别'}}</span></li>
                     <li><span>戴眼镜</span><span>{{sturcDetail.glasses ? sturcDetail.glasses : '未识别'}}</span></li>
                     <li><span>戴帽子</span><span>{{sturcDetail.hat ? sturcDetail.hat : '未识别'}}</span></li>
                     <li><span>戴口罩</span><span>{{sturcDetail.mask ? sturcDetail.mask : '未识别'}}</span></li>
                     <li><span>抱小孩</span><span>{{sturcDetail.baby ? sturcDetail.baby : '未识别'}}</span></li>
                     <li><span>拎东西</span><span>{{sturcDetail.bag ? sturcDetail.bag : '未识别'}}</span></li>
-                    <li><span>上身款式</span><span>{{sturcDetail.upperType ? sturcDetail.upperType : '未识别'}}</span></li>
-                    <li><span>上身颜色</span><span>{{sturcDetail.upperColor ? sturcDetail.upperColor : '未识别'}}</span></li>
-                    <li><span>下身款式</span><span>{{sturcDetail.bottomType ? sturcDetail.bottomType : '未识别'}}</span></li>
-                    <li><span>下身颜色</span><span>{{sturcDetail.bottomColor ? sturcDetail.bottomColor : '未识别'}}</span></li>
+                    <li><span>上身款式</span><span>{{sturcDetail.coatLengthDesc ? sturcDetail.coatLengthDesc : '未识别'}}</span></li>
+                    <li><span>上身颜色</span><span>{{sturcDetail.coatColorDesc ? sturcDetail.coatColorDesc : '未识别'}}</span></li>
+                    <li><span>下身款式</span><span>{{sturcDetail.trousersLenDesc ? sturcDetail.trousersLenDesc : '未识别'}}</span></li>
+                    <li><span>下身颜色</span><span>{{sturcDetail.trousersColorDesc ? sturcDetail.trousersColorDesc : '未识别'}}</span></li>
                   </ul>
                 </vue-scroll>
               </div>
@@ -285,7 +235,7 @@
           <!-- slides -->
           <swiper-slide v-for="(item, index) in curStrucInfoList" :key="item.id">
             <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
-              <img style="height: .88rem;width: 50%;padding-right: .02rem;" :src="item.personStoragePath" alt="">
+              <img style="height: .88rem;width: 50%;padding-right: .02rem;" :src="item.PersonStoragePath" alt="">
               <img style="height: .88rem;width: 50%;padding-left: .02rem;" :src="item.subStoragePath" alt="">
               <div class="vl_jfo_sim"><i class="vl_icon vl_icon_retrieval_05" :class="{'vl_icon_retrieval_06':  index === curImgIndex}"></i>{{item.semblance ? (item.semblance*1).toFixed(2) : '0.00'}}<span style="font-size: 12px;">%</span></div>
             </div>
@@ -335,16 +285,10 @@
         },
         radio: "1",
         dSum: 0, // 设备总数
-        dIds: [], // 设备IDS
+        selectCameraArr: [],
+        selectBayonetArr: [],
         chooseType: 1, // 选择设备装备，1是刚进入，2是已选择
         showNewTask: false, // 展示修改任务
-        searchData: {
-          portraitGroupId: null,  // 人员组
-          sex: null, // 1男，2女
-          ageGroup: null, // 年龄段
-          time1: null,
-          time2: null
-        },
         searching: false,
         openMap: false,
         msClear: {},
@@ -380,7 +324,6 @@
         curImgIndex: 0,
         sturcDetail: {},
         strucDetailDialog: false,
-        devicePinYin: 'abcdefghijklmnopqrstuvwxyz',
         videoUrl: '' // 弹窗视频回放里的视频
       }
     },
@@ -424,14 +367,16 @@
         this.setDTime();
         this.showNewTask = false;
       },
-      tcDiscuss (boolean) {
+      tcDiscuss () {
         let p1 = {
           origin: this.radio,
           taskOperateType: 1,
+          taskName: this.taskDetail.taskName
         };
         let params = {
           origin: this.radio,
           taskOperateType: 1,
+          taskName: this.taskDetail.taskName
         }
         if (!this.imgList) {
           if (!document.querySelector('.el-message--info')) {
@@ -467,22 +412,20 @@
           } else {
             params['deviceNames'] = dNameList.join(',')
           }
-          p1['deviceIds'] = this.selectCameraArr.map(res => res.id).join(',');
-          params['deviceIds'] = "5DTxZRNGOZuLsl07jcNO09";
-//          params['deviceIds'] = this.selectCameraArr.map(res => res.id).join(',');
-          p1['bayonetIds'] = this.selectBayonetArr.map(res => res.id).join(',');
-          params['bayonetIds'] = this.selectBayonetArr.map(res => res.id).join(',');
+          p1['deviceIds'] = this.selectCameraArr.map(res => res.uid).join(',');
+//          params['deviceIds'] = "5DTxZRNGOZuLsl07jcNO09";
+          params['deviceIds'] = this.selectCameraArr.map(res => res.uid).join(',');
+          p1['bayonetIds'] = this.selectBayonetArr.map(res => res.uid).join(',');
+          params['bayonetIds'] = this.selectBayonetArr.map(res => res.uid).join(',');
           p1['startTime'] = formatDate(this.searchData.startTime, 'yyyy-MM-dd HH:mm:ss');
           params['startTime'] = formatDate(this.searchData.startTime, 'yyyy-MM-dd HH:mm:ss');
           p1['endTime'] = formatDate(this.searchData.endTime, 'yyyy-MM-dd HH:mm:ss');
           params['endTime'] = formatDate(this.searchData.endTime, 'yyyy-MM-dd HH:mm:ss');
         }
-        if (!boolean) {
-          this.searching = true;
-        }
         this.searching = true;
         params.taskOperateType = 1;
         params.taskId = this.$route.query.uid;
+        console.log('开始搞')
         PortraitPostByphotoTask(params).then(res => {
           this.searching = false;
           if (res && res.data) {
@@ -527,22 +470,16 @@
         if (result) {
           // bayonetList deviceList
           this.dSum = 0;
-          this.dIds = [];
+          this.selectCameraArr = [];
+          this.selectBayonetArr = [];
           if (result.deviceList) {
             this.dSum = result.deviceList.length;
-            for (let i = 0; i < result.deviceList.length; i++) {
-              this.dIds.push(result.deviceList[i].uid);
-            }
+            this.selectCameraArr = result.deviceList;
           }
           if (result.bayonetList && result.bayonetList.length > 0) {
             this.dSum += result.bayonetList.length;
+            this.selectBayonetArr = result.bayonetList;
           }
-//        if (result.bayonetDeviceList && result.bayonetDeviceList.length > 0) {
-//          this.dSum += result.bayonetDeviceList.length;
-//          for (let i = 0; i < result.bayonetDeviceList.length; i++) {
-//            this.dIds.push(result.bayonetDeviceList[i].uid);
-//          }
-//        }
         }
       },
       areaTypeChanged () {
@@ -594,15 +531,17 @@
       getTheList () {
         PortraitPostByphotoRealtime(this.$route.query)
             .then(sRes => {
-              if (sRes) {
+              if (sRes && sRes.data) {
                 this.$set(sRes.data, 'taskResult', JSON.parse(sRes.data.taskResult));
                 this.$set(sRes.data, 'taskWebParam', JSON.parse(sRes.data.taskWebParam));
                 sRes.data.taskWebParam.deviceNames = sRes.data.taskWebParam.deviceNames.split(',')
-                this.strucInfoList = sRes.data.taskResult;
+                this.strucInfoList = sRes.data.taskResult ? sRes.data.taskResult : [];
                 this.pagination1.total = this.strucInfoList.length;
                 this.changeOrder();
                 this.taskDetail = sRes.data.taskWebParam;
                 console.log(sRes.data)
+              } else {
+                this.strucInfoList = [];
               }
             })
       },
@@ -612,11 +551,11 @@
         if (id) {
           getPeopleTaskDetail(id)
               .then(res => {
-                if (res) {
+                if (res && res.data) {
                   this.$set(res.data, 'taskResult', JSON.parse(res.data.taskResult));
                   this.$set(res.data, 'taskWebParam', JSON.parse(res.data.taskWebParam));
                   res.data.taskWebParam.deviceNames = res.data.taskWebParam.deviceNames.split(',')
-                  this.strucInfoList = res.data.taskResult;
+                  this.strucInfoList = res.data.taskResult ? res.data.taskResult : [];
                   this.pagination1.total = this.strucInfoList.length;
                   this.changeOrder();
                   this.taskDetail = res.data.taskWebParam;
@@ -626,6 +565,8 @@
                     filePathName: '带图' + Math.random(),
                     path: this.taskDetail.uploadImgUrls
                   }
+                } else {
+                  this.strucInfoList = [];
                 }
               })
         }
@@ -645,7 +586,7 @@
             break;
           case 3:
             this.strucInfoList.sort((a, b) => {
-              return this.devicePinYin.indexOf(b.deviceNamePinyin.toLowerCase()[0]) - this.devicePinYin.indexOf(a.deviceNamePinyin.toLowerCase()[0]);
+              return a.localeCompare(b, 'zh');
             })
             break;
           case 4:
@@ -695,8 +636,7 @@
         this.sturcDetail = data;
         this.drawPoint(data);
         this.setPlayerData();
-      },
-      tcDiscuss () {}
+      }
     },
     watch: {
       stucOrder () {
@@ -705,6 +645,47 @@
     }
   }
 </script>
+<style lang="scss" scoped="scoped">
+  .ytsr_xzsb_s {
+    height: 40px;
+    line-height: 40px;
+    width: 100%;
+    border-radius: 4px;
+    border: 1px solid #DCDFE6;
+    cursor: pointer;
+    color: #999999;
+    padding: 0 6px;
+    > span {
+      display: inline-block;
+      width: 50%;
+      &:last-child {
+        text-align: right;
+      }
+    }
+  }
+  .ytsr_dtxz_rst {
+    width: 100%;
+    line-height: 40px;
+    padding: 0px 15px; margin-top: 5px;
+    background-color: #F5F7FA;
+    color: #C0C4CC;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    > span {
+      display: inline-block;
+      padding: 0 3px;
+      color: #333;
+    }
+    > a {
+      display: inline-block;
+      padding-left: 5px;
+      color: #2580FC !important;
+      text-decoration: none !important;
+      /*font-style: italic;*/
+      cursor: pointer;
+    }
+  }
+</style>
 <style lang="scss">
   .cum_pagination_shot {
     padding: 0px;
@@ -730,7 +711,7 @@
       left: calc(50% - .05rem);
     }
   }
-  .vl_judge_tc_ytsr {
+  .vl_judge_tc_ytsr_shot {
     width: 100%;
     height: 100%;
     .vl_j_left {

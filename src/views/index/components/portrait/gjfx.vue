@@ -793,13 +793,16 @@
           this.count = 3;
           PersonTracePostRealTime(d).then(res => {
             this.searchLoading = false;
-            if (res) {
-              if (!res.data || res.data.length === 0) {
+            if (res && res.data) {
+              this.$set(res.data, 'taskResult', JSON.parse(res.data.taskResult));
+              if (!res.data.taskResult || res.data.taskResult.length === 0) {
                 this.$message.info("抱歉，没有找到匹配结果");
+                this.evData = [];
+                this.shotAddressAndTimes(this.evData)
+                this.reselt = false;
                 this.amap.clearMap();
                 return false;
               }
-              this.$set(res.data, 'taskResult', JSON.parse(res.data.taskResult));
               this.selectIndex = 2;
               this.reselt = true;
               this.evData = res.data.taskResult;
