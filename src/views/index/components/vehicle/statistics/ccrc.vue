@@ -101,10 +101,10 @@
                   label="序号">
               </el-table-column>
               <el-table-column
-                  prop="plateNo"
+                  prop="PlateNo"
                   label="车牌号码">
                 <template slot-scope="scope">
-                  <span>{{scope.row.plateNo}}</span>
+                  <span>{{scope.row.PlateNo}}</span>
                   <i class="icon" v-if="scope.row.firstEnterFlag"></i>
                 </template>
               </el-table-column>
@@ -119,15 +119,15 @@
                   label="入城时间">
               </el-table-column>
               <el-table-column
-                  prop="vehicleColor"
+                  prop="vehicleType"
                   label="车牌分组"
                   show-overflow-tooltip>
                 <template slot-scope="scope">
-                  <span>{{scope.row.vehicleType.join(',')}}</span>
+                  <span>{{scope.row.vehicleType&&scope.row.vehicleType.join(',')}}</span>
                 </template>
               </el-table-column>
               <el-table-column
-                  prop="vehicleClass"
+                  prop="vehicleClassDesc"
                   label="车辆类型"
                   show-overflow-tooltip>
               </el-table-column>

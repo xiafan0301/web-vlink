@@ -149,7 +149,7 @@
             <div class="th-ycxc-record-list">
               <div class="list-box">
                 <div class="list-item" v-for="(item, index) in regulationsList" :key="item.uid" @click="onOpenDetail(index)">
-                  <img :src="item.vehicleDto.subStoragePath" alt="">
+                  <img :src="item.vehicleDto.StorageUrl1" alt="">
                   <p class="time"><i></i>{{item.vehicleDto.shotTime}}</p>
                   <p class="address"><i></i>{{item.vehicleDto.deviceName}}</p>
                   <p class="address1" style="color: red; padding-top: 5px"><i></i>
@@ -218,6 +218,12 @@ export default {
   created () {
     this.setDTime();
     this.pickerOptions.disabledDate = this.disabledDate;
+    if (this.$route.query.value1) {
+      this.value1 = this.$route.query.value1
+      this.value2 = this.$route.query.value2
+      this.searchData.licensePlateNum = this.$route.query.vehicleNumber
+      this.search()
+    }
   },
   mounted() {
     this.setDTime();
