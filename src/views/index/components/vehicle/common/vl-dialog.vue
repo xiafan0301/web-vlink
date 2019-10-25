@@ -73,7 +73,7 @@
       </div>
       <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
         <div class="struc_c_d_qj struc_c_d_img">
-          <img class="bigImg"  :src="sturcDetail.subStoragePath" alt="">
+          <img class="bigImg"  :src="sturcDetail[detailLeftInfo.imgKey]" alt="">
           <span>抓拍图</span>
         </div>
         <div class="struc_c_d_box" style="float: left;" v-if="playerData">
@@ -95,7 +95,7 @@
         <!-- slides -->
         <swiper-slide v-for="(item, index) in curStrucInfoList" :key="item.id">
           <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
-            <img style="width: 100%; height: .88rem;" :src="item[detailBottomInfo.imgKey]" alt="">
+            <img :src="item[detailBottomInfo.imgKey]" alt="">
             <!--<div class="vl_jfo_sim" ><i class="vl_icon vl_icon_retrieval_05" :class="{'vl_icon_retrieval_06':  index === curImgIndex}"></i>{{item.semblance ? item.semblance : 92}}<span style="font-size: 12px;">%</span></div>-->
           </div>
         </swiper-slide>
@@ -259,6 +259,7 @@
         this.setPlayerData();
       },
       pageJump (data, curBtn) {
+        console.log(curBtn, data)
         this.$emit(curBtn.cb, data)
       },
       prevPageData () {
@@ -537,10 +538,13 @@
             border: 1px solid rgba(211, 211, 211, 1);
             cursor: pointer;
           }
-          a:hover {
+          .is_active:hover {
             background: #0c70f8;
             border: solid 1px #0c70f8;
             color: #ffffff;
+          }
+          .disabled:hover {
+            cursor: not-allowed;
           }
         }
       }
@@ -649,6 +653,7 @@
             cursor: pointer;
             border: 1px solid #FFFFFF;
             padding: 2px;
+            height: .88rem;
             img {
               width: 100%;
               height: 100%;

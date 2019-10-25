@@ -68,10 +68,10 @@
     <div class="reselt" v-if="reselt">
       <div class="plane insetPadding">
         <h3 class="title">分析结果</h3>
-        <el-table :data="evData" style="width: 100%">
-          <el-table-column  type="index" :show-overflow-tooltip="true" label="序号"></el-table-column>
+        <el-table :data="evData" style="width: 100%;":height="tableHeight" @row-click="createInfoWindow($event)">
+          <el-table-column  type="index" width="24px" label="序号"></el-table-column>
           <el-table-column  prop="address" :show-overflow-tooltip="true" label="落脚点位置"></el-table-column>
-          <el-table-column prop="stopOverTime" width="110px" sortable label="停留时长">
+          <el-table-column prop="stopOverTime" width="120px" sortable label="停留时长">
             <template slot-scope="scope">
               <span>{{ scope.row.stopOverTime | transMinute }}</span>
             </template>
@@ -81,7 +81,7 @@
       </div>
     </div>
 <!-- 视频播放 -->
-  <div is="mapVideoPlay" :oData="mapVideoData"></div>
+    <div is="mapVideoPlay" :oData="mapVideoData"></div>
     <!-- 地图选择 -->
     <!-- <el-dialog :visible.sync="dialogVisible" width="80%">
         <mapselect @selectMap="mapPoint" @closeMap="hideMap" :allPoints="allDevice" :allBayonets="allBayonet"></mapselect>
@@ -108,6 +108,10 @@ export default {
   },
   data() {
     return {
+      hoverWindow: null,
+      tableHeight: 400,
+      curInfoWinVideoPath: '',
+
       mapVideoData: null,
       dialogVisible: false,
       isload: false,
@@ -178,10 +182,15 @@ export default {
     });
     map.setMapStyle("amap://styles/whitesmoke");
     this.amap = map;
-    this.getMapGETmonitorList()//查询行政区域
+//    this.getMapGETmonitorList()//查询行政区域
     // this.getAllDevice() //查询所有的设备
     // this.getAllBayonetList() //查询所有的卡口
-    
+    // 查看当然table的高度
+    this.tableHeight = $('#mapBox').height() - 41;
+    // 监听地图信息窗体点击事件
+    $('body').on('click', '.vl_vehicle_ljd_mk_p', () => {
+      this.showVideo(this.curInfoWinVideoPath);
+    })
   },
   methods: {
     // 关闭视频
@@ -197,7 +206,6 @@ export default {
       if (this.amap) {
           this.amap.setZoomAndCenter(14, mapXupuxian.center);
         }
-      
     },
     setDTime () {
     },
@@ -346,24 +354,16 @@ export default {
           this.reselt = true;
           if (!res.data || res.data.length === 0) {
             if(!document.querySelector('.el-message--info')){
-           this.$message.info("抱歉，没有找到匹配结果");
-          }
-            
+             this.$message.info("抱歉，没有找到匹配结果");
+            }
             this.evData=[]
             this.amap.clearMap();
-            //this.searching = false;
             return false;
           }
-          this.evData = res.data.map(x => {
-            x.checked = false;
-            return x;
-          });
-        //  console.log(this.evData);
-          
+          this.evData = res.data;
           this.amap.clearMap();
-          this.evData.sort(this.compare("shotNum"))
+          this.evData.sort(this.compare("stopOverTime"))
           this.drawMarkers(this.evData);
-          //this.showEventList();
         }else{
           this.isload=false
         }
@@ -392,101 +392,60 @@ export default {
       })
     },
     drawMarkers(data) {
-      //console.log(data);
-      // let limit = 0
-      // if(data.length > 3){
-      //    limit= data[2].shotNum
-      // }
       let _this = this
       for (let i = 0; i < data.length; i++) {
         let obj = data[i];
-        let _idWin = "vlJfoImg" + i;
-        // let isBig = obj.shotNum >= limit?true:false
-       // if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
-            let _sContent = `<div id="${_idWin}" class="vl_jig_mk_p"><img class="igm" src="${obj.storagePath}"><p class='addres'>${obj.address} <i class='el-icon-caret-right'></i></p><p class='times'>${transMinute(obj.stopOverTime)}</p></div>`;
-            // 窗体
-            let marker = new AMap.Marker({
-              // 添加自定义点标记
-              map: this.amap,
-              position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-              offset: new AMap.Pixel(-90, -184), // 相对于基点的偏移位置
-              draggable: false, // 是否可拖动
-              extData: obj,
-              // 自定义点标记覆盖物内容
-              content: _sContent,
-              zIndex: 1000
-            });
-            // let clickWindow = new window.AMap.InfoWindow({
-            //   isCustom: true,
-            //   closeWhenClickMap: false,
-            //   offset: new window.AMap.Pixel(0, -40), // 相对于基点的偏移位置
-            //   content: obj.sContent
-            // });
-            // clickWindow.open(self.amap, new window.AMap.LngLat(obj.shotPlaceLongitude, obj.shotPlaceLatitude));
-            //obj.sContent=_sContent
-            
-          // 打开弹窗
-          
           // 摄像头
-            let _id = "vlJfoSxt" + i;
-            let _content =
-              "<div id=" +
-              _id +
-              ' class="vl_icon vl_jfo_sxt vl_icon_judge_04"></div>';
-            marker = new AMap.Marker({
-              // 添加自定义点标记
-              map: this.amap,
-              position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-              offset: new AMap.Pixel(-28.5, -50), // 相对于基点的偏移位置
-              draggable: false, // 是否可拖动
-              extData: obj,
-              // 自定义点标记覆盖物内容
-              content: _content,
-              zIndex: 100
-            });
-            setTimeout(() => {
-              this.addListen($("#" + _id), "mouseover", i,obj);
-              this.addListen($("#" + _id), "mouseout", i, obj);
-              // this.addListen($("#" + _id), "click", i, obj);
-              this.addListen($("#" + _idWin), "click", i, obj);
-              this.addListen($("#" + _idWin), "mouseover", i, obj);
-              this.addListen($("#" + _idWin), "mouseout", i, obj);
-              //this.addListen($("#" + _id), "click", i, obj);
-            }, 300);
-          // }
-      //  }
+        let _id = "vlVehicleLjdSxt" + i;
+        let _content =
+          "<div id=" +
+          _id +
+          ' class="vl_icon vl_jfo_sxt vl_icon_judge_04"></div>';
+        let marker = new AMap.Marker({
+          // 添加自定义点标记
+          map: this.amap,
+          position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
+          offset: new AMap.Pixel(-28.5, -50), // 相对于基点的偏移位置
+          draggable: false, // 是否可拖动
+          extData: obj,
+          // 自定义点标记覆盖物内容
+          content: _content,
+          zIndex: 100
+        });
+        marker.on('mouseover', function () {
+          $("#" + _id).addClass("vl_icon_judge_02");
+          _this.createInfoWindow(obj)
+        })
+        marker.on('mouseout', function () {
+          $("#" + _id).removeClass("vl_icon_judge_02");
+        })
       }
       this.amap.setFitView();
     },
-    addListen(el, evType, key, obj = {}) {
-      let self = this;
-      let _key;
-      el.bind(evType, function() {
-        
-        switch (evType) {
-          case "mouseover":
-            $("#vlJfoImg" + key).addClass("vl_jig_mk_img_show");
-            $("#vlJfoSxt" + key).addClass("vl_icon_judge_02");
-            break;
-          case "mouseout":
-            if (!obj.checked) {
-              $("#vlJfoImg" + key).removeClass("vl_jig_mk_img_show");
-              $("#vlJfoSxt" + key).removeClass("vl_icon_judge_02");
-            }
-            break;
-          case "click":
-            self.showVideo(obj);
-            break;
-        }
+    createInfoWindow (obj) {
+      let _sContent = `<div class="vl_vehicle_ljd_mk_p"><img class="igm" src="${obj.storagePath}"><p class='addres'>${obj.address} <i class='el-icon-caret-right'></i></p><p class='times'>${transMinute(obj.stopOverTime)}</p></div>`;
+      this.hoverWindow = new window.AMap.InfoWindow({
+        isCustom: true,
+        closeWhenClickMap: true,
+        offset: new window.AMap.Pixel(-2, -50), // 相对于基点的偏移位置
+        content: _sContent
       });
+      this.hoverWindow.open(this.amap, new window.AMap.LngLat(obj.shotPlaceLongitude, obj.shotPlaceLatitude));
+      this.curInfoWinVideoPath = obj.videoPath;
+      this.amap.setCenter([obj.shotPlaceLongitude, obj.shotPlaceLatitude])
     },
-    
-    showVideo(v){
+    showVideo(path){
       this.mapVideoData = {
-        name: '',
-        url: v.videoPath
+        name: Math.random(),
+        url: path
       }
     }
+  },
+  beforeDestroy () {
+    if (this.amap) {
+      this.amap.destroy();
+    }
+    $('body').unbind('click');
   }
 };
 </script>
@@ -547,6 +506,7 @@ export default {
   box-shadow: 4px 0px 10px 0px #838383;
   box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);
   animation: fadeInLeft 0.4s ease-out 0.3s both;
+  overflow: hidden;
   .title {
     font-size: 14px;
     font-weight: bold;
@@ -660,8 +620,8 @@ export default {
 }
 }
 
-.vl_jig_mk_p {
-  display: none;
+.vl_vehicle_ljd_mk_p {
+  /*display: none;*/
   position: relative;
   width: 180px;
   height: auto;
@@ -696,6 +656,7 @@ export default {
   .igm{
     width: 100%;
     height: 100px;
+    background: #666666;
   }
   .big {
     font-size: 16px;

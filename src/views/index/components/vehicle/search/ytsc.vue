@@ -57,8 +57,18 @@
                 </div>
               </el-form>
             </div>
+            <div class="cheti_img_out">
+              <div class="titile">
+                车体特征图片
+              </div>
+              <ul class="clearfix">
+                <li v-for="(item, index) in imgBDataList" :key="index">
+                  <div><img :src="item.src" alt=""></div>
+                </li>
+              </ul>
+            </div>
             <!-- 按钮样式 -->
-            <div class="btn_warp">
+            <div class="btn_warp" style="margin-top: 20px">
               <el-button class="reset_btn" @click="resetMenu">重置</el-button>
               <el-button
                       class="select_btn"
@@ -273,6 +283,7 @@
         imgDataList: [], // 上传图片的可框选车体信息
         initImageInfo: {}, // 上传图片的原始信息
         imgCutDataList: [], // 车体特征图片列表
+        imgBDataList: []
       };
     },
     mounted() {
@@ -329,7 +340,7 @@
         getImageAreaInfo(params)
             .then(res => {
               if (res && res.data) {
-                if (res.data.length === 0) {
+                if (res.data.length > 0) {
                   this.isOpenImgDialog = true;
 
                   res.data.map(item => {
@@ -339,22 +350,25 @@
                     };
                     this.imgDataList.push(obj);
                   })
+                } else {
+                  this.uploadClear = {};
                 }
               }
             })
       },
       emitImgData (obj) {
         this.isOpenImgDialog = obj.open;
+        this.imgBDataList = obj.imgBDataList
+        console.log(obj)
         if (obj.imgBDataList.length > 0) {
           this.imgCutDataList = obj.imgCutDataList;
-          // this.curImageUrl = obj.imgPath;
-          // this.imgData = {
-          //   path: obj.imgPath
-          // }
+        } else {
+          this.uploadClear = {};
         }
       },
       /*重置菜单的数据 */
       resetMenu() {
+        this.imgBDataList = []
         this.uploadClear = {};
         // 置空数据数量
         this.total = 0;
@@ -611,6 +625,27 @@
       display: flex;
       // 左边菜单样式
       .left_menu {
+        .cheti_img_out{
+          .titile{
+            text-align: center;
+            border-bottom: 1px solid #D3D3D3;
+            padding: 10px 0;
+            margin-bottom: 20px;
+          }
+          li{
+            width: 50%;
+            float: left;
+            padding-left: 10px;
+            padding-bottom: 10px;
+            > div{
+              border: 1px solid #D3D3D3;
+              img{
+                height: 100%;
+                width: 100%;
+              }
+            }
+          }
+        }
         width: 272px;
         position: relative;
         background: #fff;

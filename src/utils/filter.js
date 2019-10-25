@@ -13,10 +13,11 @@ Vue.filter('fnPercent', function (val, total) {
  * */
 Vue.filter('transMinute', function (seconds) {
   if (seconds < 0) { seconds = 0; }
-  let iH = Math.floor(seconds / 60);
+  let iD = Math.floor(seconds / 1440);
+  let iH = Math.floor((seconds % 1440) / 60);
   let iS = seconds % 60;
-  return (((iH === 0 && iS > 0) || (iH === 0 && iS === 0)) ? '' : (iH + '小时')) +
-    ((iH > 0 && iS === 0) ? '' : (iS + '分钟'));
+  return (((iD === 0 && iS > 0) || (iD === 0 && iS === 0)) ? '' : (iD + '天')) + (((iH === 0 && iS > 0) || (iH === 0 && iS === 0)) ? '' : (iH + '小时')) +
+      ((iH > 0 && iS === 0) ? '' : (iS + '分钟'));
 });
 /*
  * 时间戳处理

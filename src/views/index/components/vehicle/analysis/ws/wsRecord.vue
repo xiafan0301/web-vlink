@@ -22,82 +22,80 @@
           <h2>尾随车辆的特征信息</h2>
           <ul class="left_ul">
             <li>
-              <img :src="resultList.length > 0 && resultList[0].struVehicleDto.storagePath" alt="" class="bigImg">
+              <img :src="resultList.length > 0 && resultList[0].struVehicleDto.StorageUrl3" alt="" class="bigImg">
             </li>
             <li>
               <span>有无车牌：</span>
-              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.hasPlate ? resultList[0].struVehicleDto.hasPlate : '未知'}}</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.HasPlate === '1' ? '有车牌' : '无车牌'}}</span>
             </li>
             <li>
               <span>车牌号：</span>
-              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.plateNo ? resultList[0].struVehicleDto.plateNo : '未知'}}</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.PlateNo ? resultList[0].struVehicleDto.PlateNo : '未知'}}</span>
             </li>
             <li>
               <span>号牌种类：</span>
-              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.plateClass ? resultList[0].struVehicleDto.plateClass : '未知'}}</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.plateClassDesc ? resultList[0].struVehicleDto.plateClassDesc : '未知'}}</span>
             </li>
             <li>
               <span>车牌颜色：</span>
-              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.plateColor ? resultList[0].struVehicleDto.plateColor : '未知'}}</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.plateColorDesc ? resultList[0].struVehicleDto.plateColorDesc : '未知'}}</span>
             </li>
             <li>
               <span>车辆类型：</span>
-              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.vehicleClass ? resultList[0].struVehicleDto.vehicleClass : '未知'}}</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.vehicleClassDesc ? resultList[0].struVehicleDto.vehicleClassDesc : '未知'}}</span>
             </li>
             <li>
               <span>车辆品牌：</span>
-              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.vehicleBrand ? resultList[0].struVehicleDto.vehicleBrand : '未知'}}</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.vehicleBrandDesc ? resultList[0].struVehicleDto.vehicleBrandDesc : '未知'}}</span>
             </li>
             <li>
               <span>车辆型号：</span>
-              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.vehicleModel ? resultList[0].struVehicleDto.vehicleModel : '未知'}}</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.VehicleModel ? resultList[0].struVehicleDto.VehicleModel : '未知'}}</span>
             </li>
             <li>
               <span>车辆年款：</span>
-              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.vehicleStyles ? resultList[0].struVehicleDto.vehicleStyles : '未知'}}</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.VehicleStyles ? resultList[0].struVehicleDto.VehicleStyles : '未知'}}</span>
             </li>
             <li>
               <span>车辆颜色：</span>
-              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.vehicleColor ? resultList[0].struVehicleDto.vehicleColor : '未知'}}</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.vehicleColorDesc ? resultList[0].struVehicleDto.vehicleColorDesc : '未知'}}</span>
             </li>
             <li>
               <span>车顶：</span>
-              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.vehicleRoof ? resultList[0].struVehicleDto.vehicleRoof : '未知'}}</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.VehicleRoof ? resultList[0].struVehicleDto.VehicleRoof : '未知'}}</span>
             </li>
             <li>
               <span>撞痕：</span>
-              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.hitMarkInfo ? resultList[0].struVehicleDto.hitMarkInfo : '未知'}}</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.HitMarkInfo ? resultList[0].struVehicleDto.HitMarkInfo : '未知'}}</span>
             </li>
             <li>
               <span>车前物品描述：</span>
-              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.descOfFrontItem ? resultList[0].struVehicleDto.descOfFrontItem : '未知'}}</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.DescOfFrontItem ? resultList[0].struVehicleDto.DescOfFrontItem : '未知'}}</span>
             </li>
             <li>
               <span>车后物品描述：</span>
-              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.descOfRearItem ? resultList[0].struVehicleDto.descOfRearItem : '未知'}}</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.DescOfRearItem ? resultList[0].struVehicleDto.DescOfRearItem : '未知'}}</span>
             </li>
             <li>
               <span>遮阳板状态：</span>
-              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.sunvisor ? resultList[0].struVehicleDto.sunvisor : '未知'}}</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.Sunvisor === 0 ? '无' : resultList.length > 0 && resultList[0].struVehicleDto.Sunvisor === 1 ? '有' : '未知'}}</span>
             </li>
             <li>
               <span>安全带状态：</span>
-              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.safetyBelt ? resultList[0].struVehicleDto.safetyBelt : '未知'}}</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.SafetyBelt === 0 ? '无' : resultList.length > 0 && resultList[0].struVehicleDto.SafetyBelt === 1 ? '有' : '未知'}}</span>
             </li>
             <li>
               <span>打电话状态：</span>
-              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.calling ? resultList[0].struVehicleDto.calling : '未知'}}</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.Calling === 0 ? '无' : resultList.length > 0 && resultList[0].struVehicleDto.Calling === 1 ? '有' : '未知'}}</span>
             </li>
           </ul>
         </vue-scroll>
       </div>
       <div class="right">
         <div class="operation_box">
-          <!-- <p @click="skipBreakRecordPage">查看违章记录</p> -->
           <p @click="skipVehicleControlPage">车辆布控</p>
           <p @click="skipTrajectoryPage">轨迹分析</p>
           <p @click="skipFootholdPage">落脚点分析</p>
-          <!-- <p>以车搜车</p> -->
         </div>
         <div id="rightContainerMap"></div>
         <!--地图操作按钮-->
@@ -111,37 +109,14 @@
     <!-- 视频全屏放大 -->
     <div style="width: 0; height: 0;" v-if="showLarge" :class="{vl_j_fullscreen: showLarge}">
       <div is="flvplayer" :oData="playerData" @playerClose="playerClose"  :oConfig="{sign: false, close: true, pause: true}" ></div>
-
-      <!-- <video id="controlVideo" :src="videoDetail.videoPath" crossOrigin="anonymous"></video>
-      <div @click="closeVideo" class="vl_icon vl_icon_event_23 close_icon"></div>
-      <div class="control_bottom">
-        <div>{{videoDetail.deviceName}}</div>
-        <div>
-          <span @click="playLargeVideo(false)" class="vl_icon vl_icon_judge_01" v-show="isPlaying"></span>
-          <span @click="playLargeVideo(true)" class="vl_icon vl_icon_control_09" v-show="!isPlaying"></span>
-          <span @click="playerCut" class="vl_icon vl_icon_control_07"></span>
-          <span><a download="视频" :href="videoDetail.videoPath" target="_blank" class="vl_icon vl_icon_event_26"></a></span>
-        </div>
-      </div> -->
     </div>
-    <!-- 截屏 dialog -->
-    <!-- <el-dialog title="截屏" :visible.sync="cutDialogVisible" :center="false" :append-to-body="true" width="1000px">
-      <div style="text-align: center; padding-top: 30px;">
-        <canvas :id="flvplayerId + '_cut_canvas'"></canvas>
-      </div>
-      <div slot="footer" class="dialog-footer" style="padding: 0 0 20px 0;">
-        <el-button  @click="cutDialogVisible = false">取 消</el-button>&nbsp;&nbsp;&nbsp;&nbsp;
-        <el-button  type="priamry" @click="playerCutSave">保 存</el-button>
-        <a :id="flvplayerId + '_cut_a'" style="display: none;">保存</a>
-      </div>
-    </el-dialog> -->
   </div>
 </template>
 <script>
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { mapXupuxian } from "@/config/config.js";
 import { getTailBehindDetail } from '@/views/index/api/api.judge.js'
-import { random14 } from '@/utils/util.js';
+// import { random14 } from '@/utils/util.js';
 import flvplayer from '@/components/common/flvplayer.vue';
 export default {
   components: { vlBreadcrumb, flvplayer },
@@ -153,7 +128,9 @@ export default {
       vehicleDetail: {}, // 尾随车辆详细信息
       marker: {},
       playerData: null,
-      queryObj: {}
+      queryObj: {},
+      mapTimer: null,
+      initTimer: null,
     }
   },
   created () {
@@ -161,7 +138,7 @@ export default {
       plateNo: this.$route.query.plateNo,
       dateStart: this.$route.query.dateStart,
       dateEnd: this.$route.query.dateEnd,
-      plateNoTb: this.$route.query.dateStart,
+      plateNoTb: this.$route.query.plateNoTb,
       vehicleClass: this.$route.query.vehicleClass,
       interval: this.$route.query.interval,
       deviceCode: this.$route.query.deviceCode,
@@ -170,10 +147,22 @@ export default {
   },
   mounted () {
     this.initMap();
-    // this.getVehicleDetail();
-    setTimeout(() => {
+    this.initTimer = setTimeout(() => {
       this.getDetail();
     }, 500)
+  },
+  beforeDestroy () {
+    if (this.map) {
+      this.map.destroy();
+    }
+    if (this.initTimer) {
+      window.clearTimeout(this.initTimer);
+      this.initTimer = null;
+    }
+    if (this.mapTimer) {
+      window.clearTimeout(this.mapTimer);
+      this.mapTimer = null;
+    }
   },
   methods: {
     // 跳至新建布控页面
@@ -186,7 +175,7 @@ export default {
           { name: '新建布控' }
         ]
       });
-      this.$router.push({name: 'control_create', query: { plateNo: this.resultList[0].struVehicleDto.plateNo, imgurl: this.resultList[0].struVehicleDto.storagePath, modelName: '车辆追踪' }});
+      this.$router.push({name: 'control_create', query: { plateNo: this.resultList[0].struVehicleDto.PlateNo, imgurl: this.resultList[0].struVehicleDto.StorageUrl3, modelName: '车辆追踪' }});
     },
     // 跳至轨迹分析页面
     skipTrajectoryPage () {
@@ -198,7 +187,7 @@ export default {
           { name: '车辆轨迹' }
         ]
       });
-      this.$router.push({name: 'vehicle_analysis_clgj', query: { plateNo: this.resultList[0].struVehicleDto.plateNo }});
+      this.$router.push({name: 'vehicle_analysis_clgj', query: { plateNo: this.resultList[0].struVehicleDto.PlateNo }});
     },
     // 跳至落脚点分析页面
     skipFootholdPage () {
@@ -210,7 +199,7 @@ export default {
           { name: '落脚点分析' }
         ]
       });
-      this.$router.push({name: 'vehicle_search_ljd', query: { plateNo: this.resultList[0].struVehicleDto.plateNo }});
+      this.$router.push({name: 'vehicle_search_ljd', query: { plateNo: this.resultList[0].struVehicleDto.PlateNo }});
     },
     // 获取尾随车辆详情
     getDetail () {
@@ -229,10 +218,9 @@ export default {
       getTailBehindDetail(params)
         .then(res => {
           if (res && res.data && res.data.length > 0) {
-            console.log('res', res)
             this.resultList = res.data;
 
-            this.mapMark(this.resultList)
+            this.mapMark(this.resultList);
           }
         })
     },
@@ -264,10 +252,10 @@ export default {
         for (let i = 0; i < data.length; i++) {
           
           let obj = data[i];
-          if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
+          if (obj.shotPlaceLatitude > 0 && obj.shotPlaceLongitude > 0) {
             let offSet = [-20.5, -55];
-            let _idBtn = 'vlJtcPlayBtn' + obj.struVehicleDto.deviceID;
-            let _id = 'vlJtcVideo' + obj.deviceID;
+            let _idBtn = 'vlJtcPlayBtn' + obj.struVehicleDto.DeviceID;
+            let _id = 'vlJtcVideo' + obj.DeviceID;
 
             let iconType, sContent, deviceName;
 
@@ -275,25 +263,25 @@ export default {
               deviceName = obj.deviceName;
               if (i === 0) {
                 // iconType = 'vl_icon_04_019';
-                sContent = '<div id="vehicle' + obj.deviceID + '"  title="'+ deviceName +'" class="vl_icon vl_icon_04_019"></div>';
+                sContent = '<div id="vehicle' + obj.DeviceID + '"  title="'+ deviceName +'" class="vl_icon vl_icon_04_019"></div>';
               } else if (i === (data.length - 1)) {
                 // iconType = 'vl_icon_05_019';
-                sContent = '<div id="vehicle' + obj.deviceID + '"  title="'+ deviceName +'" class="vl_icon vl_icon_05_019"></div>';
+                sContent = '<div id="vehicle' + obj.DeviceID + '"  title="'+ deviceName +'" class="vl_icon vl_icon_05_019"></div>';
               } else {
                 iconType = 0;
-                sContent = '<div id="vehicle' + obj.deviceID + '"  title="'+ deviceName +'" class="vl_icon vl_icon_map_mark'+ iconType +'"></div>';
+                sContent = '<div id="vehicle' + obj.DeviceID + '"  title="'+ deviceName +'" class="vl_icon vl_icon_map_mark'+ iconType +'"></div>';
               }
             } else { // 卡口
               deviceName = obj.bayonetName;
               if (i === 0) {
                 // iconType = 'vl_icon_04_019';
-                sContent = '<div id="vehicle' + obj.deviceID + '"  title="'+ obj.deviceName +'" class="vl_icon vl_icon_04_019"></div>';
+                sContent = '<div id="vehicle' + obj.DeviceID + '"  title="'+ obj.deviceName +'" class="vl_icon vl_icon_04_019"></div>';
               } else if (i === (data.length - 1)) {
                 // iconType = 'vl_icon_05_019';
-                sContent = '<div id="vehicle' + obj.deviceID + '"  title="'+ obj.deviceName +'" class="vl_icon vl_icon_05_019"></div>';
+                sContent = '<div id="vehicle' + obj.DeviceID + '"  title="'+ obj.deviceName +'" class="vl_icon vl_icon_05_019"></div>';
               } else {
                 iconType = 8;
-                sContent = '<div id="vehicle' + obj.deviceID + '"  title="'+ deviceName +'" class="vl_icon vl_icon_map_mark'+ iconType +'"></div>';
+                sContent = '<div id="vehicle' + obj.DeviceID + '"  title="'+ deviceName +'" class="vl_icon vl_icon_map_mark'+ iconType +'"></div>';
               }
               deviceName = obj.bayonetName;
             }
@@ -312,13 +300,13 @@ export default {
 
             marker.on('mouseover', function () {
               if(i !== 0 && i !== (data.length - 1)) {
-                $('#vehicle' + obj.deviceID).addClass('vl_icon_map_hover_mark' + iconType);
+                $('#vehicle' + obj.DeviceID).addClass('vl_icon_map_hover_mark' + iconType);
               }
 
               let sContent = "<div class='tip_box'><div class='select_target'><p class='select_p'>查询目标</p>"
-                    +"<img src="+ obj.storagePath +" /><div class='mongolia'>"
+                    +"<img src="+ obj.StorageUrl3 +" /><div class='mongolia'>"
                     +"<span>"+ obj.shotTime +"</span><i id="+ _id +" class='vl_icon vl_icon_control_09'></i></div></div>"
-                    +"<div class='tail_vehicle'><p class='tail_p'>尾随车辆</p><img src="+ obj.struVehicleDto.storagePath +" />"
+                    +"<div class='tail_vehicle'><p class='tail_p'>尾随车辆</p><img src="+ obj.struVehicleDto.StorageUrl3 +" />"
                     +"<div class='mongolia'><span>"+ obj.struVehicleDto.shotTime +"</span><i id="+ _idBtn +" class='vl_icon vl_icon_control_09'></i></div></div>"
                     +"<div class='divide'></div><div class='device_name'>"+ deviceName +"</div></div>";
 
@@ -330,14 +318,14 @@ export default {
                 });
                 hoverWindow.open(_this.map, new window.AMap.LngLat(obj.shotPlaceLongitude, obj.shotPlaceLatitude));
 
-                setTimeout(() => {
+                this.mapTimer = setTimeout(() => {
                   _this.addListen(_idBtn, obj.struVehicleDto);
                   _this.addListen(_id, obj);
                 }, 500);
             });
             marker.on('mouseout', function () {
               if(i !== 0 && i !== (data.length - 1)) {
-                $('#vehicle' + obj.deviceID).removeClass('vl_icon_map_hover_mark' + iconType);
+                $('#vehicle' + obj.DeviceID).removeClass('vl_icon_map_hover_mark' + iconType);
               }
             });
           }

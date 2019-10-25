@@ -254,7 +254,7 @@ export default {
       if (this.type === 1) {
         let params = Object.assign(this.params, {
           pageSize: this.pagination.pageSize,
-          pageNum: this.pagination.pageNum
+          pageNum: pageNum
         });
         getDeviceSnapImagesPage(params).then(res => {
           if (res && res.data) {
@@ -350,11 +350,11 @@ export default {
             '<li><span>抓拍时间：</span>' + data.shotTime + '</li>' +
           '</ul>' +
         '</div>';
-      this.markerPoint = new AMap.Marker({
+      this.markerPoint = new window.AMap.Marker({
         // 添加自定义点标记
         map: this.amap,
         position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-        offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+        offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
         draggable: false, // 是否可拖动
         // 自定义点标记覆盖物内容
         content: _content

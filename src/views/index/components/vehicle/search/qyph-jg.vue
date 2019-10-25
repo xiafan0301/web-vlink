@@ -5,8 +5,8 @@
       <div class="the-result-box">
         <vue-scroll>
           <div class="list-box">
-            <div class="list-item" v-for="(item, index) in strucInfoList" :key="item.id" @click="showStrucInfo(item, index)">
-              <img :src="item.vehicleDetailList[0] ? item.vehicleDetailList[0].subStoragePath : ''" alt="">
+            <div class="list-item" v-for="(item) in strucInfoList" :key="item.id" @click="showStrucInfo(item)">
+              <img :src="item.vehicleDetailList[0] ? item.vehicleDetailList[0].StorageUrl1 : ''" alt="">
               <p class="time">车牌号:{{item.groupName}}</p>
               <p class="address">次数:{{item.totalNum}}</p>
             </div>
@@ -47,7 +47,8 @@
     },
     methods: {
       gotoControl (data){
-        this.$router.push({ name: 'control_library', query: {imgurl: data.subStoragePath, plateNo: data.plateNo} })
+        console.log(data)
+        this.$router.push({ name: 'control_library', query: {imgurl: data.StorageUrl1, plateNo: data.plateNo} })
       },
       getTheList () {
         let query = JSON.parse(window.sessionStorage.getItem('qyphParam'));
@@ -83,8 +84,8 @@
         this.pagination.pageNum = page;
         this.getTheList();
       },
-      showStrucInfo (data, index) {
-        this.curStrucList = this.strucInfoList[index].vehicleDetailList;
+      showStrucInfo (data) {
+        this.curStrucList = data.vehicleDetailList;
         this.detailData = {
           index: 0,
           list: this.curStrucList
