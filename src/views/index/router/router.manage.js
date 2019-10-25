@@ -12,6 +12,16 @@ export default {
       component: () => import('@/views/index/components/manage/specialVehicle.vue')
     },
     {
+      path: 'specialcsManage',
+      name: 'special_csmanage',
+      component: () => import('@/views/index/components/manage/specialcsManage.vue')
+    },
+    {
+      path: 'specialcsManageadd',
+      name: 'special_csmanageadd',
+      component: () => import('@/views/index/components/manage/specialcsManageadd.vue')
+    },
+    {
       path: 'user',
       name: 'user',
       component: () => import('@/views/index/components/manage/user.vue'),

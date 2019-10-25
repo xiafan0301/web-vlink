@@ -11,7 +11,7 @@ export function getArchives(params) {
   return request({
     url: '/vehicle/archives',
     method: 'get',
-    mode: 'judge',
+    mode: 'vehicle',
     params: params
   })
 }
@@ -24,7 +24,7 @@ export function getViolation(params) {
   return request({
     url: '/vehicle/violation',
     method: 'get',
-    mode: 'judge',
+    mode: 'vehicle',
     params: params
   })
 }
@@ -39,7 +39,7 @@ export function getDrivingAnalysis(data) {
   return request({
     url: '/driving-discipline-analysis',
     method: 'post',
-    mode: 'judge',
+    mode: 'vehicle',
     data
   })
 }
@@ -52,7 +52,7 @@ export function postExport(data) {
   return request({
     url: '/export',
     method: 'post',
-    mode: 'judge',
+    mode: 'vehicle',
     data
   })
 }
@@ -67,7 +67,7 @@ export function getFeatureSearch(data) {
   return request({
     url: '/vehicle-investigate/feature-search',
     method: 'post',
-    mode: 'judge',
+    mode: 'vehicle',
     data
   })
 }
@@ -81,7 +81,7 @@ export function getPhotoAnalysis(url) {
   return request({
     url: '/vehicle-investigate/photo-analysis?uploadImgUrls=' + url,
     method: 'get',
-    mode: 'judge'
+    mode: 'vehicle'
   })
 }
 
@@ -95,7 +95,7 @@ export function getPhotoSearch(data) {
   return request({
     url: '/vehicle-investigate/photo-search',
     method: 'post',
-    mode: 'judge',
+    mode: 'vehicle',
     data
   })
 }
@@ -204,7 +204,7 @@ export function postTaskInfosPage(params) {
   return request({
     url: '/personinvestigation/showtasklist',
     method: 'post',
-    mode: 'judge',
+    mode: 'portrait',
     params
   })
 }
@@ -220,7 +220,15 @@ export function getdetailbg(params) {
   return request({
     url: '/personinvestigation/showinvestigationdetails',
     method: 'get',
-    mode: 'judge',
+    mode: 'portrait',
+    params
+  })
+}
+export function postdetailbg(params) {
+  return request({
+    url: '/personinvestigation/updateinvestigationtask',
+    method: 'post',
+    mode: 'portrait',
     params
   })
 }

@@ -139,7 +139,7 @@
                 @click="showStrucInfo(item, index)"
               >
                 <div class="img_wrap">
-                  <img :src="item.subStoragePath" />
+                  <img :src="item.StorageUrl1" />
                 </div>
                 <div class="text_wrap">
                   <div class="text_message" :title="item.deviceName">
@@ -151,7 +151,7 @@
                     {{item.shotTime}}
                   </div>
                   <div class="text_message">
-                    车牌号码：{{item.plateNo ? item.plateNo : "未识别"}}
+                    车牌号码：{{item.PlateNo ? item.PlateNo : "未识别"}}
                   </div>
                 </div>
               </div>
@@ -404,7 +404,7 @@ export default {
             }
           } else if (this.sortType === 2) {
             // 监控排序
-            queryParams.orderBy = "deviceNamePinyin";
+            queryParams.orderBy = "devicePinyin";
             if (this.cameraSortType) {
               queryParams.order = "desc";
             } else {

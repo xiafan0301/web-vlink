@@ -108,7 +108,7 @@
                     @dragend="dragEnd"
                     draggable="true"
                     style="cursor: move;"
-                    :src="item.subStoragePath"
+                    :src="item.StorageUrl1"
                   />
                 </div>
                 <div class="text_wrap">
@@ -121,7 +121,7 @@
                     {{item.shotTime}}
                   </div>
                   <div class="text_message">
-                    车牌号码：{{item.plateNo ? item.plateNo : "未识别"}}
+                    车牌号码：{{item.PlateNo ? item.PlateNo : "未识别"}}
                   </div>
                 </div>
               </div>
@@ -162,11 +162,11 @@
 
     <!-- D设备 B卡口  这里是设备和卡口 -->
     <div
-            is="mapSelector"
-            :open="openMap"
-            :clear="msClear"
-            :showTypes="'DB'"
-            @mapSelectorEmit="mapSelectorEmit">
+      is="mapSelector"
+      :open="openMap"
+      :clear="msClear"
+      :showTypes="'DB'"
+      @mapSelectorEmit="mapSelectorEmit">
     </div>
   </div>
 </template>
@@ -327,10 +327,11 @@ export default {
         url: this.curImageUrl
         // url: 'http://10.116.126.10/root/test/20190918-1635-002.jpg'
       };
+      this.imgDataList = [];
       getImageAreaInfo(params)
         .then(res => {
           if (res && res.data) {
-            if (res.data.length === 0) {
+            if (res.data.length > 0) {
               this.isOpenImgDialog = true;
 
               res.data.map(item => {
@@ -340,6 +341,8 @@ export default {
                 };
                 this.imgDataList.push(obj);
               })
+            } else {
+              this.uploadClear = {};
             }
           }
         })
@@ -401,7 +404,7 @@ export default {
         }
       } else if (this.sortType === 2) {
         // 监控排序
-        queryParams.orderBy = "deviceNamePinyin";
+        queryParams.orderBy = "devicePinyin";
         if (this.cameraSortType) {
           queryParams.order = "desc";
         } else {
@@ -533,11 +536,11 @@ export default {
     },
     // 拖拽开始
     dragStart(ev, item) {
-      if (item && item.subStoragePath) {
+      if (item && item.StorageUrl1) {
         if (!ev) {
           ev = window.event;
         }
-        ev.dataTransfer.setData("upload_pic_url", item.subStoragePath); // 设置属性dataTransfer   两个参数   1：key   2：value
+        ev.dataTransfer.setData("upload_pic_url", item.StorageUrl1); // 设置属性dataTransfer   两个参数   1：key   2：value
       }
     },
     dragEnd() {
