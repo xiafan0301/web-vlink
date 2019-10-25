@@ -592,6 +592,7 @@ export default {
         url: this.curImageUrl
         // url: 'http://10.116.126.10/root/test/20190918-1635-002.jpg'
       };
+      this.imgDataList = [];
       getImageAreaInfo(params)
         .then(res => {
           if (res && res.data) {
@@ -605,6 +606,8 @@ export default {
                 };
                 this.imgDataList.push(obj);
               })
+            } else {
+              this.uploadClear = {};
             }
           }
         })

@@ -162,11 +162,11 @@
 
     <!-- D设备 B卡口  这里是设备和卡口 -->
     <div
-            is="mapSelector"
-            :open="openMap"
-            :clear="msClear"
-            :showTypes="'DB'"
-            @mapSelectorEmit="mapSelectorEmit">
+      is="mapSelector"
+      :open="openMap"
+      :clear="msClear"
+      :showTypes="'DB'"
+      @mapSelectorEmit="mapSelectorEmit">
     </div>
   </div>
 </template>
@@ -327,10 +327,11 @@ export default {
         url: this.curImageUrl
         // url: 'http://10.116.126.10/root/test/20190918-1635-002.jpg'
       };
+      this.imgDataList = [];
       getImageAreaInfo(params)
         .then(res => {
           if (res && res.data) {
-            if (res.data.length === 0) {
+            if (res.data.length > 0) {
               this.isOpenImgDialog = true;
 
               res.data.map(item => {
@@ -340,6 +341,8 @@ export default {
                 };
                 this.imgDataList.push(obj);
               })
+            } else {
+              this.uploadClear = {};
             }
           }
         })
