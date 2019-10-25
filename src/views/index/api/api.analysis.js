@@ -11,7 +11,7 @@ export function getArchives(params) {
   return request({
     url: '/vehicle/archives',
     method: 'get',
-    mode: 'judge',
+    mode: 'vehicle',
     params: params
   })
 }

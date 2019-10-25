@@ -243,7 +243,7 @@
                           <div class="com_width_to_height" style="margin-bottom: 5px;">
                             <div>
                               <div>
-                                <img class="bigImg" :src="item.vehicleDto.subStoragePath" :alt="item.vehicleDto.plateNo" :title="item.vehicleDto.plateNo">
+                                <img class="bigImg" :src="item.vehicleDto.StorageUrl1" :alt="item.vehicleDto.plateNo" :title="item.vehicleDto.plateNo">
                               </div>
                             </div>
                           </div>
@@ -284,7 +284,7 @@
                         </div>
                         <ul>
                           <li v-for="(item, index) in stopOverRecordList" :key="index">
-                            <span style="padding-left: 10px">{{index + 1}}</span><span style="padding-left: 5px">{{item.address}}</span>
+                            <span style="padding-left: 10px">{{index + 1}}</span><span style="padding-left: 5px; padding-top: 14px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;">{{item.address}}</span>
                             <span>{{item.stopOverTime}}分钟</span>
                           </li>
                         </ul>
@@ -497,7 +497,7 @@ export default {
     },
     setMapMarkerForYjcm1 () {
       this.yjcmMap1.clearMap();
-      if (this.yjcmList && this.yjcmList.allRecords && this.yjcmList.allRecords.length > 0) {
+      if (this.stopOverRecordList && this.stopOverRecordList.length > 0) {
         let _this = this;
         let oList = {};
         for (let i = 0; i < this.yjcmList.allRecords.length; i++) {
@@ -510,27 +510,56 @@ export default {
             oList[_o.deviceId].CM_shotTimes.push(_o.shotTime);
           }
         }
-        // console.log('oList', oList);
-        for (let key in oList) {
-          let _oo = oList[key];
-          if (_oo.longitude > 0 && _oo.latitude > 0) {
-            // console.log('_oo', _oo);
-            new window.AMap.Marker({ // 添加自定义点标记
-              map: _this.yjcmMap1,
-              position: [_oo.longitude, _oo.latitude], // 基点位置 [116.397428, 39.90923]
-              offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
-              draggable: false, // 是否可拖动
-              // extData: obj,
-              // 自定义点标记覆盖物内容
-              content: '<div class="map_icons vl_icon vl_icon_cl cl_report_cm">' +
-                '<div class="cl_report_hw"><div>' +
-                '<p>' + _oo.deviceName + '</p>' +
-                '<h3>' + _oo.CM_shotTimes.length + '次</h3>' +
-                '</div></div></div>'
-            });
-          }
-        }
+        console.log('oList', oList);
+        // for (let key in oList) {
+        //   let _oo = oList[key];
+        //   if (_oo.longitude > 0 && _oo.latitude > 0) {
+        //     console.log('_oo', _oo);
+        //     new window.AMap.Marker({ // 添加自定义点标记
+        //       map: _this.yjcmMap1,
+        //       position: [_oo.longitude, _oo.latitude], // 基点位置 [116.397428, 39.90923]
+        //       offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
+        //       draggable: false, // 是否可拖动
+        //       // extData: obj,
+        //       // 自定义点标记覆盖物内容
+        //       content: '<div class="map_icons vl_icon vl_icon_cl cl_report_cm">' +
+        //         '<div class="cl_report_hw"><div>' +
+        //         '<p>' + _oo.deviceName + '</p>' +
+        //         '<h3>' + _oo.CM_shotTimes.length + '次</h3>' +
+        //         '</div></div></div>'
+        //     });
+        //   }
+        // }
+        this.stopOverRecordList.forEach((item)=>{
+            if (item.shotPlaceLongitude > 0 && item.shotPlaceLatitude > 0) {
+              new window.AMap.Marker({ // 添加自定义点标记
+                map: _this.yjcmMap1,
+                position: [item.shotPlaceLongitude, item.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
+                offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
+                draggable: false, // 是否可拖动
+                // extData: obj,
+                // 自定义点标记覆盖物内容
+                content: '<div class="map_icons vl_icon vl_icon_cl cl_report_cm">' +
+                  '<div class="cl_report_hw cl_report_hw1"><div>' +
+                   '<div><img src="' + item.subStoragePath + '"  alt=""></div> ' +
+                  '<p style="text-align: left">地址：' + item.deviceName + '</p>' +
+                  '<h3 style="font-weight: normal; font-size: 14px; text-align: left"> 停留时长：' + _this.formdata(item.stopOverTime) + '</h3>' +
+                  '</div></div></div>'
+              });
+            }
+        })
         this.yjcmMap1.setFitView();
+      }
+    },
+    formdata (val) {
+      if (val> 60) {
+        let _b = parseInt(val/60)
+        let _c = val - _b*60
+        return _b + '小时' + _c + '分钟'
+      } else if (val === 60) {
+        return 1 + '小时'
+      }else {
+        return val + '分钟'
       }
     },
     setMapMarkerForClgj () {
@@ -911,7 +940,7 @@ export default {
         width: 40px !important;
       }
       span:nth-of-type(2){
-        width: 100px !important;
+        width: 85px !important;
       }
       span:nth-of-type(3){
         width: 80px !important;
@@ -996,7 +1025,7 @@ export default {
 }
 .cl_report_cm {
   position: relative;
-  > .cl_report_hw {
+   .cl_report_hw {
     position: absolute; bottom: 125%; left: -90px; z-index: 1;
     background-color: #fff;
     background:rgba(255,255,255,1);
@@ -1011,7 +1040,7 @@ export default {
         padding-bottom: 5px;
         text-align: center;
       }
-      > h3 {
+       h3 {
         color: #333; font-weight: bold; font-size: 20px;
         text-align: center;
       }
@@ -1042,6 +1071,13 @@ export default {
         border-left: 20px solid transparent;
         border-right: 20px solid transparent;
       }
+    }
+  }
+   .cl_report_hw1{
+    > h3 {
+      color: #fff;
+      text-align: center;
+      font-weight: normal !important;
     }
   }
 }

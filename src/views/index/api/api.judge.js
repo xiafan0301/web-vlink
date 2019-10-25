@@ -69,7 +69,7 @@ export function JfoGETCity(data) {
     url: '/vehicle-investigate/first-enter-city',
     method: 'post',
     data,
-    mode: 'judge'
+    mode: 'vehicle'
   })
 }
 /**

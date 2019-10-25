@@ -9,9 +9,9 @@
     <div class="tpcfxxq_content">
       <div class="tpcfxxq_content_cl">
         <div style="padding: 10px 20px; border-bottom: 1px solid #F2F2F2">车辆登记信息</div>
-        <div class="cei_pai">{{this.$route.query.vehicleNumber}}dxfgdfgdfgf</div>
+        <div class="cei_pai">{{this.$route.query.vehicleNumber}}</div>
         <div style="display: inline-block; line-height: 40px">
-          <el-button type="primary" style="width: 80px">查询</el-button>
+          <el-button type="primary" style="width: 80px" @click="serchtpc">查询</el-button>
         </div>
       </div>
       <div class="tpcfxxq_content_tp">
@@ -20,7 +20,7 @@
           <div class="th-ycxc-record-list">
             <div class="list-box">
               <div class="list-item" v-for="(item, index) in regulationsList" :key="item.uid" @click="onOpenDetail(index)">
-                <img :src="item.vehicleDto.subStoragePath" alt="">
+                <img :src="item.vehicleDto.StorageUrl1" alt="">
                 <p class="time"><i></i>{{item.vehicleDto.shotTime}}</p>
                 <p class="address"><i></i>{{item.vehicleDto.deviceName}}</p>
                 <p class="address1" style="color: red; padding-top: 5px"><i></i>
@@ -66,9 +66,14 @@ export default {
     }
   },
   created() {
+  },
+  mounted () {
     this.getViolationList()
   },
   methods: {
+    serchtpc () {
+      this.$router.push({ name: "vehicle_search_tpc" , query: {value1: formatDate(this.$route.query.value1), value2: formatDate(this.$route.query.value2), vehicleNumber: this.$route.query.vehicleNumber}});
+    },
     getViolationList() {
       let params = {}
       params['startDate'] =formatDate(this.$route.query.value1)

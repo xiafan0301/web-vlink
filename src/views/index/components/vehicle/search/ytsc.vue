@@ -158,7 +158,7 @@
     <!--检索详情弹窗-->
     <div is="vehicleDetail" :detailData="detailData"></div>
 
-    <div is="imgSelect" :initImageInfo="initImageInfo" :open="isOpenImgDialog" :imgDataList="imgDataList" @emitImgData="emitImgData"></div>
+    <div is="imgSelectYtsc" :initImageInfo="initImageInfo" :open="isOpenImgDialog" :imgDataList="imgDataList" @emitImgData="emitImgData"></div>
 
     <!-- D设备 B卡口  这里是设备和卡口 -->
     <div
@@ -186,10 +186,9 @@
   import { objDeepCopy } from "../../../../../utils/util.js"; // 深拷贝方法
   import mapSelector from '@/components/common/mapSelector.vue';
 
-  import imgSelect from '@/components/common/imgSelect.vue';
-  // import imgSelectYtsc from '@/components/common/imgSelectYtsc.vue';
+  import imgSelectYtsc from '@/components/common/imgSelectYtsc.vue';
   export default {
-    components: { vlBreadcrumb, vehicleDetail, vlUpload, imgSelect, mapSelector },
+    components: { vlBreadcrumb, vehicleDetail, vlUpload, mapSelector,imgSelectYtsc },
     data() {
       return {
         dSum: 0, // 设备总数
@@ -273,7 +272,7 @@
         imgData: {},
         imgDataList: [], // 上传图片的可框选车体信息
         initImageInfo: {}, // 上传图片的原始信息
-        // imgCutDataList: [], // 车体特征图片列表
+        imgCutDataList: [], // 车体特征图片列表
       };
     },
     mounted() {
@@ -346,23 +345,14 @@
       },
       emitImgData (obj) {
         this.isOpenImgDialog = obj.open;
-        if (obj.imgPath) {
-          this.curImageUrl = obj.imgPath;
-          this.imgData = {
-            path: obj.imgPath
-          }
+        if (obj.imgBDataList.length > 0) {
+          this.imgCutDataList = obj.imgCutDataList;
+          // this.curImageUrl = obj.imgPath;
+          // this.imgData = {
+          //   path: obj.imgPath
+          // }
         }
       },
-      // emitImgData (obj) {
-      //   this.isOpenImgDialog = obj.open;
-      //   if (obj.imgBDataList.length > 0) {
-      //     this.imgCutDataList = obj.imgCutDataList;
-      //     // this.curImageUrl = obj.imgPath;
-      //     // this.imgData = {
-      //     //   path: obj.imgPath
-      //     // }
-      //   }
-      // },
       /*重置菜单的数据 */
       resetMenu() {
         this.uploadClear = {};
