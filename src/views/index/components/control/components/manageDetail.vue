@@ -943,11 +943,12 @@ export default {
             const [{data: devList}, {data: bayList}] = res;
             devList.forEach(f => {f.dataType = 1;f.name = f.deviceName})
             bayList.forEach(f => {f.dataType = 2;f.name = f.bayonetName})
-            this.mapMark([...devList, ...bayList]);
+            this.mapMark(devList, bayList);
           }
         })
     },
-    mapMark (data) {
+    mapMark (devs, bays) {
+      const data = [...devs, ...bays];
       for (let i = 0; i < data.length; i++) {
         let obj = data[i];
         if (obj.longitude > 0 && obj.latitude > 0) {
@@ -1009,6 +1010,32 @@ export default {
       this.map.setFitView();
       addCluster(this.map, this.markerList);
       this.controlArea(1);//回填已选设备
+
+      // 把地图定位到已选设备位置
+      if (bays.length > 0) {
+        this.positionMap(bays);
+      } else if (devs.length > 0) {
+        this.positionMap(devs);
+      }
+    },
+    // 把地图定位到已选设备位置
+    positionMap (array) {
+      for (let item of this.markerList) {
+        const obj = item.getExtData();
+        let key = null;
+        array[0].hasOwnProperty('uid') && (key = 'uid');
+        array[0].hasOwnProperty('deviceId') && (key = 'deviceId');
+        array[0].hasOwnProperty('bayonetId') && (key = 'bayonetId');
+        if (array.some(s => s[key] === obj.uid)) {
+          console.log(item.getPosition(), 'fffffffff')
+          this.setViewingArea(item.getPosition());
+          break;
+        }
+      }
+    },
+    // 把地图的可视区域设置在选中设备或卡口的区域
+    setViewingArea (obj) {
+      this.map.setZoomAndCenter(14, obj);
     },
     resetZoom () {
       if (this.map) {
