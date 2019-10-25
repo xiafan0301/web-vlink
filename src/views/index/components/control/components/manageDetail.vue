@@ -167,7 +167,7 @@
               </ul>
               <ul class="model_info" v-if="controlDetail.modelType === 5">
                 <li>
-                  <span>布防场所：</span><span>{{controlDetail.locations}}</span>
+                  <span>布防场所：</span><span>{{controlDetail.locations && controlDetail.locations.join(',')}}</span>
                 </li>
                 <li>
                   <span>停留时长：</span><span>{{controlDetail.stayTime}}</span>
