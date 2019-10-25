@@ -87,6 +87,8 @@ export default {
     getVehicleData (data) {
       this.vehicleList = this.vehicleList.concat(data);
       this.vehicleList = unique(this.vehicleList, 'objId');
+      console.log(this.vehicleList, 'this.vehicleList');
+      
     },
     // 删除从布控库中已选择的车辆
     delVehicle (index) {

@@ -303,8 +303,8 @@ export default {
     // 新增页-1
     } else {
       this.pageType = 1;
-      this.modelType = 1;
-      this.modelType_ = 1;
+      this.modelType = 5;
+      this.modelType_ = 5;
       // 从车辆侦查或者人像侦查跳转过来新建布控
       // const {imgurl, modelName, plateNo} = this.$route.query;
       // this.imgurl = imgurl;

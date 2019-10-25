@@ -4,7 +4,7 @@
     :visible.sync="vehicleLibDialog"
     :close-on-click-modal="false"
     width="1200px"
-    title="车辆布控库">
+    :title="model === 'gwcl' ? '公务车辆' : '车辆布控库'">
     <el-form ref="libForm" :model="libForm">
       <el-form-item label="" prop="vehicleColor">
         <el-select value-key="enumField" v-model="libForm.vehicleColor" filterable placeholder="车身颜色不限">
@@ -55,12 +55,8 @@
           <div class="data_list">
             <span :title="item.vehicleNumber">{{item.vehicleNumber}}</span>
             <span :title="item.numberType">{{item.numberType}}</span>
-            <span :title="item.vehicleNumber">{{item.vehicleNumber}}</span>
-            <span :title="item.numberType">{{item.numberType}}</span>
           </div>
           <div class="data_list">
-            <span :title="item.vehicleType" v-if="item.vehicleType">{{item.vehicleType}}</span>
-            <span :title="item.vehicleColor" v-if="item.vehicleColor">{{item.vehicleColor}}</span>
             <span :title="item.vehicleType" v-if="item.vehicleType">{{item.vehicleType}}</span>
             <span :title="item.vehicleColor" v-if="item.vehicleColor">{{item.vehicleColor}}</span>
           </div>
@@ -112,8 +108,9 @@
 <script>
 import {dataList} from '@/utils/data.js';
 import {getVehicleList} from '@/views/index/api/api.control.js';
+import {getSpecialGroup, getSpecialVehicleList} from '@/views/index/api/api.manage.js';
 export default {
-  // model : 把公务车辆区别出来，单独处理
+  // model : gwcl 把公务车辆区别出来，单独处理
   props: ['model', 'fileList'],
   data () {
     return {
@@ -126,12 +123,14 @@ export default {
       vehicleColorList: this.dicFormater(dataList.carColor)[0].dictList,
       vehicleTypeList: this.dicFormater(dataList.vehicleType)[0].dictList,
       plateTypeList: this.dicFormater(dataList.plateType)[0].dictList,
+      plateColorList: this.dicFormater(dataList.plateColor)[0].dictList,
       vehicleLibDialog: false,
       loading: false,
       currentPage: 1,
       pageNum: 1,
       pageSize: 6,
-      carMemberList: {}
+      carMemberList: {},
+      gwclGroupId: null,//公务车辆组id
     }
 
   },
@@ -140,7 +139,15 @@ export default {
     search () {
       this.pageNum = 1;
       this.currentPage = 1;
-      this.getVehicleList();
+      if (this.model === 'gwcl') {
+        if (this.gwclGroupId) {
+          this.getSpecialVehicleList();
+        } else {
+          this.getSpecialGroup();
+        }
+      } else {
+        this.getVehicleList();
+      }
     },
     //  获取全部车像列表，或者根据组id获取车像列表
     getVehicleList () {
@@ -153,7 +160,6 @@ export default {
         'where.vehicleType': this.libForm.vehicleType,
         'where.numberType': this.libForm.numberType
       }
-      // this.groupIds && (params['where.groupId'] = this.groupIds);
       this.libForm.vehicleNumber && (params['where.vehicleNumber'] = this.libForm.vehicleNumber);
       this.loading = true;
       getVehicleList(params).then(res => {
@@ -176,10 +182,74 @@ export default {
         this.loading = false;
       })
     },
+    // 获取特殊车辆分组列表，并拿到公务车组id
+    getSpecialGroup () {
+      getSpecialGroup().then(res => {
+        if (res && res.data) {
+          const obj = res.data.find(f => f.name === '红名单');
+          if (obj) this.gwclGroupId = obj.id;
+          this.getSpecialVehicleList();
+        }
+      })
+    },
+    // 获取公务车辆列表
+    getSpecialVehicleList () {
+      const params = {
+        'where.vehicleColor': this.libForm.vehicleColor,
+        'where.vehicleType': this.libForm.vehicleType,
+        'where.numberType': this.libForm.numberType,
+        'where.groupId': this.gwclGroupId,
+        pageNum: this.pageNum,
+        pageSize: this.pageSize,
+        orderBy: null,
+        order: null
+      }
+      this.libForm.vehicleNumber && (params['where.vehicleNumber'] = this.libForm.vehicleNumber);
+      this.loading = true;
+      getSpecialVehicleList(params).then(res => {
+        if (res && res.data) {
+          this.carMemberList = res.data;
+          this.carMemberList.list = this.carMemberList.list.map(f => {
+            if (this.fileList && this.fileList.some(s => s.vehicleNumber === f.vehicleNumber)) {
+              this.$set(f, 'isChecked', true);
+            } else {
+              this.$set(f, 'isChecked', false);
+            }
+            let {vehicleImagePath, numberColor, numberType, vehicleColor, vehicleType, groupList, ...other} = f;
+            const obj1 = this.plateColorList.find(f => f.enumField === numberColor);
+            numberColor = obj1 ? obj1.enumValue : '无';
+
+            const obj2 = this.vehicleTypeList.find(f => f.enumField === vehicleType);
+            vehicleType = obj2 ? obj2.enumValue : '无';
+            const obj3 = this.plateTypeList.find(f => f.enumField === numberType);
+            numberType = obj3 ? obj3.enumValue : '无';
+            
+            const obj4 = this.vehicleColorList.find(f => f.enumField === vehicleColor);
+            vehicleColor = obj4 ? obj4.enumValue : '无';
+            const groupNames = groupList.map(m => m.groupName).join(',');
+            return {
+              photoUrl: vehicleImagePath,
+              numberColor,
+              vehicleType,
+              numberType,
+              vehicleColor,
+              groupNames,
+              ...other
+            }
+          })
+        }
+      }).finally(() => {
+        this.loading = false;
+      })
+    },
     handleCurrentChange (page) {
       this.pageNum = page;
       this.currentPage = page;
-      this.getVehicleList();
+      if (this.model === 'gwcl') {
+        this.getSpecialVehicleList();
+      } else {
+        this.getVehicleList();
+      }
     },
     // 确认
     selControlLibMember () {
@@ -309,6 +379,23 @@ export default {
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
+  }
+}
+// 重置布控库popover
+.more_popover_box .more_popover{
+  max-height: 240px;
+  display: flex;
+  flex-wrap: wrap;
+  > span{
+    margin-bottom: 10px;
+    margin-right: 2px;
+    padding: 5px 10px;
+    background:rgba(250,250,250,1);
+    border:1px solid rgba(242,242,242,1);
+    border-radius: 3px;
+    white-space:nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden; 
   }
 }
 </style>

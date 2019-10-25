@@ -824,7 +824,7 @@ export function getSpecialVehicleDetail (uid) {
  */
 export function getSpecialVehicleList (params) {
   return request({
-    url: '/special-vehicles',
+    url: '/special-vehicles', 
     params,
     method: 'get'
   });
