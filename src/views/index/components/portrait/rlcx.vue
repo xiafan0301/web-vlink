@@ -600,7 +600,7 @@ export default {
           startDate: formatDate(this.searchForm.time[0]),
           endDate: formatDate(this.searchForm.time[1])
         },
-        orderBy: this.orderType === 1 ? 'shotTime' : 'deviceName',
+        orderBy: this.orderType === 1 ? 'shotTime' : 'devicePinyin',
         order: this.order === 1 ? 'desc' : 'asc'
       };
       if (this.searchForm.type === 1) {
@@ -609,8 +609,8 @@ export default {
         });
       } else if (this.searchForm.type === 2) {
         params.where = Object.assign(params.where, {
-//          deviceIds: this.dIds.join(',')
-          deviceIds: '63'
+          deviceIds: this.dIds.join(',')
+//          deviceIds: '63'
         });
       }
       if (this.searchForm.type2 === 1) {
@@ -757,6 +757,7 @@ export default {
         }
       } else {
         this.orderType = type;
+        this.order = 1;
       }
       this.searchSubmit();
     },

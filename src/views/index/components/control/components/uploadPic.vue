@@ -75,7 +75,11 @@ export default {
   watch: {
     fileList () {
       if (this.mode !== 'message') {
+        console.log('ttttttttttttttttt');
+        
         this.fileList.forEach(f => f.photoUrl && (f.url = f.photoUrl));
+        console.log(this.fileList, 'this.fileList');
+        
       }
       if (this.fileList.some(s => s.fileType === 2)) {
         this.isShow = true;
@@ -125,15 +129,15 @@ export default {
     },
     uploadPicError () {
       this.$emit('uploadPicError', true);
-      this.$message.error('上传失败！');
+      this.$message.info('上传失败！');
     },
     uploadPicExceed () {
-      this.$message.warning(`最多一次可上传${this.maxSize}张图片${this.flag ? ',只能上传一个视频' : ''}`);
+      this.$message.info(`最多一次可上传${this.maxSize}张图片${this.flag ? ',只能上传一个视频' : ''}`);
     },
     beforeAvatarUpload (file) {
       // 当前传的文件数如果大于1，就需要判断接下来上传的文件的是不是视频，是视频的话就返回false
       if (this.flag && this.picNum > 0 && (file.type === 'video/mp4' || file.type === 'video/bmp')) {
-        this.$message.error('图片和视频只能上传一种!');
+        this.$message.info('图片和视频只能上传一种!');
         return false;
       }
 
@@ -147,14 +151,14 @@ export default {
       }
 
       if (this.flag && !isJPG) {
-        this.$message.error('上传文件只能是 jpeg、jpg、png、mp4、bmp 格式!');
+        this.$message.info('上传文件只能是 jpeg、jpg、png、mp4、bmp 格式!');
       } else if (!isJPG) {
-        this.$message.error('上传图片只能是 jpeg、jpg、png 格式!');
+        this.$message.info('上传图片只能是 jpeg、jpg、png 格式!');
       }
       if (this.flag && !isLt4M) {
-        this.$message.error('上传文件大小不能超过 10MB!');
+        this.$message.info('上传文件大小不能超过 10MB!');
       } else if (!isJPG) {
-        this.$message.error('上传图片大小不能超过 4MB!');
+        this.$message.info('上传图片大小不能超过 4MB!');
       }
       return isJPG && isLt4M;
     }

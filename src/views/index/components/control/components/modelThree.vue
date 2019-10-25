@@ -71,7 +71,7 @@ export default {
       })
       this.devs = devList;
       this.bays = bayonetList;
-      this.fileListOne = surveillanceObjectDtoList.filter(m => m.objType === 1);//回填上访人员照片
+      this.fileListOne = surveillanceObjectDtoList.filter(m => m.objType === 1 || m.objType === 3);//回填上访人员照片
       this.fileListTwo = surveillanceObjectDtoList.filter(m => m.objType === 2);//回填上访车辆信息
       this.isShowControlDev = true;
     }
@@ -114,7 +114,7 @@ export default {
     },
     // 删除车牌号码
     removeLicensePlateNum (index) {
-      if (this.modelThreeForm.carNumberInfo.length === 1) return this.$message.warning('只剩一个不允许删除');
+      if (this.modelThreeForm.carNumberInfo.length === 1) return this.$message.info('只剩一个不允许删除');
       this.modelThreeForm.carNumberInfo.splice(index, 1);
     },
     // 删除从布控库中选择的车牌
@@ -124,17 +124,17 @@ export default {
     // 向父组件传值
     sendParent () {
       if (this.fileListOne.length === 0 && !this.modelThreeForm.carNumberInfo[0].vehicleNumber) {
-        return this.$message.warning('请选择布控人员或者车辆');
+        return this.$message.info('请选择布控人员或者车辆');
       } 
       this.$refs['modelThree'].validate((valid) => {
         if (valid) {
           if (this.$refs['controlDev']) {
             this.$refs['controlDev'].sendParent();
-            if (this.devData.devList.length === 0 && this.devData.bayonetList.length === 0) return this.$message.warning('请先选择布控设备');
+            if (this.devData.devList.length === 0 && this.devData.bayonetList.length === 0) return this.$message.info('请先选择布控设备');
             const _carNumberInfo = this.modelThreeForm.carNumberInfo.map(m => m.vehicleNumber).join(',');
             this.$emit('getModel', {carNumberInfo: _carNumberInfo, modelType: 3,  pointDtoList: [this.devData], surveillanceObjectDtoList: [...imgUrls(this.fileListOne), ...this.fileListTwo]});
           } else {
-            this.$message.warning('请先选择布控设备');
+            this.$message.info('请先选择布控设备');
           }
         } else {
           return false;
@@ -147,7 +147,7 @@ export default {
     // 一键布控
     selControl (formName) {
       if (this.fileListOne.length === 0 && !this.modelThreeForm.carNumberInfo[0].vehicleNumber) {
-        return this.$message.warning('请选择布控人员或者车辆');
+        return this.$message.info('请选择布控人员或者车辆');
       } 
       this.$refs[formName].validate((valid) => {
         if (valid) {

@@ -7,6 +7,7 @@ export const conDetail = {
   duration: null,
   eventDetail: null,
   eventId: null,
+  contactList: [],
   objectList: [],
   objectNum: null,
   runningEndTime: null,

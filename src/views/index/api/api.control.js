@@ -566,13 +566,13 @@ export function getControlMap(params) {
 }
 /**
  * getControlMapByDevice 设备下布控列表查询接口
- * @param {object} params
+ * @param {object} data
  */
-export function getControlMapByDevice(params) {
+export function getControlMapByDevice(data, uid) {
   return request({
-    url: '/surveillances/device/' + params.uid + '/surveillance-detail',
-    method: 'get',
-    params,
+    url: '/surveillances/device/' + uid + '/surveillance-detail',
+    method: 'post',
+    data,
     mode: 'control'
   })
 }

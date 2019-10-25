@@ -240,7 +240,7 @@ export default {
     getCommentInfoList () {
       this.pageNum += 1;
       if (this.pageNum > Math.ceil(this.total/5) && this.pageNum > 1) {
-        this.$message.warning('没有更多数据了');
+        this.$message.info('没有更多数据了');
         return;
       }
       const params = {

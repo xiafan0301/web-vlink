@@ -70,6 +70,6 @@ export function exportExcel(data) {
     url: '/export',
     method: 'post',
     data,
-    mode: 'judge'
+    mode: 'vehicle'
   })
 }

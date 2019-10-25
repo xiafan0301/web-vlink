@@ -20,10 +20,12 @@
         </el-option>
       </el-select>  
     </el-form-item>
-    <el-form-item label="失踪时间:" prop="lostTime" :rules="{ required: true, message: '请选择失踪时间', trigger: 'blur'}">
+    <el-form-item label="失踪时间:" prop="lostTime" :rules="[{ required: true, message: '请选择失踪时间', trigger: 'change'},{ validator: validateDate, trigger: 'change' }]">
       <el-date-picker
         v-model="modelOneForm.lostTime"
         type="datetime"
+        :time-arrow-control="true"
+        :picker-options="expireTimeOption"
         placeholder="请选择失踪时间">
       </el-date-picker>
     </el-form-item>
@@ -90,13 +92,25 @@ import vehicleLib from './vehicleLib.vue';
 import portraitLib from './portraitLib.vue';
 import {random14, objDeepCopy, imgUrls, unique, formatDate} from '@/utils/util.js';
 import {checkName, checkPlateNumber} from '@/utils/validator.js';
+const validateDate_ = (rule, value, callback) => {
+  if (value) {
+    let timestamp = new Date().getTime()// 当前的时间戳
+    if (value >= timestamp) {
+      callback(new Error('不能选择大于当前的时间'))
+    } else {
+      callback()
+    }
+  } else {
+    callback()
+  }
+}
 export default {
   components: {uploadPic, controlDev, vehicleLib, portraitLib},
   props: ['modelList'],
   data () {
     return {
       modelOneForm: {
-        lostTime: new Date('2019-9-10 11:00'),
+        lostTime: null,
         name: null,
         sex: null,
         address: null,
@@ -107,6 +121,12 @@ export default {
         longitude: null,
         latitude: null
       },
+      expireTimeOption: {
+        disabledDate(date) {
+            return date.getTime() > Date.now();
+        }
+      },
+      validateDate: validateDate_,
       validPlateNumber: checkPlateNumber,
       validName: checkName,
       sexList: [
@@ -197,7 +217,7 @@ export default {
     // 一键布控
     selControl (formName) {
       if (this.fileListOne.length === 0) {
-        return this.$message.warning('请上传失踪人员图片');
+        return this.$message.info('请上传失踪人员图片');
       } 
       this.$refs[formName].validate((valid) => {
         if (valid) {
@@ -211,13 +231,13 @@ export default {
     // 向父组件传值
     sendParent () {
       if (this.fileListOne.length === 0) {
-        return this.$message.warning('请上传失踪人员图片');
+        return this.$message.info('请上传失踪人员图片');
       } 
       this.$refs['modelOne'].validate((valid) => {
         if (valid) {
           if (this.$refs['controlDev']) {
             this.$refs['controlDev'].sendParent();
-            if (this.devData.devList.length === 0 && this.devData.bayonetList.length === 0) return this.$message.warning('请先选择布控设备');
+            if (this.devData.devList.length === 0 && this.devData.bayonetList.length === 0) return this.$message.info('请先选择布控设备');
             
             let _modelOneForm = objDeepCopy(this.modelOneForm);
 
@@ -230,7 +250,7 @@ export default {
             _modelOneForm = {..._modelOneForm, ...this.devData}
             this.$emit('getModel', {carNumberInfo: _modelOneForm.carNumberInfo, modelType: 1,  pointDtoList: [_modelOneForm], surveillanceObjectDtoList: [...imgUrls(this.fileListOne), ...imgUrls(this.fileListTwo), ...this.fileListThree]});
           } else {
-            this.$message.warning('请先选择布控设备');
+            this.$message.info('请先选择布控设备');
           }
         } else {
           return false;
@@ -292,7 +312,7 @@ export default {
     },
     // 删除车牌号码
     removeLicensePlateNum (index) {
-      if (this.modelOneForm.carNumberInfo.length === 1) return this.$message.warning('只剩一个不允许删除');
+      if (this.modelOneForm.carNumberInfo.length === 1) return this.$message.info('只剩一个不允许删除');
       this.modelOneForm.carNumberInfo.splice(index, 1);
     },
     // 删除从布控库中选择的车牌
@@ -303,7 +323,7 @@ export default {
     // 获取追踪点
     getAddress (e, type) {
       if (!e.location) {
-        this.$message.error('无法获取到经纬度！');
+        this.$message.info('无法获取到经纬度！');
         return;
       }
       if (type === 1) {

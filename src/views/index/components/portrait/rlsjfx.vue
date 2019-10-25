@@ -261,6 +261,7 @@ export default {
   mounted () {
     this.getFaceTotal();
     this.getFaceControlSta();
+    this.getFaceSnapSta();
     this.drawChart2();
     // 进入页面滚动条保持在最顶部
     document.getElementById('rlsjfxBox').scrollTop = 0;
@@ -274,10 +275,23 @@ export default {
       this.$router.push({name: 'person_info'});
     },
     skipPortraitSearch () {
-      this.$router.push({name: 'portrait_rlcx'});
+      const rlsjfxParam = {
+        bayonetIds: this.bIds.join(','),
+        cameraIds: this.dIds.join(','),
+        startTime: this.faceSnapForm.queryDate[0],
+        endTime: this.faceSnapForm.queryDate[1]
+      }
+      if (sessionStorage.getItem('rlsjfxParam')) {
+        sessionStorage.clear('rlsjfxParam');
+      }
+      sessionStorage.setItem('rlsjfxParam', JSON.stringify(rlsjfxParam));
+      this.$router.push({name: 'portrait_rlcx', query: {mode: 'rlsjfx'}});
     },
     skipHistoryAlarm () {
-      this.$router.push({name: 'history_alarm'});
+      this.$router.push({name: 'history_alarm', query: {
+        startTime: this.faceControlQueryDate[0],
+        endTime: this.faceControlQueryDate[1]
+      }});
     },
     // 验证所选时间是否符合要求
     validationDate (obj) {
@@ -290,7 +304,7 @@ export default {
         _endTime = new Date(obj[1]).getTime();
       }
       if ((_endTime - _startTime) > 3 * 3600 * 24 * 1000) {
-        this.$message.warning('所选时间间隔不能超过三天');
+        this.$message.info('所选时间间隔不能超过三天');
         if ('queryDate' in obj) {
           obj.queryDate = [startTime, endTime];
         } else {
@@ -347,11 +361,11 @@ export default {
     // 获取人脸抓拍统计
     getFaceSnapSta () {
       const params = {
-        deviceIds: this.dIds.join(','),
-        bayonetIds: this.bIds.join(','),
         startTime: this.faceSnapForm.queryDate[0] + ' 00:00:00',
         endTime: this.faceSnapForm.queryDate[1] + ' 23:59:59'
       }
+      this.dIds.length > 0 && (params.deviceIds = this.dIds.join(','));
+      this.bIds.length > 0 && (params.bayonetIds = this.bIds.join(','));
       this.loadingBtn1 = true;
       apiFaceSnap(params).then(res => {
         if (res) {

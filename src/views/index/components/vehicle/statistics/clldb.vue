@@ -145,7 +145,7 @@ export default {
       tabIndex: 1,
       carTypeList: this.dicFormater(dataList.vehicleType)[0].dictList,
       laneList: [
-        {value: null, label: '全部'},
+        {value: null, label: '全部车道'},
         {value: 1, label: '1'},
         {value: 2, label: '2'},
         {value: 3, label: '3'},
@@ -212,6 +212,11 @@ export default {
     },
     // 获取车流量对比数据
     async getCarComparison () {
+      if (this.queryForm.bayonetIds.length === 0) {
+        return this.$message.info('请先选择卡口');
+      } else if (this.queryForm.bayonetIds.length > 10) {
+        return this.$message.info('一次最多选择10个卡口进行统计分析');
+      }
       try {
         this.loadingBtn = true;
         const {

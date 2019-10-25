@@ -206,7 +206,7 @@ export default {
 
                 }else{
                     //获取地址失败
-                    _this.$message.error('没有获取到地址');
+                    _this.$message.info('没有获取到地址');
                 }
             });
         })
@@ -237,7 +237,7 @@ export default {
     chooseAddress (e) {
       console.log(e);
       if (!e.location) {
-        this.$message.error('无法获取到经纬度！');
+        this.$message.info('无法获取到经纬度！');
         return;
       }
       this.markLocation(e.location.lng, e.location.lat, e.address);

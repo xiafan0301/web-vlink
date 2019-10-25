@@ -88,13 +88,14 @@
             <div class="chart_item">
               <h1>设备过车数（Top5）</h1>
               <!-- <p>数量（次）</p> -->
-              <div id="chartContainer1">
-                <div class="chart_table">
+              <div id="chartContainer1" :style="{'display' : chartData1.length === 0 ? 'flex' : 'block'}">
+                <div class="chart_table" v-if="chartData1.length > 0">
                   <el-table :data="chartData1">
                     <el-table-column label="设备名称" prop="name" show-overflow-tooltip></el-table-column>
                     <el-table-column label="过车数" prop="total" width="100" show-overflow-tooltip></el-table-column>
                   </el-table>
                 </div>
+                <span v-if="chartData1.length === 0">暂无数据</span>
               </div>
             </div>
           </div>
@@ -204,7 +205,7 @@ export default {
     // }
   },
   mounted () {
-    
+    this.getCarBeforeSta();
   },
   methods: {
     // getEndTime(time) {
@@ -454,46 +455,51 @@ export default {
     // 获取过车数据统计
     getCarBeforeSta () {
       const params = {  
-        deviceIds: this.dIds.join(','),
-        bayonetIds: this.bIds.join(','),
         startTime: formatDate(this.queryForm.startTime),
         endTime: formatDate(this.queryForm.endTime)
       }
+      this.dIds.length > 0 && (params.deviceIds = this.dIds.join(','));
+      this.bIds.length > 0 && (params.bayonetIds = this.bIds.join(','));
       apiPassingCarSta(params).then(res => {
-        if (res) {
+        if (res && res.data) {
           this.gcsjDetail = res.data;
           this.chartData1 = res.data.device;
-          this.chartData2 = res.data.brandDto
+          this.chartData2 = res.data.brandDto;
           this.chartData3 = res.data.timeDto;
           this.chartData4 = res.data.carTypeDto;
-          
-          if (this.chartData2.length === 0) {
-            if (this.charts.chart2) {
-              this.charts.chart2.destroy();
-            }
-            this.charts.chart2 = null;
-          } else {
-            this.drawChart2();
-          }
-          if (this.chartData3.length === 0) {
-            if (this.charts.chart3) {
-              this.charts.chart3.destroy();
-            }
-            this.charts.chart3 = null;
-          } else {
-            this.drawChart3();
-          }
-          if (this.chartData4.length === 0) {
-            if (this.charts.chart4) {
-              this.charts.chart4.destroy();
-            }
-            this.charts.chart4 = null;
-          } else {
-            this.drawChart4();
-          }
+        } else {
+          this.gcsjDetail = {};
+          this.chartData1 = [];
+          this.chartData2 = [];
+          this.chartData3 = [];
+          this.chartData4 = [];
         }
       }).finally(() => {
         this.loadingBtn = false;
+        if (this.chartData2.length === 0) {
+          if (this.charts.chart2) {
+            this.charts.chart2.destroy();
+          }
+          this.charts.chart2 = null;
+        } else {
+          this.drawChart2();
+        }
+        if (this.chartData3.length === 0) {
+          if (this.charts.chart3) {
+            this.charts.chart3.destroy();
+          }
+          this.charts.chart3 = null;
+        } else {
+          this.drawChart3();
+        }
+        if (this.chartData4.length === 0) {
+          if (this.charts.chart4) {
+            this.charts.chart4.destroy();
+          }
+          this.charts.chart4 = null;
+        } else {
+          this.drawChart4();
+        }
       })
     }
   }
@@ -669,12 +675,15 @@ export default {
             }
             #chartContainer3, #chartContainer4{
               display: flex;
+            }
+            #chartContainer1, #chartContainer3, #chartContainer4{
               justify-content: center;
               align-items: center;
               > span{
                 color: #999;
               }
             }
+           
             .chart_table {
               padding: 8px 0 0;
             }

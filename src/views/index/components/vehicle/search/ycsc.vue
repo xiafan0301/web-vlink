@@ -108,7 +108,7 @@
                     @dragend="dragEnd"
                     draggable="true"
                     style="cursor: move;"
-                    :src="item.subStoragePath"
+                    :src="item.StorageUrl1"
                   />
                 </div>
                 <div class="text_wrap">
@@ -121,7 +121,7 @@
                     {{item.shotTime}}
                   </div>
                   <div class="text_message">
-                    车牌号码：{{item.plateNo ? item.plateNo : "未识别"}}
+                    车牌号码：{{item.PlateNo ? item.PlateNo : "未识别"}}
                   </div>
                 </div>
               </div>
@@ -404,7 +404,7 @@ export default {
         }
       } else if (this.sortType === 2) {
         // 监控排序
-        queryParams.orderBy = "deviceNamePinyin";
+        queryParams.orderBy = "devicePinyin";
         if (this.cameraSortType) {
           queryParams.order = "desc";
         } else {
@@ -536,11 +536,11 @@ export default {
     },
     // 拖拽开始
     dragStart(ev, item) {
-      if (item && item.subStoragePath) {
+      if (item && item.StorageUrl1) {
         if (!ev) {
           ev = window.event;
         }
-        ev.dataTransfer.setData("upload_pic_url", item.subStoragePath); // 设置属性dataTransfer   两个参数   1：key   2：value
+        ev.dataTransfer.setData("upload_pic_url", item.StorageUrl1); // 设置属性dataTransfer   两个参数   1：key   2：value
       }
     },
     dragEnd() {
