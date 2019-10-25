@@ -289,7 +289,7 @@
                     @dragend="dragEnd"
                     draggable="true"
                     style="cursor: move;"
-                    :src="item.subStoragePath"
+                    :src="item.StorageUrl1"
                   />
                 </div>
                 <div class="text_wrap">
@@ -302,7 +302,7 @@
                     {{item.shotTime}}
                   </div>
                   <div class="text_message">
-                    车牌号码：{{item.plateNo ? item.plateNo : "未识别"}}
+                    车牌号码：{{item.PlateNo ? item.PlateNo : "未识别"}}
                   </div>
                 </div>
               </div>
@@ -370,6 +370,7 @@ import {
 import { MapGETmonitorList } from "../../../api/api.map.js"; // 获取设备树接口
 import { objDeepCopy } from "../../../../../utils/util.js"; // 深拷贝方法
 import { constants } from "crypto";
+import { dataList } from '@/utils/data.js';
 
 export default {
   components: { vehicleDetail, vlBreadcrumb, vlUpload, imgSelect, mapSelector },
@@ -623,10 +624,10 @@ export default {
     },
     getSelectOption() {
       // 获取到自定义特征的下拉框列表数据
-      this.plateClassOptions = this.dicFormater(45)[0].dictList;
-      this.plateColorOptions = this.dicFormater(46)[0].dictList;
-      this.vehicleClassOptions = this.dicFormater(44)[0].dictList;
-      this.vehicleColorOptions = this.dicFormater(47)[0].dictList;
+      this.plateClassOptions = this.dicFormater(dataList.plateType)[0].dictList;
+      this.plateColorOptions = this.dicFormater(dataList.licensePlateColor)[0].dictList;
+      this.vehicleClassOptions = this.dicFormater(dataList.vehicleType)[0].dictList;
+      this.vehicleColorOptions = this.dicFormater(dataList.carColor)[0].dictList;
 
       // console.log('车牌类别', this.plateClassOptions);
       // console.log('车牌类别1', this.plateColorOptions);
@@ -728,7 +729,7 @@ export default {
         }
       } else if (this.sortType === 2) {
         // 监控排序
-        queryParams.orderBy = "deviceNamePinyin";
+        queryParams.orderBy = "devicePinyin";
         if (this.cameraSortType) {
           queryParams.order = "desc";
         } else {
@@ -746,7 +747,7 @@ export default {
             this.getStrucInfoLoading = true; // 打开加载效果
             this.pageNum = 1;
           }
-          if (this.selectCameraArr.length <= 0 && this.selectBayonetArr <= 0) {
+          if (this.selectCameraArr.length <= 0 && this.selectBayonetArr.length <= 0) {
             this.$message.warning("请选择至少一个卡口与摄像头");
             this.getStrucInfoLoading = false; // 关闭加载效果
             return;
@@ -922,11 +923,11 @@ export default {
     },
     // 拖拽开始
     dragStart(ev, item) {
-      if (item && item.subStoragePath) {
+      if (item && item.StorageUrl1) {
         if (!ev) {
           ev = window.event;
         }
-        ev.dataTransfer.setData("upload_pic_url", item.subStoragePath); // 设置属性dataTransfer   两个参数   1：key   2：value
+        ev.dataTransfer.setData("upload_pic_url", item.StorageUrl1); // 设置属性dataTransfer   两个参数   1：key   2：value
       }
     },
     dragEnd() {
