@@ -204,7 +204,7 @@ export function postTaskInfosPage(params) {
   return request({
     url: '/personinvestigation/showtasklist',
     method: 'post',
-    mode: 'judge',
+    mode: 'portrait',
     params
   })
 }
@@ -220,7 +220,15 @@ export function getdetailbg(params) {
   return request({
     url: '/personinvestigation/showinvestigationdetails',
     method: 'get',
-    mode: 'judge',
+    mode: 'portrait',
+    params
+  })
+}
+export function postdetailbg(params) {
+  return request({
+    url: '/personinvestigation/updateinvestigationtask',
+    method: 'post',
+    mode: 'portrait',
     params
   })
 }

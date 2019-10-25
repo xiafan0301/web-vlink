@@ -2,6 +2,7 @@
   <div class="point">
     <div class="">
       <div
+              v-show="!isCut"
               is="vlBreadcrumb"
               :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
           {name: '车辆轨迹'}]"
@@ -90,6 +91,7 @@
     components: {vlBreadcrumb, vlDialog},
     data() {
       return {
+        isCut: false, // 是否为截屏跳转.
         detailData: null,
         activeList: 0,
         serarchLoading: false,
@@ -137,7 +139,11 @@
     },
     mounted() {
       if (this.$route.query.plateNo) {
-        this.ruleForm.input5 = this.$route.query.plateNo;
+        this.ruleForm.input3 = this.$route.query.plateNo.split(',').splice(0, 6)
+//        this.ruleForm.input5 = this.$route.query.plateNo;
+      }
+      if (this.$route.query.isCut) {
+        this.isCut = true;
       }
       this.renderMap();
       this.setDTime();
@@ -260,7 +266,7 @@
             res.data.forEach(x => {
               x.traceList.forEach(y => {
                 if (y.bayonetName) {
-                  y.deviceID = y.bayonetName;
+                  y.DeviceID = y.bayonetName;
                 }
               })
             })
@@ -290,7 +296,7 @@
             } else {
               x['dataType'] = 0;
             }
-            let _i = _arr.findIndex(y => y.deviceID === x.deviceID);
+            let _i = _arr.findIndex(y => y.DeviceID === x.DeviceID);
             if (_i === -1) {
               _arr.push(x);
             } else {
@@ -316,7 +322,7 @@
         _arr.forEach(x => {
           let b = true;
           this.evData.forEach(y => {
-            if (y.traceList.findIndex(z => z.deviceID === x.deviceID) === -1){
+            if (y.traceList.findIndex(z => z.DeviceID === x.DeviceID) === -1){
               b = false;
             }
           })
@@ -352,7 +358,7 @@
         for (let  i = 0; i < data.length; i++) {
           let obj = data[i];
           if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
-            let $id = 'mapMark' + obj.dataType + obj.uid;
+            let $id = 'mapMark' + obj.dataType + obj.DeviceID;
             let _time = '', isStartEnd = false;
             if (obj.showTime) {
               _time = '<p class="vl_map_mark_time">';
@@ -364,11 +370,11 @@
             let _content = `<div id="${$id}" class="vl_icon right_map_icon vl_icon_map_mark` + obj.dataType + `">` + _time + `</div>`
             // 判断是不是起止点
             let curList = this.evData[this.activeList].traceList;
-            if (obj.deviceID === curList[curList.length - 1].deviceID) {
+            if (obj.DeviceID === curList[curList.length - 1].DeviceID) {
               _content = `<div id="${$id}" class="vl_icon vl_icon_map_mark_start">` + _time + `</div>`;
               isStartEnd = true;
             }
-            if (obj.deviceID === curList[0].deviceID) {
+            if (obj.DeviceID === curList[0].DeviceID) {
               _content = `<div id="${$id}" class="vl_icon vl_icon_map_mark_end">` + _time + `</div>`;
               isStartEnd = true;
             }
