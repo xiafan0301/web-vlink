@@ -22,8 +22,7 @@
         </div>
         <div class="btn_box">
           <el-button class="nosure_btn" size="small" @click="cancelSelectCut">取消</el-button>
-          <!-- <el-button class="nosure_btn" size="small" @click="prev">上一步</el-button> -->
-          <el-button class="sure_btn" size="small" @click="sureSelectCut">确定</el-button>
+          <el-button class="sure_btn" size="small" :disabled="!hasImgBoxData" @click="sureSelectCut">确定</el-button>
         </div>
       </div>
       <div class="middle">
@@ -113,6 +112,7 @@ export default {
         height: null,
         width: null
       }, // 原始图片信息
+      hasImgBoxData: false // 是否有框选图片
     }
   },
   watch: {
@@ -131,6 +131,15 @@ export default {
     initImageInfo () {
       this.imgInfo = Object.assign({}, this.initImageInfo);
     },
+    imgBDataList (val) {
+      val.map(item => {
+        if (item.src) {
+          this.hasImgBoxData = true;
+        } else {
+          this.hasImgBoxData = false;
+        }
+      })
+    }
   },
   mounted () {
     // this.$nextTick(() => {
@@ -144,6 +153,7 @@ export default {
       this.tabStep = 1;
       this.$emit('emitImgData', {
         open: false,
+        // uploadClear: {},
         imgBDataList: []
       })
     },
@@ -199,7 +209,6 @@ export default {
         for (let key in item) { // 根据图片的缩放比例计算车体的缩放后的各数据的大小
           newItem[key] = Math.ceil(item[key] / scale);
         }
-        console.log(item)
 
         let $div = document.createElement('div');
         let $id = 'select_box_' + index;
