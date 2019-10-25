@@ -46,7 +46,6 @@ export default {
     },
     imgDataList (val) {
       this.selectList = val;
-
       if (val.length > 0) {
         setTimeout(() => {
           this.getImgScale();
@@ -58,15 +57,22 @@ export default {
     }
   },
   methods: {
+    // 默认选中第一个框体
+    checkFirstImgBox () {
+      let obj = this.selectList[0];
+      let firstId = 'select_box_0';
+
+      let $idObj = document.getElementById(firstId);
+      $($idObj).addClass('active_select');
+
+      this.createImgPath(obj.x, obj.y, obj.width, obj.height);
+    },
     // 获取图片缩放比例
     getImgScale () {
       let imgWidth = $('#imgBox').width();
       let scale = this.imgInfo.width / imgWidth; // 原图初始比例
+      console.log('asdasd', this.selectList);
       
-      
-      // let currHeight = Math.ceil(imgWidth / scale); // 图片压缩后的height
-      // $('#imgBox').css('height', currHeight + 'px');
-
       this.selectList.forEach((item, index) => {
 
         // 在页面显示的图片大小计算宽和高的比例
@@ -92,9 +98,12 @@ export default {
 
         $('.img_box')[0].appendChild($div);
 
+        // 默认选中第一个框体
+        this.checkFirstImgBox();
+
+
         this.handleClickListen($id, item.x, item.y, item.width, item.height);
       })
-     
     },
     // 图片选择区域的点击监听事件
     handleClickListen (id, x, y, width, height) {
@@ -193,7 +202,8 @@ export default {
     cancelSave () {
       $('.img_box div').remove(); // 删除添加的div元素
       this.$emit('emitImgData', {
-        open: false
+        open: false,
+        // uploadClear: {}
       })
     }
   }

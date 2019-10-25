@@ -262,8 +262,6 @@ export default {
   components: { vehicleBreadcrumb, mapSelector, vlUpload, portraitDetail, noResult, imgSelect },
   data () {
     return {
-      isOpenImgDialog: false, // 是否显示框选弹框
-
       isInitPage: true,
       tipMessage: '选择人像特征，查询具有相同特征人像的抓拍记录',
 
@@ -359,6 +357,8 @@ export default {
       detailData: null,
 
       imgData: {},
+      // 人体框选
+      isOpenImgDialog: false, // 是否显示框选弹框
       imgDataList: [],
       initImageInfo: {}
     }
@@ -375,6 +375,7 @@ export default {
         url: this.curImageUrl
         // url: 'http://10.116.126.10/root/test/20190918-1635-002.jpg'
       };
+      this.imgDataList = [];
       getImageAreaInfo(params)
         .then(res => {
           if (res && res.data) {
@@ -388,17 +389,23 @@ export default {
                 };
                 this.imgDataList.push(obj);
               })
+            } else {
+              this.uploadClear = {};
+              this.$MyMessage('图片解析失败')
             }
           }
         })
     },
     emitImgData (obj) {
+      console.log(obj)
       this.isOpenImgDialog = obj.open;
       if (obj.imgPath) {
         this.curImageUrl = obj.imgPath;
         this.imgData = {
           path: obj.imgPath
         }
+      } else {
+        this.uploadClear = {};
       }
     },
     // 拖拽开始
@@ -593,7 +600,7 @@ export default {
           startDate: formatDate(this.searchForm.time[0]),
           endDate: formatDate(this.searchForm.time[1])
         },
-        orderBy: this.orderType === 1 ? 'shotTime' : 'deviceNamePinyin',
+        orderBy: this.orderType === 1 ? 'shotTime' : 'deviceName',
         order: this.order === 1 ? 'desc' : 'asc'
       };
       if (this.searchForm.type === 1) {
@@ -602,7 +609,8 @@ export default {
         });
       } else if (this.searchForm.type === 2) {
         params.where = Object.assign(params.where, {
-          deviceIds: this.dIds.join(',')
+//          deviceIds: this.dIds.join(',')
+          deviceIds: '63'
         });
       }
       if (this.searchForm.type2 === 1) {

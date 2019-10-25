@@ -22,24 +22,24 @@
         <div class="per_left_time">
           <div class="left_time">
             <el-date-picker
-                v-model="searchData.startTime"
-                style="width: 100%;margin-bottom: 20px;"
-                class="vl_date"
-                type="datetime"
-                :time-arrow-control="true"
-                @change="chooseStartTime"
-                value-format="timestamp"
-                placeholder="选择日期时间">
+              v-model="searchData.startTime"
+              style="width: 100%;margin-bottom: 10px;"
+              class="vl_date"
+              type="datetime"
+              :time-arrow-control="true"
+              @change="chooseStartTime"
+              value-format="timestamp"
+              placeholder="选择日期时间">
             </el-date-picker>
             <el-date-picker
-                    style="width: 100%;"
-                    class="vl_date vl_date_end"
-                    v-model="searchData.endTime"
-                    @change="chooseEndTime"
-                    :time-arrow-control="true"
-                    value-format="timestamp"
-                    type="datetime"
-                    placeholder="选择日期时间">
+              style="width: 100%;"
+              class="vl_date vl_date_end"
+              v-model="searchData.endTime"
+              @change="chooseEndTime"
+              :time-arrow-control="true"
+              value-format="timestamp"
+              type="datetime"
+              placeholder="选择日期时间">
             </el-date-picker>
           </div>
         </div>
@@ -61,33 +61,33 @@
         <div class="frequent-a-content">
           <ul class="tab-menu">
             <li
-                    v-for="(item,index) in tabList"
-                    :key="index"
-                    :class="{'is-active': selectIndex === item.value}"
-                    @click="selectTab(item.value)"
+              v-for="(item,index) in tabList"
+              :key="index"
+              :class="{'is-active': selectIndex === item.value}"
+              @click="selectTab(item.value)"
             >{{item.label}}</li>
           </ul>
           <div class="search_box">
             <el-form :inline="true" :model="taskForm" class="event_form" ref="taskForm">
               <el-form-item label="任务名称：" prop="taskName">
                 <el-input
-                        style="width: 200px;"
-                        type="text"
-                        placeholder="请输入任务名称"
-                        v-model="taskForm.taskName"
+                  style="width: 200px;"
+                  type="text"
+                  placeholder="请输入任务名称"
+                  v-model="taskForm.taskName"
                 />
               </el-form-item>
               <el-form-item label="创建时间：" prop="reportTime">
                 <el-date-picker
-                        class="vl_date"
-                        v-model="taskForm.reportTime"
-                        type="datetimerange"
-                        value-format="yyyy-MM-dd HH:mm:ss"
-                        format="yyyy-MM-dd HH:mm:ss"
-                        range-separator="至"
-                        start-placeholder="开始日期"
-                        end-placeholder="结束日期"
-                        :default-time="['00:00:00', '23:59:59']"
+                  class="vl_date"
+                  v-model="taskForm.reportTime"
+                  type="datetimerange"
+                  value-format="yyyy-MM-dd HH:mm:ss"
+                  format="yyyy-MM-dd HH:mm:ss"
+                  range-separator="至"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  :default-time="['00:00:00', '23:59:59']"
                 ></el-date-picker>
               </el-form-item>
               <el-form-item>
@@ -118,29 +118,29 @@
                 <el-table-column label="操作" fixed="right">
                   <template slot-scope="scope">
                   <span
-                          class="operation_btn"
-                          @click="skipResultPage(scope.row)"
-                          v-if="selectIndex === 1"
+                    class="operation_btn"
+                    @click="skipResultPage(scope.row)"
+                    v-if="selectIndex === 1"
                   >查看</span>
                     <span
-                            class="operation_btn"
-                            @click="showInterruptDialog(scope.row)"
-                            v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 1"
+                      class="operation_btn"
+                      @click="showInterruptDialog(scope.row)"
+                      v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 1"
                     >中断任务</span>
                     <span
-                            class="operation_btn"
-                            @click="recoveryOrRestart(scope.row)"
-                            v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 4"
+                      class="operation_btn"
+                      @click="recoveryOrRestart(scope.row)"
+                      v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 4"
                     >恢复任务</span>
                     <span
-                            class="operation_btn"
-                            @click="recoveryOrRestart(scope.row)"
-                            v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 3"
+                      class="operation_btn"
+                      @click="recoveryOrRestart(scope.row)"
+                      v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 3"
                     >重启任务</span>
                     <span
-                            class="operation_btn"
-                            @click="showDeleteDialog(scope.row)"
-                            v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus !== 4"
+                      class="operation_btn"
+                      @click="showDeleteDialog(scope.row)"
+                      v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus !== 4"
                     >删除任务</span>
                   </template>
                 </el-table-column>
@@ -149,13 +149,13 @@
           </div>
           <template v-if="pagination.total > 0">
             <el-pagination
-                    class="cum_pagination"
-                    @current-change="handleCurrentChange"
-                    :current-page.sync="pagination.pageNum"
-                    :page-sizes="[100, 200, 300, 400]"
-                    :page-size="pagination.pageSize"
-                    layout="total, prev, pager, next, jumper"
-                    :total="pagination.total"
+              class="cum_pagination"
+              @current-change="handleCurrentChange"
+              :current-page.sync="pagination.pageNum"
+              :page-sizes="[100, 200, 300, 400]"
+              :page-size="pagination.pageSize"
+              layout="total, prev, pager, next, jumper"
+              :total="pagination.total"
             ></el-pagination>
           </template>
         </div>
@@ -699,8 +699,8 @@ export default {
       width: 100%;
       height: auto;
       border-bottom: 1px solid #D3D3D3;
-      padding-bottom: 30px;
-      margin-bottom: 30px;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
       .vl_jtc_img_list {
         width: 100%;
         margin-top: 10px;
@@ -759,7 +759,7 @@ export default {
     .vl_jtc_search {
       width: 100%;
       height: auto;
-      padding: 30px 0 20px 0;
+      padding: 20px 0 20px 0;
       .el-input__inner {
         height: 40px!important;
         line-height: 40px!important;
@@ -810,7 +810,7 @@ export default {
     }
     .ytsr_left_radio {
       padding-left: 20px;
-      margin: 20px 0;
+      margin: 20px 0 10px 0;
       display: flex;
       height: 40px;
       >span {
@@ -829,7 +829,7 @@ export default {
       }
       .left_time {
         width: 100%;
-        margin: 20px 0;
+        margin: 10px 0;
         .el-date-editor {
           width: 100%;
         }

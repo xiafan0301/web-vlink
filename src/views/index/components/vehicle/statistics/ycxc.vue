@@ -61,7 +61,7 @@
             <span class="el-icon-arrow-down"></span>
           </div>
           <div class="tzsc_dtxz_rst"  v-show="selectAreaType === 2">
-            已选<span>{{dSum}}</span>个设备<a href="javascript: void(0);" @click="openMap={}">重选</a>
+            已选<span>{{dSum}}</span>个设备<a href="javascript: void(0);" @click="openMapDialog">重选</a>
           </div>
          
           <div class="left_num">
@@ -324,15 +324,8 @@ export default {
       carTypeList: [], // 车辆类型列表
       controlVehicleList: [], // 布控车辆列表
       searchStr: {}, // 传到抓拍记录页面的数据
+      dataTimer: null
     }
-  },
-  watch: {
-    // 'queryForm.startDate' () {
-    //   let _this = this;
-    //   const threeDays = 2 * 3600 * 24 * 1000;
-    //   const endTime = new Date(_this.queryForm.startDate).getTime() + threeDays;
-    //   _this.queryForm.endDate = formatDate(endTime);
-    // }
   },
   created () {
     if (this.$route.query.startDate) {
@@ -346,10 +339,16 @@ export default {
     this.getControlVehicleList();
     
     if (this.$route.query.startDate) {
-      setTimeout(() => {
+      this.dataTimer = setTimeout(() => {
         this.handleSubmitData();
       }, 2000)
 
+    }
+  },
+  beforeDestroy () {
+    if (this.dataTimer) {
+      window.clearTimeout(this.dataTimer);
+      this.dataTimer = null;
     }
   },
   methods: {
@@ -357,6 +356,20 @@ export default {
       this.selectBayonetArr = [];
       this.selectCameraArr = [];
       this.selectAreaType = 2;
+      this.openMap = !this.openMap;
+    },
+    openMapDialog () {
+      if (this.selectBayonetArr) {
+        this.selectBayonetArr.forEach(val => {
+          this.activeDeviceList.push(val);
+        })
+      }
+      if (this.selectCameraArr) {
+        this.selectCameraArr.forEach(val => {
+          this.activeDeviceList.push(val);
+        })
+      }
+
       this.openMap = !this.openMap;
     },
     mapSelectorEmit (result) {
@@ -437,13 +450,11 @@ export default {
       this.pagination.pageNum = this.$route.query.pageNum;
       this.pagination.pageSize = this.$route.query.pageSize;
 
-      this.activeDeviceList = [
-        ...this.$route.query.bayonetIds.split(','),
-        ...this.$route.query.cameraIds.split(','),
-      ];
+      this.selectBayonetArr = this.$route.query.bayonetIds && this.$route.query.bayonetIds.split(',');
+      this.selectCameraArr = this.$route.query.cameraIds && this.$route.query.cameraIds.split(',');
 
-      this.selectBayonetArr = this.$route.query.bayonetIds.split(',');
-      this.selectCameraArr = this.$route.query.cameraIds.split(',');
+      this.selectAreaType = 2;
+      this.dSum = (this.selectBayonetArr && this.selectBayonetArr.length) + (this.selectCameraArr && this.selectCameraArr.length);
     },
     // 获取布控车辆
     getControlVehicleList () {
@@ -488,9 +499,8 @@ export default {
       this.selectAreaType = 0;
 
       this.setDTime();
-
-      // this.resetLoading = false;
-
+      
+      this.dataList = [];
     },
     onSearch () {
       this.searchLoading = true;

@@ -21,24 +21,24 @@
           <div class="per_left_time">
             <div class="left_time">
               <el-date-picker
-                      v-model="searchData.startTime"
-                      style="width: 100%;margin-bottom: 20px;"
-                      class="vl_date"
-                      type="datetime"
-                      :time-arrow-control="true"
-                      @change="chooseStartTime"
-                      value-format="timestamp"
-                      placeholder="选择日期时间">
+                v-model="searchData.startTime"
+                style="width: 100%;margin-bottom: 10px;"
+                class="vl_date"
+                type="datetime"
+                :time-arrow-control="true"
+                @change="chooseStartTime"
+                value-format="timestamp"
+                placeholder="选择日期时间">
               </el-date-picker>
               <el-date-picker
-                      style="width: 100%;"
-                      class="vl_date vl_date_end"
-                      v-model="searchData.endTime"
-                      @change="chooseEndTime"
-                      :time-arrow-control="true"
-                      value-format="timestamp"
-                      type="datetime"
-                      placeholder="选择日期时间">
+                style="width: 100%;"
+                class="vl_date vl_date_end"
+                v-model="searchData.endTime"
+                @change="chooseEndTime"
+                :time-arrow-control="true"
+                value-format="timestamp"
+                type="datetime"
+                placeholder="选择日期时间">
               </el-date-picker>
             </div>
           </div>
@@ -134,7 +134,7 @@
         <template v-else>
           <div class="not_content">
             <img src="../../../../assets/img/not-content.png" alt="">
-            <p>暂无相关数据</p>
+            <p>抱歉，没有相关的结果!</p>
           </div>
         </template>
       </div>
@@ -142,11 +142,11 @@
 
     <!-- D设备 B卡口  这里是设备和卡口 -->
     <div
-            is="mapSelector"
-            :open="openMap"
-            :clear="msClear"
-            :showTypes="'DB'"
-            @mapSelectorEmit="mapSelectorEmit">
+      is="mapSelector"
+      :open="openMap"
+      :clear="msClear"
+      :showTypes="'DB'"
+      @mapSelectorEmit="mapSelectorEmit">
     </div>
   </div>
 </template>
@@ -465,8 +465,8 @@ export default {
         width: 100%;
         height: auto;
         border-bottom: 1px solid #D3D3D3;
-        padding-bottom: 30px;
-        margin-bottom: 30px;
+        padding-bottom: 10px;
+        margin-bottom: 10px;
         .vl_jtc_img_list {
           width: 100%;
           margin-top: 10px;
@@ -525,7 +525,7 @@ export default {
       .vl_jtc_search {
         width: 100%;
         height: auto;
-        padding: 30px 0 20px 0;
+        padding: 20px 0;
         .el-input__inner {
           height: 40px!important;
           line-height: 40px!important;
@@ -595,7 +595,7 @@ export default {
         }
         .left_time {
           width: 100%;
-          margin: 20px 0;
+          margin: 10px 0;
           .el-date-editor {
             width: 100%;
           }

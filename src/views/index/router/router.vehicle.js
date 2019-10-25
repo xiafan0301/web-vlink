@@ -97,10 +97,18 @@ export default {
       name: 'vehicle_search_xcgl',
       component: () => import('@/views/index/components/vehicle/analysis/xcgl.vue')
     }, {
-      path: 'tpc', // 套牌车分析
+      path: 'tpc', // 套牌车
       name: 'vehicle_search_tpc',
       component: () => import('@/views/index/components/vehicle/analysis/tpc.vue')
     }, {
+      path: 'tpcfx', // 套牌车分析
+      name: 'vehicle_search_tpcfx',
+      component: () => import('@/views/index/components/vehicle/analysis/tpcfx.vue')
+    }, {
+      path: 'tpcfxxq', // 套牌车分析详情
+      name: 'vehicle_search_tpcfxxq',
+      component: () => import('@/views/index/components/vehicle/analysis/tpcfxxq.vue')
+    },{
       path: 'txcl', // 同行车辆分析
       name: 'vehicle_search_txcl',
       component: () => import('@/views/index/components/vehicle/analysis/txcl.vue')

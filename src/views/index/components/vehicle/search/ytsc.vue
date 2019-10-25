@@ -330,7 +330,7 @@
         getImageAreaInfo(params)
             .then(res => {
               if (res && res.data) {
-                if (res.data.length === 0) {
+                if (res.data.length > 0) {
                   this.isOpenImgDialog = true;
 
                   res.data.map(item => {
@@ -340,6 +340,8 @@
                     };
                     this.imgDataList.push(obj);
                   })
+                } else {
+                  this.uploadClear = {};
                 }
               }
             })

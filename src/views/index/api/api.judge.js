@@ -22,7 +22,31 @@ export function JtcPOSTAppendtpInfo(data) {
     url: '/fake-plate-vehicle',
     method: 'post',
     data,
-    mode: 'judge'
+    mode: 'vehicle'
+  })
+}
+/**
+ * JtcPOSTAppendixInfo 套牌车查询接（分页）
+ * @param {object} params
+ */
+export function JtcPOSTAppendtpInfos(data) {
+  return request({
+    url: '/fake-plate-vehicles',
+    method: 'post',
+    data,
+    mode: 'vehicle'
+  })
+}
+/**
+ * JtcPOSTAppendixInfo 特殊场所
+ * @param {object} params
+ */
+export function Jtcgettsc(data) {
+  return request({
+    url: '/special-place/groups-devices',
+    method: 'get',
+    params: data,
+    mode: 'base'
   })
 }
 /**
@@ -292,7 +316,7 @@ export function getVehicleShot(data) {
     url: '/vehicle/shot-num',
     method: 'post',
     data,
-    mode: 'judge'
+    mode: 'vehicle'
   });
 }
 /**
@@ -409,7 +433,7 @@ export function QypzGetAreaCross(data) {
     url: '/vehicle-analysis/area-cross',
     method: 'post',
     data,
-    mode: 'judge'
+    mode: 'vehicle'
   });
 }
 /*--------------------------  车辆侦查-车辆轨迹start  ---------------------------------*/
@@ -422,7 +446,7 @@ export function InvestigateGetTrace(data) {
     url: '/vehicle-investigate/trace',
     method: 'post',
     data,
-    mode: 'judge'
+    mode: 'vehicle'
   })
 }
 /*--------------------------  车辆轨迹end  ---------------------------------*/
@@ -526,7 +550,7 @@ export function getVehicleInvestigationReport(params) {
     url: '/report-service/vehicle-report',
     method: 'post',
     data: params,
-    mode: 'judge'
+    mode: 'vehicle'
   })
 }
 
