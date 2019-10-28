@@ -26,7 +26,7 @@
         <div><span class="vl_f_666">事发地点：</span><span class="vl_f_333">{{helpDetail.eventAddress}}</span></div>
         <div class="help_det_img_list">
           <template v-if="helpDetail.attachmentList.length > 0 && helpDetail.attachmentList[0].fileType === 1">
-            <img v-for="(item, index) in helpDetail.attachmentList" :src="item.path" :key="index" alt="" @click="openBigImg(index, helpDetail.attachmentList)">
+            <img v-for="(item, index) in helpDetail.attachmentList" :src="item.path" :key="index" alt="" class="bigImg">
           </template>
           <div v-if="helpDetail.attachmentList.length > 0 && helpDetail.attachmentList[0].fileType === 2" @mouseenter="eventVideoTool = true;" @mouseleave="eventVideoTool = false;">
             <video id="eventVideo" :src="helpDetail.attachmentList[0].path" width="117px" height="117px" style="object-fit: fill;" @click="showLargeVideo()"></video>
@@ -52,7 +52,7 @@
             <li class="con_three">{{item.isParticipate ? '已参与民众互助' : '未参与民众互助'}}</li>
             <li class="con_four vl_f_333">{{item.content}}</li>
             <li class="con_five" v-if="item.sysAppendixInfoList.length > 0">
-              <img :src="info.path" alt="" v-for="(info, _index) in item.sysAppendixInfoList" :key="_index"  @click="openBigImg(_index, item.sysAppendixInfoList)">
+              <img :src="info.path" alt="" v-for="(info, _index) in item.sysAppendixInfoList" :key="_index" class="bigImg">
             </li>
             <li class="con_six">
               <div><i class="vl_icon vl_icon_message_5"></i><span class="vl_f_666" @click="commentId = item.uid;isConfirmation = false;">回复该评论</span></div>
@@ -118,7 +118,6 @@
       <i @click="showCut = false" class="close_btn el-icon-error"></i>
       <a download="截图" :href="demoImg" id="controlResultCutImg" ></a>
     </div>
-    <BigImg :imgList="imgList" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
   </div>
 </template>
 <script>
@@ -127,9 +126,8 @@ import {objDeepCopy} from '../../../../utils/util.js';
 import {getEventDetail} from '@/views/index/api/api.event.js';
 import {getCommentInfoList, replyComment, shieldComment} from '@/views/index/api/api.message.js';
 import {dataList} from '@/utils/data.js';
-import BigImg from '@/components/common/bigImg.vue';
 export default {
-  components: {emotion, BigImg},
+  components: {emotion},
   props: ['helpId'],
   data () {
     return {
@@ -146,9 +144,6 @@ export default {
       shieldId: null,//屏蔽id
       shieldUserId: null,//被屏蔽用户id
       commentIndex: null,//评论下标
-      imgList: [],
-      imgIndex: null,
-      isShowImg: false,
       // 屏蔽弹窗参数
       shieldDialog: null,
       shieldChecked: false,
@@ -168,17 +163,6 @@ export default {
     this.getCommentInfoList();
   },
   methods: {
-    // 关闭图片放大
-    emitCloseImgDialog(value){
-      this.isShowImg = value;
-      this.imgList = [];
-    },
-    // 放大图片
-    openBigImg (index, data) {
-      this.isShowImg = true;
-      this.imgIndex = index;
-      this.imgList = data;
-    },
     // 根据id获取民众互助详情
     getMutualHelpDetail () {
       getEventDetail(this.helpId).then(res => {
