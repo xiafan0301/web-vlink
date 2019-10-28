@@ -323,7 +323,6 @@ export default {
     },
     // 卡口编号排序
     bayonetNoSort (data) {
-      console.log(data)
       if (data.order) {
         this.orderObj = data;
       } else {

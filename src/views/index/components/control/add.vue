@@ -344,7 +344,6 @@ export default {
     },
     // 布控事件下拉列表滚动加载方法
     loadMore () {
-      console.log(111111111);
       this.pageNum++;
       this.getEventList();
     },
@@ -498,7 +497,6 @@ export default {
             this.modelData = null;
             this.$refs['model'].sendParent();
             if (!this.modelData) return;
-            console.log(this.modelData, 'this.modelData');
             let data  = {
               ..._createForm,
               modelList: [this.modelData]
@@ -606,7 +604,6 @@ export default {
           const [{modelType}] = modelList;
           this.modelList = modelList;
           this.modelType_ = this.modelType = modelType;
-          console.log(this.modelList, 'modelList')
           this.$_hideLoading();
         }
       })
@@ -636,7 +633,6 @@ export default {
             this.modelData = null;
             this.$refs['model'].sendParent();
             if (!this.modelData) return;
-            console.log(this.modelData, 'this.modelData');
             let data  = {
               ..._createForm,
               modelList: [this.modelData]

@@ -708,7 +708,6 @@ export default {
     },
     // 获取布控详情
     getControlDetail () {
-      console.log(this.controlId, 'this.controlId')
       getControlDetail(this.controlId).then(res => {
         if (res && res.data) {
           this.controlDetail = res.data;
@@ -816,7 +815,6 @@ export default {
                 }
               })
               this.situList = unique(devList, 'uid');//去重
-              console.log(this.situList, 'situList')
               // 组装卡口列表数据
               let bayList = [];
               trackingPointList.forEach(f => {
@@ -828,7 +826,6 @@ export default {
               this.bayList.forEach(f => {
                 this.$set(f, 'isDropdown', false);
               })
-              console.log(this.bayList, 'bayList')
             }
            
           }
@@ -937,7 +934,6 @@ export default {
       // 阻止默认动作（如打开一些元素的链接）
       e.preventDefault();
       e.stopPropagation();
-      console.log(this.rightVideoList, 'rightVideoList')
       if (this.dragActiveObj) {
         this.rightVideoList.splice(index, 1, {
           isShowVideo: true,
@@ -1021,7 +1017,6 @@ export default {
         array[0].hasOwnProperty('deviceId') && (key = 'deviceId');
         array[0].hasOwnProperty('bayonetId') && (key = 'bayonetId');
         if (array.some(s => s[key] === obj.uid)) {
-          console.log(item.getPosition(), 'fffffffff')
           this.setViewingArea(item.getPosition());
           break;
         }
