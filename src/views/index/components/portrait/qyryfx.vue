@@ -980,7 +980,6 @@ export default {
                     this.clearMarkList(); // 清除地图标记
                     this.isInitPage = false;
                   }
-                  this.resetLeftMenu('qyryfxFrom');
                 } else {
                   this.clearMarkList(); // 清除地图标记
                   this.isInitPage = false;
