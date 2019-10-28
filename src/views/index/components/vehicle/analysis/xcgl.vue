@@ -246,14 +246,14 @@
   </div>
 </template>
 <script>
-import { ajaxCtx, mapXupuxian } from "@/config/config";
+import { ajaxCtx } from "@/config/config";
 import { dataList } from "@/utils/data.js";
 import {
   JtcPOSTAppendixInfo,
   JtcGETAppendixInfoList,
   JtcPUTAppendixsOrder
 } from "../../../api/api.judge.js";
-import { MapGETmonitorList } from "../../../api/api.map.js";
+/* import { MapGETmonitorList } from "../../../api/api.map.js"; */
 import { getDrivingAnalysis, postExport } from "../../../api/api.analysis.js";
 import {
   random14,
@@ -652,7 +652,6 @@ export default {
         this.messageInfo.close();
       }
       /* this.emptyData(1); */
-      let reg = /^([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})$/;
 
       if (this.selectIndex === 1) {
         if (
