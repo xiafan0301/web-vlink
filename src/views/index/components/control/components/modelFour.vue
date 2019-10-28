@@ -4,7 +4,7 @@
     <div class="sel_lib"><span>禁入人员：</span><span @click="popSel(1)">从布控库中选择</span></div>
     <div class="sel_img_box">
       <div class="img_box" v-for="(item, index) in protraitList" :key="index">
-        <img :src="item.photoUrl" alt="">
+        <img :src="item.photoUrl" alt="" class="bigImg">
         <i class="el-icon-error" @click="delPortrait(index)"></i>
         <span :title="item.name">{{item.name | strCutWithLen(12)}}</span>
       </div>
@@ -12,7 +12,7 @@
     <div class="sel_lib"><span>禁入车辆：</span><span @click="popSel(2)">从布控库中选择</span></div>
     <div class="sel_img_box">
       <div class="img_box" v-for="(item, index) in vehicleList" :key="index">
-        <img :src="item.photoUrl" alt="">
+        <img :src="item.photoUrl" alt="" class="bigImg">
         <i class="el-icon-error" @click="delVehicle(index)"></i>
         <span>{{item.vehicleNumber}}</span>
       </div>
@@ -142,6 +142,7 @@ export default {
       > img{
         width: 100%;
         height: 100%;
+        cursor: pointer;
       }
       > i{
         font-size: 6px;
