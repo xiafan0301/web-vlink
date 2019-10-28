@@ -178,7 +178,6 @@ export default {
   data () {
     return {
       // 摄像头信息参数
-      cameraList: [{}],
       loading: false,
       delBayonetDialog: false,
       loadingBtn: false,

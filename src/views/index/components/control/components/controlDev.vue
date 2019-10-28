@@ -67,8 +67,7 @@
 </template>
 <script>
 import {mapXupuxian} from '@/config/config.js';
-import {MapGETmonitorList} from '@/views/index/api/api.map.js';
-import {random14, objDeepCopy, addCluster} from '@/utils/util.js';
+import {random14, addCluster} from '@/utils/util.js';
 import mapSelector from '@/components/common/mapSelector.vue';
 import { setTimeout } from 'timers';
 import {getAllMonitorList, getBayonetList} from '@/views/index/api/api.base.js';
@@ -227,17 +226,21 @@ export default {
       // 编辑时
       if (this.selDevs.length > 0) {
         this.changeColorAndGetTreeData(this.selDevs, 1);
+        this.positionMap(this.selDevs);
         if (this.selBays.length > 0) {
           this.changeColorAndGetTreeData(this.selBays, 2);
+          this.positionMap(this.selBays);
         }
       // 新增时
       } else {
         if (this.devIdListFive && this.devIdListFive.length > 0) {
           console.log(this.devIdListFive, 'this.devIdListFive')
           this.changeColorAndGetTreeData(this.devIdListFive, 1);
+          this.positionMap(this.devIdListFive);
         }          
         if (this.bayIdListFive && this.bayIdListFive.length > 0) {
           this.changeColorAndGetTreeData(this.bayIdListFive, 2);
+          this.positionMap(this.bayIdListFive);
         }   
       }    
     },
@@ -246,17 +249,18 @@ export default {
       let _this = this, _hoverWindow = null;
       // 遍历列表，摄像头 或者卡口
       for (let i = 0; i < data.length; i++) {
-        let offSet = [-20.5, -70];
+        let offSet = [-23, -70];
         let obj = data[i];
         if (obj.longitude > 0 && obj.latitude > 0) {
-          let _content = null;
+          // let _content = null;
           // 摄像头
-          if (obj.dataType === 1) {
-            _content = '<div id="' + obj.uid + '_sxt' + '" class="vl_icon vl_icon_sxt"></div>';
-          // 卡口
-          } else {
-            _content = '<div id="' + obj.uid + '_kk' + '" class="vl_icon vl_icon_kk"></div>';
-          }
+          // if (obj.dataType === 1) {
+          //   _content = '<div id="' + obj.uid + '_sxt' + '" class="vl_icon vl_icon_sxt"></div>';
+          // // 卡口
+          // } else {
+          //   _content = '<div id="' + obj.uid + '_kk' + '" class="vl_icon vl_icon_kk"></div>';
+          // }
+          
           let _marker = new window.AMap.Marker({ // 添加自定义点标记
             map: _this.map,
             position: [obj.longitude, obj.latitude],
@@ -264,7 +268,7 @@ export default {
             draggable: false, // 是否可拖动
             extData: obj,
             // 自定义点标记覆盖物内容
-            content: _content
+            content: this.setMarkContent(obj)
           });
           // mouseover
           _marker.on('mouseover', function () {
@@ -423,7 +427,7 @@ export default {
       for (let item of this.markerList) {
         const obj = item.getExtData();
         let key = null;
-        array[0].hasOwnProperty('uid') && (key = 'uid');
+        array[0].hasOwnProperty('uid') && (key = 'uid');  
         array[0].hasOwnProperty('deviceId') && (key = 'deviceId');
         array[0].hasOwnProperty('bayonetId') && (key = 'bayonetId');
         if (array.some(s => s[key] === obj.uid)) {
@@ -447,7 +451,7 @@ export default {
             } else {
               _bayList.push(obj);
             }
-            let uContent = this.setMarkContent(f.getExtData())
+            let uContent = this.setMarkContent(f.getExtData(), 'change')
             f.setContent(uContent);
           }
         }
@@ -469,7 +473,7 @@ export default {
         array[0].hasOwnProperty('uid') && (key = 'uid');
         if (array.some(s => s[key] === obj.uid && obj.dataType === type)) {
           list.push(obj);
-          const uContent = this.setMarkContent(obj)
+          const uContent = this.setMarkContent(obj, 'change')
           f.setContent(uContent);
         }
       })
@@ -498,15 +502,29 @@ export default {
       }
     },
     // 设置marker的显示图标
-    setMarkContent (obj) {
-      const type = obj.dataType === 1 ? 0 : 1;
-      return '<div id="' + obj.uid + '" class="map_icons vl_icon vl_icon_map_sxt_in_area' + type + '"></div>'
+    setMarkContent (obj, operate) {  
+      let sDataType, uContent;
+      if (obj.dataType === 1 && obj.deviceStatus !== 1) {
+        sDataType = 6;
+      } else if (obj.dataType === 2 && !obj.isEnabled) {
+        sDataType = 9
+      } else {
+        sDataType = obj.dataType === 1 ? 0 : 1;
+      }
+      uContent = '<div id="' + obj.uid + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + '"></div>'
+      if (operate === 'change') {
+        sDataType = obj.dataType === 1 ? 0 : 1;
+        let sClass = 'vl_icon_map_sxt_in_area' + sDataType;
+        uContent = '<div id="' + obj.uid + '" class="map_icons vl_icon ' + sClass +'"></div>';
+      }
+      return uContent;
     },
     // 获取城内所有卡口
     getAllBay () {
       // 编辑时
       if (this.selBays.length > 0) {
         this.changeColorAndGetTreeData(this.selBays, 2);
+        this.positionMap(this.selBays);
       // 新增时
       } else {
         this.getTreeData(this.allBayList, 2);//获得卡口树数据
@@ -514,10 +532,11 @@ export default {
         // 让选中的卡口变色
         this.markerList.forEach(f => {
           if (this.allBayList.some(s => s.uid === f.getExtData().uid)) {
-            let uContent = this.setMarkContent(f.getExtData())
+            let uContent = this.setMarkContent(f.getExtData(), 'change')
             f.setContent(uContent);
           }
         })
+        this.positionMap(this.allBayList);
       }
       this.bayOrdev = 2;
     },

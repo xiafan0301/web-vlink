@@ -38,8 +38,7 @@ import uploadPic from './uploadPic.vue';
 import controlDev from './controlDev.vue';
 import vehicleLib from './vehicleLib.vue';
 import portraitLib from './portraitLib.vue';
-import {mapXupuxian} from '@/config/config.js';
-import {random14, objDeepCopy, unique, imgUrls} from '@/utils/util.js';
+import {unique, imgUrls} from '@/utils/util.js';
 import {checkPlateNumber} from '@/utils/validator.js';
 export default {
   components: {uploadPic, controlDev, vehicleLib, portraitLib},

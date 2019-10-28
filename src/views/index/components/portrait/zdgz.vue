@@ -7,8 +7,6 @@
           {name: '重点人群关注'}]">
       </div>
     </div>
-    
-    
     <div :class="['vl_j_left']">
       <div class="vl_jtc_search" style="padding-top: 0;">
         <div class="zdgz_left_search_type">
@@ -26,6 +24,7 @@
           type="datetime"
           placeholder="开始时间"
           :time-arrow-control="true"
+          :picker-options="pickerOptions"
           class="full vl_date"
           :clearable="false"
           value-format="timestamp"
@@ -34,6 +33,7 @@
           v-model="searchData.time2"
           type="datetime"
           :clearable="false"
+          :picker-options="pickerOptions"
           :time-arrow-control="true"
           placeholder="结束时间"
           class="full vl_date vl_date_end"
@@ -315,17 +315,9 @@ export default {
         // {value: 6, label: '50-70'},
         // {value: 7, label: '70-'}
       ],
-      
       pickerOptions: {
         disabledDate (time) {
-          let date = new Date();
-          let curDate = date.getTime();
-          let curS = 3 * 24 * 3600 * 1000;
-            let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
-          let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
-          let start = new Date(curDate - curS).getFullYear() +
-        "-" + _sm + "-" +_sd;
-          return time.getTime() > Date.now();
+          return time > new Date();
         }
       },
       amap: null, // 地图实例

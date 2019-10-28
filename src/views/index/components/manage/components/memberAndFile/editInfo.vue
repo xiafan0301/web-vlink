@@ -62,7 +62,6 @@
 </vue-scroll>
 </template>
 <script>
-import { validatePhone } from '@/utils/validator.js';
 import { getDepartmentList } from '@/views/index/api/api.manage.js';
 import { getUserDetail, updateUserInfo } from '@/views/index/api/api.user.js';
 import { getDiciData } from '@/views/index/api/api.js';

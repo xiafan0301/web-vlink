@@ -482,13 +482,11 @@ export default {
       if (val) {
         this.closeShow = false;
       } else {
-        // if (this.closeShow) { 
-          if (this.selectMethod === 1) {
-            this.getVeGroupInfo();
-          } else {
-            this.getVelBottomNameInfo();
-          }
-        // }
+        if (this.selectMethod === 1) {
+          this.getVeGroupInfo();
+        } else {
+          this.getVelBottomNameInfo();
+        }
       }
     }
   },
@@ -701,25 +699,11 @@ export default {
     // 新增分组
     addGroupInfo (form) {
       this.$refs[form].validate(valid => {
-        // this.isShowError = false;
         if (valid) {
           if (this.isShowError) {
             return;
           }
           this.handleAddGroupInfo();
-          // const params = {
-          //   groupName: this.addGroupForm.userGroupName
-          // };
-          // checkVelRename(params)
-          //   .then(res => {
-          //     if (res.data) {
-          //       this.isShowError = true;
-          //     } else {
-          //       this.isShowError = false;
-          //       this.handleAddGroupInfo();
-          //     }
-          //   })
-          //   .catch(() => {})
         }
       })
     },
@@ -787,25 +771,11 @@ export default {
     // 复制或新增复制到组 --判断组名是否重复
     addCopyGroupInfo (form) {
       this.$refs[form].validate(valid => {
-        // this.isShowError = false;
         if (valid) {
           if (this.isShowError) {
             return;
           }
           this.handleAddCopyGroupInfo();
-          // const params = {
-          //   groupName: this.addGroupForm.userGroupName
-          // };
-          // checkVelRename(params)
-          //   .then(res => {
-          //     if (res.data) {
-          //       this.isShowError = true;
-          //     } else {
-          //       this.isShowError = false;
-          //       this.handleAddCopyGroupInfo();
-          //     }
-          //   })
-          //   .catch(() => {})
         }
       })
     },
@@ -817,7 +787,6 @@ export default {
       });
       const params = {
         groupName: this.addGroupForm.userGroupName || null,
-        // groupId: id || null,
         vehicleIds: selectArr
       };
       this.isAddCopyLoading = true;

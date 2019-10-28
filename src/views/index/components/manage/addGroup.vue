@@ -148,7 +148,6 @@ export default {
     },
     // 提交数据
     submitData () {
-      console.log(this.$refs['addGSelctor'].getCheckedIds())
       if (this.$route.query.groupId) {
         this.editGroup(); // 编辑分组
       } else {
@@ -271,7 +270,6 @@ export default {
       updateGroupDevice(params)
         .then(res => {
           if (res) {
-            console.log('res', res)
             if (res) {
                this.$message({
                 type: 'success',

@@ -15,7 +15,6 @@
           <el-form :model="editRoom" :rules="rules" ref="editRoom" label-width="90px" class="add_room_form">
             <el-form-item label="点室编号:" prop="roomNumber" style="margin-bottom:10px;">
               <span style="color: #333333;">{{editRoom.roomNumber ? editRoom.roomNumber : '无'}}</span>
-              <!-- <el-input style="width: 100%;" placeholder="请输入点室编号" v-model="editRoom.roomNumber"></el-input> -->
             </el-form-item>
             <el-form-item label="点室名称:" prop="roomName">
               <el-input style="width: 100%;" placeholder="请输入点室名称" v-model="editRoom.roomName" maxlength="50"></el-input>

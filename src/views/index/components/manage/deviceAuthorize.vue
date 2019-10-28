@@ -359,7 +359,6 @@ export default {
     },
     // 临时授权--右侧设备展开
     openTempArrow (index) {
-      console.log(index)
       this.tempDeviceList[index].isOpenArrow = !this.tempDeviceList[index].isOpenArrow;
       this.tempDeviceList = JSON.parse(JSON.stringify(this.tempDeviceList));
     },

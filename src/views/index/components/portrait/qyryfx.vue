@@ -609,12 +609,10 @@ export default {
           if (res && res.data) {
             this.pagination.total = res.data.total;
             
-            // console.log(this.peopleGroupOptions)
             res.data.list.map(item => {
               let personGroupIdName = [];
               item.taskWebParam = JSON.parse(item.taskWebParam);
               let personGroupId = item.taskWebParam.personGroupId.split(',');
-              // console.log('personGroupId', personGroupId);
               
               this.peopleGroupOptions.map(val => {
                 personGroupId && personGroupId.forEach(value => {
@@ -624,8 +622,6 @@ export default {
                 })
               })
               if (personGroupIdName.length > 0) {
-                // console.log('personGroupIdName', personGroupIdName);
-                
                 item.taskWebParam.personGroupId = personGroupIdName.join('、');
               }
             })
@@ -817,9 +813,7 @@ export default {
     },
     // 获取地图选择的数据
     mapPoint (data) {
-      // console.log('data', data)
       if (data) {
-
         let allDeviceNameList = [];
         if (data.deviceList.length > 0) {
           data.deviceList.map(item => {
@@ -843,7 +837,6 @@ export default {
         if (this.deleteIndexArr.length > 0) { // 如果之前删除过，则将之前删除的值删除
           this.deleteIndexArr.splice(0, 1);
         }
-        // console.log('addddd', this.deleteIndexArr)
         this.selectAreaDataList.push(obj);
       }
     },
@@ -898,8 +891,6 @@ export default {
     },
     /**重置左边菜单的方法 */
     resetLeftMenu(form) {
-      console.log('mmmmmmmmmmmmmmmmmmmmmmmmm');
-      
       this.$refs[form].resetFields();
 
       this.clearMapSelect1 = !this.clearMapSelect1;

@@ -197,12 +197,11 @@
 </template>
 <script>
 import {modelOne,modelTwo,modelThree,modelFour,modelFive,modelSix} from './components/modelType.js';
-import {getAllMonitorList, getControlInfoByName, addControl, getControlDetailIsEditor, putControl} from '@/views/index/api/api.control.js';
+import {getControlInfoByName, addControl, getControlDetailIsEditor, putControl} from '@/views/index/api/api.control.js';
 import {getEventList, getEventDetail, updateEvent} from '@/views/index/api/api.event.js';
 import {getOrganInfos} from '@/views/index/api/api.message.js';
 import {getCascadeTypeList} from '@/views/index/api/api.base.js';
-import {formatDate, objDeepCopy, unique} from '@/utils/util.js';
-import {mapXupuxian} from '@/config/config.js';
+import {formatDate, objDeepCopy} from '@/utils/util.js';
 import {dataList} from '@/utils/data.js';
 import {checkName, validatePhone} from '@/utils/validator.js';
 export default {
@@ -303,8 +302,8 @@ export default {
     // 新增页-1
     } else {
       this.pageType = 1;
-      this.modelType = 1;
-      this.modelType_ = 1;
+      this.modelType = 2;
+      this.modelType_ = 2;
       // 从车辆侦查或者人像侦查跳转过来新建布控
       // const {imgurl, modelName, plateNo} = this.$route.query;
       // this.imgurl = imgurl;
@@ -317,7 +316,7 @@ export default {
   },
   mounted () {
     this.getEventList();
-    this.getCascadeTypeList();
+    this.getCascadeTypeList()
     this.getOrganInfos();
     this.getTimeAfter();
     this.Bus.$on('sendIsShowOperateBtn', bl => {

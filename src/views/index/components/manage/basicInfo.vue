@@ -25,7 +25,6 @@ export default {
 .main {
   padding: 20px;
   height: 100%;
-  // box-shadow: 4px 0px 10px 0px rgba(131,131,131,0.28);
   > .ar-tab-nav {
     background-color: #ffffff;
     padding-top: 8px;

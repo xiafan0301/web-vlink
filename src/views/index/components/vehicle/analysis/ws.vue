@@ -225,7 +225,7 @@ export default {
       })
     },
     // 开始时间blur
-    blurStartTime (form) {
+    blurStartTime () {
       let _this = this;
       if (_this.searchForm.shotTime) {
         if (_this.searchForm.plateNo && _this.searchForm.dateEnd) {
@@ -328,13 +328,13 @@ export default {
               this.$message.info('请先设置目标车辆');
             }
             return;
-          };
+          }
           if (!this.searchForm.deviceCode) {
             if (!document.querySelector('.el-message--info')) {
               this.$message.info('请设置分析起点');
             }
             return;
-          };
+          }
           let deviceCode, vehicleType;
           this.deviceList.map(item => {
             if (item.deviceName === this.searchForm.deviceCode) {

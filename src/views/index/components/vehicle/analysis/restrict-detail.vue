@@ -113,7 +113,6 @@ export default {
   methods: {
     // 车牌号和抓拍次数排序
     sortPlateNoOrTimes (column) {
-      console.log(column)
       if (column.order) {
         if (column.order === 'ascending') {
           this.pagination.order = 'asc';

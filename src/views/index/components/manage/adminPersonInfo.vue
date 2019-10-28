@@ -657,25 +657,11 @@ export default {
     // 确定新增分组
     sureAddGroup (form) {
       this.$refs[form].validate(valid => {
-        // this.isShowError = false;
         if (valid) {
           if (this.isShowError) {
             return;
           }
           this.handleAddCopyGroupInfo();
-          // const params = {
-          //   name: this.groupForm.userGroupName
-          // };
-          // judgePerson(params)  // --判断组名是否重复
-          //   .then(res => {
-          //     if (res.data) {
-          //       this.isShowError = true;
-          //     } else {
-          //       this.isShowError= false;
-          //       this.handleAddCopyGroupInfo();
-          //     }
-          //   })
-          //   .catch(() => {})
         }
       })
     }

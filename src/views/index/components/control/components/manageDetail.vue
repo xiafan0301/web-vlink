@@ -170,7 +170,7 @@
                   <span>布防场所：</span><span>{{controlDetail.locations && controlDetail.locations.join(',')}}</span>
                 </li>
                 <li>
-                  <span>停留时长：</span><span>{{controlDetail.stayTime}}</span>
+                  <span>停留时长：</span><span>{{controlDetail.stayTime}}分钟</span>
                 </li>
                 <li>
                   <span>布控车辆：</span>
