@@ -252,15 +252,6 @@ export default {
         let offSet = [-23, -70];
         let obj = data[i];
         if (obj.longitude > 0 && obj.latitude > 0) {
-          // let _content = null;
-          // 摄像头
-          // if (obj.dataType === 1) {
-          //   _content = '<div id="' + obj.uid + '_sxt' + '" class="vl_icon vl_icon_sxt"></div>';
-          // // 卡口
-          // } else {
-          //   _content = '<div id="' + obj.uid + '_kk' + '" class="vl_icon vl_icon_kk"></div>';
-          // }
-          
           let _marker = new window.AMap.Marker({ // 添加自定义点标记
             map: _this.map,
             position: [obj.longitude, obj.latitude],

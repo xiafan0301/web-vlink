@@ -513,7 +513,7 @@ import stopDialog from './stopDialog.vue';
 import {conDetail} from '../testData.js';
 import flvplayer from '@/components/common/flvplayer.vue';
 import {getControlDetail, getControlObjList, controlArea, getControlDevice, getAlarmSnap} from '@/views/index/api/api.control.js';
-import {getEventDetail} from '@/views/index/api/api.event.js';
+// import {getEventDetail} from '@/views/index/api/api.event.js';
 import {getAllMonitorList, getAllBayonetList} from '@/views/index/api/api.base.js';
 import {mapXupuxian} from '@/config/config.js';
 import BigImg from '@/components/common/bigImg.vue';
@@ -733,9 +733,22 @@ export default {
     //   })
     // },
     // 设置marker的显示图标
-    setMarkContent (obj) {
-      const type = obj.dataType === 1 ? 0 : 1;
-      return '<div id="' + obj.uid + '" class="map_icons vl_icon vl_icon_map_sxt_in_area' + type + '"></div>'
+    setMarkContent (obj, operate) {
+      let sDataType, uContent;
+      if (obj.dataType === 1 && obj.deviceStatus !== 1) {
+        sDataType = 6;
+      } else if (obj.dataType === 2 && !obj.isEnabled) {
+        sDataType = 9
+      } else {
+        sDataType = obj.dataType === 1 ? 0 : 1;
+      }
+      uContent = '<div id="' + obj.uid + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + '"></div>'
+      if (operate === 'change') {
+        sDataType = obj.dataType === 1 ? 0 : 1;
+        let sClass = 'vl_icon_map_sxt_in_area' + sDataType;
+        uContent = '<div id="' + obj.uid + '" class="map_icons vl_icon ' + sClass +'"></div>';
+      }
+      return uContent;
     },
     // 改造数据成树结构公共方法
     getTreeData (data, type) {
@@ -765,7 +778,7 @@ export default {
         const obj = f.getExtData();
         if (array.some(s => s === obj.uid && obj.dataType === type)) {
           list.push(obj);
-          const uContent = this.setMarkContent(obj)
+          const uContent = this.setMarkContent(obj, 'change')
           f.setContent(uContent);
         }
       })
@@ -953,25 +966,6 @@ export default {
         let obj = data[i];
         if (obj.longitude > 0 && obj.latitude > 0) {
           let offSet = [-20.5, -70];
-          let _content = null;
-          if (obj.dataType === 1) {
-            // if (obj.isNormal && obj.isSelected) {
-            //   _content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_sxt"></div>';
-            // } else if (obj.isNormal && !obj.isSelected) {
-            //   _content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_sxt_uncheck"></div>';
-            // } else if (!obj.isNormal) {
-            //   _content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_sxt_not_choose"></div>';
-            // }
-             _content = '<div id="' + obj.uid + '_sxt' + '" class="vl_icon vl_icon_sxt"></div>';
-          } else {
-            // if (obj.isNormal && obj.isSelected) {
-              _content = '<div id="' + obj.uid + '_kk' + '" class="vl_icon vl_icon_kk"></div>';
-            // } else if (obj.isNormal && !obj.isSelected) {
-              // _content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_kk_uncheck"></div>';
-            // } else if (!obj.isNormal) {
-              // _content = '';
-            // }
-          }
           let marker = new window.AMap.Marker({ // 添加自定义点标记
             map: this.map,
             position: [obj.longitude, obj.latitude],
@@ -979,7 +973,7 @@ export default {
             draggable: false, // 是否可拖动
             extData: obj,
             // 自定义点标记覆盖物内容
-            content: _content
+            content: this.setMarkContent(obj)
           });
           // mouseover
           marker.on('mouseover', () => {
