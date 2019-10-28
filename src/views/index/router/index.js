@@ -8,8 +8,6 @@ import routerVideo from './router.video.js'
 import routerMap from './router.map.js'
 // 事件板块 router
 import routerEvent from './router.event.js'
-// 检索模块 router
-import routerSearch from './router.search.js'
 // 布控板块 router
 import routerControl from './router.control.js'
 // 消息板块 router
@@ -42,7 +40,6 @@ const router = new VueRouter({
         routerVideo,
         routerMap,
         routerEvent,
-        routerSearch,
         routerControl,
         routerMessage,
         routerAlarm,

@@ -335,7 +335,6 @@ export default {
             this.delSignActive = {};
           }
         }
-      }).then(action => {
       });
     },
     signEmit () {

@@ -40,7 +40,7 @@
           <div class="db_tree_c">
             <ul class="db_tree_cul db_tree_cd db_tree_cul_open">
               <li v-for="(ditem, dindex) in getCurTypeData(sitem.childList)" :key="'dl_' + sindex + '_' + dindex">
-                <el-checkbox v-model="ditem.checked" v-if="showCheckBox" @change="handleCheckboxChange(sitem, ditem.checked, 'db_ids_' + sitem.areaUid + '_' + sindex)"></el-checkbox>
+                <el-checkbox v-model="ditem.checked" v-if="showCheckBox" @change="handleCheckboxChange(sitem, ditem.checked)"></el-checkbox>
                 {{ditem.infoName}}
                 <i @click="delOne(ditem)" class="el-icon-delete" v-if="!showCheckBox"></i>
               </li>
@@ -80,7 +80,7 @@
             })
           })
         } else {
-          this.treeList.forEach((x, index) => {
+          this.treeList.forEach(x => {
             x.checkAll = false;
             x.childList.forEach(y => {
               y.checked = false;
@@ -97,7 +97,7 @@
             })
           })
         } else {
-          this.treeList.forEach((x, index) => {
+          this.treeList.forEach((x) => {
             x.checkAll = false;
             x.childList.forEach(y => {
               y.checked = false;
@@ -109,7 +109,7 @@
     mounted () {
     },
     methods: {
-      handleCheckboxChange (parent, bool, el) {
+      handleCheckboxChange (parent, bool) {
         let _b = true;
         if (!bool) {
           this.$set(parent, 'checkAll', false);

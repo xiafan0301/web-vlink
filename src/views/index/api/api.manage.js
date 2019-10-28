@@ -989,7 +989,7 @@ export function getAdItem (data) {
  * 展示数量和轮换速度【查询】接口
  * @param {*} data
  */
-export function getCountSpeed (data) {
+export function getCountSpeed () {
   return request({
     url: '/ad-space/get-count-speed',
     method: 'get',

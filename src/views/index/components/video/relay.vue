@@ -56,7 +56,7 @@
                     <!-- relayList -->
                     <template v-for="(item, index) in relayList">
                       <li v-if="item.videoPath" :key="'relay_li_' + index">
-                        <div v-if="!deviceIsPlaying(item, 1)"
+                        <div v-if="!deviceIsPlaying(item)"
                           @dragstart="dragStart($event, item, 1)" @dragend="dragEnd"
                           draggable="true" style="cursor: move;">
                           <div class="relay_ul_lit">{{item.createTime}}<span class="relay_ul_lit_t2">告警</span></div>
@@ -92,7 +92,7 @@
                     </template>
                     <template v-for="(item, index) in relayList">
                       <li v-if="!item.videoPath" :key="'relay_li2_' + index">
-                        <div v-if="!deviceIsPlaying(item, 1)"
+                        <div v-if="!deviceIsPlaying(item)"
                           @dragstart="dragStart($event, item, 1)" @dragend="dragEnd"
                           draggable="true" style="cursor: move;">
                           <div class="relay_ul_lit">{{item.createTime}}</div>
@@ -249,15 +249,11 @@
   </div>
 </template>
 <script>
-import {ajaxCtx} from '@/config/config';
-import {mapXupuxian} from '@/config/config.js';
 import videoEmpty from './videoEmpty.vue';
 import relayNew from './relay-new.vue';
 import {formatDate} from '@/utils/util.js';
 import flvplayer from '@/components/common/flvplayer.vue';
-import { apiAreaServiceDeviceList, getAllMonitorList, getAllBayonetList } from "@/views/index/api/api.base.js";
-import {selectVideoContinue, updVideoContinue, JtcPOSTAppendixInfo, JtcGETAppendixInfoList} from '@/views/index/api/api.judge.js'
-import { error } from 'util';
+import {selectVideoContinue, updVideoContinue} from '@/views/index/api/api.judge.js'
 export default {
   components: {videoEmpty, flvplayer, relayNew},
   data () {
@@ -398,7 +394,7 @@ export default {
           }
         }
         if (isFinished) { this.searchLoading2 = false; } else { this.searchLoading = false; }
-      }).catch((error => {
+      }).catch((() => {
         if (isFinished) { this.searchLoading2 = false; } else { this.searchLoading = false; }
       }));
     },
@@ -455,7 +451,7 @@ export default {
         }
       }
     },
-    deviceIsPlaying (item, type) {
+    deviceIsPlaying (item) {
       let flag = false;
       for (let i = 0; i < this.videoList.length; i++) {
         if (this.videoList[i].video && this.videoList[i].video.uid === item.uid) {
@@ -619,10 +615,10 @@ export default {
           this.relayList2.splice(iInd, 1);
         }
       }
-      this.relayModifyApi(uid, type, isFinished, cbType);
+      this.relayModifyApi(uid, type, isFinished);
     },
     // cbType  1结束任务 2重启任务 为空则不会查询
-    relayModifyApi (uid, type, isFinished, cbType) {
+    relayModifyApi (uid, type, isFinished) {
       updVideoContinue({
         uid: uid,
         type: type,
@@ -637,7 +633,7 @@ export default {
           this.getRelayList(); // 进行中
         } */
           
-      }).catch(error => {});
+      });
     },
 
     showListEvent (type) {

@@ -158,7 +158,7 @@ export default {
             let fd = new FormData();
             let fileBlob = new File([blob], new Date().getTime() + '.png')
             fd.append("file", fileBlob);
-            handUpload(fd).then((response, file, fileList) => {
+            handUpload(fd).then((response) => {
               if (response && response.data) {
                 let oRes = response.data;
                 if (oRes) {
@@ -213,7 +213,7 @@ export default {
         return false;
       }
     },
-    uploadSucess (response, file, fileList) {
+    uploadSucess (response) {
       this.uploading = false;
       if (response && response.data) {
         let oRes = response.data;

@@ -758,7 +758,6 @@ export default {
     },
     drawRectangleEditor(sid) {
       if (this.drawObj.rectangle[sid]) {
-        let _this = this,
           obj = this.drawObj.rectangle[sid];
         if (obj.editor) {
           obj.editor.open();
@@ -856,7 +855,7 @@ export default {
           obj.editor.open();
         } else {
           // 新建可编辑的矩形
-          let circle = new AMap.Circle({
+          let circle = new window.AMap.Circle({
             center: obj.obj.getCenter(),
             radius: obj.obj.getRadius(), //半径
             borderWeight: 3,
@@ -952,8 +951,7 @@ export default {
     },
     drawPolylineEditor(sid) {
       if (this.drawObj.polyline[sid]) {
-        let _this = this,
-          obj = this.drawObj.polyline[sid];
+        obj = this.drawObj.polyline[sid];
         if (obj.editor) {
           obj.editor.open();
         } else {
@@ -1016,8 +1014,7 @@ export default {
     },
     drawPolygonEditor(sid) {
       if (this.drawObj.polygon[sid]) {
-        let _this = this,
-          obj = this.drawObj.polygon[sid];
+        obj = this.drawObj.polygon[sid];
         if (obj.editor) {
           obj.editor.open();
         } else {
@@ -1071,9 +1068,8 @@ export default {
       });
     },
     drawCircle10kmClick(e) {
-      // e.lnglat.getLng()+','+e.lnglat.getLat()
       this.amap.setDefaultCursor("crosshair");
-      let circle = new AMap.Circle({
+      let circle = new window.AMap.Circle({
         center: e.lnglat,
         radius: 1000 * 10, //半径
         borderWeight: 3,
@@ -1096,12 +1092,11 @@ export default {
       /* this.drawActiveType = 0; */
       this.amap.off("click", this.drawCircle10kmClick);
       // this.drawCircle10kmMark(_sid, circle);
-      this.checkout(_this.circle,'AMap.circle')
+      this.checkout(this.circle,'AMap.circle')
     },
     drawCircle10kmEditor(sid) {
       if (this.drawObj.circle10km[sid]) {
-        let _this = this,
-          obj = this.drawObj.circle10km[sid];
+        obj = this.drawObj.circle10km[sid];
         if (obj.editor) {
           obj.editor.open();
         } else {
@@ -1382,8 +1377,7 @@ export default {
     },
     // 地图标记
     doMark(obj, sClass) {
-      console.log("doMark", obj, sClass);
-      let marker = new window.AMap.Marker({
+      new window.AMap.Marker({
         // 添加自定义点标记
         map: this.amap,
         position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]

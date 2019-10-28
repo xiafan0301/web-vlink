@@ -204,7 +204,7 @@ export default {
     // 提交
     submitData (form) {
       this.$refs[form].validate(valid => {
-        let attachmentList = [], taskProcessDto = {}, dispatchType = null;
+        let attachmentList = [], taskProcessDto = {};
         if (valid) {
           if (this.uploadImgList.length > 9) {
             this.$message({

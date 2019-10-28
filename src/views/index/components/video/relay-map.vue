@@ -65,7 +65,7 @@ import {formatDate, random14} from '@/utils/util.js';
 import {mapXupuxian} from '@/config/config.js';
 import mapVideoPlay from '@/components/common/mapVideoPlay.vue';
 import imgZoom from '@/components/common/imgZoom.vue';
-import {getVideoContinue,getVideoContinueAllpointss} from '@/views/index/api/api.judge.js'
+import {getVideoContinue} from '@/views/index/api/api.judge.js'
 
 export default {
   components: {mapVideoPlay, imgZoom},
@@ -207,7 +207,7 @@ export default {
       }
       if (gjPath && gjPath.length > 0) {
         // 绘制轨迹
-        var polyline = new window.AMap.Polyline({
+        new window.AMap.Polyline({
           map: this.amap,
           showDir: true,
           path: gjPath,
@@ -235,9 +235,6 @@ export default {
       } else if (type === 3) {
         this.amap.setZoom(this.amap.getZoom() - 1);
       }
-    },
-    doMark (obj, sClass) {
-      // console.log('doMark', obj);
     }
   },
   beforeDestroy () {

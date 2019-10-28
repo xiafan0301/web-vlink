@@ -470,7 +470,7 @@
   import vlUpload from '@/components/common/upload.vue';
   import vlBreadcrumb from '@/components/common/breadcrumb.vue';
   import { PortraitPostByphotoTask, PortraitPostByphotoRealtime } from '@/views/index/api/api.portrait.js';
-  import {JtcPOSTAppendixInfo, getTailBehindList } from '../../api/api.judge'
+  import {JtcPOSTAppendixInfo } from '../../api/api.judge'
   import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
   import {getGroups} from '../../api/api.judge.js';
   import noResult from '@/components/common/noResult.vue';
