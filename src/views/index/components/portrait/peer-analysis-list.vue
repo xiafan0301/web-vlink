@@ -203,10 +203,7 @@
   </vue-scroll>
 </template>
 <script>
-// eslint-disable-next-line no-unused-vars
 import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume, postPeopleTask } from '@/views/index/api/api.analysis.js';
-import {JtcPUTAppendixsOrder, JtcPOSTAppendixInfo, JtcGETAppendixInfoList,  getShotDevice, getTailBehindList } from '../../api/api.judge'
-import { ajaxCtx, mapXupuxian } from '@/config/config.js';
 import { formatDate } from "@/utils/util.js";
 import vlUpload from "@/components/common/upload.vue";
 import mapSelector from '@/components/common/mapSelector.vue';
@@ -370,7 +367,6 @@ export default {
               customClass: 'request_tip'
             })
             this.getDataList()
-            console.log(res.data)
           }
         })
       }
@@ -481,12 +477,11 @@ export default {
     },
     //恢复任务,重启任务
     recoveryOrRestart(obj) {
-        putTaskInfosResume(obj.uid).then(res => {
-            console.log(res)
-            if(res) {
-                this.getDataList();
-            }
-        }).catch(() => {})
+      putTaskInfosResume(obj.uid).then(res => {
+        if(res) {
+          this.getDataList();
+        }
+      }).catch(() => {})
     },
     // 查询任务列表数据
     selectDataList () {

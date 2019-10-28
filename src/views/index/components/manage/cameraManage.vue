@@ -625,7 +625,6 @@ export default {
       } else {
         manufacturer = this.searchForm.manufacturer;
       }
-      console.log(this.searchForm.dateTime)
 
       const params = {
         'where.onlineStartDate': this.searchForm.dateTime[0] && (this.searchForm.dateTime[0] + ' 00:00:00'),
@@ -643,7 +642,6 @@ export default {
         order: this.pagination.order,
         orderBy: this.pagination.orderBy
       };
-      console.log('params', params)
       this.isSearchLoading = true;
       getDeviceList(params)
         .then(res => {
@@ -653,7 +651,7 @@ export default {
 
             this.dataList = res.data.list;
             this.dataList.map(val => {
-              let dutyUnitName = '';
+              // let dutyUnitName = '';
               this.departmentList.map(item => {
                 if (item.uid == val.dutyUnitId) {
                   val.dutyUnitName = item.organName;

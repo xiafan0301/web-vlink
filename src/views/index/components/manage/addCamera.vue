@@ -116,7 +116,7 @@
               <el-form-item label="IP:" prop="ip">
                 <ul class="ip-adress">
                   <li v-for="(item,index) in onlineForm.ip" :key="index">
-                    <el-input v-model="item.value" @change="checkIpVal(item,index)" @blur="setDefaultVal(item)" placeholder="255"></el-input>
+                    <el-input v-model="item.value" @change="checkIpVal(item)" @blur="setDefaultVal(item)" placeholder="255"></el-input>
                     <div class="dot"></div>
                   </li>
                 </ul>
@@ -406,7 +406,6 @@ export default {
           .then(res => {
             if (res && res.data) {
               let obj = res.data;
-              console.log('obj', obj)
 
               this.deivceCodeId = obj.code;
 
@@ -591,8 +590,7 @@ export default {
       }
     },
     //input---ipaddress
-    checkIpVal(item, index) {
-      console.log("===========",item,index)
+    checkIpVal(item) {
       // let self = this;
       //确保每个值都处于0-255
       let val = item.value;
@@ -623,7 +621,6 @@ export default {
       this.resAddress = str;
       if (this.onlineForm.address) str = str + this.onlineForm.address;
       this.markLocation(str);
-
     },
     // 获得选中的级联对象列表
     getCascaderObj(val, opt) {
@@ -654,8 +651,6 @@ export default {
             _this.onlineForm.latitude = lat;
             let lnglatXY = [lon, lat];
             _this.addMarker(lnglatXY);
-          } else {
-            console.log('定位失败！');
           }
         });
       });
@@ -707,9 +702,6 @@ export default {
           _this.map,
           new window.AMap.LngLat(lnglatXY[0],lnglatXY[1])
         );
-        hoverWindow.on("close", function() {
-          console.log("infoWindow close");
-        });
       });
       marker.on("mouseout", function() {
         if (hoverWindow) {
@@ -850,7 +842,6 @@ export default {
     },
     // 地址回调
     geocoder_CallBack(data) {
-      console.log('data', data)
       const {province, city, district, township} = data.regeocode.addressComponent;
       const adcode = data.regeocode.addressComponent.adcode;
       const arr = [province, city, district];
@@ -870,23 +861,18 @@ export default {
     getCascaderObj2 (val, list) {
       let result = null;
       let fun = (val, list) => {
-        try {
-          list.forEach(a => {
-            if (a.uid == val) {
-              result = a;
-              // foreach.break = new Error("找到了就跳出循环");  
-            } else {
-              if (a.hasOwnProperty('childList')) {
-                fun(val, a.childList);
-              }
+        list.forEach(a => {
+          if (a.uid == val) {
+            result = a;
+            // foreach.break = new Error("找到了就跳出循环");  
+          } else {
+            if (a.hasOwnProperty('childList')) {
+              fun(val, a.childList);
             }
-          })
-        } catch(e) {
-          console.log(e);
-        }
+          }
+        })
       }
       fun(val, list);
-      console.log('result', result)
       return result;
     },
     // 回填级联时，根据详情返回的areaId，找到其所有的上级和下级
@@ -943,7 +929,6 @@ export default {
           }
           this.onlineForm.areaId = this.onlineForm.locationName[this.onlineForm.locationName.length - 1];
            this.onlineForm.address = this.resAddress + this.onlineForm.address;
-          console.log('this.onlineForm.address', this.onlineForm.address)
           const params = {
             ...this.cameraForm,
             ...this.onlineForm,

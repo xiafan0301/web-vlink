@@ -371,7 +371,7 @@ export default {
       };
       getVehicleTracks(params)
         .then(res => {
-
+          console.log(res);
         })
     },
     // 获取车辆详情
@@ -431,31 +431,13 @@ export default {
       _this.map = map;
 
       _this.mapMark( _this.detailInfo);
-      // map.on('click', function(e) {
-        
-      //   new window.AMap.service('AMap.Geocoder', function () { // 回调函数
-      //     let geocoder = null;
-      //     geocoder = new window.AMap.Geocoder({});
-      //     const lnglatXY = [e.lnglat.getLng(), e.lnglat.getLat()];//地图上所标点的坐标
-
-      //     geocoder.getAddress(lnglatXY, function (status, result) {
-      //       console.log('result', result)
-      //       if (status === 'complete' && result.info === 'OK') {
-      //         _this.mapMark( _this.detailInfo);
-      //       }
-      //     });
-      //   });
-      // });
     },
     // 地图标记
     mapMark (obj) {
-      console.log(obj)
       let _this = this;
       
-      // _this.map.clearMap();
       let hoverWindow = null;
       if (obj.longitude > 0 && obj.latitude > 0) {
-        console.log('nnnnnn')
         let offSet = [-20.5, -48];
         let marker = new window.AMap.Marker({ // 添加自定义点标记
           map: _this.map,
