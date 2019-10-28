@@ -218,7 +218,6 @@ export default {
           getUserDetail(userId)
             .then(res => {
               if (res) {
-                console.log(res)
                 if (res) {
                   this.addUser.userName = res.data.userName;
                   this.addUser.userSex = parseInt(res.data.userSex);
@@ -246,7 +245,6 @@ export default {
     remoteMethod(query) {
       if (query !== '') {
         this.loading = true;
-        // console.log(this.userList)
         setTimeout(() => {
           this.loading = false;
           this.reportUserList = this.userList.filter(item => {

@@ -452,7 +452,7 @@ import { autoDownloadUrl } from '@/utils/util.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import { getSpecialGroup, addSpecialVehicle, editSpecialVehicle, getSpecialVehicleDetail, 
   getSpecialVehicleList, addGroup, checkRename, editVeGroup, delGroup,
-  getVehicleBrand, getVehicleModel, moveoutGroup, vehicleImport, vehicleExport, getReVehicleInfo, downloadVehicleModel } from '@/views/index/api/api.manage.js';
+  getVehicleBrand, getVehicleModel, moveoutGroup, vehicleExport, getReVehicleInfo, downloadVehicleModel } from '@/views/index/api/api.manage.js';
 export default {
   components: { vlUpload },
   data () {
@@ -580,7 +580,6 @@ export default {
   },
   methods: {
     uploadEmit (data) {
-      console.log('uploadEmit data', data);
       if (data && data.path) {
         this.dialogImageUrl = data.path;
         this.$nextTick(() => {
@@ -1089,9 +1088,9 @@ export default {
         getSpecialVehicleDetail(obj.uid)
           .then(res => {
             if (res) {
-              let vehicleColor = res.data.vehicleColor;
-              let vehicleType = res.data.vehicleType;
-              let numberType = res.data.numberType;
+              // let vehicleColor = res.data.vehicleColor;
+              // let vehicleType = res.data.vehicleType;
+              // let numberType = res.data.numberType;
               let numberColor = res.data.numberColor;
 
               this.imgData = Object.assign({}, {path: res.data.vehicleImagePath})
@@ -1113,7 +1112,7 @@ export default {
                   this.carForm.groupList.push(item.uid);
                 });
               }
-              this.carForm.vehicleColor = res.data.vehicleColor;;
+              this.carForm.vehicleColor = res.data.vehicleColor;
               this.carForm.vehicleType = res.data.vehicleType;
               this.carForm.numberType = res.data.numberType;
               this.carForm.numberColor = numberColor && numberColor.toString();

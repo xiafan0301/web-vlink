@@ -299,7 +299,6 @@ export default {
   },
   mounted () {
     this.userInfo = this.$store.state.loginUser;
-    console.log('userInfo', this.userInfo)
     this.addUnit.proKey = this.userInfo.proKey;
     this.editUnit.proKey = this.userInfo.proKey;
 
@@ -408,7 +407,6 @@ export default {
     },
     // 获取当前部门及子级部门
     getDepartList () {
-      console.log('this.userInfo.organList[0].uid', this.userInfo.organList[0].uid)
        this.allDepartmentList = [];
        this.departmentList = [];
        let organPid = null;
@@ -581,7 +579,6 @@ export default {
     },
     // 显示添加部门弹出框
     onAddDepart (obj, e) {
-      console.log(obj)
       e.stopPropagation();
       this.departmentFormList = [];
       this.addUnit = {

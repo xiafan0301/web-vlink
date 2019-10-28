@@ -156,7 +156,7 @@
   </div>
 </template>
 <script>
-// import { getDepartmentList } from '@/views/index/api/api.manage.js';
+import { getDepartmentList } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {
@@ -292,7 +292,9 @@ export default {
         })
     },
     selectDataList () {},
-    resetForm (form) {},
+    resetForm (form) {
+      this.$refs[form].resetFields();
+    },
     // 跳至查看档案页面
     skipSelectDetail (obj) {
       this.$router.push({name: 'machine_detail', query: { status: obj.status }});

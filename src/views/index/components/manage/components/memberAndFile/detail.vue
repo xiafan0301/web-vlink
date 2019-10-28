@@ -17,7 +17,6 @@
         </p>
       </div>
       <div class="divide"></div>
-      <!-- <div class="detail_info"> -->
         <ul class="detail_info clearfix">
           <li>
             <span>成员编号:</span>
@@ -48,7 +47,6 @@
             <span>{{detailInfo.userEmail ? detailInfo.userEmail : '无'}}</span>
           </li>
         </ul>
-      <!-- </div> -->
     </div>
     <div class="relate_job">
       <div class="header">

@@ -482,10 +482,6 @@ export default {
     editGroupInfo (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-          // this.isShowError = false;
-          // const params = {
-          //   groupName: this.addGroupForm.userGroupName
-          // };
           if (this.isShowError) {
             return;
           }
@@ -494,16 +490,6 @@ export default {
             return;
           }
           this.handleEditGroupInfo();
-          // checkVelRename(params)
-          //   .then(res => {
-          //     if (res.data) {
-          //       this.isShowError = true;
-          //     } else {
-          //       this.isShowError = false;
-          //       this.handleEditGroupInfo();
-          //     }
-          //   })
-          //   .catch(() => {})
         }
       })
     },
@@ -552,11 +538,6 @@ export default {
               this.$router.back(-1);
               this.isDeleteLoading = false;
             } else {
-              // this.$message({
-              //   type: 'error',
-              //   message: '删除失败',
-              //   customClass: 'request_tip'
-              // })
               this.isDeleteLoading = false;
             }
           })
@@ -593,11 +574,6 @@ export default {
             this.isRemoveLoading = false;
             this.moveoutGroupDialog = false;
           } else {
-            // this.$message({
-            //   type: 'error',
-            //   message: '移出失败',
-            //   customClass: 'request_tip'
-            // })
             this.isRemoveLoading = false;
           }
         })
@@ -610,7 +586,6 @@ export default {
         selectArr.push(item.uid);
       });
       const params = {
-        // groupName: this.addGroupName || null,
         groupName: name || null,
         vehicleIds: selectArr
       };
@@ -630,25 +605,11 @@ export default {
     },
     addCopyGroupDialog (form) {
       this.$refs[form].validate(valid => {
-        // this.isShowError = false;
         if (valid) {
           if (this.isShowError) {
             return;
           }
           this.handleAddCopyGroupDialog();
-          // const params = {
-          //   groupName: this.addGroupForm.userGroupName
-          // };
-          // checkVelRename(params)
-          //   .then(res => {
-          //     if (res.data) {
-          //       this.isShowError = true;
-          //     } else {
-          //       this.isShowError = false;
-          //       this.handleAddCopyGroupDialog();
-          //     }
-          //   })
-          //   .catch(() => {})
         }
       })
     },
@@ -660,7 +621,6 @@ export default {
       });
       const params = {
         groupName: this.addGroupForm.userGroupName || null,
-        // groupId: id || null,
         vehicleIds: selectArr
       };
       this.isAddCopyLoading = true;

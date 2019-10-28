@@ -203,7 +203,6 @@ export default {
               this.taskDetail = res.data;
               this.taskDetail.taskResult = JSON.parse(this.taskDetail.taskResult);
               this.taskDetail.taskWebParam = JSON.parse(this.taskDetail.taskWebParam);
-              console.log('taskWebParam', this.taskDetail.taskWebParam)  
             }
           })
       }
@@ -231,7 +230,6 @@ export default {
         startTime : formatDate(this.editForm.startTime),
         endTime: formatDate(this.editForm.endTime)
       };
-      console.log('params', params)
       getPersonShotDev(params)
         .then(res => {
           if (res && res.code === '00000000') {
@@ -252,7 +250,6 @@ export default {
         })
     },
     uploadEmit (data) {
-      console.log('uploadEmit data', data);
       if (data && data.path) {
         this.dialogImageUrl = data.path;
         this.$nextTick(() => {
@@ -264,7 +261,6 @@ export default {
     },
     // 开始时间选择change
     handleStartTime (val) {
-      console.log(val)
       if (val) {
         // if ( (new Date(val[1]).getTime() - new Date(val[0]).getTime()) >= 3* 24 * 3600 * 1000) {
         //   if (!document.querySelector('.el-message--info')) {

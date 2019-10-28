@@ -152,7 +152,7 @@ import { getNightVehicleList, exportNightVehicle } from "@/views/index/api/api.j
 import { getGroupListIsVehicle } from '@/views/index/api/api.control.js';
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
-import { formatDate, autoDownloadUrl, dateOrigin } from "@/utils/util.js";
+import { autoDownloadUrl } from "@/utils/util.js";
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import noResult from '@/components/common/noResult.vue';
 import mapSelector from '@/components/common/mapSelector.vue';
@@ -373,7 +373,6 @@ export default {
       this.openMap = !this.openMap;
     },
     mapSelectorEmit (result) {
-      console.log(result)
       if (result) {
         // bayonetList deviceList
         this.dSum = 0;

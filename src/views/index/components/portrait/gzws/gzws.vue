@@ -233,9 +233,7 @@
 </template>
 <script>
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
-import { ajaxCtx } from '@/config/config.js';
 import { checkPlateNumber } from '@/utils/validator.js';
-import { getShotDevice, getTailBehindList } from '@/views/index/api/api.judge.js';
 import { getPersonShotDev, getPersonFollowing } from '@/views/index/api/api.portrait.js';
 import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
 import { formatDate, dateOrigin } from '@/utils/util.js';
@@ -315,7 +313,6 @@ export default {
   },
   methods: {
     uploadEmit (data) {
-      console.log('uploadEmit data', data);
       if (data && data.path) {
         this.dialogImageUrl = data.path;
         this.$nextTick(() => {
@@ -327,7 +324,6 @@ export default {
     },
     // 开始时间选择change
     handleStartTime (val) {
-      console.log(val)
       if (val) {
         // if ( (new Date(val[1]).getTime() - new Date(val[0]).getTime()) >= 3* 24 * 3600 * 1000) {
         //   if (!document.querySelector('.el-message--info')) {
@@ -397,7 +393,6 @@ export default {
         startTime : formatDate(this.addForm.startTime),
         endTime: formatDate(this.addForm.endTime)
       };
-      console.log('params', params)
       getPersonShotDev(params)
         .then(res => {
           if (res && res.code === '00000000') {
@@ -448,7 +443,7 @@ export default {
               this.$message.info('请设置分析起点');
             }
             return;
-          };
+          }
           let deviceCode;
           this.deviceList.map(item => {
             if (item.deviceName === this.addForm.deviceCode) {

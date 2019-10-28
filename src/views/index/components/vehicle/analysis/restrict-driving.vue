@@ -435,7 +435,6 @@ export default {
             isTailNumberLimit: this.addForm.isTailNumberLimit,
             isVehicleTypeLimit: this.addForm.isVehicleTypeLimit
           };
-          console.log('params', params)
           this.isSearchLoading = true;
           addLimitTask(params)
             .then(res => {

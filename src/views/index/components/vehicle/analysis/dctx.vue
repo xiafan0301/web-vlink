@@ -333,11 +333,9 @@ export default {
       let _arr = [];
       this.deviceList = objDeepCopy(this.mapLocationList);
       if (this.deviceList.length > 0) {
-        // console.log('mapLocationList', this.mapLocationList)
         this.deviceList.forEach((item, index) => {
           if (item.pathRecords && item.pathRecords.length > 0) {
             item.pathRecords.forEach(a => {
-              // console.log('aaaa', a)
               // 判断同一个卡口是否出现多次，，若出现，则只显示一个卡口
               if (a.bayonetName) {
                 a.DeviceID = a.bayonetName;
@@ -378,9 +376,7 @@ export default {
                 if (this.isCheckedVehicle === index) { // 选中的轨迹
                   // 判断是否重复出现在同一个设备点
                   if (a.PlateNo === _arr[_i].PlateNo) {
-                    
                     _arr[_i]['shotTime'] += ',' + a.shotTime;
-                    // console.log('_arr[_i]', _arr[_i]['shotTime'])
                   } else {
                     a['simLength'] += 1;
                     _arr.splice(_i, 1, a);
@@ -404,9 +400,7 @@ export default {
      * 地图描点
      */
     drawPoint (data) {
-      // console.log('data', data)
       if (data && data.length > 0) {
-
         let _this = this;
 
         for (let i = 0; i < data.length; i++) {
@@ -519,7 +513,6 @@ export default {
 
       this.filterData();
       this.drawLine();
-
     },
     // 查询数据
     searchData () {
@@ -542,7 +535,6 @@ export default {
         }
         return;
       }
-      
       if (this.searchForm.peerVehicleNumber) {
         vehicleNumberList.push(this.searchForm.peerVehicleNumber.trim());
       }

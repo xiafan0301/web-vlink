@@ -642,19 +642,6 @@ export default {
             return;
           }
           this.handleAddCopyGroupInfo();
-          // const params = {
-          //   name: this.addGroupForm.userGroupName
-          // };
-          // judgePerson(params)  // --判断组名是否重复
-          //   .then(res => {
-          //     if (res.data) {
-          //       this.isShowError = true;
-          //     } else {
-          //       this.isShowError= false;
-          //       this.handleAddCopyGroupInfo();
-          //     }
-          //   })
-          //   .catch(() => {})
         }
       })
     },
@@ -754,9 +741,7 @@ export default {
     handleCurrentChange (page) {
       this.showGroup = false;
       this.pagination.pageNum = page;
-      // if (this.selectMethod === 1) {
-        this.getPersonList();
-      // }
+      this.getPersonList();
     },
     // 显示新增分组弹出框
     showAddGroupDialog () {
@@ -766,27 +751,12 @@ export default {
     },
     // 新增分组
     addGroupInfo (form) {
-      // this.isShowError= false;
       this.$refs[form].validate(valid => {
-        // this.isShowError = false;
         if (valid) {
           if (this.isShowError) {
             return;
           }
           this.handleAddGroupInfo();
-          // const params = {
-          //   name: this.addGroupForm.userGroupName
-          // };
-          // judgePerson(params)
-          //   .then(res => {
-          //     if (res.data) {
-          //       this.isShowError = true;
-          //     } else {
-          //       this.isShowError= false;
-          //       this.handleAddGroupInfo();
-          //     }
-          //   })
-          //   .catch(() => {})
         }
       })
     },

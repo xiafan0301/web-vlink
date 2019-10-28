@@ -400,10 +400,7 @@ export default {
         getTaskInfosDetail(id)
           .then(res => {
             if (res && res.data) {
-              console.log(res.data);
-              
               this.taskDetail = res.data;
-              console.log(this.taskDetail);
               
               if (this.taskDetail.taskResult) {
                 this.taskDetail.taskResult = JSON.parse(this.taskDetail.taskResult);
@@ -427,8 +424,6 @@ export default {
                 }
               }
               this.initMap(this.taskDetail.taskResult);
-
-              console.log('taskWebParam', this.taskDetail.taskWebParam)
             }
           })
       }

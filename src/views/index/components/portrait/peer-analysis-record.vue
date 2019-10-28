@@ -132,25 +132,17 @@ export default {
             if (res) {
               this.$set(res.data, 'taskResult', JSON.parse(res.data.taskResult))
               this.$set(res.data, 'taskWebParam', JSON.parse(res.data.taskWebParam))
-              // console.log(res.data.taskResult)
-              // res.data.taskResult[0].uid = 1
-              console.log(res.data)
               let o = null
               if (this.$route.query.id) {
                 o = res.data.taskResult.find(item => {return item.uid + '' === this.$route.query.id + ''})
               }
-              console.log(o)
               if (o && o.personRetrieveDetailDtoList) {
                 this.retireObj = Object.assign({}, o)
                 this.listbox = [...o.personRetrieveDetailDtoList]
                 this.list = [...o.personRetrieveDetailDtoList.slice(0, 12)]
-                // console.log(new Date(this.list[0].shotTime).getTime())
-                // console.log(this.list)
                 this.list.sort((a, b) => {return new Date(a.shotTime).getTime() - new Date(b.shotTime).getTime()})
               }
-              // res.data.taskResult.push(...res.data.taskResult)
               this.pagination.total = this.listbox.length
-              // this.boxList = [...res.data.taskResult.slice(0, 12)]
             }
           })
       }
@@ -177,27 +169,14 @@ export default {
             this.list.sort((a, b) => {return a.deviceName.localeCompare(b.deviceName, 'zh-CN')})
         }
       }
-      // if (type === this.orderType) {
-      //   if (this.order === 1) {
-      //     this.list.sort((a, b) => {return new Date(b.shotTime).getTime() - new Date(a.shotTime).getTime()})
-      //     this.order = 2;
-      //   } else {
-      //     this.list.sort((a, b) => {return new Date(a.shotTime).getTime() - new Date(b.shotTime).getTime()})
-      //     this.order = 1;
-      //   }
-      // } else {
-      //   this.orderType = type;
-      // }
     },
     onOpenCompair (obj) {
-      // console.log(obj)
       this.dialogObj = Object.assign({}, obj)
       this.compairDialog = true
     },
     onPageChange (page) {
       this.list.splice(0, this.list.length)
       this.list = [...this.listbox.slice((page - 1) * 12, 12 + (page - 1) * 12)]
-      // console.log(this.list)
     },
   }
 }
