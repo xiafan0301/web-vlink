@@ -183,7 +183,7 @@
 </template>
 <script>
 import flvplayer from '@/components/common/flvplayer.vue';
-import {random14, unique, addCluster} from '@/utils/util.js';
+import {random14, addCluster} from '@/utils/util.js';
 import {getControlNameBySelect, getControlEventBySelect, getControlObjBySelect, getControlMap, getControlMapByDevice, getAlarmListByDev, getAllAlarmSnapListByDev} from '@/views/index/api/api.control.js';
 import {dataList} from '@/utils/data.js';
 import {mapXupuxian} from '@/config/config.js';
@@ -807,7 +807,7 @@ export default {
             content: content
           });
           // 点标记点击事件
-          marker.on('click', function(e) {
+          marker.on('click', function() {
             // 点击切换告警闪烁图标
             if (_this.markerAlarmList.some(s => s.deviceId === marker.getExtData().uid)) {
               if (!$('#' + marker.getExtData().uid).hasClass('vl_icon_control_02')) {
