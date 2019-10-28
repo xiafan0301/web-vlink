@@ -50,7 +50,6 @@ export default {
     setTimeout(() => {
       // 修改时回填数据
       if (this.modelList) {
-        console.log(this.modelList, 'this.modelList')
         // 回填嫌疑车牌
         let [{pointDtoList: [{bayonetList, devList}], surveillanceObjectDtoList}] = this.modelList;
         this.protraitList = surveillanceObjectDtoList.filter(m => m.objType === 1);//回填禁入人员

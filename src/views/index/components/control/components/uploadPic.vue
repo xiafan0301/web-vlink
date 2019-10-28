@@ -74,12 +74,8 @@ export default {
   },
   watch: {
     fileList () {
-      if (this.mode !== 'message') {
-        console.log('ttttttttttttttttt');
-        
-        this.fileList.forEach(f => f.photoUrl && (f.url = f.photoUrl));
-        console.log(this.fileList, 'this.fileList');
-        
+      if (this.mode !== 'message') {        
+        this.fileList.forEach(f => f.photoUrl && (f.url = f.photoUrl));        
       }
       if (this.fileList.some(s => s.fileType === 2)) {
         this.isShow = true;
@@ -114,13 +110,10 @@ export default {
       this.picNum = fileList && fileList.length;
     },
     handlePictureCardPreview (file) {
-      console.log(file, 'file')
       this.dialogImageUrl = file.url;
       this.dialogVisible = true;
-      console.log(this.dialogImageUrl, 'this.dialogImageUrl')
     },
     uploadPicSucess (response, file, fileList) {
-      console.log(file.raw.type, 'file')
       this.videoUrl = file.response.data.sysCommonImageInfo.fileFullPath;
       if (file.raw.type === 'video/mp4' || file.raw.type === 'video/bmp') this.isShow = true;
       this.$emit('uploadPicSubmit', file);

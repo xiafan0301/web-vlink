@@ -90,8 +90,7 @@
 </template>
 <script>
 import G2 from '@antv/g2';
-import { View } from '@antv/data-set';
-import {apiCarFlow, exportExcel} from '@/views/index/api/api.vehicle.js';
+import {exportExcel} from '@/views/index/api/api.vehicle.js';
 import {getAllBayonetListByName} from '@/views/index/api/api.vehicle.js';
 import {formatDate, dateOrigin} from '@/utils/util.js';
 import {dataList} from '@/utils/data.js';

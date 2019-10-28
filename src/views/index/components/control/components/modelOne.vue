@@ -284,7 +284,6 @@ export default {
     // 嫌疑人照片的上传方法
     uploadPicDelTwo (fileList) {
       this.fileListTwo = fileList;
-      console.log(this.fileListTwo, 'this.fileListTwo');
       
     },
     // 嫌疑人照片的上传方法

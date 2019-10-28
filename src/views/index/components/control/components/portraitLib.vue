@@ -213,7 +213,7 @@ export default {
     },
     // 多选
     operateRadio () {
-      console.log(this.protraitMemberList, 'this.protraitMemberList')
+      
     },
     // 重置
     reset () {
