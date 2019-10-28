@@ -33,7 +33,7 @@
 import vehicleLib from './vehicleLib.vue';
 import portraitLib from './portraitLib.vue';
 import mapSelector from '@/components/common/mapSelector.vue';
-import {random14, objDeepCopy, unique} from '@/utils/util.js';
+import {unique} from '@/utils/util.js';
 export default {
   components: {mapSelector, vehicleLib, portraitLib},
   props: ['modelList'],

@@ -52,8 +52,7 @@
 import controlDev from './controlDev.vue';
 import vehicleLib from './vehicleLib.vue';
 import portraitLib from './portraitLib.vue';
-import {mapXupuxian} from '@/config/config.js';
-import {random14, objDeepCopy, unique} from '@/utils/util.js';
+import {unique} from '@/utils/util.js';
 export default {
   components: {controlDev, vehicleLib, portraitLib},
   props: ['modelList'],
@@ -193,14 +192,12 @@ export default {
       });
     },
     seacher(v) {
-      const placeSearch = new AMap.PlaceSearch({
+      const placeSearch = new window.AMap.PlaceSearch({
         // city 指定搜索所在城市，支持传入格式有：城市名、citycode和adcode
         city: "湖南"
       });
-
-      if (!!v) {
-        let _this = this;
-        return new Promise((resolve, reject) => {
+      if (v) {
+        return new Promise((resolve) => {
           placeSearch.search(v, (status, result) => {
             // 查询成功时，result即对应匹配的POI信息
             let pois = result.poiList.pois;

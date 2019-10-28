@@ -367,7 +367,6 @@ import { getAreaList } from '@/views/index/api/api.user.js';
 import {mapXupuxian} from '@/config/config.js';
 import {dataList} from '@/utils/data.js';
 import {objDeepCopy} from '@/utils/util.js';
-import { setTimeout } from 'timers';
 export default {
   data () {
     return {
@@ -575,7 +574,7 @@ export default {
     // 处理省市区县数据
     handleAreaData (data) {
       let _this = this;
-      data.forEach((val, index) => {
+      data.forEach((val) => {
         if (val.childList.length === 0) { // 当childList为[]时,删除childList
           _this.$delete(val, 'childList');
         } else {
@@ -584,8 +583,7 @@ export default {
       })
       return data;
     },
-    checkIpVal(item, index) {
-      console.log("===========",item,index)
+    checkIpVal(item) {
       // let self = this;
       //确保每个值都处于0-255
       let val = item.value;
@@ -937,7 +935,7 @@ export default {
           opt.forEach(f => {
             if (f.uid == val) { 
               res = f;
-              foreach.break = new Error("找到了就跳出循环");  
+              // foreach.break = new Error("找到了就跳出循环"); 
             } else {
               if (f.hasOwnProperty('childList')) {
                 func(val, f.childList);
@@ -982,7 +980,6 @@ export default {
       func(obj.parentUid, _opt);
       return res.reverse();
     },
-    
     // 所在位置change
     handleChangeAddress () {
       console.log(this.basicInfoForm.bayonetAddress)
@@ -995,22 +992,22 @@ export default {
     //根据地址搜索
     markLocation(address) {
       let _this = this;
-      _this.map.plugin('AMap.Geocoder', function() {
-        let geocoder = new window.AMap.Geocoder();            
-        geocoder.getLocation(address, function(status, result) {
-          if (status === 'complete' && result.info === 'OK') {
-            // 经纬度             
+      _this.map.plugin('AMap.Geocoder', function() {
+        let geocoder = new window.AMap.Geocoder();
+        geocoder.getLocation(address, function(status, result) {
+          if (status === 'complete' && result.info === 'OK') {
+            // 经纬度
             console.log(result, 'result')
-            let lng = result.geocodes[0].location.lng;
-            let lat = result.geocodes[0].location.lat; 
+            let lng = result.geocodes[0].location.lng;
+            let lat = result.geocodes[0].location.lat;
             _this.basicInfoForm.longitude = lng;
             _this.basicInfoForm.Latitude = lat;
-             _this.addMarker(lng, lat);
-            } else {
-              console.log('定位失败！');
-            }
-        });
-      });
+            _this.addMarker(lng, lat);
+          } else {
+            console.log('定位失败！');
+          }
+        });
+      });
     },
     // 翻页
     handleCurrentChange (page) {

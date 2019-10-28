@@ -34,8 +34,7 @@
 <script>
 import controlDev from './controlDev.vue';
 import vehicleLib from './vehicleLib.vue';
-import {mapXupuxian} from '@/config/config.js';
-import {random14, objDeepCopy, unique} from '@/utils/util.js';
+import {unique} from '@/utils/util.js';
 import {getGroupsDevices} from '@/views/index/api/api.base.js';
 export default {
   components: {controlDev, vehicleLib},
@@ -86,9 +85,7 @@ export default {
     // 从布控库中获取嫌疑车辆
     getVehicleData (data) {
       this.vehicleList = this.vehicleList.concat(data);
-      this.vehicleList = unique(this.vehicleList, 'objId');
-      console.log(this.vehicleList, 'this.vehicleList');
-      
+      this.vehicleList = unique(this.vehicleList, 'objId');      
     },
     // 删除从布控库中已选择的车辆
     delVehicle (index) {
@@ -147,7 +144,7 @@ export default {
       this.devData = data;
     },
     // 从库中选择
-    popSel (type) {
+    popSel () {
       this.$refs['vehicleLibDialog'].vehicleLibDialog = true;
       this.$refs['vehicleLibDialog'].reset();
     },
