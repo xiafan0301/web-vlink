@@ -534,7 +534,7 @@ export default {
       infoRightShow: false, // 右边菜单状态
       videoMenuStatus: true, // 左边菜单状态
       amap: null, // 地图对象
-      mapCenter: [110.594419, 27.908869], //地图中心位
+      // mapCenter: [110.594419, 27.908869], //地图中心位
       showTypes: "DB", //设备类型
       selectedDevice: {}, // 当前选中的设备信息
       currentClickDevice: [],
@@ -1061,7 +1061,7 @@ export default {
       let map = new window.AMap.Map("mapMap", {
         zoom: 14, // 级别
         resizeEnable: true,
-        center: _this.mapCenter // 中心点坐标
+        center: mapXupuxian.center // 中心点坐标
       });
       map.setMapStyle("amap://styles/whitesmoke");
       _this.amap = map;
