@@ -150,17 +150,21 @@ export default {
     },
     // 进入修改已选择的设备页面
     changePageType () {
+      this.$_showLoading();
       if (this.map) {
         this.map.destroy();
         this.map = null;
       }
       this.removeObj = {1: [],2: []};
       this.markerList = [];
-     
+    
       this.pageType = 2;
       this.$nextTick(() => {
         this.activeDeviceList = [...this.devIdList.map(m => m.uid), ...this.bayIdList.map(m => m.uid)];
       })
+      setTimeout(() => {
+        this.$_hideLoading();
+      }, 1500);
     },
     // 传给父组件 
     sendParent () {
@@ -169,7 +173,7 @@ export default {
         const bayonetList = this.bayIdList.map(m => {return {bayonetId: m.uid}})
         this.$emit('getChildModel', {devList, bayonetList});
       } else {
-        this.$message.warning('请先选择布控设备');
+        this.$message.info('请先选择布控设备');
       }
     },
     // 初始化地图
@@ -191,6 +195,7 @@ export default {
     },
     // 获取地图上的设备和卡口数据
     getDevAndBayList () {
+      this.$_showLoading();
       Promise.all([getAllMonitorList({ccode: mapXupuxian.adcode}), 
         getBayonetList  ({ 
           "where.areaId": mapXupuxian.adcode,
@@ -203,7 +208,7 @@ export default {
           const [{data: devList}, {data: {list: bayList}}] = res;
           devList.forEach(f => {f.dataType = 1;f.name = f.deviceName})
           bayList.forEach(f => {f.dataType = 2;f.name = f.bayonetName})
-          this.allBayList = bayList.filter(f => f.isEnterPoint === 1 || f.isEnterPoint === 2);
+          this.allBayList = bayList.filter(f => f.isEnterPoint === 1 || f.isEnterPoint === 2);//筛选出入城卡口
           this.devList = [...devList, ...bayList];
           this.operateModel();
         }
@@ -292,6 +297,7 @@ export default {
       }
       _this.map.setFitView();
       addCluster(_this.map, _this.markerList);
+      this.$_hideLoading();
     },
     // 人员失踪位置和家庭位置标记
     addressMark () {

@@ -323,11 +323,7 @@
                       <span>{{scope.row.taskWebParam.age ? scope.row.taskWebParam.age : '不限'}}</span>
                     </template>
                   </el-table-column>
-                  <el-table-column label="结果数" prop="age" show-overflow-tooltip v-if="selectIndex === 1">
-                    <template slot-scope="scope">
-                      <span>{{scope.row.taskWebParam.age ? scope.row.taskWebParam.age : '不限'}}</span>
-                    </template>
-                  </el-table-column>
+                  <el-table-column label="结果数" prop="resultNum" v-if="selectIndex === 1"></el-table-column>
                   <el-table-column label="状态" v-if="selectIndex === 0" prop="taskStatus" show-overflow-tooltip>
                     <template slot-scope="scope">
                       <span>{{scope.row.taskStatus && scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 3 ? '失败' : '已中断'}}</span>
@@ -538,7 +534,7 @@ export default {
       infoRightShow: false, // 右边菜单状态
       videoMenuStatus: true, // 左边菜单状态
       amap: null, // 地图对象
-      mapCenter: [110.594419, 27.908869], //地图中心位
+      // mapCenter: [110.594419, 27.908869], //地图中心位
       showTypes: "DB", //设备类型
       selectedDevice: {}, // 当前选中的设备信息
       currentClickDevice: [],
@@ -902,6 +898,8 @@ export default {
     },
     /**重置左边菜单的方法 */
     resetLeftMenu(form) {
+      console.log('mmmmmmmmmmmmmmmmmmmmmmmmm');
+      
       this.$refs[form].resetFields();
 
       this.clearMapSelect1 = !this.clearMapSelect1;
@@ -991,6 +989,7 @@ export default {
                     this.clearMarkList(); // 清除地图标记
                     this.isInitPage = false;
                   }
+                  this.resetLeftMenu('qyryfxFrom');
                 } else {
                   this.clearMarkList(); // 清除地图标记
                   this.isInitPage = false;
@@ -1013,6 +1012,8 @@ export default {
                   this.submitLoading = false;
                   this.selectIndex = 1;
                   this.getTaskList();
+
+                  this.resetLeftMenu('qyryfxFrom');
                 } else {
                   this.submitLoading = false;
                 }
@@ -1060,7 +1061,7 @@ export default {
       let map = new window.AMap.Map("mapMap", {
         zoom: 14, // 级别
         resizeEnable: true,
-        center: _this.mapCenter // 中心点坐标
+        center: mapXupuxian.center // 中心点坐标
       });
       map.setMapStyle("amap://styles/whitesmoke");
       _this.amap = map;

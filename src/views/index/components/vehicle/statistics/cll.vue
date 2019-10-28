@@ -101,7 +101,7 @@
           </div>
           <div class="main_box" v-show="tabIndex === 3">
             <el-table :data="bodyList">
-              <el-table-column :label="name" v-for="(name, key) in headerList" :key="name">
+              <el-table-column :label="name" v-for="(name, key) in headerList" :key="name" show-overflow-tooltip width="110px">
                 <template>
                   <span :style="{'color': parseInt(bodyList[0][key]) > parseInt(queryForm.warningNum) ? 'red' : '#555'}">{{bodyList[0][key]}}</span>
                 </template>
@@ -173,7 +173,7 @@ export default {
       },
       listBayonet: [],
       tabIndex: 2,
-      carTypeList: this.dicFormater(dataList.vehicleType)[0],
+      carTypeList: this.dicFormater(dataList.vehicleType)[0].dictList,
       statementTitle: null,
       // laneList: [],
       statementTypeList: [
@@ -226,7 +226,7 @@ export default {
     validationWarningNum () {
       const reg = /^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$/;
       if (this.queryForm.warningNum !== '' && !reg.test(this.queryForm.warningNum)) {
-        this.$message.warning('输入的警戒数值必须大于0');
+        this.$message.info('输入的警戒数值必须大于0');
         this.queryForm.warningNum = '';
       }
     },
@@ -531,7 +531,7 @@ export default {
             this.tabIndex = 2;
             this.isShowChart = false;
             this.isInitPage = false;
-            // this.$message.warning('没有相关卡口的统计数据');
+            // this.$message.info('没有相关卡口的统计数据');
           } 
           
         }

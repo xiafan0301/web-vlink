@@ -38,6 +38,7 @@
           <li><span :class="{'vc_rep_mu_sed': showType === 5}" @click="changeShowType(5)">夜间活动规律</span></li>
           <li><span :class="{'vc_rep_mu_sed': showType === 6}" @click="changeShowType(6)">频繁出没分析</span></li>
           <li><span :class="{'vc_rep_mu_sed': showType === 7}" @click="changeShowType(7)">套牌车分析</span></li>
+          <li><span :class="{'vc_rep_mu_sed': showType === 8}" @click="changeShowType(8)">落脚点分析</span></li>
           <!-- <li><span :class="{'vc_rep_mu_sed': showType === 8}" @click="changeShowType(8)">同行车辆分析</span></li> -->
           <!-- <li><span :class="{'vc_rep_mu_sed': showType === 9}" @click="changeShowType(9)">区域碰撞</span></li> -->
         </ul>
@@ -243,7 +244,7 @@
                           <div class="com_width_to_height" style="margin-bottom: 5px;">
                             <div>
                               <div>
-                                <img class="bigImg" :src="item.vehicleDto.subStoragePath" :alt="item.vehicleDto.plateNo" :title="item.vehicleDto.plateNo">
+                                <img class="bigImg" :src="item.vehicleDto.StorageUrl1" :alt="item.vehicleDto.plateNo" :title="item.vehicleDto.plateNo">
                               </div>
                             </div>
                           </div>
@@ -283,9 +284,9 @@
                           <span>停留时长</span>
                         </div>
                         <ul>
-                          <li v-for="(item, index) in stopOverRecordList" :key="index">
-                            <span style="padding-left: 10px">{{index + 1}}</span><span style="padding-left: 5px">{{item.address}}</span>
-                            <span>{{item.stopOverTime}}分钟</span>
+                          <li v-for="(item, index) in stopOverRecordList" :key="index" @click="createInfoWindow(item)" style="cursor: pointer">
+                            <span style="padding-left: 10px">{{index + 1}}</span><span style="padding-left: 5px; padding-top: 14px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;">{{item.address}}</span>
+                            <span style="margin-left: 13px; padding-left: 0">{{item.stopOverTime&&formdata(item.stopOverTime)}}</span>
                           </li>
                         </ul>
                       </div>
@@ -333,17 +334,22 @@
         </div>
       </div>
     </div>
+    <div is="mapVideoPlay" :oData="mapVideoData"></div>
   </div>
 </template>
 <script>
 import vehicleBreadcrumb from '../breadcrumb.vue';
-import {getDate, formatDate, dateOrigin} from '@/utils/util.js';
+import {getDate, formatDate, dateOrigin, transMinute} from '@/utils/util.js';
 import {mapXupuxian} from '@/config/config.js';
 import {getVehicleInvestigationReport} from '@/views/index/api/api.judge.js';
+import mapVideoPlay from '@/components/common/mapVideoPlay.vue';
 export default {
-  components: {vehicleBreadcrumb},
+  components: {vehicleBreadcrumb, mapVideoPlay},
   data () {
     return {
+      mapVideoData: null,
+      curInfoWinVideoPath: '',
+      hoverWindow: null,
       mapPicShow: false,
       mapPicShow2: false,
       searchForm: {
@@ -387,6 +393,9 @@ export default {
     this.initClgjMap();
     this.initYjcmMap();
     this.initYjcmMap1();
+    $('body').on('click', '.vl_vehicle_ljd_mk_p', () => {
+      this.showVideo(this.curInfoWinVideoPath);
+    })
     if (this.$route.query.pn && this.$route.query.st && this.$route.query.et) {
       this.searchForm.plateNo = this.$route.query.pn;
       this.searchForm.time = [getDate(this.$route.query.st), getDate(this.$route.query.et)];
@@ -394,6 +403,12 @@ export default {
     }
   },
   methods: {
+    showVideo(path){
+      this.mapVideoData = {
+        name: Math.random(),
+        url: path
+      }
+    },
     // goToQypz () {
     //     // vehicle_search_qy
     //   this.$store.commit('setBreadcrumbData', {
@@ -432,7 +447,7 @@ export default {
           this.stopOverRecordList = data.stopOverRecordList;
           this.setMapMarkerForYjcm(); // 夜间出没
           this.setMapMarkerForClgj(); // 车辆轨迹
-          this.setMapMarkerForYjcm1(); // 夜间出没
+          this.setMapMarkerForYjcm1(this.stopOverRecordList); // 夜间出没
          
         } else {
           this.clInfo = null;
@@ -495,42 +510,58 @@ export default {
         this.yjcmMap.setFitView();
       }
     },
-    setMapMarkerForYjcm1 () {
-      this.yjcmMap1.clearMap();
-      if (this.yjcmList && this.yjcmList.allRecords && this.yjcmList.allRecords.length > 0) {
-        let _this = this;
-        let oList = {};
-        for (let i = 0; i < this.yjcmList.allRecords.length; i++) {
-          let _o = this.yjcmList.allRecords[i];
-          if (!oList[_o.deviceId]) {
-            oList[_o.deviceId] = Object.assign({}, _o, {
-              CM_shotTimes: [_o.shotTime]
-            });
-          } else {
-            oList[_o.deviceId].CM_shotTimes.push(_o.shotTime);
-          }
-        }
-        // console.log('oList', oList);
-        for (let key in oList) {
-          let _oo = oList[key];
-          if (_oo.longitude > 0 && _oo.latitude > 0) {
-            // console.log('_oo', _oo);
-            new window.AMap.Marker({ // 添加自定义点标记
-              map: _this.yjcmMap1,
-              position: [_oo.longitude, _oo.latitude], // 基点位置 [116.397428, 39.90923]
-              offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
-              draggable: false, // 是否可拖动
-              // extData: obj,
-              // 自定义点标记覆盖物内容
-              content: '<div class="map_icons vl_icon vl_icon_cl cl_report_cm">' +
-                '<div class="cl_report_hw"><div>' +
-                '<p>' + _oo.deviceName + '</p>' +
-                '<h3>' + _oo.CM_shotTimes.length + '次</h3>' +
-                '</div></div></div>'
-            });
-          }
-        }
-        this.yjcmMap1.setFitView();
+    setMapMarkerForYjcm1 (data) {
+      let _this = this
+      for (let i = 0; i < data.length; i++) {
+        let obj = data[i];
+        // 摄像头
+        let _id = "vlVehicleLjdSxt" + i;
+        let _content =
+          "<div id=" +
+          _id +
+          ' class="vl_icon vl_jfo_sxt vl_icon_judge_04"></div>';
+        let marker = new AMap.Marker({
+          // 添加自定义点标记
+          map: this.yjcmMap1,
+          position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
+          offset: new AMap.Pixel(-28.5, -50), // 相对于基点的偏移位置
+          draggable: false, // 是否可拖动
+          extData: obj,
+          // 自定义点标记覆盖物内容
+          content: _content,
+          zIndex: 100
+        });
+        marker.on('mouseover', function () {
+          $("#" + _id).addClass("vl_icon_judge_02");
+          _this.createInfoWindow(obj)
+        })
+        marker.on('mouseout', function () {
+          $("#" + _id).removeClass("vl_icon_judge_02");
+        })
+      }
+      this.yjcmMap1.setFitView();
+    },
+    createInfoWindow (obj) {
+      let _sContent = `<div class="vl_vehicle_ljd_mk_p"><img class="igm" src="${obj.storagePath}"><p class='addres'>${obj.address} <i class='el-icon-caret-right'></i></p><p class='times'>${transMinute(obj.stopOverTime)}</p></div>`;
+      this.hoverWindow = new window.AMap.InfoWindow({
+        isCustom: true,
+        closeWhenClickMap: true,
+        offset: new window.AMap.Pixel(-2, -50), // 相对于基点的偏移位置
+        content: _sContent
+      });
+      this.hoverWindow.open(this.yjcmMap1, new window.AMap.LngLat(obj.shotPlaceLongitude, obj.shotPlaceLatitude));
+      this.curInfoWinVideoPath = obj.videoPath;
+      this.yjcmMap1.setCenter([obj.shotPlaceLongitude, obj.shotPlaceLatitude])
+    },
+    formdata (val) {
+      if (val> 60) {
+        let _b = parseInt(val/60)
+        let _c = val - _b*60
+        return _b + '小时' + _c + '分钟'
+      } else if (val === 60) {
+        return 1 + '小时'
+      }else {
+        return val + '分钟'
       }
     },
     setMapMarkerForClgj () {
@@ -678,6 +709,12 @@ export default {
       }).catch(() => {
       });
     } */
+  },
+  beforeDestroy () {
+    // if (this.amap) {
+    //   this.amap.destroy();
+    // }
+    $('body').unbind('click');
   }
 }
 </script>
@@ -904,6 +941,7 @@ export default {
       }
     }
     .rep_map_sk1{
+      width: 270px;
       top: 1px; left: 1px; bottom: 22px;
       box-shadow: none;
       border-radius:4px 0px 0px 4px;
@@ -911,13 +949,16 @@ export default {
         width: 40px !important;
       }
       span:nth-of-type(2){
-        width: 100px !important;
+        width: 85px !important;
       }
       span:nth-of-type(3){
-        width: 80px !important;
+        width: 90px !important;
       }
       ul{
         max-height: 398px !important;
+        li:hover{
+          background-color: #F0F5FF;
+        }
       }
     }
   }
@@ -943,6 +984,84 @@ export default {
 .tpc_fake_res { width: 14px; height: 15px; background-position: -863px -530px; }
 </style>
 <style lang="scss">
+.vl_vehicle_ljd_mk_p {
+    /*display: none;*/
+    position: relative;
+    width: 180px;
+    height: auto;
+    background: #ffffff;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    box-shadow: 4px 0px 10px 0px #838383;
+    box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);
+    .times{
+      position: absolute;
+      left: 10px;
+      top: 10px;
+      background: #50CC62;
+      padding: 0px 8px;
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
+      color: #ffffff;
+    }
+    .addres{
+      right: 10px;
+      text-align: left;
+      position: absolute;
+      left: 10px;
+      bottom: 10px;
+      color: #ffffff;
+      i{
+        float: right;
+        font-size: 24px;;
+      }
+    }
+    .igm{
+      width: 100%;
+      height: 100px;
+      background: #666666;
+    }
+    .big {
+      font-size: 16px;
+      font-weight: bold;
+    }
+    &:after {
+      border-bottom-color: rgba(0, 0, 0, 1);
+      content: "";
+      display: inline-block;
+      position: absolute;
+      left: 50%;
+      margin-left: -10px;
+      bottom: -10px;
+      border-top: 10px solid #fff;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+    }
+    &.vl_jig_mk_img_show{
+      display: block;
+    }
+    &.vl_jig_mk_img_hover {
+      &:after {
+        border-bottom-color: rgba(0, 0, 0, 1);
+        content: "";
+        display: inline-block;
+        position: absolute;
+        left: 50%;
+        margin-left: -10px;
+        bottom: -10px;
+        border-top: 10px solid #0c70f8;
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+      }
+      background: rgba(12, 112, 248, 1);
+      position: relative;
+      border: 0.04rem solid #0c70f8;
+      > p {
+        color: #ffffff;
+      }
+    }
+  }
 .map_pic_show, .map_pic_show2 {
   .cl_report_gj {
     > div {
@@ -996,7 +1115,7 @@ export default {
 }
 .cl_report_cm {
   position: relative;
-  > .cl_report_hw {
+   .cl_report_hw {
     position: absolute; bottom: 125%; left: -90px; z-index: 1;
     background-color: #fff;
     background:rgba(255,255,255,1);
@@ -1011,7 +1130,7 @@ export default {
         padding-bottom: 5px;
         text-align: center;
       }
-      > h3 {
+       h3 {
         color: #333; font-weight: bold; font-size: 20px;
         text-align: center;
       }
@@ -1042,6 +1161,13 @@ export default {
         border-left: 20px solid transparent;
         border-right: 20px solid transparent;
       }
+    }
+  }
+   .cl_report_hw1{
+    > h3 {
+      color: #fff;
+      text-align: center;
+      font-weight: normal !important;
     }
   }
 }

@@ -46,19 +46,23 @@ export default {
     }
   },
   mounted () {
-    // 修改时回填数据
-    if (this.modelList) {
-      console.log(this.modelList, 'this.modelList')
-      // 回填嫌疑车牌
-      let [{pointDtoList: [{bayonetList, devList}], surveillanceObjectDtoList}] = this.modelList;
-      this.protraitList = surveillanceObjectDtoList.filter(m => m.objType === 1);//回填禁入人员
-      this.vehicleList = surveillanceObjectDtoList.filter(m => m.objType === 2);//回填禁入车辆
-      this.isShowControlDev = true;
+    this.$_showLoading();
+    setTimeout(() => {
+      // 修改时回填数据
+      if (this.modelList) {
+        console.log(this.modelList, 'this.modelList')
+        // 回填嫌疑车牌
+        let [{pointDtoList: [{bayonetList, devList}], surveillanceObjectDtoList}] = this.modelList;
+        this.protraitList = surveillanceObjectDtoList.filter(m => m.objType === 1);//回填禁入人员
+        this.vehicleList = surveillanceObjectDtoList.filter(m => m.objType === 2);//回填禁入车辆
+        this.isShowControlDev = true;
 
-      this.$nextTick(() => {
-        this.activeDeviceList = [...devList.map(m => m.deviceId), ...bayonetList.map(m => m.bayonetId)];
-      })
-    }
+        this.$nextTick(() => {
+          this.activeDeviceList = [...devList.map(m => m.deviceId), ...bayonetList.map(m => m.bayonetId)];
+        })
+      }
+      this.$_hideLoading();
+    }, 1500);
   },
   methods: {
      // 从布控库中获取禁入人员
@@ -94,6 +98,9 @@ export default {
     },
     // 向父组件传值
     sendParent () {
+      if (this.protraitList.length === 0 && this.vehicleList.length === 0) {
+        return this.$message.info('请选择布控人员或者车辆');
+      } 
       const devData = this.$refs['mapSelector'].getCheckedIds();
       if (devData.deviceList.length > 0 || devData.bayonetList.length > 0) {
         let {deviceList: devList, bayonetList} = devData;
@@ -105,7 +112,7 @@ export default {
         })
         this.$emit('getModel', {modelType: 4,  pointDtoList: [{devList, bayonetList}], surveillanceObjectDtoList: [...this.protraitList, ...this.vehicleList]});
       } else {
-        this.$message.warning('请先选择布控设备');
+        this.$message.info('请先选择布控设备');
       }
     }
   }

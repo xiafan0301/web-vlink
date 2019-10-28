@@ -178,7 +178,7 @@ export default {
     // 判断是否选择了复制对象
     judgeIsSelectedCopy () {
       if (this.memberList.every(e => e.isChecked === false)) {
-        this.$message.error('请先勾选复制对象!');
+        this.$message.info('请先勾选复制对象!');
       } else {
         this.isShowGroupCopy = !this.isShowGroupCopy;
       }
@@ -186,7 +186,7 @@ export default {
     // 判断是否选择了删除对象
     judgeIsSelectedRemove () {
       if (this.memberList.every(e => e.isChecked === false)) {
-        this.$message.error('请先勾选删除对象!');
+        this.$message.info('请先勾选删除对象!');
       } else {
         this.delPortraitDialog = true;
       }

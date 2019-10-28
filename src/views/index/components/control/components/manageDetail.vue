@@ -20,10 +20,16 @@
           <li style="width: 34%;">
             <div><span class="vl_f_666">布控名称：</span><span class="vl_f_333">{{controlDetail.surveillanceName}}</span></div>
             <div><span class="vl_f_666">有效期限：</span><span class="vl_f_333">{{controlDetail.surveillanceDateStart}} 至 {{controlDetail.surveillanceDateEnd}}</span></div>
-            <div><span class="vl_f_666">短信联动：</span><span class="vl_f_333" v-for="(item, index) in controlDetail.contactList" :key="index">{{item.contact}}&nbsp;&nbsp;{{item.mobile}}<span v-if="index + 1 < controlDetail.contactList.length">&nbsp;&nbsp;|&nbsp;&nbsp;</span></span></div>
+            <div>
+              <span class="vl_f_666">短信联动：</span>
+              <template v-if="controlDetail.contactList.length > 0">
+                <span class="vl_f_333" v-for="(item, index) in controlDetail.contactList" :key="index">{{item.contact}}&nbsp;&nbsp;{{item.mobile}}<span v-if="index + 1 < controlDetail.contactList.length">&nbsp;&nbsp;|&nbsp;&nbsp;</span></span>
+              </template>
+              <span v-else>无</span>
+            </div>
           </li>
           <li style="width: 34%;">
-            <div><span class="vl_f_666">关联事件：</span><span class="vl_f_333">{{controlDetail.eventCode}}</span></div>
+            <div><span class="vl_f_666">关联事件：</span><span class="vl_f_333">{{controlDetail.eventCode || '无'}}</span></div>
             <div class="control_time"><span class="vl_f_666">布控时间段：</span><span class="vl_f_333">{{controlDetail.time}}</span></div>
           </li>
           <li style="width: 34%;">
@@ -39,7 +45,7 @@
           <li style="width: 34%;" v-if="controlDetail.shareDept"><div><span class="vl_f_666">共享对象：</span><span class="vl_f_333">{{controlDetail.shareDept}}</span></div></li>
         </ul>
         <ul>
-          <li><div><span class="vl_f_666">布控原因：</span><span class="vl_f_333">{{controlDetail.surveillanceReason}}</span></div></li>
+          <li><div><span class="vl_f_666">布控原因：</span><span class="vl_f_333">{{controlDetail.surveillanceReason || '无'}}</span></div></li>
         </ul>
         <!-- <div class="manage_d_c_e" v-if="controlDetail.eventDetail">
           <div class="vl_f_666">事件内容：</div>
@@ -87,19 +93,23 @@
                 <li><span>人员性别：</span><span>{{controlDetail.sex}}</span></li>
                 <li><span>失踪时间：</span><span>{{controlDetail.lostTime}}</span></li>
                 <li><span>失踪地址：</span><span>{{controlDetail.lostAddress}}</span></li>
-                <li><span>家庭地址：</span><span>{{controlDetail.homeAddress}}</span></li>
+                <li><span>家庭地址：</span><span>{{controlDetail.homeAddress || '无'}}</span></li>
               
                 <li class="img_list">
                   <span style="padding-left: 0;">嫌疑人照片：</span>
-                  <div>
+                  <div v-if="getBigImgList().length > 0">
                     <img v-for="(item, index) in getBigImgList()" :key="index" @click="openBigImg(index, getBigImgList())" :src="item.path" alt="">
                   </div>
+                  <div v-else>无</div>
                 </li>
                 <li>
                   <span>嫌疑车辆：</span>
-                  <template v-for="(item, index) in filterObj(controlDetail.objectList, 2, 4)">
-                    <span style="flex: none;" :key="index">{{item.name}}<span v-if="index < filterObj(controlDetail.objectList, 2, 4).length - 1">&nbsp;|&nbsp;</span></span>
+                  <template v-if="filterObj(controlDetail.objectList, 2, 4).length > 0">
+                    <template v-for="(item, index) in filterObj(controlDetail.objectList, 2, 4)">
+                      <span style="flex: none;" :key="index">{{item.name}}<span v-if="index < filterObj(controlDetail.objectList, 2, 4).length - 1">&nbsp;|&nbsp;</span></span>
+                    </template>
                   </template>
+                  <span v-else>无</span>
                 </li>
               </ul>
               <ul class="model_info" v-if="controlDetail.modelType === 2">
@@ -108,48 +118,56 @@
                 <li><span>布防范围：</span><span>{{controlDetail.radius}}千米</span></li>
                 <li>
                   <span>禁入人员：</span>
-                  <div>
+                  <div v-if="filterObj(controlDetail.objectList, 1).length > 0">
                     <img @click="openBigImg(index, filterObj(controlDetail.objectList, 1))" v-for="(item, index) in filterObj(controlDetail.objectList, 1)" :key="index" :src="item.path" alt="">
                   </div>
+                  <div v-else>无</div>
                 </li>
                 <li>
                   <span>禁入车辆：</span>
-                  <div>
+                  <div v-if="filterObj(controlDetail.objectList, 2).length > 0">
                     <img @click="openBigImg(index, filterObj(controlDetail.objectList, 2))" v-for="(item, index) in filterObj(controlDetail.objectList, 2)" :key="index" :src="item.path" alt="">
                   </div>
+                  <div v-else>无</div>
                 </li>
               </ul>
               <ul class="model_info" v-if="controlDetail.modelType === 3">
                 <li>
                   <span>上访人员照片：</span>
-                  <div>
+                  <div v-if="filterObj(controlDetail.objectList, 1, 3).length > 0">
                     <img @click="openBigImg(index, filterObj(controlDetail.objectList, 1, 3))" v-for="(item, index) in filterObj(controlDetail.objectList, 1, 3)" :key="index" :src="item.path" alt="">
                   </div>
+                  <div v-else>无</div>
                 </li>
                 <li>
                   <span>上访车辆：</span>
-                  <template v-for="(item, index) in filterObj(controlDetail.objectList, 2, 4)">
-                    <span style="flex: none;" :key="index">{{item.name}}<span v-if="index < filterObj(controlDetail.objectList, 2, 4).length - 1">&nbsp;|&nbsp;</span></span>
+                  <template v-if="filterObj(controlDetail.objectList, 2, 4).length > 0">
+                    <template v-for="(item, index) in filterObj(controlDetail.objectList, 2, 4)">
+                      <span style="flex: none;" :key="index">{{item.name}}<span v-if="index < filterObj(controlDetail.objectList, 2, 4).length - 1">&nbsp;|&nbsp;</span></span>
+                    </template>
                   </template>
+                  <span v-else>无</span>
                 </li>
               </ul>
               <ul class="model_info" v-if="controlDetail.modelType === 4">
                 <li>
                   <span>禁入人员：</span>
-                  <div>
+                  <div v-if="filterObj(controlDetail.objectList, 1).length > 0">
                     <img @click="openBigImg(index, filterObj(controlDetail.objectList, 1))" v-for="(item, index) in filterObj(controlDetail.objectList, 1)" :key="index" :src="item.path" alt="">
                   </div>
+                  <div v-else>无</div>
                 </li>
                 <li>
                   <span>禁入车辆：</span>
-                  <div>
+                  <div v-if="filterObj(controlDetail.objectList, 2).length > 0">
                     <img @click="openBigImg(index, filterObj(controlDetail.objectList, 2))" v-for="(item, index) in filterObj(controlDetail.objectList, 2)" :key="index" :src="item.path" alt="">
                   </div>
+                  <div v-else>无</div>
                 </li>
               </ul>
               <ul class="model_info" v-if="controlDetail.modelType === 5">
                 <li>
-                  <span>布防场所：</span><span>{{controlDetail.locations}}</span>
+                  <span>布防场所：</span><span>{{controlDetail.locations && controlDetail.locations.join(',')}}</span>
                 </li>
                 <li>
                   <span>停留时长：</span><span>{{controlDetail.stayTime}}</span>
@@ -161,18 +179,22 @@
                   </div>
                 </li>
               </ul>
-              <ul class="model_info" v-if="controlDetail.modelType === 6">
+              <ul class="model_info" v-if="controlDetail.modelType === 9">
                 <li>
                   <span>布控人员信息：</span>
-                  <div>
+                  <div v-if="filterObj(controlDetail.objectList, 1, 3).length > 0">
                     <img @click="openBigImg(index, filterObj(controlDetail.objectList, 1, 3))" v-for="(item, index) in filterObj(controlDetail.objectList, 1, 3)" :key="index" :src="item.path" alt="">
                   </div>
+                  <div v-else>无</div>
                 </li>
                 <li>
                   <span>布控车辆：</span>
-                  <template v-for="(item, index) in filterObj(controlDetail.objectList, 2, 4)">
-                    <span style="flex: none;" :key="index">{{item.name}}<span v-if="index < filterObj(controlDetail.objectList, 2, 4).length - 1">&nbsp;|&nbsp;</span></span>
+                  <template v-if="filterObj(controlDetail.objectList, 2, 4).length > 0">
+                    <template v-for="(item, index) in filterObj(controlDetail.objectList, 2, 4)">
+                      <span style="flex: none;" :key="index">{{item.name}}<span v-if="index < filterObj(controlDetail.objectList, 2, 4).length - 1">&nbsp;|&nbsp;</span></span>
+                    </template>
                   </template>
+                  <span v-else>无</span>
                 </li>
               </ul>
               <!-- 布控设备 -->
@@ -569,11 +591,11 @@ export default {
   methods: {
     // 获取嫌疑人像列表
     getBigImgList () {
-      return this.controlDetail.objectList.filter(f => f.photoUrl !== this.controlDetail.missingUrl && (f.type === 1 || f.type === 3)).map(m => {return {path: m.photoUrl}});
+      return this.controlDetail.objectList.filter(f => f.photoUrl !== this.controlDetail.missingUrl && (f.type === 1 || f.type === 3)).map(m => {return {path: m.photoUrl}}) || [];
     },
     // 过滤布控对象类型
     filterObj(list, type, _type) {
-      return list.filter(f => f.type === type || f.type === _type).map(m => {return {path: m.photoUrl, name: m.name}});
+      return list.filter(f => f.type === type || f.type === _type).map(m => {return {path: m.photoUrl, name: m.name}}) || [];
     },
     // 布控模型类型名称转码
     transcoding (type) {
@@ -921,11 +943,12 @@ export default {
             const [{data: devList}, {data: bayList}] = res;
             devList.forEach(f => {f.dataType = 1;f.name = f.deviceName})
             bayList.forEach(f => {f.dataType = 2;f.name = f.bayonetName})
-            this.mapMark([...devList, ...bayList]);
+            this.mapMark(devList, bayList);
           }
         })
     },
-    mapMark (data) {
+    mapMark (devs, bays) {
+      const data = [...devs, ...bays];
       for (let i = 0; i < data.length; i++) {
         let obj = data[i];
         if (obj.longitude > 0 && obj.latitude > 0) {
@@ -987,6 +1010,32 @@ export default {
       this.map.setFitView();
       addCluster(this.map, this.markerList);
       this.controlArea(1);//回填已选设备
+
+      // 把地图定位到已选设备位置
+      if (bays.length > 0) {
+        this.positionMap(bays);
+      } else if (devs.length > 0) {
+        this.positionMap(devs);
+      }
+    },
+    // 把地图定位到已选设备位置
+    positionMap (array) {
+      for (let item of this.markerList) {
+        const obj = item.getExtData();
+        let key = null;
+        array[0].hasOwnProperty('uid') && (key = 'uid');
+        array[0].hasOwnProperty('deviceId') && (key = 'deviceId');
+        array[0].hasOwnProperty('bayonetId') && (key = 'bayonetId');
+        if (array.some(s => s[key] === obj.uid)) {
+          console.log(item.getPosition(), 'fffffffff')
+          this.setViewingArea(item.getPosition());
+          break;
+        }
+      }
+    },
+    // 把地图的可视区域设置在选中设备或卡口的区域
+    setViewingArea (obj) {
+      this.map.setZoomAndCenter(14, obj);
     },
     resetZoom () {
       if (this.map) {
@@ -1653,7 +1702,7 @@ export default {
     }
   }
   .close_btn{
-    font-size: 1.3rem;
+    font-size: .3rem;
   }
   .vl_icon{
     transition: none;

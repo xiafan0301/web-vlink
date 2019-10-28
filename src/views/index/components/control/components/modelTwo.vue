@@ -116,18 +116,18 @@ export default {
       this.$refs['modelTwo'].validate((valid) => {
         if (valid) {
           if (this.protraitList.length === 0 && this.vehicleList.length === 0) {
-            return this.$message.warning('禁入人员、禁入车辆至少选一种');
+            return this.$message.info('禁入人员、禁入车辆至少选一种');
           }
           if (this.$refs['controlDev']) {
             this.$refs['controlDev'].sendParent();
-            if (this.devData.devList.length === 0 && this.devData.bayonetList.length === 0) return this.$message.warning('请先选择布控设备');
+            if (this.devData.devList.length === 0 && this.devData.bayonetList.length === 0) return this.$message.info('请先选择布控设备');
             const longitude = this.addressObjTwo.lnglat[0];
             const latitude = this.addressObjTwo.lnglat[1];
 
             const _modelTwoForm = {...this.modelTwoForm, ...this.devData, longitude, latitude}
             this.$emit('getModel', {modelType: 2,  pointDtoList: [_modelTwoForm], surveillanceObjectDtoList: [...this.protraitList, ...this.vehicleList]});
           } else {
-            this.$message.warning('请先选择布控设备');
+            this.$message.info('请先选择布控设备');
           }
         } else {
           return false;
@@ -152,7 +152,7 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           if (this.protraitList.length === 0 && this.vehicleList.length === 0) {
-            return this.$message.warning('禁入人员、禁入车辆至少选一种');
+            return this.$message.info('禁入人员、禁入车辆至少选一种');
           }
           this.isShowControlDev = true;
         } else {
@@ -175,7 +175,7 @@ export default {
     // 获取追踪点
     getAddress (e) {
       if (!e.location) {
-        this.$message.error('无法获取到经纬度！');
+        this.$message.info('无法获取到经纬度！');
         return;
       }
       this.addressObjTwo.lnglat = [e.location.lng, e.location.lat];

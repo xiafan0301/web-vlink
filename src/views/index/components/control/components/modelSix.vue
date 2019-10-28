@@ -60,24 +60,28 @@ export default {
     }
   },
   mounted () {
-    // 修改时回填数据
-    if (this.modelList) {
-      console.log(this.modelList, 'this.modelList')
-      // 回填嫌疑车牌
-      let [{carNumberInfo, pointDtoList: [{bayonetList, devList}], surveillanceObjectDtoList}] = this.modelList;
-      carNumberInfo = carNumberInfo.split(',');
-      this.modelSixForm.carNumberInfo = [];
-      carNumberInfo.forEach(f => {
-        this.modelSixForm.carNumberInfo.push({vehicleNumber: f});
-      })
-      this.fileListOne = surveillanceObjectDtoList.filter(m => m.objType === 1);//回填上访人员照片
-      this.fileListTwo = surveillanceObjectDtoList.filter(m => m.objType === 2);//回填上访车辆信息
-      this.isShowControlDev = true;
+    this.$_showLoading();
+    setTimeout(() => {
+      // 修改时回填数据
+      if (this.modelList) {
+        console.log(this.modelList, 'this.modelList')
+        // 回填嫌疑车牌
+        let [{carNumberInfo, pointDtoList: [{bayonetList, devList}], surveillanceObjectDtoList}] = this.modelList;
+        carNumberInfo = carNumberInfo.split(',');
+        this.modelSixForm.carNumberInfo = [];
+        carNumberInfo.forEach(f => {
+          this.modelSixForm.carNumberInfo.push({vehicleNumber: f});
+        })
+        this.fileListOne = surveillanceObjectDtoList.filter(m => m.objType === 1 || m.objType === 3);//回填上访人员照片
+        this.fileListTwo = surveillanceObjectDtoList.filter(m => m.objType === 2);//回填上访车辆信息
+        this.isShowControlDev = true;
 
-      this.$nextTick(() => {
-        this.activeDeviceList = [...devList.map(m => m.deviceId), ...bayonetList.map(m => m.bayonetId)];
-      })
-    }
+        this.$nextTick(() => {
+          this.activeDeviceList = [...devList.map(m => m.deviceId), ...bayonetList.map(m => m.bayonetId)];
+        })
+      }
+      this.$_hideLoading();
+    }, 1500)
   },
   methods: {
     // 从布控库中获取布控人员信息
@@ -113,6 +117,9 @@ export default {
     },
     // 向父组件传值
     sendParent () {
+      if (this.fileListOne.length === 0 && this.fileListTwo.length === 0) {
+        return this.$message.info('请选择布控人员或者车辆');
+      } 
       const devData = this.$refs['mapSelector'].getCheckedIds();
       if (devData.deviceList.length > 0 || devData.bayonetList.length > 0) {
         let {deviceList: devList, bayonetList} = devData;
@@ -123,9 +130,9 @@ export default {
           return {bayonetId: m.uid}
         })
         const _carNumberInfo = this.modelSixForm.carNumberInfo.map(m => m.vehicleNumber).join(',');
-        this.$emit('getModel', {carNumberInfo: _carNumberInfo, modelType: 6,  pointDtoList: [{devList, bayonetList}], surveillanceObjectDtoList: [...imgUrls(this.fileListOne), ...this.fileListTwo]});
+        this.$emit('getModel', {carNumberInfo: _carNumberInfo, modelType: 9,  pointDtoList: [{devList, bayonetList}], surveillanceObjectDtoList: [...imgUrls(this.fileListOne), ...this.fileListTwo]});
       } else {
-        this.$message.warning('请先选择布控设备');
+        this.$message.info('请先选择布控设备');
       }
        
     },
@@ -138,7 +145,7 @@ export default {
     },
     // 删除车牌号码
     removeLicensePlateNum (index) {
-      if (this.modelSixForm.carNumberInfo.length === 1) return this.$message.warning('只剩一个不允许删除');
+      if (this.modelSixForm.carNumberInfo.length === 1) return this.$message.info('只剩一个不允许删除');
       this.modelSixForm.carNumberInfo.splice(index, 1);
     },
     // 移除从布控库中选择的车牌

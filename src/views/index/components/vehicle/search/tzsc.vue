@@ -351,12 +351,10 @@ import vehicleDetail from "../common/vehicleDetail.vue";
 import imgSelect from '@/components/common/imgSelect.vue';
 import mapSelector from '@/components/common/mapSelector.vue';
 
-import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入溆浦县地图
+import { ajaxCtx } from "@/config/config"; // 引入溆浦县地图
 import { formatDate, dateOrigin } from "@/utils/util.js";
 
 import {
-  JtcPOSTAppendixInfo,
-  JtcGETAppendixInfoList,
   getImageAreaInfo
 } from "../../../api/api.judge.js"; // 图片上传接口
 
@@ -367,9 +365,9 @@ import {
   getPhotoAnalysis
 } from "../../../api/api.analysis.js"; // 车辆特征检索接口
 
-import { MapGETmonitorList } from "../../../api/api.map.js"; // 获取设备树接口
+/* import { MapGETmonitorList } from "../../../api/api.map.js"; // 获取设备树接口 */
 import { objDeepCopy } from "../../../../../utils/util.js"; // 深拷贝方法
-import { constants } from "crypto";
+/* import { constants } from "crypto"; */
 import { dataList } from '@/utils/data.js';
 
 export default {
@@ -778,6 +776,7 @@ export default {
               this.strucInfoList = []; // 清空搜索结果
               this.total = 0;
               this.noDataTips = "抱歉，没有相关的结果!";
+              console.log(err)
             });
         } else {
           return false;
@@ -840,6 +839,7 @@ export default {
           })
           .catch(err => {
             this.getCharacterLoading = false;
+            console.log(err)
           });
       } else {
         this.$message.warning("请先上传车辆图片再获取特征");

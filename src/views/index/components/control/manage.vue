@@ -5,28 +5,6 @@
       <div class="control_manage_box">
         <div class="search_box">
           <el-form :inline="true" ref="manageForm" :model="manageForm" class="manage_form">
-            <!-- <el-form-item prop="type">
-              <el-select v-model="manageForm.type" placeholder="布控类型">
-                <el-option label="全部类型" :value="null"></el-option>
-                <el-option
-                  v-for="item in typeList"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value">
-                </el-option>
-              </el-select>
-            </el-form-item> -->
-            <!-- <el-form-item prop="alarmId">
-              <el-select v-model="manageForm.alarmId" placeholder="告警级别">
-                <el-option label="全部告警等级" :value="null"></el-option>
-                <el-option
-                  v-for="item in alarmLevelList"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value">
-                </el-option>
-              </el-select>
-            </el-form-item> -->
             <el-form-item prop="time">
               <el-date-picker
                 class="vl_date"
@@ -52,27 +30,7 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <!-- <el-form-item prop="controlObj">
-              <el-select v-model="manageForm.controlObj" value-key="uid" filterable placeholder="请输入布控对象搜索">
-                <el-option
-                  v-for="item in controlObjList"
-                  :key="item.uid"
-                  :label="item.name"
-                  :value="item">  
-                </el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item prop="deviceId">
-              <el-select v-model="manageForm.deviceId" value-key="value" filterable placeholder="请输入设备名搜索">
-                <el-option
-                  v-for="item in facilityNameList"
-                  :key="item.uid"
-                  :label="item.label"
-                  :value="item.value">  
-                </el-option>
-              </el-select>
-            </el-form-item> -->
-            <el-form-item prop="deviceId">
+            <el-form-item prop="name">
               <el-input v-model="manageForm.name" placeholder="请输入布控名称或关键字"></el-input>
             </el-form-item>
             <el-form-item>
@@ -202,7 +160,7 @@ import manageDetail from './components/manageDetail.vue';
 import add from './add.vue';
 import delDialog from './components/delDialog.vue';
 import stopDialog from './components/stopDialog.vue';
-import {getControlObjBySelect, getControlList, getControlDevice} from '@/views/index/api/api.control.js';
+import {getControlList, getControlDevice} from '@/views/index/api/api.control.js';
 import {dataList} from '@/utils/data.js';
 import {unique} from '@/utils/util.js';
 export default {
@@ -255,9 +213,6 @@ export default {
     }
   },
   created () {
-    // this.changeControlState();
-    this.getControlList();
-    // this.getControlDevice();
     const data = this.$route.query;
     // 外部跳转到详情页
     if (data.pageType && data.controlId) {
@@ -267,13 +222,13 @@ export default {
       })
     }
     // 外部跳转到列表页
-    if (data.deviceId && data.state) {
+    if (!data.pageType && data.state) {
       this.$nextTick(() => {
-        // this.getControlDevice();
         this.manageForm.state = parseInt(data.state);
-        // this.manageForm.deviceId = data.deviceId;
         this.getControlList();
       })
+    } else {
+      this.getControlList();
     }
   },
   methods: {
@@ -298,20 +253,6 @@ export default {
         this.getControlList();
       }
     },
-    // 获取布控对象下拉列表
-    // getControlObjBySelect () {
-    //   getControlObjBySelect({surveillanceStatus: this.manageForm.state}).then(res => {
-    //     if (res) {
-    //       this.controlObjList = unique(res.data.filter(f => f.name), 'objId');
-    //     }
-    //   })
-    // },
-    // 切换布控状态后，重新获取布控名称列表、事件列表、布控对象列表数据
-    // changeControlState () {
-    //   this.controlObjList = [];
-    //   this.manageForm.controlObj = {};
-    //   // this.getControlObjBySelect();
-    // },
     handleCurrentChange (page) {
       this.pageNum = page;
       this.currentPage = page;

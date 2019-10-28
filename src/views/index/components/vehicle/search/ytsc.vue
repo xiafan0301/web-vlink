@@ -57,8 +57,18 @@
                 </div>
               </el-form>
             </div>
+            <div class="cheti_img_out">
+              <div class="titile">
+                车体特征图片
+              </div>
+              <ul class="clearfix">
+                <li v-for="(item, index) in imgBDataList" :key="index">
+                  <div><img :src="item.src" alt=""></div>
+                </li>
+              </ul>
+            </div>
             <!-- 按钮样式 -->
-            <div class="btn_warp">
+            <div class="btn_warp" style="margin-top: 20px">
               <el-button class="reset_btn" @click="resetMenu">重置</el-button>
               <el-button
                       class="select_btn"
@@ -158,7 +168,7 @@
     <!--检索详情弹窗-->
     <div is="vehicleDetail" :detailData="detailData"></div>
 
-    <div is="imgSelect" :initImageInfo="initImageInfo" :open="isOpenImgDialog" :imgDataList="imgDataList" @emitImgData="emitImgData"></div>
+    <div is="imgSelectYtsc" :initImageInfo="initImageInfo" :open="isOpenImgDialog" :imgDataList="imgDataList" @emitImgData="emitImgData"></div>
 
     <!-- D设备 B卡口  这里是设备和卡口 -->
     <div
@@ -186,10 +196,9 @@
   import { objDeepCopy } from "../../../../../utils/util.js"; // 深拷贝方法
   import mapSelector from '@/components/common/mapSelector.vue';
 
-  import imgSelect from '@/components/common/imgSelect.vue';
-  // import imgSelectYtsc from '@/components/common/imgSelectYtsc.vue';
+  import imgSelectYtsc from '@/components/common/imgSelectYtsc.vue';
   export default {
-    components: { vlBreadcrumb, vehicleDetail, vlUpload, imgSelect, mapSelector },
+    components: { vlBreadcrumb, vehicleDetail, vlUpload, mapSelector,imgSelectYtsc },
     data() {
       return {
         dSum: 0, // 设备总数
@@ -273,7 +282,8 @@
         imgData: {},
         imgDataList: [], // 上传图片的可框选车体信息
         initImageInfo: {}, // 上传图片的原始信息
-        // imgCutDataList: [], // 车体特征图片列表
+        imgCutDataList: [], // 车体特征图片列表
+        imgBDataList: []
       };
     },
     mounted() {
@@ -348,25 +358,17 @@
       },
       emitImgData (obj) {
         this.isOpenImgDialog = obj.open;
-        if (obj.imgPath) {
-          this.curImageUrl = obj.imgPath;
-          this.imgData = {
-            path: obj.imgPath
-          }
+        this.imgBDataList = obj.imgBDataList
+        console.log(obj)
+        if (obj.imgBDataList.length > 0) {
+          this.imgCutDataList = obj.imgCutDataList;
+        } else {
+          this.uploadClear = {};
         }
       },
-      // emitImgData (obj) {
-      //   this.isOpenImgDialog = obj.open;
-      //   if (obj.imgBDataList.length > 0) {
-      //     this.imgCutDataList = obj.imgCutDataList;
-      //     // this.curImageUrl = obj.imgPath;
-      //     // this.imgData = {
-      //     //   path: obj.imgPath
-      //     // }
-      //   }
-      // },
       /*重置菜单的数据 */
       resetMenu() {
+        this.imgBDataList = []
         this.uploadClear = {};
         // 置空数据数量
         this.total = 0;
@@ -623,6 +625,27 @@
       display: flex;
       // 左边菜单样式
       .left_menu {
+        .cheti_img_out{
+          .titile{
+            text-align: center;
+            border-bottom: 1px solid #D3D3D3;
+            padding: 10px 0;
+            margin-bottom: 20px;
+          }
+          li{
+            width: 50%;
+            float: left;
+            padding-left: 10px;
+            padding-bottom: 10px;
+            > div{
+              border: 1px solid #D3D3D3;
+              img{
+                height: 100%;
+                width: 100%;
+              }
+            }
+          }
+        }
         width: 272px;
         position: relative;
         background: #fff;
