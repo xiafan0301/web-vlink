@@ -758,7 +758,7 @@ export default {
     },
     drawRectangleEditor(sid) {
       if (this.drawObj.rectangle[sid]) {
-          obj = this.drawObj.rectangle[sid];
+        let obj = this.drawObj.rectangle[sid];
         if (obj.editor) {
           obj.editor.open();
         } else {
@@ -951,7 +951,7 @@ export default {
     },
     drawPolylineEditor(sid) {
       if (this.drawObj.polyline[sid]) {
-        obj = this.drawObj.polyline[sid];
+        let obj = this.drawObj.polyline[sid];
         if (obj.editor) {
           obj.editor.open();
         } else {
@@ -1014,7 +1014,7 @@ export default {
     },
     drawPolygonEditor(sid) {
       if (this.drawObj.polygon[sid]) {
-        obj = this.drawObj.polygon[sid];
+        let obj = this.drawObj.polygon[sid];
         if (obj.editor) {
           obj.editor.open();
         } else {
@@ -1096,7 +1096,7 @@ export default {
     },
     drawCircle10kmEditor(sid) {
       if (this.drawObj.circle10km[sid]) {
-        obj = this.drawObj.circle10km[sid];
+        let obj = this.drawObj.circle10km[sid];
         if (obj.editor) {
           obj.editor.open();
         } else {
