@@ -264,18 +264,18 @@
               <div class="struc_cd_info_main">
                 <vue-scroll>
                   <ul>
-                    <li><span>性别</span><span>{{sturcDetail.sex ? sturcDetail.sex : '未识别'}}</span></li>
+                    <li><span>性别</span><span>{{sturcDetail.gender ? sturcDetail.gender : '未识别'}}</span></li>
                     <li><span>年龄段</span><span>{{sturcDetail.age ? sturcDetail.age : '未识别'}}</span></li>
-                    <li><span>发型</span><span>{{sturcDetail.hair ? sturcDetail.hair : '未识别'}}</span></li>
+                    <li><span>发型</span><span>{{sturcDetail.hairStyleDesc ? sturcDetail.hairStyleDesc : '未识别'}}</span></li>
                     <li><span>戴眼镜</span><span>{{sturcDetail.glasses ? sturcDetail.glasses : '未识别'}}</span></li>
                     <li><span>戴帽子</span><span>{{sturcDetail.hat ? sturcDetail.hat : '未识别'}}</span></li>
                     <li><span>戴口罩</span><span>{{sturcDetail.mask ? sturcDetail.mask : '未识别'}}</span></li>
                     <li><span>抱小孩</span><span>{{sturcDetail.baby ? sturcDetail.baby : '未识别'}}</span></li>
                     <li><span>拎东西</span><span>{{sturcDetail.bag ? sturcDetail.bag : '未识别'}}</span></li>
-                    <li><span>上身款式</span><span>{{sturcDetail.upperType ? sturcDetail.upperType : '未识别'}}</span></li>
-                    <li><span>上身颜色</span><span>{{sturcDetail.upperColor ? sturcDetail.upperColor : '未识别'}}</span></li>
-                    <li><span>下身款式</span><span>{{sturcDetail.bottomType ? sturcDetail.bottomType : '未识别'}}</span></li>
-                    <li><span>下身颜色</span><span>{{sturcDetail.bottomColor ? sturcDetail.bottomColor : '未识别'}}</span></li>
+                    <li><span>上身款式</span><span>{{sturcDetail.coatLengthDesc ? sturcDetail.coatLengthDesc : '未识别'}}</span></li>
+                    <li><span>上身颜色</span><span>{{sturcDetail.coatColorDesc ? sturcDetail.coatColorDesc : '未识别'}}</span></li>
+                    <li><span>下身款式</span><span>{{sturcDetail.trousersLenDesc ? sturcDetail.trousersLenDesc : '未识别'}}</span></li>
+                    <li><span>下身颜色</span><span>{{sturcDetail.trousersColorDesc ? sturcDetail.trousersColorDesc : '未识别'}}</span></li>
                   </ul>
                 </vue-scroll>
               </div>
@@ -322,7 +322,7 @@
         </swiper>
       </div>
     </el-dialog>
-    <div id="rightMap"></div>
+    <div id="rightGjfxMap"></div>
     <div id="capMap"></div>
     <!--人工筛选-->
     <el-dialog
@@ -525,7 +525,7 @@
       }
     },
     mounted() {
-      let map = new window.AMap.Map("rightMap", {
+      let map = new window.AMap.Map("rightGjfxMap", {
         zoom: 10,
         center: mapXupuxian.center
       });
@@ -757,7 +757,7 @@
       },
       randerMap() {
         this.$nextTick(() => {
-          $('.vl_jig_right').append($('#rightMap'))
+          $('.vl_jig_right').append($('#rightGjfxMap'))
           this.amap.clearMap();
           this.drawMapMarker(this.evData);
         })
@@ -1151,10 +1151,6 @@
         width: 100%;
         height: calc(100% - 53px);
         position: relative;
-        #rightMap {
-          width: 100%;
-          height: 100%;
-        }
       }
     }
   }
@@ -1637,6 +1633,26 @@
   }
 </style>
 <style lang="scss">
+  #rightGjfxMap {
+    width: 100%;
+    height: 100%;
+    .vl_icon {
+      width: 47px;
+      position: relative;
+      > .vl_map_mark_time {
+        position: absolute; top: 10px; left: 98%;
+        width: 130px;
+        word-break:keep-all;
+        font-size: 12px; color: #fff;
+        background-color: rgba(0, 0, 0, 0.4);
+        border-radius: 2px;
+        padding: 2px 5px;
+        span{
+          display: block;
+        }
+      }
+    }
+  }
   .clgj_map_show_pic {
     .vl_jtc_mk { display: block !important; }
   }

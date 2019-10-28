@@ -38,7 +38,6 @@
                       :picker-options="pickerOptions"
                       @change="chooseEndTime"
                       type="datetime"
-                      time-arrow-control
                       placeholder="选择日期时间">
               </el-date-picker>
             </el-form-item>
@@ -89,7 +88,7 @@
       </template>
       <div class="insetLeft2 vl_icon vl_icon_vehicle_03" v-show="hideleft" @click="showResult"></div>
     </div>
-    <div class="right" id="rightMap"></div>
+    <div class="right" id="rightGjfxJgMap"></div>
     <div class="reselt" v-if="reselt && showLeft">
       <div class="plane insetPadding">
         <h3 class="title">分析结果<p>共经过{{totalAddressNum}}个地方，出现{{totalMapNum}}次</p></h3>
@@ -494,7 +493,7 @@
         this.showNewTask = false;
       },
       renderMap() {
-        let map = new window.AMap.Map("rightMap", {
+        let map = new window.AMap.Map("rightGjfxJgMap", {
           zoom: 10,
           center: mapXupuxian.center
         });
@@ -1236,7 +1235,7 @@
   }
 </style>
 <style lang="scss">
-  #rightMap {
+  #rightGjfxJgMap {
     .vl_icon {
       width: 47px;
       position: relative;
@@ -1250,16 +1249,6 @@
         padding: 2px 5px;
         span{
           display: block;
-        }
-      }
-    }
-  }
-  .clgj_map_show_pic {
-    .vl_jtc_mk { display: block !important; }
-    &#rightMap {
-      .vl_icon.vl_icon_sxt {
-        > p {
-          display: none;
         }
       }
     }
