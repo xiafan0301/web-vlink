@@ -175,15 +175,13 @@ import vlUpload from "@/components/common/upload.vue";
 import vlBreadcrumb from "@/components/common/breadcrumb.vue";
 import vehicleDetail from "../common/vehicleDetail.vue";
 
-import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入一个地图的地址
+import { ajaxCtx } from "@/config/config"; // 引入一个地图的地址
 import { formatDate, dateOrigin } from "@/utils/util.js";
 import {
-  JtcPOSTAppendixInfo,
-  JtcGETAppendixInfoList,
   getImageAreaInfo
 } from "../../../api/api.judge.js"; // 图片上传接口
 import { getPhotoSearch } from "../../../api/api.analysis.js"; // 根据图检索接口
-import { objDeepCopy } from "../../../../../utils/util.js"; // 深拷贝方法
+/* import { objDeepCopy } from "../../../../../utils/util.js"; // 深拷贝方法 */
 import mapSelector from '@/components/common/mapSelector.vue';
 
 import imgSelect from '@/components/common/imgSelect.vue';
@@ -254,7 +252,7 @@ export default {
             start = y - 1 + "-" + (m - 1 + 12) + "-" + d;
           }
           threeMonths = new Date(start).getTime();
-          let treeDays = time.getTime() - 3600 * 1000 * 24 * 3;
+          /* let treeDays = time.getTime() - 3600 * 1000 * 24 * 3; */
           return time.getTime() > Date.now() || time.getTime() < threeMonths;
         }
       },
@@ -456,6 +454,7 @@ export default {
                 this.strucInfoList = []; // 清空搜索结果
                 this.total = 0;
                 this.isInit = false; // 页面初始化状态改变
+                console.log(err)
               });
           } else {
             return false;
