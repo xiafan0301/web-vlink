@@ -42,8 +42,10 @@
         <div class="tpcfx_right_content">
           <div class="tpcfx_img" v-for="(item, index ) in list" :key="index" @click="godetail(item)">
             <div class="tpcfx_img_1">
-              <img :src="item.storagePath" alt="" class="bigImg" title="点击放大图片">
-              <div style="text-align: center">{{item.plateNo}}</div>
+              <div style="height: 150px; overflow: hidden">
+                <img :src="item.StorageUrl1" alt="" title="点击放大图片">
+              </div>
+              <div style="text-align: center">{{item.PlateNo}}</div>
             </div>
           </div>
         </div>
@@ -92,7 +94,7 @@ export default {
       this.JtcPOSTAppendtpInfoss()
     },
     godetail (val) {
-      this.$router.push({ name: "vehicle_search_tpcfxxq" , query: {value1: this.value1, value2: this.value2, vehicleNumber: val.plateNo}});
+      this.$router.push({ name: "vehicle_search_tpcfxxq" , query: {value1: this.value1, value2: this.value2, vehicleNumber: val.PlateNo}});
     },
     serch () {
       this.JtcPOSTAppendtpInfoss()
@@ -114,8 +116,8 @@ export default {
       }
       let _s = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD + ' 00:00:00';
       // let _e = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD + ' 23:59:59';
-      this.value1 = new Date(_s);
-      this.value2 = new Date(curDate);
+      this.value1 = formatDate(_s);
+      this.value2 = formatDate(curDate);
     },
     JtcPOSTAppendtpInfoss () {
       let params = {
@@ -187,6 +189,7 @@ export default {
             width: 100%;
             box-shadow:0px -4px 10px 0px rgba(131,131,131,0.28);
             padding: 10px;
+            height: 200px;
             img{
               width: 100%;
               height: auto;
