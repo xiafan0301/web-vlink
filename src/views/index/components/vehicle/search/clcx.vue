@@ -162,7 +162,7 @@
       </el-table-column>
     </el-table>
         <div class="right_tw_list" v-show="!isList">
-          <div class="r_tw_l_item" v-for="item in tableData" @click="handleClick(item)">
+          <div class="r_tw_l_item" v-for="item in tableData" :key="item.id" @click="handleClick(item)">
             <div class="r_tw_l_img">
               <img :src="item.StorageUrl1" alt="">
             </div>
@@ -206,10 +206,8 @@
 </template>
 <script>
 import vehicleDetail from '../common/vehicleDetail.vue';
-import { mapXupuxian } from "@/config/config.js";
-import { cityCode, dataList } from "@/utils/data.js";
-import { getVehicleShot,getAllDevice,getGroups,getSnapList,exportNightVehicle} from "@/views/index/api/api.judge.js";
-import { MapGETmonitorList } from "@/views/index/api/api.map.js";
+import { dataList } from "@/utils/data.js";
+import {getAllDevice,getGroups,getSnapList,exportNightVehicle} from "@/views/index/api/api.judge.js";
 // import mapselect from "@/views/index/components/common/mapSelect";
 import mapSelector from '@/components/common/mapSelector.vue';
 import {formatDate, dateOrigin} from '@/utils/util.js';
@@ -227,19 +225,6 @@ export default {
       markerPoint: null, // 地图点集合
       pickerOptions: {
           disabledDate (time) {
-            let date = new Date();
-            let y = date.getFullYear();
-            let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
-            let d = date.getDate();
-            let threeMonths = '';
-            let start = '';
-            if (parseFloat(m) >= 2) {
-              start = y + '-' + (m - 1) + '-' + d;
-            } else {
-              start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
-            }
-            threeMonths = new Date(start).getTime();
-            //return time.getTime() > Date.now() || time.getTime() < threeMonths;
             return time.getTime() > Date.now() ;
           }
         },

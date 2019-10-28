@@ -590,7 +590,6 @@ export default {
     },
     //告警数据转成时间格式
     getNormalAlarm() {
-      let params = {}
       if(this.sortType === 1) {
         if(this.sortOrderS === 'desc') {
           this.alarmList.sort(this.compareDown("semblance"))

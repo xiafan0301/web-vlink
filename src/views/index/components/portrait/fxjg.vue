@@ -174,7 +174,6 @@ import { getTaskInfosDetail, postModifyTaskAnalysis } from "../../api/api.analys
 import { getCaBa } from "@/views/index/api/api.base.js";
 import snapDialog from './components/snapDetail';
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
-import { mapXupuxian } from "@/config/config";
 import mapSelector from '@/components/common/mapSelector.vue';
 import { validateSimilarity, validateFrequency } from "@/utils/validator.js";
 import { dateOrigin, formatDate  } from "@/utils/util.js";

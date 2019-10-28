@@ -184,16 +184,11 @@
   import vlUpload from "@/components/common/upload.vue";
   import vlBreadcrumb from "@/components/common/breadcrumb.vue";
   import vehicleDetail from "../common/vehicleDetail.vue";
-
-  import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入一个地图的地址
   import { formatDate, dateOrigin } from "@/utils/util.js";
   import {
-    JtcPOSTAppendixInfo,
-    JtcGETAppendixInfoList,
     getImageAreaInfo
   } from "../../../api/api.judge.js"; // 图片上传接口
   import { getPhotoSearch } from "../../../api/api.analysis.js"; // 根据图检索接口
-  import { objDeepCopy } from "../../../../../utils/util.js"; // 深拷贝方法
   import mapSelector from '@/components/common/mapSelector.vue';
 
   import imgSelectYtsc from '@/components/common/imgSelectYtsc.vue';
@@ -263,12 +258,10 @@
               start = y - 1 + "-" + (m - 1 + 12) + "-" + d;
             }
             threeMonths = new Date(start).getTime();
-            let treeDays = time.getTime() - 3600 * 1000 * 24 * 3;
             return time.getTime() > Date.now() || time.getTime() < threeMonths;
           }
         },
         /* 上传图片变量 */
-        uploadAcion: ajaxCtx.base + "/new", //上传路径
         uploading: false, // 是否上传中
         curImageUrl: "", // 当前上传的图片
 
@@ -452,7 +445,7 @@
                       this.total = 0;
                     }
                   })
-                  .catch(err => {
+                  .catch(() => {
                     this.getStrucInfoLoading = false; // 关闭加载效果
                     this.strucInfoList = []; // 清空搜索结果
                     this.total = 0;

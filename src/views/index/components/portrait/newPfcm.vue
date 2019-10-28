@@ -258,7 +258,6 @@
   </div>
 </template>
 <script>
-import { mapXupuxian } from "@/config/config";
 import { validateSimilarity, validateFrequency } from "@/utils/validator.js";
 import { postTaskAnalysis, getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from "../../api/api.analysis.js";
 import { formatDate, random14, dateOrigin } from "@/utils/util.js";

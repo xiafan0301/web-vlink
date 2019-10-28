@@ -292,9 +292,9 @@
           city: "湖南"
         });
 
-        if (!!v) {
+        if (v) {
           let _this = this;
-          return new Promise((resolve, reject) => {
+          return new Promise((resolve) => {
             placeSearch.search(v, (status, result) => {
               // 查询成功时，result即对应匹配的POI信息
               let pois = result.poiList.pois;
@@ -437,7 +437,7 @@
             if (_this.curAddSearch.area) {
               _this.map.remove(_this.curAddSearch.area)
             }
-            let circle = new AMap.Circle({
+            let circle = new window.AMap.Circle({
               center:e.lnglat,
               radius: 5000, //半径
               borderWeight: 3,
@@ -581,7 +581,7 @@
           })
         }else{
           this.mapTreeData.forEach(el=>{
-            let myLngLat=new AMap.LngLat(el.longitude,el.latitude);
+            let myLngLat=new window.AMap.LngLat(el.longitude,el.latitude);
             // let  closestPositionOnLine  = AMap.GeometryUtil.closestOnLine(myLngLat,obj.C.path);
             // console.log(closestPositionOnLine);
 
@@ -597,7 +597,7 @@
       setCenter(){
         var _this=this
         // console.log(this.input3);
-        var placeSearch = new AMap.PlaceSearch({
+        var placeSearch = new window.AMap.PlaceSearch({
           // city 指定搜索所在城市，支持传入格式有：城市名、citycode和adcode
           city: '021'
         })
@@ -655,7 +655,7 @@
       },
       cancelAddArea () {
         if (this.curAddSearch.area) {this.map.remove(this.curAddSearch.area);}
-        if (this.confirmIcon) {this.map.remove(this.confirmIcon)};
+        if (this.confirmIcon) {this.map.remove(this.confirmIcon)}
         // 先判断你选择的区域有没有设备,没有就不用做处理
         if (this.curAddSearch.curPointData.length) {
           this.recoverSXTcolor(this.curAddSearch.curMarks);
@@ -776,7 +776,7 @@
       },
       tcDiscuss () {
         let supQuery = {'where': {dtoList: []}};
-          supQuery.where['dtoList'] = this.searchData.map((x, index) => {
+          supQuery.where['dtoList'] = this.searchData.map(x => {
             let obj = {}
             obj['cameraIds'] = x.curPointData.filter(x => x.dataType === 0).map(y => {return y.uid}).join(',');
             obj['bayonetIds'] = x.curPointData.filter(x => x.dataType === 1).map(y => {return y.uid}).join(',');
