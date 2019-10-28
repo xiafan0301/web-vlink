@@ -234,7 +234,6 @@ export default {
       // 新增时
       } else {
         if (this.devIdListFive && this.devIdListFive.length > 0) {
-          console.log(this.devIdListFive, 'this.devIdListFive')
           this.changeColorAndGetTreeData(this.devIdListFive, 1);
           this.positionMap(this.devIdListFive);
         }          
@@ -252,15 +251,6 @@ export default {
         let offSet = [-23, -70];
         let obj = data[i];
         if (obj.longitude > 0 && obj.latitude > 0) {
-          // let _content = null;
-          // 摄像头
-          // if (obj.dataType === 1) {
-          //   _content = '<div id="' + obj.uid + '_sxt' + '" class="vl_icon vl_icon_sxt"></div>';
-          // // 卡口
-          // } else {
-          //   _content = '<div id="' + obj.uid + '_kk' + '" class="vl_icon vl_icon_kk"></div>';
-          // }
-          
           let _marker = new window.AMap.Marker({ // 添加自定义点标记
             map: _this.map,
             position: [obj.longitude, obj.latitude],
@@ -348,7 +338,6 @@ export default {
       const minute10 = 10*60*1000;
       const minute30 = 30*60*1000;
       const time = new Date().getTime() - this.lostTime.getTime();
-      console.log(time, 'time')
       if (time === minute10) {
         return 10*1000;
       } else if (time > minute10 && time < minute30) {
@@ -402,7 +391,6 @@ export default {
       // 新增时
       } else {  
         const lngLat = this.addressObjTwo.lnglat;
-        console.log(this.addressObjTwo.radius, 'this.addressObjTwo.radius')
         if (lngLat[0] === null) return;
         let circle = new window.AMap.Circle({
           center: new window.AMap.LngLat(lngLat[0], lngLat[1]), // 圆心位置
@@ -431,7 +419,6 @@ export default {
         array[0].hasOwnProperty('deviceId') && (key = 'deviceId');
         array[0].hasOwnProperty('bayonetId') && (key = 'bayonetId');
         if (array.some(s => s[key] === obj.uid)) {
-          console.log(item.getPosition(), 'fffffffff')
           this.setViewingArea(item.getPosition());
           break;
         }

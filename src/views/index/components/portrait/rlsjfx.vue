@@ -194,7 +194,6 @@ let startTime = formatDate(dateOrigin(false, new Date(new Date().getTime() - 24 
 let endTime = formatDate(dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)), 'yyyy-MM-dd');
 import vehicleBreadcrumb from './breadcrumb.vue';
 import G2 from '@antv/g2';
-import { View } from '@antv/data-set';
 import mapSelector from '@/components/common/mapSelector.vue';
 import {apiFaceTotal, apiFaceSnap, apiFaceWarning} from '@/views/index/api/api.portrait.js';
 export default {
@@ -319,7 +318,6 @@ export default {
     // 选择设备弹窗点击确定方法
     mapSelectorEmit (result) {
        if (result) {
-        console.log(result, 'result');
         this.dSum = 0;
         this.dIds = [];
         this.bIds = [];

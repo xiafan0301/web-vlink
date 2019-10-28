@@ -64,7 +64,6 @@ export default {
     setTimeout(() => {
       // 修改时回填数据
       if (this.modelList) {
-        console.log(this.modelList, 'this.modelList')
         // 回填嫌疑车牌
         let [{carNumberInfo, pointDtoList: [{bayonetList, devList}], surveillanceObjectDtoList}] = this.modelList;
         carNumberInfo = carNumberInfo.split(',');
@@ -86,7 +85,6 @@ export default {
   methods: {
     // 从布控库中获取布控人员信息
     getPortraitData (data) {
-      console.log(data, 'datadata')
       this.fileListOne = this.fileListOne.concat(data);
       this.fileListOne = unique(this.fileListOne, 'objId');
     },

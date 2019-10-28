@@ -666,7 +666,6 @@ export default {
             this.bayonetDevList.splice(this.devIndex, 1, objDeepCopy(this.bayonetDevForm));
             this.editDevDialog = false;
           }
-          console.log(this.bayonetDevList, 'this.bayonetDevList')
         } else {
           return false;
         }
@@ -741,7 +740,6 @@ export default {
     // 新增卡口
     submitAddBayonet () {
       this.loadingBtn = true;
-      console.log(JSON.stringify(this.commonFunc(1)))
       addBayonetInfo(this.commonFunc(1)).then(res => {
         if (res) {
           this.$message.success('新增成功');
@@ -778,7 +776,6 @@ export default {
             })
           }
           this.markLocation(data.bayonetAddress);
-          console.log(this.basicInfoForm, 'this.basicInfoForm')
           // 回填设备信息
           this.bayonetDevList = data.bayonetDevInfoDtoList && data.bayonetDevInfoDtoList.map(m => {
             return {
@@ -942,8 +939,8 @@ export default {
               }
             }
           })
-        }catch(e){
-          console.log("跳出来了")
+        } catch(e) {
+          console.log(e);
         }
       }
       func(_val, _opt);

@@ -86,7 +86,6 @@ export default {
   mounted () {
     // 修改时回填数据
     if (this.modelList) {
-      console.log(this.modelList, 'this.modelList')
       // 回填嫌疑车牌
       let [{pointDtoList: [{bayonetList, devList, address, longitude, latitude, radius}], surveillanceObjectDtoList}] = this.modelList;
       this.modelTwoForm.address = address;
