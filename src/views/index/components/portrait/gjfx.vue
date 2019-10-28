@@ -48,7 +48,6 @@
                     :picker-options="pickerOptions"
                     @change="chooseEndTime"
                     type="datetime"
-                    time-arrow-control
                     placeholder="选择日期时间">
             </el-date-picker>
           </el-form-item>
@@ -65,7 +64,7 @@
                 <el-button @click="resetForm('ruleForm')" class="full">重置</el-button>
               </el-col>
               <el-col :span="12">
-                <el-button type="primary" :loading="searchLoading" @click="submitForm('ruleForm')" class="select_btn full">分析</el-button>
+                <el-button type="primary" :loading="searchLoading" @click="submitForm()" class="select_btn full">分析</el-button>
               </el-col>
             </el-row>
           </el-form-item>
@@ -115,7 +114,7 @@
                               </div>
                             </div>
                             <div class="address"><i class="el-icon-location-outline"></i>{{sItem.bayonetAddress ? sItem.bayonetAddress : sItem.address}}</div>
-                            <div class="del_icon el-icon-delete" @click.stop="updateLine(sItem, item.list, sIndex)"></div>
+                            <div class="del_icon el-icon-delete" @click.stop="updateLine(sItem)"></div>
                           </div>
                         </li>
                       </ul>
@@ -406,12 +405,10 @@
   import vlBreadcrumb from '@/components/common/breadcrumb.vue';
   import flvplayer from '@/components/common/flvplayer.vue';
   import { mapXupuxian,ajaxCtx } from "@/config/config.js";
-  import { objDeepCopy, random14, formatDate, dateOrigin } from "@/utils/util.js";
+  import { objDeepCopy, formatDate, dateOrigin } from "@/utils/util.js";
   import { cityCode } from "@/utils/data.js";
   import {PortraitPostPersonTrace, PersonTracePostRealTime} from "@/views/index/api/api.portrait.js";
-  import { MapGETmonitorList } from "@/views/index/api/api.map.js";
   import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
-  import { getAllBayonetList } from "@/views/index/api/api.base.js";
   export default {
     components: {vlBreadcrumb, flvplayer, vlUpload},
     data() {
@@ -532,7 +529,7 @@
       map.setMapStyle("amap://styles/whitesmoke");
       this.amap = map;
       // 弹窗地图
-      let supMap = new AMap.Map('capMap', {
+      let supMap = new window.AMap.Map('capMap', {
         center: mapXupuxian.center,
         zoom: 16
       });
@@ -579,22 +576,22 @@
             taskStatus: 4 // 1：处理中 2：处理成功 3：处理失败 4：处理中断
           };
           this.isInterruptLoading = true;
-//          putAnalysisTask(params)
-//              .then(res => {
-//                if (res) {
-//                  this.$message({
-//                    type: 'success',
-//                    message: '中断任务成功',
-//                    customClass: 'request_tip'
-//                  });
-//                  this.interruptDialog = false;
-//                  this.isInterruptLoading = false;
-//                  this.getDataList();
-//                } else {
-//                  this.isInterruptLoading = false;
-//                }
-//              })
-//              .catch(() => {this.isInterruptLoading = false;})
+          putAnalysisTask(params)
+              .then(res => {
+                if (res) {
+                  this.$message({
+                    type: 'success',
+                    message: '中断任务成功',
+                    customClass: 'request_tip'
+                  });
+                  this.interruptDialog = false;
+                  this.isInterruptLoading = false;
+                  this.getDataList();
+                } else {
+                  this.isInterruptLoading = false;
+                }
+              })
+              .catch(() => {this.isInterruptLoading = false;})
         }
       },
       // 确认删除任务
@@ -605,7 +602,6 @@
             taskType: 6, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
             delFlag: true
           };
-          this.isDeleteLoading = true;
           putAnalysisTask(params)
               .then(res => {
                 if (res) {
@@ -618,10 +614,10 @@
                   this.isDeleteLoading = false;
                   this.getDataList();
                 } else {
-                  this.isDeleteLoading = false;
+                  this.$MyMessage('中断失败')
                 }
               })
-              .catch(() => {this.isDeleteLoading = false;})
+              .catch(() => {this.$MyMessage('中断失败')})
         }
       },
       //恢复任务,重启任务
@@ -712,7 +708,6 @@
       },
       scrollIt (e) {
         if(e.srcElement.scrollTop + e.srcElement.offsetHeight > e.srcElement.scrollHeight - 10){
-         console.log('到底了');
          if (!this.loading && !this.noMore) {
            this.loading = true;
            setTimeout(() => {
@@ -735,7 +730,7 @@
         this.reselt = true;
         this.hideleft = false;
       },
-      submitForm(v) {
+      submitForm() {
         if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data2 && this.ruleForm.input3){
           let pg = {
           }
@@ -945,7 +940,6 @@
       },
       drawMapMarker (oData) {
         let data = this.fitlerSXT(oData);
-        let path = [];
         for (let  i = 0; i < data.length; i++) {
           let obj = data[i];
           if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
@@ -960,10 +954,10 @@
               sClass = 'vl_icon_map_mark1'
             }
             let _content = `<div class="vl_icon ` + sClass + `">` + _time + `</div>`
-            let point = new AMap.Marker({ // 添加自定义点标记
+            let point = new window.AMap.Marker({ // 添加自定义点标记
               map: this.amap,
               position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-              offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+              offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
               draggable: false, // 是否可拖动
               // 自定义点标记覆盖物内容
               content: _content
@@ -999,7 +993,7 @@
             path.push(_path);
           }
         })
-        var polyline = new AMap.Polyline({
+        var polyline = new window.AMap.Polyline({
           path: path,
           showDir: true,
           strokeColor: '#61C772',
@@ -1008,10 +1002,9 @@
         this.markerLine.push(polyline);
         this.amap.add([polyline]);
       }, // 画线
-      updateLine (obj, list, index) {
+      updateLine (obj) {
         this.amap.clearMap();
         let _i = this.evData.indexOf(obj);
-        // list.splice(index, 1)
         this.evData.splice(_i, 1);
         this.shotAddressAndTimes(this.evData);
         this.operData();
@@ -1038,17 +1031,17 @@
           sClass = 'vl_icon_map_hover_mark1'
         }
         let _content = '<div class="vl_icon ' + sClass + '"></div>'
-        this.supMarkerPoint = new AMap.Marker({ // 添加自定义点标记
+        this.supMarkerPoint = new window.AMap.Marker({ // 添加自定义点标记
           map: this.map,
           position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-          offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+          offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
           draggable: false, // 是否可拖动
           // 自定义点标记覆盖物内容
           content: _content
         });
         this.map.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
         let sConent = `<div class="cap_info_win"><p>设备名称：${data.bayonetName ? data.bayonetName : data.deviceName}</p><p>抓拍地址：${data.bayonetAddress ? data.bayonetAddress : data.address}</p></div>`
-        new AMap.InfoWindow({
+        new window.AMap.InfoWindow({
           map: this.map,
           isCustom: true,
           closeWhenClickMap: false,

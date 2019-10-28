@@ -109,7 +109,7 @@
               </div>
               <div class="video_container">
                 <vue-scroll>
-                  <div class="vl_jtc_mk" v-for="(item, index) in curVideoList" :key="item.id">
+                  <div class="vl_jtc_mk" v-for="item in curVideoList" :key="item.id">
                     <p>{{item.shotTime}}</p>
                     <div is="flvplayer" :oData="item.playerData"
                          :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
@@ -270,7 +270,7 @@
 <script>
 let AMap = window.AMap;
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
-import {PortraitPostFocusRealTime, PortraitPostFocusTask, newGETAlarmSnapList, JfoGETEventList,getAllDevice } from "@/views/index/api/api.judge.js";
+import {PortraitPostFocusRealTime, PortraitPostFocusTask } from "@/views/index/api/api.judge.js";
 import {getGroupListIsPortrait} from '../../api/api.control.js';
 import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
 import {FocusPostReloadtask} from '@/views/index/api/api.portrait.js';
@@ -292,11 +292,6 @@ export default {
       taskType: "1", // 左侧任务类型，1 实时，2离线
       flvplayerId: 'flv_' + random14(),
       clearMapSelect: false, // 清除地图选择
-      pagination: {
-        currentPage: 1,
-        pageSize: 6,
-        total: 0
-      },
       evData: [],
       searchData: {
         portraitGroupId: null,  // 人员组
@@ -328,13 +323,8 @@ export default {
           let curS = 3 * 24 * 3600 * 1000;
             let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
           let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
-          let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
-          let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
           let start = new Date(curDate - curS).getFullYear() +
         "-" + _sm + "-" +_sd;
-          
-          let threeMonths = new Date(start).getTime();
-          //return time.getTime() > Date.now() || time.getTime() < threeMonths;
           return time.getTime() > Date.now();
         }
       },
@@ -397,7 +387,6 @@ export default {
     });
     map.setMapStyle('amap://styles/whitesmoke');
     this.amap = map;
-    // this.getAllDevice()
     // 获取人员组，跟车辆组列表
     getGroupListIsPortrait().then(res => {
       if (res) {
