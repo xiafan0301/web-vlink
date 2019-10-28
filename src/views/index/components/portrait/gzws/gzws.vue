@@ -471,6 +471,7 @@ export default {
                 this.isAddLoading = false;
 
                 this.getDataList();
+                this.cancelAdd('addForm');
               } else {
                 this.isAddLoading = false;
               }

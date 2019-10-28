@@ -446,6 +446,8 @@ export default {
                 });
                 this.getDataList();
                 this.isSearchLoading = false;
+
+                this.resetData('addForm');
               } else {
                 this.isSearchLoading = false;
               }
