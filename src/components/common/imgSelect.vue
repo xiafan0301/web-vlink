@@ -1,6 +1,6 @@
 <template>
   <el-dialog
-  title="框选搜索主体"
+  title="请选择搜索目标"
   :visible.sync="dialogVisible"
   width="1024px"
   :show-close="false"
@@ -15,7 +15,7 @@
     </div>
     <span slot="footer" class="dialog-footer">
       <el-button @click="cancelSave" size="small">取 消</el-button>
-      <el-button :loading="submitLoading" type="primary" @click="saveCutImg" size="small">保 存</el-button>
+      <el-button :loading="submitLoading" type="primary" @click="saveCutImg" size="small">确 定</el-button>
     </span>
   </el-dialog>
 </template>
