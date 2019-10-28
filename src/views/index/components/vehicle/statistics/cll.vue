@@ -115,10 +115,7 @@
   </div>
 </template>
 <script>
-// let startTime = formatDate(new Date(new Date(new Date().toLocaleDateString('zh-Hans-CN').replace(/日/g, '').replace(/\/|年|月/g, '/').replace(/[^\d/]/g,''))).getTime() - 24*60*60*1000, 'yyyy-MM-dd HH:mm:ss');
-// let endTime = formatDate(new Date(new Date(new Date().toLocaleDateString('zh-Hans-CN').replace(/日/g, '').replace(/\/|年|月/g, '/').replace(/[^\d/]/g,''))).getTime() - 1, 'yyyy-MM-dd HH:mm:ss');
 import G2 from '@antv/g2';
-import { View } from '@antv/data-set';
 import {apiCarFlow, exportExcel} from '@/views/index/api/api.vehicle.js';
 import {getAllBayonetListByName} from '@/views/index/api/api.vehicle.js';
 import {formatDate, dateOrigin} from '@/utils/util.js';
@@ -289,29 +286,6 @@ export default {
         width: G2.DomUtil.getWidth(temp),
         height: G2.DomUtil.getHeight(temp)
       });
-      // let dv = new View().source(this.chartData);
-      // dv.transform({
-      //   type: 'fold',
-      //   fields: ['车流量'], // 展开字段集
-      //   key: 'type', // key字段
-      //   value: 'value', // value字段
-      // });
-      // impute 补全列/补全字段
-      // dv.transform({
-      //   type: 'impute',
-      //   field: '车流量1',       // 待补全字段
-      //   // groupBy: [ 'value' ], // 分组字段集（传空则不分组）
-      //   method: 'value',  // 补全常量
-      //   value: 1     // 补全字段值时执行的规则
-      // });
-
-      // let view2 = chart.view();
-      // view2.source(dv, {});
-      
-      // chart.interval()
-      // .position('date*车流量1') 
-      // .color('#F2F2F2')
-      // .size(30);
       chart.source(this.chartData, {
         '车流量': {
           min: 0
@@ -372,13 +346,6 @@ export default {
         width: G2.DomUtil.getWidth(temp),
         height: G2.DomUtil.getHeight(temp)
       });
-      // let dv = new View().source(this.chartData);
-      // dv.transform({
-      //   type: 'fold',
-      //   fields: ['车流量'], // 展开字段集
-      //   key: 'type', // key字段
-      //   value: 'value', // value字段
-      // });
       chart.source(this.chartData, {
         '车流量': {
           min: 0

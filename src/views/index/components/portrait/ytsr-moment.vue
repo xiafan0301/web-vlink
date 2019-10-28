@@ -470,7 +470,7 @@
   import vlUpload from '@/components/common/upload.vue';
   import vlBreadcrumb from '@/components/common/breadcrumb.vue';
   import { PortraitPostByphotoTask, PortraitPostByphotoRealtime } from '@/views/index/api/api.portrait.js';
-  import {JtcPOSTAppendixInfo, getTailBehindList } from '../../api/api.judge'
+  import {JtcPOSTAppendixInfo } from '../../api/api.judge'
   import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
   import {getGroups} from '../../api/api.judge.js';
   import noResult from '@/components/common/noResult.vue';
@@ -746,7 +746,6 @@
             taskType: 4, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
             taskStatus: 4 // 1：处理中 2：处理成功 3：处理失败 4：处理中断
           };
-          this.isInterruptLoading = true;
           putAnalysisTask(params)
               .then(res => {
                 if (res) {
@@ -756,13 +755,12 @@
                     customClass: 'request_tip'
                   });
                   this.interruptDialog = false;
-                  this.isInterruptLoading = false;
                   this.getDataList();
                 } else {
-                  this.isInterruptLoading = false;
+                  this.$MyMessage('中断失败')
                 }
               })
-              .catch(() => {this.isInterruptLoading = false;})
+              .catch(() => {this.$MyMessage('中断失败')})
         }
       },
       // 确认删除任务

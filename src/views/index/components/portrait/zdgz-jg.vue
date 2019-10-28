@@ -135,7 +135,7 @@
           </div>
           <div class="video_container">
             <vue-scroll>
-              <div class="vl_jtc_mk" v-for="(item, index) in curVideo.videoList" :key="item.id">
+              <div class="vl_jtc_mk" v-for="item in curVideo.videoList" :key="item.id">
                 <p>{{item.shotTime}}</p>
                 <div is="flvplayer" :oData="item.playerData"
                      :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
@@ -156,7 +156,7 @@
   import vlBreadcrumb from '@/components/common/breadcrumb.vue';
   import { getPeopleTaskDetail } from '@/views/index/api/api.analysis.js';
   import {PortraitPostFocusTask} from "@/views/index/api/api.judge.js";
-  import { random14, formatDate } from '@/utils/util.js';
+  import { formatDate } from '@/utils/util.js';
   import { mapXupuxian } from "@/config/config.js";
   import flvplayer from '@/components/common/flvplayer.vue';
   import {getGroupListIsPortrait} from '../../api/api.control.js';

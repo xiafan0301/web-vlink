@@ -159,7 +159,6 @@
   // import mapselect from "@/views/index/components/common/mapSelect";
   import mapSelector from '@/components/common/mapSelector.vue';
   import portraitDetail from './common/portraitDetail.vue';
-  import { log } from 'util';
   import {formatDate, dateOrigin} from '@/utils/util.js';
   import vlUpload from '@/components/common/upload.vue';
   export default {
@@ -417,7 +416,7 @@
 
         // console.log(this.selectDevice);
       },
-      submitForm(v) {
+      submitForm() {
 
         if (
             this.ruleForm &&
@@ -443,7 +442,7 @@
           this.$message.info("请上传图片。");
         }
       },
-      resetForm(v) {
+      resetForm() {
         this.curImageUrl = "";
         this.setDTime()
         this.ruleForm.data1 = dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000));
@@ -606,11 +605,11 @@
                   obj.groupName
                   }</p><p class="big">${obj.totalNum}次</p></div>`;
               // 窗体
-              new AMap.Marker({
+              new window.AMap.Marker({
                 // 添加自定义点标记
                 map: this.amap,
                 position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-                offset: new AMap.Pixel(-90, -124), // 相对于基点的偏移位置
+                offset: new window.AMap.Pixel(-90, -124), // 相对于基点的偏移位置
                 draggable: false, // 是否可拖动
                 extData: obj,
                 // 自定义点标记覆盖物内容
@@ -623,11 +622,11 @@
                 "<div id=" +
                 _id +
                 ' class="vl_icon vl_jfo_sxt vl_icon_judge_04"></div>';
-            new AMap.Marker({
+            new window.AMap.Marker({
               // 添加自定义点标记
               map: this.amap,
               position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-              offset: new AMap.Pixel(-28.5, -50), // 相对于基点的偏移位置
+              offset: new window.AMap.Pixel(-28.5, -50), // 相对于基点的偏移位置
               draggable: false, // 是否可拖动
               extData: obj,
               // 自定义点标记覆盖物内容
@@ -643,8 +642,6 @@
         this.amap.setFitView();
       },
       addListen(el, evType, key, obj = {}) {
-        let self = this;
-        let _key;
         el.bind(evType, function() {
           switch (evType) {
             case "mouseover":

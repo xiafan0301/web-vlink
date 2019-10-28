@@ -74,7 +74,7 @@
             this.$message.info('抱歉，没有找到匹配结果');
             this.$router.push({name: "vehicle_search_qyph"})
           }
-        }).catch(err => {
+        }).catch(() => {
           this.$_hideLoading();
           this.$message.info('抱歉，没有找到匹配结果');
           this.$router.push({name: "vehicle_search_qyph"})

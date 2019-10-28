@@ -516,7 +516,7 @@ export default {
           this.showpost = true
           this.searchLoading = false
         }
-      }).catch(error => {
+      }).catch(() => {
         this.searchLoading = false
       })
     },
@@ -672,7 +672,6 @@ export default {
     }, // 更新画线
     drawMapMarker (oData) {
       let data = this.fitlerSXT(oData);
-      let path = [];
       for (let  i = 0; i < data.length; i++) {
         let obj = data[i];
         if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
@@ -683,7 +682,7 @@ export default {
           })
           _time += '</p>';
           let _content = `<div class="vl_icon vl_icon_sxt">` + _time + `</div>`
-          let point = new AMap.Marker({ // 添加自定义点标记
+          let point = new window.AMap.Marker({ // 添加自定义点标记
             map: this.amap,
             position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
             offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置

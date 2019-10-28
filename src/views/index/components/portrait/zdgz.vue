@@ -24,6 +24,7 @@
           type="datetime"
           placeholder="开始时间"
           :time-arrow-control="true"
+          :picker-options="pickerOptions"
           class="full vl_date"
           :clearable="false"
           value-format="timestamp"
@@ -32,6 +33,7 @@
           v-model="searchData.time2"
           type="datetime"
           :clearable="false"
+          :picker-options="pickerOptions"
           :time-arrow-control="true"
           placeholder="结束时间"
           class="full vl_date vl_date_end"
@@ -107,7 +109,7 @@
               </div>
               <div class="video_container">
                 <vue-scroll>
-                  <div class="vl_jtc_mk" v-for="(item) in curVideoList" :key="item.id">
+                  <div class="vl_jtc_mk" v-for="item in curVideoList" :key="item.id">
                     <p>{{item.shotTime}}</p>
                     <div is="flvplayer" :oData="item.playerData"
                          :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
@@ -290,11 +292,6 @@ export default {
       taskType: "1", // 左侧任务类型，1 实时，2离线
       flvplayerId: 'flv_' + random14(),
       clearMapSelect: false, // 清除地图选择
-      pagination: {
-        currentPage: 1,
-        pageSize: 6,
-        total: 0
-      },
       evData: [],
       searchData: {
         portraitGroupId: null,  // 人员组
@@ -318,22 +315,9 @@ export default {
         // {value: 6, label: '50-70'},
         // {value: 7, label: '70-'}
       ],
-      
       pickerOptions: {
         disabledDate (time) {
-          // let date = new Date();
-          // let curDate = date.getTime();
-          // let curS = 3 * 24 * 3600 * 1000;
-          //   let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
-          // let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
-          // let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
-          // let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
-          // let start = new Date(curDate - curS).getFullYear() +
-        // "-" + _sm + "-" +_sd;
-          
-          // let threeMonths = new Date(start).getTime();
-          //return time.getTime() > Date.now() || time.getTime() < threeMonths;
-          return time.getTime() > Date.now();
+          return time > new Date();
         }
       },
       amap: null, // 地图实例
@@ -373,6 +357,7 @@ export default {
         }
       ],
       selectIndex: 1, // 默认已完成的任务
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
       taskForm: {
         startTime: '',
         endTime: '',
@@ -394,7 +379,6 @@ export default {
     });
     map.setMapStyle('amap://styles/whitesmoke');
     this.amap = map;
-    // this.getAllDevice()
     // 获取人员组，跟车辆组列表
     getGroupListIsPortrait().then(res => {
       if (res) {
