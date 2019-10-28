@@ -26,11 +26,11 @@
             </li>
             <li>
               <span>发型：</span>
-              <span>{{detailInfo.hair ? detailInfo.hair : '未知'}}</span>
+              <span>{{detailInfo.hairStyleDesc ? detailInfo.hairStyleDesc : '未知'}}</span>
             </li>
             <li>
               <span>上身款式：</span>
-              <span>{{detailInfo.upperType ? detailInfo.upperType : '未知'}}</span>
+              <span>{{detailInfo.coatLengthDesc ? detailInfo.coatLengthDesc : '未知'}}</span>
             </li>
             <li>
               <span>上身纹理：</span>
@@ -38,15 +38,15 @@
             </li>
             <li>
               <span>上身颜色：</span>
-              <span>{{detailInfo.upperColor ? detailInfo.upperColor : '未知'}}</span>
+              <span>{{detailInfo.coatColorDesc ? detailInfo.coatColorDesc : '未知'}}</span>
             </li>
             <li>
               <span>下身款式：</span>
-              <span>{{detailInfo.bottomType ? detailInfo.bottomType : '未知'}}</span>
+              <span>{{detailInfo.trousersLenDesc ? detailInfo.trousersLenDesc : '未知'}}</span>
             </li>
             <li>
               <span>下身颜色：</span>
-              <span>{{detailInfo.bottomColor ? detailInfo.bottomColor : '未知'}}</span>
+              <span>{{detailInfo.trousersColorDesc ? detailInfo.trousersColorDesc : '未知'}}</span>
             </li>
             <li>
               <span>是否打伞：</span>

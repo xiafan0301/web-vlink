@@ -323,11 +323,7 @@
                       <span>{{scope.row.taskWebParam.age ? scope.row.taskWebParam.age : '不限'}}</span>
                     </template>
                   </el-table-column>
-                  <el-table-column label="结果数" prop="age" show-overflow-tooltip v-if="selectIndex === 1">
-                    <template slot-scope="scope">
-                      <span>{{scope.row.taskWebParam.age ? scope.row.taskWebParam.age : '不限'}}</span>
-                    </template>
-                  </el-table-column>
+                  <el-table-column label="结果数" prop="resultNum" v-if="selectIndex === 1"></el-table-column>
                   <el-table-column label="状态" v-if="selectIndex === 0" prop="taskStatus" show-overflow-tooltip>
                     <template slot-scope="scope">
                       <span>{{scope.row.taskStatus && scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 3 ? '失败' : '已中断'}}</span>
@@ -902,6 +898,8 @@ export default {
     },
     /**重置左边菜单的方法 */
     resetLeftMenu(form) {
+      console.log('mmmmmmmmmmmmmmmmmmmmmmmmm');
+      
       this.$refs[form].resetFields();
 
       this.clearMapSelect1 = !this.clearMapSelect1;
@@ -991,6 +989,7 @@ export default {
                     this.clearMarkList(); // 清除地图标记
                     this.isInitPage = false;
                   }
+                  this.resetLeftMenu('qyryfxFrom');
                 } else {
                   this.clearMarkList(); // 清除地图标记
                   this.isInitPage = false;
@@ -1013,6 +1012,8 @@ export default {
                   this.submitLoading = false;
                   this.selectIndex = 1;
                   this.getTaskList();
+
+                  this.resetLeftMenu('qyryfxFrom');
                 } else {
                   this.submitLoading = false;
                 }

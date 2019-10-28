@@ -883,7 +883,7 @@ export default {
           list.forEach(a => {
             if (a.uid == val) {
               result = a;
-              foreach.break = new Error("找到了就跳出循环");  
+              // foreach.break = new Error("找到了就跳出循环");  
             } else {
               if (a.hasOwnProperty('childList')) {
                 fun(val, a.childList);
