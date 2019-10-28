@@ -104,8 +104,8 @@
 <script>
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { mapXupuxian } from "@/config/config.js";
-import { random14 } from '@/utils/util.js';
-import { PortraitGetDispatch } from '@/views/index/api/api.portrait.js';
+// import { random14 } from '@/utils/util.js';
+// import { PortraitGetDispatch } from '@/views/index/api/api.portrait.js';
 import flvplayer from '@/components/common/flvplayer.vue';
 export default {
   components: { vlBreadcrumb, flvplayer },
