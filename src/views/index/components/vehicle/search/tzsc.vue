@@ -92,7 +92,7 @@
                       <!-- 车牌类型 -->
                       <span
                         v-else-if="item.plateClass || item.plateClass === 0"
-                      >{{ '车牌类型:' + dicFormater(45, item.name) }}</span>
+                      >{{ '车牌类型:' + dicFormater(plateType, item.name) }}</span>
                       <!-- <span v-else>{{item.name}}</span> -->
                     </div>
                     <div
@@ -115,7 +115,7 @@
                       <!-- 车牌类型 -->
                       <span
                               v-else-if="item.plateClass || item.plateClass === 0"
-                      >{{ '车牌类型:' + dicFormater(45, item.name) }}</span>
+                      >{{ '车牌类型:' + dicFormater(plateType, item.name) }}</span>
                       <span v-else-if="item.vehicleBrand">{{ '车辆品牌:' + item.name }}</span>
                       <span v-else-if="item.vehicleStyles">{{ '车辆年款:' + item.name }}</span>
                       <span v-else-if="item.vehicleRoof">{{ '车顶天窗:' + item.name }}</span>
@@ -380,7 +380,7 @@ export default {
       selectAreaType: 0,
       selectCameraArr: [], // 选中的摄像头数组
       selectBayonetArr: [], // 选中的卡口数组
-
+      plateType: dataList.plateType,
 
       uploadClear: {},
       detailData: null,
@@ -607,6 +607,7 @@ export default {
               })
             } else {
               this.uploadClear = {};
+              this.$MyMessage('图片解析失败')
             }
           }
         })
