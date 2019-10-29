@@ -94,7 +94,7 @@
           </el-form-item>
           <el-form-item class="operation_button">
             <el-button class="reset_btn" @click="resetData('addForm')">重置</el-button>
-            <el-button class="select_btn" type="primary" :loading="isSearchLoading" @click="searchData('addForm')">查询</el-button>
+            <el-button class="select_btn" type="primary" :loading="isSearchLoading" @click="searchData('addForm')">确定</el-button>
           </el-form-item>
         </el-form>
       </div>

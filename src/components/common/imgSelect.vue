@@ -82,6 +82,10 @@ export default {
         }
 
         let $div = document.createElement('div');
+        let $p = document.createElement('p');
+
+        $p.setAttribute('class', 'title_p');
+        $p.innerText = '目标' + index;
 
         let $id = 'select_box_' + index;
 
@@ -95,7 +99,9 @@ export default {
 
         $div.style.left = newItem.x + 'px';
         $div.style.top = newItem.y + 'px';
-
+        
+        $div.appendChild($p);
+        
         $('.img_box')[0].appendChild($div);
 
         // 默认选中第一个框体
@@ -225,16 +231,24 @@ export default {
           position: absolute;
           background:rgba(12,112,248,0.1);
           border:1px solid rgba(18,100,248,1);
-          opacity: 0.4;
           cursor: pointer;
           &:hover {
-            background:rgba(255,0,0,0.2);
-            border:1px solid rgba(255,0,57,1);
+            z-index: 1000;
+          }
+          .title_p {
+            width: 100%;
+            height: 20px;
+            text-align: center;
+            color: #ffffff;
+            background-color: #0C70F8;
           }
         }
         .active_select {
           background:rgba(255,0,0,0.2);
           border:1px solid rgba(255,0,57,1);
+          .title_p {
+            background-color: #FF0039;
+          }
         }
       }
     }
