@@ -45,7 +45,7 @@
             </el-form-item>
 
             <el-form-item>
-              <el-radio-group v-model="searchForm.type2" @change="areaTypeChanged2">
+              <el-radio-group v-model="searchForm.type2">
                 <el-radio style="margin-left: 20px;" :label="1">从图片提取</el-radio>
                 <el-radio style="margin-left: 20px;" :label="2">自定义特征</el-radio>
               </el-radio-group>
@@ -253,13 +253,12 @@ import vehicleBreadcrumb from '@/components/common/breadcrumb.vue';
 import mapSelector from '@/components/common/mapSelector.vue';
 import vlUpload from '@/components/common/upload.vue';
 import { handUpload } from "@/views/index/api/api.base.js";
-import {getFaceRetrievalPerson, JtcGETAppendixInfoList, getImageAreaInfo, JtcPOSTAppendixInfo} from '../../api/api.judge.js';
+import {getFaceRetrievalPerson, getImageAreaInfo, JtcPOSTAppendixInfo} from '../../api/api.judge.js';
 import {getPicRecognize} from '../../api/api.structuring.js';
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import {formatDate, dateOrigin} from '@/utils/util.js';
 import portraitDetail from './common/portraitDetail.vue';
 
-import {ajaxCtx} from '@/config/config';
 export default {
   components: { vehicleBreadcrumb, mapSelector, vlUpload, portraitDetail, noResult, imgSelect },
   data () {
@@ -607,23 +606,13 @@ export default {
         if (result.bayonetList && result.bayonetList.length > 0) {
           this.dSum += result.bayonetList.length;
         }
-//        if (result.bayonetDeviceList && result.bayonetDeviceList.length > 0) {
-//          this.dSum += result.bayonetDeviceList.length;
-//          for (let i = 0; i < result.bayonetDeviceList.length; i++) {
-//            this.dIds.push(result.bayonetDeviceList[i].uid);
-//          }
-//        }
       }
     },
-
     areaTypeChanged () {
       this.searchForm.type = 2;
       this.openMap = !this.openMap;
     },
-    areaTypeChanged2 (val) {
-    },
     searchAble () {
-      let flag = false, msg = '';
       if (this.dSum <= 0) {
         return '请选择设备';
       }

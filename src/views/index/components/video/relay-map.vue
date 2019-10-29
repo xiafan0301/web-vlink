@@ -61,7 +61,7 @@
 </template>
 <script>
 // http://localhost:9101/#/video-relay-map?uid=0xBrpzEdZKEidWSzxIY5S6&type=0
-import {formatDate, random14} from '@/utils/util.js';
+import {random14} from '@/utils/util.js';
 import {mapXupuxian} from '@/config/config.js';
 import mapVideoPlay from '@/components/common/mapVideoPlay.vue';
 import imgZoom from '@/components/common/imgZoom.vue';

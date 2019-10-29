@@ -181,7 +181,7 @@ import {
   getImageAreaInfo,
   JtcPOSTAppendixInfo
 } from "../../../api/api.judge.js"; // 图片上传接口
-import { getVehicleList, handUpload } from "../../../api/api.base.js";
+import { handUpload } from "../../../api/api.base.js";
 import { getPhotoSearch } from "../../../api/api.analysis.js"; // 根据图检索接口
 import mapSelector from '@/components/common/mapSelector.vue';
 

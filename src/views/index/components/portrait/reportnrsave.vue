@@ -435,7 +435,7 @@
         // this.map.setZoomAndCenter(16, [data.personDetailList[0].shotPlaceLongitude, data.personDetailList[0].shotPlaceLatitude]); // 自适应点位置
         this.map.setFitView();
       },
-      updateLine (obj, list, index) {
+      updateLine (obj) {
         this.amap.clearMap();
         let _i = this.data.indexOf(obj);
         // list.splice(index, 1)
