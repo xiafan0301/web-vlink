@@ -213,6 +213,12 @@ export default {
         let $div = document.createElement('div');
         let $id = 'select_box_' + index;
 
+        let $p = document.createElement('p');
+
+        $p.setAttribute('class', 'title_p');
+        $p.innerText = '目标' + index;
+        
+
         $div.setAttribute('id', $id);
 
         $div.setAttribute('class', 'select_box');
@@ -223,6 +229,8 @@ export default {
       
         $div.style.left = newItem.x + 'px';
         $div.style.top = newItem.y + 'px';
+
+        $div.appendChild($p);
 
         $('.img_box')[0].appendChild($div);
 
@@ -723,20 +731,35 @@ export default {
             height: auto;
             background-color: #EAEAEA;
           }
+          .select_box {
+            &:hover {
+              z-index: 1000;
+            }
+            .title_p {
+              width: 100%;
+              height: 20px;
+              text-align: center;
+              color: #ffffff;
+              background-color: #0C70F8;
+            }
+          }
           .select_box, .second_select_box {
             position: absolute;
             background:rgba(12,112,248,0.1);
             border:1px solid rgba(18,100,248,1);
             opacity: 0.4;
             cursor: pointer;
-            &:hover {
-              background:rgba(255,0,0,0.2);
-              border:1px solid rgba(255,0,57,1);
-            }
+            // &:hover {
+            //   background:rgba(255,0,0,0.2);
+            //   border:1px solid rgba(255,0,57,1);
+            // }
           }
           .active_select, .second_active_select {
             background:rgba(255,0,0,0.2);
             border:1px solid rgba(255,0,57,1);
+            .title_p {
+              background-color: #FF0039;
+            }
           }
           .cut_end {
             z-index: 1000;

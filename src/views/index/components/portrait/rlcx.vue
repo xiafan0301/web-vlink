@@ -439,7 +439,6 @@ export default {
               if (res.data.length === 1) {
                 let obj = res.data[0];
                 this.createImgPath(obj.x, obj.y, obj.width, obj.height);
-
               } else {
                 this.isOpenImgDialog = true;
   
