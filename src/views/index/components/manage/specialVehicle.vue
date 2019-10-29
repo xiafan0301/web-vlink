@@ -180,27 +180,6 @@
           <div style="padding: 0 15px; height: 210px; text-align:center;">
             <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit" :imgData="imgData"></div>
           </div>
-          <!-- <div :class="['upload_pic', {'hidden': dialogImageUrl}]">
-            <el-upload
-              :disabled="isAddImgDisabled"
-              ref="uploadPic"
-              accept="image/*"
-              :limit="1"
-              :action="uploadUrl"
-              list-type="picture-card"
-              :on-success="uploadPicSuccess"
-              :on-preview="handlePictureCardPreview"
-              :on-remove="handleRemove"
-              :before-upload="beforeAvatarUpload"
-              :file-list="fileList">
-              <i class="vl_icon vl_icon_012_012"></i>
-            </el-upload>
-          </div>
-          <template v-if="!isAddImgDisabled">
-            <h1 class="vl_f_999">点击修改车像</h1>
-            <p>请上传车辆图片</p>
-          </template> -->
-          <!-- <h1 class="vl_f_999">点击修改车像</h1> -->
           <p>请上传车辆图片</p>
         </div>
         <div class="right">
@@ -516,9 +495,9 @@ export default {
       carForm: {
         vehicleImagePath: null, // 车牌图片地址
         vehicleNumber: null, // 车牌号码
-        vehicleColor: '0', // 车身颜色
+        vehicleColor: null, // 车身颜色
         vehicleBrand: null, // 车辆品牌
-        vehicleType: '0', // 车辆类型
+        vehicleType: null, // 车辆类型
         numberType: null, // 号牌类型
         numberColor: null, // 号牌颜色
         ownerName: null, // 车主姓名
@@ -582,9 +561,6 @@ export default {
     uploadEmit (data) {
       if (data && data.path) {
         this.dialogImageUrl = data.path;
-        this.$nextTick(() => {
-          this.getDeviceList();
-        })
       } else {
         this.dialogImageUrl = null;
       }
@@ -617,6 +593,11 @@ export default {
         .then(res => {
           if (res) {
             this.vehicleTypeList = res.data;
+            res.data.map(val => {
+              if (val.enumValue === '其他') {
+                this.carForm.vehicleType = val.enumField;
+              }
+            })
           }
         })
     },
@@ -637,6 +618,11 @@ export default {
         .then(res => {
           if (res) {
             this.vehicleColorList = res.data;
+            res.data.map(val => {
+              if (val.enumValue === '其他') {
+                this.carForm.vehicleColor = val.enumField;
+              }
+            })
           }
         })
         .catch(() => {})

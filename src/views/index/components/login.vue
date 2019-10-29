@@ -153,6 +153,8 @@ export default {
     getAllDics() {
       // 页面一进来就将字典信息全部存入本地
       getDicts().then(res => {
+        console.log('res', res);
+        
         localStorage.setItem("dic", JSON.stringify(res.data));
         this.$_setDic(res.data);
       });
