@@ -63,7 +63,7 @@
               </div>
               <ul class="clearfix">
                 <li v-for="(item, index) in imgBDataList" :key="index">
-                  <div><img :src="item.src" alt=""></div>
+                  <img :src="item.src" alt="">
                 </li>
               </ul>
             </div>
@@ -185,17 +185,13 @@
   import vlBreadcrumb from "@/components/common/breadcrumb.vue";
   import vehicleDetail from "../common/vehicleDetail.vue";
 
-  import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入一个地图的地址
+  import { ajaxCtx } from "@/config/config"; // 引入一个地图的地址
   import { formatDate, dateOrigin } from "@/utils/util.js";
   import {
-    JtcPOSTAppendixInfo,
-    JtcGETAppendixInfoList,
     getImageAreaInfo
   } from "../../../api/api.judge.js"; // 图片上传接口
   import { getPhotoSearch } from "../../../api/api.analysis.js"; // 根据图检索接口
-  import { objDeepCopy } from "../../../../../utils/util.js"; // 深拷贝方法
   import mapSelector from '@/components/common/mapSelector.vue';
-
   import imgSelectYtsc from '@/components/common/imgSelectYtsc.vue';
   export default {
     components: { vlBreadcrumb, vehicleDetail, vlUpload, mapSelector,imgSelectYtsc },
@@ -263,7 +259,7 @@
               start = y - 1 + "-" + (m - 1 + 12) + "-" + d;
             }
             threeMonths = new Date(start).getTime();
-            let treeDays = time.getTime() - 3600 * 1000 * 24 * 3;
+            // let treeDays = time.getTime() - 3600 * 1000 * 24 * 3;
             return time.getTime() > Date.now() || time.getTime() < threeMonths;
           }
         },
@@ -453,6 +449,7 @@
                     }
                   })
                   .catch(err => {
+                    console.log(err)
                     this.getStrucInfoLoading = false; // 关闭加载效果
                     this.strucInfoList = []; // 清空搜索结果
                     this.total = 0;
@@ -632,18 +629,26 @@
             padding: 10px 0;
             margin-bottom: 20px;
           }
+          li:nth-of-type(even){
+            padding-right: 0
+          }
           li{
             width: 50%;
             float: left;
-            padding-left: 10px;
             padding-bottom: 10px;
-            > div{
+            padding-right: 10px;
+            /*div:nth-of-type(even){*/
+            /*  margin-right: 0;*/
+            /*}*/
+            img{
+              height: 100%;
+              width: 100%;
               border: 1px solid #D3D3D3;
-              img{
-                height: 100%;
-                width: 100%;
-              }
             }
+            /*div{*/
+            /*  border: 1px solid #D3D3D3;*/
+            /*  margin-right: 10px;*/
+            /*}*/
           }
         }
         width: 272px;

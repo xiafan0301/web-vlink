@@ -404,7 +404,7 @@ export function getPhotoAnalysis(params) {
     url: '/vehicle-investigate/photo-analysis',
     method: 'get',
     params,
-    mode: 'judge'
+    mode: 'vehicle'
   });
 }
 /*--------------------------  车辆侦查--尾随分析end  ---------------------------------*/

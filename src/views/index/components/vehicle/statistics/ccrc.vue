@@ -242,9 +242,9 @@
 </template>
 <script>
 import vehicleDetail from '../common/vehicleDetail.vue';
-import { mapXupuxian } from "@/config/config";
-import { MapGETmonitorList } from "@/views/index/api/api.map.js";
-import { objDeepCopy, formatDate } from "@/utils/util.js";
+// import { mapXupuxian } from "@/config/config";
+// import { MapGETmonitorList } from "@/views/index/api/api.map.js";
+import { formatDate } from "@/utils/util.js";
 import { JfoGETCity , getbayonet} from '../../../api/api.judge.js';
 import { cityCode } from "@/utils/data.js";
 import { getGroupsByType } from "@/views/index/api/api.js";

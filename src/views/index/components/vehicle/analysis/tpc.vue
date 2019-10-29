@@ -255,12 +255,12 @@ export default {
         return false;
       }
     },
-    changval1 (val) {
-      // this.value2 = formatDate(val + 3*24*60*60*1000)
-    },
-    disabledDate(time) {
-      // return  time.getTime() > this.value1 + 3*24*60*60*1000 || time.getTime() < this.value1 - 24*60*60*1000
-    },
+    // changval1 (val) {
+    //   // this.value2 = formatDate(val + 3*24*60*60*1000)
+    // },
+    // disabledDate(time) {
+    //   // return  time.getTime() > this.value1 + 3*24*60*60*1000 || time.getTime() < this.value1 - 24*60*60*1000
+    // },
     setDTime () {
       let date = new Date();
       let curDate = date.getTime();
