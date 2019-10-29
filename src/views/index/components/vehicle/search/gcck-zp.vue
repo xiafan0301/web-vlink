@@ -114,7 +114,6 @@ import {formatDate, getDate} from '@/utils/util.js';
 import {getDeviceSnapImagesSum, getDeviceSnapImagesPage} from '../../../api/api.judge.js';
 import {getDiciData} from '../../../api/api.js';
 import {getSpecialGroup} from '../../../api/api.manage.js';
-import { constants } from 'crypto';
 export default {
   components: {vlBreadcrumb, flvplayer, vehicleDetail},
   data () {
@@ -278,7 +277,7 @@ export default {
         // $('.gcck_ll').first().show(300);
       });
     },
-    getDeviceSnapSum (dId) {
+    getDeviceSnapSum () {
       getDeviceSnapImagesSum({
         deviceIds: this.$route.query.deviceIds,
         startTime: formatDate(this.formInline.time[0], 'yyyy-MM-dd 00:00:00'),

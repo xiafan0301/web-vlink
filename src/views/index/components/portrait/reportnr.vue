@@ -516,7 +516,7 @@ export default {
           this.showpost = true
           this.searchLoading = false
         }
-      }).catch(error => {
+      }).catch(() => {
         this.searchLoading = false
       })
     },
@@ -643,7 +643,7 @@ export default {
       // this.map.setZoomAndCenter(16, [data.personDetailList[0].shotPlaceLongitude, data.personDetailList[0].shotPlaceLatitude]); // 自适应点位置
       this.map.setFitView();
     },
-    updateLine (obj, list, index) {
+    updateLine (obj) {
       this.arr.push(obj)
       localStorage.setItem("temp",JSON.stringify(this.arr));
       this.amap.clearMap();
@@ -672,7 +672,6 @@ export default {
     }, // 更新画线
     drawMapMarker (oData) {
       let data = this.fitlerSXT(oData);
-      let path = [];
       for (let  i = 0; i < data.length; i++) {
         let obj = data[i];
         if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
@@ -683,10 +682,10 @@ export default {
           })
           _time += '</p>';
           let _content = `<div class="vl_icon vl_icon_sxt">` + _time + `</div>`
-          let point = new AMap.Marker({ // 添加自定义点标记
+          let point = new window.AMap.Marker({ // 添加自定义点标记
             map: this.amap,
             position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-            offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+            offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
             draggable: false, // 是否可拖动
             // 自定义点标记覆盖物内容
             content: _content
@@ -734,22 +733,22 @@ export default {
         this.map1.remove(this.supMarkerPoint)
       }
       let _content = '<div class="vl_icon vl_icon_judge_02"></div>'
-      this.supMarkerPoint = new AMap.Marker({ // 添加自定义点标记
+      this.supMarkerPoint = new window.AMap.Marker({ // 添加自定义点标记
         map: this.map1,
         position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-        offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+        offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
         draggable: false, // 是否可拖动
         // 自定义点标记覆盖物内容
         content: _content
       });
       this.map1.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
       let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`
-      new AMap.InfoWindow({
+      new window.AMap.InfoWindow({
         map: this.map1,
         isCustom: true,
         closeWhenClickMap: false,
         position: [data.shotPlaceLongitude, data.shotPlaceLatitude],
-        offset: new AMap.Pixel(0, -70),
+        offset: new window.AMap.Pixel(0, -70),
         content: sConent
       })
     },
@@ -779,7 +778,7 @@ export default {
           path.push(_path);
         }
       })
-      var polyline = new AMap.Polyline({
+      var polyline = new window.AMap.Polyline({
         path: path,
         showDir: true,
         strokeColor: '#61C772',
@@ -797,7 +796,7 @@ export default {
       this.amap = map;
       this.drawMapMarker(this.data)
       // 弹窗地图
-      let supMap = new AMap.Map('capMap', {
+      let supMap = new window.AMap.Map('capMap', {
         center: mapXupuxian.center,
         zoom: 16
       });

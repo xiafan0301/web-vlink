@@ -255,10 +255,10 @@ export default {
         return false;
       }
     },
-    changval1 (val) {
+    changval1 () {
       // this.value2 = formatDate(val + 3*24*60*60*1000)
     },
-    disabledDate(time) {
+    disabledDate() {
       // return  time.getTime() > this.value1 + 3*24*60*60*1000 || time.getTime() < this.value1 - 24*60*60*1000
     },
     setDTime () {

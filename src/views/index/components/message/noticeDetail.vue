@@ -14,26 +14,21 @@
         <div>
           <div class="vl_f_333">{{detail.details}}</div>
           <div class="det_pic_box">
-            <img v-for="(item, index) in imgList" :src="item.path" alt="" :key="index" @click="openBigImg(index)">
+            <img v-for="(item, index) in imgList" :src="item.path" alt="" :key="index" class="bigImg">
           </div>
         </div>
       </div>
     </div>
-    <BigImg :imgList="imgList" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
   </div>
 </template>
 <script>
 import {getMsgNoteDetail} from '@/views/index/api/api.message.js';
-import BigImg from '@/components/common/bigImg.vue';
 export default {
-  components: {BigImg},
   props: ['msgNoteId'],
   data () {
     return {
       detail: null,
-      imgList: [],
-      imgIndex: null,
-      isShowImg: false
+      imgList: []
     }
   },
   mounted () {
@@ -49,18 +44,9 @@ export default {
         }
       })
     },
-    // 关闭图片放大
-    emitCloseImgDialog(value){
-      this.isShowImg = value;
-    },
-    // 放大图片
-    openBigImg (index) {
-      this.isShowImg = true;
-      this.imgIndex = index;
-    },
     skip (pageType) {
       this.$emit('changePage', pageType)
-    },
+    }
   }
 }
 </script>

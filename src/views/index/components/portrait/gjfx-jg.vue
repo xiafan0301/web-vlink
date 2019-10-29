@@ -104,7 +104,7 @@
               <ul>
                 <li class="p_main_list" :class="{'is_open': item.isOpen}" v-for="item in leftEvData" :key="item.id">
                   <div class="p_main_head" @click="item.isOpen = !item.isOpen"><i :class="{'el-icon-caret-right': !item.isOpen, 'el-icon-caret-bottom': item.isOpen}"></i>{{item.label}}({{item.times}}次)</div>
-                  <div class="p_main_item" v-for="(sItem, sIndex) in item.list" :key="sItem.id" @click="showStrucInfo(sItem, evData.findIndex(function (u) {return u === sItem}))">
+                  <div class="p_main_item" v-for="sItem in item.list" :key="sItem.id" @click="showStrucInfo(sItem, evData.findIndex(function (u) {return u === sItem}))">
                     <div class="info">
                       <div class="info_left">
                         <img :src="sItem.subStoragePath" alt="">
@@ -277,7 +277,7 @@
   import vlBreadcrumb from '@/components/common/breadcrumb.vue';
   import flvplayer from '@/components/common/flvplayer.vue';
   import { mapXupuxian,ajaxCtx } from "@/config/config.js";
-  import { objDeepCopy, random14, formatDate, dateOrigin } from "@/utils/util.js";
+  import { objDeepCopy, formatDate, dateOrigin } from "@/utils/util.js";
   import { cityCode } from "@/utils/data.js";
   import {PortraitPostPersonTrace} from "@/views/index/api/api.portrait.js";
   import { getPeopleTaskDetail } from '@/views/index/api/api.analysis.js';

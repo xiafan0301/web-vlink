@@ -309,7 +309,7 @@ export default {
   },
   methods: {
     /* 轮巡控制事件 begin */
-    patrolProgFormat (percentage) {
+    patrolProgFormat () {
       // return Math.round(percentage) + '秒';
       return Math.ceil(this.patrolStartSecond / 10)  + ' 秒';
     },

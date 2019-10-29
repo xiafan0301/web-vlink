@@ -68,7 +68,7 @@
     <div class="reselt" v-if="reselt">
       <div class="plane insetPadding">
         <h3 class="title">分析结果</h3>
-        <el-table :data="evData" style="width: 100%;":height="tableHeight" @row-click="createInfoWindow($event)">
+        <el-table :data="evData" style="width: 100%;" :height="tableHeight" @row-click="createInfoWindow($event)">
           <el-table-column  type="index" width="24px" label="序号"></el-table-column>
           <el-table-column  prop="address" :show-overflow-tooltip="true" label="落脚点位置"></el-table-column>
           <el-table-column prop="stopOverTime" width="120px" sortable label="停留时长">
@@ -253,7 +253,7 @@ export default {
     //   // console.log(this.selectDevice);
       
     // },
-    changeTab(v) {
+    changeTab() {
       //console.log(v);
       // if (v == "2") {
       //   this.dialogVisible = true;
@@ -401,11 +401,11 @@ export default {
           "<div id=" +
           _id +
           ' class="vl_icon vl_jfo_sxt vl_icon_judge_04"></div>';
-        let marker = new AMap.Marker({
+        let marker = new window.AMap.Marker({
           // 添加自定义点标记
           map: this.amap,
           position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-          offset: new AMap.Pixel(-28.5, -50), // 相对于基点的偏移位置
+          offset: new window.AMap.Pixel(-28.5, -50), // 相对于基点的偏移位置
           draggable: false, // 是否可拖动
           extData: obj,
           // 自定义点标记覆盖物内容

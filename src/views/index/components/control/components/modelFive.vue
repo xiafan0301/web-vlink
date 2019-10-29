@@ -18,7 +18,7 @@
       <div class="sel_lib"><span @click="popSel">从公务车辆中选择</span></div>
       <div class="sel_img_box">
         <div class="img_box" v-for="(item, index) in vehicleList" :key="index">
-          <img :src="item.photoUrl" alt="">
+          <img :src="item.photoUrl" alt="" class="bigImg">
           <i class="el-icon-error" @click="delVehicle(index)"></i>
           <span>{{item.vehicleNumber}}</span>
         </div>
@@ -196,6 +196,7 @@ export default {
       > img{
         width: 100%;
         height: 100%;
+        cursor: pointer;
       }
       > i{
         font-size: 6px;

@@ -104,7 +104,7 @@
               this.$router.push({name: "vehicle_search_qy"})
             }
           }
-        }).catch(err => {
+        }).catch(() => {
           this.$message.info('抱歉，没有找到匹配结果');
           this.$router.push({name: "vehicle_search_qy"})
         })

@@ -716,7 +716,8 @@ export default {
     },
     // 过滤抓拍上墙数据，只剩8条
     filterSnapList () {
-      return this.querySnapList.length >= 8 ? this.querySnapList.splice(0, 8) : this.querySnapList;
+      let newSnapList = Object.assign(this.querySnapList, []);
+      return this.querySnapList.length >= 8 ? newSnapList.splice(0, 8) : this.querySnapList;
     }
   },
   mounted () {
@@ -942,8 +943,6 @@ export default {
         // videoElement.pause();
         if (this.oData.type === 5) {
           this.videoRelayEmpty = true;
-          if (this.video) {
-          }
         }
       };
       videoElement.onerror = () => {
@@ -1047,15 +1046,15 @@ export default {
         "orderBy": "shotTime",
         "order": "desc",
         "where": {
-//              "deviceId": dId
+              "deviceId": dId
 //              "deviceId": "5DTxZRNGOZuLsl07jcNO09"
-          "deviceId": "9"
+//          "deviceId": "9"
         }
       };
 
       if (this.oData.type === 1) {
         VideoPostQueryLiveSnap(params).then(res =>{
-          if (res) {
+          if (res.data && res.data.list) {
             console.log(res);
             // 处理当前需要的key
             this.querySnapList = res.data.list.map(x => {
@@ -1662,21 +1661,6 @@ export default {
       if ($canvas && $canvas.length > 0) {
         this.img = $canvas[0].toDataURL('image/png');
         this.filename = 'image_' + this.cutTime + '.png';
-        if('msSaveOrOpenBlob' in navigator){
-          // 兼容EDGE
-          let arr = img.split(',');
-          let mime = arr[0].match(/:(.*?);/)[1];
-          let bstr = atob(arr[1]);
-          let n = bstr.length;
-          let u8arr = new Uint8Array(n);
-          while (n--) {
-            u8arr[n] = bstr.charCodeAt(n);
-          }
-          let blob = new Blob([u8arr], {type:mime});
-          window.navigator.msSaveOrOpenBlob(blob, filename);
-          return;
-        }
-
         this.img.replace('image/png', 'image/octet-stream');
         
         $canvas[0].toBlob((blob) => {

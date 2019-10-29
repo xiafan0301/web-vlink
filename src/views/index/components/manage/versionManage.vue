@@ -128,7 +128,7 @@ export default {
       this.selectDataList();
     },
     // 显示修改版本弹出框
-    showUpdateDialog (obj) {
+    showUpdateDialog () {
 
     },
     // 显示新增版本弹出框

@@ -274,7 +274,7 @@
   import { getDepartmentList, getCusGroup } from '@/views/index/api/api.manage.js';
   import {getAllMonitorList, getBayonetList, getDeviceByBayonetUids} from '@/views/index/api/api.base.js';
   import {mapXupuxian} from '@/config/config.js';
-  import {random14, addCluster, objDeepCopy} from '@/utils/util.js';
+  import {random14, addCluster} from '@/utils/util.js';
   import dbTreeS from '@/components/common/dbTree_single.vue';
   export default {
     /* 提交成功后通过在父组件 emit mapSelectorEmit 事件获取所框选的东西 */
@@ -413,8 +413,7 @@
       },
       open () {
         this.dialogVisible = true;
-        if (this.amap) {
-        } else {
+        if (!this.amap) {
           this.$nextTick(() => {
             setTimeout(() => {
               this.initMap();
@@ -715,7 +714,7 @@
       },
       cancelAddArea () {
         if (this.curAddSearch.area) {this.amap.remove(this.curAddSearch.area);}
-        if (this.confirmIcon) {this.amap.remove(this.confirmIcon)};
+        if (this.confirmIcon) {this.amap.remove(this.confirmIcon)}
         // 先判断你选择的区域有没有设备,没有就不用做处理
         if (this.curAddSearch.curPointData.length) {
           this.recoverSXTcolor(this.curAddSearch.curMarks);
@@ -816,8 +815,7 @@
           // city 指定搜索所在城市，支持传入格式有：城市名、citycode和adcode
           city: "湖南"
         });
-
-        if (!!v) {
+        if (v) {
           let _this = this;
           return new Promise((resolve) => {
             placeSearch.search(v, (status, result) => {

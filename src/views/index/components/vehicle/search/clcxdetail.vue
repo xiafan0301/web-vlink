@@ -175,8 +175,6 @@
 </template>
 <script>
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
-
-import { ScpGETstrucInfoList } from "@/views/index/api/api.search.js";
 import { getSnapDetail,getArchives } from "@/views/index/api/api.judge.js";
 import { dataList } from "@/utils/data.js";
 export default {

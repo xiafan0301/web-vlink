@@ -325,7 +325,7 @@
                   </el-table-column>
                   <el-table-column label="结果数" prop="resultNum" v-if="selectIndex === 1"></el-table-column>
                   <el-table-column label="状态" v-if="selectIndex === 0" prop="taskStatus" show-overflow-tooltip>
-                    <template slot-scope="scope">
+                    <template slot-scope="scope" v-if="scope.row.taskStatus !== 2">
                       <span>{{scope.row.taskStatus && scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 3 ? '失败' : '已中断'}}</span>
                     </template>
                   </el-table-column>
@@ -980,7 +980,6 @@ export default {
                     this.clearMarkList(); // 清除地图标记
                     this.isInitPage = false;
                   }
-                  this.resetLeftMenu('qyryfxFrom');
                 } else {
                   this.clearMarkList(); // 清除地图标记
                   this.isInitPage = false;

@@ -114,7 +114,7 @@
   import { mapXupuxian } from "@/config/config.js";
 //  import {getAllDevice} from '../../../api/api.judge.js';
   import {getAllMonitorList, getAllBayonetList} from '../../../api/api.base.js';
-  import { objDeepCopy, formatDate, addCluster} from '../../../../../utils/util.js';
+  import { formatDate, addCluster} from '../../../../../utils/util.js';
   export default {
     components: {vlBreadcrumb},
     data() {
@@ -172,7 +172,7 @@
     methods: {
       cancelAddArea () {
         if (this.searchData.area) {this.map.remove(this.searchData.area);}
-        if (this.confirmIcon) {this.map.remove(this.confirmIcon)};
+        if (this.confirmIcon) {this.map.remove(this.confirmIcon)}
         // 先判断你选择的区域有没有设备,没有就不用做处理
         if (this.searchData.curPointData.length) {
           this.recoverSXTcolor(this.searchData.curMarks);
@@ -274,21 +274,19 @@
       createFilter(queryString) {
         return restaurant => {
           // console.log(restaurant.name.toLowerCase().indexOf(queryString.toLowerCase()));
-
           return (
               restaurant.name.toLowerCase().indexOf(queryString.toLowerCase()) > -1
           );
         };
       },
       seacher(v) {
-        var placeSearch = new AMap.PlaceSearch({
+        var placeSearch = new window.AMap.PlaceSearch({
           // city 指定搜索所在城市，支持传入格式有：城市名、citycode和adcode
           city: "湖南"
         });
-
-        if (!!v) {
+        if (v) {
           let _this = this;
-          return new Promise((resolve, reject) => {
+          return new Promise((resolve) => {
             placeSearch.search(v, (status, result) => {
               // 查询成功时，result即对应匹配的POI信息
               let pois = result.poiList.pois;
@@ -410,7 +408,7 @@
             if (_this.searchData.area) {
               _this.map.remove(_this.searchData.area)
             }
-            let circle = new AMap.Circle({
+            let circle = new window.AMap.Circle({
               center:e.lnglat,
               radius: 5000, //半径
               borderWeight: 3,
@@ -474,7 +472,7 @@
         this.searchData.curPointData = [];
         if(type!="AMap.Polyline"){
           this.mapTreeData.forEach(el=>{
-            let myLngLat=new AMap.LngLat(el.longitude,el.latitude);
+            let myLngLat=new window.AMap.LngLat(el.longitude,el.latitude);
             //  var isPointInRing = window.AMap.GeometryUtil.isPointInRing(myLngLat,obj.C.path);
             let isPointInRing = obj.contains(myLngLat);
             // console.log(marker.getPosition());
@@ -487,7 +485,7 @@
           })
         }else{
           this.mapTreeData.forEach(el=>{
-            let myLngLat=new AMap.LngLat(el.longitude,el.latitude);
+            let myLngLat=new window.AMap.LngLat(el.longitude,el.latitude);
             // let  closestPositionOnLine  = AMap.GeometryUtil.closestOnLine(myLngLat,obj.C.path);
             // console.log(closestPositionOnLine);
 
@@ -503,7 +501,7 @@
       setCenter(){
         var _this=this
         // console.log(this.input3);
-        var placeSearch = new AMap.PlaceSearch({
+        var placeSearch = new window.AMap.PlaceSearch({
           // city 指定搜索所在城市，支持传入格式有：城市名、citycode和adcode
           city: '021'
         })
@@ -515,7 +513,6 @@
             let new_center=pois[0].location
             _this.map.setZoomAndCenter(16, new_center);
           }
-
           // for(var i = 0; i < pois.length; i++){
           //     var poi = pois[i];
           //     var marker = [];

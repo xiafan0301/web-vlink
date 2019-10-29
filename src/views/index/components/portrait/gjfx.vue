@@ -103,7 +103,7 @@
                       <ul>
                         <li class="p_main_list" :class="{'is_open': item.isOpen}" v-for="item in leftEvData" :key="item.id">
                           <div class="p_main_head" @click="item.isOpen = !item.isOpen"><i :class="{'el-icon-caret-right': !item.isOpen, 'el-icon-caret-bottom': item.isOpen}"></i>{{item.label}}({{item.times}}次)</div>
-                          <div class="p_main_item" v-for="(sItem, sIndex) in item.list" :key="sItem.id" @click="showStrucInfo(sItem, evData.findIndex(function (u) {return u === sItem}))">
+                          <div class="p_main_item" v-for="sItem in item.list" :key="sItem.id" @click="showStrucInfo(sItem, evData.findIndex(function (u) {return u === sItem}))">
                             <div class="info">
                               <div class="info_left">
                                 <img :src="sItem.subStoragePath" alt="">
@@ -1046,7 +1046,7 @@
           isCustom: true,
           closeWhenClickMap: false,
           position: [data.shotPlaceLongitude, data.shotPlaceLatitude],
-          offset: new AMap.Pixel(0, -70),
+          offset: new window.AMap.Pixel(0, -70),
           content: sConent
         })
       },
