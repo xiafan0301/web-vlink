@@ -4,6 +4,7 @@
     <!-- 面包屑通用样式 -->
     <div
       is="vlBreadcrumb"
+      v-show="!isCut"
       :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
           {name: '特征搜车'}]"
     ></div>
@@ -92,7 +93,7 @@
                       <!-- 车牌类型 -->
                       <span
                         v-else-if="item.plateClass || item.plateClass === 0"
-                      >{{ '车牌类型:' + dicFormater(45, item.name) }}</span>
+                      >{{ '车牌类型:' + dicFormater(plateType, item.name) }}</span>
                       <!-- <span v-else>{{item.name}}</span> -->
                     </div>
                     <div
@@ -115,7 +116,7 @@
                       <!-- 车牌类型 -->
                       <span
                               v-else-if="item.plateClass || item.plateClass === 0"
-                      >{{ '车牌类型:' + dicFormater(45, item.name) }}</span>
+                      >{{ '车牌类型:' + dicFormater(plateType, item.name) }}</span>
                       <span v-else-if="item.vehicleBrand">{{ '车辆品牌:' + item.name }}</span>
                       <span v-else-if="item.vehicleStyles">{{ '车辆年款:' + item.name }}</span>
                       <span v-else-if="item.vehicleRoof">{{ '车顶天窗:' + item.name }}</span>
@@ -380,7 +381,9 @@ export default {
       selectAreaType: 0,
       selectCameraArr: [], // 选中的摄像头数组
       selectBayonetArr: [], // 选中的卡口数组
+      plateType: dataList.plateType,
 
+      isCut: false, // 是否为截屏跳转.
 
       uploadClear: {},
       detailData: null,
@@ -551,6 +554,9 @@ export default {
     this.setDTime();
     // 从字典中取出自定义的特征数组
     this.getSelectOption();
+    if (this.$route.query.isCut) {
+        this.isCut = true;
+    }
   },
   methods: {
     areaTypeChanged () {
@@ -559,6 +565,8 @@ export default {
     },
     mapSelectorEmit (result) {
       console.log(result)
+      this.selectCameraArr = []
+      this.selectBayonetArr = []
       if (result) {
         // bayonetList deviceList
         this.dSum = 0;
@@ -664,6 +672,7 @@ export default {
               }
             } else {
               this.uploadClear = {};
+              this.$MyMessage('图片解析失败')
             }
           }
         })
