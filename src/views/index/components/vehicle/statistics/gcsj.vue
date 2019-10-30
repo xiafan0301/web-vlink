@@ -8,14 +8,7 @@
     </div>
     <div class="con_box">
       <div class="con_left">
-        <div class="rlcx_xzsb_s" @click="areaTypeChanged" v-show="queryForm.type === 0">
-          <span>选择设备</span>
-          <span class="el-icon-arrow-down"></span>
-        </div>
-        <div class="rlcx_dtxz_rst" v-show="queryForm.type === 2">
-          已选<span>{{dSum}}</span>个设备<a href="javascript: void(0);" @click="openMap={}">重选</a>
-        </div>
-        <div class="left_start">
+        <div class="left_start" style="padding-top: 0;">
           <el-date-picker
             :clearable="false"
             class="vl_date"
@@ -38,6 +31,13 @@
             :time-arrow-control="true"
             placeholder="请选择结束时间">
           </el-date-picker>
+        </div>
+        <div class="rlcx_xzsb_s" @click="areaTypeChanged" v-show="queryForm.type === 0">
+          <span>选择设备</span>
+          <span class="el-icon-arrow-down"></span>
+        </div>
+        <div class="rlcx_dtxz_rst" v-show="queryForm.type === 2">
+          已选<span>{{dSum}}</span>个设备<a href="javascript: void(0);" @click="openMap={}">重选</a>
         </div>
         <div class="left_btn">
           <el-button class="reset_btn" @click="resetQueryForm">重置</el-button>
@@ -138,6 +138,7 @@ import { View } from '@antv/data-set';
 import {apiPassingCarSta} from '@/views/index/api/api.vehicle.js';
 import mapSelector from '@/components/common/mapSelector.vue';
 import {formatDate, dateOrigin} from '@/utils/util.js';
+import {dataList} from '@/utils/data.js';
 export default {
   components: {mapSelector},
   data () {
@@ -466,7 +467,16 @@ export default {
           this.chartData1 = res.data.device;
           this.chartData2 = res.data.brandDto;
           this.chartData3 = res.data.timeDto;
-          this.chartData4 = res.data.carTypeDto;
+          // 对车辆类型转码
+          this.chartData4 = res.data.carTypeDto && res.data.carTypeDto.map(m => {
+            const obj = this.dicFormater(dataList.vehicleType)[0].dictList.find(f => f.enumField === m.name);
+            let name = null;
+            if (obj) name = obj.enumValue;
+            return {
+              total: m.total,
+              name
+            }
+          });
         } else {
           this.gcsjDetail = {};
           this.chartData1 = [];
@@ -536,7 +546,7 @@ export default {
       .left_btn{
         display: flex;
         justify-content: space-between;
-        padding-top: 10px;
+        padding-top: 20px;
         .select_btn, .reset_btn {
           width: 110px;
         }

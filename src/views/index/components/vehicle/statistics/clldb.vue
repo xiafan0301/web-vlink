@@ -8,31 +8,6 @@
     </div>
     <div class="con_box">
       <div class="con_left">
-        <el-select v-model="queryForm.bayonetIds" multiple collapse-tags filterable placeholder="请选择卡口" style="width: 100%;">
-          <el-option
-            v-for="item in listBayonet"
-            :key="item.value"
-            :label="item.label"
-            :value="item">
-          </el-option>
-        </el-select>
-        <el-select v-model="queryForm.carType" placeholder="选择车辆类型">
-          <el-option :value="null" label="全部类型"></el-option>
-          <el-option
-            v-for="item in carTypeList"
-            :key="item.enumField"
-            :label="item.enumValue"
-            :value="item.enumField">
-          </el-option>
-        </el-select>
-        <el-select v-model="queryForm.lane" placeholder="选择车道">
-          <el-option
-            v-for="item in laneList"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
-          </el-option>
-        </el-select>
         <div class="left_start">
           <el-date-picker
             :clearable="false"
@@ -57,6 +32,31 @@
             placeholder="请选择结束时间">
           </el-date-picker>
         </div>
+        <el-select v-model="queryForm.bayonetIds" multiple collapse-tags filterable placeholder="请选择卡口" style="width: 100%;">
+          <el-option
+            v-for="item in listBayonet"
+            :key="item.value"
+            :label="item.label"
+            :value="item">
+          </el-option>
+        </el-select>
+        <el-select v-model="queryForm.carType" placeholder="选择车辆类型">
+          <el-option :value="null" label="全部类型"></el-option>
+          <el-option
+            v-for="item in carTypeList"
+            :key="item.enumField"
+            :label="item.enumValue"
+            :value="item.enumField">
+          </el-option>
+        </el-select>
+        <el-select v-model="queryForm.lane" placeholder="选择车道" style="padding-bottom: 0;">
+          <el-option
+            v-for="item in laneList"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
         <div class="left_btn">
           <el-button class="reset_btn" @click="resetQueryForm">重置</el-button>
           <el-button class="select_btn" type="primary" :loading="loadingBtn" @click="getCarComparison">统计</el-button>
