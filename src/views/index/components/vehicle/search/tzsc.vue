@@ -4,6 +4,7 @@
     <!-- 面包屑通用样式 -->
     <div
       is="vlBreadcrumb"
+      v-show="!isCut"
       :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
           {name: '特征搜车'}]"
     ></div>
@@ -382,6 +383,8 @@ export default {
       selectBayonetArr: [], // 选中的卡口数组
       plateType: dataList.plateType,
 
+      isCut: false, // 是否为截屏跳转.
+
       uploadClear: {},
       detailData: null,
       selectType: 1, // 图片提取或者自定义提取
@@ -551,6 +554,9 @@ export default {
     this.setDTime();
     // 从字典中取出自定义的特征数组
     this.getSelectOption();
+    if (this.$route.query.isCut) {
+        this.isCut = true;
+    }
   },
   methods: {
     areaTypeChanged () {
@@ -559,6 +565,8 @@ export default {
     },
     mapSelectorEmit (result) {
       console.log(result)
+      this.selectCameraArr = []
+      this.selectBayonetArr = []
       if (result) {
         // bayonetList deviceList
         this.dSum = 0;
