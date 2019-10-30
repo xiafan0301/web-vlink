@@ -68,11 +68,11 @@
                     <div class="gcck_rbl_i">
                       <div>
                         <div @click="goToDetail(item, sindex)">
-                          <img :title="sitem.deviceName" :alt="sitem.deviceName" :src="sitem.subStoragePath">
+                          <img :title="sitem.deviceName" :alt="sitem.deviceName" :src="sitem.StorageUrl1">
                         </div>
                       </div>
                     </div>
-                    <div class="gcck_rbl_t com_ellipsis" :title="sitem.plateNo" style="color: #333;"><i class="vl_icon vl_icon_sm_cl"></i>{{sitem.plateNo ? sitem.plateNo : '未知车牌'}}</div>
+                    <div class="gcck_rbl_t com_ellipsis" :title="sitem.PlateNo" style="color: #333;"><i class="vl_icon vl_icon_sm_cl"></i>{{sitem.PlateNo ? sitem.PlateNo : '未知车牌'}}</div>
                     <div class="gcck_rbl_t com_ellipsis" :title="sitem.shotTime"><i class="vl_icon vl_icon_sm_sj"></i>{{sitem.shotTime}}</div>
                   </div>
                 </li>
@@ -114,6 +114,7 @@ import {formatDate, getDate} from '@/utils/util.js';
 import {getDeviceSnapImagesSum, getDeviceSnapImagesPage} from '../../../api/api.judge.js';
 import {getDiciData} from '../../../api/api.js';
 import {getSpecialGroup} from '../../../api/api.manage.js';
+import { dataList } from '@/utils/data.js';
 export default {
   components: {vlBreadcrumb, flvplayer, vehicleDetail},
   data () {
@@ -207,7 +208,7 @@ export default {
       }
     },
     getLxList () {
-      getDiciData(44).then(res => {
+      getDiciData(dataList.vehicleType).then(res => {
         if (res && res.data) {
           this.lxList = res.data;
         }
@@ -228,7 +229,7 @@ export default {
       });
     },
     getCppList () {
-      getDiciData(48).then(res => {
+      getDiciData(dataList.ownership).then(res => {
         if (res && res.data && res.data.length > 0) {
           this.cppList = res.data;
         }
