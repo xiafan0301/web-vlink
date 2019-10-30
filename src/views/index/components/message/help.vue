@@ -24,9 +24,9 @@
               <el-select value-key="uid" v-model="helpForm.helpRadius" filterable placeholder="请选择推送范围">
                 <el-option
                   v-for="item in helpRadiusList"
-                  :key="item.uid"
-                  :label="item.label"
-                  :value="item.value">
+                  :key="item.enumField"
+                  :label="item.enumValue"
+                  :value="item.enumField">
                 </el-option>
               </el-select>
             </el-form-item>
@@ -34,9 +34,9 @@
               <el-select value-key="uid" v-model="helpForm.helpState" filterable placeholder="请选择互助状态">
                 <el-option
                   v-for="item in helpStateList"
-                  :key="item.uid"
-                  :label="item.label"
-                  :value="item.value">
+                  :key="item.enumField"
+                  :label="item.enumValue"
+                  :value="item.enumField">
                 </el-option>
               </el-select>
             </el-form-item>
@@ -88,9 +88,11 @@
               </el-table-column>
               <el-table-column  
                 label="状态"
-                prop="eventStatusName"
                 show-overflow-tooltip
                 >
+                <template slot-scope="scope">
+                  {{dicFormater(dataList_.eventStatus, String(scope.row.eventStatus))}}
+                </template>
               </el-table-column>
               <el-table-column  
                 label="事发时间"
@@ -169,18 +171,9 @@ export default {
         helpRadius: null,
         helpState: null
       },
-      helpRadiusList: this.dicFormater(dataList.distanceId)[0].dictList.map(m => {
-        return {
-          value: parseInt(m.enumField),
-          label: m.enumValue
-        }
-      }),
-      helpStateList: this.dicFormater(dataList.eventStatus)[0].dictList.filter(f => f.enumField !== '1').map(m => {
-        return {
-          value: parseInt(m.enumField),
-          label: m.enumValue
-        }
-      }),
+      dataList_: dataList,
+      helpRadiusList: this.dicFormater(dataList.distanceId)[0].dictList,
+      helpStateList: this.dicFormater(dataList.eventStatus)[0].dictList.filter(f => f.enumField !== '1'),
       // 表格参数
       helpList: [{name: 'xxx'}],
       // 翻页参数
