@@ -88,7 +88,7 @@
                   <div v-if="sturcDetail.vehicleInfo">
                     <p class="name_info">
                       <span>{{sturcDetail.vehicleInfo.vehicleNumber}}</span>
-                      <span>{{sturcDetail.vehicleInfo.vehicleTypeStr}}</span>
+                      <span v-if="sturcDetail.vehicleInfo.vehicleTypeStr">{{sturcDetail.vehicleInfo.vehicleTypeStr}}</span>
                       <span
                         v-if="sturcDetail.vehicleInfo.ownerName"
                       >{{sturcDetail.vehicleInfo.ownerName}}</span>
@@ -258,7 +258,7 @@
                 <div class="struc_cdu_line" v-if="sturcDetail.alarmFeature.featureValue.plateClass || sturcDetail.alarmFeature.featureValue.plateClass === 0">
                   <p>
                     <b>车牌类型</b>
-                    <span>{{dicFormater(45, sturcDetail.alarmFeature.featureValue.plateClass)}}</span>
+                    <span>{{sturcDetail.alarmFeature.featureValue.plateClass}}</span>
                   </p>
                 </div>
                 </vue-scroll>
@@ -355,6 +355,7 @@ import {
   delAlarm
 } from "@/views/index/api/api.control.js";
 import { formatDate } from "@/utils/util";
+import { dataList } from '@/utils/data.js';
 export default {
   data() {
     return {
@@ -392,6 +393,7 @@ export default {
       pageSize: 10,
       total: 0,
       historyUrl: '',
+      plateType: dataList.plateType
     };
   },
   mounted() {
