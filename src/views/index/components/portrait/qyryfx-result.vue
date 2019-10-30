@@ -423,6 +423,8 @@ export default {
                   this.taskDetail.taskWebParam.personGroupNames = personGroupIdName.join('、');
                 }
               }
+              // console.log('this.taskDetail.taskResult', this.taskDetail.taskResult);
+              
               this.initMap(this.taskDetail.taskResult);
             }
           })
@@ -503,22 +505,18 @@ export default {
       }
     },
     // D设备 B卡口
-    setMarks(deviceList = null) {
+    setMarks(deviceList = null) {     
       for (let j = 0; j < deviceList.length; j++) {
         const deviceItem = deviceList[j];
         if (deviceItem.bayonetName) {
-          // const deviceName = deviceItem.deviceName.split('Bayonet_');
-          // deviceItem.deviceName = deviceName[1];
           this.doMark(deviceItem, "vl_icon vl_icon_kk");
-          break;
         } else {
           this.doMark( deviceItem, "vl_icon vl_icon_sxt");
-          break;
         }
       }
     },
     // 地图标记
-    doMark(device, sClass) {
+    doMark(device, sClass) {   
       let marker;
       if (device.shotNum > 0) {
         // 非初始化的状态
