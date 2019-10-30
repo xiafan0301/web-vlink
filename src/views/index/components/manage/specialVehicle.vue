@@ -755,6 +755,8 @@ export default {
       getReVehicleInfo(params)
         .then(res => {
           if (res && res.data) {
+            console.log('hhhhhh', res.data);
+            
             this.isAddDisabled = true;
 
             let carInfo = res.data;
@@ -772,7 +774,9 @@ export default {
               });
             }
 
-            this.fileList = carInfo.vehicleImagePath ? [{url: carInfo.vehicleImagePath}] : [];//回填图片
+            this.imgData = {
+              path: carInfo.vehicleImagePath
+            };
             this.dialogImageUrl = carInfo.vehicleImagePath;
 
             this.carForm.vehicleNumber = carInfo.vehicleNumber;
@@ -893,7 +897,6 @@ export default {
             if (!document.querySelector('.el-message--info')) {
               this.$message.info('请先上传车辆照片');
             }
-           
             return;
           }
           if (this.carForm.groupList.length === 0) {
@@ -924,7 +927,6 @@ export default {
               } else {
                 this.isVehicleLoading = false;
               }
-              // this.$refs[form].resetFields();
             })
             .catch(() => {this.isVehicleLoading = false;})
         }
@@ -934,6 +936,8 @@ export default {
     updateVehicle (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
+          console.log('vvvv', this.dialogImageUrl);
+          
           if (!this.dialogImageUrl) {
             if (!document.querySelector('.el-message--info')) {
               this.$message.info('请先上传车辆照片');
@@ -1070,13 +1074,16 @@ export default {
       this.dialogVisiable = true;
     },
     getDetail (obj) {
+      console.log('obj', obj);
+      
       if (obj) {
         getSpecialVehicleDetail(obj.uid)
           .then(res => {
             if (res) {
               let numberColor = res.data.numberColor;
 
-              this.imgData = Object.assign({}, {path: res.data.vehicleImagePath})
+              this.imgData = Object.assign({}, {path: res.data.vehicleImagePath});
+              this.dialogImageUrl = res.data.vehicleImagePath;
 
               this.carForm.uid = res.data.uid;
               this.carForm.vehicleNumber = res.data.vehicleNumber;
