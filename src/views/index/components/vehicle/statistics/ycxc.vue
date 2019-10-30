@@ -355,8 +355,6 @@ export default {
   methods: {
     // 监听车牌号的排序
     sortVehicleType (column) {
-      console.log(column);
-      
       if (column.order) {
         if (column.order === 'ascending') {
           this.pagination.order = 'asc';
@@ -526,7 +524,12 @@ export default {
       this.handleSubmitData();
     },
     handleSubmitData () {
-      
+      if ((this.selectCameraArr && this.selectCameraArr.length <= 0) && (this.selectBayonetArr && this.selectBayonetArr.length <= 0)) {
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('请先选择设备');
+        }
+        return;
+      }
       if (this.selectCameraArr && this.selectCameraArr.length > 0) {
         this.queryForm.cameraIds = this.selectCameraArr.join(",");
       }
