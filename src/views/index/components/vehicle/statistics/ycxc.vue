@@ -99,9 +99,9 @@
           <vue-scroll>
             <div class="the-table">
               <el-table
-                class="data_table" :data="dataList">
+                class="data_table" :data="dataList" @sort-change="sortVehicleType">
                 <el-table-column label="序号" width="150px" type="index" :index="indexMethod"></el-table-column>
-                <el-table-column label="车牌号码" prop="vehicleNumber" show-overflow-tooltip></el-table-column>
+                <el-table-column label="车牌号码" prop="vehicleNumber" show-overflow-tooltip  sortable="custom"></el-table-column>
                 <el-table-column label="车辆类型" prop="vehicleType">
                   <template slot-scope="scope">
                     <span>{{ scope.row.vehicleType ? scope.row.vehicleType : '-' }}</span>
@@ -319,6 +319,8 @@ export default {
         pageNum: 1,
         pageSize: 10,
         total: 0,
+        order: 'desc',
+        orderBy: 'shotTimes'
       },
       exportLoadingbtn: false, // 导出按钮loading
       carTypeList: [], // 车辆类型列表
@@ -342,7 +344,6 @@ export default {
       this.dataTimer = setTimeout(() => {
         this.handleSubmitData();
       }, 2000)
-
     }
   },
   beforeDestroy () {
@@ -352,6 +353,25 @@ export default {
     }
   },
   methods: {
+    // 监听车牌号的排序
+    sortVehicleType (column) {
+      console.log(column);
+      
+      if (column.order) {
+        if (column.order === 'ascending') {
+          this.pagination.order = 'asc';
+        }
+        if (column.order === 'descending') {
+          this.pagination.order = 'desc';
+        }
+        this.pagination.orderBy = 'vehicleNumber';
+      } else {
+        this.pagination.order = 'desc';
+        this.pagination.orderBy = 'shotTimes';
+      }
+
+      this.handleSubmitData();
+    },
     areaTypeChanged () {
       this.selectBayonetArr = [];
       this.selectCameraArr = [];
@@ -539,8 +559,8 @@ export default {
         isNextDay: isNextDay,
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
-        order: 'desc',
-        orderBy: 'shotTimes'
+        order: this.pagination.order,
+        orderBy: this.pagination.orderBy
       };
 
       this.searchStr = JSON.parse(JSON.stringify(params));

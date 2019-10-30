@@ -227,7 +227,7 @@
                 </el-select>
               </el-form-item>
               <el-form-item prop="numberType">
-                <el-select v-model="carForm.numberType" placeholder="请选择号牌类型" style="width: 85%;" :disabled="isAddDisabled" @change="carForm.numberColor = carForm.numberType">
+                <el-select v-model="carForm.numberType" placeholder="请选择号牌类型" style="width: 85%;" :disabled="isAddDisabled">
                   <el-option
                     v-for="(item, index) in numberTypeList"
                     :key="index"
@@ -237,7 +237,7 @@
                 </el-select>
               </el-form-item>
               <el-form-item prop="numberColor">
-                <el-select v-model="carForm.numberColor" placeholder="请选择号牌颜色" style="width: 85%;" disabled>
+                <el-select v-model="carForm.numberColor" placeholder="请选择号牌颜色" style="width: 85%;">
                   <el-option
                     v-for="item in numColorList"
                     :key="item.enumField"
@@ -1074,9 +1074,6 @@ export default {
         getSpecialVehicleDetail(obj.uid)
           .then(res => {
             if (res) {
-              // let vehicleColor = res.data.vehicleColor;
-              // let vehicleType = res.data.vehicleType;
-              // let numberType = res.data.numberType;
               let numberColor = res.data.numberColor;
 
               this.imgData = Object.assign({}, {path: res.data.vehicleImagePath})
