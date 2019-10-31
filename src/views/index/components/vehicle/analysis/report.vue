@@ -28,7 +28,7 @@
             st: timeStr[0],
             et: timeStr[1]
             }}">导出报告</router-link>
-          <a v-else class="vc_rep_cs_dc vc_rep_cs_dc_dis">导出报告</a>
+          <a class="vc_rep_cs_dc vc_rep_cs_dc_dis" v-else>导出报告</a>
         </div>
         <ul class="vc_rep_mu">
           <li><span :class="{'vc_rep_mu_sed': showType === 1}" @click="changeShowType(1)">车辆档案信息</span></li>
@@ -520,11 +520,11 @@ export default {
           "<div id=" +
           _id +
           ' class="vl_icon vl_jfo_sxt vl_icon_judge_04"></div>';
-        let marker = new AMap.Marker({
+        let marker = new window.AMap.Marker({
           // 添加自定义点标记
           map: this.yjcmMap1,
           position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-          offset: new AMap.Pixel(-28.5, -50), // 相对于基点的偏移位置
+          offset: new window.AMap.Pixel(-28.5, -50), // 相对于基点的偏移位置
           draggable: false, // 是否可拖动
           extData: obj,
           // 自定义点标记覆盖物内容

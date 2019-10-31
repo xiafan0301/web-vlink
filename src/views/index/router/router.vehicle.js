@@ -109,10 +109,6 @@ export default {
       name: 'vehicle_search_tpcfxxq',
       component: () => import('@/views/index/components/vehicle/analysis/tpcfxxq.vue')
     },{
-      path: 'txcl', // 同行车辆分析
-      name: 'vehicle_search_txcl',
-      component: () => import('@/views/index/components/vehicle/analysis/txcl.vue')
-    }, {
       path: 'ws', // 尾随分析
       name: 'vehicle_search_ws',
       component: () => import('@/views/index/components/vehicle/analysis/ws.vue')

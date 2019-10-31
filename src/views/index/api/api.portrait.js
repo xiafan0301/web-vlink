@@ -205,7 +205,7 @@ export function PortraitGetStayPointTasks(params) {
   return request({
     url: '/person-stay-point/tasks',
     method: 'get',
-    data: params,
+    params,
     mode: 'portrait'
   })
 }

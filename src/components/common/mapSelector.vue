@@ -316,7 +316,7 @@
         leftIsIndeterminate: false, // 列表选择左侧不确定状态
         DBleftAll: false, // 列表选择左侧全选
         DBrightAll: false, // 列表选择右侧全选
-        curTabType: 0, // 当前激活的tab
+        curTabType: 1, // 当前激活的tab
         showDeviceList: true, // 默认显示列表选择
         activeDBList: [], // 等待初始化的设备
         isDialog: true, // 是不是弹窗

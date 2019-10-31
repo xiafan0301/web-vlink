@@ -2,6 +2,7 @@
   <div class="vl_judge_tc_ytsr">
     <div class="">
       <div is="vlBreadcrumb"
+           v-show="!isCut"
            :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
             {name: '以图搜人'}]">
       </div>
@@ -32,7 +33,7 @@
           <el-radio style="display: block;" v-model="radio" label="3">布控库</el-radio>
         </span>
       </div>
-      <div class="ytsr_left_search" v-show="radio === '1' || radio === '3'">
+      <div class="ytsr_left_search" v-show="radio === '1'">
         <el-select
                 v-model="searchData.portraitGroupId"
                 placeholder="全部人像"
@@ -79,6 +80,21 @@
         <div class="ytsr_dtxz_rst" v-else>
           已选<span>{{dSum}}</span>个设备<a href="javascript: void(0);" @click="openMap={}">重选</a>
         </div>
+      </div>
+      <div class="ytsr_left_search" v-show="radio === '3'">
+        <el-select
+                v-model="searchData.portraitGroupId"
+                placeholder="全部人像"
+                multiple
+                collapse-tags
+        >
+          <el-option
+                  v-for="item in controlGroupList"
+                  :key="item.id"
+                  :label="item.groupName"
+                  :value="item.uid">
+          </el-option>
+        </el-select>
       </div>
       <div class="vl_jtc_search">
         <div style="text-align: center;margin-bottom: 0px;">
@@ -206,7 +222,17 @@
                     ≥{{scope.row.taskWebParam.minSemblance ? scope.row.taskWebParam.minSemblance : 0}}%
                   </template>
                 </el-table-column>
-                <el-table-column label="状态" v-if="selectIndex === 0" prop="taskStatus" show-overflow-tooltip>
+                <el-table-column label="查询范围" show-overflow-tooltip>
+                  <template slot-scope="scope">
+                    {{scope.row.taskWebParam.origin === 1 ? '基础信息库' : scope.row.taskWebParam.origin === 2 ? '抓拍视图库' : '布控库' }}
+                  </template>
+                </el-table-column>
+                <el-table-column label="结果数" v-if="selectIndex === 1">
+                  <template slot-scope="scope">
+                    {{scope.row.resultNum}}
+                  </template>
+                </el-table-column>
+                <el-table-column label="状态" v-if="selectIndex === 0">
                   <template slot-scope="scope">
                     <span>{{scope.row.taskStatus && scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 3 ? '失败' : '已中断'}}</span>
                   </template>
@@ -481,6 +507,7 @@
     components: {vlBreadcrumb, noResult, flvplayer, vlUpload, mapSelector},
     data() {
       return {
+        isCut: false, // 是否为截屏跳转.
         chooseType: 1, // 选择设备装备，1是刚进入，2是已选择
         openMap: false,
         msClear: {},
@@ -503,6 +530,7 @@
         isIndeterminate: false, // 是否处于全选与全不选之间
         checkAllTree: true, // 树是否全选
         portraitGroupList: [],
+        controlGroupList: [],
         treeTabShow: false,
         selectCameraArr: [], // 选中的摄像头数组
         selectBayonetArr: [], // 选中的卡口数组
@@ -576,6 +604,9 @@
       }
     },
     mounted () {
+      if (this.$route.query.isCut) {
+        this.isCut = true;
+      }
       this.getDataList();
       // 弹窗地图
       let supMap = new window.AMap.Map('capMap', {
@@ -604,10 +635,12 @@
       getGroups({groupType: 4}).then(res => {
         if (res) {
           this.portraitGroupList = res.data;
-          // 去除默认选中
-//          this.searchData.portraitGroupId = this.portraitGroupList.map(x => {
-//            return x.uid
-//          })
+        }
+      })
+      // 获取人员组，跟车辆组列表
+      getGroups({groupType: 6}).then(res => {
+        if (res) {
+          this.controlGroupList = res.data;
         }
       })
       this.setDTime();
@@ -836,12 +869,20 @@
         } else {
           params['minSemblance'] = 0;
         }
-        if (this.radio === '1' || this.radio === '3') {
+        if (this.radio === '1') {
           p1['portraitGroupId'] = this.searchData.portraitGroupId.join(',');
           params['portraitGroupId'] = this.searchData.portraitGroupId.join(',');
           let pNameList = []
           this.searchData.portraitGroupId.forEach(x => {
             pNameList.push(this.portraitGroupList.find(y => y.uid === x).groupName)
+          })
+          params['portraitGroupName'] = pNameList;
+        } else if (this.radio === '3') {
+          p1['portraitGroupId'] = this.searchData.portraitGroupId.join(',');
+          params['portraitGroupId'] = this.searchData.portraitGroupId.join(',');
+          let pNameList = []
+          this.searchData.portraitGroupId.forEach(x => {
+            pNameList.push(this.controlGroupList.find(y => y.uid === x).groupName)
           })
           params['portraitGroupName'] = pNameList;
         } else {
@@ -981,7 +1022,7 @@
             break;
           case 3:
             this.curStrucInfoList.sort((a, b) => {
-              return a.localeCompare(b, 'zh');
+              return a.dei.localeCompare(b, 'zh');
             })
             break;
           case 4:
@@ -1041,6 +1082,9 @@
     watch: {
       stucOrder () {
         this.changeOrder();
+      },
+      radio () {
+        this.searchData.portraitGroupId = [];
       }
     }
   }
@@ -1301,12 +1345,6 @@
           > input {
             width: 50%;
           }
-          /*.el-range-separator {*/
-          /*height: 40px;*/
-          /*line-height: 40px;*/
-          /*width: 10px;*/
-          /*padding: 0;*/
-          /*}*/
         }
         button {
           width: 110px;

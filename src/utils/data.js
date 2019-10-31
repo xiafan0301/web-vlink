@@ -35,6 +35,9 @@ const dataList = {
   ownership: 1052, //号牌归属
   plateColor: 1046,     //号牌颜色
   licensePlateColor: 1046, //车牌颜色
+  idType: 1060, // 证件类型
+  bayonetUse: 1061, // 卡口用途
+  isEnterPoint: 1062, // 出入场类型
 }
 // 处理方式
 const handeMethods = {
