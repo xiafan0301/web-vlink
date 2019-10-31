@@ -242,14 +242,14 @@
                         </div>
                         </div>
                       <div class="img_warp">
-                        <img :src="sItem.upPhotoUrl" title="点击放大图片" class="bigImg" alt />
+                        <img :src="sItem.upPhotoUrl" alt="" />
                       </div>
                       <div class="similarity">
                         <p class="similarity_count">{{sItem.semblance}}<span style="font-size:16px">%</span></p>
                         <p class="similarity_title">相似度</p>
                       </div>
                       <div class="img_warp">
-                        <img :src="sItem.subStoragePath" title="点击放大图片" class="bigImg" alt />
+                        <img :src="sItem.subStoragePath" alt="" />
                       </div>
                       <div class="people_message">
                         <h2 class="name">{{item.name}}</h2>
