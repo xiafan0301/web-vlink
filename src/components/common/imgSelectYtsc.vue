@@ -216,7 +216,7 @@ export default {
         let $p = document.createElement('p');
 
         $p.setAttribute('class', 'title_p');
-        $p.innerText = '目标' + index;
+        $p.innerText = '目标';
         
 
         $div.setAttribute('id', $id);
@@ -747,7 +747,7 @@ export default {
             position: absolute;
             background:rgba(12,112,248,0.1);
             border:1px solid rgba(18,100,248,1);
-            opacity: 0.4;
+            // opacity: 0.4;
             cursor: pointer;
             // &:hover {
             //   background:rgba(255,0,0,0.2);
