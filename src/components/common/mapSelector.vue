@@ -1422,6 +1422,7 @@
           cursor: pointer;
           &.sd_opts_sed {
             /*background-color: #F2F9FF;*/
+            color: #0C70F8;
             > .sd_opts_icon1 { background-image: url(../../assets/img/vehicle/cut1m.png); }
             > .sd_opts_icon2 { background-image: url(../../assets/img/vehicle/cut2m.png); }
             > .sd_opts_icon3 { background-image: url(../../assets/img/vehicle/cut3m.png); }
