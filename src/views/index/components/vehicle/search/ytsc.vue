@@ -61,9 +61,11 @@
               <div class="titile">
                 车体特征图片
               </div>
-              <ul class="clearfix">
+              <div style="text-align: center; color: #9F9F9F" v-if="imgBDataList.length === 0">暂无数据</div>
+              <ul class="clearfix" v-else>
                 <li v-for="(item, index) in imgBDataList" :key="index">
-                  <div><img :src="item.src" alt=""></div>
+                  <i class="el-icon-delete loi" @click="shangchu(index)"></i>
+                  <img :src="item.src" alt="">
                 </li>
               </ul>
             </div>
@@ -188,7 +190,7 @@
   import {
     getImageAreaInfo
   } from "../../../api/api.judge.js"; // 图片上传接口
-  import { getPhotoSearch } from "../../../api/api.analysis.js"; // 根据图检索接口
+  // import { getPhotoSearch } from "../../../api/api.analysis.js"; // 根据图检索接口
   import mapSelector from '@/components/common/mapSelector.vue';
 
   import imgSelectYtsc from '@/components/common/imgSelectYtsc.vue';
@@ -293,6 +295,9 @@
       }
     },
     methods: {
+      shangchu(val) {
+        this.imgBDataList.splice(val,1)
+      },
       areaTypeChanged () {
         this.selectAreaType = 2;
         this.openMap = !this.openMap;
@@ -424,33 +429,38 @@
                 this.getStrucInfoLoading = false; // 关闭加载效果
                 return;
               }
-              let queryParams = Object.assign(this.getStrucParams(), {
-                pageNum: this.pageNum,
-                pageSize: this.pageSize
-              });
-              getPhotoSearch(queryParams)
-                  .then(res => {
-                    this.getStrucInfoLoading = false; // 关闭加载效果
-                    this.isInit = false; // 页面初始化状态改变
-                    if (res.data && res.data.list) {
-                      if (res.data.list.length > 0) {
-                        this.strucInfoList = res.data.list;
-                        this.total = res.data.total;
-                      } else {
-                        this.strucInfoList = []; // 清空搜索结果
-                        this.total = 0;
-                      }
-                    } else {
-                      this.strucInfoList = []; // 清空搜索结果
-                      this.total = 0;
-                    }
-                  })
-                  .catch(() => {
-                    this.getStrucInfoLoading = false; // 关闭加载效果
-                    this.strucInfoList = []; // 清空搜索结果
-                    this.total = 0;
-                    this.isInit = false; // 页面初始化状态改变
-                  });
+              setTimeout(()=>{
+                this.strucInfoList = [];
+                this.getStrucInfoLoading = false
+                this.isInit = false
+              }, 200)
+              // let queryParams = Object.assign(this.getStrucParams(), {
+              //   pageNum: this.pageNum,
+              //   pageSize: this.pageSize
+              // });
+              // getPhotoSearch(queryParams)
+              //     .then(res => {
+              //       this.getStrucInfoLoading = false; // 关闭加载效果
+              //       this.isInit = false; // 页面初始化状态改变
+              //       if (res.data && res.data.list) {
+              //         if (res.data.list.length > 0) {
+              //           this.strucInfoList = res.data.list;
+              //           this.total = res.data.total;
+              //         } else {
+              //           this.strucInfoList = []; // 清空搜索结果
+              //           this.total = 0;
+              //         }
+              //       } else {
+              //         this.strucInfoList = []; // 清空搜索结果
+              //         this.total = 0;
+              //       }
+              //     })
+              //     .catch(() => {
+              //       this.getStrucInfoLoading = false; // 关闭加载效果
+              //       this.strucInfoList = []; // 清空搜索结果
+              //       this.total = 0;
+              //       this.isInit = false; // 页面初始化状态改变
+              //     });
             } else {
               return false;
             }
@@ -625,16 +635,40 @@
             padding: 10px 0;
             margin-bottom: 20px;
           }
+          ul{
+            display: flex;
+            flex-wrap: wrap;
+          }
+          li:nth-of-type(even){
+            margin-right: 0;
+          }
           li{
-            width: 50%;
-            float: left;
-            padding-left: 10px;
+            width: 48%;
             padding-bottom: 10px;
-            > div{
+            margin-right: 4%;
+            position: relative;
+            .loi{
+              position: absolute;
+              right: 0;
+              top: 0;
+              font-size: 16px;
+              width: 40px;
+              height: 30px;
+              color: #fff;
+              line-height: 30px;
+              padding-left: 10px;
+              background-color: rgba(0, 0, 0, 0.3);
+              display: none;
+              cursor: pointer;
+            }
+            img{
+              height: 100%;
+              width: 100%;
               border: 1px solid #D3D3D3;
-              img{
-                height: 100%;
-                width: 100%;
+            }
+            &:hover{
+              .loi{
+                display: block;
               }
             }
           }
