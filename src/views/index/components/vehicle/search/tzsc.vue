@@ -70,6 +70,8 @@
                     :class="{ have_character: this.curImageUrl !== '' }"
                     @click.stop="getCharacter"
                     :loading="getCharacterLoading"
+                    :disabled="!curImageUrl"
+                    :type="curImageUrl ? 'primary' : ''"
                   >获取特征</el-button>
                   <div class="characteristic_list" :style="{'height': showAllCharac ? 'auto' : '146px'}" v-if="characteristicList.length > 0">
                     <div
@@ -557,6 +559,10 @@ export default {
     if (this.$route.query.isCut) {
         this.isCut = true;
     }
+    if (this.$route.query.imgurl) {
+        this.curImageUrl = this.$route.query.imgurl;
+        this.getImageInfo()
+    }
   },
   methods: {
     areaTypeChanged () {
@@ -671,7 +677,10 @@ export default {
                 })
               }
             } else {
-              this.uploadClear = {};
+              /* this.uploadClear = {}; */
+              this.imgData = {
+                path: this.curImageUrl
+              }
               this.$MyMessage('图片解析失败')
             }
           }
@@ -684,6 +693,8 @@ export default {
         this.imgData = {
           path: obj.imgPath
         }
+      } else {
+        this.curImageUrl = ''
       }
     },
     getSelectOption() {
@@ -975,6 +986,7 @@ export default {
     },
     uploadEmit(data) {
       if (data && data.path) {
+        this.uploadClear = {};
         this.curImageUrl = data.path;
         this.initImageInfo = {
           url: data.path,
@@ -985,6 +997,7 @@ export default {
       } else {
         this.curImageUrl = "";
         this.initImageInfo = {};
+        this.characteristicList = [];
       }
     },
     // 拖拽开始

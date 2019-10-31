@@ -53,7 +53,7 @@
 
                 <!-- 上传车像图片 -->
                 <div style="padding: 0 15px; height: 210px;">
-                  <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit"></div>
+                  <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit" :imgData="imgData"></div>
                 </div>
               </el-form>
             </div>
@@ -391,7 +391,10 @@ export default {
                 })
               }
             } else {
-              this.uploadClear = {};
+              /* this.uploadClear = {}; */
+              this.imgData = {
+                path: this.curImageUrl
+              }
               this.$MyMessage('图片解析失败')
             }
           }
@@ -404,6 +407,8 @@ export default {
         this.imgData = {
           path: obj.imgPath
         }
+      } else {
+        this.curImageUrl = ''
       }
     },
     /*重置菜单的数据 */
@@ -563,6 +568,7 @@ export default {
     },
     uploadEmit(data) {
       if (data && data.path) {
+        this.uploadClear = {};
         this.curImageUrl = data.path;
         this.initImageInfo = {
           url: data.path,
