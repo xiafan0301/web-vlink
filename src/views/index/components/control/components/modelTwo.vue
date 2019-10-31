@@ -27,7 +27,7 @@
     <div class="sel_lib"><span>禁入人员：</span><span @click="popSel(1)">从布控库中选择</span></div>
     <div class="sel_img_box">
       <div class="img_box" v-for="(item, index) in protraitList" :key="index">
-        <img :src="item.photoUrl" alt="">
+        <img :src="item.photoUrl" alt="" class="bigImg">
         <i class="el-icon-error" @click="delPortrait(index)"></i>
         <span :title="item.name">{{item.name | strCutWithLen(12)}}</span>
       </div>
@@ -35,7 +35,7 @@
     <div class="sel_lib"><span>禁入车辆：</span><span @click="popSel(2)">从布控库中选择</span></div>
     <div class="sel_img_box">
       <div class="img_box" v-for="(item, index) in vehicleList" :key="index">
-        <img :src="item.photoUrl" alt="">
+        <img :src="item.photoUrl" alt="" class="bigImg">
         <i class="el-icon-error" @click="delVehicle(index)"></i>
         <span>{{item.vehicleNumber}}</span>
       </div>
@@ -52,8 +52,7 @@
 import controlDev from './controlDev.vue';
 import vehicleLib from './vehicleLib.vue';
 import portraitLib from './portraitLib.vue';
-import {mapXupuxian} from '@/config/config.js';
-import {random14, objDeepCopy, unique} from '@/utils/util.js';
+import {unique} from '@/utils/util.js';
 export default {
   components: {controlDev, vehicleLib, portraitLib},
   props: ['modelList'],
@@ -87,7 +86,6 @@ export default {
   mounted () {
     // 修改时回填数据
     if (this.modelList) {
-      console.log(this.modelList, 'this.modelList')
       // 回填嫌疑车牌
       let [{pointDtoList: [{bayonetList, devList, address, longitude, latitude, radius}], surveillanceObjectDtoList}] = this.modelList;
       this.modelTwoForm.address = address;
@@ -193,14 +191,12 @@ export default {
       });
     },
     seacher(v) {
-      const placeSearch = new AMap.PlaceSearch({
+      const placeSearch = new window.AMap.PlaceSearch({
         // city 指定搜索所在城市，支持传入格式有：城市名、citycode和adcode
         city: "湖南"
       });
-
-      if (!!v) {
-        let _this = this;
-        return new Promise((resolve, reject) => {
+      if (v) {
+        return new Promise((resolve) => {
           placeSearch.search(v, (status, result) => {
             // 查询成功时，result即对应匹配的POI信息
             let pois = result.poiList.pois;
@@ -241,6 +237,7 @@ export default {
       > img{
         width: 100%;
         height: 100%;
+        cursor: pointer;
       }
       > i{
         font-size: 6px;

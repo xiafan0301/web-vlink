@@ -153,7 +153,6 @@
 <script>
 import { getVehicleList, delVehicle } from '@/views/index/api/api.archives.js';
 import { dataList } from '@/utils/data.js';
-import { getDepartmentList } from '@/views/index/api/api.manage.js';
 import { getDiciData } from '@/views/index/api/api.js';
 export default {
   data () {

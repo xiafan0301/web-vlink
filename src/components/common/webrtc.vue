@@ -131,14 +131,14 @@
         console.log('watch oAdd:', this.oWaitAdd);
         let flag = false; // 是否已经在通话中
         for (let i = 0; i < this.aWRData.length; i++) {
-          if (this.aWRData[i].remoteId === obj.remoteId) {
+          if (this.aWRData[i].remoteId === this.oWaitAdd.remoteId) {
             flag = true;
             break;
           }
         }
         if (flag) {
           this.$message({
-            message: '您已经在与 ' + obj.remoteName + '（' + obj.remoteId + '）进行通话！',
+            message: '您已经在与 ' + this.oWaitAdd.remoteName + '（' + this.oWaitAdd.remoteId + '）进行通话！',
             type: 'warning'
           });
           // this.$emit('wrClose', {uid: obj.uid, _mid: obj._mid});

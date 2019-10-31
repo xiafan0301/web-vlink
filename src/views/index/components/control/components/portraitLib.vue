@@ -93,7 +93,6 @@
   </el-dialog>
 </template>
 <script>
-import {dataList} from '@/utils/data.js';
 import {nationData} from '../testData.js';
 import {getPortraitList} from '@/views/index/api/api.control.js';
 export default {
@@ -214,7 +213,7 @@ export default {
     },
     // 多选
     operateRadio () {
-      console.log(this.protraitMemberList, 'this.protraitMemberList')
+      
     },
     // 重置
     reset () {

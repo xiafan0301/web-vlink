@@ -87,7 +87,7 @@
               <ul class="model_info" v-if="controlDetail.modelType === 1">
                 <li>失踪人员信息：</li>
                 <li>
-                  <span>人脸照片：</span><img @click="openBigImg(0, [{path: controlDetail.missingUrl}])" :src="controlDetail.missingUrl" alt="">
+                  <span>人脸照片：</span><img class="bigImg" :src="controlDetail.missingUrl" alt="">
                 </li>
                 <li><span>人员姓名：</span><span>{{controlDetail.name}}</span></li>
                 <li><span>人员性别：</span><span>{{controlDetail.sex}}</span></li>
@@ -98,7 +98,7 @@
                 <li class="img_list">
                   <span style="padding-left: 0;">嫌疑人照片：</span>
                   <div v-if="getBigImgList().length > 0">
-                    <img v-for="(item, index) in getBigImgList()" :key="index" @click="openBigImg(index, getBigImgList())" :src="item.path" alt="">
+                    <img v-for="(item, index) in getBigImgList()" :key="index" class="bigImg" :src="item.path" alt="">
                   </div>
                   <div v-else>无</div>
                 </li>
@@ -119,14 +119,14 @@
                 <li>
                   <span>禁入人员：</span>
                   <div v-if="filterObj(controlDetail.objectList, 1).length > 0">
-                    <img @click="openBigImg(index, filterObj(controlDetail.objectList, 1))" v-for="(item, index) in filterObj(controlDetail.objectList, 1)" :key="index" :src="item.path" alt="">
+                    <img class="bigImg" v-for="(item, index) in filterObj(controlDetail.objectList, 1)" :key="index" :src="item.path" alt="">
                   </div>
                   <div v-else>无</div>
                 </li>
                 <li>
                   <span>禁入车辆：</span>
                   <div v-if="filterObj(controlDetail.objectList, 2).length > 0">
-                    <img @click="openBigImg(index, filterObj(controlDetail.objectList, 2))" v-for="(item, index) in filterObj(controlDetail.objectList, 2)" :key="index" :src="item.path" alt="">
+                    <img class="bigImg" v-for="(item, index) in filterObj(controlDetail.objectList, 2)" :key="index" :src="item.path" alt="">
                   </div>
                   <div v-else>无</div>
                 </li>
@@ -135,7 +135,7 @@
                 <li>
                   <span>上访人员照片：</span>
                   <div v-if="filterObj(controlDetail.objectList, 1, 3).length > 0">
-                    <img @click="openBigImg(index, filterObj(controlDetail.objectList, 1, 3))" v-for="(item, index) in filterObj(controlDetail.objectList, 1, 3)" :key="index" :src="item.path" alt="">
+                    <img class="bigImg" v-for="(item, index) in filterObj(controlDetail.objectList, 1, 3)" :key="index" :src="item.path" alt="">
                   </div>
                   <div v-else>无</div>
                 </li>
@@ -153,14 +153,14 @@
                 <li>
                   <span>禁入人员：</span>
                   <div v-if="filterObj(controlDetail.objectList, 1).length > 0">
-                    <img @click="openBigImg(index, filterObj(controlDetail.objectList, 1))" v-for="(item, index) in filterObj(controlDetail.objectList, 1)" :key="index" :src="item.path" alt="">
+                    <img class="bigImg" v-for="(item, index) in filterObj(controlDetail.objectList, 1)" :key="index" :src="item.path" alt="">
                   </div>
                   <div v-else>无</div>
                 </li>
                 <li>
                   <span>禁入车辆：</span>
                   <div v-if="filterObj(controlDetail.objectList, 2).length > 0">
-                    <img @click="openBigImg(index, filterObj(controlDetail.objectList, 2))" v-for="(item, index) in filterObj(controlDetail.objectList, 2)" :key="index" :src="item.path" alt="">
+                    <img class="bigImg" v-for="(item, index) in filterObj(controlDetail.objectList, 2)" :key="index" :src="item.path" alt="">
                   </div>
                   <div v-else>无</div>
                 </li>
@@ -170,12 +170,12 @@
                   <span>布防场所：</span><span>{{controlDetail.locations && controlDetail.locations.join(',')}}</span>
                 </li>
                 <li>
-                  <span>停留时长：</span><span>{{controlDetail.stayTime}}</span>
+                  <span>停留时长：</span><span>{{controlDetail.stayTime}}分钟</span>
                 </li>
                 <li>
                   <span>布控车辆：</span>
                   <div>
-                    <img @click="openBigImg(index, filterObj(controlDetail.objectList, 2))" v-for="(item, index) in filterObj(controlDetail.objectList, 2)" :key="index" :src="item.path" alt="">
+                    <img class="bigImg" v-for="(item, index) in filterObj(controlDetail.objectList, 2)" :key="index" :src="item.path" alt="">
                   </div>
                 </li>
               </ul>
@@ -183,7 +183,7 @@
                 <li>
                   <span>布控人员信息：</span>
                   <div v-if="filterObj(controlDetail.objectList, 1, 3).length > 0">
-                    <img @click="openBigImg(index, filterObj(controlDetail.objectList, 1, 3))" v-for="(item, index) in filterObj(controlDetail.objectList, 1, 3)" :key="index" :src="item.path" alt="">
+                    <img class="bigImg" v-for="(item, index) in filterObj(controlDetail.objectList, 1, 3)" :key="index" :src="item.path" alt="">
                   </div>
                   <div v-else>无</div>
                 </li>
@@ -389,7 +389,7 @@
           <div>
             <div class="result_img_box" v-for="(item, index) in controlResList.list" :key="index">
               <div @mouseenter="item.curVideoTool = true;" @mouseleave="item.curVideoTool = false;">
-                <img :src="item.path" alt="" v-show="!item.isShowCurImg" @click="openBigImg(index, controlResList.list)">
+                <img :src="item.path" alt="" v-show="!item.isShowCurImg" class="bigImg">
                 <video  v-show="item.isShowCurImg" :id='"controlResult" + index' :src="item.snapVideo" style="object-fit: fill;" width="100%" height="239px" @click="showLargeVideo(item, 1)"></video>
                 <div class="result_tool" v-show="item.curVideoTool">
                   <div>{{item.deviceName}}</div>
@@ -485,7 +485,7 @@
         <vue-scroll>
           <div class="detail_img_box">
             <div v-for="(item, index) in eventDetail.attachmentList" :key="item.id">
-              <img v-if="item.fileType === 1" @click="openBigImg(index, eventDetail.attachmentList)" :src="item.path" alt="">
+              <img v-if="item.fileType === 1" class="bigImg" :src="item.path" alt="">
               <div v-else @mouseenter="eventVideoTool = true;" @mouseleave="eventVideoTool = false;">
                 <video id="eventVideo" :src="item.path" width="117px" height="117px" style="object-fit: fill;" @click="showLargeVideo(item, 2)"></video>
                 <div class="result_tool" v-show="eventVideoTool">
@@ -502,7 +502,6 @@
     </div> -->
     <div is="delDialog" ref="delDialog" :controlId="controlId" @getControlList="getControlList"></div>
     <div is="stopDialog" ref="stopDialog" :controlId="controlId" @getControlList="getControlList"></div>
-    <BigImg :imgList="imgList" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
   </div>
 </template>
 <script>
@@ -513,12 +512,11 @@ import stopDialog from './stopDialog.vue';
 import {conDetail} from '../testData.js';
 import flvplayer from '@/components/common/flvplayer.vue';
 import {getControlDetail, getControlObjList, controlArea, getControlDevice, getAlarmSnap} from '@/views/index/api/api.control.js';
-import {getEventDetail} from '@/views/index/api/api.event.js';
+// import {getEventDetail} from '@/views/index/api/api.event.js';
 import {getAllMonitorList, getAllBayonetList} from '@/views/index/api/api.base.js';
 import {mapXupuxian} from '@/config/config.js';
-import BigImg from '@/components/common/bigImg.vue';
 export default {
-  components: {delDialog, stopDialog, flvplayer, BigImg},
+  components: {delDialog, stopDialog, flvplayer},
   props: ['controlId'],
   data () {
     return {
@@ -526,9 +524,6 @@ export default {
       controlDetail: conDetail,//布控详情
       // eventDetail: null,//事件详情
       eventVideoTool: false,
-      imgList: [],
-      imgIndex: null,
-      isShowImg: false,
       // 地图参数
       map: null,
       zoomLevel: 10,
@@ -608,17 +603,6 @@ export default {
         6: '自定义'
       }
       return obj[type];
-    },
-    // 关闭图片放大
-    emitCloseImgDialog(value){
-      this.isShowImg = value;
-      this.imgList = [];
-    },
-    // 放大图片
-    openBigImg (index, data) {
-      this.isShowImg = true;
-      this.imgIndex = index;
-      this.imgList = data;
     },
     /* ************布控结果********* */
     // 停止播放
@@ -708,7 +692,6 @@ export default {
     },
     // 获取布控详情
     getControlDetail () {
-      console.log(this.controlId, 'this.controlId')
       getControlDetail(this.controlId).then(res => {
         if (res && res.data) {
           this.controlDetail = res.data;
@@ -733,9 +716,22 @@ export default {
     //   })
     // },
     // 设置marker的显示图标
-    setMarkContent (obj) {
-      const type = obj.dataType === 1 ? 0 : 1;
-      return '<div id="' + obj.uid + '" class="map_icons vl_icon vl_icon_map_sxt_in_area' + type + '"></div>'
+    setMarkContent (obj, operate) {
+      let sDataType, uContent;
+      if (obj.dataType === 1 && obj.deviceStatus !== 1) {
+        sDataType = 6;
+      } else if (obj.dataType === 2 && !obj.isEnabled) {
+        sDataType = 9
+      } else {
+        sDataType = obj.dataType === 1 ? 0 : 1;
+      }
+      uContent = '<div id="' + obj.uid + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + '"></div>'
+      if (operate === 'change') {
+        sDataType = obj.dataType === 1 ? 0 : 1;
+        let sClass = 'vl_icon_map_sxt_in_area' + sDataType;
+        uContent = '<div id="' + obj.uid + '" class="map_icons vl_icon ' + sClass +'"></div>';
+      }
+      return uContent;
     },
     // 改造数据成树结构公共方法
     getTreeData (data, type) {
@@ -765,7 +761,7 @@ export default {
         const obj = f.getExtData();
         if (array.some(s => s === obj.uid && obj.dataType === type)) {
           list.push(obj);
-          const uContent = this.setMarkContent(obj)
+          const uContent = this.setMarkContent(obj, 'change')
           f.setContent(uContent);
         }
       })
@@ -803,7 +799,6 @@ export default {
                 }
               })
               this.situList = unique(devList, 'uid');//去重
-              console.log(this.situList, 'situList')
               // 组装卡口列表数据
               let bayList = [];
               trackingPointList.forEach(f => {
@@ -815,7 +810,6 @@ export default {
               this.bayList.forEach(f => {
                 this.$set(f, 'isDropdown', false);
               })
-              console.log(this.bayList, 'bayList')
             }
            
           }
@@ -924,7 +918,6 @@ export default {
       // 阻止默认动作（如打开一些元素的链接）
       e.preventDefault();
       e.stopPropagation();
-      console.log(this.rightVideoList, 'rightVideoList')
       if (this.dragActiveObj) {
         this.rightVideoList.splice(index, 1, {
           isShowVideo: true,
@@ -953,25 +946,6 @@ export default {
         let obj = data[i];
         if (obj.longitude > 0 && obj.latitude > 0) {
           let offSet = [-20.5, -70];
-          let _content = null;
-          if (obj.dataType === 1) {
-            // if (obj.isNormal && obj.isSelected) {
-            //   _content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_sxt"></div>';
-            // } else if (obj.isNormal && !obj.isSelected) {
-            //   _content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_sxt_uncheck"></div>';
-            // } else if (!obj.isNormal) {
-            //   _content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_sxt_not_choose"></div>';
-            // }
-             _content = '<div id="' + obj.uid + '_sxt' + '" class="vl_icon vl_icon_sxt"></div>';
-          } else {
-            // if (obj.isNormal && obj.isSelected) {
-              _content = '<div id="' + obj.uid + '_kk' + '" class="vl_icon vl_icon_kk"></div>';
-            // } else if (obj.isNormal && !obj.isSelected) {
-              // _content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_kk_uncheck"></div>';
-            // } else if (!obj.isNormal) {
-              // _content = '';
-            // }
-          }
           let marker = new window.AMap.Marker({ // 添加自定义点标记
             map: this.map,
             position: [obj.longitude, obj.latitude],
@@ -979,7 +953,7 @@ export default {
             draggable: false, // 是否可拖动
             extData: obj,
             // 自定义点标记覆盖物内容
-            content: _content
+            content: this.setMarkContent(obj)
           });
           // mouseover
           marker.on('mouseover', () => {
@@ -1027,7 +1001,6 @@ export default {
         array[0].hasOwnProperty('deviceId') && (key = 'deviceId');
         array[0].hasOwnProperty('bayonetId') && (key = 'bayonetId');
         if (array.some(s => s[key] === obj.uid)) {
-          console.log(item.getPosition(), 'fffffffff')
           this.setViewingArea(item.getPosition());
           break;
         }

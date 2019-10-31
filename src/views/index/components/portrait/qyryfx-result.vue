@@ -31,14 +31,14 @@
               </li>
               <li class="area_list" v-for="(item, index) in taskDetail.taskWebParam && taskDetail.taskWebParam.deviceAndTimeList" :key="index">
                 <div>
-                  <span>区域1时间：</span>
+                  <span>区域{{index + 1}}时间：</span>
                   <div class="time_box">
                     <p>{{item.startTime}}</p>
                     <p>{{item.endTime}}</p>
                   </div>
                 </div>
                 <div>
-                  <span>区域1设备：</span>
+                  <span>区域{{index + 1}}设备：</span>
                   <p>{{item.deviceNames && item.deviceNames ? item.deviceNames : '无'}}</p>
                 </div>
               </li>
@@ -401,8 +401,13 @@ export default {
           .then(res => {
             if (res && res.data) {
               this.taskDetail = res.data;
-              this.taskDetail.taskResult = JSON.parse(this.taskDetail.taskResult);
-              this.taskDetail.taskWebParam = JSON.parse(this.taskDetail.taskWebParam);
+              
+              if (this.taskDetail.taskResult) {
+                this.taskDetail.taskResult = JSON.parse(this.taskDetail.taskResult);
+              }
+              if (this.taskDetail.taskWebParam) {
+                this.taskDetail.taskWebParam = JSON.parse(this.taskDetail.taskWebParam);
+              }
               let personGroupIdName = []; 
               this.taskDetail.taskWebParam.personGroupId && this.taskDetail.taskWebParam.personGroupId.split(',').map(val => {
                 this.peopleGroupOptions.map(item => {
@@ -419,8 +424,6 @@ export default {
                 }
               }
               this.initMap(this.taskDetail.taskResult);
-
-              console.log('taskWebParam', this.taskDetail.taskWebParam)
             }
           })
       }

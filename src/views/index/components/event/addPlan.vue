@@ -212,7 +212,6 @@ export default {
     },
     // 在上传之前
     beforeUpload (file) {
-      console.log(file)
       const isLt = file.size / 1024 / 1024 < 10;
       const isWord = file.type === 'text/plain' || file.type === 'application/msword' 
         || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'

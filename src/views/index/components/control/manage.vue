@@ -160,9 +160,8 @@ import manageDetail from './components/manageDetail.vue';
 import add from './add.vue';
 import delDialog from './components/delDialog.vue';
 import stopDialog from './components/stopDialog.vue';
-import {getControlList, getControlDevice} from '@/views/index/api/api.control.js';
-import {dataList} from '@/utils/data.js';
-import {unique} from '@/utils/util.js';
+import {getControlList} from '@/views/index/api/api.control.js';
+// import {dataList} from '@/utils/data.js';
 export default {
   components: {manageDetail, add, delDialog, stopDialog},
   data () {

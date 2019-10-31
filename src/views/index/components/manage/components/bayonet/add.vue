@@ -367,7 +367,6 @@ import { getAreaList } from '@/views/index/api/api.user.js';
 import {mapXupuxian} from '@/config/config.js';
 import {dataList} from '@/utils/data.js';
 import {objDeepCopy} from '@/utils/util.js';
-import { setTimeout } from 'timers';
 export default {
   data () {
     return {
@@ -575,7 +574,7 @@ export default {
     // 处理省市区县数据
     handleAreaData (data) {
       let _this = this;
-      data.forEach((val, index) => {
+      data.forEach((val) => {
         if (val.childList.length === 0) { // 当childList为[]时,删除childList
           _this.$delete(val, 'childList');
         } else {
@@ -584,8 +583,7 @@ export default {
       })
       return data;
     },
-    checkIpVal(item, index) {
-      console.log("===========",item,index)
+    checkIpVal(item) {
       // let self = this;
       //确保每个值都处于0-255
       let val = item.value;
@@ -668,7 +666,6 @@ export default {
             this.bayonetDevList.splice(this.devIndex, 1, objDeepCopy(this.bayonetDevForm));
             this.editDevDialog = false;
           }
-          console.log(this.bayonetDevList, 'this.bayonetDevList')
         } else {
           return false;
         }
@@ -743,7 +740,6 @@ export default {
     // 新增卡口
     submitAddBayonet () {
       this.loadingBtn = true;
-      console.log(JSON.stringify(this.commonFunc(1)))
       addBayonetInfo(this.commonFunc(1)).then(res => {
         if (res) {
           this.$message.success('新增成功');
@@ -780,7 +776,6 @@ export default {
             })
           }
           this.markLocation(data.bayonetAddress);
-          console.log(this.basicInfoForm, 'this.basicInfoForm')
           // 回填设备信息
           this.bayonetDevList = data.bayonetDevInfoDtoList && data.bayonetDevInfoDtoList.map(m => {
             return {
@@ -937,15 +932,15 @@ export default {
           opt.forEach(f => {
             if (f.uid == val) { 
               res = f;
-              foreach.break = new Error("找到了就跳出循环");  
+              // foreach.break = new Error("找到了就跳出循环"); 
             } else {
               if (f.hasOwnProperty('childList')) {
                 func(val, f.childList);
               }
             }
           })
-        }catch(e){
-          console.log("跳出来了")
+        } catch(e) {
+          console.log(e);
         }
       }
       func(_val, _opt);
@@ -982,7 +977,6 @@ export default {
       func(obj.parentUid, _opt);
       return res.reverse();
     },
-    
     // 所在位置change
     handleChangeAddress () {
       console.log(this.basicInfoForm.bayonetAddress)
@@ -995,22 +989,22 @@ export default {
     //根据地址搜索
     markLocation(address) {
       let _this = this;
-      _this.map.plugin('AMap.Geocoder', function() {
-        let geocoder = new window.AMap.Geocoder();            
-        geocoder.getLocation(address, function(status, result) {
-          if (status === 'complete' && result.info === 'OK') {
-            // 经纬度             
+      _this.map.plugin('AMap.Geocoder', function() {
+        let geocoder = new window.AMap.Geocoder();
+        geocoder.getLocation(address, function(status, result) {
+          if (status === 'complete' && result.info === 'OK') {
+            // 经纬度
             console.log(result, 'result')
-            let lng = result.geocodes[0].location.lng;
-            let lat = result.geocodes[0].location.lat; 
+            let lng = result.geocodes[0].location.lng;
+            let lat = result.geocodes[0].location.lat;
             _this.basicInfoForm.longitude = lng;
             _this.basicInfoForm.Latitude = lat;
-             _this.addMarker(lng, lat);
-            } else {
-              console.log('定位失败！');
-            }
-        });
-      });
+            _this.addMarker(lng, lat);
+          } else {
+            console.log('定位失败！');
+          }
+        });
+      });
     },
     // 翻页
     handleCurrentChange (page) {

@@ -92,6 +92,7 @@
         <div class="ccrc_content_right_content">
           <div class="ccrc_content_right_table" v-loading = "searchLoading">
             <el-table
+                @sort-change ="sorttable"
                 :data="tableData"
                 style="width: 100%">
               <el-table-column
@@ -101,6 +102,7 @@
                   label="序号">
               </el-table-column>
               <el-table-column
+                  sortable="custom"
                   prop="PlateNo"
                   label="车牌号码">
                 <template slot-scope="scope">
@@ -242,8 +244,6 @@
 </template>
 <script>
 import vehicleDetail from '../common/vehicleDetail.vue';
-// import { mapXupuxian } from "@/config/config";
-// import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import { formatDate } from "@/utils/util.js";
 import { JfoGETCity , getbayonet} from '../../../api/api.judge.js';
 import { cityCode } from "@/utils/data.js";
@@ -312,6 +312,7 @@ export default {
       regulationsList: [],
       sortTimeType: null, // 时间排序active
       sortMonitoryType: null, // 监控排序active
+      order: null
       /* 抓拍记录页面参数 */
       /* strucDetailDialog: false, // 抓拍记录弹窗
       strucCurTab: 1, // 抓拍记录弹窗tab
@@ -371,6 +372,16 @@ export default {
     });
   },
   methods: {
+    sorttable(column){
+      if (column.order === 'ascending') {
+        this.order = 'asc'
+      }else if (column.order === 'descending'){
+        this.order = 'desc'
+      } else {
+        this.order = column.order
+      }
+      this.JfoGETCity ()
+    },
     selchange (val) {
       console.log(val)
       if (val.indexOf("全选") !== -1 && this.lll.length - 1 < this.kakou.length) {
@@ -457,7 +468,8 @@ export default {
         endTime: formatDate(this.value2),
         unvehicleFlag: this.unvehicleFlag,
         onlyFirstEnterCity: this.onlySurveillance,
-        vehicleNumber: this.v
+        vehicleNumber: this.v,
+        orderBy: "plateNo"
       }
       if (this.lll&& this.lll.length > 0) {
         params['bayonetUid'] = this.lll.join(',')
@@ -471,6 +483,9 @@ export default {
       }
       if (this.vehicleNumber) {
         params.vehicleNumber = this.v + this.vehicleNumber
+      }
+      if (this.order) {
+        params['order'] = this.order
       }
       JfoGETCity(params).then(res => {
         if (res.data == null) {

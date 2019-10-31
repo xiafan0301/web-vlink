@@ -90,7 +90,7 @@ import uploadPic from './uploadPic.vue';
 import controlDev from './controlDev.vue';
 import vehicleLib from './vehicleLib.vue';
 import portraitLib from './portraitLib.vue';
-import {random14, objDeepCopy, imgUrls, unique, formatDate} from '@/utils/util.js';
+import {objDeepCopy, imgUrls, unique, formatDate} from '@/utils/util.js';
 import {checkName, checkPlateNumber} from '@/utils/validator.js';
 const validateDate_ = (rule, value, callback) => {
   if (value) {
@@ -284,7 +284,6 @@ export default {
     // 嫌疑人照片的上传方法
     uploadPicDelTwo (fileList) {
       this.fileListTwo = fileList;
-      console.log(this.fileListTwo, 'this.fileListTwo');
       
     },
     // 嫌疑人照片的上传方法
@@ -354,14 +353,12 @@ export default {
       });
     },
     seacher(v) {
-      const placeSearch = new AMap.PlaceSearch({
+      const placeSearch = new window.AMap.PlaceSearch({
         // city 指定搜索所在城市，支持传入格式有：城市名、citycode和adcode
         city: "湖南"
       });
-
-      if (!!v) {
-        let _this = this;
-        return new Promise((resolve, reject) => {
+      if (v) {
+        return new Promise((resolve) => {
           placeSearch.search(v, (status, result) => {
             // 查询成功时，result即对应匹配的POI信息
             let pois = result.poiList.pois;

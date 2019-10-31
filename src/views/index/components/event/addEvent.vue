@@ -249,7 +249,6 @@ export default {
   },
   watch: {
     uplaodVideoList (val) {
-      console.log('val', val)
       if (val && val.length > 0) {
         this.isShowUpload = false;
       } else {

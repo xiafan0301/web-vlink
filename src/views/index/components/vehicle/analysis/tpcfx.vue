@@ -37,12 +37,12 @@
           <el-button type="primary" style="width: 110px" @click="serch" :loading="searchLoading">查询</el-button>
         </div>
       </div>
-      <div class="tpcfx_right" v-loading="searchLoading">
+      <div class="tpcfx_right" v-loading="searchLoading" v-if="list.length > 0">
         <div style="font-size:14px;font-weight:400;color:rgba(51,51,51,1); padding: 10px 0 0 10px">套牌车分析({{pagination.total}})</div>
         <div class="tpcfx_right_content">
           <div class="tpcfx_img" v-for="(item, index ) in list" :key="index" @click="godetail(item)">
             <div class="tpcfx_img_1">
-              <div style="height: 150px; overflow: hidden">
+              <div style="height: 150px; overflow: hidden;background-color: #EAEAEA; position: relative">
                 <img :src="item.StorageUrl1" alt="" title="点击放大图片">
               </div>
               <div style="text-align: center">{{item.PlateNo}}</div>
@@ -58,6 +58,11 @@
             layout="total, prev, pager, next"
             :total="pagination.total">
         </el-pagination>
+      </div>
+      <div class="not_content" v-else v-loading="searchLoading">
+        <img src="../../../../../assets/img/null-content.png" alt="" v-show="showimgnull">
+        <img src="../../../../../assets/img/not-content.png" alt="" v-show="!showimgnull">
+        <p style="color: #666666; margin-top: 30px;">{{nodata}}</p>
       </div>
     </div>
   </div>
@@ -79,19 +84,22 @@ export default {
         total: 0
       },
       currentPage: 1,
-      searchLoading: false
+      searchLoading: false,
+      nodata: '选择分析时间段，查询这段时间内的全部套牌车记录',
+      showimgnull: true,
     }
   },
   mounted() {
     this.setDTime();
-    this.JtcPOSTAppendtpInfoss()
+    // this.JtcPOSTAppendtpInfoss()
   },
   created() {
   },
   methods: {
     reset () {
       this.setDTime()
-      this.JtcPOSTAppendtpInfoss()
+      this.list = []
+      this.showimgnull = true
     },
     godetail (val) {
       this.$router.push({ name: "vehicle_search_tpcfxxq" , query: {value1: this.value1, value2: this.value2, vehicleNumber: val.PlateNo}});
@@ -132,6 +140,10 @@ export default {
         if(res && res.data) {
           this.list = res.data.list
           this.pagination.total = res.data.total
+          if (this.list.length === 0) {
+            this.nodata = "抱歉，没有相关结果!"
+            this.showimgnull = false
+          }
         }
         this.$nextTick(() => {
           this.searchLoading = false;
@@ -189,10 +201,17 @@ export default {
             width: 100%;
             box-shadow:0px -4px 10px 0px rgba(131,131,131,0.28);
             padding: 10px;
-            height: 200px;
+            height: 180px;
             img{
               width: 100%;
               height: auto;
+              max-height: 100%;
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              margin: auto;
             }
           }
         }

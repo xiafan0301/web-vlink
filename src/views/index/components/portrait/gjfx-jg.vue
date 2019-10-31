@@ -38,7 +38,6 @@
                       :picker-options="pickerOptions"
                       @change="chooseEndTime"
                       type="datetime"
-                      time-arrow-control
                       placeholder="选择日期时间">
               </el-date-picker>
             </el-form-item>
@@ -55,7 +54,7 @@
                   <el-button @click="resetForm('ruleForm')" class="full">取消</el-button>
                 </el-col>
                 <el-col :span="12">
-                  <el-button type="primary" :loading="searchLoading" @click="submitForm('ruleForm')" class="select_btn full">确定</el-button>
+                  <el-button type="primary" :loading="searchLoading" @click="submitForm()" class="select_btn full">确定</el-button>
                 </el-col>
               </el-row>
             </el-form-item>
@@ -89,7 +88,7 @@
       </template>
       <div class="insetLeft2 vl_icon vl_icon_vehicle_03" v-show="hideleft" @click="showResult"></div>
     </div>
-    <div class="right" id="rightMap"></div>
+    <div class="right" id="rightGjfxJgMap"></div>
     <div class="reselt" v-if="reselt && showLeft">
       <div class="plane insetPadding">
         <h3 class="title">分析结果<p>共经过{{totalAddressNum}}个地方，出现{{totalMapNum}}次</p></h3>
@@ -105,7 +104,7 @@
               <ul>
                 <li class="p_main_list" :class="{'is_open': item.isOpen}" v-for="item in leftEvData" :key="item.id">
                   <div class="p_main_head" @click="item.isOpen = !item.isOpen"><i :class="{'el-icon-caret-right': !item.isOpen, 'el-icon-caret-bottom': item.isOpen}"></i>{{item.label}}({{item.times}}次)</div>
-                  <div class="p_main_item" v-for="(sItem, sIndex) in item.list" :key="sItem.id" @click="showStrucInfo(sItem, evData.findIndex(function (u) {return u === sItem}))">
+                  <div class="p_main_item" v-for="sItem in item.list" :key="sItem.id" @click="showStrucInfo(sItem, evData.findIndex(function (u) {return u === sItem}))">
                     <div class="info">
                       <div class="info_left">
                         <img :src="sItem.subStoragePath" alt="">
@@ -116,7 +115,7 @@
                       </div>
                     </div>
                     <div class="address"><i class="el-icon-location-outline"></i>{{sItem.bayonetAddress ? sItem.bayonetAddress : sItem.address}}</div>
-                    <div class="del_icon el-icon-delete" @click.stop="updateLine(sItem, item.list, sIndex)"></div>
+                    <div class="del_icon el-icon-delete" @click.stop="updateLine(sItem)"></div>
                   </div>
                 </li>
               </ul>
@@ -278,11 +277,9 @@
   import vlBreadcrumb from '@/components/common/breadcrumb.vue';
   import flvplayer from '@/components/common/flvplayer.vue';
   import { mapXupuxian,ajaxCtx } from "@/config/config.js";
-  import { objDeepCopy, random14, formatDate, dateOrigin } from "@/utils/util.js";
+  import { objDeepCopy, formatDate, dateOrigin } from "@/utils/util.js";
   import { cityCode } from "@/utils/data.js";
   import {PortraitPostPersonTrace} from "@/views/index/api/api.portrait.js";
-  import { MapGETmonitorList } from "@/views/index/api/api.map.js";
-  import { getAllBayonetList } from "@/views/index/api/api.base.js";
   import { getPeopleTaskDetail } from '@/views/index/api/api.analysis.js';
   export default {
     components: {vlBreadcrumb, flvplayer, vlUpload},
@@ -471,7 +468,7 @@
         this.reselt = true;
         this.hideleft = false;
       },
-      submitForm(v) {
+      submitForm() {
         if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data2 && this.ruleForm.input3){
           let pg = {
           }
@@ -494,14 +491,14 @@
         this.showNewTask = false;
       },
       renderMap() {
-        let map = new window.AMap.Map("rightMap", {
+        let map = new window.AMap.Map("rightGjfxJgMap", {
           zoom: 10,
           center: mapXupuxian.center
         });
         map.setMapStyle("amap://styles/whitesmoke");
         this.amap = map;
         // 弹窗地图
-        let supMap = new AMap.Map('capMap', {
+        let supMap = new window.AMap.Map('capMap', {
           center: mapXupuxian.center,
           zoom: 16
         });
@@ -535,7 +532,7 @@
       },
       getVehicleShot(d) {
         this.searchLoading = true;
-        PortraitPostPersonTrace(d).then(res => {
+        PortraitPostPersonTrace(d).then(() => {
           this.searchLoading = false;
           this.$message.info("修改成功")
           this.$router.push({name: 'portrait_gjfx'})
@@ -645,7 +642,6 @@
       },
       drawMapMarker (oData) {
         let data = this.fitlerSXT(oData);
-        let path = [];
         for (let  i = 0; i < data.length; i++) {
           let obj = data[i];
           if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
@@ -660,10 +656,10 @@
               sClass = 'vl_icon_map_mark1'
             }
             let _content = `<div class="vl_icon ` + sClass + `">` + _time + `</div>`
-            let point = new AMap.Marker({ // 添加自定义点标记
+            let point = new window.AMap.Marker({ // 添加自定义点标记
               map: this.amap,
               position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-              offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+              offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
               draggable: false, // 是否可拖动
               // 自定义点标记覆盖物内容
               content: _content
@@ -699,7 +695,7 @@
             path.push(_path);
           }
         })
-        var polyline = new AMap.Polyline({
+        var polyline = new window.AMap.Polyline({
           path: path,
           showDir: true,
           strokeColor: '#61C772',
@@ -708,10 +704,9 @@
         this.markerLine.push(polyline);
         this.amap.add([polyline]);
       }, // 画线
-      updateLine (obj, list, index) {
+      updateLine (obj) {
         this.amap.clearMap();
         let _i = this.evData.indexOf(obj);
-        // list.splice(index, 1)
         this.evData.splice(_i, 1);
         this.shotAddressAndTimes(this.evData);
         this.operData();
@@ -738,22 +733,22 @@
           sClass = 'vl_icon_map_hover_mark1'
         }
         let _content = '<div class="vl_icon ' + sClass + '"></div>'
-        this.supMarkerPoint = new AMap.Marker({ // 添加自定义点标记
+        this.supMarkerPoint = new window.AMap.Marker({ // 添加自定义点标记
           map: this.map,
           position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-          offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+          offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
           draggable: false, // 是否可拖动
           // 自定义点标记覆盖物内容
           content: _content
         });
         this.map.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
         let sConent = `<div class="cap_info_win"><p>设备名称：${data.bayonetName ? data.bayonetName : data.deviceName}</p><p>抓拍地址：${data.bayonetAddress ? data.bayonetAddress : data.address}</p></div>`
-        new AMap.InfoWindow({
+        new window.AMap.InfoWindow({
           map: this.map,
           isCustom: true,
           closeWhenClickMap: false,
           position: [data.shotPlaceLongitude, data.shotPlaceLatitude],
-          offset: new AMap.Pixel(0, -70),
+          offset: new window.AMap.Pixel(0, -70),
           content: sConent
         })
       },
@@ -1236,7 +1231,7 @@
   }
 </style>
 <style lang="scss">
-  #rightMap {
+  #rightGjfxJgMap {
     .vl_icon {
       width: 47px;
       position: relative;
@@ -1250,16 +1245,6 @@
         padding: 2px 5px;
         span{
           display: block;
-        }
-      }
-    }
-  }
-  .clgj_map_show_pic {
-    .vl_jtc_mk { display: block !important; }
-    &#rightMap {
-      .vl_icon.vl_icon_sxt {
-        > p {
-          display: none;
         }
       }
     }

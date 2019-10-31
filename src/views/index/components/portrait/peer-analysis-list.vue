@@ -6,18 +6,6 @@
             {name: '同行分析'}]">
       </div>
       <div class="vl_p_peer_left">
-        <div  class="ytsr_left_radio">
-          <span>任务名称：</span>
-          <span style="padding-right: 20px">
-          <el-input v-model="taskName" placeholder="请输入任务名称" maxlength="20"></el-input>
-        </span>
-        </div>
-        <div class="vl_jtc_img_box">
-          <div style="padding: 0 25px; height: 210px;">
-            <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit"></div>
-          </div>
-        </div>
-        <div class="per_semblance_ytsr"><span>同行次数：</span><el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100; if(value&&value <2)value = 2;" placeholder="填写同行次数" v-model="searchData.minSemblance"></el-input>(2-100)</div>
         <!--查询范围-->
         <div class="per_left_time">
           <div class="left_time">
@@ -42,6 +30,18 @@
               placeholder="选择日期时间">
             </el-date-picker>
           </div>
+        </div>
+        <div class="vl_jtc_img_box">
+          <div style="padding: 0 25px; height: 210px;">
+            <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit"></div>
+          </div>
+        </div>
+        <div class="per_semblance_ytsr"><span>同行次数：</span><el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100; if(value&&value <2)value = 2;" placeholder="填写同行次数" v-model="searchData.minSemblance"></el-input>(2-100)</div>
+        <div class="ytsr_left_radio">
+          <!-- <span>任务名称：</span> -->
+          <!-- <span style="padding-right: 20px"> -->
+          <el-input v-model="taskName" placeholder="请输入任务名称" maxlength="20"></el-input>
+        <!-- </span> -->
         </div>
         <div class="peer_xzsb_s" @click="areaTypeChanged" v-if="chooseType === 1">
           <span>选择设备</span>
@@ -203,10 +203,7 @@
   </vue-scroll>
 </template>
 <script>
-// eslint-disable-next-line no-unused-vars
 import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume, postPeopleTask } from '@/views/index/api/api.analysis.js';
-import {JtcPUTAppendixsOrder, JtcPOSTAppendixInfo, JtcGETAppendixInfoList,  getShotDevice, getTailBehindList } from '../../api/api.judge'
-import { ajaxCtx, mapXupuxian } from '@/config/config.js';
 import { formatDate } from "@/utils/util.js";
 import vlUpload from "@/components/common/upload.vue";
 import mapSelector from '@/components/common/mapSelector.vue';
@@ -370,7 +367,6 @@ export default {
               customClass: 'request_tip'
             })
             this.getDataList()
-            console.log(res.data)
           }
         })
       }
@@ -481,12 +477,11 @@ export default {
     },
     //恢复任务,重启任务
     recoveryOrRestart(obj) {
-        putTaskInfosResume(obj.uid).then(res => {
-            console.log(res)
-            if(res) {
-                this.getDataList();
-            }
-        }).catch(() => {})
+      putTaskInfosResume(obj.uid).then(res => {
+        if(res) {
+          this.getDataList();
+        }
+      }).catch(() => {})
     },
     // 查询任务列表数据
     selectDataList () {
@@ -698,8 +693,8 @@ export default {
     .vl_jtc_img_box {
       width: 100%;
       height: auto;
-      border-bottom: 1px solid #D3D3D3;
-      padding-bottom: 10px;
+      // border-bottom: 1px solid #D3D3D3;
+      // padding-bottom: 10px;
       margin-bottom: 10px;
       .vl_jtc_img_list {
         width: 100%;
@@ -809,8 +804,9 @@ export default {
       }
     }
     .ytsr_left_radio {
+      width: calc(100% - 20px);
       padding-left: 20px;
-      margin: 20px 0 10px 0;
+      margin: 10px 0;
       display: flex;
       height: 40px;
       >span {

@@ -51,8 +51,7 @@ export default {
             })
             this.value1 = res.data.groupName
           }
-        }).catch(error => {
-      })
+        })
     }
   },
   methods: {
@@ -85,7 +84,7 @@ export default {
               this.$router.go(-1)
             }
             this.addloading = false
-          }).catch(error => {
+          }).catch(() => {
           this.addloading = false
         })
       }else {
@@ -101,7 +100,7 @@ export default {
               console.log(res)
             }
             this.addloading = false
-          }).catch(error => {
+          }).catch(() => {
           this.addloading = false
         })
       }

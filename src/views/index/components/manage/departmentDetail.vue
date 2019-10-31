@@ -313,7 +313,6 @@ export default {
       };
       getDepartmentList(params)
         .then(res => {
-          console.log('000', res)
           if (res && res.data.list) {
             let restArr = [];
             this.departmentData.push({
@@ -325,32 +324,8 @@ export default {
                 uid: item.uid,
                 organName: item.organName
               });
-              // if (item.organLayer === (this.departDetailInfo.organLayer + 1)) {
-              //   this.childDepartList.push({
-              //     uid: item.uid,
-              //     name: item.organName,
-              //     isShow: false,
-              //     isSelect: false,
-              //     children: []
-              //   });
-              // } else {
-              //   restArr.push(item);
-              // }
-              console.log('rest', restArr);
             });
-            // restArr.forEach(a => {
-            //   this.childDepartList.forEach(b => {
-            //     if (a.parentOrganName === b.name) {
-            //       b.children.push({
-            //         uid: a.uid,
-            //         name: a.organName,
-            //         isSelect: false
-            //       })
-            //     }
-            //   })
-            // })
           }
-          console.log('childDepartList', this.childDepartList)
         })
     },
     handleTreeList (arr, obj, finalArr) {

@@ -116,7 +116,7 @@
               <el-form-item label="IP:" prop="ip">
                 <ul class="ip-adress">
                   <li v-for="(item,index) in onlineForm.ip" :key="index">
-                    <el-input v-model="item.value" @change="checkIpVal(item,index)" @blur="setDefaultVal(item)" placeholder="255"></el-input>
+                    <el-input v-model="item.value" @change="checkIpVal(item)" @blur="setDefaultVal(item)" placeholder="255"></el-input>
                     <div class="dot"></div>
                   </li>
                 </ul>
@@ -211,7 +211,7 @@ import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { mapXupuxian } from "@/config/config.js";
-import mapData from '@/config/mapdata.json';
+// import mapData from '@/config/mapdata.json';
 import { getAreaList } from '@/views/index/api/api.user.js';
 export default {
   components: { vlBreadcrumb },
@@ -389,7 +389,7 @@ export default {
     // 处理省市区县数据
     handleAreaData (data) {
       let _this =this;
-      data.forEach((val, index) => {
+      data.forEach((val) => {
         if (val.childList.length === 0) { // 当childList为[]时,删除childList
           _this.$delete(val, 'childList');
         } else {
@@ -406,7 +406,6 @@ export default {
           .then(res => {
             if (res && res.data) {
               let obj = res.data;
-              console.log('obj', obj)
 
               this.deivceCodeId = obj.code;
 
@@ -591,8 +590,7 @@ export default {
       }
     },
     //input---ipaddress
-    checkIpVal(item, index) {
-      console.log("===========",item,index)
+    checkIpVal(item) {
       // let self = this;
       //确保每个值都处于0-255
       let val = item.value;
@@ -616,14 +614,13 @@ export default {
       }
     },
     // 所在位置change
-    handleChangeAddress (value) {
+    handleChangeAddress () {
       this.onlineForm.address = null;
       const arr = this.getCascaderObj(this.onlineForm.locationName, this.areaDataList);
       let str = arr.map(m => m.cname).join('');
       this.resAddress = str;
       if (this.onlineForm.address) str = str + this.onlineForm.address;
       this.markLocation(str);
-
     },
     // 获得选中的级联对象列表
     getCascaderObj(val, opt) {
@@ -643,24 +640,20 @@ export default {
     //根据地址搜索
     markLocation(address) {
       let _this = this;
-      _this.map.plugin('AMap.Geocoder', function() {
-        let geocoder = new window.AMap.Geocoder();            
-        geocoder.getLocation(address, function(status, result) {
-          if (status === 'complete' && result.info === 'OK') {
-            // 经纬度                      
-            let lon = result.geocodes[0].location.lng;
-            let lat = result.geocodes[0].location.lat;
-             
+      _this.map.plugin('AMap.Geocoder', function() {
+        let geocoder = new window.AMap.Geocoder();
+        geocoder.getLocation(address, function(status, result) {
+          if (status === 'complete' && result.info === 'OK') {
+            // 经纬度
+            let lon = result.geocodes[0].location.lng;
+            let lat = result.geocodes[0].location.lat;
             _this.onlineForm.longitude = lon;
             _this.onlineForm.latitude = lat;
-                      
-             let lnglatXY = [lon, lat];
-             _this.addMarker(lnglatXY);
-            } else {
-              console.log('定位失败！');
-            }
-        });
-      });
+            let lnglatXY = [lon, lat];
+            _this.addMarker(lnglatXY);
+          }
+        });
+      });
     },
     addMarker (lnglatXY) {
       let hoverWindow = null;
@@ -670,30 +663,28 @@ export default {
       let marker = new window.AMap.Marker({
         // 添加自定义点标记
         map: _this.map,
-        position: lnglatXY,
-        offset: new window.AMap.Pixel(-23, -56),
-        // 设置是否可以拖拽
-        draggable: false,
+        position: lnglatXY,
+        offset: new window.AMap.Pixel(-23, -56),
+        // 设置是否可以拖拽
+        draggable: false,
         // 自定义点标记覆盖物内容
         content: content,
-      });
-      if(_this.t == 1) {
-        console.log(lnglatXY);
+      });
+      if(_this.t == 1) {
         _this.map.add(marker);
-        marker.setMap(_this.map);
-        _this.map.setFitView();// 执行定位
-        _this.t++;
-      }
-      
-      //修改标点位置
-      if(_this.t != 1){
+        marker.setMap(_this.map);
+        _this.map.setFitView();// 执行定位
+        _this.t++;
+      }
+      //修改标点位置
+      if(_this.t != 1){
         _this.map.add(marker);
-        marker.setPosition(lnglatXY);
-        _this.map.setCenter(lnglatXY);
+        marker.setPosition(lnglatXY);
+         _this.map.setCenter(lnglatXY);
         _this.map.setZoom(14);
-        marker.setMap(_this.map);
-        _this.map.setFitView();// 执行定位
-      }  
+        marker.setMap(_this.map);
+        _this.map.setFitView();// 执行定位
+      }
       // hover
       marker.on("mouseover", function() {
         let sContent = '<div class="vl_map_hover" >' +
@@ -711,15 +702,12 @@ export default {
           _this.map,
           new window.AMap.LngLat(lnglatXY[0],lnglatXY[1])
         );
-        hoverWindow.on("close", function() {
-          console.log("infoWindow close");
-        });
       });
       marker.on("mouseout", function() {
         if (hoverWindow) {
           hoverWindow.close();
         }
-      }); 
+      });
     },
     mapZoomSet (val) {
       if (this.map) {
@@ -770,16 +758,15 @@ export default {
         }
       });
 
-      let geocoder;
-      window.AMap.service('AMap.Geocoder',function(){//回调函数
-        //实例化Geocoder
-        geocoder = new window.AMap.Geocoder({
-          city: "全国", //城市，默认：“全国”
-          radius: 500 //范围，默认：500
-        })
-        //TODO: 使用geocoder 对象完成相关功能
-      })
-
+      // let geocoder;
+      // window.AMap.service('AMap.Geocoder',function(){ //回调函数
+      //   //实例化Geocoder   
+      //   let geocoder = new window.AMap.Geocoder({
+      //     city: "全国", //城市，默认：“全国”
+      //     radius: 500 //范围，默认：500
+      //   })
+      //   //TODO: 使用geocoder 对象完成相关功能
+      // })
       map.setMapStyle("amap://styles/whitesmoke");
       _this.map = map;
 
@@ -801,62 +788,60 @@ export default {
           _this.mapsearch(e.lnglat.getLng(),e.lnglat.getLat());
       });
 
-      let auto = new AMap.Autocomplete(map);
+      let auto = new window.AMap.Autocomplete(map);
       window.AMap.event.addListener(auto, "select", _this.select);//注册监听，当选中某条记录时会触发
     },
     select (e) {
       if (e.poi && e.poi.location) {
         /* map.setZoom(15); */
-        map.setCenter(e.poi.location);
+        this.map.setCenter(e.poi.location);
       }
     },
     //地图搜索
     mapsearch (lng,lat) {
-      this.myMapViewLocation(lng, lat);
+      this.myMapViewLocation(lng, lat);
     },
     // 回显
     myMapViewLocation (mlon, mlat) {
-      //console.log("回显坐标");
-      if(mlon && mlat){
-        this.removeMarkers(lnglatXY);
-        let lnglatXY = [mlon,mlat];
-        this.addMarker(lnglatXY);
-      }
+      if(mlon && mlat){
+        this.removeMarkers(lnglatXY);
+        let lnglatXY = [mlon,mlat];
+        this.addMarker(lnglatXY);
+      }
     },
     removeAllOverlay () {
       // 清除地图上所有添加的覆盖物
       this.map.clearMap();
     },
     //移除之前的标点
-    removeMarkers(lnglatXY){
-      let marker = new window.AMap.Marker({
-        map: this.map,
-        position: lnglatXY,
-        icon: "http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png",
-        offset: new window.AMap.Pixel(-13, -30)
-      });
-      let markers = [];
-      markers.push(marker);
-      this.map.remove(markers);
+    removeMarkers(lnglatXY) {
+      let marker = new window.AMap.Marker({
+        map: this.map,
+        position: lnglatXY,
+        icon: "http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png",
+        offset: new window.AMap.Pixel(-13, -30)
+        });
+        let markers = [];
+        markers.push(marker);
+        this.map.remove(markers);
     },
     // 填写地址
     writeAddress(lnglatXY){
       let _this = this;
-      let geocoder = new window.AMap.Geocoder({
-        city : "全国", //城市，默认：“全国”
-      });
-      geocoder.getAddress(lnglatXY, function(status, result) {
-        if (status === 'complete' && result.info === 'OK') {
-           _this.geocoder_CallBack(result);
-        } else {
+      let geocoder = new window.AMap.Geocoder({
+        city : "全国", //城市，默认：“全国”
+      });
+    geocoder.getAddress(lnglatXY, function(status, result) {
+      if (status === 'complete' && result.info === 'OK') {
+          _this.geocoder_CallBack(result);
+        } else {
           //获取地址失败
           _this.$message.error('没有获取到地址');
         }
-      });
+      });
     },
     // 地址回调
     geocoder_CallBack(data) {
-      console.log('data', data)
       const {province, city, district, township} = data.regeocode.addressComponent;
       const adcode = data.regeocode.addressComponent.adcode;
       const arr = [province, city, district];
@@ -868,34 +853,26 @@ export default {
       }
       this.resAddress = arr.join('');
       const codeList = this.getCascaderObj3(adcode, this.areaDataList, township); // 根据省市区县回填省市区级联
-
       this.onlineForm.locationName = codeList && codeList.map(m => m.uid);
-
-      let address = data.regeocode.formattedAddress.replace(arr.join(''), ''); //返回地址描述
-
+      let address = data.regeocode.formattedAddress.replace(arr.join(''),''); //返回地址描述
       this.onlineForm.address = address;
     },
     // 根据adcode找寻它所属对象
     getCascaderObj2 (val, list) {
       let result = null;
       let fun = (val, list) => {
-        try {
-          list.forEach(a => {
-            if (a.uid == val) {
-              result = a;
-              foreach.break = new Error("找到了就跳出循环");  
-            } else {
-              if (a.hasOwnProperty('childList')) {
-                fun(val, a.childList);
-              }
+        list.forEach(a => {
+          if (a.uid == val) {
+            result = a;
+            // foreach.break = new Error("找到了就跳出循环");  
+          } else {
+            if (a.hasOwnProperty('childList')) {
+              fun(val, a.childList);
             }
-          })
-        } catch(e) {
-
-        }
+          }
+        })
       }
       fun(val, list);
-      console.log('result', result)
       return result;
     },
     // 回填级联时，根据详情返回的areaId，找到其所有的上级和下级
@@ -952,7 +929,6 @@ export default {
           }
           this.onlineForm.areaId = this.onlineForm.locationName[this.onlineForm.locationName.length - 1];
            this.onlineForm.address = this.resAddress + this.onlineForm.address;
-          console.log('this.onlineForm.address', this.onlineForm.address)
           const params = {
             ...this.cameraForm,
             ...this.onlineForm,

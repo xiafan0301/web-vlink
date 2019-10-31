@@ -1,6 +1,6 @@
 <template>
   <el-dialog
-  title="框选搜索主体"
+  title="请选择搜索目标"
   :visible.sync="dialogVisible"
   width="1024px"
   :show-close="false"
@@ -15,7 +15,7 @@
     </div>
     <span slot="footer" class="dialog-footer">
       <el-button @click="cancelSave" size="small">取 消</el-button>
-      <el-button :loading="submitLoading" type="primary" @click="saveCutImg" size="small">保 存</el-button>
+      <el-button :loading="submitLoading" type="primary" @click="saveCutImg" size="small">确 定</el-button>
     </span>
   </el-dialog>
 </template>
@@ -58,15 +58,15 @@ export default {
   },
   methods: {
     // 默认选中第一个框体
-    checkFirstImgBox () {
-      let obj = this.selectList[0];
-      let firstId = 'select_box_0';
+    // checkFirstImgBox () {
+    //   let obj = this.selectList[0];
+    //   let firstId = 'select_box_0';
 
-      let $idObj = document.getElementById(firstId);
-      $($idObj).addClass('active_select');
+    //   let $idObj = document.getElementById(firstId);
+    //   $($idObj).addClass('active_select');
 
-      this.createImgPath(obj.x, obj.y, obj.width, obj.height);
-    },
+    //   this.createImgPath(obj.x, obj.y, obj.width, obj.height);
+    // },
     // 获取图片缩放比例
     getImgScale () {
       let imgWidth = $('#imgBox').width();
@@ -99,8 +99,7 @@ export default {
         $('.img_box')[0].appendChild($div);
 
         // 默认选中第一个框体
-        this.checkFirstImgBox();
-
+        // this.checkFirstImgBox();
 
         this.handleClickListen($id, item.x, item.y, item.width, item.height);
       })

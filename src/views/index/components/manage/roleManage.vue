@@ -510,13 +510,11 @@ export default {
       this.editRoleDialog = false;
     },
     // 显示查看权限弹出框
-    showSelectAuthorityDialog (obj) {
-      console.log(obj);
+    showSelectAuthorityDialog () {
       this.selectAuthorityDialog = true;
     },
     // 显示配置权限弹出框
-    showConfigRoleDialog (obj) {
-      console.log(obj);
+    showConfigRoleDialog () {
       this.configAuthorityDialog = true;
     }
   }

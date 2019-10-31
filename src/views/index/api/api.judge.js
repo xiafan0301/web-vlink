@@ -378,7 +378,7 @@ export function getViolation(params) {
     url: '/vehicle/continuous-violation',
     method: 'get',
     params,
-    mode: 'judge'
+    mode: 'vehicle'
   });
 }
 /**

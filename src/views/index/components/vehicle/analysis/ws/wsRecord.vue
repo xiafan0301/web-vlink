@@ -302,7 +302,6 @@ export default {
               if(i !== 0 && i !== (data.length - 1)) {
                 $('#vehicle' + obj.DeviceID).addClass('vl_icon_map_hover_mark' + iconType);
               }
-
               let sContent = "<div class='tip_box'><div class='select_target'><p class='select_p'>查询目标</p>"
                     +"<img src="+ obj.StorageUrl3 +" /><div class='mongolia'>"
                     +"<span>"+ obj.shotTime +"</span><i id="+ _id +" class='vl_icon vl_icon_control_09'></i></div></div>"

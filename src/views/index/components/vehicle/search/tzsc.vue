@@ -351,25 +351,23 @@ import vehicleDetail from "../common/vehicleDetail.vue";
 import imgSelect from '@/components/common/imgSelect.vue';
 import mapSelector from '@/components/common/mapSelector.vue';
 
-import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入溆浦县地图
+import { ajaxCtx } from "@/config/config"; // 引入溆浦县地图
 import { formatDate, dateOrigin } from "@/utils/util.js";
 
 import {
-  JtcPOSTAppendixInfo,
-  JtcGETAppendixInfoList,
-  getImageAreaInfo
+  getImageAreaInfo,
+  JtcPOSTAppendixInfo
 } from "../../../api/api.judge.js"; // 图片上传接口
 
-import { getVehicleList } from "../../../api/api.base.js";
-
+import { getVehicleList, handUpload } from "../../../api/api.base.js";
 import {
   getFeatureSearch,
   getPhotoAnalysis
 } from "../../../api/api.analysis.js"; // 车辆特征检索接口
 
-import { MapGETmonitorList } from "../../../api/api.map.js"; // 获取设备树接口
+/* import { MapGETmonitorList } from "../../../api/api.map.js"; // 获取设备树接口 */
 import { objDeepCopy } from "../../../../../utils/util.js"; // 深拷贝方法
-import { constants } from "crypto";
+/* import { constants } from "crypto"; */
 import { dataList } from '@/utils/data.js';
 
 export default {
@@ -584,8 +582,61 @@ export default {
 //        }
       }
     },
+    // 创建一个canvas，生成图片
+    createImgPath (x, y, width, height) {
+      let image = new Image();
+      image.setAttribute("crossOrigin",'Anonymous');
+      image.src = this.curImageUrl;
 
+      image.onload = () => {
+        
+        let $canvas = document.createElement('canvas');
+        $($canvas).attr({'width': width, 'height': height});
+        let ctx = $canvas.getContext('2d');
+  
+        ctx.drawImage(image, x, y, width, height, 0, 0, width, height);
 
+        $($canvas)[0].toBlob((blob) => {
+          let fd = new FormData();
+          let fileBlob = new File([blob], new Date().getTime() + '.png')
+          fd.append("file", fileBlob);
+          // 上传图片
+          handUpload(fd)
+            .then(res => {
+              if (res && res.data) {
+                this.setImgUid(res.data);
+              }
+            })
+            .catch(() => {})
+        });
+      }
+    },
+    // 设置截屏图片信息---上传图片
+    setImgUid (oRes) {
+     let imgObj = {
+        cname: oRes.fileName, // 附件名称 ,
+        filePathName: oRes.fileName, // 附件保存名称 ,
+        fileType: 1, // 文件类型 ,
+        imgHeight: oRes.fileHeight, // 图片高存储的单位位px ,
+        imgSize: oRes.fileSize, // 图片大小存储的单位位byte ,
+        imgWidth: oRes.fileWidth, //  图片宽存储的单位位px ,
+        path: oRes.fileFullPath, // 附件路径 ,
+        thumbnailName: oRes.thumbnailFileName, // 缩略图名称 ,
+        thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
+      };
+      this.curImageUrl = imgObj.path;
+      this.imgData = {
+        path: imgObj.path
+      };
+      if (this.$store.state.loginUser && this.$store.state.loginUser.uid) {
+        imgObj.contentUid = this.$store.state.loginUser.uid;
+        JtcPOSTAppendixInfo(imgObj).then(jRes => {
+          if (jRes) {
+            console.log(jRes);
+          }
+        })
+      }
+    },
     // 获取图片区域信息
     getImageInfo () {
       const params = {
@@ -598,15 +649,19 @@ export default {
         .then(res => {
           if (res && res.data) {
             if (res.data.length > 0) {
-              this.isOpenImgDialog = true;
-
-              res.data.map(item => {
-                const obj = {
-                  ...item,
-                  // uid: 1 + Math.random()
-                };
-                this.imgDataList.push(obj);
-              })
+              if (res.data.length === 1) {
+                let obj = res.data[0];
+                this.createImgPath(obj.x, obj.y, obj.width, obj.height);
+              } else {
+                this.isOpenImgDialog = true;
+  
+                res.data.map(item => {
+                  const obj = {
+                    ...item
+                  };
+                  this.imgDataList.push(obj);
+                })
+              }
             } else {
               this.uploadClear = {};
             }
@@ -778,6 +833,7 @@ export default {
               this.strucInfoList = []; // 清空搜索结果
               this.total = 0;
               this.noDataTips = "抱歉，没有相关的结果!";
+              console.log(err)
             });
         } else {
           return false;
@@ -840,6 +896,7 @@ export default {
           })
           .catch(err => {
             this.getCharacterLoading = false;
+            console.log(err)
           });
       } else {
         this.$message.warning("请先上传车辆图片再获取特征");

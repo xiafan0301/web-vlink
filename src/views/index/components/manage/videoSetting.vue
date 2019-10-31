@@ -7,10 +7,7 @@
       <div><router-link :to="{ name: 'mark_manage'}" @click.native = "state = 4">标记管理</router-link></div>
     </div>
     <div>
-      <!-- <transition enter-active-class="fade-in" leave-active-class="leave-immediately"
-                  :duration="{ enter: 300, leave: 100 }"> -->
-        <router-view></router-view>
-      <!-- </transition> -->
+      <router-view></router-view>
     </div>
   </div>
 </template>

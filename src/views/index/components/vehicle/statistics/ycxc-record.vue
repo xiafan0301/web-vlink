@@ -55,7 +55,7 @@ import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import noResult from '@/components/common/noResult.vue';
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
-import { getNightVehicleRecordList, getSnapDetail  }from "@/views/index/api/api.judge.js";
+import { getNightVehicleRecordList }from "@/views/index/api/api.judge.js";
 export default {
   components: {
     noResult,

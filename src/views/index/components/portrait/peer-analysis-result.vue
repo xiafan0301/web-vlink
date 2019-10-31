@@ -304,7 +304,6 @@ export default {
             if (res) {
               this.$set(res.data, 'taskResult', JSON.parse(res.data.taskResult))
               this.$set(res.data, 'taskWebParam', JSON.parse(res.data.taskWebParam))
-              // console.log(res.data)
               let arr = res.data.taskWebParam.deviceId.split(',')
               let arr1 = []
               if (arr && arr.length > 0) {
@@ -324,8 +323,6 @@ export default {
               } else if (arr1.length === this.deviceList.length) {
                 this.deviceStr = '全部设备'
               }
-              console.log(res.data.taskResult)
-              // res.data.taskResult.push(...res.data.taskResult)
               this.pagination.total = res.data.taskResult.length
               this.boxList = [...res.data.taskResult.slice(0, 12)]
               this.boxList.sort((a, b) => {return b.peerNumber - a.peerNumber})
@@ -356,22 +353,18 @@ export default {
                 this.deviceList.push(...item.deviceBasicList)
               }
             })
-            // console.log(this.deviceList)
           }
         }
       });
     },
     goRecord (obj) {
-      // console.log(obj)
-      // obj.uid = 1
       this.$router.push({name: 'peer_analysis_record', query: {uid: this.$route.query.uid, id: obj.uid}})
     },
     onPageChange (page) {
       this.boxList.splice(0, this.boxList.length)
       this.boxList = [...this.taskDetail.taskResult.slice((page - 1) * 12, 12 + (page - 1) * 12)]
       this.boxList.sort((a, b) => {return a.peerNumber - b.peerNumber})
-      // console.log(this.boxList)
-    },
+    }
   }
 }
 </script>

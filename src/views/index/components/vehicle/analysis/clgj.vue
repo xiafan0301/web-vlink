@@ -58,7 +58,7 @@
                 <el-button @click="resetForm('ruleForm')" class="full">重置</el-button>
               </el-col>
               <el-col :span="12">
-                <el-button type="primary" :loading="serarchLoading" @click="submitForm('ruleForm')" class="select_btn full">分析</el-button>
+                <el-button type="primary" :loading="serarchLoading" @click="submitForm()" class="select_btn full">分析</el-button>
               </el-col>
             </el-row>
           </el-form-item>
@@ -83,10 +83,9 @@
   import vlBreadcrumb from "@/components/common/breadcrumb.vue";
   import vlDialog from '../common/vl-dialog.vue';
   import { mapXupuxian } from "@/config/config.js";
-  import { objDeepCopy, random14, formatDate } from "@/utils/util.js";
-  import { cityCode, dataList } from "@/utils/data.js";
+  import { objDeepCopy, formatDate } from "@/utils/util.js";
+  import { cityCode } from "@/utils/data.js";
   import { InvestigateGetTrace } from "@/views/index/api/api.judge.js";
-  import { getDiciData } from '@/views/index/api/api.js';
   export default {
     components: {vlBreadcrumb, vlDialog},
     data() {
@@ -201,7 +200,7 @@
       hideLeft() {
         this.hideleft = !this.hideleft;
       },
-      submitForm(v) {
+      submitForm() {
         if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data2){
           if (this.ruleForm.input3.length || this.ruleForm.input5) {
             let pg = {

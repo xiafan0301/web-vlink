@@ -87,10 +87,6 @@
             <span>经纬度：</span>
             <span>{{detailInfo.longitude}},{{detailInfo.latitude}}</span>
           </li>
-          <!-- <li>
-            <span>经纬度：</span>
-            <span>经度{{detailInfo.longitude}},纬度{{detailInfo.latitude}}</span>
-          </li> -->
           <li class="position" :title="detailInfo.address">
             <span>所在位置：</span>
             <span>{{detailInfo.address ? detailInfo.address : '无'}}</span>
@@ -107,11 +103,6 @@
             <span>RTSP端口：</span>
             <span>{{detailInfo.rtspPort ? detailInfo.rtspPort : '无'}}</span>
           </li>
-          
-          <!-- <li class="position">
-            <span>视频接入编码：</span>
-            <span>{{detailInfo.deviceCode}}</span>
-          </li> -->
         </ul>
       </div>
     </div>
@@ -216,7 +207,7 @@ export default {
       this.$router.back(-1);
     },
     // 显示删除弹出框
-    showDeleteDialog (obj) {
+    showDeleteDialog () {
       this.delCameraDialog = true;
     },
     // 删除摄像头

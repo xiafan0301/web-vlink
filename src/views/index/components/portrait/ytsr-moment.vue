@@ -469,17 +469,14 @@
   import mapSelector from '@/components/common/mapSelector.vue';
   import vlUpload from '@/components/common/upload.vue';
   import vlBreadcrumb from '@/components/common/breadcrumb.vue';
-  import { PortraitPostByphotoTask, PortraitPostByphotoRealtime, PortraitGetDispatch } from '@/views/index/api/api.portrait.js';
-  import { ScpGETdeviceListById, ScpGETretrievalHisById} from '../../api/api.search.js';
-  import {JtcPUTAppendixsOrder, JtcPOSTAppendixInfo, JtcGETAppendixInfoList,  getShotDevice, getTailBehindList } from '../../api/api.judge'
+  import { PortraitPostByphotoTask, PortraitPostByphotoRealtime } from '@/views/index/api/api.portrait.js';
+  import {JtcPOSTAppendixInfo } from '../../api/api.judge'
   import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
-  import { handUpload} from '@/views/index/api/api.base.js';
   import {getGroups} from '../../api/api.judge.js';
   import noResult from '@/components/common/noResult.vue';
   import flvplayer from '@/components/common/flvplayer.vue';
   import { ajaxCtx, mapXupuxian, onlineOutTime } from '@/config/config.js';
-  import { MapGETmonitorList } from "@/views/index/api/api.map.js";
-  import { objDeepCopy, formatDate } from "@/utils/util.js";
+  import { formatDate } from "@/utils/util.js";
   export default {
     components: {vlBreadcrumb, noResult, flvplayer, vlUpload, mapSelector},
     data() {
@@ -581,7 +578,7 @@
     mounted () {
       this.getDataList();
       // 弹窗地图
-      let supMap = new AMap.Map('capMap', {
+      let supMap = new window.AMap.Map('capMap', {
         center: mapXupuxian.center,
         zoom: 16
       });
@@ -749,7 +746,6 @@
             taskType: 4, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
             taskStatus: 4 // 1：处理中 2：处理成功 3：处理失败 4：处理中断
           };
-          this.isInterruptLoading = true;
           putAnalysisTask(params)
               .then(res => {
                 if (res) {
@@ -759,13 +755,12 @@
                     customClass: 'request_tip'
                   });
                   this.interruptDialog = false;
-                  this.isInterruptLoading = false;
                   this.getDataList();
                 } else {
-                  this.isInterruptLoading = false;
+                  this.$MyMessage('中断失败')
                 }
               })
-              .catch(() => {this.isInterruptLoading = false;})
+              .catch(() => {this.$MyMessage('中断失败')})
         }
       },
       // 确认删除任务
@@ -1015,22 +1010,22 @@
           this.map.remove(this.supMarkerPoint)
         }
         let _content = '<div class="vl_icon vl_icon_judge_02"></div>'
-        this.supMarkerPoint = new AMap.Marker({ // 添加自定义点标记
+        this.supMarkerPoint = new window.AMap.Marker({ // 添加自定义点标记
           map: this.map,
           position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-          offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+          offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
           draggable: false, // 是否可拖动
           // 自定义点标记覆盖物内容
           content: _content
         });
         this.map.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
         let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`
-        new AMap.InfoWindow({
+        new window.AMap.InfoWindow({
           map: this.map,
           isCustom: true,
           closeWhenClickMap: false,
           position: [data.shotPlaceLongitude, data.shotPlaceLatitude],
-          offset: new AMap.Pixel(0, -70),
+          offset: new window.AMap.Pixel(0, -70),
           content: sConent
         })
       },

@@ -49,7 +49,7 @@
         </el-table-column>
         <el-table-column label="操作" fixed="right">
           <template slot-scope="scope">
-            <span class="operation_btn" @click="showRemoveDialog(scope.row)">解除黑名单</span>
+            <span class="operation_btn" @click="showRemoveDialog()">解除黑名单</span>
           </template>
         </el-table-column>
       </el-table>
@@ -129,7 +129,7 @@ export default {
       this.selectDataList();
     },
     // 显示解除黑名单的弹出框
-    showRemoveDialog (obj) {
+    showRemoveDialog () {
       this.removeDialog = true;
     },
     selectDataList () {

@@ -331,7 +331,7 @@ export default {
     editProcessStatus() {
       const uid = this.$route.query.uid;
       updateProcess(uid).then((res)=>{
-        console.log(res)
+        console.log(res);
       }).catch(()=>{})
     },
     // 跳至结束调度页面

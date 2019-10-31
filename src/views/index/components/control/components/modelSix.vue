@@ -43,7 +43,7 @@ import vehicleLib from './vehicleLib.vue';
 import portraitLib from './portraitLib.vue';
 import mapSelector from '@/components/common/mapSelector.vue';
 import {checkPlateNumber} from '@/utils/validator.js';
-import {random14, objDeepCopy, unique, imgUrls} from '@/utils/util.js';
+import {unique, imgUrls} from '@/utils/util.js';
 export default {
   components: {uploadPic, mapSelector, vehicleLib, portraitLib},
   props: ['modelList'],
@@ -64,7 +64,6 @@ export default {
     setTimeout(() => {
       // 修改时回填数据
       if (this.modelList) {
-        console.log(this.modelList, 'this.modelList')
         // 回填嫌疑车牌
         let [{carNumberInfo, pointDtoList: [{bayonetList, devList}], surveillanceObjectDtoList}] = this.modelList;
         carNumberInfo = carNumberInfo.split(',');
@@ -86,7 +85,6 @@ export default {
   methods: {
     // 从布控库中获取布控人员信息
     getPortraitData (data) {
-      console.log(data, 'datadata')
       this.fileListOne = this.fileListOne.concat(data);
       this.fileListOne = unique(this.fileListOne, 'objId');
     },

@@ -4,7 +4,7 @@
     <div class="sel_lib"><span>禁入人员：</span><span @click="popSel(1)">从布控库中选择</span></div>
     <div class="sel_img_box">
       <div class="img_box" v-for="(item, index) in protraitList" :key="index">
-        <img :src="item.photoUrl" alt="">
+        <img :src="item.photoUrl" alt="" class="bigImg">
         <i class="el-icon-error" @click="delPortrait(index)"></i>
         <span :title="item.name">{{item.name | strCutWithLen(12)}}</span>
       </div>
@@ -12,7 +12,7 @@
     <div class="sel_lib"><span>禁入车辆：</span><span @click="popSel(2)">从布控库中选择</span></div>
     <div class="sel_img_box">
       <div class="img_box" v-for="(item, index) in vehicleList" :key="index">
-        <img :src="item.photoUrl" alt="">
+        <img :src="item.photoUrl" alt="" class="bigImg">
         <i class="el-icon-error" @click="delVehicle(index)"></i>
         <span>{{item.vehicleNumber}}</span>
       </div>
@@ -33,7 +33,7 @@
 import vehicleLib from './vehicleLib.vue';
 import portraitLib from './portraitLib.vue';
 import mapSelector from '@/components/common/mapSelector.vue';
-import {random14, objDeepCopy, unique} from '@/utils/util.js';
+import {unique} from '@/utils/util.js';
 export default {
   components: {mapSelector, vehicleLib, portraitLib},
   props: ['modelList'],
@@ -50,7 +50,6 @@ export default {
     setTimeout(() => {
       // 修改时回填数据
       if (this.modelList) {
-        console.log(this.modelList, 'this.modelList')
         // 回填嫌疑车牌
         let [{pointDtoList: [{bayonetList, devList}], surveillanceObjectDtoList}] = this.modelList;
         this.protraitList = surveillanceObjectDtoList.filter(m => m.objType === 1);//回填禁入人员
@@ -143,6 +142,7 @@ export default {
       > img{
         width: 100%;
         height: 100%;
+        cursor: pointer;
       }
       > i{
         font-size: 6px;

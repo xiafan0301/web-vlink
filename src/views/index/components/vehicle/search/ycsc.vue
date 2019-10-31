@@ -175,19 +175,17 @@ import vlUpload from "@/components/common/upload.vue";
 import vlBreadcrumb from "@/components/common/breadcrumb.vue";
 import vehicleDetail from "../common/vehicleDetail.vue";
 
-import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入一个地图的地址
+import { ajaxCtx } from "@/config/config"; // 引入一个地图的地址
 import { formatDate, dateOrigin } from "@/utils/util.js";
 import {
-  JtcPOSTAppendixInfo,
-  JtcGETAppendixInfoList,
-  getImageAreaInfo
+  getImageAreaInfo,
+  JtcPOSTAppendixInfo
 } from "../../../api/api.judge.js"; // 图片上传接口
+import { handUpload } from "../../../api/api.base.js";
 import { getPhotoSearch } from "../../../api/api.analysis.js"; // 根据图检索接口
-import { objDeepCopy } from "../../../../../utils/util.js"; // 深拷贝方法
 import mapSelector from '@/components/common/mapSelector.vue';
 
 import imgSelect from '@/components/common/imgSelect.vue';
-// import imgSelectYtsc from '@/components/common/imgSelectYtsc.vue';
 export default {
   components: { vlBreadcrumb, vehicleDetail, vlUpload, imgSelect, mapSelector },
   data() {
@@ -254,7 +252,7 @@ export default {
             start = y - 1 + "-" + (m - 1 + 12) + "-" + d;
           }
           threeMonths = new Date(start).getTime();
-          let treeDays = time.getTime() - 3600 * 1000 * 24 * 3;
+          /* let treeDays = time.getTime() - 3600 * 1000 * 24 * 3; */
           return time.getTime() > Date.now() || time.getTime() < threeMonths;
         }
       },
@@ -311,15 +309,63 @@ export default {
           }
           this.dSum += result.bayonetList.length;
         }
-//        if (result.bayonetDeviceList && result.bayonetDeviceList.length > 0) {
-//          this.dSum += result.bayonetDeviceList.length;
-//          for (let i = 0; i < result.bayonetDeviceList.length; i++) {
-//            this.dIds.push(result.bayonetDeviceList[i].uid);
-//          }
-//        }
       }
     },
+    // 创建一个canvas，生成图片
+    createImgPath (x, y, width, height) {
+      let image = new Image();
+      image.setAttribute("crossOrigin",'Anonymous');
+      image.src = this.curImageUrl;
 
+      image.onload = () => {
+        
+        let $canvas = document.createElement('canvas');
+        $($canvas).attr({'width': width, 'height': height});
+        let ctx = $canvas.getContext('2d');
+  
+        ctx.drawImage(image, x, y, width, height, 0, 0, width, height);
+
+        $($canvas)[0].toBlob((blob) => {
+          let fd = new FormData();
+          let fileBlob = new File([blob], new Date().getTime() + '.png')
+          fd.append("file", fileBlob);
+          // 上传图片
+          handUpload(fd)
+            .then(res => {
+              if (res && res.data) {
+                this.setImgUid(res.data);
+              }
+            })
+            .catch(() => {})
+        });
+      }
+    },
+    // 设置截屏图片信息---上传图片
+    setImgUid (oRes) {
+     let imgObj = {
+        cname: oRes.fileName, // 附件名称 ,
+        filePathName: oRes.fileName, // 附件保存名称 ,
+        fileType: 1, // 文件类型 ,
+        imgHeight: oRes.fileHeight, // 图片高存储的单位位px ,
+        imgSize: oRes.fileSize, // 图片大小存储的单位位byte ,
+        imgWidth: oRes.fileWidth, //  图片宽存储的单位位px ,
+        path: oRes.fileFullPath, // 附件路径 ,
+        thumbnailName: oRes.thumbnailFileName, // 缩略图名称 ,
+        thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
+      };
+      this.curImageUrl = imgObj.path;
+      this.imgData = {
+        path: imgObj.path
+      };
+      if (this.$store.state.loginUser && this.$store.state.loginUser.uid) {
+        imgObj.contentUid = this.$store.state.loginUser.uid;
+        JtcPOSTAppendixInfo(imgObj).then(jRes => {
+          if (jRes) {
+            console.log(jRes);
+          }
+        })
+      }
+    },
     // 获取图片区域信息
     getImageInfo () {
       const params = {
@@ -332,15 +378,18 @@ export default {
         .then(res => {
           if (res && res.data) {
             if (res.data.length > 0) {
-              this.isOpenImgDialog = true;
-
-              res.data.map(item => {
-                const obj = {
-                  ...item,
-                  // uid: 1 + Math.random()
-                };
-                this.imgDataList.push(obj);
-              })
+              if (res.data.length === 1) {
+                let obj = res.data[0];
+                this.createImgPath(obj.x, obj.y, obj.width, obj.height);
+              } else {
+                this.isOpenImgDialog = true;
+                res.data.map(item => {
+                  const obj = {
+                    ...item
+                  };
+                  this.imgDataList.push(obj);
+                })
+              }
             } else {
               this.uploadClear = {};
             }
@@ -356,16 +405,6 @@ export default {
         }
       }
     },
-    // emitImgData (obj) {
-    //   this.isOpenImgDialog = obj.open;
-    //   if (obj.imgBDataList.length > 0) {
-    //     this.imgCutDataList = obj.imgCutDataList;
-    //     // this.curImageUrl = obj.imgPath;
-    //     // this.imgData = {
-    //     //   path: obj.imgPath
-    //     // }
-    //   }
-    // },
     /*重置菜单的数据 */
     resetMenu() {
       this.uploadClear = {};
@@ -456,6 +495,7 @@ export default {
                 this.strucInfoList = []; // 清空搜索结果
                 this.total = 0;
                 this.isInit = false; // 页面初始化状态改变
+                console.log(err)
               });
           } else {
             return false;

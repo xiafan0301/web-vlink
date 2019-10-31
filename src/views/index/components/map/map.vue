@@ -1216,7 +1216,7 @@
                 _this.resetTools(4);
                 _this.mapMark([obj], true);
               }
-            }).catch(err => {
+            }).catch(() => {
               _this.$_hideLoading();
             })
           }
@@ -1488,7 +1488,7 @@
         this.map.cluster.addMarkers(_arAdd)
       },
       domClassOper (y) {
-        let _curObj = document.getElementById('mapMark' + y.getExtData().dataType + y.getExtData().uid).classList, point = y.getPosition();
+        let _curObj = document.getElementById('mapMark' + y.getExtData().dataType + y.getExtData().uid).classList;
         let b = this.updateMarkVisible(y.getExtData());
         if (!b){
           if (!_curObj.contains(this.hideClass)) {
@@ -1659,7 +1659,7 @@
           this.map.setFitView();
         }
       },
-      supCheckedTypeChange (item, index) {
+      supCheckedTypeChange (item) {
         item.checkAll = item.supTypeList.length === item.supTypeListAll.length;
         item.isIndeterminate = item.supTypeList.length > 0 && item.supTypeList.length < item.supTypeListAll.length;
         let _i = this.constObj.findIndex(x => x === item);
@@ -1798,7 +1798,7 @@
 
       // 模拟假车辆数据
       getVehicel () {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
           setTimeout(() => {
             let arr = [];
 //          let _i = parseInt(Math.random()  * 50);

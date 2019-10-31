@@ -48,7 +48,6 @@
                     :picker-options="pickerOptions"
                     @change="chooseEndTime"
                     type="datetime"
-                    time-arrow-control
                     placeholder="选择日期时间">
             </el-date-picker>
           </el-form-item>
@@ -65,7 +64,7 @@
                 <el-button @click="resetForm('ruleForm')" class="full">重置</el-button>
               </el-col>
               <el-col :span="12">
-                <el-button type="primary" :loading="searchLoading" @click="submitForm('ruleForm')" class="select_btn full">分析</el-button>
+                <el-button type="primary" :loading="searchLoading" @click="submitForm()" class="select_btn full">分析</el-button>
               </el-col>
             </el-row>
           </el-form-item>
@@ -104,7 +103,7 @@
                       <ul>
                         <li class="p_main_list" :class="{'is_open': item.isOpen}" v-for="item in leftEvData" :key="item.id">
                           <div class="p_main_head" @click="item.isOpen = !item.isOpen"><i :class="{'el-icon-caret-right': !item.isOpen, 'el-icon-caret-bottom': item.isOpen}"></i>{{item.label}}({{item.times}}次)</div>
-                          <div class="p_main_item" v-for="(sItem, sIndex) in item.list" :key="sItem.id" @click="showStrucInfo(sItem, evData.findIndex(function (u) {return u === sItem}))">
+                          <div class="p_main_item" v-for="sItem in item.list" :key="sItem.id" @click="showStrucInfo(sItem, evData.findIndex(function (u) {return u === sItem}))">
                             <div class="info">
                               <div class="info_left">
                                 <img :src="sItem.subStoragePath" alt="">
@@ -115,7 +114,7 @@
                               </div>
                             </div>
                             <div class="address"><i class="el-icon-location-outline"></i>{{sItem.bayonetAddress ? sItem.bayonetAddress : sItem.address}}</div>
-                            <div class="del_icon el-icon-delete" @click.stop="updateLine(sItem, item.list, sIndex)"></div>
+                            <div class="del_icon el-icon-delete" @click.stop="updateLine(sItem)"></div>
                           </div>
                         </li>
                       </ul>
@@ -264,18 +263,18 @@
               <div class="struc_cd_info_main">
                 <vue-scroll>
                   <ul>
-                    <li><span>性别</span><span>{{sturcDetail.sex ? sturcDetail.sex : '未识别'}}</span></li>
+                    <li><span>性别</span><span>{{sturcDetail.gender ? sturcDetail.gender : '未识别'}}</span></li>
                     <li><span>年龄段</span><span>{{sturcDetail.age ? sturcDetail.age : '未识别'}}</span></li>
-                    <li><span>发型</span><span>{{sturcDetail.hair ? sturcDetail.hair : '未识别'}}</span></li>
+                    <li><span>发型</span><span>{{sturcDetail.hairStyleDesc ? sturcDetail.hairStyleDesc : '未识别'}}</span></li>
                     <li><span>戴眼镜</span><span>{{sturcDetail.glasses ? sturcDetail.glasses : '未识别'}}</span></li>
                     <li><span>戴帽子</span><span>{{sturcDetail.hat ? sturcDetail.hat : '未识别'}}</span></li>
                     <li><span>戴口罩</span><span>{{sturcDetail.mask ? sturcDetail.mask : '未识别'}}</span></li>
                     <li><span>抱小孩</span><span>{{sturcDetail.baby ? sturcDetail.baby : '未识别'}}</span></li>
                     <li><span>拎东西</span><span>{{sturcDetail.bag ? sturcDetail.bag : '未识别'}}</span></li>
-                    <li><span>上身款式</span><span>{{sturcDetail.upperType ? sturcDetail.upperType : '未识别'}}</span></li>
-                    <li><span>上身颜色</span><span>{{sturcDetail.upperColor ? sturcDetail.upperColor : '未识别'}}</span></li>
-                    <li><span>下身款式</span><span>{{sturcDetail.bottomType ? sturcDetail.bottomType : '未识别'}}</span></li>
-                    <li><span>下身颜色</span><span>{{sturcDetail.bottomColor ? sturcDetail.bottomColor : '未识别'}}</span></li>
+                    <li><span>上身款式</span><span>{{sturcDetail.coatLengthDesc ? sturcDetail.coatLengthDesc : '未识别'}}</span></li>
+                    <li><span>上身颜色</span><span>{{sturcDetail.coatColorDesc ? sturcDetail.coatColorDesc : '未识别'}}</span></li>
+                    <li><span>下身款式</span><span>{{sturcDetail.trousersLenDesc ? sturcDetail.trousersLenDesc : '未识别'}}</span></li>
+                    <li><span>下身颜色</span><span>{{sturcDetail.trousersColorDesc ? sturcDetail.trousersColorDesc : '未识别'}}</span></li>
                   </ul>
                 </vue-scroll>
               </div>
@@ -322,7 +321,7 @@
         </swiper>
       </div>
     </el-dialog>
-    <div id="rightMap"></div>
+    <div id="rightGjfxMap"></div>
     <div id="capMap"></div>
     <!--人工筛选-->
     <el-dialog
@@ -406,12 +405,10 @@
   import vlBreadcrumb from '@/components/common/breadcrumb.vue';
   import flvplayer from '@/components/common/flvplayer.vue';
   import { mapXupuxian,ajaxCtx } from "@/config/config.js";
-  import { objDeepCopy, random14, formatDate, dateOrigin } from "@/utils/util.js";
+  import { objDeepCopy, formatDate, dateOrigin } from "@/utils/util.js";
   import { cityCode } from "@/utils/data.js";
   import {PortraitPostPersonTrace, PersonTracePostRealTime} from "@/views/index/api/api.portrait.js";
-  import { MapGETmonitorList } from "@/views/index/api/api.map.js";
   import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
-  import { getAllBayonetList } from "@/views/index/api/api.base.js";
   export default {
     components: {vlBreadcrumb, flvplayer, vlUpload},
     data() {
@@ -525,14 +522,14 @@
       }
     },
     mounted() {
-      let map = new window.AMap.Map("rightMap", {
+      let map = new window.AMap.Map("rightGjfxMap", {
         zoom: 10,
         center: mapXupuxian.center
       });
       map.setMapStyle("amap://styles/whitesmoke");
       this.amap = map;
       // 弹窗地图
-      let supMap = new AMap.Map('capMap', {
+      let supMap = new window.AMap.Map('capMap', {
         center: mapXupuxian.center,
         zoom: 16
       });
@@ -579,22 +576,22 @@
             taskStatus: 4 // 1：处理中 2：处理成功 3：处理失败 4：处理中断
           };
           this.isInterruptLoading = true;
-//          putAnalysisTask(params)
-//              .then(res => {
-//                if (res) {
-//                  this.$message({
-//                    type: 'success',
-//                    message: '中断任务成功',
-//                    customClass: 'request_tip'
-//                  });
-//                  this.interruptDialog = false;
-//                  this.isInterruptLoading = false;
-//                  this.getDataList();
-//                } else {
-//                  this.isInterruptLoading = false;
-//                }
-//              })
-//              .catch(() => {this.isInterruptLoading = false;})
+          putAnalysisTask(params)
+              .then(res => {
+                if (res) {
+                  this.$message({
+                    type: 'success',
+                    message: '中断任务成功',
+                    customClass: 'request_tip'
+                  });
+                  this.interruptDialog = false;
+                  this.isInterruptLoading = false;
+                  this.getDataList();
+                } else {
+                  this.isInterruptLoading = false;
+                }
+              })
+              .catch(() => {this.isInterruptLoading = false;})
         }
       },
       // 确认删除任务
@@ -605,7 +602,6 @@
             taskType: 6, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
             delFlag: true
           };
-          this.isDeleteLoading = true;
           putAnalysisTask(params)
               .then(res => {
                 if (res) {
@@ -618,10 +614,10 @@
                   this.isDeleteLoading = false;
                   this.getDataList();
                 } else {
-                  this.isDeleteLoading = false;
+                  this.$MyMessage('中断失败')
                 }
               })
-              .catch(() => {this.isDeleteLoading = false;})
+              .catch(() => {this.$MyMessage('中断失败')})
         }
       },
       //恢复任务,重启任务
@@ -712,7 +708,6 @@
       },
       scrollIt (e) {
         if(e.srcElement.scrollTop + e.srcElement.offsetHeight > e.srcElement.scrollHeight - 10){
-         console.log('到底了');
          if (!this.loading && !this.noMore) {
            this.loading = true;
            setTimeout(() => {
@@ -735,7 +730,7 @@
         this.reselt = true;
         this.hideleft = false;
       },
-      submitForm(v) {
+      submitForm() {
         if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data2 && this.ruleForm.input3){
           let pg = {
           }
@@ -757,7 +752,7 @@
       },
       randerMap() {
         this.$nextTick(() => {
-          $('.vl_jig_right').append($('#rightMap'))
+          $('.vl_jig_right').append($('#rightGjfxMap'))
           this.amap.clearMap();
           this.drawMapMarker(this.evData);
         })
@@ -945,7 +940,6 @@
       },
       drawMapMarker (oData) {
         let data = this.fitlerSXT(oData);
-        let path = [];
         for (let  i = 0; i < data.length; i++) {
           let obj = data[i];
           if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
@@ -960,10 +954,10 @@
               sClass = 'vl_icon_map_mark1'
             }
             let _content = `<div class="vl_icon ` + sClass + `">` + _time + `</div>`
-            let point = new AMap.Marker({ // 添加自定义点标记
+            let point = new window.AMap.Marker({ // 添加自定义点标记
               map: this.amap,
               position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-              offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+              offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
               draggable: false, // 是否可拖动
               // 自定义点标记覆盖物内容
               content: _content
@@ -999,7 +993,7 @@
             path.push(_path);
           }
         })
-        var polyline = new AMap.Polyline({
+        var polyline = new window.AMap.Polyline({
           path: path,
           showDir: true,
           strokeColor: '#61C772',
@@ -1008,10 +1002,9 @@
         this.markerLine.push(polyline);
         this.amap.add([polyline]);
       }, // 画线
-      updateLine (obj, list, index) {
+      updateLine (obj) {
         this.amap.clearMap();
         let _i = this.evData.indexOf(obj);
-        // list.splice(index, 1)
         this.evData.splice(_i, 1);
         this.shotAddressAndTimes(this.evData);
         this.operData();
@@ -1038,22 +1031,22 @@
           sClass = 'vl_icon_map_hover_mark1'
         }
         let _content = '<div class="vl_icon ' + sClass + '"></div>'
-        this.supMarkerPoint = new AMap.Marker({ // 添加自定义点标记
+        this.supMarkerPoint = new window.AMap.Marker({ // 添加自定义点标记
           map: this.map,
           position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-          offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+          offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
           draggable: false, // 是否可拖动
           // 自定义点标记覆盖物内容
           content: _content
         });
         this.map.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
         let sConent = `<div class="cap_info_win"><p>设备名称：${data.bayonetName ? data.bayonetName : data.deviceName}</p><p>抓拍地址：${data.bayonetAddress ? data.bayonetAddress : data.address}</p></div>`
-        new AMap.InfoWindow({
+        new window.AMap.InfoWindow({
           map: this.map,
           isCustom: true,
           closeWhenClickMap: false,
           position: [data.shotPlaceLongitude, data.shotPlaceLatitude],
-          offset: new AMap.Pixel(0, -70),
+          offset: new window.AMap.Pixel(0, -70),
           content: sConent
         })
       },
@@ -1151,10 +1144,6 @@
         width: 100%;
         height: calc(100% - 53px);
         position: relative;
-        #rightMap {
-          width: 100%;
-          height: 100%;
-        }
       }
     }
   }
@@ -1637,6 +1626,26 @@
   }
 </style>
 <style lang="scss">
+  #rightGjfxMap {
+    width: 100%;
+    height: 100%;
+    .vl_icon {
+      width: 47px;
+      position: relative;
+      > .vl_map_mark_time {
+        position: absolute; top: 10px; left: 98%;
+        width: 130px;
+        word-break:keep-all;
+        font-size: 12px; color: #fff;
+        background-color: rgba(0, 0, 0, 0.4);
+        border-radius: 2px;
+        padding: 2px 5px;
+        span{
+          display: block;
+        }
+      }
+    }
+  }
   .clgj_map_show_pic {
     .vl_jtc_mk { display: block !important; }
   }

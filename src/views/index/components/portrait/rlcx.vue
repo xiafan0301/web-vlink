@@ -45,7 +45,7 @@
             </el-form-item>
 
             <el-form-item>
-              <el-radio-group v-model="searchForm.type2" @change="areaTypeChanged2">
+              <el-radio-group v-model="searchForm.type2">
                 <el-radio style="margin-left: 20px;" :label="1">从图片提取</el-radio>
                 <el-radio style="margin-left: 20px;" :label="2">自定义特征</el-radio>
               </el-radio-group>
@@ -252,12 +252,13 @@ import { mapXupuxian } from "@/config/config.js";
 import vehicleBreadcrumb from '@/components/common/breadcrumb.vue';
 import mapSelector from '@/components/common/mapSelector.vue';
 import vlUpload from '@/components/common/upload.vue';
-import {getFaceRetrievalPerson, JtcGETAppendixInfoList, getImageAreaInfo} from '../../api/api.judge.js';
+import { handUpload } from "@/views/index/api/api.base.js";
+import {getFaceRetrievalPerson, getImageAreaInfo, JtcPOSTAppendixInfo} from '../../api/api.judge.js';
 import {getPicRecognize} from '../../api/api.structuring.js';
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import {formatDate, dateOrigin} from '@/utils/util.js';
 import portraitDetail from './common/portraitDetail.vue';
-import {ajaxCtx} from '@/config/config';
+
 export default {
   components: { vehicleBreadcrumb, mapSelector, vlUpload, portraitDetail, noResult, imgSelect },
   data () {
@@ -368,6 +369,61 @@ export default {
     // this.getImageInfo();
   },
   methods: {
+    // 创建一个canvas，生成图片
+    createImgPath (x, y, width, height) {
+      let image = new Image();
+      image.setAttribute("crossOrigin",'Anonymous');
+      image.src = this.curImageUrl;
+
+      image.onload = () => {
+        
+        let $canvas = document.createElement('canvas');
+        $($canvas).attr({'width': width, 'height': height});
+        let ctx = $canvas.getContext('2d');
+  
+        ctx.drawImage(image, x, y, width, height, 0, 0, width, height);
+
+        $($canvas)[0].toBlob((blob) => {
+          let fd = new FormData();
+          let fileBlob = new File([blob], new Date().getTime() + '.png')
+          fd.append("file", fileBlob);
+          // 上传图片
+          handUpload(fd)
+            .then(res => {
+              if (res && res.data) {
+                this.setImgUid(res.data);
+              }
+            })
+            .catch(() => {})
+        });
+      }
+    },
+    // 设置截屏图片信息---上传图片
+    setImgUid (oRes) {
+     let imgObj = {
+        cname: oRes.fileName, // 附件名称 ,
+        filePathName: oRes.fileName, // 附件保存名称 ,
+        fileType: 1, // 文件类型 ,
+        imgHeight: oRes.fileHeight, // 图片高存储的单位位px ,
+        imgSize: oRes.fileSize, // 图片大小存储的单位位byte ,
+        imgWidth: oRes.fileWidth, //  图片宽存储的单位位px ,
+        path: oRes.fileFullPath, // 附件路径 ,
+        thumbnailName: oRes.thumbnailFileName, // 缩略图名称 ,
+        thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
+      };
+      this.curImageUrl = imgObj.path;
+      this.imgData = {
+        path: imgObj.path
+      };
+      if (this.$store.state.loginUser && this.$store.state.loginUser.uid) {
+        imgObj.contentUid = this.$store.state.loginUser.uid;
+        JtcPOSTAppendixInfo(imgObj).then(jRes => {
+          if (jRes) {
+            console.log(jRes);
+          }
+        })
+      }
+    },
     // 获取图片区域信息
     getImageInfo () {
       const params = {
@@ -380,15 +436,20 @@ export default {
         .then(res => {
           if (res && res.data) {
             if (res.data.length > 0) {
-              this.isOpenImgDialog = true;
+              if (res.data.length === 1) {
+                let obj = res.data[0];
+                this.createImgPath(obj.x, obj.y, obj.width, obj.height);
 
-              res.data.map(item => {
-                const obj = {
-                  ...item,
-                  // uid: 1 + Math.random()
-                };
-                this.imgDataList.push(obj);
-              })
+              } else {
+                this.isOpenImgDialog = true;
+  
+                res.data.map(item => {
+                  const obj = {
+                    ...item
+                  };
+                  this.imgDataList.push(obj);
+                })
+              }
             } else {
               this.uploadClear = {};
               this.$MyMessage('图片解析失败')
@@ -397,7 +458,6 @@ export default {
         })
     },
     emitImgData (obj) {
-      console.log(obj)
       this.isOpenImgDialog = obj.open;
       if (obj.imgPath) {
         this.curImageUrl = obj.imgPath;
@@ -546,23 +606,13 @@ export default {
         if (result.bayonetList && result.bayonetList.length > 0) {
           this.dSum += result.bayonetList.length;
         }
-//        if (result.bayonetDeviceList && result.bayonetDeviceList.length > 0) {
-//          this.dSum += result.bayonetDeviceList.length;
-//          for (let i = 0; i < result.bayonetDeviceList.length; i++) {
-//            this.dIds.push(result.bayonetDeviceList[i].uid);
-//          }
-//        }
       }
     },
-
     areaTypeChanged () {
       this.searchForm.type = 2;
       this.openMap = !this.openMap;
     },
-    areaTypeChanged2 (val) {
-    },
     searchAble () {
-      let flag = false, msg = '';
       if (this.dSum <= 0) {
         return '请选择设备';
       }

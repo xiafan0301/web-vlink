@@ -323,13 +323,9 @@
                       <span>{{scope.row.taskWebParam.age ? scope.row.taskWebParam.age : '不限'}}</span>
                     </template>
                   </el-table-column>
-                  <el-table-column label="结果数" prop="age" show-overflow-tooltip v-if="selectIndex === 1">
-                    <template slot-scope="scope">
-                      <span>{{scope.row.taskWebParam.age ? scope.row.taskWebParam.age : '不限'}}</span>
-                    </template>
-                  </el-table-column>
+                  <el-table-column label="结果数" prop="resultNum" v-if="selectIndex === 1"></el-table-column>
                   <el-table-column label="状态" v-if="selectIndex === 0" prop="taskStatus" show-overflow-tooltip>
-                    <template slot-scope="scope">
+                    <template slot-scope="scope" v-if="scope.row.taskStatus !== 2">
                       <span>{{scope.row.taskStatus && scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 3 ? '失败' : '已中断'}}</span>
                     </template>
                   </el-table-column>
@@ -538,7 +534,7 @@ export default {
       infoRightShow: false, // 右边菜单状态
       videoMenuStatus: true, // 左边菜单状态
       amap: null, // 地图对象
-      mapCenter: [110.594419, 27.908869], //地图中心位
+      // mapCenter: [110.594419, 27.908869], //地图中心位
       showTypes: "DB", //设备类型
       selectedDevice: {}, // 当前选中的设备信息
       currentClickDevice: [],
@@ -613,12 +609,10 @@ export default {
           if (res && res.data) {
             this.pagination.total = res.data.total;
             
-            // console.log(this.peopleGroupOptions)
             res.data.list.map(item => {
               let personGroupIdName = [];
               item.taskWebParam = JSON.parse(item.taskWebParam);
               let personGroupId = item.taskWebParam.personGroupId.split(',');
-              // console.log('personGroupId', personGroupId);
               
               this.peopleGroupOptions.map(val => {
                 personGroupId && personGroupId.forEach(value => {
@@ -628,8 +622,6 @@ export default {
                 })
               })
               if (personGroupIdName.length > 0) {
-                // console.log('personGroupIdName', personGroupIdName);
-                
                 item.taskWebParam.personGroupId = personGroupIdName.join('、');
               }
             })
@@ -821,9 +813,7 @@ export default {
     },
     // 获取地图选择的数据
     mapPoint (data) {
-      // console.log('data', data)
       if (data) {
-
         let allDeviceNameList = [];
         if (data.deviceList.length > 0) {
           data.deviceList.map(item => {
@@ -847,7 +837,6 @@ export default {
         if (this.deleteIndexArr.length > 0) { // 如果之前删除过，则将之前删除的值删除
           this.deleteIndexArr.splice(0, 1);
         }
-        // console.log('addddd', this.deleteIndexArr)
         this.selectAreaDataList.push(obj);
       }
     },
@@ -1013,6 +1002,8 @@ export default {
                   this.submitLoading = false;
                   this.selectIndex = 1;
                   this.getTaskList();
+
+                  this.resetLeftMenu('qyryfxFrom');
                 } else {
                   this.submitLoading = false;
                 }
@@ -1060,7 +1051,7 @@ export default {
       let map = new window.AMap.Map("mapMap", {
         zoom: 14, // 级别
         resizeEnable: true,
-        center: _this.mapCenter // 中心点坐标
+        center: mapXupuxian.center // 中心点坐标
       });
       map.setMapStyle("amap://styles/whitesmoke");
       _this.amap = map;

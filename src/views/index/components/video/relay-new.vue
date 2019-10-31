@@ -215,11 +215,10 @@
   </div>
 </template>
 <script>
-import {ajaxCtx} from '@/config/config';
 import {mapXupuxian} from '@/config/config.js';
 import vlUpload from '@/components/common/upload.vue';
-import {apiAreaServiceDeviceList, getAllMonitorList, getAllBayonetList, getDeviceByBayonetUids} from "@/views/index/api/api.base.js";
-import {JtcGETAppendixInfoList, addPersonVideoContinue, addVhicleVideoContinue} from '@/views/index/api/api.judge.js';
+import {getDeviceByBayonetUids} from "@/views/index/api/api.base.js";
+import {addPersonVideoContinue, addVhicleVideoContinue} from '@/views/index/api/api.judge.js';
 import {getPhotoAnalysis} from "@/views/index/api/api.analysis.js"; // 车辆特征检索接口
 import {getPicRecognize} from '../../api/api.structuring.js';
 import {MapGETmonitorList} from '@/views/index/api/api.map.js'; // 获取设备树接口
@@ -547,7 +546,7 @@ export default {
     // 标记设备/卡口
     doMark (lnglat, title, sClass) {
       // console.log('doMark', obj);
-      let marker = new window.AMap.Marker({ // 添加自定义点标记
+      new window.AMap.Marker({ // 添加自定义点标记
         map: this.xjMap,
         position: lnglat, // 基点位置 [116.397428, 39.90923]
         offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
@@ -736,7 +735,7 @@ export default {
             this.xjClose(true);
           }
           this.submitLoading = false;
-        }).catch((error => {
+        }).catch((() => {
           this.submitLoading = false;
         }));
       } else if (this.xjType === 2) {
@@ -756,7 +755,7 @@ export default {
             this.xjClose(true);
           }
           this.submitLoading = false;
-        }).catch((error => {
+        }).catch((() => {
           this.submitLoading = false;
         }));
       }

@@ -261,7 +261,6 @@ export default {
       this.isAddLoading = true;
       addVideoRound(params)
         .then(res => {
-          console.log('res', res)
           if (res) {
             this.$message({
               type: 'success',
@@ -300,9 +299,6 @@ export default {
             allKkDeviceIds.push(a.uid);
           });
         });
-
-        // console.log('currSxtDeviceIds', currSxtDeviceIds)
-        // console.log('allSxtDeviceIds', allSxtDeviceIds)
 
         let newCurrSxtDeviceIds = JSON.parse(JSON.stringify(currSxtDeviceIds));
         let newAllSxtDeviceIds = JSON.parse(JSON.stringify(allSxtDeviceIds));
@@ -343,8 +339,7 @@ export default {
             }
           }
         }
-        // console.log('currSxtDeviceIds', newCurrSxtDeviceIds)
-        // console.log('allSxtDeviceIds', newAllSxtDeviceIds)
+
         devList = newCurrSxtDeviceIds;
         newAllSxtDeviceIds.map(item => {
           devList.push(item);

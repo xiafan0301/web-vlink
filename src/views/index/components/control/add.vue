@@ -197,12 +197,11 @@
 </template>
 <script>
 import {modelOne,modelTwo,modelThree,modelFour,modelFive,modelSix} from './components/modelType.js';
-import {getAllMonitorList, getControlInfoByName, addControl, getControlDetailIsEditor, putControl} from '@/views/index/api/api.control.js';
+import {getControlInfoByName, addControl, getControlDetailIsEditor, putControl} from '@/views/index/api/api.control.js';
 import {getEventList, getEventDetail, updateEvent} from '@/views/index/api/api.event.js';
 import {getOrganInfos} from '@/views/index/api/api.message.js';
 import {getCascadeTypeList} from '@/views/index/api/api.base.js';
-import {formatDate, objDeepCopy, unique} from '@/utils/util.js';
-import {mapXupuxian} from '@/config/config.js';
+import {formatDate, objDeepCopy} from '@/utils/util.js';
 import {dataList} from '@/utils/data.js';
 import {checkName, validatePhone} from '@/utils/validator.js';
 export default {
@@ -317,7 +316,7 @@ export default {
   },
   mounted () {
     this.getEventList();
-    this.getCascadeTypeList();
+    this.getCascadeTypeList()
     this.getOrganInfos();
     this.getTimeAfter();
     this.Bus.$on('sendIsShowOperateBtn', bl => {
@@ -345,7 +344,6 @@ export default {
     },
     // 布控事件下拉列表滚动加载方法
     loadMore () {
-      console.log(111111111);
       this.pageNum++;
       this.getEventList();
     },
@@ -499,7 +497,6 @@ export default {
             this.modelData = null;
             this.$refs['model'].sendParent();
             if (!this.modelData) return;
-            console.log(this.modelData, 'this.modelData');
             let data  = {
               ..._createForm,
               modelList: [this.modelData]
@@ -607,7 +604,6 @@ export default {
           const [{modelType}] = modelList;
           this.modelList = modelList;
           this.modelType_ = this.modelType = modelType;
-          console.log(this.modelList, 'modelList')
           this.$_hideLoading();
         }
       })
@@ -637,7 +633,6 @@ export default {
             this.modelData = null;
             this.$refs['model'].sendParent();
             if (!this.modelData) return;
-            console.log(this.modelData, 'this.modelData');
             let data  = {
               ..._createForm,
               modelList: [this.modelData]

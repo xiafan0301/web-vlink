@@ -201,7 +201,7 @@ export default {
             // 需要分页
             this.pagination.pageNum = this.pagination.pageNum + 1;
             this.strucIndex = 0;
-            this.getList(this.pagination.pageNum);
+            this.getList();
           }
         }
       } else {
@@ -212,7 +212,7 @@ export default {
           if (this.pagination.pageNum > 1) {
             this.pagination.pageNum = this.pagination.pageNum - 1;
             this.strucIndex = this.pagination.pageSize - 1;
-            this.getList(this.pagination.pageNum);
+            this.getList();
           }
         }
       }
@@ -220,7 +220,7 @@ export default {
       console.log('this.pagination.pageNum', this.pagination.pageNum); */
     },
     // 获取列表数据
-    getList (pageNum) {
+    getList () {
       // type === 1 for 特征搜人
       if (this.type === 1) {
         let params = Object.assign(this.params, {
@@ -241,7 +241,7 @@ export default {
     drawPoint(data) {
       if (!this.amap) {
         // 地图不存在 初始化地图
-        let map = new AMap.Map("portraitDetail_capMap", {
+        let map = new window.AMap.Map("portraitDetail_capMap", {
           center:mapXupuxian.center,
           zoom: 16
         });
@@ -260,11 +260,11 @@ export default {
             '<li><span>抓拍时间：</span>' + data.shotTime + '</li>' +
           '</ul>' +
         '</div>';
-      this.markerPoint = new AMap.Marker({
+      this.markerPoint = new window.AMap.Marker({
         // 添加自定义点标记
         map: this.amap,
         position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-        offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+        offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
         draggable: false, // 是否可拖动
         // 自定义点标记覆盖物内容
         content: _content
