@@ -22,12 +22,14 @@
        </ul>
      </div>
      <div class="special_csmanage_right_r special_csmanage_right" :class="{'hideResult': Result}">
-       <div v-for="(item, index) in fenzulist" :key ="index" :class="['special_csmanage_right_r_tree', 'special_csmanage_right_r_tree_'+ index]" style="height: 30px">
-         <div class="special_csmanage_right_r_tree_hd" @click="oo(item,index)" :class="{'opencolor': item.isopen }"><i :class="[{'el-icon-arrow-right': !item.isopen},{'el-icon-arrow-down':item.isopen}]"></i>{{item.deviceList[0].address}}</div>
-         <div class="special_csmanage_right_r_tree_i" v-for="(ite, inde) in item.deviceList" :key ="inde">
-           <div>{{ite.deviceName}}</div>
+       <vue-scroll>
+         <div v-for="(item, index) in fenzulist" :key ="index" :class="['special_csmanage_right_r_tree', 'special_csmanage_right_r_tree_'+ index]">
+           <div class="special_csmanage_right_r_tree_hd" @click="oo(item,index)" :class="{'opencolor': item.isopen }"><i :class="[{'el-icon-arrow-right': !item.isopen},{'el-icon-arrow-down':item.isopen}]"></i>{{item.deviceList[0].address}}</div>
+           <div class="special_csmanage_right_r_tree_i" v-for="(ite, inde) in item.deviceList" :key ="inde">
+             <div v-show="item.isopen">{{ite.deviceName}}</div>
+           </div>
          </div>
-       </div>
+       </vue-scroll>
        <div class="insetLeft vl_icon vl_icon_vehicle_02" @click="hideResult" :class="{'vl_icon_vehicle_03': Result}"></div>
      </div>
      <div class="map_rm" id="mapMap"></div>
@@ -130,10 +132,15 @@ export default {
     },
     oo (val,index) {
       val.isopen = !val.isopen
+      let _heit  = 0
+      if(val.isopen) {
+        _heit = $('.special_csmanage_right_r_tree_' + index).height()
+      }
+      console.log(_heit)
       if (val.isopen) {
         $('.special_csmanage_right_r_tree_' + index).animate({height:175}, 300, "linear")
       } else {
-        $('.special_csmanage_right_r_tree_' + index).animate({height:30}, 300, "linear")
+        $('.special_csmanage_right_r_tree_' + index).animate({height:_heit + 20}, 300, "linear")
       }
     }
   }

@@ -7,15 +7,110 @@
       </el-breadcrumb>
     </div>
     <div class="tpcfxxq_content">
-      <div class="tpcfxxq_content_cl">
-        <div style="padding: 10px 20px; border-bottom: 1px solid #F2F2F2">车辆登记信息</div>
+      <div class="tpcfxxq_content_cl" v-if="showll">
+        <div style="padding: 10px 20px; border-bottom: 1px solid #F2F2F2; font-size:16px;">车辆登记信息</div>
         <div class="cei_pai">{{this.$route.query.vehicleNumber}}</div>
         <div style="display: inline-block; line-height: 40px">
           <el-button type="primary" style="width: 80px" @click="serchtpc">查询</el-button>
         </div>
       </div>
+      <div class="ccrc_content_right_content" v-else  v-loading="searchLoading">
+        <div class="title" style="padding: 10px 20px; border-bottom: 1px solid #F2F2F2; font-size:16px;">车辆登记信息</div>
+        <div class="ccrc_content_right_table">
+          <div>
+            <div style="width: 70px" class="smalltitle">
+              号牌号码：
+            </div>
+            <div class="ttt-1">{{vehicleArch.plateno}}</div>
+          </div>
+          <div>
+            <div style="width: 80px; white-space:nowrap;" class="smalltitle">
+              车辆所有人：
+            </div>
+            <div class="ttt-2">{{vehicleArch.owner}}</div>
+          </div>
+          <div>
+            <div style="width: 70px; white-space:nowrap" class="smalltitle">
+              中文品牌：
+            </div>
+            <div class="ttt-2">{{vehicleArch.brand}}</div>
+          </div>
+          <div>
+            <div style="width: 70px; white-space:nowrap" class="smalltitle">
+              车身颜色：
+            </div>
+            <div class="ttt-2">{{vehicleArch.color}}</div>
+          </div>
+          <div>
+            <div style="width: 70px; white-space:nowrap" class="smalltitle">
+              车身形式：
+            </div>
+            <div class="ttt-2">{{vehicleArch.bodyform}}</div>
+          </div>
+          <div>
+            <div style="width: 86px; white-space:nowrap" class="smalltitle">
+              车门数：
+            </div>
+            <div class="ttt-2">{{vehicleArch.doornumber}}</div>
+          </div>
+          <div>
+            <div style="width: 70px; white-space:nowrap" class="smalltitle">
+              发动机号：
+            </div>
+            <div class="ttt-2">{{vehicleArch.engineno}}</div>
+          </div>
+          <div>
+            <div style="width: 70px; white-space:nowrap" class="smalltitle">
+              车辆类型：
+            </div>
+            <div class="ttt-2">{{vehicleArch.platetype}}</div>
+          </div>
+          <div>
+            <div style="width: 70px; white-space:nowrap" class="smalltitle">
+              年款：
+            </div>
+            <div class="ttt-2">{{vehicleArch.model}}</div>
+          </div>
+          <div>
+            <div style="width: 86px; white-space:nowrap" class="smalltitle">
+              座位数：
+            </div>
+            <div class="ttt-2">{{vehicleArch.seatnumber}}</div>
+          </div>
+          <div>
+            <div style="width: 70px; white-space:nowrap" class="smalltitle">
+              车辆状态：
+            </div>
+            <div class="ttt-2">{{vehicleArch.status}}</div>
+          </div>
+          <div>
+            <div style="width: 70px; white-space:nowrap" class="smalltitle">
+              使用性质：
+            </div>
+            <div class="ttt-2">{{vehicleArch.usecharacter}}</div>
+          </div>
+          <div>
+            <div style="width: 70px; white-space:nowrap" class="smalltitle">
+              车型：
+            </div>
+            <div class="ttt-2">{{vehicleArch.vehicletype}}</div>
+          </div>
+          <div>
+            <div style="width: 86px; white-space:nowrap" class="smalltitle">
+              厂商名称：
+            </div>
+            <div class="ttt-2">{{vehicleArch.vendor}}</div>
+          </div>
+          <div>
+            <div style="width: 70px; white-space:nowrap" class="smalltitle">
+              有效期止：
+            </div>
+            <div class="ttt-2">{{vehicleArch.validuntil}}</div>
+          </div>
+        </div>
+      </div>
       <div class="tpcfxxq_content_tp">
-        <div style="padding: 10px 20px; border-bottom: 1px solid #F2F2F2">套牌拽拍信息</div>
+        <div style="padding: 10px 20px; border-bottom: 1px solid #F2F2F2; font-size: 16px">套牌抓拍信息</div>
         <div class="th-ycxc-record">
           <div class="th-ycxc-record-list">
             <div class="list-box">
@@ -46,6 +141,7 @@
 
 <script>
 import {JtcPOSTAppendtpInfo} from '../../../api/api.judge.js';
+import {getArchives} from '../../../api/api.analysis.js';
 import vehicleDetail from '../common/vl-dialog.vue';
 import { formatDate } from "@/utils/util.js";
 export default {
@@ -63,6 +159,9 @@ export default {
         total: 0
       },
       currentPage: 1,
+      showll: true,
+      vehicleArch: {},      //车辆档案
+      searchLoading: false
     }
   },
   created() {
@@ -72,7 +171,8 @@ export default {
   },
   methods: {
     serchtpc () {
-      this.$router.push({ name: "vehicle_search_tpc" , query: {value1: formatDate(this.$route.query.value1), value2: formatDate(this.$route.query.value2), vehicleNumber: this.$route.query.vehicleNumber}});
+      this.showll = false
+      this.getVehicle()
     },
     getViolationList() {
       let params = {}
@@ -91,6 +191,24 @@ export default {
         })
       }).catch( error => {
         console.log(error);
+      })
+    },
+    //获取车辆档案
+    getVehicle() {
+      this.searchLoading = true;
+      const query = {
+        plateNo: this.$route.query.vehicleNumber
+      }
+      this.searching = true;
+      getArchives(query).then( res => {
+        console.log("0000000000",res)
+        if(res && res.data) {
+          this.vehicleArch = res.data
+        }
+        this.searchLoading = false;
+      }).catch(error => {
+        console.log(error);
+        this.searchLoading = false;
       })
     },
     /**
@@ -117,6 +235,40 @@ export default {
 
 <style scoped lang="scss">
   .tpcfxxq{
+    .ccrc_content_right_content{
+      background-color: white;
+      box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
+      .title{
+        border-bottom: 1px solid #F2F2F2;
+        padding: 20px;
+        font-size:16px;
+      }
+      .ccrc_content_right_table{
+        flex-wrap:wrap;
+        display: flex;
+        padding: 20px;
+        >div{
+          width: 25%;
+          padding-bottom: 20px;
+          display: flex;
+          .smalltitle{
+            text-align: right;
+            color: #666666;
+          }
+          .ttt-1{
+            width: calc(100% - 70px);
+            word-wrap: break-word
+          }
+          .ttt-2{
+            width: calc(100% - 80px);
+            word-wrap: break-word
+          }
+        }
+      }
+      .cum_pagination{
+        padding-right: 0;
+      }
+    }
    height: 100%;
     .ccrc_breadcrumb{
       background-color: white;
