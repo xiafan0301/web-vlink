@@ -233,22 +233,22 @@
           sClass = 'vl_icon_map_hover_mark1'
         }
         let _content = '<div class="vl_icon ' + sClass + '"></div>'
-        this.markerPoint = new AMap.Marker({ // 添加自定义点标记
+        this.markerPoint = new window.AMap.Marker({ // 添加自定义点标记
           map: this.amap,
           position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-          offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+          offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
           draggable: false, // 是否可拖动
           // 自定义点标记覆盖物内容
           content: _content
         });
         this.amap.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
         let sConent = `<div class="cap_info_win_dia"><p>设备名称：${data.bayonetName ? data.bayonetName : data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`
-        this.infoWindow = new AMap.InfoWindow({
+        this.infoWindow = new window.AMap.InfoWindow({
           map: this.amap,
           isCustom: true,
           closeWhenClickMap: false,
           position: [data.shotPlaceLongitude, data.shotPlaceLatitude],
-          offset: new AMap.Pixel(0, -70),
+          offset: new window.AMap.Pixel(0, -70),
           content: sConent
         })
       },

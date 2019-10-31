@@ -67,6 +67,7 @@
           </el-select>
           <el-input v-model="queryForm.provinceName" placeholder="请输入车牌号"></el-input>
         </div>
+        <p style="font-size: 13px;line-height: 1.5;color: #999999;">如有不确定的车牌信息可用“?”代替，如：湘A12??5</p>
         <div class="left_btn">
           <el-button class="reset_btn" @click="resetQueryForm">重置</el-button>
           <el-button class="select_btn" type="primary" @click="getControlCarSta" :loading="loadingBtn">查询</el-button>

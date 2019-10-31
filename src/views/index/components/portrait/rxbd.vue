@@ -32,7 +32,7 @@
   import vlUpload from '@/components/common/upload.vue';
   import {ajaxCtx} from '@/config/config';
   import {ScpGETbasePortraitInfo, ScpGETportraitCmpInfo, ScpGETretrievalHisById} from '../../api/api.search.js';
-  import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcPUTAppendixsOrder} from '../../api/api.judge.js'
+  import {JtcGETAppendixInfoList} from '../../api/api.judge.js'
   export default {
     components: {vlUpload},
     data () {

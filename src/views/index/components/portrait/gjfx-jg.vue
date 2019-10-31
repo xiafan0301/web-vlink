@@ -266,7 +266,7 @@
         </div>
       </div>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="filterDialog = false">取 消</el-button>
+        <el-button @click="chooseCancel">取 消</el-button>
         <el-button type="primary" @click="chooseOk">确 定</el-button>
       </span>
     </el-dialog>
@@ -476,6 +476,7 @@
           pg['endTime'] = formatDate(this.ruleForm.data2);
           pg['uploadImgUrls'] = this.ruleForm.input3;
           pg['taskId'] = this.$route.query.uid;
+          pg['taskName'] = this.taskDetail.taskName;
           pg['taskOperateType'] = 1;
           this.getVehicleShot(pg);
         }else{
@@ -598,6 +599,12 @@
         item.times--;
         this.evData.splice(this.evData.findIndex(x => x === sItem), 1);
         this.shotAddressAndTimes(this.evData);
+      },
+      chooseCancel () {
+        this.filterDialog = false;
+        this.evData = [];
+        this.reselt = false;
+        this.amap.clearMap();
       },
       chooseOk () {
         this.showLeft = true;
@@ -1056,7 +1063,7 @@
             padding-left: 10px;
             float: right;
             >div {
-              font-size: 24px;
+              font-size: 20px;
               color: #0C70F8;
               font-weight: bold;
               margin-top: 10px;

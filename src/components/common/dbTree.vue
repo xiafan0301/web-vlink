@@ -1,54 +1,76 @@
 <template>
+<div>
+  <div class="sdd_c_tab" v-show="showTypes.indexOf('D') >= 0 && showTypes.indexOf('B') >= 0">
+    <span :class="{'active': leftTabShow === 0}" @click="leftTabShow = 0">摄像头</span>
+    <span :class="{'active': leftTabShow === 1}" @click="leftTabShow = 1">卡口</span>
+  </div>
   <ul class="db_tree" :id="dbId">
     <li :id="'db_area_' + item.areaId" v-for="(item, index) in treeList" :key="'tl_' + index">
-      <i class="el-icon-arrow-right" @click="selFirstEvent(item.areaId)"></i>
-      <span @click="selFirstEvent(item.areaId)">{{item.areaName}}</span>
+      <!-- <i class="el-icon-arrow-right" @click="selFirstEvent(item.areaId)"></i>
+      <span @click="selFirstEvent(item.areaId)">{{item.areaName}}</span> -->
       <ul class="db_tree_s" v-if="item.areaTreeList && item.areaTreeList.length > 0">
-        <li :id="'db_area_' + sitem.areaId" v-for="(sitem, sindex) in item.areaTreeList" :key="'stl_' + sindex">
-          <i class="el-icon-caret-right" @click="selSecondEvent(sitem.areaId, item.areaId)"></i>
-          <span @click="selSecondEvent(sitem.areaId, item.areaId)">{{sitem.areaName}}</span>
-          <div class="db_tree_c">
-            <div>
-              <span class="db_tree_ct_d db_tree_ct_sed" @click="changeType(sitem.areaId, 1)">摄像头</span>
-              <span class="db_tree_ct_b" @click="changeType(sitem.areaId, 2)">卡口</span>
-            </div>
-            <ul class="db_tree_cul db_tree_cd db_tree_cul_open">
-              <template v-if="sitem.deviceBasicList && sitem.deviceBasicList.length > 0">
-                <li @click="selectItem(1, ditem, $event)" v-for="(ditem, dindex) in sitem.deviceBasicList" :key="'dl_' + index + '_' + sindex + '_' + dindex">
-                  {{ditem.deviceName}}
-                  <i class="vl_icon vl_icon_v11"></i>
-                </li>
+        <template v-if="leftTabShow === 0">
+          <li :id="'db_area_' + sitem.areaId" v-for="(sitem, sindex) in item.areaTreeList" :key="'stl_' + sindex">
+            <template v-if="sitem.deviceBasicList && sitem.deviceBasicList.length > 0">
+              <i class="el-icon-caret-right" @click="selSecondEvent(sitem.areaId, item.areaId)"></i>
+              <span @click="selSecondEvent(sitem.areaId, item.areaId)">{{sitem.areaName}}</span>
+              <div class="db_tree_c">
+              <!--  <div>
+                  <span class="db_tree_ct_d db_tree_ct_sed" @click="changeType(sitem.areaId, 1)">摄像头</span>
+                  <span class="db_tree_ct_b" @click="changeType(sitem.areaId, 2)">卡口</span>
+                </div> -->
+                <ul class="db_tree_cul db_tree_cd db_tree_cul_open">
+                    <li @click="selectItem(1, ditem, $event)" v-for="(ditem, dindex) in sitem.deviceBasicList" :key="'dl_' + index + '_' + sindex + '_' + dindex">
+                      {{ditem.deviceName}}
+                      <i class="vl_icon vl_icon_v11"></i>
+                    </li>
+                </ul>
+                <ul class="db_tree_cul db_tree_cb db_tree_cul_open"  v-if="leftTabShow === 1">
+                  <template v-if="sitem.bayonetList && sitem.bayonetList.length > 0">
+                    <li @click="selectItem(2, bitem, $event)" v-for="(bitem, bindex) in sitem.bayonetList" :key="'bl_' + index + '_' + sindex + '_' + bindex">
+                      {{bitem.bayonetName}}
+                      <i class="vl_icon db_tree_cul_ck"></i>
+                    </li>
+                  </template>
+                  <template v-else>
+                    <li class="db_li_empty">暂无</li>
+                  </template>
+                </ul>
+              </div>
+            </template>
+          </li>
+        </template>
+        <template v-if="leftTabShow === 1">
+          <li :id="'db_area_' + sitem.areaId" v-for="(sitem, sindex) in item.areaTreeList" :key="'stl_' + sindex">
+            <template v-if="sitem.bayonetList && sitem.bayonetList.length > 0">
+              <i class="el-icon-caret-right" @click="selSecondEvent(sitem.areaId, item.areaId)"></i>
+              <span @click="selSecondEvent(sitem.areaId, item.areaId)">{{sitem.areaName}}</span>
+              <div class="db_tree_c">
+                <ul class="db_tree_cul db_tree_cd db_tree_cul_open">
+                  <li @click="selectItem(2, bitem, $event)" v-for="(bitem, bindex) in sitem.bayonetList" :key="'bl_' + index + '_' + sindex + '_' + bindex">
+                      {{bitem.bayonetName}}
+                      <i class="vl_icon db_tree_cul_ck"></i>
+                    </li>
+                </ul>
+              </div>
               </template>
-              <template v-else>
-                <li class="db_li_empty">暂无</li>
-              </template>
-            </ul>
-            <ul class="db_tree_cul db_tree_cb">
-              <template v-if="sitem.bayonetList && sitem.bayonetList.length > 0">
-                <li @click="selectItem(2, bitem, $event)" v-for="(bitem, bindex) in sitem.bayonetList" :key="'bl_' + index + '_' + sindex + '_' + bindex">
-                  {{bitem.bayonetName}}
-                  <i class="vl_icon db_tree_cul_ck"></i>
-                </li>
-              </template>
-              <template v-else>
-                <li class="db_li_empty">暂无</li>
-              </template>
-            </ul>
-          </div>
-        </li>
+          </li>
+        </template>
       </ul>
     </li>
   </ul>
+</div>
 </template>
 <script>
 import {random14} from '@/utils/util.js';
 import {MapGETmonitorList} from '@/views/index/api/api.map.js';
 export default {
-  props: ['likeKey', 'doSearch'],
+  props: ['likeKey', 'doSearch', 'showTypes'],
   data () {
     return {
       treeList: [],
       dbId: 'db_tree_' + random14(),
+      leftTabShow: 0,
     }
   },
   watch: {
@@ -60,6 +82,13 @@ export default {
     this.getTreeList();
   },
   methods: {
+    getCurTypeData (item) {
+        if (this.filterable) {
+          return item.filter(x => x.dataType === this.leftTabShow && x.infoName.includes(this.filterable));
+        } else {
+          return item.filter(x => x.dataType === this.leftTabShow);
+        }
+    },
     getTreeList () {
       let params = {
         areaUid: '431224',
@@ -134,6 +163,29 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.sdd_c_tab {
+    height: 28px;
+    border: 1px solid #D3D3D3;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    width: 232px;
+    margin-left: 20px;
+    > span {
+      display: inline-block;
+      float: left;
+      width: 50%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    >.active{
+      background: #E0F2FF;
+      color: #0C70F8;
+    }
+  }
 /* 设备/卡口 树样式 */
 .db_tree {
   > li {
@@ -160,9 +212,10 @@ export default {
   }
   .db_tree_s {
     display: none;
-    position: relative; top: -5px;
+    position: relative;
     > li {
       position: relative;
+      top: 5px;
       > span {
         display: block;
         height: 36px; line-height: 36px;

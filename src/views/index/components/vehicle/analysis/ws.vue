@@ -99,7 +99,7 @@
                       <i class="vl_icon_tail_2 vl_icon"></i>
                       {{item.PlateNo}}
                     </span>
-                    <span class="vehicle_type">{{item.VehicleClass}}</span>
+                    <span class="vehicle_type">{{item.vehicleClassDesc}}</span>
                   </p>
                   <p>
                     <i class="vl_icon_tail_1 vl_icon"></i>

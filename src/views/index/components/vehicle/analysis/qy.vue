@@ -39,24 +39,6 @@
                   <!--</div>-->
                   <!--区域选择-->
                   <div class="search_item">
-                    <div class="search_line_ts">
-                      <div class="title">
-                        <span class="">区域:</span>
-                        <!--<span>-->
-                          <!--<i class="choose_btn el-icon-location-outline" @click="setFitV(index)" :class="{'not-active': !item.area}"></i>-->
-                          <!--<i class="choose_btn el-icon-delete" v-show="index > 1" @click="clearArea(index)"></i>-->
-                        <!--</span>-->
-                      </div>
-                      <div class="drawBox">
-                        <div class="items">
-                          <span @click="clickTab('cut1', searchData.length)" :class="['cut1',{'hover':hover=='cut1'}]"></span>
-                          <span @click="clickTab('cut2', searchData.length)"  :class="['cut2',{'hover':hover=='cut2'}]"></span>
-                          <!--<span @click="clickTab('cut3', searchData.length)"  :class="['cut3',{'hover':hover=='cut3'}]"></span>-->
-                          <span @click="clickTab('cut4', searchData.length)"  :class="['cut4',{'hover':hover=='cut4'}]"></span>
-                          <!--<span @click="clickTab('cut5', searchData.length)"  :class="['cut5',{'hover':hover=='cut5'}]"></span>-->
-                        </div>
-                      </div>
-                    </div>
                     <div class="search_line">
                       <!--<span class="time">开始</span>-->
                       <el-date-picker
@@ -83,6 +65,24 @@
                               type="datetime"
                               placeholder="请选择结束时间">
                       </el-date-picker>
+                    </div>
+                    <div class="search_line_ts">
+                      <div class="title">
+                        <span class="">区域:</span>
+                        <!--<span>-->
+                        <!--<i class="choose_btn el-icon-location-outline" @click="setFitV(index)" :class="{'not-active': !item.area}"></i>-->
+                        <!--<i class="choose_btn el-icon-delete" v-show="index > 1" @click="clearArea(index)"></i>-->
+                        <!--</span>-->
+                      </div>
+                      <div class="drawBox">
+                        <div class="items">
+                          <span @click="clickTab('cut1', searchData.length)" :class="['cut1',{'hover':hover=='cut1'}]"></span>
+                          <span @click="clickTab('cut2', searchData.length)"  :class="['cut2',{'hover':hover=='cut2'}]"></span>
+                          <!--<span @click="clickTab('cut3', searchData.length)"  :class="['cut3',{'hover':hover=='cut3'}]"></span>-->
+                          <span @click="clickTab('cut4', searchData.length)"  :class="['cut4',{'hover':hover=='cut4'}]"></span>
+                          <!--<span @click="clickTab('cut5', searchData.length)"  :class="['cut5',{'hover':hover=='cut5'}]"></span>-->
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <!--按钮-->

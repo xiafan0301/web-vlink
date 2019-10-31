@@ -54,7 +54,7 @@
           </div>
           <div class="data_list">
             <span :title="item.vehicleNumber">{{item.vehicleNumber}}</span>
-            <span :title="item.numberType">{{item.numberType}}</span>
+            <span :title="item.numberType" v-if="item.numberType">{{item.numberType}}</span>
           </div>
           <div class="data_list">
             <span :title="item.vehicleType" v-if="item.vehicleType">{{item.vehicleType}}</span>
@@ -123,7 +123,7 @@ export default {
       vehicleColorList: this.dicFormater(dataList.carColor)[0].dictList,
       vehicleTypeList: this.dicFormater(dataList.vehicleType)[0].dictList,
       plateTypeList: this.dicFormater(dataList.plateType)[0].dictList,
-      plateColorList: this.dicFormater(dataList.plateColor)[0].dictList,
+      plateColorList: this.dicFormater(dataList.plateColor)[0].dictList,  
       vehicleLibDialog: false,
       loading: false,
       currentPage: 1,
@@ -186,7 +186,7 @@ export default {
     getSpecialGroup () {
       getSpecialGroup().then(res => {
         if (res && res.data) {
-          const obj = res.data.find(f => f.name === '红名单');
+          const obj = res.data.find(f => f.name === '公务车辆');
           if (obj) this.gwclGroupId = obj.id;
           this.getSpecialVehicleList();
         }
@@ -217,15 +217,15 @@ export default {
             }
             let {vehicleImagePath, numberColor, numberType, vehicleColor, vehicleType, groupList, ...other} = f;
             const obj1 = this.plateColorList.find(f => f.enumField === numberColor);
-            numberColor = obj1 ? obj1.enumValue : '无';
+            numberColor = obj1 ? obj1.enumValue : '';
 
             const obj2 = this.vehicleTypeList.find(f => f.enumField === vehicleType);
-            vehicleType = obj2 ? obj2.enumValue : '无';
+            vehicleType = obj2 ? obj2.enumValue : '';
             const obj3 = this.plateTypeList.find(f => f.enumField === numberType);
-            numberType = obj3 ? obj3.enumValue : '无';
+            numberType = obj3 ? obj3.enumValue : '';
             
             const obj4 = this.vehicleColorList.find(f => f.enumField === vehicleColor);
-            vehicleColor = obj4 ? obj4.enumValue : '无';
+            vehicleColor = obj4 ? obj4.enumValue : '';
             const groupNames = groupList.map(m => m.groupName).join(',');
             return {
               photoUrl: vehicleImagePath,
