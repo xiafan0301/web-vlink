@@ -33,7 +33,7 @@
           </el-date-picker>
         </div>
         <div class="rlcx_xzsb_s" @click="areaTypeChanged" v-show="queryForm.type === 0">
-          <span>选择设备</span>
+          <span>全部设备</span>
           <span class="el-icon-arrow-down"></span>
         </div>
         <div class="rlcx_dtxz_rst" v-show="queryForm.type === 2">
@@ -41,7 +41,7 @@
         </div>
         <div class="left_btn">
           <el-button class="reset_btn" @click="resetQueryForm">重置</el-button>
-          <el-button class="select_btn" type="primary" @click="search" :loading="loadingBtn">统计</el-button>
+          <el-button class="select_btn" type="primary" @click="getCarBeforeSta" :loading="loadingBtn">统计</el-button>
         </div>
       </div>
       <div class="con_right">
@@ -187,44 +187,13 @@ export default {
         passingCarNums: '',
         carNums: '',
         fieldCarNums: ''
-      },
-    
-      // selectLength: null
+      }
     }
-  },
-  watch: {
-    // 'queryForm.startTime' () {
-    //   const threeDays = 2 * 3600 * 24 * 1000;
-    //   const endTime = new Date(this.queryForm.startTime).getTime() + threeDays;
-    //   this.queryForm.endTime = formatDate(endTime, 'yyyy-MM-dd');
-    // },
-    // selectLength () {
-    //   // 设备和卡口全选后才获取过车数据统计
-    //   if (this.selectLength === (this.queryForm.devData.selSelectedData1.length + this.queryForm.devData.selSelectedData2.length)) {
-    //     this.getCarBeforeSta();
-    //   }
-    // }
   },
   mounted () {
     this.getCarBeforeSta();
   },
   methods: {
-    // getEndTime(time) {
-    //   let startTime = new Date(this.queryForm.startTime).getTime();
-    //   this.pickerOptions1 = {
-    //     disabledDate(time) {
-    //       return time.getTime() < (startTime - 8.64e7) || time.getTime() > ((startTime + 2 * 3600 * 24 * 1000) - 8.64e6);
-    //     },
-    //   }
-    // },
-    // 获取子组件传过来的设备和卡口总是
-    // allSelectLength (num) {
-    //   this.selectLength = num;
-    // },
-    // 获得选择设备组件传过来的数据
-    // getSelectData (data) {
-    //   this.queryForm.devData = data;
-    // },
     areaTypeChanged () {
       this.queryForm.type = 2;
       this.openMap = !this.openMap;
@@ -427,11 +396,6 @@ export default {
       this.dIds = [];
       this.bIds = [];
     },
-    //查询
-    search() {
-      this.loadingBtn = true;
-      this.getCarBeforeSta();
-    },
     // 选择设备弹窗点击确定方法
     mapSelectorEmit (result) {
        if (result) {
@@ -455,12 +419,14 @@ export default {
     },
     // 获取过车数据统计
     getCarBeforeSta () {
+      if (this.queryForm.type === 2 && this.dIds.length === 0 && this.bIds.length === 0) return this.$message.info('请选择至少一个卡口与摄像头');
       const params = {  
         startTime: formatDate(this.queryForm.startTime),
         endTime: formatDate(this.queryForm.endTime)
       }
       this.dIds.length > 0 && (params.deviceIds = this.dIds.join(','));
       this.bIds.length > 0 && (params.bayonetIds = this.bIds.join(','));
+      this.loadingBtn = true;
       apiPassingCarSta(params).then(res => {
         if (res && res.data) {
           this.gcsjDetail = res.data;

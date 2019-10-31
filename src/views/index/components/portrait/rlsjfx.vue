@@ -100,7 +100,7 @@
             >
             </el-date-picker>
             <div class="rlcx_xzsb_s" @click="areaTypeChanged" v-show="faceSnapForm.type === 0">
-              <span>选择设备</span>
+              <span>全部设备</span>
               <span class="el-icon-arrow-down"></span>
             </div>
             <div class="rlcx_dtxz_rst" v-show="faceSnapForm.type === 2">
@@ -358,6 +358,7 @@ export default {
     },
     // 获取人脸抓拍统计
     getFaceSnapSta () {
+      if (this.faceSnapForm.type === 2 && this.dIds.length === 0 && this.bIds.length === 0) return this.$message.info('请选择至少一个卡口与摄像头');
       const params = {
         startTime: this.faceSnapForm.queryDate[0] + ' 00:00:00',
         endTime: this.faceSnapForm.queryDate[1] + ' 23:59:59'
