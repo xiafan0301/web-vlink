@@ -242,8 +242,8 @@ export default {
       if (this.queryForm.statementType !== 5) {
         data.carFlowQueryDto['reportType'] = this.queryForm.statementType
       } else {
-        data.carFlowQueryDto['startTime'] = this.queryForm.startTime;
-        data.carFlowQueryDto['endTime'] = this.queryForm.endTime;
+        data.carFlowQueryDto['startTime'] = formatDate(this.queryForm.startTime);
+        data.carFlowQueryDto['endTime'] = formatDate(this.queryForm.endTime);
       }
       this.loadingBtnExport = true;
       exportExcel(data).then(res => {

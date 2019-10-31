@@ -367,11 +367,19 @@ export default {
   },
   created () {
     this.getMapGETmonitorList();
-    // this.getImageInfo();
   },
   mounted () {
     if (this.$route.query.isCut) {
       this.isCut = true;
+    }
+    if (this.$route.query.imgurl) {
+      this.curImageUrl = this.$route.query.imgurl;
+      this.initImageInfo = {
+        url: this.$route.query.imgurl,
+        width: this.$route.query.imgWidth,
+        height: this.$route.query.imgHeight
+      };
+      this.getImageInfo();
     }
   },
   methods: {
@@ -456,7 +464,9 @@ export default {
                 })
               }
             } else {
-              this.uploadClear = {};
+              this.imgData = {
+                path: this.curImageUrl
+              }
               this.$MyMessage('图片解析失败')
             }
           }
@@ -470,7 +480,7 @@ export default {
           path: obj.imgPath
         }
       } else {
-        this.uploadClear = {};
+        this.curImageUrl = ''
       }
     },
     // 拖拽开始
@@ -488,6 +498,7 @@ export default {
     uploadEmit (data) {
       console.log('uploadEmit data', data);
       if (data && data.path) {
+        this.uploadClear = {};
         this.curImageUrl = data.path;
 
         this.initImageInfo = {

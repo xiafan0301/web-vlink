@@ -30,6 +30,33 @@
             <div style="width: 272px;height: 100%;">
               <div class="search_main">
                 <!--区域选择-->
+                <div class="search_line">
+                  <!--<span class="time">从</span>-->
+                  <el-date-picker
+                          v-model="searchData.startTime"
+                          style="width: 100%;"
+                          class="vl_date"
+                          :time-arrow-control="true"
+                          :picker-options="pickerOptions"
+                          type="datetime"
+                          value-format="timestamp"
+                          placeholder="请选择开始时间">
+                  </el-date-picker>
+                </div>
+                <div class="search_line">
+                  <!--<span class="time">至</span>-->
+                  <el-date-picker
+                          style="width: 100%;"
+                          class="vl_date vl_date_end"
+                          :time-arrow-control="true"
+                          v-model="searchData.endTime"
+                          :picker-options="pickerOptions"
+                          type="datetime"
+                          @change="chooseEndTime"
+                          value-format="timestamp"
+                          placeholder="请选择结束时间">
+                  </el-date-picker>
+                </div>
                 <div class="search_line_ts">
                   <div class="title">
                     <span class="">抓拍区域:</span>
@@ -47,34 +74,6 @@
                       <!--<span @click="clickTab('cut5')"  :class="['cut5',{'hover':hover=='cut5'}]"></span>-->
                     </div>
                   </div>
-                </div>
-                <div class="search_line">
-                  <!--<span class="time">从</span>-->
-                  <el-date-picker
-                          v-model="searchData.startTime"
-                          style="width: 100%;"
-                          class="vl_date"
-                          :time-arrow-control="true"
-                          :picker-options="pickerOptions"
-                          type="datetime"
-                          value-format="timestamp"
-                          placeholder="请选择开始时间">
-                  </el-date-picker>
-                </div>
-                <!--<p class="red_star"></p>-->
-                <div class="search_line">
-                  <!--<span class="time">至</span>-->
-                  <el-date-picker
-                    style="width: 100%;"
-                    class="vl_date vl_date_end"
-                    :time-arrow-control="true"
-                    v-model="searchData.endTime"
-                    :picker-options="pickerOptions"
-                    type="datetime"
-                    @change="chooseEndTime"
-                    value-format="timestamp"
-                    placeholder="请选择结束时间">
-                  </el-date-picker>
                 </div>
                 <div class="search_line">
                   <div class="per_semblance"><span>频次 <b>期间不少于</b></span><el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 200)value = 200;"  v-model="searchData.minTimes"></el-input> 次</div>
@@ -513,18 +512,6 @@
             let new_center=pois[0].location
             _this.map.setZoomAndCenter(16, new_center);
           }
-          // for(var i = 0; i < pois.length; i++){
-          //     var poi = pois[i];
-          //     var marker = [];
-          //     marker[i] = new AMap.Marker({
-          //         position: poi.location,   // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
-          //         title: poi.name
-          //     });
-          //     // 将创建的点标记添加到已有的地图实例：
-          //     _this.amap.add(marker[i]);
-          // }
-          // _this.amap.setFitView();
-
         })
 
       },

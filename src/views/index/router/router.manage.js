@@ -3,7 +3,7 @@ export default {
   path: '/manage',
   name: 'manage',
   redirect: {
-    name: 'set_video'
+    name: 'camera_manage'
   },
   component: () => import('@/views/index/components/manage/manage.vue'),
   children: [{

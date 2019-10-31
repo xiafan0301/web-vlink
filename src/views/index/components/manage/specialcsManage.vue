@@ -97,10 +97,9 @@ export default {
             })
             this.item1.push(res.data[0])
             this.zidi = res.data[1].deviceList
-            let __arr = this.zidi.map((item)=>{
-              return item.areaName
-            })
-            console.log(__arr)
+            // let __arr = this.zidi.map((item)=>{
+            //   return item.areaName
+            // })
           }
         })
     },

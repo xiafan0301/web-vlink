@@ -31,8 +31,7 @@
 <script>
   import vlUpload from '@/components/common/upload.vue';
   import {ajaxCtx} from '@/config/config';
-  import {ScpGETbasePortraitInfo, ScpGETportraitCmpInfo, ScpGETretrievalHisById} from '../../api/api.search.js';
-  import {JtcGETAppendixInfoList} from '../../api/api.judge.js'
+  import {ScpGETportraitCmpInfo, ScpGETretrievalHisById} from '../../api/api.search.js';
   export default {
     components: {vlUpload},
     data () {
