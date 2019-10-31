@@ -72,7 +72,7 @@
               <template v-if="sturcDetail.objType == 2">
               <div class="struc_cdi_line control_line" v-if="sturcDetail.vehicleInfo">
                  <span>{{sturcDetail.vehicleInfo.vehicleNumber}}</span>
-                 <span>{{sturcDetail.vehicleInfo.vehicleTypeStr}}</span>
+                 <span v-if="sturcDetail.vehicleInfo.vehicleTypeStr">{{sturcDetail.vehicleInfo.vehicleTypeStr}}</span>
                  <span v-if="sturcDetail.vehicleInfo.ownerName">{{sturcDetail.vehicleInfo.ownerName}}</span>
               </div>
               <div class="struc_cdu_line" v-if="sturcDetail.vehicleInfo.ownerBirth">
@@ -262,7 +262,7 @@
                 <div class="struc_cdu_line" v-if="sturcDetail.alarmFeature.featureValue.plateClass || sturcDetail.alarmFeature.featureValue.plateClass === 0">
                   <p>
                     <b>车牌类型</b>
-                    <span>{{dicFormater(45, sturcDetail.alarmFeature.featureValue.plateClass)}}</span>
+                    <span>{{sturcDetail.alarmFeature.featureValue.plateClass}}</span>
                   </p>
                 </div>
                 </vue-scroll>

@@ -194,7 +194,6 @@ import vehicleDetail from '../common/vehicleDetail.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 import dbTree from '@/components/common/dbTree.vue';
 import {getDeviceByBayonetUid, getDeviceDetailById} from '../../../api/api.base.js';
-import {MapGETmonitorList} from '../../../api/api.map.js';
 import {getDeviceSnapImagesSum, getDeviceSnapImagesPage} from '../../../api/api.judge.js';
 import {formatDate, dateOrigin} from '@/utils/util.js';
 export default {
@@ -600,7 +599,7 @@ export default {
         // $('.gcck_ll').first().show(300);
       });
     },
-    getDeviceSnapSumHis (dId) {
+    getDeviceSnapSumHis () {
       getDeviceSnapImagesSum({
         deviceIds: this.zpDeviceIdsHis,
         startTime: formatDate(this.searchTime2[0], 'yyyy-MM-dd 00:00:00'),
@@ -692,10 +691,6 @@ export default {
         }, this.picPlayTime * 1000);
       }
     },
-
-    picPlayChange (val) {
-    },
-
     getTreeList1 () {
       this.doSearch1 = {};
     },

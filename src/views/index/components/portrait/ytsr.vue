@@ -24,7 +24,7 @@
           <el-radio style="display: block;" v-model="radio" label="3">布控库</el-radio>
         </span>
         </div>
-        <div class="ytsr_left_search" v-show="radio === '1' || radio === '3'">
+        <div class="ytsr_left_search" v-show="radio === '1'">
           <el-select
                   v-model="searchData.portraitGroupId"
                   placeholder="全部人像"
@@ -42,24 +42,24 @@
         <div class="ytsr_left_search"  v-show="radio === '2'">
           <div class="left_time">
             <el-date-picker
-                    v-model="searchData.startTime"
-                    style="width: 100%;margin-bottom: 20px;"
-                    class="vl_date"
-                    type="datetime"
-                    :time-arrow-control="true"
-                    :picker-options="pickerOptions"
-                    value-format="timestamp"
-                    placeholder="选择日期时间">
+                v-model="searchData.startTime"
+                style="width: 100%;margin-bottom: 20px;"
+                class="vl_date"
+                type="datetime"
+                :time-arrow-control="true"
+                :picker-options="pickerOptions"
+                value-format="timestamp"
+                placeholder="选择日期时间">
             </el-date-picker>
             <el-date-picker
-                    style="width: 100%;"
-                    class="vl_date vl_date_end"
-                    v-model="searchData.endTime"
-                    :picker-options="pickerOptions"
-                    :time-arrow-control="true"
-                    value-format="timestamp"
-                    type="datetime"
-                    placeholder="选择日期时间">
+                style="width: 100%;"
+                class="vl_date vl_date_end"
+                v-model="searchData.endTime"
+                :picker-options="pickerOptions"
+                :time-arrow-control="true"
+                value-format="timestamp"
+                type="datetime"
+                placeholder="选择日期时间">
             </el-date-picker>
           </div>
           <div class="ytsr_xzsb_s" @click="areaTypeChanged" v-if="chooseType === 1">
@@ -69,6 +69,21 @@
           <div class="ytsr_dtxz_rst" v-else>
             已选<span>{{dSum}}</span>个设备<a href="javascript: void(0);" @click="openMap={}">重选</a>
           </div>
+        </div>
+        <div class="ytsr_left_search" v-show="radio === '3'">
+          <el-select
+                  v-model="searchData.portraitGroupId"
+                  placeholder="全部人像"
+                  multiple
+                  collapse-tags
+          >
+            <el-option
+                    v-for="item in controlGroupList"
+                    :key="item.id"
+                    :label="item.groupName"
+                    :value="item.uid">
+            </el-option>
+          </el-select>
         </div>
         <div class="vl_jtc_search">
           <div style="text-align: center;margin-bottom: 0px;">
@@ -87,9 +102,13 @@
           <span>相似度：</span>≥{{taskDetail ? taskDetail.minSemblance : 0}}%
         </div>
         <div class="vl_ytsr_left_line">
-          <span>基础信息库：</span>
-          <span>
+          <span v-if="radio === '1'">基础信息库：</span>
+          <span v-else>布控库：</span>
+          <span v-if="taskDetail.portraitGroupName && taskDetail.portraitGroupName.length">
             <p v-for="item in taskDetail.portraitGroupName" :key="item.id">{{item}}</p>
+          </span>
+          <span v-else>
+            <p>全部人像</p>
           </span>
         </div>
         <div class="update_task">
@@ -215,7 +234,6 @@
   import { getPeopleTaskDetail } from '@/views/index/api/api.analysis.js';
   import { PortraitPostByphotoRealtime, PortraitPostByphotoTask} from '@/views/index/api/api.portrait.js';
   import {getGroups} from '../../api/api.judge.js';
-  let AMap = window.AMap;
   export default {
     components: {vlBreadcrumb, noResult, vlUpload, mapSelector},
     data() {
@@ -224,6 +242,7 @@
         imgData:null,
         imgList: null,
         portraitGroupList: [],
+        controlGroupList: [],
         uploadClear: {},
         searchData: {
           minSemblance: 85, // 最小相似度
@@ -288,6 +307,12 @@
       getGroups({groupType: 4}).then(res => {
         if (res) {
           this.portraitGroupList = res.data;
+        }
+      })
+      // 获取人员组，跟车辆组列表
+      getGroups({groupType: 6}).then(res => {
+        if (res) {
+          this.controlGroupList = res.data;
         }
       })
       this.setDTime();
@@ -450,9 +475,15 @@
                   this.$set(res.data, 'taskResult', JSON.parse(res.data.taskResult));
                   this.$set(res.data, 'taskWebParam', JSON.parse(res.data.taskWebParam));
                   // res.data.taskResult.push(...res.data.taskResult)
-                  this.strucInfoList = res.data.taskResult;
+                  this.strucInfoList = res.data.taskResult ? res.data.taskResult : [];
                   this.pagination.total = this.strucInfoList.length;
                   this.taskDetail = res.data.taskWebParam;
+                  let {portraitGroupId, minSemblance, startTime, endTime, origin} = res.data.taskWebParam;
+                  this.radio = origin + '';
+                  this.searchData.portraitGroupId = portraitGroupId.split(',');
+                  this.searchData.minSemblance = minSemblance;
+                  this.searchData.startTime = startTime;
+                  this.searchData.endTime = endTime;
                   console.log(res.data)
                   this.imgData = {
                     cname: '带图' + Math.random(),
@@ -472,6 +503,11 @@
       imgListTap (data, index) {
         this.curImgIndex = index;
         this.sturcDetail = data;
+      }
+    },
+    watch: {
+      radio () {
+        this.searchData.portraitGroupId = [];
       }
     }
   }
@@ -585,6 +621,143 @@
       }
       .update_task {
         text-align: center;
+      }
+      .vl_jtc_img_box {
+        width: 100%;
+        height: auto;
+        border-bottom: 1px solid #D3D3D3;
+        padding-bottom: 30px;
+        margin-bottom: 30px;
+        .vl_jtc_img_list {
+          width: 100%;
+          margin-top: 10px;
+          text-align: center;
+          .middle_img {
+            display: inline-block;
+          }
+          > div {
+            width: 30%;
+            padding-top: 30%;
+            border: 1px dashed #D3D3D3;
+            position: relative;
+            &:hover {
+              .del_mask {
+                display: block;
+              }
+            }
+            &:last-child {
+              float: right;
+            }
+            &:first-child {
+              float: left;
+            }
+            .del_mask {
+              display: none;
+              position: absolute;
+              width: 100%;
+              height: 100%;
+              background: rgba(0, 0, 0, .2);
+              top: 0;
+              > i {
+                cursor: pointer;
+                display: block;
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                margin: auto;
+                color: #ffffff;
+                width: 16px;
+                height: 16px;
+                text-align: center;
+              }
+            }
+            > img {
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+            }
+          }
+        }
+      }
+      .ytsr_left_radio {
+        padding-left: 20px;
+        margin: 20px 0;
+        display: flex;
+        height: 40px;
+        >span {
+          display: block;
+          &:first-child {
+            width: 90px;
+            line-height: 40px;
+          }
+        }
+      }
+      .ytsr_left_search {
+        margin-left: 20px;
+        width: 232px;
+        .el-select {
+          width: 100%;
+        }
+        .left_time {
+          width: 100%;
+          margin: 20px 0;
+          .el-date-editor {
+            width: 100%;
+          }
+          .el-range__close-icon {
+            display: none;
+          }
+        }
+      }
+      .vl_jtc_search {
+        width: 100%;
+        height: auto;
+        padding: 30px 0 20px 0;
+        .el-input__inner {
+          height: 40px!important;
+          line-height: 40px!important;
+        }
+        .el-input__icon {
+          height: 40px!important;
+          line-height: 40px!important;
+        }
+        .el-range-editor {
+          width: 100%;
+          /*padding: 0;*/
+          > .el-range__close-icon {
+            display: none;
+          }
+          > input {
+            width: 50%;
+          }
+        }
+        button {
+          width: 110px;
+          height: 40px;
+          line-height: 40px;
+          padding: 0 12px;
+        }
+        .el-select {
+          margin-bottom: 10px;
+        }
+        > div {
+          margin-bottom: 10px;
+        }
+        .vl_jtc_search_item {
+          height: 217px;
+          .camera-tree {
+            border: 1px solid #e4e7ed;
+            border-radius: 4px;
+            background-color: #fff;
+            -webkit-box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+            box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+            -webkit-box-sizing: border-box;
+          }
+        }
       }
     }
     .vl_s_right {

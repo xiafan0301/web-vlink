@@ -91,7 +91,7 @@
                 ></el-option>
               </el-select>
             </el-input>
-      
+            <p style="font-size: 13px;line-height: 1.5;color: #999999;">如有不确定的车牌信息可用“?”代替，如：湘A12??5</p>
           </el-form-item>
           <el-form-item>
             <el-row :gutter="10">
