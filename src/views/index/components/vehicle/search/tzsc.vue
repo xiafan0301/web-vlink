@@ -561,6 +561,11 @@ export default {
     }
     if (this.$route.query.imgurl) {
         this.curImageUrl = this.$route.query.imgurl;
+        this.initImageInfo = {
+          url: this.$route.query.imgurl,
+          width: this.$route.query.imgWidth,
+          height: this.$route.query.imgHeight
+        };
         this.getImageInfo()
     }
   },
