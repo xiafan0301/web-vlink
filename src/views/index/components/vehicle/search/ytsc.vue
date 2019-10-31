@@ -3,6 +3,7 @@
   <div class="ytsc_wrap">
     <!-- 面包屑通用样式 -->
     <div
+            v-show="!isCut"
             is="vlBreadcrumb"
             :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
           {name: '以图搜车'}]"
@@ -53,7 +54,7 @@
 
                 <!-- 上传车像图片 -->
                 <div style="padding: 0 15px; height: 210px;">
-                  <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit"></div>
+                  <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit" :imgData="imgData"></div>
                 </div>
               </el-form>
             </div>
@@ -198,6 +199,7 @@
     components: { vlBreadcrumb, vehicleDetail, vlUpload, mapSelector,imgSelectYtsc },
     data() {
       return {
+        isCut: false, // 是否为截屏跳转.
         dSum: 0, // 设备总数
         openMap: false,
         msClear: {},
@@ -285,8 +287,17 @@
       //获取摄像头卡口数据
       this.setDTime();
       // 处理其他页面跳转的参数
+      if (this.$route.query.isCut) {
+        this.isCut = true;
+      }
       if (this.$route.query.imgurl) {
         this.curImageUrl = this.$route.query.imgurl;
+        this.initImageInfo = {
+          url: this.$route.query.imgurl,
+          width: this.$route.query.imgWidth,
+          height: this.$route.query.imgHeight
+        };
+        this.getImageInfo();
       }
     },
     computed: {
@@ -349,7 +360,10 @@
                     this.imgDataList.push(obj);
                   })
                 } else {
-                  this.uploadClear = {};
+                  this.imgData = {
+                    path: this.curImageUrl
+                  }
+                  this.$MyMessage('图片解析失败')
                 }
               }
             })
@@ -361,7 +375,7 @@
         if (obj.imgBDataList.length > 0) {
           this.imgCutDataList = obj.imgCutDataList;
         } else {
-          this.uploadClear = {};
+          this.curImageUrl = ''
         }
       },
       /*重置菜单的数据 */
@@ -526,6 +540,7 @@
       },
       uploadEmit(data) {
         if (data && data.path) {
+          this.uploadClear = {};
           this.curImageUrl = data.path;
           this.initImageInfo = {
             url: data.path,

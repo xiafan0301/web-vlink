@@ -1595,7 +1595,7 @@ export default {
           break;
         case 2:
           routeUrl = this.$router.resolve({
-            name: 'cut_vehicle_search_ycsc',
+            name: 'cut_vehicle_search_ytsc',
             query: {imgurl: this.skipImgUrl, isCut: true, imgWidth: this.imgObj.imgWidth, imgHeight: this.imgObj.imgHeight}
           });
           break;
