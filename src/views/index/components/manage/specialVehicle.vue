@@ -180,27 +180,6 @@
           <div style="padding: 0 15px; height: 210px; text-align:center;">
             <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit" :imgData="imgData"></div>
           </div>
-          <!-- <div :class="['upload_pic', {'hidden': dialogImageUrl}]">
-            <el-upload
-              :disabled="isAddImgDisabled"
-              ref="uploadPic"
-              accept="image/*"
-              :limit="1"
-              :action="uploadUrl"
-              list-type="picture-card"
-              :on-success="uploadPicSuccess"
-              :on-preview="handlePictureCardPreview"
-              :on-remove="handleRemove"
-              :before-upload="beforeAvatarUpload"
-              :file-list="fileList">
-              <i class="vl_icon vl_icon_012_012"></i>
-            </el-upload>
-          </div>
-          <template v-if="!isAddImgDisabled">
-            <h1 class="vl_f_999">点击修改车像</h1>
-            <p>请上传车辆图片</p>
-          </template> -->
-          <!-- <h1 class="vl_f_999">点击修改车像</h1> -->
           <p>请上传车辆图片</p>
         </div>
         <div class="right">
@@ -248,7 +227,7 @@
                 </el-select>
               </el-form-item>
               <el-form-item prop="numberType">
-                <el-select v-model="carForm.numberType" placeholder="请选择号牌类型" style="width: 85%;" :disabled="isAddDisabled" @change="carForm.numberColor = carForm.numberType">
+                <el-select v-model="carForm.numberType" placeholder="请选择号牌类型" style="width: 85%;" :disabled="isAddDisabled">
                   <el-option
                     v-for="(item, index) in numberTypeList"
                     :key="index"
@@ -258,7 +237,7 @@
                 </el-select>
               </el-form-item>
               <el-form-item prop="numberColor">
-                <el-select v-model="carForm.numberColor" placeholder="请选择号牌颜色" style="width: 85%;" disabled>
+                <el-select v-model="carForm.numberColor" placeholder="请选择号牌颜色" style="width: 85%;">
                   <el-option
                     v-for="item in numColorList"
                     :key="item.enumField"
@@ -516,9 +495,9 @@ export default {
       carForm: {
         vehicleImagePath: null, // 车牌图片地址
         vehicleNumber: null, // 车牌号码
-        vehicleColor: '0', // 车身颜色
+        vehicleColor: null, // 车身颜色
         vehicleBrand: null, // 车辆品牌
-        vehicleType: '0', // 车辆类型
+        vehicleType: null, // 车辆类型
         numberType: null, // 号牌类型
         numberColor: null, // 号牌颜色
         ownerName: null, // 车主姓名
@@ -582,9 +561,6 @@ export default {
     uploadEmit (data) {
       if (data && data.path) {
         this.dialogImageUrl = data.path;
-        this.$nextTick(() => {
-          this.getDeviceList();
-        })
       } else {
         this.dialogImageUrl = null;
       }
@@ -617,6 +593,11 @@ export default {
         .then(res => {
           if (res) {
             this.vehicleTypeList = res.data;
+            res.data.map(val => {
+              if (val.enumValue === '其他') {
+                this.carForm.vehicleType = val.enumField;
+              }
+            })
           }
         })
     },
@@ -637,6 +618,11 @@ export default {
         .then(res => {
           if (res) {
             this.vehicleColorList = res.data;
+            res.data.map(val => {
+              if (val.enumValue === '其他') {
+                this.carForm.vehicleColor = val.enumField;
+              }
+            })
           }
         })
         .catch(() => {})
@@ -769,6 +755,8 @@ export default {
       getReVehicleInfo(params)
         .then(res => {
           if (res && res.data) {
+            console.log('hhhhhh', res.data);
+            
             this.isAddDisabled = true;
 
             let carInfo = res.data;
@@ -786,7 +774,9 @@ export default {
               });
             }
 
-            this.fileList = carInfo.vehicleImagePath ? [{url: carInfo.vehicleImagePath}] : [];//回填图片
+            this.imgData = {
+              path: carInfo.vehicleImagePath
+            };
             this.dialogImageUrl = carInfo.vehicleImagePath;
 
             this.carForm.vehicleNumber = carInfo.vehicleNumber;
@@ -907,7 +897,6 @@ export default {
             if (!document.querySelector('.el-message--info')) {
               this.$message.info('请先上传车辆照片');
             }
-           
             return;
           }
           if (this.carForm.groupList.length === 0) {
@@ -938,7 +927,6 @@ export default {
               } else {
                 this.isVehicleLoading = false;
               }
-              // this.$refs[form].resetFields();
             })
             .catch(() => {this.isVehicleLoading = false;})
         }
@@ -948,6 +936,8 @@ export default {
     updateVehicle (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
+          console.log('vvvv', this.dialogImageUrl);
+          
           if (!this.dialogImageUrl) {
             if (!document.querySelector('.el-message--info')) {
               this.$message.info('请先上传车辆照片');
@@ -1084,16 +1074,16 @@ export default {
       this.dialogVisiable = true;
     },
     getDetail (obj) {
+      console.log('obj', obj);
+      
       if (obj) {
         getSpecialVehicleDetail(obj.uid)
           .then(res => {
             if (res) {
-              // let vehicleColor = res.data.vehicleColor;
-              // let vehicleType = res.data.vehicleType;
-              // let numberType = res.data.numberType;
               let numberColor = res.data.numberColor;
 
-              this.imgData = Object.assign({}, {path: res.data.vehicleImagePath})
+              this.imgData = Object.assign({}, {path: res.data.vehicleImagePath});
+              this.dialogImageUrl = res.data.vehicleImagePath;
 
               this.carForm.uid = res.data.uid;
               this.carForm.vehicleNumber = res.data.vehicleNumber;

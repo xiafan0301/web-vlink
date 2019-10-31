@@ -146,9 +146,9 @@
             <el-select v-model="libVehicleForm.vehicleColor" placeholder="选择车身颜色">
               <el-option
                 v-for="item in carColorList"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
+                :key="item.enumField"
+                :label="item.enumValue"
+                :value="item.enumField">
               </el-option>
             </el-select>
           </el-form-item>
@@ -156,9 +156,9 @@
             <el-select v-model="libVehicleForm.vehicleType" placeholder="选择车辆类型">
               <el-option
                 v-for="item in carTypeList"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
+                :key="item.enumField"
+                :label="item.enumValue"
+                :value="item.enumField">
               </el-option>
             </el-select>
           </el-form-item>
@@ -166,9 +166,9 @@
             <el-select v-model="libVehicleForm.numberType" placeholder="选择号牌类型">
               <el-option
                 v-for="item in numTypeList"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
+                :key="item.enumField"
+                :label="item.enumValue"
+                :value="item.enumField">
               </el-option>
             </el-select>
           </el-form-item>
@@ -441,9 +441,9 @@
                   <el-select v-model="carForm.vehicleColor" placeholder="选择车身颜色" style="width: 100%;" :disabled="isAddDisabled">
                     <el-option
                       v-for="item in carColorList"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value">
+                      :key="item.enumField"
+                      :label="item.enumValue"
+                      :value="item.enumField">
                     </el-option>
                   </el-select>
                 </el-form-item>
@@ -451,29 +451,29 @@
                   <el-select v-model="carForm.vehicleType" placeholder="选择车辆类型" style="width: 100%;" :disabled="isAddDisabled">
                     <el-option
                       v-for="item in carTypeList"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value">
+                      :key="item.enumField"
+                      :label="item.enumValue"
+                      :value="item.enumField">
                     </el-option>
                   </el-select>
                 </el-form-item>
                 <el-form-item label=" " style="width: 415px;" prop="numberType">
-                  <el-select v-model="carForm.numberType" placeholder="选择号牌类型" style="width: 100%;" @change="carForm.numberColor = carForm.numberType" :disabled="isAddDisabled">
+                  <el-select v-model="carForm.numberType" placeholder="选择号牌类型" style="width: 100%;" :disabled="isAddDisabled">
                     <el-option
                       v-for="item in numTypeList"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value">
+                      :key="item.enumField"
+                      :label="item.enumValue"
+                      :value="item.enumField">
                     </el-option>
                   </el-select>
                 </el-form-item>
                 <el-form-item label=" " style="width: 415px;" prop="numberColor">
-                  <el-select v-model="carForm.numberColor" placeholder="选择号牌颜色" style="width: 100%;" :disabled="true">
+                  <el-select v-model="carForm.numberColor" placeholder="选择号牌颜色" style="width: 100%;" :disabled="isAddDisabled">
                     <el-option
                       v-for="item in numColorList"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value">
+                      :key="item.enumField"
+                      :label="item.enumValue"
+                      :value="item.enumField">
                     </el-option>
                   </el-select>
                 </el-form-item>
@@ -577,6 +577,7 @@ import groupDialog from './components/groupDialog.vue';
 import {delVehicleGroupById, getPortraitByIdNo, addPortrait, getVehicleByVehicleNumber, addVehicle, getPortraitList, getVehicleList, getPortraitById, putPortrait, getVehicleById, putVehicle, getGroupListIsPortrait, getGroupListIsVehicle} from '@/views/index/api/api.control.js';
 import {objDeepCopy} from '@/utils/util.js';
 import {nationData} from '../control/testData.js';
+import {dataList} from '@/utils/data.js';
 export default {
   components: {allCar, allPortrait, customCar, customPortrait, groupDialog},
   data () {
@@ -618,58 +619,11 @@ export default {
         {label: '女', value: 2}
       ],//性别列表数据
       nationalList: nationData,//民族列表数据
-      carTypeList: [
-        {label: '其他', value: 9},
-        {label: '轿车', value: 1},
-        {label: '面包车', value: 2},
-        {label: '客车', value: 3},
-        {label: '货车', value: 4},
-        {label: '自行车', value: 5},
-        {label: '电动车', value: 6},
-        {label: '摩托车', value: 7},
-        {label: '挂车', value: 8}
-      ],//车辆类型列表数据
-      numTypeList: [
-        {label: '大型汽车', value: 1},
-        {label: '小型汽车', value: 2},
-        {label: '轻便摩托车', value: 8},
-        {label: '挂车', value: 15},
-        {label: '警用汽车', value: 23},
-        {label: '警用摩托', value: 24},
-        {label: '小型新能源汽车', value: 25},
-        {label: '大型新能源汽车', value: 26},
-        {label: '小吨位货车', value: 27},
-        {label: '大吨位货车', value: 28},
-        {label: '客车', value: 29},
-        {label: '其他', value: 99}
-      ],//号码类型列表数据
-      carColorList: [
-        {label: '其他', value: 11},
-        {label: '白', value: 1},
-        {label: '灰', value: 2},
-        {label: '黄', value: 3},
-        {label: '粉', value: 4},
-        {label: '红', value: 5},
-        {label: '紫', value: 6},
-        {label: '绿', value: 7},
-        {label: '蓝', value: 8},
-        {label: '棕', value: 9},
-        {label: '黑', value: 10}
-      ],//车身颜色列表
-      numColorList: [
-        {label: '黄底黑字', value: 1},
-        {label: '蓝底白字', value: 2},
-        {label: '蓝底白字', value: 8},
-        {label: '黄底黑字', value: 15},
-        {label: '白底黑字', value: 23},
-        {label: '白底黑字', value: 24},
-        {label: '绿底黑字', value: 25},
-        {label: '黄绿双拼底黑字', value: 26},
-        {label: '蓝底白字', value: 27},
-        {label: '黄底黑字', value: 28},
-        {label: '黄底黑字', value: 29},
-        {label: '其他', value: 99}
-      ],//号牌颜色列表
+
+      carColorList: this.dicFormater(dataList.carColor)[0].dictList,
+      carTypeList: this.dicFormater(dataList.vehicleType)[0].dictList,
+      numTypeList: this.dicFormater(dataList.plateType)[0].dictList,
+      numColorList: this.dicFormater(dataList.plateColor)[0].dictList,
       // 翻页数据
       currentPage: 1,
       pageSize: 6,
@@ -693,8 +647,8 @@ export default {
         vehicleNumber: null,
         vehicleColor: null,
         vehicleType: null,
-        numberType: 2,
-        numberColor: 2,
+        numberType: '02',
+        numberColor: '2',
         groupIds: [],
         desci: ''
       },
@@ -1195,7 +1149,6 @@ export default {
           this.fileList = carInfo.vehicleImagePath ? [{url: carInfo.vehicleImagePath}] : [];//回填图片
           this.dialogImageUrl = carInfo.vehicleImagePath;
           carInfo.groupIds = carInfo.groupList.filter(f => f.selected).map(m => m.uid);
-          carInfo.numberColor = carInfo.numberType;
           this.lastCarIdNo = carInfo.vehicleNumber;
           this.carForm = carInfo;
           console.log(this.carForm)

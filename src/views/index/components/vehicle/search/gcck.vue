@@ -23,7 +23,7 @@
             </div>
             <div class="gcck_ll_l">
               <div>
-                <div is="dbTree" @selectItem="selectItem" :likeKey="searchVal1" :doSearch="doSearch1"></div>
+                <div is="dbTree" @selectItem="selectItem" :likeKey="searchVal1" :doSearch="doSearch1" :showTypes="showTypes"></div>
               </div>
             </div>
           </div>
@@ -59,7 +59,7 @@
             </div>
             <div class="gcck_ll_l" style="padding-top: 165px;">
               <div>
-                <div is="dbTree" @selectItem="selectItem2" :likeKey="searchVal2" :doSearch="doSearch2"></div>
+                <div is="dbTree" @selectItem="selectItem2" :likeKey="searchVal2" :doSearch="doSearch2" :showTypes="showTypes"></div>
               </div>
             </div>
           </div>
@@ -89,7 +89,7 @@
                 <li v-for="(item, index) in zpList" :key="'jrzp_' + index">
                   <div class="vc_gcck_rbl">
                     <p @click="goToDetail(index)">
-                      <img :title="item.deviceName" :alt="item.deviceName" :src="item.subStoragePath">
+                      <img :title="item.deviceName" :alt="item.deviceName" :src="item.StorageUrl1">
                     </p>
                     <div class="com_ellipsis"><i class="vl_icon vl_icon_sm_sj"></i>{{item.shotTime}}</div>
                     <div class="com_ellipsis"><i class="vl_icon vl_icon_sm_sxt"></i>{{item.deviceName}}</div>
@@ -132,11 +132,11 @@
                         <div class="gcck_rbl_i">
                           <div>
                             <div @click="goToDetailHis(item, sindex)">
-                              <img :title="sitem.deviceName" :alt="sitem.deviceName" :src="sitem.subStoragePath">
+                              <img :title="sitem.deviceName" :alt="sitem.deviceName" :src="sitem.StorageUrl1">
                             </div>
                           </div>
                         </div>
-                        <div class="gcck_rbl_t com_ellipsis" :title="sitem.plateNo" style="color: #333;"><i class="vl_icon vl_icon_sm_cl"></i>{{sitem.plateNo ? sitem.plateNo : '未知车牌'}}</div>
+                        <div class="gcck_rbl_t com_ellipsis" :title="sitem.PlateNo" style="color: #333;"><i class="vl_icon vl_icon_sm_cl"></i>{{sitem.PlateNo ? sitem.PlateNo : '未知车牌'}}</div>
                         <div class="gcck_rbl_t com_ellipsis" :title="sitem.shotTime"><i class="vl_icon vl_icon_sm_sj"></i>{{sitem.shotTime}}</div>
                       </div>
                     </li>
@@ -200,6 +200,7 @@ export default {
   components: {vlBreadcrumb, flvplayer, dbTree, vehicleDetail},
   data () {
     return {
+      showTypes: 'DB',
       detailData: null,
       showType: 1, // 1实时过车  2历史过车
       videoTotal: null, // 1 / 2 / 8
@@ -760,12 +761,12 @@ export default {
         overflow: hidden;
         > .gcck_ll_s {
           position: absolute; top: 50px; left: 0;
-          width: 100%; height: 65px;
-          padding: 15px 20px 0 15px;
+          width: 100%; height: 70px;
+          padding: 20px 20px 0 20px;
         }
         > .gcck_ll_l {
           height: 100%;
-          padding-top: 65px;
+          padding-top: 70px;
           > div {
             height: 100%;
             overflow: auto;

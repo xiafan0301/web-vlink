@@ -52,87 +52,76 @@
                   <span>{{sturcDetail.address}}</span>
                 </p>
               </div> -->
-              <div class="struc_cdi_line" v-if="sturcDetail.gender">
+              <div class="struc_cdi_line">
                 <p>
                   <b>性别</b>
-                  <span>{{sturcDetail.gender}}</span>
+                  <span>{{sturcDetail.gender ? sturcDetail.gender : '未识别'}}</span>
                 </p>
               </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.age">
+              <div class="struc_cdi_line">
                 <p>
                   <b>年龄段</b>
-                  <span>{{sturcDetail.age}}</span>
+                  <span>{{sturcDetail.age ? sturcDetail.age : '未识别'}}</span>
                 </p>
               </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.glasses">
+              <div class="struc_cdi_line">
                 <p>
-                  <b>眼镜</b>
-                  <span>{{sturcDetail.glasses}}</span>
+                  <b>发型</b>
+                  <span>{{sturcDetail.hairStyleDesc ? sturcDetail.hairStyleDesc : '未识别'}}</span>
                 </p>
               </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.hat">
+              <div class="struc_cdi_line">
                 <p>
-                  <b>帽子</b>
-                  <span>{{sturcDetail.hat}}</span>
+                  <b>戴眼镜</b>
+                  <span>{{sturcDetail.glasses ? sturcDetail.glasses : '未识别'}}</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line">
+                <p>
+                  <b>戴帽子</b>
+                  <span>{{sturcDetail.hat ? sturcDetail.hat : '未识别'}}</span>
                 </p>
               </div>
               <div class="struc_cdi_line" v-if="sturcDetail.mask">
                 <p>
-                  <b>口罩</b>
-                  <span>{{sturcDetail.mask}}</span>
+                  <b>戴口罩</b>
+                  <span>{{sturcDetail.mask ? sturcDetail.mask : '未识别'}}</span>
                 </p>
               </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.hairStyleDesc">
-                <p>
-                  <b>发型</b>
-                  <span>{{sturcDetail.hairStyleDesc}}</span>
-                </p>
-              </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.coatLengthDesc">
-                <p>
-                  <b>上身款式</b>
-                  <span>{{sturcDetail.coatLengthDesc}}</span>
-                </p>
-              </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.upperColor">
-                <p>
-                  <b>上身颜色</b>
-                  <span>{{sturcDetail.upperColor}}</span>
-                </p>
-              </div>
-              <!-- <div class="struc_cdi_line" v-if="sturcDetail.bottomType">
-                <p>
-                  <b>下身款式</b>
-                  <span>{{sturcDetail.bottomType}}</span>
-                </p>
-              </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.bottomColor">
-                <p>
-                  <b>下身颜色</b>
-                  <span>{{sturcDetail.bottomColor}}</span>
-                </p>
-              </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.baby">
+              <!-- <div class="struc_cdi_line">
                 <p>
                   <b>抱小孩</b>
-                  <span>{{sturcDetail.baby}}</span>
+                  <span>{{sturcDetail.baby ? sturcDetail.baby : '未识别'}}</span>
                 </p>
               </div>
-              <div class="struc_cdi_line" v-if="sturcDetail.bag">
+              <div class="struc_cdi_line">
                 <p>
                   <b>拎东西</b>
-                  <span>{{sturcDetail.bag}}</span>
+                  <span>{{sturcDetail.bag ? sturcDetail.bag : '未识别'}}</span>
                 </p>
               </div> -->
-           
-              <!-- <div class="struc_cdi_line">
-                <p v-if="sturcDetail.features">
-                  <b>特征</b>
-                  <span>{{sturcDetail.features}}</span>
+              <div class="struc_cdi_line">
+                <p>
+                  <b>上身款式</b>
+                  <span>{{sturcDetail.coatLengthDesc ? sturcDetail.coatLengthDesc : '未识别'}}</span>
                 </p>
-                <p class="tz" v-else>
-                  <b>特征</b>
-                  <span>{{sturcDetail.sex+" "+(sturcDetail.age || "")+ " " + (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+" "+ (sturcDetail.baby || "")+ " " + (sturcDetail.bag || "") + " "+(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")+ " " + (sturcDetail.bottomColor || "") +(sturcDetail.bottomType || "")}}</span>
+              </div>
+              <div class="struc_cdi_line">
+                <p>
+                  <b>上身颜色</b>
+                  <span>{{sturcDetail.upperColor ? sturcDetail.upperColor : '未识别'}}</span>
+                </p>
+              </div>
+              <!-- <div class="struc_cdi_line">
+                <p>
+                  <b>下身款式</b>
+                  <span>{{sturcDetail.trousersLenDesc ? sturcDetail.trousersLenDesc : '未识别'}}</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line">
+                <p>
+                  <b>下身颜色</b>
+                  <span>{{sturcDetail.trousersColorDesc ? sturcDetail.trousersColorDesc : '未识别'}}</span>
                 </p>
               </div> -->
                 </vue-scroll>
@@ -167,9 +156,10 @@
             <p>暂无视频</p>
           </div>
         </div>
-          <div class="download_btn">
+        <p class="download_tips" v-show="sturcDetail.videoPath">下载提示：右键点击视频选择“另存视频为”即可下载视频。</p>
+          <!-- <div class="download_btn">
             <a download="视频" :href="sturcDetail.videoPath"></a>下载视频
-          </div>
+          </div> -->
         </div>
       </div>
       <div class="struc-list">
@@ -434,6 +424,12 @@ html {font-size: 100px;}
   @media screen and (min-width: 1920px) {html {font-size: 100px !important;} }
 .snap_dialog {
   /* height: 100%; */
+  .download_tips {
+        float: left;
+        width: 100%;
+        text-align: right;
+        padding-top: 10px;
+      }
   .struc_detail_dialog_comp {
     .el-dialog {
       max-width: 13.06rem;

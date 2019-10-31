@@ -392,6 +392,7 @@ export default {
               }
             } else {
               this.uploadClear = {};
+              this.$MyMessage('图片解析失败')
             }
           }
         })
