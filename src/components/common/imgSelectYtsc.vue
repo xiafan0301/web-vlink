@@ -747,7 +747,7 @@ export default {
             position: absolute;
             background:rgba(12,112,248,0.1);
             border:1px solid rgba(18,100,248,1);
-            opacity: 0.4;
+            // opacity: 0.4;
             cursor: pointer;
             // &:hover {
             //   background:rgba(255,0,0,0.2);
