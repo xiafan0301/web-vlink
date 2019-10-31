@@ -1,7 +1,7 @@
 <template>
   <div class="portrait_content">
     <div class="vc_gcck_bd">
-      <div is="vehicleBreadcrumb" :breadcrumbData="[{name: '人像侦查', routerName: 'portrait'}, {name: '特征搜人'}]"></div>
+      <div is="vehicleBreadcrumb" v-show="!isCut" :breadcrumbData="[{name: '人像侦查', routerName: 'portrait'}, {name: '特征搜人'}]"></div>
     </div>
     <div class="rlcx_main clearfix">
       <div class="rlcx_l">
@@ -263,6 +263,7 @@ export default {
   components: { vehicleBreadcrumb, mapSelector, vlUpload, portraitDetail, noResult, imgSelect },
   data () {
     return {
+      isCut: false, // 是否为截屏跳转.
       isInitPage: true,
       tipMessage: '选择人像特征，查询具有相同特征人像的抓拍记录',
 
@@ -366,7 +367,11 @@ export default {
   },
   created () {
     this.getMapGETmonitorList();
-    // this.getImageInfo();
+  },
+  mounted () {
+    if (this.$route.query.isCut) {
+      this.isCut = true;
+    }
   },
   methods: {
     // 创建一个canvas，生成图片
@@ -450,7 +455,9 @@ export default {
                 })
               }
             } else {
-              this.uploadClear = {};
+              this.imgData = {
+                path: this.curImageUrl
+              }
               this.$MyMessage('图片解析失败')
             }
           }
@@ -464,7 +471,7 @@ export default {
           path: obj.imgPath
         }
       } else {
-        this.uploadClear = {};
+        this.curImageUrl = ''
       }
     },
     // 拖拽开始
@@ -482,6 +489,7 @@ export default {
     uploadEmit (data) {
       console.log('uploadEmit data', data);
       if (data && data.path) {
+        this.uploadClear = {};
         this.curImageUrl = data.path;
 
         this.initImageInfo = {

@@ -254,7 +254,7 @@
 import vehicleBreadcrumb from '../breadcrumb.vue';
 import {formatDate} from '@/utils/util.js';
 import {mapXupuxian} from '@/config/config.js';
-import {getVehicleInvestigationReport, JfoGETSurveillanceObject} from '@/views/index/api/api.judge.js';
+import {getVehicleInvestigationReport} from '@/views/index/api/api.judge.js';
 export default {
   components: {vehicleBreadcrumb},
   data () {
@@ -342,7 +342,7 @@ export default {
                   instance.confirmButtonLoading = true;
                   instance.confirmButtonText = '正在生成文件...';
                   let _this = this;
-                  let pdf = new jsPDF('p','pt','a3');
+                  let pdf = new window.jsPDF('p','pt','a3');
                   // 设置打印比例 越大打印越小
                   pdf.internal.scaleFactor = 2;
                   let options = {
@@ -367,8 +367,7 @@ export default {
             });
           });
         }
-      }).catch(error => {
-        console.log('error');
+      }).catch(() => {
         this.searchLoading = false;
       });
     },
@@ -392,7 +391,7 @@ export default {
           let _oo = oList[key];
           if (_oo.longitude > 0 && _oo.latitude > 0) {
             // console.log('_oo', _oo);
-            let marker = new window.AMap.Marker({ // 添加自定义点标记
+            new window.AMap.Marker({ // 添加自定义点标记
               map: _this.yjcmMap,
               position: [_oo.longitude, _oo.latitude], // 基点位置 [116.397428, 39.90923]
               offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
@@ -450,7 +449,7 @@ export default {
         }
       }
       // 绘制轨迹
-      var polyline = new window.AMap.Polyline({
+      new window.AMap.Polyline({
           map: this.clgjMap,
           path: gjPath,
           showDir: true,

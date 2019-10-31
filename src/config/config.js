@@ -80,7 +80,7 @@ const oDomains = {
     },
     // 车辆地址
     vehicle: {
-      // test: 'http://10.116.65.64:8081',
+      // test: 'http://10.116.64.82:8082',
       dev: 'https://apidev.aorise.org/vlink-voiture',
       test: 'https://apirel.aorise.org/vlink-voiture',
       prod: 'https://apiprod.aorise.org/vlink-voiture'
@@ -88,7 +88,7 @@ const oDomains = {
     // 人像地址
     portrait: {
       // dev: 'http://10.116.65.64:8081',
-      // test: 'http://10.116.64.78:8082',
+      // test: 'http://10.116.64.82:8082',
       dev: 'https://apidev.aorise.org/vlink-portrait',
       test: 'https://apirel.aorise.org/vlink-portrait',
       prod: 'https://apiprod.aorise.org/vlink-portrait'

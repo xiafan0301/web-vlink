@@ -94,21 +94,11 @@
   </ul>
 </template>
 <script>
-  import {PortraitGetDispatch} from '@/views/index/api/api.portrait.js';
 export default {
   data () {
     return {
       ytsrRoute: 'portrait_ytsr_moment'
     }
-  },
-  mounted () {
-    /* PortraitGetDispatch().then(res => {
-      if (res) {
-        if (res.data === 2) {
-          this.ytsrRoute = 'portrait_ytsr_list'
-        }
-      }
-    }) */
   },
   methods: {
   }

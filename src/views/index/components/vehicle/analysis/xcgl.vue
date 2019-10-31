@@ -442,6 +442,8 @@ export default {
     },
     mapSelectorEmit (result) {
       console.log(result)
+      this.selectCameraArr = []
+      this.selectBayonetArr = []
       if (result) {
         // bayonetList deviceList
         this.dSum = 0;
@@ -720,15 +722,13 @@ export default {
         startDate: formatDate(this.searchData.startTime, "yyyy-MM-dd HH:mm:ss"),
         endDate: formatDate(this.searchData.endTime, "yyyy-MM-dd HH:mm:ss")
       };
-      if (!this.checkAllTree) {
-        if (this.selectCameraArr && this.selectCameraArr.length > 0) {
-          let cameraIds = this.selectCameraArr.map(res => res.id);
+      if (this.selectCameraArr && this.selectCameraArr.length > 0) {
+          let cameraIds = this.selectCameraArr;
           params["cameraIds"] = cameraIds.join("-");
-        }
-        if (this.selectBayonetArr && this.selectBayonetArr.length > 0) {
-          let bayonetIds = this.selectBayonetArr.map(res => res.id);
+      }
+      if (this.selectBayonetArr && this.selectBayonetArr.length > 0) {
+          let bayonetIds = this.selectBayonetArr;
           params["bayonetIds"] = bayonetIds.join("-");
-        }
       }
       if (this.selectIndex === 0) {
         if (this.imgData) {

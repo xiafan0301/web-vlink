@@ -2,6 +2,7 @@
   <div class="point">
     <div class="">
       <div is="vlBreadcrumb"
+           v-show="!isCut"
            :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
             {name: '轨迹分析'}]">
       </div>
@@ -362,7 +363,7 @@
         </div>
       </div>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="filterDialog = false">取 消</el-button>
+        <el-button @click="chooseCancel">取 消</el-button>
         <el-button type="primary" @click="chooseOk">确 定</el-button>
       </span>
     </el-dialog>
@@ -413,6 +414,7 @@
     components: {vlBreadcrumb, flvplayer, vlUpload},
     data() {
       return {
+        isCut: false, // 是否为截屏跳转.
         // 任务
         tabList: [
           {
@@ -522,6 +524,9 @@
       }
     },
     mounted() {
+      if (this.$route.query.isCut) {
+        this.isCut = true;
+      }
       let map = new window.AMap.Map("rightGjfxMap", {
         zoom: 10,
         center: mapXupuxian.center
@@ -711,7 +716,7 @@
          if (!this.loading && !this.noMore) {
            this.loading = true;
            setTimeout(() => {
-             this.count += 2;
+             this.count += 4;
              this.operData();
              this.loading = false;
            }, 2000)
@@ -747,6 +752,9 @@
         this.setDTime();
         this.ruleForm.input3 = '';
         this.ruleForm.value1 = [];
+        this.evData = [];
+        this.reselt = false;
+        this.amap.clearMap();
         this.uploadClear = {};
         this.setDTime ();
       },
@@ -828,6 +836,7 @@
             return false;
           }
           d['taskOperateType'] = 1;
+          d['taskName'] = this.taskName;
           PortraitPostPersonTrace(d).then(res => {
             this.searchLoading = false;
             if (res && res.data) {
@@ -896,6 +905,12 @@
         item.times--;
         this.evData.splice(this.evData.findIndex(x => x === sItem), 1);
         this.shotAddressAndTimes(this.evData);
+      },
+      chooseCancel () {
+        this.filterDialog = false;
+        this.evData = [];
+        this.reselt = false;
+        this.amap.clearMap();
       },
       chooseOk () {
         this.showLeft = true;
@@ -1144,6 +1159,26 @@
         width: 100%;
         height: calc(100% - 53px);
         position: relative;
+        #rightGjfxMap {
+          width: 100%;
+          height: 100%;
+          .vl_icon {
+            width: 47px;
+            position: relative;
+            > .vl_map_mark_time {
+              position: absolute; top: 10px; left: 98%;
+              width: 130px;
+              word-break:keep-all;
+              font-size: 12px; color: #fff;
+              background-color: rgba(0, 0, 0, 0.4);
+              border-radius: 2px;
+              padding: 2px 5px;
+              span{
+                display: block;
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -1451,7 +1486,7 @@
             padding-left: 10px;
             float: right;
             >div {
-              font-size: 24px;
+              font-size: 20px;
               color: #0C70F8;
               font-weight: bold;
               margin-top: 10px;
@@ -1626,26 +1661,7 @@
   }
 </style>
 <style lang="scss">
-  #rightGjfxMap {
-    width: 100%;
-    height: 100%;
-    .vl_icon {
-      width: 47px;
-      position: relative;
-      > .vl_map_mark_time {
-        position: absolute; top: 10px; left: 98%;
-        width: 130px;
-        word-break:keep-all;
-        font-size: 12px; color: #fff;
-        background-color: rgba(0, 0, 0, 0.4);
-        border-radius: 2px;
-        padding: 2px 5px;
-        span{
-          display: block;
-        }
-      }
-    }
-  }
+
   .clgj_map_show_pic {
     .vl_jtc_mk { display: block !important; }
   }

@@ -85,7 +85,7 @@ export default {
         let $p = document.createElement('p');
 
         $p.setAttribute('class', 'title_p');
-        $p.innerText = '目标' + index;
+        $p.innerText = '目标' + (index + 1);
 
         let $id = 'select_box_' + index;
 

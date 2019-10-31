@@ -100,13 +100,13 @@
           <div class="vl_ytsr_left_line">
             <span>性别：</span>
             <span>
-            <p>{{taskDetail.sex ? taskDetial.sex : '不限'}}</p>
+            <p>{{taskDetail.sex ? taskDetail.sex : '不限'}}</p>
           </span>
           </div>
           <div class="vl_ytsr_left_line">
             <span>年龄段：</span>
             <span>
-            <p>{{taskDetail.age ? taskDetial.age : '不限'}}</p>
+            <p>{{taskDetail.age ? taskDetail.age : '不限'}}</p>
           </span>
           </div>
           <div class="vl_ytsr_left_line">

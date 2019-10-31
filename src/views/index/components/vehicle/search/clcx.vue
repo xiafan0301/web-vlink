@@ -74,12 +74,11 @@
             <el-input
               placeholder
               v-model="ruleForm.plateNo"
-              class="input-with-select width232"
+              class="input-with-select-clcx width232"
             >
               <el-select
                 clearable
                 v-model="select"
-                style="width: 70px;"
                 slot="prepend"
                 placeholder
               >
@@ -91,7 +90,7 @@
                 ></el-option>
               </el-select>
             </el-input>
-      
+            <p style="font-size: 13px;line-height: 1.5;color: #999999;">如有不确定的车牌信息可用“?”代替，如：湘A12??5</p>
           </el-form-item>
           <el-form-item>
             <el-row :gutter="10">
@@ -110,22 +109,28 @@
       <p class="r_o_tab" v-show="!isNull">
         <span  class="is_tuwen" :class="{'active': isList}" @click="isList = true;"></span>
         <span  class="is_list" :class="{'active': !isList}" @click="isList = false;"></span>
-        <el-button type="primary" size="small" :loading="isDao" @click="exportList" class="fright">导出</el-button>
+        <el-button type="primary" size="small" v-show="isList" :loading="isDao" @click="exportList(false)" class="fright">导出</el-button>
+        <el-button type="primary" size="small" v-show="isList" :loading="isDaoAll" @click="exportList(true)" class="fright">导出全部查询结果</el-button>
       </p>
       <div v-if="!isNull">
         <h3 class="title">查询结果</h3>
         <el-table
         v-show="isList"
         :data="tableData"
+        @selection-change="handleSelectionChange"
         style="width: 100%; padding:20px;">
+          <el-table-column
+              type="selection"
+              width="55">
+          </el-table-column>
        <el-table-column  type="index" :show-overflow-tooltip="true" label="序号"  width="80"></el-table-column>
       <el-table-column
         prop="PlateNo"
+        sortable
         label="车牌号码">
       </el-table-column>
       <el-table-column
         prop="plateColorDesc"
-        sortable
         label="号牌颜色">
       </el-table-column>
       <el-table-column
@@ -145,8 +150,11 @@
           label="品牌">
         </el-table-column>
         <el-table-column
-                prop="vehicleGroup"
                 label="所属分组">
+          <template slot-scope="scope">
+            <span v-if="scope.row.vehicleGroup"></span>
+            <span v-else>--</span>
+          </template>
         </el-table-column>
       <el-table-column
         label="是否是布控车辆">
@@ -164,7 +172,7 @@
         <div class="right_tw_list" v-show="!isList">
           <div class="r_tw_l_item" v-for="item in tableData" :key="item.id" @click="handleClick(item)">
             <div class="r_tw_l_img">
-              <img :src="item.StorageUrl1" alt="">
+              <img :src="item.StorageUrl3" alt="">
             </div>
             <p><span>车牌号：</span>{{item.PlateNo}}</p>
             <p><span>设备名称：</span>{{item.deviceName}}</p>
@@ -215,6 +223,7 @@ export default {
   components: { mapSelector, vehicleDetail },
   data () {
     return {
+      oldParams: {},
       dSum: 0,
       chooseType: 1,
       msClear: {},
@@ -234,6 +243,7 @@ export default {
       dialogVisible: false,
       strucDetailDialog: false,
       isload: false,
+      isDaoAll: false,
       value1: null,
       select: '',
       ruleForm: {
@@ -254,7 +264,6 @@ export default {
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       vehicleOptions: [],
       grounpOptions: [
-        
         {
           groupName:'布控车辆',
           uid:-2,
@@ -280,7 +289,7 @@ export default {
       }
     }
   },
-   beforeRouteEnter(to, from, next) {
+  beforeRouteEnter(to, from, next) {
      next(vm => {
          // 通过 `vm` 访问组件实例
            if (from.name == 'vehicle_menu' && to.name == 'vehicle_search_clcx') {//一定是从A进到B页面才刷新
@@ -293,34 +302,12 @@ export default {
     this.getGroups()
     let dic=this.dicFormater(dataList.vehicleType);
     this.vehicleOptions= [...dic[0].dictList]
-    // let vd= JSON.parse(localStorage.getItem("searchD"))
-    // if(vd && this.$route.query.dateStart){
-    //   this.isNull=false;
-    //   //this.getSnapList(vd)
-    //   this.ruleForm= {
-    //     dateStart:this.$route.query.dateStart,
-    //     dateEnd:this.$route.query.dateEnd,
-    //     _vehicleGroup:this.$route.query.vehicleGroup?this.$route.query.vehicleGroup.split(","):'',
-    //     vehicleClass:this.$route.query.vehicleClass,
-    //     include:this.$route.query.include,
-    //     _include:0,
-    //     plateNo:this.$route.query.plateNo,
-    //     pageNum:1,
-    //     pageSize:10,
-    //   }
-    //   this.value1 = this.$route.query.areaIds?this.$route.query.areaIds.split(","):''
-    //   let da=  JSON.parse(localStorage.getItem("clcxData"))
-    //   let numb= JSON.parse(localStorage.getItem("clcxPage"))
-    //   // this.totalData = da
-    //   // this.pagination.total=da.length
-    //   this.pagination.pageNum = numb
-    //   // this.tableData= this.totalData.slice((numb-1)*10,10*numb)
-     
-    // }
-    //this.submitForm()
-    
   },
   methods: {
+    handleSelectionChange (val) {
+      console.log(this.oldParams, val)
+      this.oldParams.selectedIds = val;
+    },
     imgListTap(data, index) {
       // 点击swiper图片
        this.playing = false;
@@ -329,16 +316,23 @@ export default {
       this.drawPoint(data); // 重新绘制地图
     },
     //导出
-    exportList(){
-      this.isDao=true
-      this.ruleForm.deviceIds  = this.selectDevice?this.selectDevice.join(","):''
-      this.ruleForm.bayonetIds = this.selectBayonet?this.selectBayonet.join(","):''
-      this.ruleForm.vehicleGroup = this.ruleForm._vehicleGroup?this.ruleForm._vehicleGroup.join(","):''
-      this.ruleForm.dateStart = formatDate(this.ruleForm.dateStart);
-      this.ruleForm.dateEnd = formatDate(this.ruleForm.dateEnd);
-      this.ruleForm.vehicleClass = this.ruleForm.vehicleClass?this.ruleForm.vehicleClass:''
-      this.ruleForm.pageNum =this.pagination.pageNum
-      let d = JSON.stringify(this.ruleForm)
+    exportList(all){
+      if (all) {
+        this.isDaoAll = true;
+        this.oldParams.pageSize = 0;
+      } else {
+        if (this.oldParams.selectedIds.length) {
+          this.isDao = true;
+          this.oldParams.exportIds = this.oldParams.selectedIds.map(x => {
+            let index = this.tableData.findIndex(y => y === x);
+            return index + 1;
+          }).join(',');
+        } else {
+          this.$MyMessage('请选择要导出的行，或者点导出全部');
+          return false;
+        }
+      }
+      let d = JSON.stringify(this.oldParams)
       d = JSON.parse(d)
       d.plateNo = this.select + this.ruleForm.plateNo;
       if(!d.plateNo){
@@ -359,19 +353,19 @@ export default {
           a.setAttribute('id', 'export_id');
           document.body.appendChild(a);
           a.click();
-          this.isDao=false
+          this.isDao = false;
+          this.isDaoAll = false;
         }else{
-          this.isDao=false
+          this.isDao = false;
+          this.isDaoAll = false;
            //this.$message.error('导出失败！');
         }
       })
     },
     updataB(){
-      //console.log(88888888888);
       this.isNull=true
       this.tableData = [];
       this.resetForm()
-     // this.submitForm()
     },
     //设置默认时间
     setDTime() {
@@ -412,8 +406,9 @@ export default {
       this.ruleForm.vehicleGroup = this.ruleForm._vehicleGroup?this.ruleForm._vehicleGroup.join(","):''
       this.ruleForm.dateStart = formatDate(this.ruleForm.dateStart);
       this.ruleForm.dateEnd = formatDate(this.ruleForm.dateEnd);
-      this.ruleForm.vehicleClass = this.ruleForm.vehicleClass?this.ruleForm.vehicleClass:''
-      this.ruleForm.pageNum =this.pagination.pageNum
+      this.ruleForm.vehicleClass = this.ruleForm.vehicleClass?this.ruleForm.vehicleClass:'';
+      this.ruleForm.pageNum =this.pagination.pageNum;
+      this.oldParams = Object.assign(this.ruleForm, {selectedIds: []})
       let d = JSON.stringify(this.ruleForm)
       d = JSON.parse(d)
       d.plateNo = this.select + this.ruleForm.plateNo;
@@ -685,6 +680,9 @@ export default {
       height: 38px;
       background: url("../../../../../assets/img/icons.png") no-repeat;
     }
+    button {
+      margin-right: 20px;
+    }
     .is_list {
       background-position: -1096px -259px;
     }
@@ -737,28 +735,31 @@ export default {
 }
 </style>
 <style lang="scss">
-.clcx{
-  .el-dialog__wrapper .el-dialog__body{
-  padding: 0px;
-}
-.el-dialog__header{
-  padding: 0px 20px 3px;
-}
-.el-dialog__headerbtn{
-  z-index: 1;
-}
-}
-.blankinput{
-  .el-input__inner{
-    color: #c6c6c6;
+  .input-with-select-clcx {
+    vertical-align: bottom !important;
   }
-}
-.el-form-item__label{
-  padding-right: 0px;
-}
-.plate_no .el-input-group__prepend{
-  padding: 0px 15px!important;
-  width: 56px!important;
-  background: #fff;
-}
+  .clcx{
+    .el-dialog__wrapper .el-dialog__body{
+    padding: 0px;
+  }
+  .el-dialog__header{
+    padding: 0px 20px 3px;
+  }
+  .el-dialog__headerbtn{
+    z-index: 1;
+  }
+  }
+  .blankinput{
+    .el-input__inner{
+      color: #c6c6c6;
+    }
+  }
+  .el-form-item__label{
+    padding-right: 0px;
+  }
+  .plate_no .el-input-group__prepend{
+    padding: 0px 15px!important;
+    width: 54px!important;
+    background: #fff;
+  }
 </style>

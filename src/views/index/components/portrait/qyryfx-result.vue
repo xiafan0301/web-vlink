@@ -242,14 +242,14 @@
                         </div>
                         </div>
                       <div class="img_warp">
-                        <img :src="sItem.upPhotoUrl" title="点击放大图片" class="bigImg" alt />
+                        <img :src="sItem.upPhotoUrl" alt="" />
                       </div>
                       <div class="similarity">
                         <p class="similarity_count">{{sItem.semblance}}<span style="font-size:16px">%</span></p>
                         <p class="similarity_title">相似度</p>
                       </div>
                       <div class="img_warp">
-                        <img :src="sItem.subStoragePath" title="点击放大图片" class="bigImg" alt />
+                        <img :src="sItem.subStoragePath" alt="" />
                       </div>
                       <div class="people_message">
                         <h2 class="name">{{item.name}}</h2>
@@ -423,6 +423,8 @@ export default {
                   this.taskDetail.taskWebParam.personGroupNames = personGroupIdName.join('、');
                 }
               }
+              // console.log('this.taskDetail.taskResult', this.taskDetail.taskResult);
+              
               this.initMap(this.taskDetail.taskResult);
             }
           })
@@ -503,22 +505,18 @@ export default {
       }
     },
     // D设备 B卡口
-    setMarks(deviceList = null) {
+    setMarks(deviceList = null) {     
       for (let j = 0; j < deviceList.length; j++) {
         const deviceItem = deviceList[j];
         if (deviceItem.bayonetName) {
-          // const deviceName = deviceItem.deviceName.split('Bayonet_');
-          // deviceItem.deviceName = deviceName[1];
           this.doMark(deviceItem, "vl_icon vl_icon_kk");
-          break;
         } else {
           this.doMark( deviceItem, "vl_icon vl_icon_sxt");
-          break;
         }
       }
     },
     // 地图标记
-    doMark(device, sClass) {
+    doMark(device, sClass) {   
       let marker;
       if (device.shotNum > 0) {
         // 非初始化的状态

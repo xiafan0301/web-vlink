@@ -568,15 +568,13 @@ export default {
         ];
         this.peopleGroupOptions.map(item => {
           this.qyryfxFrom.personGroupId.push(item.uid);
-        })
+        });
+        
+        this.getTaskList();
       }
     });
   },
   mounted() {
-
-    // setTimeout(() => {
-      this.getTaskList();
-    // }, 500);
   },
   methods: {
     // 查询方式change
