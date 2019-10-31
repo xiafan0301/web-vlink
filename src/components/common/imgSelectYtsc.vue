@@ -216,7 +216,7 @@ export default {
         let $p = document.createElement('p');
 
         $p.setAttribute('class', 'title_p');
-        $p.innerText = '目标' + (index + 1);
+        $p.innerText = '目标';
         
 
         $div.setAttribute('id', $id);
