@@ -84,7 +84,7 @@
                 <div>
                   <span v-if="item.semblance">{{item.semblance}}</span><span class="percent">%</span>
                   <p>相似度</p>
-                  <el-progress :percentage="item.semblance" color="#0C70F8"></el-progress>
+                  <el-progress :percentage="item.semblance ? item.semblance : 0" color="#0C70F8"></el-progress>
                 </div>
                 <div class="img_info"><img :src="item.surveillancePhoto" alt="布防照片"></div>
               </div>
