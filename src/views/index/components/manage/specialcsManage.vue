@@ -10,12 +10,7 @@
          <span>新增分组</span>
        </div>
        <ul class="fen_zu">
-         <li>
-           <span>是佛教护法</span>
-           <i class="operation_btn del_btn vl_icon vl_icon_manage_8"></i>
-           <i class="operation_btn edit_btn vl_icon vl_icon_manage_7"></i>
-         </li>
-         <li v-for="(item, index) in fenzulist" :key ="index">{{item.groupName}}
+         <li v-for="(item, index) in fenzulist" :key ="index" @click="qieh(item,index)" :class="{'active': index === showind}">{{item.groupName}}
            <i class="operation_btn del_btn vl_icon vl_icon_manage_8" @click="delfenzu(item)"></i>
            <i class="operation_btn edit_btn vl_icon vl_icon_manage_7" @click="addzu('修改', item.uid)"></i>
          </li>
@@ -23,10 +18,12 @@
      </div>
      <div class="special_csmanage_right_r special_csmanage_right" :class="{'hideResult': Result}">
        <vue-scroll>
-         <div v-for="(item, index) in fenzulist" :key ="index" :class="['special_csmanage_right_r_tree', 'special_csmanage_right_r_tree_'+ index]">
-           <div class="special_csmanage_right_r_tree_hd" @click="oo(item,index)" :class="{'opencolor': item.isopen }"><i :class="[{'el-icon-arrow-right': !item.isopen},{'el-icon-arrow-down':item.isopen}]"></i>{{item.deviceList[0].address}}</div>
-           <div class="special_csmanage_right_r_tree_i" v-for="(ite, inde) in item.deviceList" :key ="inde">
-             <div v-show="item.isopen">{{ite.deviceName}}</div>
+         <div v-for="(item, index) in item1" :key ="index" :class="['special_csmanage_right_r_tree', 'special_csmanage_right_r_tree_'+ index]">
+           <div class="special_csmanage_right_r_tree_hd" @click="oo(item,index)" :class="{'opencolor': item.isopen }"><i :class="[{'el-icon-arrow-right': !item.isopen},{'el-icon-arrow-down':item.isopen}]"></i>{{item.deviceList[0]&&item.deviceList[0].address}}</div>
+           <div class="special_csmanage_right_r_tree_i_tal" style="height: 0; overflow: hidden">
+             <div class="special_csmanage_right_r_tree_i" v-for="(ite, inde) in item.deviceList" :key ="inde">
+               <div>{{ite.deviceName}}</div>
+             </div>
            </div>
          </div>
        </vue-scroll>
@@ -64,6 +61,9 @@ export default {
       fenzulist: [],
       deleteDialog: false,
       item: {},
+      item1: [],
+      showind: 0,
+      zidi: []
     }
   },
   created () {
@@ -79,6 +79,13 @@ export default {
     map.setMapStyle('amap://styles/whitesmoke');
   },
   methods: {
+    qieh (val, i) {
+      this.item1 = []
+      this.showind = i
+      this.item1.push(val)
+      $('.special_csmanage_right_r_tree_i_tal').height(0)
+      val.isopen = false
+    },
     getlist () {
       Jtcgettsc()
         .then(res => {
@@ -88,6 +95,12 @@ export default {
               this.$set(item, 'isopen', false)
               return item
             })
+            this.item1.push(res.data[0])
+            this.zidi = res.data[1].deviceList
+            let __arr = this.zidi.map((item)=>{
+              return item.areaName
+            })
+            console.log(__arr)
           }
         })
     },
@@ -132,15 +145,11 @@ export default {
     },
     oo (val,index) {
       val.isopen = !val.isopen
-      let _heit  = 0
-      if(val.isopen) {
-        _heit = $('.special_csmanage_right_r_tree_' + index).height()
-      }
-      console.log(_heit)
+      let _heght = val.deviceList.length * 34
       if (val.isopen) {
-        $('.special_csmanage_right_r_tree_' + index).animate({height:175}, 300, "linear")
+        $('.special_csmanage_right_r_tree_i_tal').animate({height:_heght}, 300, "linear")
       } else {
-        $('.special_csmanage_right_r_tree_' + index).animate({height:_heit + 20}, 300, "linear")
+        $('.special_csmanage_right_r_tree_i_tal').animate({height:0}, 300, "linear")
       }
     }
   }
@@ -182,9 +191,13 @@ export default {
           }
         }
         .fen_zu{
+          .active{
+            background-color:  #E0F2FF;
+          }
           li{
             padding-left: 48px;
-            padding-bottom: 10px;
+            padding-top: 5px;
+            padding-bottom: 5px;
             cursor: pointer;
             .vl_icon_manage_7{
               background-position: -584px -377px;
