@@ -456,6 +456,9 @@
       if (this.hasGroupFilter) {
         this.getGroups();
       }
+      if (!this.showDeviceList) { // 区域人员分析，若没有列表选择，则默认显示地图选择
+        this.curTabType = 0;
+      }
     },
     computed: {
       mapAllList () {
