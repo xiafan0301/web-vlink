@@ -3,7 +3,8 @@
     <div class="dev_box" v-if="pageType === 1">
       <div class="tab">
         <span>布控设备</span>
-        <el-button type="info" plain @click="changePageType">修改布控设备</el-button>
+        <!-- 公务车辆监管不允许修改设备 -->
+        <el-button v-if="model !== 'gwcl'" type="info" plain @click="changePageType">修改布控设备</el-button>
       </div>
       <div class="sel_dev">
         <div class="title">
@@ -74,7 +75,7 @@ import {getAllMonitorList, getBayonetList} from '@/views/index/api/api.base.js';
 import { Promise } from 'q';
 export default {
   components: {mapSelector},
-  props: ['addressObj', 'addressObjTwo', 'modelType', 'lostTime', 'devIdListFive', 'bayIdListFive', 'devs', 'bays'],
+  props: ['model', 'addressObj', 'addressObjTwo', 'modelType', 'lostTime', 'devIdListFive', 'bayIdListFive', 'devs', 'bays'],
   data () {
     return {
       pageType: null,//页面类型，1为布控设备展示页面，2为修改布控设备页面
@@ -149,7 +150,6 @@ export default {
     },
     // 进入修改已选择的设备页面
     changePageType () {
-      this.$_showLoading();
       if (this.map) {
         this.map.destroy();
         this.map = null;
@@ -161,9 +161,6 @@ export default {
       this.$nextTick(() => {
         this.activeDeviceList = [...this.devIdList.map(m => m.uid), ...this.bayIdList.map(m => m.uid)];
       })
-      setTimeout(() => {
-        this.$_hideLoading();
-      }, 1500);
     },
     // 传给父组件 
     sendParent () {
@@ -194,7 +191,6 @@ export default {
     },
     // 获取地图上的设备和卡口数据
     getDevAndBayList () {
-      this.$_showLoading();
       Promise.all([getAllMonitorList({ccode: mapXupuxian.adcode}), 
         getBayonetList  ({ 
           "where.areaId": mapXupuxian.adcode,
@@ -291,7 +287,6 @@ export default {
       }
       _this.map.setFitView();
       addCluster(_this.map, _this.markerList);
-      this.$_hideLoading();
     },
     // 人员失踪位置和家庭位置标记
     addressMark () {

@@ -158,7 +158,7 @@ export default {
         order: null,
         'where.vehicleColor': this.libForm.vehicleColor,
         'where.vehicleType': this.libForm.vehicleType,
-        'where.numberType': this.libForm.numberType
+        'where.numberType': this.libForm.plateType
       }
       this.libForm.vehicleNumber && (params['where.vehicleNumber'] = this.libForm.vehicleNumber);
       this.loading = true;
@@ -197,7 +197,7 @@ export default {
       const params = {
         'where.vehicleColor': this.libForm.vehicleColor,
         'where.vehicleType': this.libForm.vehicleType,
-        'where.numberType': this.libForm.numberType,
+        'where.numberType': this.libForm.plateType,
         'where.groupId': this.gwclGroupId,
         pageNum: this.pageNum,
         pageSize: this.pageSize,

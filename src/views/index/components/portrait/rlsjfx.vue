@@ -448,19 +448,23 @@ export default {
       chart.tooltip({
         useHtml: true,
         htmlContent: function (title, items) {
-          let str = `<div class="my_tooltip">`;
-          if (title === '0点') {
-            str += `<h1>${title}</h1>`;
-          } else {
-            str += `<h1>${_this.transformTime(title)}-${title}</h1>`;
-          }
-          str += `<span><span>${items[0].value}</span><span>张</span></span></div>`;
+          let str = `<div class="my_tooltip"><h1>${title}</h1><span><span>${items[0].value}</span><span>张</span></span></div>`;
+          // if (title === '0点') {
+          //   str += `<h1>${title}</h1>`;
+          // } else {
+          //   str += `<h1>${_this.transformTime(title)}-${title}</h1>`;
+          // }
+          // str += `<span><span>${items[0].value}</span><span>张</span></span></div>`;
           return str;
           // return`<div class="my_tooltip"><h1>${title}</h1><span><span>${items[0].value}</span><span>张</span></span></div>`;
         }
       });
       chart.legend(false);
-      chart.line().position('name*total').shape('hv').color('#088BFD').size(2);
+      chart.line().position('name*total').shape('circle').color('#088BFD').size(2);
+      chart.point().position('name*total').size(4).shape('circle').style({
+        stroke: '#fff',
+        lineWidth: 1
+      });
       // chart.area().position('time*value').color([ 'l(270) 0:#ffffff 1:#00C4FC' ]).shape('smooth');
       chart.render();
       this.charts.chart1 = chart;
@@ -497,19 +501,23 @@ export default {
       chart.tooltip({
         useHtml: true,
         htmlContent: function (title, items) {
-          let str = `<div class="my_tooltip">`;
-          if (title === '0点') {
-            str += `<h1>${title}</h1>`;
-          } else {
-            str += `<h1>${_this.transformTime(title)}-${title}</h1>`;
-          }
-          str += `<span><span>${items[0].value}</span><span>次</span></span></div>`;
+          let str = `<div class="my_tooltip"><h1>${title}</h1><span><span>${items[0].value}</span><span>次</span></span></div>`;
+          // if (title === '0点') {
+          //   str += `<h1>${title}</h1>`;
+          // } else {
+          //   str += `<h1>${_this.transformTime(title)}-${title}</h1>`;
+          // }
+          // str += `<span><span>${items[0].value}</span><span>次</span></span></div>`;
           return str;
           // return`<div class="my_tooltip"><h1>${title}</h1><span><span>${items[0].value}</span><span>张</span></span></div>`;
         }
       });
       chart.legend(false);
-      chart.line().position('name*total').shape('hv').color('#088BFD').size(2);
+      chart.line().position('name*total').shape('circle').color('#088BFD').size(2);
+      chart.point().position('name*total').size(4).shape('circle').style({
+        stroke: '#fff',
+        lineWidth: 1
+      });
       // chart.area().position('time*value').color([ 'l(270) 0:#ffffff 1:#00C4FC' ]).shape('smooth');
       chart.render();
       this.charts.chart2 = chart;
