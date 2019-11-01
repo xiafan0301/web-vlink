@@ -12,7 +12,7 @@
       <template v-if="dataList.length > 0">
         <div class="vehicle_info">
           <span>车牌号{{$route.query.plateNo}}</span>
-          <span>限行区域内共有<span class="number">{{dataList.length}}</span>条抓拍信息</span>
+          <span>限行区域内共有<span class="number">{{pagination.total}}</span>条抓拍信息</span>
         </div>
         <div class="result_sort">
           <div class="sort">
@@ -103,7 +103,7 @@ export default {
         'where.taskId': this.queryObj.uid,
         'where.plateNo': this.$route.query.plateNo,
         pageNum: this.pagination.pageNum,
-        pageSize: this.pagination.pageSize,
+        // pageSize: this.pagination.pageSize,
         order: this.pagination.order,
         orderBy: this.pagination.orderBy
       };

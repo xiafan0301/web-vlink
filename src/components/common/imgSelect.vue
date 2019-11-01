@@ -29,8 +29,6 @@ export default {
       dialogVisible: false,
       submitLoading: false,
       selectList: [],
-      initImgWidth: 500, // 图片原width
-      initImgHeight: 341, // 图片原height
       fd: null,
       selectComplete: true, // 点击选择出现
       imgInfo: {

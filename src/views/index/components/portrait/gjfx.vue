@@ -2,14 +2,13 @@
   <div class="point">
     <div class="">
       <div is="vlBreadcrumb"
-           v-show="!isCut"
-           :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
-            {name: '轨迹分析'}]">
+        v-show="!isCut"
+        :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
+        {name: '轨迹分析'}]">
       </div>
     </div>
-
     <div :class="['left',{hide:hideleft}]">
-      <div class="plane" style="padding-top: 20px;">
+      <div class="plane">
         <div class="gjfx_left_search_type">
           <span :class="{'active': taskType === '1'}" @click="taskType = '1'">在线查询</span>
           <span :class="{'active': taskType === '2'}" @click="taskType = '2'">离线任务</span>
@@ -31,25 +30,27 @@
           </el-form-item>
           <el-form-item class="" prop="data1">
             <el-date-picker
-                    v-model="ruleForm.data1"
-                    style="width: 100%;"
-                    class="vl_date"
-                    :picker-options="pickerOptions"
-                    type="datetime"
-                     time-arrow-control
-                    placeholder="选择日期时间">
+              v-model="ruleForm.data1"
+              style="width: 100%;"
+              class="vl_date"
+              :picker-options="pickerOptions"
+              type="datetime"
+              :clearable="false"
+                time-arrow-control
+              placeholder="选择日期时间">
             </el-date-picker>
           </el-form-item>
           <el-form-item>
             <el-date-picker
-                    style="width: 100%;"
-                    class="vl_date vl_date_end"
-                    v-model="ruleForm.data2"
-                    :time-arrow-control="true"
-                    :picker-options="pickerOptions"
-                    @change="chooseEndTime"
-                    type="datetime"
-                    placeholder="选择日期时间">
+              style="width: 100%;"
+              :clearable="false"
+              class="vl_date vl_date_end"
+              v-model="ruleForm.data2"
+              :time-arrow-control="true"
+              :picker-options="pickerOptions"
+              @change="chooseEndTime"
+              type="datetime"
+              placeholder="选择日期时间">
             </el-date-picker>
           </el-form-item>
           <el-form-item>
@@ -59,7 +60,7 @@
               </div>
             </div>
           </el-form-item>
-          <el-form-item>
+          <el-form-item class="operation_button">
             <el-row :gutter="10">
               <el-col :span="12">
                 <el-button @click="resetForm('ruleForm')" class="full">重置</el-button>
@@ -76,10 +77,10 @@
       <div class="frequent-a-content">
         <ul class="tab-menu">
           <li
-                  v-for="(item,index) in tabList"
-                  :key="index"
-                  :class="{'is-active': selectIndex === item.value}"
-                  @click="selectTab(item.value)"
+            v-for="(item,index) in tabList"
+            :key="index"
+            :class="{'is-active': selectIndex === item.value}"
+            @click="selectTab(item.value)"
           >{{item.label}}</li>
         </ul>
         <template v-if="selectIndex === 2">
@@ -92,10 +93,6 @@
             <div class="reselt" v-if="reselt && showLeft">
               <div class="plane insetPadding">
                 <h3 class="title">分析结果<p>共经过{{totalAddressNum}}个地方，出现{{totalMapNum}}次</p></h3>
-                <!--<div class="sup_title">-->
-                <!--<div  @click="timeOrderS">时间排序 <span><i class="el-icon-caret-top" :class="{'active': !timeOrder}"></i><i :class="{'active': timeOrder}" class="el-icon-caret-bottom"></i></span></div>-->
-                <!--<div>({{}}次)</div>-->
-                <!--</div>-->
                 <div class="plane_main_box"  @scroll="scrollIt">
                   <!--<vue-scroll>-->
                   <div class="plane_main">
@@ -137,31 +134,30 @@
             <el-form :inline="true" :model="taskForm" class="event_form" ref="taskForm">
               <el-form-item label="任务名称：" prop="taskName">
                 <el-input
-                        style="width: 200px;"
-                        type="text"
-                        placeholder="请输入任务名称"
-                        v-model="taskForm.taskName"
+                  style="width: 200px;"
+                  type="text"
+                  placeholder="请输入任务名称"
+                  v-model="taskForm.taskName"
                 />
               </el-form-item>
               <el-form-item label="创建时间：" prop="reportTime">
                 <el-date-picker
-                        v-model="taskForm.reportTime"
-                        type="datetimerange"
-                        value-format="yyyy-MM-dd HH:mm:ss"
-                        format="yyyy-MM-dd HH:mm:ss"
-                        range-separator="至"
-                        start-placeholder="开始日期"
-                        end-placeholder="结束日期"
-                        :default-time="['00:00:00', '23:59:59']"
+                  v-model="taskForm.reportTime"
+                  type="datetimerange"
+                  value-format="yyyy-MM-dd HH:mm:ss"
+                  format="yyyy-MM-dd HH:mm:ss"
+                  range-separator="至"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  :default-time="['00:00:00', '23:59:59']"
                 ></el-date-picker>
               </el-form-item>
-              <el-form-item>
+              <el-form-item >
                 <el-button class="select_btn" @click="selectDataList">查询</el-button>
                 <el-button class="reset_btn" @click="resetTaskForm('taskForm')">重置</el-button>
               </el-form-item>
             </el-form>
             <div class="divide"></div>
-            <!--<el-button @click="skipAddTaskPage" class="th-button-export-color">新建任务</el-button>-->
           </div>
           <div class="content-box">
             <div class="table_box">
@@ -187,29 +183,29 @@
                 <el-table-column label="操作" fixed="right">
                   <template slot-scope="scope">
                   <span
-                          class="operation_btn"
-                          @click="skipResultPage(scope.row)"
-                          v-if="selectIndex === 1"
+                    class="operation_btn"
+                    @click="skipResultPage(scope.row)"
+                    v-if="selectIndex === 1"
                   >查看</span>
                     <span
-                            class="operation_btn"
-                            @click="showInterruptDialog(scope.row)"
-                            v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 1"
+                      class="operation_btn"
+                      @click="showInterruptDialog(scope.row)"
+                      v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 1"
                     >中断任务</span>
                     <span
-                            class="operation_btn"
-                            @click="recoveryOrRestart(scope.row)"
-                            v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 4"
+                      class="operation_btn"
+                      @click="recoveryOrRestart(scope.row)"
+                      v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 4"
                     >恢复任务</span>
                     <span
-                            class="operation_btn"
-                            @click="recoveryOrRestart(scope.row)"
-                            v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 3"
+                      class="operation_btn"
+                      @click="recoveryOrRestart(scope.row)"
+                      v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 3"
                     >重启任务</span>
                     <span
-                            class="operation_btn"
-                            @click="showDeleteDialog(scope.row)"
-                            v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus !== 4"
+                      class="operation_btn"
+                      @click="showDeleteDialog(scope.row)"
+                      v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus !== 4"
                     >删除任务</span>
                   </template>
                 </el-table-column>
@@ -218,13 +214,13 @@
           </div>
           <template v-if="pagination.total > 0">
             <el-pagination
-                    class="cum_pagination"
-                    @current-change="handleCurrentChange"
-                    :current-page.sync="pagination.pageNum"
-                    :page-sizes="[100, 200, 300, 400]"
-                    :page-size="pagination.pageSize"
-                    layout="total, prev, pager, next, jumper"
-                    :total="pagination.total"
+              class="cum_pagination"
+              @current-change="handleCurrentChange"
+              :current-page.sync="pagination.pageNum"
+              :page-sizes="[100, 200, 300, 400]"
+              :page-size="pagination.pageSize"
+              layout="total, prev, pager, next, jumper"
+              :total="pagination.total"
             ></el-pagination>
           </template>
         </template>
@@ -370,12 +366,12 @@
 
     <!--中断任务弹出框-->
     <el-dialog
-            title="中断任务确认"
-            :visible.sync="interruptDialog"
-            width="482px"
-            :close-on-click-modal="false"
-            :close-on-press-escape="false"
-            class="dialog_comp"
+      title="中断任务确认"
+      :visible.sync="interruptDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
     >
       <span style="color: #999999;">任务中断，任务的数据处理进程将中止，可以在列表中恢复任务的数据处理</span>
       <div slot="footer" class="dialog-footer">
@@ -386,12 +382,12 @@
 
     <!--删除任务弹出框-->
     <el-dialog
-            title="删除任务确认"
-            :visible.sync="deleteDialog"
-            width="482px"
-            :close-on-click-modal="false"
-            :close-on-press-escape="false"
-            class="dialog_comp"
+      title="删除任务确认"
+      :visible.sync="deleteDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
     >
       <span style="color: #999999;">任务删除，任务的数据处理进程将被清除，任务不再可以恢复</span>
       <div slot="footer" class="dialog-footer">
@@ -1085,6 +1081,9 @@
   };
 </script>
 <style lang="scss" scoped>
+/deep/ .el-form-item {
+  margin-bottom: 10px;
+}
   .vl_gjfx_right {
     display: inline-block;
     width: calc(100% - 272px);
@@ -1368,7 +1367,7 @@
     animation: fadeInLeft 0.4s ease-out 0.3s both;
     transition: marginLeft 0.3s ease-in;
     .plane {
-      padding: 20px;
+      padding: 10px;
       position: relative;
       height: 100%;
       min-height: 560px;
@@ -1666,6 +1665,9 @@
     .vl_jtc_mk { display: block !important; }
   }
   .demo-ruleForm {
+    .operation_button {
+      margin-top: 20px;
+    }
     .quyu {
       .el-form-item__label {
         padding: 0;
@@ -1676,7 +1678,7 @@
       }
     }
     .ytsr_left_radio {
-      margin-top: 10px;
+      // margin-top: 10px;
       display: flex;
       height: 40px;
       >span {

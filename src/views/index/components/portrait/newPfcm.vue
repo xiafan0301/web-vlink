@@ -252,9 +252,7 @@
       </el-dialog>
       </div>
     </div>
-
-    <div is="mapSelector" singleAreas :editAble="editAble" hideDBlist :open="openMap" :clear="msClear" :showTypes="'DB'" @mapSelectorEmit="mapSelectorEmit"></div>
-
+    <div is="mapSelector" singleArea  :editAble="editAble" hideDBlist :open="openMap" :clear="msClear" :showTypes="'DB'" @mapSelectorEmit="mapSelectorEmit"></div>
   </div>
 </template>
 <script>
