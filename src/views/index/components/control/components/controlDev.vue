@@ -70,7 +70,6 @@
 import {mapXupuxian} from '@/config/config.js';
 import {random14, addCluster} from '@/utils/util.js';
 import mapSelector from '@/components/common/mapSelector.vue';
-import { setTimeout } from 'timers';
 import {getAllMonitorList, getBayonetList} from '@/views/index/api/api.base.js';
 import { Promise } from 'q';
 export default {

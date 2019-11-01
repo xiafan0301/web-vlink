@@ -281,7 +281,7 @@ export default {
       this.charts.chart2 = chart;
     },
     drawChart3 () {
-      let _this = this, chart = null;
+      let chart = null;
       if (this.charts.chart3) {
         this.charts.chart3.clear();
         chart = this.charts.chart3;
