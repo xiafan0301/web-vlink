@@ -298,7 +298,7 @@
               </div>
               <span>相似度</span>
               <span>
-                {{sturcDetail.semblance ? (sturcDetail.semblance).toFixed(2) : 0.00}}
+                {{sturcDetail.semblance ? (sturcDetail.semblance).toFixed(2) : 100.00}}
                 <span style="font-size: 12px;">%</span>
               </span>
             </div>

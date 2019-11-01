@@ -82,7 +82,7 @@
                 </div>
                 <div class="img_info"><img :src="item.snapPhoto" alt="抓拍照片"></div>
                 <div>
-                  <span v-if="item.semblance">{{item.semblance}}</span><span class="percent">%</span>
+                  <span>{{item.semblance ? item.semblance : '100'}}</span><span class="percent">%</span>
                   <p>相似度</p>
                   <el-progress :percentage="item.semblance ? item.semblance : 0" color="#0C70F8"></el-progress>
                 </div>
@@ -97,7 +97,7 @@
                 <template v-if="item.objType == 2">
                   <div class="alarm_b_list">{{item.vehicleNumber}}</div>
                   <!-- <div class="alarm_b_list">{{item.numberColor}}</div> -->
-                  <div class="alarm_b_list">{{item.vehicleType}}</div>
+                  <div class="alarm_b_list" v-if="!(item.vehicleType == '' || item.vehicleType == null)">{{item.vehicleType}}</div>
                 </template>
                 <div class="alarm_b_list" v-if="item.eventCode">{{item.eventCode}}<span>|</span><span>关联事件</span></div>
               </div>
