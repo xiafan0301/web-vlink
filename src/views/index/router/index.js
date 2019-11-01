@@ -99,10 +99,10 @@ const router = new VueRouter({
       component: () => import('@/views/index/components/portrait/ytsr-moment.vue')
     },
     {
-      path: '/cut-ycsc',  // 以图搜车
-      name: 'cut_vehicle_search_ycsc',
+      path: '/cut-ytsc',  // 以图搜车
+      name: 'cut_vehicle_search_ytsc',
       meta: { unrequireLogin: true },
-      component: () => import('@/views/index/components/vehicle/search/ycsc.vue')
+      component: () => import('@/views/index/components/vehicle/search/ytsc.vue')
     },
     {
       path: '/cut-tzsc',  // 特征搜车

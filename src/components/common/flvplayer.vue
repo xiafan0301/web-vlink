@@ -502,6 +502,7 @@ export default {
   props: ['index', 'oData', 'oConfig', 'optDis', 'bResize', 'showFullScreen'],
   data () {
     return {
+      imgObj: {},
       optionsDis: false,
       mini: false, // 主要控制播放器操作栏显示方式
       videoLoading: true,
@@ -1594,20 +1595,20 @@ export default {
           break;
         case 2:
           routeUrl = this.$router.resolve({
-            name: 'cut_vehicle_search_ycsc',
-            query: {imgurl: this.skipImgUrl, isCut: true}
+            name: 'cut_vehicle_search_ytsc',
+            query: {imgurl: this.skipImgUrl, isCut: true, imgWidth: this.imgObj.imgWidth, imgHeight: this.imgObj.imgHeight}
           });
           break;
         case 3:
           routeUrl = this.$router.resolve({
             name: 'cut_portrait_rlcx',
-            query: {imgurl: this.skipImgUrl, isCut: true}
+            query: {imgurl: this.skipImgUrl, isCut: true, imgWidth: this.imgObj.imgWidth, imgHeight: this.imgObj.imgHeight}
           });
           break;
         case 4:
           routeUrl = this.$router.resolve({
             name: 'cut_vehicle_search_tzsc',
-            query: {imgurl: this.skipImgUrl, isCut: true}
+            query: {imgurl: this.skipImgUrl, isCut: true, imgWidth: this.imgObj.imgWidth, imgHeight: this.imgObj.imgHeight}
           });
           break;
         case 5:
@@ -1708,7 +1709,7 @@ export default {
     },
     // 设置截屏图片信息---上传图片
     setImgUid (oRes) {
-     let imgObj = {
+     this.imgObj = {
         cname: oRes.fileName, // 附件名称 ,
         // contentUid: this.$store.state.loginUser.uid,
         // desci: '', // 备注 ,
@@ -1724,10 +1725,10 @@ export default {
         thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
         // uid: '' //  附件标识
       };
-      this.skipImgUrl = imgObj.path;
+      this.skipImgUrl = this.imgObj.path;
       if (this.$store.state.loginUser && this.$store.state.loginUser.uid) {
-        imgObj.contentUid = this.$store.state.loginUser.uid;
-        JtcPOSTAppendixInfo(imgObj).then(jRes => {
+        this.imgObj.contentUid = this.$store.state.loginUser.uid;
+        JtcPOSTAppendixInfo(this.imgObj).then(jRes => {
           if (jRes) {
             this.skipImgPathId = jRes.data;
             this.isDisableSkip = false;

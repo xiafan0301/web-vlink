@@ -29,8 +29,6 @@ export default {
       dialogVisible: false,
       submitLoading: false,
       selectList: [],
-      initImgWidth: 500, // 图片原width
-      initImgHeight: 341, // 图片原height
       fd: null,
       selectComplete: true, // 点击选择出现
       imgInfo: {
@@ -85,7 +83,7 @@ export default {
         let $p = document.createElement('p');
 
         $p.setAttribute('class', 'title_p');
-        $p.innerText = '目标' + (index + 1);
+        $p.innerText = '目标';
 
         let $id = 'select_box_' + index;
 

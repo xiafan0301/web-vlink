@@ -56,7 +56,9 @@ export default {
   },
   methods: {
     back () {
-      this.$router.go(-1)
+      let deviceList = this.$refs['myseb'].getCheckedIds()
+      console.log(deviceList)
+      // this.$router.go(-1)
     },
     baocun () {
       this.addloading = true
@@ -131,7 +133,7 @@ export default {
         }
       }
       .add_sty{
-        padding-bottom: 50px;
+        padding-bottom: 10px;
       }
       div{
         padding: 5px 0;
