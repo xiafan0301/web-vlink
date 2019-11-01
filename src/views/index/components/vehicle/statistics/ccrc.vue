@@ -107,7 +107,7 @@
                   label="车牌号码">
                 <template slot-scope="scope">
                   <span>{{scope.row.PlateNo}}</span>
-                  <i class="icon" v-if="scope.row.firstEnterFlag"></i>
+                  <i class="icon" v-if="scope.row.firstEnterFlag === '1'"></i>
                 </template>
               </el-table-column>
               <el-table-column
