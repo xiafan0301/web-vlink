@@ -67,19 +67,10 @@
           <span>任务名称：</span>{{taskDetail.taskName}}
         </div>
         <div class="vl_ytsr_left_line">
-          <span>相似度：</span>≥{{taskDetail ? taskDetail.minSemblance : 0}}%
-        </div>
-        <div class="vl_ytsr_left_line">
           <span>抓拍时间：</span>
           <span>
           <p>{{taskDetail.startTime}}</p>
           <p>{{taskDetail.endTime}}</p>
-        </span>
-        </div>
-        <div class="vl_ytsr_left_line">
-          <span>抓拍设备：</span>
-          <span>
-           <p v-for="item in taskDetail.deviceNames" :key="item.id">{{item}}</p>
         </span>
         </div>
         <div class="update_task">
