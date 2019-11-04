@@ -67,16 +67,17 @@
             <!-- 相似度搜索 -->
             <el-form-item prop="similarity">
               <div class="similarity">
-                <ul class="similarity-input">
+                <div class="per_semblance_ytsr"><span>相似度：≥</span><el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100" placeholder="填写相似度数字" v-model="searchData.similarity"></el-input>%</div>
+                <!-- <ul class="similarity-input">
                   <li class="input-name">
                     <el-input placeholder="相似度" readonly v-model="searchData.similarityName"></el-input>
                   </li>
                   <li class="input-value">
                     <el-input v-model="searchData.similarity" placeholder></el-input>
                   </li>
-                </ul>
-                <p class="symbol"></p>
-                <p class="max-value">100</p>
+                </ul> -->
+                <!-- <p class="symbol"></p>
+                <p class="max-value">100</p> -->
               </div>
             </el-form-item>
             <!-- 频次搜索 -->
@@ -169,6 +170,7 @@
                   {{scope.row.taskWebParamObj.frequency}}
                 </template>
               </el-table-column>
+              <el-table-column label="结果数" prop="resultNum" show-overflow-tooltip></el-table-column>
               <el-table-column label="状态" v-if="selectIndex === 0" show-overflow-tooltip>
                   <template slot-scope="scope">
                       {{scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 2 ? '成功' : scope.row.taskStatus === 3 ? '失败' : scope.row.taskStatus === 4 ? '已中断' : ''}}
@@ -271,7 +273,7 @@ export default {
         taskName: "",
         startTime: "",
         endTime: "",
-        similarityName: "相似度",
+        similarityName: "相似度：≥",
         similarity: "85", // 相似度
         frequency: "3", //频次
         frequencyName: "频次不少于"
@@ -707,7 +709,7 @@ export default {
       .task-name {
         width: 232px;
       }
-      .similarity {
+      /* .similarity {
         width: 232px;
         display: flex;
         .similarity-input {
@@ -721,7 +723,7 @@ export default {
             border-color: #0c70f8;
           }
           .input-name {
-            width: 60px;
+            width: 78px;
           }
           .input-value {
             width: 88px;
@@ -737,7 +739,7 @@ export default {
           color: #333;
           line-height: 40px;
         }
-      }
+      } */
       .frequency {
         width: 232px;
         display: flex;
@@ -974,7 +976,39 @@ export default {
       }
   }
   //相似度搜索
-  .similarity,.frequency {
+  .similarity {
+    .per_semblance_ytsr {
+      color: #555;
+      position: relative;
+      >span {
+        position: absolute;
+        left: 0;
+        display: block;
+        height: 40px;
+        line-height: 40px;
+        z-index: 9;
+        color: #606266;
+        width: 82px;
+        padding-left: 12px;
+      }
+      >i {
+        display: inline-block;
+        width: 20px;
+        height: 1px;
+        background: #999;
+        margin: 19px 16px;
+        vertical-align: middle;
+      }
+      .el-input {
+        width: 202px;
+        margin-right: 10px;
+        input{
+          text-indent: 69px;
+        }
+      }
+    }
+  }
+  .frequency {
     .el-input__inner {
       border: none;
       height: 38px;

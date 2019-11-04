@@ -13,7 +13,7 @@
           <div class="task-info-row"><span class="left-text">任务名称：</span><span class="right-text">{{analysisObj.taskName}}</span></div>
           <div class="task-info-row double-row"><span class="left-text">所选时间：</span><span class="right-text">{{analysisObj.taskParam.startDate}}</span></div>
           <div class="task-info-row"><span class="left-text none-text">所选时间：</span><span class="right-text">{{analysisObj.taskParam.endDate}}</span></div>
-          <div class="task-info-row"><span class="left-text">相似度：</span><span class="right-text">{{analysisObj.taskParam.semblance}}%</span></div>
+          <div class="task-info-row"><span class="left-text">相似度：</span><span class="right-text">≥ {{analysisObj.taskParam.semblance}}%</span></div>
           <div class="task-info-row"><span class="left-text">频次：</span><span class="right-text">{{analysisObj.taskParam.frequency}}</span></div>
           <template v-if="analysisObj.taskParam.webShowName">
             <div class="task-info-row" v-for="(item,index) in analysisObj.taskParam.webName" :key="index" :class="{'double-row': index < (analysisObj.taskParam.webName.length - 1)}">
@@ -35,6 +35,13 @@
             :rules="rules"
             :hide-required-asterisk="true"
           >
+            <!-- 任务名称 -->
+            <el-form-item prop="taskName">
+              <div class="task-name">
+                <span class="left-text">任务名称：</span><span class="right-text">{{searchData.taskName}}</span>
+                <!-- <el-input v-model="searchData.taskName" placeholder="请输入任务名称" disabled></el-input> -->
+              </div>
+            </el-form-item>
             <!-- 时间 -->
             <el-form-item prop="startTime">
               <div class="time-search">
@@ -80,7 +87,8 @@
             <!-- 相似度搜索 -->
             <el-form-item prop="similarity">
               <div class="similarity">
-                <ul class="similarity-input">
+                <div class="per_semblance_ytsr"><span>相似度：≥</span><el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100" placeholder="填写相似度数字" v-model="searchData.similarity"></el-input>%</div>
+                <!-- <ul class="similarity-input">
                   <li class="input-name">
                     <el-input placeholder="相似度" readonly v-model="searchData.similarityName"></el-input>
                   </li>
@@ -89,7 +97,7 @@
                   </li>
                 </ul>
                 <p class="symbol"></p>
-                <p class="max-value">100</p>
+                <p class="max-value">100</p> -->
               </div>
             </el-form-item>
             <!-- 频次搜索 -->
@@ -106,15 +114,9 @@
                 <p class="another-value">次</p>
               </div>
             </el-form-item>
-            <!-- 任务名称 -->
-            <el-form-item prop="taskName">
-              <div class="task-name">
-                <el-input v-model="searchData.taskName" placeholder="请输入任务名称" disabled></el-input>
-              </div>
-            </el-form-item>
             <el-form-item>
               <div class="search-btn">
-                <el-button @click="resetSearch('searchForm')">重置</el-button>
+                <el-button @click="resetSearch('searchForm')">取消</el-button>
                 <el-button
                   type="primary"
                   @click="submitForm('searchForm')"
@@ -323,6 +325,7 @@ export default {
       this.$refs[formName].resetFields();
       this.setDate();
       this.msClear = !this.msClear; // 清除地图选择
+      this.isEdit = false
       /* this.resetZoom(); */
     },
     //新建
@@ -421,10 +424,15 @@ export default {
       this.$set(this.searchData, 'similarity', this.analysisObj.taskParam.semblance)
       this.$set(this.searchData, 'frequency', this.analysisObj.taskParam.frequency)
       console.log("-------------",this.analysisObj)
-      if(this.analysisObj.taskParam.bayonetIds || this.analysisObj.taskParam.deviceIds) {
-        let bayonetIds = this.analysisObj.taskParam.bayonetIds.split(",")
-        let deviceIds = this.analysisObj.taskParam.deviceIds.split(",")
-        this.activeDeviceList = [...bayonetIds, ...deviceIds]
+      if(this.analysisObj.taskParam.deviceIds || this.analysisObj.taskParam.bayonetIds) {
+        let deviceIds = [], bayonetIds = []
+        if(this.analysisObj.taskParam.deviceIds) {
+          deviceIds = this.analysisObj.taskParam.deviceIds.split(",")
+        }
+        if(this.analysisObj.taskParam.bayonetIds) {
+          bayonetIds = this.analysisObj.taskParam.bayonetIds.split(",")
+        }
+        this.activeDeviceList = [...this.bayonetIds, ...deviceIds]
       }else if(this.analysisObj.taskParam.areaIds) {
         getCaBa({areaIds:this.analysisObj.taskParam.areaIds}).then(res => {
           if(res && res.data) {
@@ -460,8 +468,15 @@ export default {
             this.$set(taskWebParam,'webName',webName)
           }
           this.$set(this.analysisObj,'taskParam',taskWebParam)
-          let deviceIds = this.analysisObj.taskParam.deviceIds.split(",")
-          let bayonetIds = this.analysisObj.taskParam.bayonetIds.split(",")
+          let deviceIds = [], bayonetIds = []
+          if(this.analysisObj.taskParam.deviceIds) {
+            deviceIds = this.analysisObj.taskParam.deviceIds.split(",")
+          }
+          if(this.analysisObj.taskParam.bayonetIds) {
+            bayonetIds = this.analysisObj.taskParam.bayonetIds.split(",")
+          }
+          /* let deviceIds = this.analysisObj.taskParam.deviceIds.split(",")
+          let bayonetIds = this.analysisObj.taskParam.bayonetIds.split(",") */
           this.dSum = deviceIds.length + bayonetIds.length
           this.list = taskResult.resultList
           if(this.list && this.list.length > 0) {
@@ -529,6 +544,7 @@ export default {
         }
         .none-text {
           color: #fff;
+          visibility: hidden;
         }
         .right-text {
           color: #555;
@@ -638,8 +654,11 @@ export default {
       //相似度,频次,任务名称搜索
       .task-name {
         width: 232px;
+        .right-text {
+          color: #555;
+        }
       }
-      .similarity {
+      /* .similarity {
         width: 232px;
         display: flex;
         .similarity-input {
@@ -669,7 +688,7 @@ export default {
           color: #333;
           line-height: 40px;
         }
-      }
+      } */
       .frequency {
         width: 232px;
         display: flex;
@@ -821,7 +840,39 @@ html {font-size: 100px;}
       }
   }
   //相似度搜索
-  .similarity,.frequency {
+  .similarity {
+    .per_semblance_ytsr {
+      color: #555;
+      position: relative;
+      >span {
+        position: absolute;
+        left: 0;
+        display: block;
+        height: 40px;
+        line-height: 40px;
+        z-index: 9;
+        color: #606266;
+        width: 82px;
+        padding-left: 12px;
+      }
+      >i {
+        display: inline-block;
+        width: 20px;
+        height: 1px;
+        background: #999;
+        margin: 19px 16px;
+        vertical-align: middle;
+      }
+      .el-input {
+        width: 202px;
+        margin-right: 10px;
+        input{
+          text-indent: 69px;
+        }
+      }
+    }
+  }
+  .frequency {
     .el-input__inner {
       border: none;
       height: 38px;
