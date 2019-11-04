@@ -362,7 +362,7 @@ export default {
       .left-time {
         position: absolute;
         bottom: 10px;left: 10px;
-        width: 340px;
+        width: 320px;
         height: 30px;
         line-height: 30px;
         text-align: left;
@@ -372,8 +372,8 @@ export default {
       }
       .right-time {
         position: absolute;
-        bottom: 10px;left: 374px;
-        width: 316px;
+        bottom: 10px;left: 355px;
+        width: 315px;
         height: 30px;
         line-height: 30px;
         text-align: left;
