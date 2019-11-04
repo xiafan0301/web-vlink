@@ -60,27 +60,23 @@ export default {
     }
   },
   mounted () {
-    this.$_showLoading();
-    setTimeout(() => {
-      // 修改时回填数据
-      if (this.modelList) {
-        // 回填嫌疑车牌
-        let [{carNumberInfo, pointDtoList: [{bayonetList, devList}], surveillanceObjectDtoList}] = this.modelList;
-        carNumberInfo = carNumberInfo.split(',');
-        this.modelSixForm.carNumberInfo = [];
-        carNumberInfo.forEach(f => {
-          this.modelSixForm.carNumberInfo.push({vehicleNumber: f});
-        })
-        this.fileListOne = surveillanceObjectDtoList.filter(m => m.objType === 1 || m.objType === 3);//回填上访人员照片
-        this.fileListTwo = surveillanceObjectDtoList.filter(m => m.objType === 2);//回填上访车辆信息
-        this.isShowControlDev = true;
+    // 修改时回填数据
+    if (this.modelList) {
+      // 回填嫌疑车牌
+      let [{carNumberInfo, pointDtoList: [{bayonetList, devList}], surveillanceObjectDtoList}] = this.modelList;
+      carNumberInfo = carNumberInfo.split(',');
+      this.modelSixForm.carNumberInfo = [];
+      carNumberInfo.forEach(f => {
+        this.modelSixForm.carNumberInfo.push({vehicleNumber: f});
+      })
+      this.fileListOne = surveillanceObjectDtoList.filter(m => m.objType === 1 || m.objType === 3);//回填上访人员照片
+      this.fileListTwo = surveillanceObjectDtoList.filter(m => m.objType === 2);//回填上访车辆信息
+      this.isShowControlDev = true;
 
-        this.$nextTick(() => {
-          this.activeDeviceList = [...devList.map(m => m.deviceId), ...bayonetList.map(m => m.bayonetId)];
-        })
-      }
-      this.$_hideLoading();
-    }, 1500)
+      this.$nextTick(() => {
+        this.activeDeviceList = [...devList.map(m => m.deviceId), ...bayonetList.map(m => m.bayonetId)];
+      })
+    }
   },
   methods: {
     // 从布控库中获取布控人员信息
