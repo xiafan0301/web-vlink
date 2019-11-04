@@ -216,6 +216,7 @@ export default {
         let $p = document.createElement('p');
 
         $p.setAttribute('class', 'title_p');
+        $p.style.whiteSpace = 'nowrap';
         $p.innerText = '目标';
         
 

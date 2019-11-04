@@ -64,11 +64,7 @@
                     placeholder="选择日期时间">
             </el-date-picker>
           </div>
-          <div class="ytsr_xzsb_s" @click="areaTypeChanged" v-if="chooseType === 1">
-            <span>选择设备</span>
-            <span class="el-icon-arrow-down"></span>
-          </div>
-          <div class="ytsr_dtxz_rst" v-else>
+          <div class="ytsr_dtxz_rst">
             已选<span>{{dSum}}</span>个设备<a href="javascript: void(0);" @click="openMap={}">重选</a>
           </div>
         </div>
@@ -192,11 +188,11 @@
           <div class="struc_c_d_box">
             <div class="struc_c_d_img">
               <img class="bigImg" :src="showShotImg ? sturcDetail.subStoragePath : sturcDetail.storagePath" alt="">
-              <i @click="showShotImg = !showShotImg">{{showShotImg ? '全景图' : '抓拍图'}}</i>
+              <i @click="showShotImg = !showShotImg">{{showShotImg ? '切换全景图' : '切换抓拍图'}}</i>
               <span>{{showShotImg ? '抓拍图' : '全景图'}}</span>
             </div>
             <div class="struc_c_d_info">
-              <h2>分析结果<div class="vl_jfo_sim" ><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? (sturcDetail.semblance*1).toFixed(2) : '0.00'}}<span style="font-size: 12px;">%</span></div></h2>
+              <h2>分析结果<div class="vl_jfo_sim" ><span>相似度 </span>{{sturcDetail.semblance ? (sturcDetail.semblance*1).toFixed(2) : '0.00'}}<span style="font-size: 12px;">%</span></div></h2>
               <div class="struc_cd_info_main">
                 <vue-scroll>
                   <ul>
@@ -305,7 +301,6 @@
         dSum: 0, // 设备总数
         selectCameraArr: [],
         selectBayonetArr: [],
-        chooseType: 1, // 选择设备装备，1是刚进入，2是已选择
         showNewTask: false, // 展示修改任务
         searching: false,
         openMap: false,
@@ -392,11 +387,6 @@
         this.showNewTask = false;
       },
       tcDiscuss () {
-        let p1 = {
-          origin: this.radio,
-          taskOperateType: 1,
-          taskName: this.taskDetail.taskName
-        };
         let params = {
           origin: this.radio,
           taskOperateType: 1,
@@ -417,7 +407,6 @@
           params['minSemblance'] = 0;
         }
         if (this.radio === '1') {
-          p1['portraitGroupId'] = this.searchData.portraitGroupId.join(',');
           params['portraitGroupId'] = this.searchData.portraitGroupId.join(',');
           let pNameList = []
           this.searchData.portraitGroupId.forEach(x => {
@@ -433,23 +422,23 @@
             params['deviceNames'] = dNameList.splice(0, 2);
             params['deviceNames'].push('等' + dNameList.length + '个设备');
             params['deviceNames'] =  params['deviceNames'].join(',')
+          } else if (dNameList.length === 0) {
+            params['deviceNames'] = this.taskDetail.deviceNames.join(',');
           } else {
             params['deviceNames'] = dNameList.join(',')
           }
-          p1['deviceIds'] = this.selectCameraArr.map(res => res.uid).join(',');
-//          params['deviceIds'] = "5DTxZRNGOZuLsl07jcNO09";
-          params['deviceIds'] = this.selectCameraArr.map(res => res.uid).join(',');
-          p1['bayonetIds'] = this.selectBayonetArr.map(res => res.uid).join(',');
-          params['bayonetIds'] = this.selectBayonetArr.map(res => res.uid).join(',');
-          p1['startTime'] = formatDate(this.searchData.startTime, 'yyyy-MM-dd HH:mm:ss');
+          if (this.selectCameraArr.length || this.selectBayonetArr.length) {
+            params['deviceIds'] = this.selectCameraArr.map(res => res.uid).join(',');
+            params['bayonetIds'] = this.selectBayonetArr.map(res => res.uid).join(',');
+          } else {
+            params['deviceIds'] = this.taskDetail.deviceIds;
+          }
           params['startTime'] = formatDate(this.searchData.startTime, 'yyyy-MM-dd HH:mm:ss');
-          p1['endTime'] = formatDate(this.searchData.endTime, 'yyyy-MM-dd HH:mm:ss');
           params['endTime'] = formatDate(this.searchData.endTime, 'yyyy-MM-dd HH:mm:ss');
         }
         this.searching = true;
         params.taskOperateType = 1;
         params.taskId = this.$route.query.uid;
-        console.log('开始搞')
         PortraitPostByphotoTask(params).then(res => {
           this.searching = false;
           if (res && res.data) {
@@ -507,7 +496,6 @@
         }
       },
       areaTypeChanged () {
-        this.chooseType = 2;
         this.openMap = {};
       },
 
@@ -585,9 +573,10 @@
                   this.taskDetail = res.data.taskWebParam;
                   let {minSemblance, startTime, endTime, deviceIds} = res.data.taskWebParam;
                   this.searchData.minSemblance = minSemblance;
-                  this.activeDBList = deviceIds;
+                  this.activeDBList = deviceIds.split(',');
                   this.searchData.startTime = new Date(startTime).getTime();
                   this.searchData.endTime = new Date(endTime).getTime();
+                  this.dSum = this.activeDBList.length;
                   console.log(res.data)
                   this.imgData = {
                     cname: '带图' + Math.random(),
@@ -1287,14 +1276,14 @@
             i {
               display: block;
               position: absolute;
-              top: .1rem;
+              bottom: .1rem;
               right: .1rem;
               line-height: .26rem;
               height: .26rem;
-              background: rgba(255, 255, 255, .8);
+              background: #0C70F8;
               border-radius: .13rem;
               font-style: normal;
-              color: #0C70F8;
+              color: #ffffff;
               font-size: 12px;
               padding: 0 .1rem;
               cursor: pointer;
@@ -1352,17 +1341,28 @@
                 font-weight: bold;
                 line-height: .74rem;
                 padding-right: 1rem;
+                position: relative;
                 .vl_jfo_sim {
-                  color: #0C70F8;
+                  color: #ffffff;
                   font-weight: bold;
                   font-size: .24rem;
                   float: right;
+                  height: .34rem;
+                  line-height: .34rem;
+                  background: #50CC62;
+                  position: absolute;
+                  right: 0;
+                  top: .2rem;
+                  padding: 0 .2rem;
+                  text-align: center;
+                  border-radius: .17rem 0 0 .17rem;
                   i {
                     vertical-align: text-bottom;
                     margin-right: .1rem;
                   }
                   span {
                     font-weight: normal;
+                    font-size: 12px;
                   }
                 }
               }
@@ -1489,13 +1489,9 @@
               padding: 0px .15rem;
               text-decoration: none;
               margin-left: 10px;
-              background: rgba(246, 248, 249, 1);
-              border: 1px solid rgba(211, 211, 211, 1);
-              cursor: pointer;
-            }
-            a:hover {
               background: #0c70f8;
               border: solid 1px #0c70f8;
+              cursor: pointer;
               color: #ffffff;
             }
           }

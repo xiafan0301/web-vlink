@@ -64,6 +64,9 @@
           <li>
             <router-link :to="{name: 'dictionary'}">数据字典</router-link>
           </li>
+          <li>
+            <router-link :to="{name: 'cascade'}">级联配置</router-link>
+          </li>
         </div>
         <div class="title"  @click="open(4)" :class="{'active': isOpen4}">
           APP管理
@@ -124,7 +127,7 @@ export default {
       }else if (val === 3) {
         this.isOpen3 = !this.isOpen3
         if (this.isOpen3) {
-          $('.title_4').animate({height:60}, 300, "linear")
+          $('.title_4').animate({height:120}, 300, "linear")
         } else {
           $('.title_4').animate({height:0}, 300, "linear")
         }

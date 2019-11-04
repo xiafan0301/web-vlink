@@ -24,7 +24,7 @@ export default {
     let nMask = $('#' + _this.maskId), nClose = $('#' + _this.imgCloseId);
     nMask.appendTo($('body'));
     nClose.appendTo($('body'));
-    $('body').on('click', '.' + _this.imgClass, function () {
+    $('#app').on('click', '.' + _this.imgClass, function () {
       let nImg = $(this);
       if (nImg && nImg.length > 0) {
         let src = nImg.attr('src');
