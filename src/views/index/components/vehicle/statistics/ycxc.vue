@@ -329,21 +329,16 @@ export default {
       dataTimer: null
     }
   },
-  created () {
-    if (this.$route.query.startDate) {
-      this.handleQueryData();
-    } else {
-      this.setDTime();
-    }
-  },
   mounted() {
+    
     this.getVehicleTypeList();
     this.getControlVehicleList();
     
-    if (this.$route.query.startDate) {
-      this.dataTimer = setTimeout(() => {
-        this.handleSubmitData();
-      }, 2000)
+    const ycxcParam = window.sessionStorage.getItem('ycxcParam');
+    if (ycxcParam) {
+      this.handleQueryData(ycxcParam);
+    } else {
+      this.setDTime();
     }
   },
   beforeDestroy () {
@@ -377,18 +372,7 @@ export default {
       this.openMap = !this.openMap;
     },
     openMapDialog () {
-      if (this.selectBayonetArr) {
-        this.selectBayonetArr.forEach(val => {
-          this.activeDeviceList.push(val);
-        })
-      }
-      if (this.selectCameraArr) {
-        this.selectCameraArr.forEach(val => {
-          this.activeDeviceList.push(val);
-        })
-      }
-
-      this.openMap = !this.openMap;
+     this.openMap = !this.openMap;
     },
     mapSelectorEmit (result) {
       if (result) {
@@ -445,16 +429,16 @@ export default {
       //   return true;
       // }
     },
-    handleQueryData () {
-      const startDate = this.$route.query.startDate.split(' ')[0];
-      const endDate = this.$route.query.endDate.split(' ')[0];
+    handleQueryData (obj) {
+      let value = JSON.parse(obj);
+      const startDate = value.startDate.split(' ')[0];
+      const endDate = value.endDate.split(' ')[0];
 
-      const startTime = this.$route.query.startHour;
-      const endTime = this.$route.query.endhour;
-      const minShotTimes = this.$route.query.minShotTimes;
-      const surveillanceIds = this.$route.query.surveillanceIds && this.$route.query.surveillanceIds.split(',');
-      const vehicleTypes =  this.$route.query.vehicleTypes && this.$route.query.vehicleTypes.split(',');
-
+      const startTime = value.startHour;
+      const endTime = value.endhour;
+      const minShotTimes = value.minShotTimes;
+      const surveillanceIds = value.surveillanceIds && value.surveillanceIds.split(',');
+      const vehicleTypes =  value.vehicleTypes && value.vehicleTypes.split(',');
 
       this.queryForm.startDate = startDate;
       this.queryForm.endDate = endDate;
@@ -464,14 +448,29 @@ export default {
       this.queryForm.surveillanceIds = surveillanceIds;
       this.queryForm.vehicleTypes = vehicleTypes;
 
-      this.pagination.pageNum = this.$route.query.pageNum;
-      this.pagination.pageSize = this.$route.query.pageSize;
+      this.pagination.pageNum = value.pageNum;
+      this.pagination.pageSize = value.pageSize;
 
-      this.selectBayonetArr = this.$route.query.bayonetIds && this.$route.query.bayonetIds.split(',');
-      this.selectCameraArr = this.$route.query.cameraIds && this.$route.query.cameraIds.split(',');
+      this.selectBayonetArr = value.bayonetIds && value.bayonetIds.split(',');
+      this.selectCameraArr = value.cameraIds && value.cameraIds.split(',');
 
       this.selectAreaType = 2;
       this.dSum = (this.selectBayonetArr && this.selectBayonetArr.length) + (this.selectCameraArr && this.selectCameraArr.length);
+
+      if (this.selectBayonetArr) {
+        this.selectBayonetArr.forEach(val => {
+          this.activeDeviceList.push(val);
+        })
+      }
+      if (this.selectCameraArr) {
+        this.selectCameraArr.forEach(val => {
+          this.activeDeviceList.push(val);
+        })
+      }
+      
+      this.dataTimer = setTimeout(() => {
+        this.handleSubmitData();
+      }, 2000);
     },
     // 获取布控车辆
     getControlVehicleList () {
@@ -520,7 +519,6 @@ export default {
       this.dataList = [];
     },
     onSearch () {
-      this.searchLoading = true;
       this.handleSubmitData();
     },
     handleSubmitData () {
@@ -557,8 +555,8 @@ export default {
         startDate: this.queryForm.startDate + ' 00:00:00',
         startHour: this.queryForm.startTime,
         minShotTimes: parseInt(this.queryForm.minShotTimes),
-        vehicleTypes: this.queryForm.vehicleTypes.length > 0 ? this.queryForm.vehicleTypes.join(',') : null,
-        surveillanceIds: this.queryForm.surveillanceIds.length > 0 ? this.queryForm.surveillanceIds.join(',') : null,
+        vehicleTypes: this.queryForm.vehicleTypes && this.queryForm.vehicleTypes.length > 0 ? this.queryForm.vehicleTypes.join(',') : null,
+        surveillanceIds: this.queryForm.surveillanceIds && this.queryForm.surveillanceIds.length > 0 ? this.queryForm.surveillanceIds.join(',') : null,
         isNextDay: isNextDay,
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
@@ -567,15 +565,17 @@ export default {
       };
 
       this.searchStr = JSON.parse(JSON.stringify(params));
+      this.searchLoading = true;
       
       getNightVehicleList(params)
         .then(res => {
           if (res && res.data) {
-            if (res.data.list.length <= 0) {
+            if (!res.data.list || (res.data.list && res.data.list.length === 0)) {
               this.isInitPage = false;
+            } else {
+              this.dataList = res.data.list;
+              this.pagination.total = res.data.total;
             }
-            this.dataList = res.data.list;
-            this.pagination.total = res.data.total;
             this.searchLoading = false;
           } else {
             this.searchLoading = false;
@@ -594,11 +594,9 @@ export default {
       this.queryForm.cameraIds = null;
 
       if (this.selectCameraArr && this.selectCameraArr.length > 0) {
-        // let cameraIds = this.selectCameraArr.map(res => res.uid);
         this.queryForm.cameraIds = this.selectCameraArr.join(",");
       }
       if (this.selectBayonetArr && this.selectBayonetArr.length > 0) {
-        // let bayonentIds = this.selectBayonetArr.map(res => res.uid);
         this.queryForm.bayonetIds = this.selectBayonetArr.join(",");
       }
 
@@ -640,10 +638,16 @@ export default {
      * 查看抓拍记录
      */
     onOpenRecord (obj) {
-      this.searchStr['vehicleNumber'] = obj.vehicleNumber;
-      this.$router.push({name: 'vehicle_search_ycxc_record', query: {
-        ...this.searchStr
-      }});
+      const ycxcParam = {
+        ...this.searchStr,
+        vehicleNumber: obj.vehicleNumber
+      };
+      if (window.sessionStorage.getItem('ycxcParam')) {
+        window.sessionStorage.clear('ycxcParam');
+      }
+      window.sessionStorage.setItem('ycxcParam', JSON.stringify(ycxcParam));
+
+      this.$router.push({name: 'vehicle_search_ycxc_record'});
     },
     /**
      * 分页赋值
