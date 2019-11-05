@@ -123,12 +123,15 @@ export default {
   methods: {
     // 获取尾随车辆详情
     getDetail () {
-      if (this.$route.query.obj) {
-        this.detailInfo = JSON.parse(this.$route.query.obj);
+      const gzwsResult = window.sessionStorage.getItem('gzwsResult');
+      if (gzwsResult) {
+        this.detailInfo = JSON.parse(gzwsResult);
         
         if (this.detailInfo.personRetrieveDetailDtoList.length > 0) {
           this.initMap(this.detailInfo.personRetrieveDetailDtoList);
         }
+        console.log('vvv', this.detailInfo);
+        
       }
     },
     mapZoomSet (val) {

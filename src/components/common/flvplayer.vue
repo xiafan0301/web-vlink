@@ -248,6 +248,13 @@
         <p class="sl_title">抓拍上墙</p>
         <span class="sl_del_icon el-icon-close" @click="snapEnd"></span>
       </div>
+      <!-- <div class="tab_list">
+        <ul>
+          <li @click="">行人</li>
+          <li>车辆</li>
+          <li>骑行</li>
+        </ul>
+      </div> -->
       <div class="flv_sl_content">
         <vue-scroll>
           <div class="flv_sl_box">
@@ -368,14 +375,14 @@
             </div>
           </div>
           <el-pagination
-                  v-if="pagination.total > 20"
-                  class="cum_pagination"
-                  @current-change="handleCurrentChange"
-                  :current-page.sync="pagination.pageNum"
-                  :page-sizes="[100, 200, 300, 400]"
-                  :page-size="pagination.pageSize"
-                  layout="total, prev, pager, next, jumper"
-                  :total="pagination.total"
+            v-if="pagination.total > 20"
+            class="cum_pagination"
+            @current-change="handleCurrentChange"
+            :current-page.sync="pagination.pageNum"
+            :page-sizes="[100, 200, 300, 400]"
+            :page-size="pagination.pageSize"
+            layout="total, prev, pager, next, jumper"
+            :total="pagination.total"
           ></el-pagination>
         </div>
       </vue-scroll>
@@ -2224,7 +2231,28 @@ export default {
     z-index: 99;
     background: rgba(27, 27, 27, .95);
     transition: height 0.4s ease-out;
+    .tab_list {
+      width: 100%;
+      border-top: 1px solid #313233;
+      >ul {
+        height: 30px;
+        margin: 10px 32px;
+        border-radius:4px;
+        text-align: center;
+        // width: 276px;
+        li {
+          cursor: pointer;
+          padding: 3px 0;
+          float: left;
+          color: #fff;
+          background-color: #000000;
+          width: 92px;
+          font-size: 12px;
+        }
+      }
+    }
     .flv_sl_top {
+      // border-bottom: 1px solid #313233;
       position: relative;
       height: 50px;
       line-height: 50px;
@@ -2243,8 +2271,7 @@ export default {
     }
     .flv_sl_content {
       height: calc(100% - 100px);
-      border-bottom: 1px solid #313233;
-      border-top: 1px solid #313233;
+      
       .flv_sl_box {
         .flv_sl_item {
           height: 90px;
