@@ -144,13 +144,9 @@
                     <span>{{scope.row.taskWebParam.interval ? scope.row.taskWebParam.interval + '分钟' : '-'}}</span>
                   </template>
                 </el-table-column>
-                <el-table-column label="结果数" prop="taskWebParam" show-overflow-tooltip v-if="selectIndex === 1">
-                  <template slot-scope="scope">
-                    <span>{{scope.row.taskWebParam.number ? scope.row.taskWebParam.number : 0}}</span>
-                  </template>
-                </el-table-column>
+                <el-table-column label="结果数" prop="resultNum" show-overflow-tooltip v-if="selectIndex === 1"></el-table-column>
                 <el-table-column label="状态" v-if="selectIndex === 0" prop="taskStatus" show-overflow-tooltip>
-                  <template slot-scope="scope">
+                  <template slot-scope="scope" v-if="scope.row.taskStatus !== 2">
                     <span>{{scope.row.taskStatus && scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 3 ? '失败' : '已中断'}}</span>
                   </template>
                 </el-table-column>
@@ -236,7 +232,7 @@
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { checkPlateNumber } from '@/utils/validator.js';
 import { getPersonShotDev, getPersonFollowing } from '@/views/index/api/api.portrait.js';
-import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
+import { getTaskInfosPage, putAnalysisTask } from '@/views/index/api/api.analysis.js';
 import { formatDate, dateOrigin } from '@/utils/util.js';
 import vlUpload from '@/components/common/upload.vue';
 import noResult from '@/components/common/noResult.vue';
@@ -572,13 +568,21 @@ export default {
     },
     // 恢复任务 --- 重启任务
     recoveryTask (obj) {
+      // console.log('obj', obj);
+      const webParam = obj.taskWebParam;
       if (obj.uid) {
-        putTaskInfosResume(obj.uid)
+        const params = {
+          uid: obj.uid,
+          taskName: obj.taskName,
+          ...webParam
+        };
+        getPersonFollowing(params)
           .then(res => {
-            if (res) {
+            if (res && res.code === '00000000') {
               this.getDataList();
             }
           })
+          .catch(() =>{})
       }
     },
     // 查询任务列表数据

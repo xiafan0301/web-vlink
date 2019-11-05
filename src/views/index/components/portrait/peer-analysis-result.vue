@@ -22,9 +22,11 @@
                 style="width: 100%;margin-bottom: 10px;"
                 class="vl_date"
                 type="datetime"
+                :clearable="false"
                 :time-arrow-control="true"
                 @change="chooseStartTime"
-                value-format="timestamp"
+                value-format="yyyy-MM-dd HH:mm:ss"
+                format="yyyy-MM-dd HH:mm:ss"
                 placeholder="选择日期时间">
               </el-date-picker>
               <el-date-picker
@@ -32,8 +34,10 @@
                 class="vl_date vl_date_end"
                 v-model="editForm.endTime"
                 @change="chooseEndTime"
+                :clearable="false"
                 :time-arrow-control="true"
-                value-format="timestamp"
+                value-format="yyyy-MM-dd HH:mm:ss"
+                format="yyyy-MM-dd HH:mm:ss"
                 type="datetime"
                 placeholder="选择日期时间">
               </el-date-picker>
@@ -45,7 +49,7 @@
             </div>
           </div>
           <div class="per_semblance_ytsr">
-            <span>同行次数：</span>
+            <span>同行次数≥：</span>
             <el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100; if(value&&value <2)value = 2;" placeholder="填写同行次数" v-model="editForm.number">
             </el-input>(2-100)
           </div>
@@ -153,6 +157,7 @@
       :open="openMap"
       :clear="msClear"
       :showTypes="'DB'"
+      :activeDeviceList="activeSelectList"
       @mapSelectorEmit="mapSelectorEmit">
     </div>
   </div>
@@ -179,12 +184,6 @@ export default {
       selectCameraArr: [],
       selectBayonetArr: [],
       showNewTask: false,
-      // searchData: {
-      //   minSemblance: 5, // 最小相似度
-      //   portraitGroupId: [],
-      //   startTime: '',
-      //   endTime: ''
-      // },
       searching: false,
 
       pagination: {
@@ -196,7 +195,8 @@ export default {
       deviceStr: null,
       deviceList: [],
       boxList: [],
-      editForm: {}
+      editForm: {},
+      activeSelectList: [], // 选中的设备数据
     }
   },
  
@@ -243,6 +243,7 @@ export default {
       params['startTime'] = formatDate(this.editForm.startTime, 'yyyy-MM-dd HH:mm:ss');
       params['endTime'] = formatDate(this.editForm.endTime, 'yyyy-MM-dd HH:mm:ss');
       params['uid'] = this.$route.query.uid;
+      params['taskName'] = this.editForm.taskName;
       postPeopleTask(params).then(res => {
         this.searching = false;
         if (res && res.data) {
@@ -251,7 +252,7 @@ export default {
             message: '修改成功',
             customClass: 'request_tip'
           })
-          this.$router.push({name: "peer_analysis_list"})
+          this.$router.push({name: "peer_analysis_list"});
         }
       })
     },
@@ -280,6 +281,8 @@ export default {
     },
     mapSelectorEmit (result) {
       if (result) {
+        console.log('result', result);
+        
         // bayonetList deviceList
         this.dSum = 0;
         if (result.deviceList && result.deviceList.length > 0) {
@@ -311,35 +314,45 @@ export default {
               this.$set(res.data, 'taskWebParam', JSON.parse(res.data.taskWebParam));
               console.log('aaa', res.data);
               
-              let arr = res.data.taskWebParam.deviceId.split(',')
-              let arr1 = []
-              if (arr && arr.length > 0) {
-                arr.forEach(item => {
-                  let o = this.deviceList.find(x => {return item === x.uid})
+              let deviceArr = res.data.taskWebParam.deviceId.split(',');
+              let bayonetArr = res.data.taskWebParam.bayonetIds.split(',');
+              let arr1 = [];
+              if (deviceArr && deviceArr.length > 0) {
+                deviceArr.forEach(item => {
+                  let o = this.deviceList.find(x => {return item === x.uid});
                   if (o) {
-                    arr1.push(o.deviceName)
+                    arr1.push(o.deviceName);
+                  }
+                })
+              }
+              if (bayonetArr && bayonetArr.length > 0) {
+                bayonetArr.forEach(item => {
+                  let o = this.deviceList.find(x => {return item === x.uid});
+                  if (o) {
+                    arr1.push(o.bayonetName);
                   }
                 })
               }
               if (arr1.length > 1 && arr1.length < this.deviceList.length) {
-                this.deviceStr = `${arr1[0]}等${arr1.length - 1}个设备`
+                this.deviceStr = `${arr1[0]}等${arr1.length - 1}个设备`;
               } else if (arr1.length === 1) {
-                this.deviceStr = arr1[0]
+                this.deviceStr = arr1[0];
               } else if (arr1.length === 0) {
-                 this.deviceStr = null
+                 this.deviceStr = null;
               } else if (arr1.length === this.deviceList.length) {
-                this.deviceStr = '全部设备'
+                this.deviceStr = '全部设备';
               }
-              this.pagination.total = res.data.taskResult.length
-              this.boxList = [...res.data.taskResult.slice(0, 12)]
-              this.boxList.sort((a, b) => {return b.peerNumber - a.peerNumber})
+
+              this.pagination.total = res.data.taskResult.length;
+              this.boxList = [...res.data.taskResult.slice(0, 12)];
+              this.boxList.sort((a, b) => {return b.peerNumber - a.peerNumber});
 
               this.taskDetail = res.data;
               this.imgData = {
                 cname: '带图' + Math.random(),
                 filePathName: '带图' + Math.random(),
                 path: res.data.taskWebParam.targetPicUrl
-              }
+              };
             }
           })
       }
@@ -353,33 +366,69 @@ export default {
       };
       return MapGETmonitorList(params).then(res => {
         if (res && res.data) {
+          console.log('bbbb', res.data);
+          
           if (res.data.areaTreeList) {
-            let arr = res.data.areaTreeList
+            let arr = res.data.areaTreeList;
             arr.forEach(item => {
               if (item.deviceBasicList && item.deviceBasicList.length > 0) {
-                this.deviceList.push(...item.deviceBasicList)
+                this.deviceList.push(...item.deviceBasicList);
+              }
+              if (item.bayonetList && item.bayonetList.length > 0) {
+                this.deviceList.push(...item.bayonetList);
               }
             })
+            console.log('this.deviceList', this.deviceList);
+            
           }
         }
       });
     },
     goRecord (obj) {
-      this.$router.push({name: 'peer_analysis_record', query: {uid: this.$route.query.uid, id: obj.uid}})
+      this.$router.push({name: 'peer_analysis_record', query: {uid: this.$route.query.uid, id: obj.uid}});
     },
     onPageChange (page) {
-      this.boxList.splice(0, this.boxList.length)
-      this.boxList = [...this.taskDetail.taskResult.slice((page - 1) * 12, 12 + (page - 1) * 12)]
-      this.boxList.sort((a, b) => {return a.peerNumber - b.peerNumber})
+      this.boxList.splice(0, this.boxList.length);
+      this.boxList = [...this.taskDetail.taskResult.slice((page - 1) * 12, 12 + (page - 1) * 12)];
+      this.boxList.sort((a, b) => {return a.peerNumber - b.peerNumber});
     },
     // 点击修改任务按钮
     showNewTaskBox () {
       this.editForm = {
         ...this.taskDetail.taskWebParam
       };
-      this.showNewTask = true;
-      console.log('mmm', this.editForm);
+
+      let deviceArr = this.taskDetail.taskWebParam.deviceId.split(',');
+      let bayonetArr = this.taskDetail.taskWebParam.bayonetIds.split(',');
+      console.log(deviceArr);
+      console.log('mmmm', this.deviceList)
+      let arrIds = [];
+      if (deviceArr && deviceArr.length > 0) {
+        deviceArr.forEach(item => {
+          let o = this.deviceList.find(x => {return item === x.uid});
+          if (o) {
+            arrIds.push(o.uid);
+            // arr1.push(o.deviceName);
+          }
+        })
+      }
+      if (bayonetArr && bayonetArr.length > 0) {
+        bayonetArr.forEach(item => {
+          let o = this.deviceList.find(x => {return item === x.uid});
+          if (o) {
+            arrIds.push(o.uid);
+            // arr1.push(o.bayonetName);
+          }
+        })
+      }
+      console.log(arrIds);
       
+      if (arrIds.length > 0) {
+        this.activeSelectList = arrIds;
+        this.chooseType = 2;
+        this.dSum = arrIds.length;
+      }
+      this.showNewTask = true;
     }
   }
 }
@@ -714,7 +763,7 @@ export default {
       line-height: 40px;
       z-index: 9;
       color: #999999;
-      width: 82px;
+      width: 95px;
       padding-left: 12px;
     }
     >i {
@@ -726,7 +775,7 @@ export default {
       vertical-align: middle;
     }
     .el-input {
-      width: 185px;
+      width: 180px;
       margin-right: 10px;
       input{
         text-indent: 69px;

@@ -209,8 +209,12 @@ export default {
     },
     // 跳至尾随记录页面
     skipWsReocrdPage (obj) {
-      let queryObj = JSON.stringify(obj);
-      this.$router.push({name: 'gzws_detail', query: {obj: queryObj, id: this.$route.query.id}})
+      if (window.sessionStorage.getItem('gzwsResult')) {
+        window.sessionStorage.clear('gzwsResult');
+      }
+      window.sessionStorage.setItem('gzwsResult', JSON.stringify(obj));
+
+      this.$router.push({name: 'gzws_detail', query: { id: this.$route.query.id }});
     },
     // 起点设备change
     handleChangeDeviceCode (obj) {
