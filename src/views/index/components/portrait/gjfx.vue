@@ -1161,22 +1161,6 @@
         #rightGjfxMap {
           width: 100%;
           height: 100%;
-          .vl_icon {
-            width: 47px;
-            position: relative;
-            > .vl_map_mark_time {
-              position: absolute; top: 10px; left: 98%;
-              width: 130px;
-              word-break:keep-all;
-              font-size: 12px; color: #fff;
-              background-color: rgba(0, 0, 0, 0.4);
-              border-radius: 2px;
-              padding: 2px 5px;
-              span{
-                display: block;
-              }
-            }
-          }
         }
       }
     }
@@ -1660,6 +1644,24 @@
   }
 </style>
 <style lang="scss">
+  #rightGjfxMap {
+    .vl_icon {
+      width: 47px;
+      position: relative;
+      > .vl_map_mark_time {
+        position: absolute; top: 10px; left: 98%;
+        width: 130px;
+        word-break:keep-all;
+        font-size: 12px; color: #fff;
+        background-color: rgba(0, 0, 0, 0.4);
+        border-radius: 2px;
+        padding: 2px 5px;
+        span{
+          display: block;
+        }
+      }
+    }
+  }
 
   .clgj_map_show_pic {
     .vl_jtc_mk { display: block !important; }

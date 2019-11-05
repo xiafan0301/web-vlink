@@ -280,6 +280,11 @@ export default {
       path: 'dictionary',
       name: 'dictionary',
       component: () => import('@/views/index/components/manage/parameterSettings/dictionary.vue')
+    },//级联配置
+    {
+      path: 'cascade',
+      name: 'cascade',
+      component: () => import('@/views/index/components/manage/cascadeConfig.vue')
     },
     //app广告管理
     {

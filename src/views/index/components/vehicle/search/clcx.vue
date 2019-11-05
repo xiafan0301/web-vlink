@@ -152,7 +152,7 @@
         <el-table-column
                 label="所属分组">
           <template slot-scope="scope">
-            <span v-if="scope.row.vehicleGroup"></span>
+            <span v-if="scope.row.vehicleGroup">{{scope.row.vehicleGroup}}</span>
             <span v-else>--</span>
           </template>
         </el-table-column>
@@ -177,7 +177,7 @@
             <p><span>车牌号：</span>{{item.PlateNo}}</p>
             <p><span>设备名称：</span>{{item.deviceName}}</p>
             <p><span>过车时间：</span>{{item.shotTime}}</p>
-            <p><span>所属分组：</span>{{item.vehicleGroup}}</p>
+            <p><span>所属分组：</span>{{item.vehicleGroup ? item.vehicleGroup : '--'}}</p>
             <p><span>是否是布控车辆：</span>{{item.isSurveillance ? '是' : '否'}}</p>
           </div>
         </div>

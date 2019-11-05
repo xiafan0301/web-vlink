@@ -33,7 +33,7 @@
             <div class="control_time"><span class="vl_f_666">布控时间段：</span><span class="vl_f_333">{{controlDetail.time}}</span></div>
           </li>
           <li style="width: 34%;">
-            <div><span class="vl_f_666">告警级别：</span><span class="vl_f_333" v-if="controlDetail.alarmLevel">{{dicFormater(dataList_.alarmLevel, controlDetail.alarmLevel)}}</span></div>
+            <div><span class="vl_f_666">告警级别：</span><span class="vl_f_333" v-if="controlDetail.alarmLevel">{{controlDetail.alarmLevel}}</span></div>
           </li>
         </ul>
         <ul style="padding-top: 14px;">
