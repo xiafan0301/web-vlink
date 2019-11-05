@@ -91,6 +91,8 @@ export default {
     },
     serchone () {
       this.getlist ()
+      console.log(this.$data)
+      this.$data = Object.assign(this.$data, this.$options.data())
     },
     getlist () {
       let params = {

@@ -36,7 +36,7 @@
           </el-date-picker>
         </div>
         <div class="kakou">
-          <el-select v-model="lll" placeholder="请选择入城卡口" style="width: 230px" multiple collapse-tags @change="selchange">
+          <el-select v-model="lll" placeholder="请选择入城卡口" style="width: 230px" multiple collapse-tags filterable @change="selchange">
             <el-option key="全选" lable="全选" value="全选"  :class="{selected: showselected}"></el-option>
             <el-option
                 v-for="item in kakou"
@@ -433,6 +433,7 @@ export default {
       this.JfoGETCity()
     },
     reset () {
+      this.tableData = []
       this.setDTime();
       this.unvehicleFlag = false
       this.v = '湘'
