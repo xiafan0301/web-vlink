@@ -216,7 +216,7 @@
   </vue-scroll>
 </template>
 <script>
-import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume, postPeopleTask } from '@/views/index/api/api.analysis.js';
+import { getTaskInfosPage, putAnalysisTask, postPeopleTask } from '@/views/index/api/api.analysis.js';
 import { formatDate } from "@/utils/util.js";
 import vlUpload from "@/components/common/upload.vue";
 import mapSelector from '@/components/common/mapSelector.vue';
