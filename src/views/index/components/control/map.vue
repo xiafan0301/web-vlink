@@ -487,6 +487,7 @@ export default {
         if (this.mapForm.state === 1) this.getAllAlarmSnapListByDev();
       }).finally(() => {
         this.loadingBtn = false;
+        this.$_hideLoading();
       })
     },
     // 获取设备下布控列表
