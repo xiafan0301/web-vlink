@@ -104,6 +104,15 @@
             })
           })
         }
+      },
+      leftTabShow (e) {
+        this.treeList.forEach(x => {
+          if (x.childList.filter(y => y.dataType === e).find(z => !z.checked)) {
+            x.checkAll = false;
+          } else {
+            x.checkAll = true;
+          }
+        })
       }
     },
     mounted () {
@@ -146,7 +155,7 @@
       },
       handleCheckAllChange(val) {
         if (val.checkAll) {
-          val.childList.forEach(x => {
+          val.childList.filter(x => x.dataType === this.leftTabShow).forEach(x => {
             x.checked = true;
           })
           let la = true;
@@ -172,7 +181,7 @@
           } else {
             this.$emit('changeAll', this.inIndeterKey, true)
           }
-          val.childList.forEach(x => {
+          val.childList.filter(x => x.dataType === this.leftTabShow).forEach(x => {
             x.checked = false;
           })
         }

@@ -163,7 +163,8 @@ export default {
     sureSelectCut () {
       this.$emit('emitImgData', {
         open: false,
-        imgBDataList: this.imgBDataList
+        imgBDataList: this.imgBDataList,
+        secondImgUrl: this.secondImgUrl
       })
       // this.dialogVisible = false;
     },
@@ -215,6 +216,7 @@ export default {
         let $p = document.createElement('p');
 
         $p.setAttribute('class', 'title_p');
+        $p.style.whiteSpace = 'nowrap';
         $p.innerText = '目标';
         
 

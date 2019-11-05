@@ -1205,3 +1205,26 @@ html {
   color: #b2b2b2;
   border-color: #DCDFE6;
 }
+
+/*基础样式*/
+.vl_inline_block {
+    display: inline-block;
+}
+.vl_bottom_line {
+    border-bottom: 1px solid #F2F2F2;
+}
+.vl_top_line {
+    border-top: 1px solid #F2F2F2;
+}
+.vl_color_333 {
+    color: #333333;
+}
+.vl_color_666 {
+    color: #666666;
+}
+.vl_color_999 {
+    color: #999999;
+}
+.vl_center {
+    text-align: center;
+}

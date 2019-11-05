@@ -432,7 +432,7 @@ export default {
         if(this.analysisObj.taskParam.bayonetIds) {
           bayonetIds = this.analysisObj.taskParam.bayonetIds.split(",")
         }
-        this.activeDeviceList = [...this.bayonetIds, ...deviceIds]
+        this.activeDeviceList = [...bayonetIds, ...deviceIds]
       }else if(this.analysisObj.taskParam.areaIds) {
         getCaBa({areaIds:this.analysisObj.taskParam.areaIds}).then(res => {
           if(res && res.data) {

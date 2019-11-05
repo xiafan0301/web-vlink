@@ -24,7 +24,7 @@
             </li>
             <li>
               <span>起点设备：</span>
-              <span>{{taskDetail.taskWebParam&& taskDetail.taskWebParam.deviceName ? taskDetail.taskWebParam.deviceName : '无'}}</span>
+              <span>{{taskDetail.taskWebParam && taskDetail.taskWebParam.deviceName ? taskDetail.taskWebParam.deviceName : '无'}}</span>
             </li>
             <li>
               <span>尾随间隔：</span>
@@ -79,8 +79,8 @@
                 <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit" :imgData="imgData"></div>
               </div>
             </el-form-item>
-            <el-form-item prop="deviceCode" class="device_code">
-              <el-select placeholder="请选择起点设备" style="width: 100%" v-model="editForm.deviceCode">
+            <el-form-item prop="deviceName" class="device_code">
+              <el-select placeholder="请选择起点设备" @change="handleChangeDeviceCode" style="width: 100%" v-model="editForm.deviceName">
                 <el-option
                   v-for="(item, index) in deviceList"
                   :key="index"
@@ -217,14 +217,13 @@ export default {
       if (obj) {
         this.deviceList.map(item => {
           if (item.deviceName === obj) {
-            this.editForm.deviceName = item.deviceName;
+            this.shotTimes = item.shotTime;
           }
         })
       }
     },
     // 获取抓拍设备列表
     getDeviceList () {
-      this.deviceList = [];
       const params = {
         targetPicUrl : this.dialogImageUrl,
         startTime : formatDate(this.editForm.startTime),
@@ -236,16 +235,27 @@ export default {
             if (res.data) {
               this.deviceList = res.data;
 
-              this.deviceList.map(item => {
-                if (item.uid === this.editForm.deviceId) {
-                  this.shotTimes = item.shotTime;
-                }
-              })
+              if (!this.editForm.deviceName) { // 清空了deviceList后对deviceList重新赋值后的操作
+                // 默认选中第一个设备
+                this.editForm.deviceName = this.deviceList[0].deviceName;
+
+                this.shotTimes = this.deviceList[0].shotTime;
+
+              } else { // 根据deviceName来匹配当前选中设备的抓拍时间
+                this.deviceList.map(item => {
+                  if (item.deviceName === this.editForm.deviceName) {
+                    this.shotTimes = item.shotTime;
+                  }
+                })
+              }
               
               this.isShowDeviceTip = false;
             } else {
               this.isShowDeviceTip = true;
             }
+          } else {
+            this.deviceList = [];
+            this.editForm.deviceName = '';
           }
         })
     },
@@ -293,17 +303,9 @@ export default {
     showUpdateTask () {
       this.isUpdateTask = true;
 
-      this.dialogImageUrl = this.taskDetail.taskWebParam.targetPicUrl;
       this.imgData = Object.assign({}, {path: this.taskDetail.taskWebParam.targetPicUrl});
 
-      this.editForm = {...this.taskDetail.taskWebParam};
-      this.editForm.deviceCode = this.taskDetail.taskWebParam.deviceName;
-      this.editForm.deviceName = this.taskDetail.taskWebParam.deviceName;
-
-
-      this.$nextTick(() => {
-        this.getDeviceList();
-      })
+      this.editForm = {...this.taskDetail.taskWebParam}; 
     },
     // 取消修改
     cancelEdit () {
@@ -321,24 +323,28 @@ export default {
             }
             return;
           }
-          if (this.dialogImageUrl && !this.editForm.deviceCode) {
+          if (this.dialogImageUrl && !this.editForm.deviceName) {
             if (!document.querySelector('.el-message--info')) {
               this.$message.info('请设置分析起点');
             }
             return;
           }
-          let deviceCode;
+          let deviceIds = [];
+          let shotTimes = new Date(this.shotTimes).getTime();
+
           this.deviceList.map(item => {
-            if (item.deviceName === this.editForm.deviceCode) {
-              deviceCode = item.deviceID;
+            let val = new Date(item.shotTime).getTime();
+            
+            if (val >= shotTimes) {
+              deviceIds.push(item.deviceID);
             }
-          })
+          });
           const params = {
             uid: this.$route.query.id,
             targetPicUrl: this.dialogImageUrl,
-            deviceId: deviceCode,
+            deviceId: deviceIds.join(','),
             deviceName: this.editForm.deviceName,
-            startTime: formatDate(this.shotTimes),
+            startTime: formatDate(this.editForm.startTime),
             endTime: formatDate(this.editForm.endTime),
             taskName: this.editForm.taskName,
             interval: this.editForm.interval

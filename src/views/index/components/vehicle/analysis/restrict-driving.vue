@@ -586,6 +586,7 @@ export default {
       box-shadow: 5px 0 10px #E5E7E7;
       animation: fadeInLeft .4s ease-out .3s both;
       padding: 20px 15px; 
+      overflow: hidden;
     }
     .right {
       width: calc(100% - 272px);

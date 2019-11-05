@@ -55,8 +55,8 @@
                 <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit"></div>
               </div>
             </el-form-item>
-            <el-form-item prop="deviceCode" class="device_code">
-              <el-select placeholder="请选择起点设备" style="width: 100%" v-model="addForm.deviceCode">
+            <el-form-item prop="deviceName" class="device_code">
+              <el-select placeholder="请选择起点设备" style="width: 100%" v-model="addForm.deviceName" @change="handleChangeDeviceCode">
                 <el-option
                   v-for="(item, index) in deviceList"
                   :key="index"
@@ -232,6 +232,7 @@
   </div>
 </template>
 <script>
+
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { checkPlateNumber } from '@/utils/validator.js';
 import { getPersonShotDev, getPersonFollowing } from '@/views/index/api/api.portrait.js';
@@ -276,7 +277,7 @@ export default {
       },
       addForm: {
         taskName: null, // 任务名称
-        deviceCode: null, // 起点设备编号
+        // deviceCode: null, // 起点设备编号
         deviceName: null, // 起点设备名称
         startTime: dateOrigin(false, new Date(new Date() - 24 * 60 * 60 * 1000)), // 开始时间
         endTime: new Date(), // 结束时间
@@ -306,6 +307,7 @@ export default {
       dataList: [], // 查询的抓拍结果列表
       uploadClear: {},
       shotTimes: null, // 选中设备的抓拍时间
+      skipStartTime: null, // 选择的开始时间
     }
   },
   created () {
@@ -399,7 +401,7 @@ export default {
             if (res.data) {
               this.deviceList = res.data;
               // 初始化页面时默认选中第一个设备
-              this.addForm.deviceCode = this.deviceList[0].deviceName;
+              // this.addForm.deviceCode = this.deviceList[0].deviceName;
               this.addForm.deviceName = this.deviceList[0].deviceName;
 
               this.shotTimes = this.deviceList[0].shotTime;
@@ -417,6 +419,7 @@ export default {
         this.deviceList.map(item => {
           if (item.deviceName === obj) {
             this.addForm.deviceName = item.deviceName;
+            this.shotTimes = item.shotTime;
           }
         })
       }
@@ -438,27 +441,31 @@ export default {
             }
             return;
           }
-          if (this.dialogImageUrl && !this.addForm.deviceCode) {
+          if (this.dialogImageUrl && !this.addForm.deviceName) {
             if (!document.querySelector('.el-message--info')) {
               this.$message.info('请设置分析起点');
             }
             return;
           }
-          let deviceCode;
+          let deviceIds = [];
+          let shotTimes = new Date(this.shotTimes).getTime();
+          
           this.deviceList.map(item => {
-            if (item.deviceName === this.addForm.deviceCode) {
-              deviceCode = item.deviceID;
+            let val = new Date(item.shotTime).getTime();
+            if (val >= shotTimes) {
+              deviceIds.push(item.deviceID);
             }
-          })
+          });
           const params = {
             targetPicUrl: this.dialogImageUrl,
-            deviceId: deviceCode,
+            deviceId: deviceIds.join(','),
             deviceName: this.addForm.deviceName,
-            startTime: formatDate(this.shotTimes),
+            startTime: formatDate(this.addForm.startTime),
             endTime: formatDate(this.addForm.endTime),
             taskName: this.addForm.taskName,
             interval: this.addForm.interval
           };
+
           this.isAddLoading = true;
           getPersonFollowing(params)
             .then(res => {
