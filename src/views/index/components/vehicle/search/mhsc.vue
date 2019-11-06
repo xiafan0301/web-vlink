@@ -338,6 +338,8 @@ export default {
     },
     mapSelectorEmit (result) {
       console.log(result)
+      this.selectCameraArr = []
+      this.selectBayonetArr = []
       if (result) {
         // bayonetList deviceList
         this.dSum = 0;
