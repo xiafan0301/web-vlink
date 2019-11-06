@@ -2,43 +2,42 @@
   <div class="point">
     <div class="">
       <div is="vlBreadcrumb"
-           :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
-            {name: '轨迹分析', routerName: 'portrait_gjfx'},
-            {name: '搜索结果'}]">
+        :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
+        {name: '轨迹分析', routerName: 'portrait_gjfx'},
+        {name: '分析结果'}]">
       </div>
     </div>
-
     <div class="vl_gjfx_jg_left">
       <template v-if="showNewTask">
         <div class="plane" style="padding-top: 20px;">
           <el-form
-                  :model="ruleForm"
-                  status-icon
-                  ref="ruleForm"
-                  label-width="0px"
-                  class="demo-ruleForm"
-          >
+            :model="ruleForm"
+            status-icon
+            ref="ruleForm"
+            label-width="0px"
+            class="demo-ruleForm"
+            >
             <el-form-item class="" prop="data1">
               <el-date-picker
-                      v-model="ruleForm.data1"
-                      style="width: 100%;"
-                      class="vl_date"
-                      :picker-options="pickerOptions"
-                      type="datetime"
-                      time-arrow-control
-                      placeholder="选择日期时间">
+                v-model="ruleForm.data1"
+                style="width: 100%;"
+                class="vl_date"
+                :picker-options="pickerOptions"
+                type="datetime"
+                time-arrow-control
+                placeholder="选择日期时间">
               </el-date-picker>
             </el-form-item>
             <el-form-item>
               <el-date-picker
-                      style="width: 100%;"
-                      class="vl_date vl_date_end"
-                      v-model="ruleForm.data2"
-                      :time-arrow-control="true"
-                      :picker-options="pickerOptions"
-                      @change="chooseEndTime"
-                      type="datetime"
-                      placeholder="选择日期时间">
+                style="width: 100%;"
+                class="vl_date vl_date_end"
+                v-model="ruleForm.data2"
+                :time-arrow-control="true"
+                :picker-options="pickerOptions"
+                @change="chooseEndTime"
+                type="datetime"
+                placeholder="选择日期时间">
               </el-date-picker>
             </el-form-item>
             <el-form-item>
@@ -62,17 +61,17 @@
         </div>
       </template>
       <template v-else>
-        <img :src="taskDetail.uploadImgUrls" alt="">
         <div class="vl_ytsr_left_line" v-show="taskDetail.taskName">
           <span>任务名称：</span>{{taskDetail.taskName}}
         </div>
         <div class="vl_ytsr_left_line">
           <span>抓拍时间：</span>
-          <span>
-          <p>{{taskDetail.startTime}}</p>
-          <p>{{taskDetail.endTime}}</p>
-        </span>
+            <span>
+            <p>{{taskDetail.startTime}}</p>
+            <p>{{taskDetail.endTime}}</p>
+          </span>
         </div>
+        <img :src="taskDetail.uploadImgUrls" alt="">
         <div class="update_task">
           <el-button type="primary" @click="showNewTask = true;">修改任务</el-button>
         </div>
@@ -127,11 +126,11 @@
       <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
     </ul>
     <el-dialog
-            :visible.sync="strucDetailDialog"
-            class="struc_detail_dialog_gjfx"
-            :close-on-click-modal="false"
-            top="4vh"
-            :show-close="false">
+      :visible.sync="strucDetailDialog"
+      class="struc_detail_dialog_gjfx"
+      :close-on-click-modal="false"
+      top="4vh"
+      :show-close="false">
       <div class="struc_tab">
         <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">抓拍详情</span>
         <span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>
@@ -191,7 +190,7 @@
           </div>
           <div class="struc_c_d_box" style="float: left;" v-if="playerData">
             <div is="flvplayer" :oData="playerData"
-                 :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
+              :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
             </div>
           </div>
           <div class="struc_c_d_box struc_vid_empty" style="float: left;" v-else>
@@ -220,10 +219,10 @@
     <div id="capMap"></div>
     <!--人工筛选-->
     <el-dialog
-            title="人工筛选"
-            :visible.sync="filterDialog"
-            :close-on-click-modal="false"
-            width="900px">
+      title="人工筛选"
+      :visible.sync="filterDialog"
+      :close-on-click-modal="false"
+      width="900px">
       <div style="height: 350px;">
         <div style="height: 96%">
           <vue-scroll>
@@ -277,7 +276,6 @@
     data() {
       return {
         showNewTask: false, // 展示修改任务
-
 
         taskDetail: {},
         imgData: null,
@@ -369,38 +367,38 @@
         const id = this.$route.query.uid
         if (id) {
           getPeopleTaskDetail(id)
-              .then(res => {
-                if (res) {
-                  this.$set(res.data, 'taskResult', JSON.parse(res.data.taskResult));
-                  this.$set(res.data, 'taskWebParam', JSON.parse(res.data.taskWebParam));
-                  res.data.taskWebParam.deviceNames = res.data.taskWebParam.deviceNames ? res.data.taskWebParam.deviceNames.split(',') : '';
-                  this.taskDetail = res.data.taskWebParam;
-                  let {startTime, endTime} = res.data.taskWebParam;
-                  this.ruleForm.data1 = new Date(startTime).getTime();
-                  this.ruleForm.data2 = new Date(endTime).getTime();
-                  console.log(res.data)
-                  this.imgData = {
-                    cname: '带图' + Math.random(),
-                    filePathName: '带图' + Math.random(),
-                    path: this.taskDetail.uploadImgUrls
-                  }
-                  this.reselt = true;
-                  this.evData = res.data.taskResult;
-                  this.evData.forEach(x => {
-                    if (x.bayonetName) {
-                      x.DeviceID = x.bayonetName;
-                    }
-                  })
-                  this.evData.sort(this.compare("shotTime", this.timeOrder ? false : true));
-                  this.shotAddressAndTimes(this.evData)
-
-                  //  重组数据，给左边列表使用
-                  this.operData(true);
-                  if (this.evData.length) {
-                    this.filterDialog = true;
-                  }
+            .then(res => {
+              if (res) {
+                this.$set(res.data, 'taskResult', JSON.parse(res.data.taskResult));
+                this.$set(res.data, 'taskWebParam', JSON.parse(res.data.taskWebParam));
+                res.data.taskWebParam.deviceNames = res.data.taskWebParam.deviceNames ? res.data.taskWebParam.deviceNames.split(',') : '';
+                this.taskDetail = res.data.taskWebParam;
+                let {startTime, endTime} = res.data.taskWebParam;
+                this.ruleForm.data1 = new Date(startTime).getTime();
+                this.ruleForm.data2 = new Date(endTime).getTime();
+                console.log(res.data)
+                this.imgData = {
+                  cname: '带图' + Math.random(),
+                  filePathName: '带图' + Math.random(),
+                  path: this.taskDetail.uploadImgUrls
                 }
-              })
+                this.reselt = true;
+                this.evData = res.data.taskResult;
+                this.evData.forEach(x => {
+                  if (x.bayonetName) {
+                    x.DeviceID = x.bayonetName;
+                  }
+                })
+                this.evData.sort(this.compare("shotTime", this.timeOrder ? false : true));
+                this.shotAddressAndTimes(this.evData)
+
+                //  重组数据，给左边列表使用
+                this.operData(true);
+                if (this.evData.length) {
+                  this.filterDialog = true;
+                }
+              }
+            })
         }
       },
 
@@ -990,7 +988,7 @@
     overflow-x: hidden;
   }
   .plane_main {
-    min-height: 700px;
+    // min-height: 700px;
     .p_main_list {
       height: 40px;
       overflow: hidden;
@@ -1103,7 +1101,7 @@
         }
       }
       .p_main_dialog_item {
-        width: 33%;
+        width: 32%;
         display: inline-block;
         border: 1px solid #D3D3D3;
         margin: 5px;

@@ -248,17 +248,23 @@
         <p class="sl_title">抓拍上墙</p>
         <span class="sl_del_icon el-icon-close" @click="snapEnd"></span>
       </div>
-      <!-- <div class="tab_list">
+      <div class="tab_list" v-show="!snapLoading">
         <ul>
-          <li @click="">行人</li>
-          <li>车辆</li>
-          <li>骑行</li>
+          <li
+            :class="{'active_li': tabIndex === item}"
+            v-for="item in tabDatalist" :key="item"
+            @click="tabIndex = item">{{item}}</li>
         </ul>
-      </div> -->
+      </div>
       <div class="flv_sl_content">
         <vue-scroll>
           <div class="flv_sl_box">
-            <div class="flv_sl_item" :class="{'active': snapActiveIndex === index}" @click="flvSnapTap(index, item.dtoType, item[item._key])" v-for="(item, index) in filterSnapList" :key="'fl_sl_item' + index">
+            <div class="flv_sl_item"
+              :class="{'active': snapActiveIndex === index}"
+              @click="flvSnapTap(index, item.dtoType, item[item._key])"
+              v-for="(item, index) in filterSnapList"
+              :key="'fl_sl_item' + index"
+            >
               <div class="sl_item_left">
                 <img :src="item[item._key] ? item[item._key].subStoragePath : ''" alt="">
               </div>
@@ -398,7 +404,7 @@
         <div class="flv_sl_single_info flv_sl_single_bInfo">
           <ul>
             <!-- <li><span>抓拍设备：{{snapSturcObj.sturcDetail.deviceName}}</span></li> -->
-            <li><span>抓拍地址：{{snapSturcObj.sturcDetail.address}}</span></li>
+            <li><span>抓拍位置：{{snapSturcObj.sturcDetail.address}}</span></li>
             <li style="color: #999;">{{snapSturcObj.sturcDetail.shotTime}}</li>
             <span class="el-icon-close" @click="closeSingleBackInfo"></span>
           </ul>
@@ -517,6 +523,9 @@ export default {
   props: ['index', 'oData', 'oConfig', 'optDis', 'bResize', 'showFullScreen'],
   data () {
     return {
+      tabIndex: '行人', // 行人 车辆 骑行
+      tabDatalist: ['行人', '车辆', '骑行'],
+
       imgObj: {},
       optionsDis: false,
       mini: false, // 主要控制播放器操作栏显示方式
@@ -1062,9 +1071,7 @@ export default {
         "orderBy": "shotTime",
         "order": "desc",
         "where": {
-              "deviceId": dId
-//              "deviceId": "5DTxZRNGOZuLsl07jcNO09"
-//          "deviceId": "9"
+          "deviceId": dId
         }
       };
 
@@ -1077,11 +1084,13 @@ export default {
               if (x.dtoType === "1") {
                 x["_key"] = 'personDto';
                 x['target'] = '行人';
-                x.personDto.gender ? x.personDto.gender : '未识别';
+                x['_info'] = '性别：'+ (x.personDto.gender ? x.personDto.gender : '未识别');
+                // x.personDto.gender ? x.personDto.gender : '未识别';
               } else {
                 x['_key'] = 'vehicleDto';
                 x['target'] = '车辆';
-                x.vehicleDto.plateNo ? x.vehicleDto.plateNo : '未识别';
+                x['_info'] = '车牌：' + (x.vehicleDto.plateNo ? x.vehicleDto.plateNo : '未识别');
+                // x.vehicleDto.plateNo ? x.vehicleDto.plateNo : '未识别';
               }
               console.log(x)
               return x;
@@ -1108,6 +1117,7 @@ export default {
               }
               return x;
             });
+            console.log('ccccc', this.querySnapList)
             this.querySnapTotal = res.data.total;
             this.pagination.total = res.data.total;
             this.snapLoading = false;
@@ -2261,6 +2271,10 @@ export default {
           width: 92px;
           font-size: 12px;
         }
+        .active_li {
+          background-color:#0C70F8;
+          color: #ffffff;
+        }
       }
     }
     .flv_sl_top {
@@ -2283,19 +2297,20 @@ export default {
     }
     .flv_sl_content {
       height: calc(100% - 100px);
-      
       .flv_sl_box {
         .flv_sl_item {
-          height: 90px;
+          height: 110px;
           display: flex;
+          padding: 10px 0;
           padding-left: 33px;
-          margin-top: 20px;
+          // margin-top: 20px;
           cursor: pointer;
           .sl_item_left {
             width: 90px;
             height: 90px;
             overflow-y: hidden;
             margin-right: 10px;
+            border: 1px solid #f2f2f2;
             img {
               width: 100%;
               height: auto;
@@ -2311,15 +2326,16 @@ export default {
           }
         }
         > .active {
+          background-color: #0B70F8;
           .sl_item_left {
-            border: 1px solid #0C70F8;
+            border: 2px solid #ffffff;
           }
           .sl_item_right {
             h5 {
-              color: #0C70F8;
+              color: #ffffff;
             }
             p {
-              color: #0C70F8;
+              color: #ffffff;
             }
           }
         }
