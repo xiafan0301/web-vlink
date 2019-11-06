@@ -1,12 +1,10 @@
 <template>
-  <div style="height: 100%;">
-    <div class="th-breadcrumb">
-      <el-breadcrumb separator-class="el-icon-arrow-right">
-        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像侦查</el-breadcrumb-item>
-        <el-breadcrumb-item :to="{ path: '/portrait/peer-analysis-result?uid=' + $route.query.uid }">同行分析</el-breadcrumb-item>
-        <el-breadcrumb-item>同行记录</el-breadcrumb-item>
-      </el-breadcrumb>
-      <!-- <el-button :loading="exportLoadingbtn" @click="onExport" class="th-button-export-color">导出</el-button> -->
+  <div class="peer_analsis_record">
+    <div class="vc_gcck_bd">
+      <div is="vlBreadcrumb" :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'}, 
+        {name: '同行分析', routerName: 'peer_analysis_list'},
+        {name: '分析结果', routerName: 'peer_analysis_result', query: {uid: $route.query.uid}}, {name: '同行记录'}]">
+      </div>
     </div>
     <div class="rlcx_r">
       <template v-if="pagination.total !== 0">
@@ -19,10 +17,26 @@
         </div>
         <ul class="rlcx_r_list clearfix">
           <li v-for="(item, index) in list" :key="index + 'pp'" @click="onOpenCompair(item)">
-            <div class="box">
+            <div class="top">
+              <div class="img_info">
+                <img :src="item.targetStoragePath" alt="">
+                <!-- <img src="../../../../assets/img/666.jpg" alt="" /> -->
+                <div class="left-float">目标对象</div>
+                <div class="peer-time">{{item.targetShotTime ? item.targetShotTime : '无'}}</div>
+              </div>
+              <div class="img_info">
+                <img :src="item.peerStoragePath" alt="" />
+                <div class="right-float">同行对象</div>
+                <div class="peer-time">{{item.shotTime ? item.shotTime : '无'}}</div>
+              </div>
+            </div>
+            <div class="bottom">
+              <p>{{item.deviceName ? item.deviceName : '无'}}</p>
+              <p>{{item.address ? item.address : '无'}}</p>
+            </div>
+            <!-- <div class="box">
               <div class="top">
                 <img :src="item.targetStoragePath" alt="">
-                <!-- <img src="../../../../assets/img/666.jpg" alt=""> -->
                 <img style="padding-left: 12px;" :src="item.peerStoragePath" alt="">
                 <div class="left-float">目标对象</div>
                 <div class="right-float">同行对象</div>
@@ -33,7 +47,7 @@
                 <p>{{item.deviceName ? item.deviceName : '无'}}</p>
                 <p>{{item.address ? item.address : '无'}}</p>
               </div>
-            </div>
+            </div> -->
           </li>
         </ul>
         <el-pagination
@@ -48,7 +62,7 @@
       <template v-else>
         <div class="not_content">
           <img src="../../../../assets/img/not-content.png" alt="">
-          <p>暂无相关数据</p>
+          <p>抱歉，没有相关的结果!</p>
         </div>
       </template>
     </div>
@@ -99,10 +113,10 @@
 </template>
 
 <script>
-import vehicleBreadcrumb from './breadcrumb.vue';
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { getPeopleTaskDetail } from '@/views/index/api/api.analysis.js';
 export default {
-  components: {vehicleBreadcrumb},
+  components: {vlBreadcrumb},
   data () {
     return {
       orderType: 1, // 1时间排序 2监控排序
@@ -125,7 +139,7 @@ export default {
   methods: {
     // 获取离线任务详情
     getDetail () {
-      const id = this.$route.query.uid
+      const id = this.$route.query.uid;
       if (id) {
         getPeopleTaskDetail(id)
           .then(res => {
@@ -145,6 +159,7 @@ export default {
               this.pagination.total = this.listbox.length
             }
           })
+          
       }
     },
     orderHandler (type) {
@@ -183,65 +198,102 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.rlcx_r {
-  position: relative;
-  height: calc(100% - 50px);
-  overflow: auto;
-  overflow-x: hidden;
-  overflow-y: auto;
-  > .rlcx_r_list {
-    padding: 5px;
-    > li {
-      padding: 5px;
-      float: left;
-      .box {
-        background-color: #fff;
-        box-shadow: 0px 5px 16px 0px rgba(169,169,169,0.2);
-        cursor: pointer;
+@media screen and (min-width: 1200px) and (max-width: 1439px) {
+  .peer_analsis_record {
+    .rlcx_r_list {
+      li {
+        width: 31%;
         .top {
-          position: relative;
-          width: 460px;
-          padding: 10px;
-          display: flex;
-          > img {
-            width: 219px; height: 219px;
+          .img_info {
+            width: 185px;
+            height: 185px;
+            img {
+              width: 100%;
+              height: 100%;
+            }
+          }
+          .peer-time {
+            width: 183px;
+          }
+        }
+      }
+    }
+  }
+}
+@media screen and (min-width: 1440px) {
+  .peer_analsis_record {
+    .rlcx_r_list {
+      li {
+        width: 23.5%;
+        .top {
+          .img_info {
+            width: 195px;
+            height: 195px;
+            img {
+              width: 100%;
+              height: 100%;
+            }
+          }
+          .peer-time {
+            width: 193px;
+          }
+        }
+      }
+    }
+  }
+}
+.peer_analsis_record {
+  height: 100%;
+  overflow: hidden;
+  .vc_gcck_bd {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 50px; line-height: 50px;
+  }
+  .rlcx_r {
+    margin-top: 50px;
+    position: relative;
+    height: calc(100% - 50px);
+    overflow: auto;
+    .rlcx_r_list {
+      width: 100%;
+      margin: 10px 0 10px 20px;
+      li {
+        margin-right: 20px;
+        margin-bottom: 10px;
+        padding: 10px;
+        float: left;
+        background-color: #fff;
+        cursor: pointer;
+        box-shadow: 0px 3px 8px 0px rgba(169,169,169,0.2);
+        .top {
+          .img_info {
+            position: relative;
+            // padding: 0 5px;
+            float: left;
+            margin: 0 5px;
+            border: 1px solid #f2f2f2;
           }
           .left-float {
-            position: absolute;
-            left: 10px;top: 10px;
-            width: 100px;
-            height: 30px;
-            line-height: 30px;
-            text-align: center;
             background: #0C70F8;
-            color: #fff;
-            border-radius: 0 20px 20px 0;
           }
           .right-float {
+            background: #50CC62;
+          }
+          .left-float, .right-float {
             position: absolute;
-            left: 241px;top: 10px;
+            left: 0;
+            top: 0;
             width: 100px;
             height: 30px;
             line-height: 30px;
             text-align: center;
-            background: #50CC62;
             color: #fff;
             border-radius: 0 20px 20px 0;
           }
-          .left-time {
+          .peer-time {
             position: absolute;
-            bottom: 10px;left: 10px;
-            width: 219px;
-            height: 30px;
-            line-height: 30px;
-            text-align: center;
-            background:rgba(0,0,0,.52);
-            color: #fff;
-          }
-          .right-time {
-            position: absolute;
-            bottom: 10px;left: 241px;
-            width: 207px;
+            bottom: 0;
+            left: 0;
             height: 30px;
             line-height: 30px;
             text-align: center;
@@ -250,74 +302,72 @@ export default {
           }
         }
         .bottom {
-          p {
-            padding: 0 0 0 10px;
-          }
+          padding: 5px;
+          clear: both;
           p:nth-child(1) {
             font-size: 14px;
             color: #333;
+            margin-bottom: 5px;
           }
           p:nth-child(2) {
-            padding-bottom: 10px;
             font-size: 12px;
             color: #999;
           }
         }
       }
-      
     }
-  }
-  > .rlcx_r_msg {
-    position: absolute; top: 20px; left: 20px;
-    color: #333;
-    > span { color: #666; }
-  }
-  > .rlcx_r_order {
-    padding-top: 20px; padding-bottom: 10px;
-    > ul {
-      position: relative;
-      margin: 0 auto;
-      width: 200px;
-      overflow: hidden;
-      > li {
-        width: 100px; height: 40px;
-        float: left;
-        text-align: center;
-        cursor: pointer;
-        font-size: 15px;
-        transition: all .3s ease-out;
-        > i {
-          opacity: 0;
+    > .rlcx_r_msg {
+      position: absolute; top: 20px; left: 20px;
+      color: #333;
+      > span { color: #666; }
+    }
+    > .rlcx_r_order {
+      padding-top: 20px; padding-bottom: 10px;
+      > ul {
+        position: relative;
+        margin: 0 auto;
+        width: 200px;
+        overflow: hidden;
+        > li {
+          width: 100px; height: 40px;
+          float: left;
+          text-align: center;
+          cursor: pointer;
+          font-size: 15px;
           transition: all .3s ease-out;
-          &.rlcx_r_order_up {
-            transform: rotate(180deg);
-          } 
-        }
-        &.rlcx_r_order_sed {
-          cursor: default;
-          color: #2580FC;
           > i {
-            opacity: 1;
-            cursor: pointer;
+            opacity: 0;
+            transition: all .3s ease-out;
+            &.rlcx_r_order_up {
+              transform: rotate(180deg);
+            } 
+          }
+          &.rlcx_r_order_sed {
+            cursor: default;
+            color: #2580FC;
+            > i {
+              opacity: 1;
+              cursor: pointer;
+            }
+          }
+        }
+        > span {
+          position: absolute; bottom: 5px; left: 8px;
+          width: 80px; height: 2px;
+          overflow: hidden;
+          background-color: #2580FC;
+          transition: all .3s ease-out;
+          &.rlcx_r_order_line2 {
+            left: 108px;
           }
         }
       }
-      > span {
-        position: absolute; bottom: 5px; left: 8px;
-        width: 80px; height: 2px;
-        overflow: hidden;
-        background-color: #2580FC;
-        transition: all .3s ease-out;
-        &.rlcx_r_order_line2 {
-          left: 108px;
-        }
-      }
     }
-  }
-  .th-center-pagination {
-    width: 100%;
-    text-align: center;
-    padding: 20px 0;
+    .th-center-pagination {
+      width: 100%;
+      text-align: center;
+      padding: 20px 0;
+    }
   }
 }
 </style>

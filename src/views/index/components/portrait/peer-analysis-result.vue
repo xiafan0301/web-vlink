@@ -1,72 +1,73 @@
 <template>
   <div class="peer-analysis">
-    <div class="th-breadcrumb">
-      <el-breadcrumb separator-class="el-icon-arrow-right">
-        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像侦查</el-breadcrumb-item>
-        <el-breadcrumb-item :to="{ path: '/portrait/peer-analysis-list' }">同行分析</el-breadcrumb-item>
-        <el-breadcrumb-item>分析结果</el-breadcrumb-item>
-      </el-breadcrumb>
+    <div class="vc_gcck_bd">
+      <div is="vlBreadcrumb" :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'}, 
+        {name: '同行分析', routerName: 'peer_analysis_list'}, {name: '分析结果'}]">
+      </div>
     </div>
     <div class="the-bottom">
       <div class="the-left-search">
         <template v-if="showNewTask">
-          <div class="task_name">
-            <span>任务名称：</span>
-            <span>{{editForm.taskName}}</span>
-          </div>
-          <!--查询范围-->
-          <div class="per_left_time">
-            <div class="left_time">
-              <el-date-picker
-                v-model="editForm.startTime"
-                style="width: 100%;margin-bottom: 10px;"
-                class="vl_date"
-                type="datetime"
-                :clearable="false"
-                :time-arrow-control="true"
-                @change="chooseStartTime"
-                value-format="yyyy-MM-dd HH:mm:ss"
-                format="yyyy-MM-dd HH:mm:ss"
-                placeholder="选择日期时间">
-              </el-date-picker>
-              <el-date-picker
-                style="width: 100%;"
-                class="vl_date vl_date_end"
-                v-model="editForm.endTime"
-                @change="chooseEndTime"
-                :clearable="false"
-                :time-arrow-control="true"
-                value-format="yyyy-MM-dd HH:mm:ss"
-                format="yyyy-MM-dd HH:mm:ss"
-                type="datetime"
-                placeholder="选择日期时间">
-              </el-date-picker>
+          <vue-scroll>
+            <div class="task_name">
+              <span>任务名称：</span>
+              <span>{{editForm.taskName}}</span>
             </div>
-          </div>
-          <div class="vl_jtc_img_box">
-            <div style="padding: 0 25px; height: 210px;">
-              <div is="vlUpload" :clear="uploadClear" :imgData="imgData" @uploadEmit="uploadEmit"></div>
+            <!--查询范围-->
+            <div class="per_left_time">
+              <div class="left_time">
+                <el-date-picker
+                  v-model="editForm.startTime"
+                  style="width: 100%;margin-bottom: 10px;"
+                  class="vl_date"
+                  type="datetime"
+                  :clearable="false"
+                  :time-arrow-control="true"
+                  @change="chooseStartTime"
+                  value-format="yyyy-MM-dd HH:mm:ss"
+                  format="yyyy-MM-dd HH:mm:ss"
+                  placeholder="选择日期时间">
+                </el-date-picker>
+                <el-date-picker
+                  style="width: 100%;"
+                  class="vl_date vl_date_end"
+                  v-model="editForm.endTime"
+                  @change="chooseEndTime"
+                  :clearable="false"
+                  :time-arrow-control="true"
+                  value-format="yyyy-MM-dd HH:mm:ss"
+                  format="yyyy-MM-dd HH:mm:ss"
+                  type="datetime"
+                  placeholder="选择日期时间">
+                </el-date-picker>
+              </div>
             </div>
-          </div>
-          <div class="per_semblance_ytsr">
-            <span>同行次数≥：</span>
-            <el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100; if(value&&value <2)value = 2;" placeholder="填写同行次数" v-model="editForm.number">
-            </el-input>(2-100)
-          </div>
-          <div class="peer_xzsb_s" @click="areaTypeChanged" v-if="chooseType === 1">
-            <span>选择设备</span>
-            <span class="el-icon-arrow-down"></span>
-          </div>
-          <div class="peer_dtxz_rst" v-else>
-            已选<span>{{dSum}}</span>个设备<a href="javascript: void(0);" @click="openMap={}">重选</a>
-          </div>
-          <div class="vl_jtc_search">
-            <div style="text-align: center;margin-bottom: 0px;">
-              <el-button @click="resetSearch">取消</el-button>
-              <el-button type="primary" :loading="searching" @click="tcDiscuss()">确定</el-button>
+            <div class="vl_jtc_img_box">
+              <div style="padding: 0 25px; height: 210px;">
+                <div is="vlUpload" :clear="uploadClear" :imgData="imgData" @uploadEmit="uploadEmit"></div>
+              </div>
             </div>
-          </div>
+            <div class="per_semblance_ytsr">
+              <span>同行次数≥：</span>
+              <el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100; if(value&&value <2)value = 2;" placeholder="填写同行次数" v-model="editForm.number">
+              </el-input>(2-100)
+            </div>
+            <div class="peer_xzsb_s" @click="areaTypeChanged" v-if="chooseType === 1">
+              <span>选择设备</span>
+              <span class="el-icon-arrow-down"></span>
+            </div>
+            <div class="peer_dtxz_rst" v-else>
+              已选<span>{{dSum}}</span>个设备<a href="javascript: void(0);" @click="openMap={}">重选</a>
+            </div>
+            <div class="vl_jtc_search">
+              <div style="text-align: center;margin-bottom: 0px;">
+                <el-button @click="resetSearch">取消</el-button>
+                <el-button type="primary" :loading="searching" @click="tcDiscuss()">确定</el-button>
+              </div>
+            </div>
+          </vue-scroll>
         </template>
+
         <template v-else>
           <ul>
             <li v-if="taskDetail.taskWebParam && taskDetail.taskWebParam.targetPicUrl">
@@ -113,10 +114,10 @@
               <div class="list-box">
                 <ul class="rlcx_r_list clearfix">
                   <li v-for="(item, index) in boxList" :key="index + 'dd'">
-                    <div style="">
-                      <!-- <img src="../../../../assets/img/666.jpg" alt=""> -->
+                    <div>
+                      <!-- <img class="box_img" src="../../../../assets/img/666.jpg" alt=""> -->
                       <img class="bigImg" :src="item.subStoragePath" alt="">
-                      <div>
+                      <div class="box_right_detail">
                         <h4>检索资料</h4>
                         <div><i class="vl_icon rlcx_sj"></i>{{item.shotTime}}</div>
                         <p>
@@ -150,7 +151,6 @@
         </template>
       </div>
     </div>
-
     <!-- D设备 B卡口  这里是设备和卡口 -->
     <div
       is="mapSelector"
@@ -170,8 +170,9 @@ import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import { formatDate } from "@/utils/util.js";
 import vlUpload from "@/components/common/upload.vue";
 import mapSelector from '@/components/common/mapSelector.vue';
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 export default {
-  components: {vlUpload, mapSelector},
+  components: {vlUpload, mapSelector, vlBreadcrumb},
   data () {
     return {
       imgData:null,
@@ -435,56 +436,106 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .peer_xzsb_s {
-    height: 40px;
-    line-height: 40px;
-    width: calc(100% - 40px);
-    border-radius: 4px;
-    border: 1px solid #DCDFE6;
-    cursor: pointer;
-    color: #999999;
-    padding: 0 6px;
-    margin-left: 20px;
-    > span {
-      display: inline-block;
-      width: 50%;
-      &:last-child {
-        text-align: right;
+
+@media screen and (min-width: 1200px) and (max-width: 1439px) {
+  .list-box {
+    > .rlcx_r_list {
+      li {
+        width: 33%;
+        > div {
+          > img {
+            top: 30px;
+            width: 150px;
+            height: 150px;
+          }
+          > div {
+            margin-left: 160px;
+          }
+        }
       }
     }
   }
-  .peer_dtxz_rst {
-    width: calc(100% - 40px);
-    line-height: 40px;
-    padding: 0px 15px; margin-top: 5px;
-    margin-left: 20px;
-    background-color: #F5F7FA;
-    color: #C0C4CC;
-    border: 1px solid #DCDFE6;
-    border-radius: 4px;
-    > span {
-      display: inline-block;
-      padding: 0 3px;
-      color: #333;
-    }
-    > a {
-      display: inline-block;
-      padding-left: 5px;
-      color: #2580FC !important;
-      text-decoration: none !important;
-      /*font-style: italic;*/
-      cursor: pointer;
+}
+@media screen and (min-width: 1440px) {
+  .list-box {
+    > .rlcx_r_list {
+      li {
+        width: 24.5%;
+        > div {
+          > img {
+            top: 10px;
+            width: 190px;
+            height: 190px;
+            border: 1px solid #f2f2f2;
+          }
+          > div {
+            margin-left: 200px;
+          }
+        }
+      }
     }
   }
+}
+
+.peer_xzsb_s {
+  height: 40px;
+  line-height: 40px;
+  width: calc(100% - 40px);
+  border-radius: 4px;
+  border: 1px solid #DCDFE6;
+  cursor: pointer;
+  color: #999999;
+  padding: 0 6px;
+  margin-left: 20px;
+  > span {
+    display: inline-block;
+    width: 50%;
+    &:last-child {
+      text-align: right;
+    }
+  }
+}
+.peer_dtxz_rst {
+  width: calc(100% - 40px);
+  line-height: 40px;
+  padding: 0px 15px; margin-top: 5px;
+  margin-left: 20px;
+  background-color: #F5F7FA;
+  color: #C0C4CC;
+  border: 1px solid #DCDFE6;
+  border-radius: 4px;
+  > span {
+    display: inline-block;
+    padding: 0 3px;
+    color: #333;
+  }
+  > a {
+    display: inline-block;
+    padding-left: 5px;
+    color: #2580FC !important;
+    text-decoration: none !important;
+    /*font-style: italic;*/
+    cursor: pointer;
+  }
+}
 .peer-analysis {
   width: 100%; height: 100%;
+  overflow: hidden;
+  .vc_gcck_bd {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 50px; line-height: 50px;
+  }
   .the-bottom {
-    width: 100%;height: calc(100% - 60px);
+    width: 100%;
+    margin-top: 50px;
+    height: calc(100% - 50px);
     display: flex;
     position: relative;
+      // overflow: hidden;
     .the-left-search {
-      width: 272px;height: 100%;
-      min-height: 600px;
+      width: 272px;
+      height: 100%;
+      // min-height: 600px;
       background: #fff;
       box-shadow: 5px 0 10px #E5E7E7;
       animation: fadeInLeft .4s ease-out .3s both;
@@ -676,10 +727,11 @@ export default {
       }
     }
     .the-right-result {
-      width: calc(100% - 285px); height: 100%;
+      width: calc(100% - 285px);
+      height: 100%;
       margin-left: 13px;
       background: #F7F9F9;
-      padding: 15px 12px 25px 0;
+      padding: 15px 0 25px 0;
       overflow-y: hidden;
       .the-result-box-peer {
         width: 100%; height: 100%;
@@ -694,27 +746,26 @@ export default {
         .list-box {
           display: flex;
           flex-wrap: wrap;
-          // justify-content: space-between;
           flex-flow: row wrap;
-          // height: calc(100% - 45px);
           > .rlcx_r_list {
+            width: 100%;
             padding: 5px;
-            > li {
+            li {
+              // width: 33%;
               padding: 5px;
               float: left;
               > div {
                 position: relative;
-                width: 395px; height: 210px;
+                height: 210px;
                 padding: 10px;
                 background-color: #fff;
                 box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
                 > img {
-                  position: absolute; top: 10px; left: 10px;
-                  width: 190px; height: 190px;
+                  position: absolute;
+                  left: 10px;
                 }
                 > div {
                   height: 100%;
-                  margin-left: 210px; padding-right: 10px;
                   > h4 {
                     color: #999;
                     margin-bottom: 10px;
