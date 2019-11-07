@@ -112,7 +112,7 @@
           </span>
         </div>
         <div class="update_task">
-          <el-button type="primary" @click="showNewTask = true;">修改任务</el-button>
+          <el-button type="primary" @click="initParams">修改任务</el-button>
         </div>
       </template>
     </div>
@@ -325,14 +325,11 @@
     methods: {
       // 修改任务相关
       resetSearch () {
-        this.taskName = '';
-        this.searchData.minSemblance = 85;
-        this.imgList = '';
-        this.radio = '1';
-        this.searchData.portraitGroupId= [];
         this.msClear = {};
-        this.uploadClear = {};
-        this.setDTime();
+        this.dSum = 0;
+        this.selectCameraArr = [];
+        this.chooseType = 1;
+        this.selectBayonetArr = [];
         this.showNewTask = false;
       },
       tcDiscuss (boolean) {
@@ -369,6 +366,10 @@
           })
           params['portraitGroupName'] = pNameList;
         } else {
+          if (this.dSum === 0) {
+            this.$MyMessage('请选择设备')
+            return false;
+          }
           let dNameList = [];
           let dList = this.selectCameraArr.map(res =>  res.deviceName);
           let bList = this.selectBayonetArr.map(res => res.bayonetName);
@@ -478,22 +479,23 @@
                   this.strucInfoList = res.data.taskResult ? res.data.taskResult : [];
                   this.pagination.total = this.strucInfoList.length;
                   this.taskDetail = res.data.taskWebParam;
-                  let {portraitGroupId, minSemblance, startTime, endTime, origin} = res.data.taskWebParam;
-                  this.radio = origin + '';
-                  this.$nextTick(() => {
-                    this.searchData.portraitGroupId = portraitGroupId.split(',');
-                  })
-                  this.searchData.minSemblance = minSemblance;
-                  this.searchData.startTime = startTime;
-                  this.searchData.endTime = endTime;
-                  console.log(res.data)
-                  this.imgData = {
-                    cname: '带图' + Math.random(),
-                    filePathName: '带图' + Math.random(),
-                    path: this.taskDetail.uploadImgUrls
-                  }
                 }
               })
+        }
+      },
+      initParams () {
+        this.showNewTask = true;
+        let {portraitGroupId, minSemblance, origin, uploadImgUrls} = this.taskDetail;
+        this.radio = origin + '';
+        this.$nextTick(() => {
+          this.searchData.portraitGroupId = portraitGroupId.split(',');
+        })
+        this.searchData.minSemblance = minSemblance;
+        this.setDTime();
+        this.imgData = {
+          cname: '带图' + Math.random(),
+          filePathName: '带图' + Math.random(),
+          path: uploadImgUrls
         }
       },
       showStrucInfo (data, index) {
@@ -510,6 +512,11 @@
     watch: {
       radio () {
         this.searchData.portraitGroupId = [];
+        this.msClear = {};
+        this.dSum = 0;
+        this.selectCameraArr = [];
+        this.chooseType = 1;
+        this.selectBayonetArr = [];
       }
     }
   }

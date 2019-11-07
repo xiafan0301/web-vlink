@@ -3,14 +3,15 @@
     <div class="vl_upload_con" @drop="dragDrop($event)" @dragover.prevent="dragOver">
       <el-upload class="vl_upload_upd"
         :show-file-list="false"
+        ref="publicImgUpload"
         accept="image/*"
         :action="uploadAcion"
         list-type="picture-card"
         :before-upload="beforeAvatarUpload"
-        :on-success="uploadSucess"
+        :on-success="uploadSuccess"
         :on-error="uploadError">
         <span v-if="uploading" class="el-icon-loading"></span>
-        <img :style="{'transform': 'rotate(' + rotateNum * 90 + 'deg)'}" class="vl_upload_img" v-else-if="currentImg" :src="currentImg.path">
+        <img v-show="!uploading" :style="{'transform': 'rotate(' + rotateNum * 90 + 'deg)'}" class="vl_upload_img" v-else-if="currentImg" :src="currentImg.path">
         <div class="vl_upload_tip" v-else>
           <span class="vl_icon"></span>
           <div>支持jpg,png,bmp格式</div>
@@ -88,7 +89,8 @@ export default {
       historyPicList: [], // 上传历史记录
       loadingHis: false,
       historyPicDialog: false,
-      choosedHisPic: null
+      choosedHisPic: null,
+      uploadTimer: null
     }
   },
   created () {
@@ -213,8 +215,7 @@ export default {
         return false;
       }
     },
-    uploadSucess (response) {
-      this.uploading = false;
+    uploadSuccess (response) {
       if (response && response.data) {
         let oRes = response.data;
         if (oRes) {
@@ -246,6 +247,8 @@ export default {
           if (jRes) {
             this.currentImg['uid'] = jRes.data;
             this.picSubmit();
+          } else {
+            this.uploading = false;
           }
         })
       }
@@ -284,6 +287,12 @@ export default {
     },
     picSubmit () {
       this.$emit('uploadEmit', this.currentImg);
+      if (this.uploadTimer) {
+        window.clearTimeout(this.uploadTimer);
+      }
+      this.uploadTimer = setTimeout(() => {
+        this.uploading = false;
+      }, 1000)
     }
   }
 }

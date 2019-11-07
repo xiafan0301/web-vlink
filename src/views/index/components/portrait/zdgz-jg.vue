@@ -112,7 +112,7 @@
         </span>
           </div>
           <div class="update_task">
-            <el-button type="primary" @click="showNewTask = true;">修改任务</el-button>
+            <el-button type="primary" @click="initParams">修改任务</el-button>
           </div>
         </template>
       </div>
@@ -242,14 +242,14 @@
         this.searchData.time2 = curDate;
       },
       resetSearch () {
-        this.setDTime()
+//        this.setDTime()
 //        this.taskName = '';
-        this.searchData.portraitGroupId = null;
-        this.searchData.sex = null;
-        this.searchData.ageGroup = null;
+//        this.searchData.portraitGroupId = null;
+//        this.searchData.sex = null;
+//        this.searchData.ageGroup = null;
         this.selectDevice = [];
         this.selectBayonet = [];
-        this.dSum = 0;
+//        this.dSum = 0;
         this.showNewTask = false;
 
         this.clearMapSelect = !this.clearMapSelect; // 清除地图选择
@@ -267,7 +267,8 @@
       },
       beginSearch () {
         let _todo = false;
-        if(this.selectBayonet.length === 0 && this.selectDevice.length === 0) {
+        console.log(!this.taskDetail.deviceIds)
+        if(this.selectBayonet.length === 0 && this.selectDevice.length === 0 && !this.taskDetail.deviceIds) {
           if (!document.querySelector('.el-message--info')) {
             this.$message.info('请至少选择一个设备')
           }
@@ -319,6 +320,7 @@
           params['bayonetIds'] = this.selectBayonet.map(res => res.uid).join(',');
         } else {
           params['deviceIds'] = this.taskDetail.deviceIds;
+          params['deviceNames'] = this.taskDetail.deviceNames.join(',')
         }
         params['portraitGroupName'] = this.portraitGroupList.find(y => y.uid === this.searchData.portraitGroupId).groupName;
         params.taskId = this.$route.query.uid;
@@ -352,22 +354,25 @@
                 if (res && res.data) {
                   this.$set(res.data, 'taskResult', JSON.parse(res.data.taskResult));
                   this.$set(res.data, 'taskWebParam', JSON.parse(res.data.taskWebParam));
-                  res.data.taskWebParam.deviceNames = res.data.taskWebParam.deviceNames.split(',')
+                  res.data.taskWebParam.deviceNames = res.data.taskWebParam.deviceNames.split(',');
                   this.evData = res.data.taskResult ? res.data.taskResult : [];
                   this.taskDetail = res.data.taskWebParam;
-                  let {startTime, endTime, deviceIds, portraitGroupId, age, sex} = res.data.taskWebParam;
-                  this.activeDBList = deviceIds.split(',');
-                  this.searchData.time1 = new Date(startTime).getTime();
-                  this.searchData.time2 = new Date(endTime).getTime();
-                  this.searchData.portraitGroupId = portraitGroupId;
-                  this.searchData.sex = sex;
-                  this.searchData.ageGroup = age;
-                  this.dSum = this.activeDBList.length;
                   console.log(res.data)
                   this.randerMap(this.evData)
                 }
               })
         }
+      },
+      initParams () {
+        this.showNewTask = true;
+        let {startTime, endTime, deviceIds, personGroupId, age, sex} = this.taskDetail;
+        this.activeDBList = deviceIds.split(',');
+        this.searchData.time1 = new Date(startTime).getTime();
+        this.searchData.time2 = new Date(endTime).getTime();
+        this.searchData.portraitGroupId = personGroupId ? personGroupId : null;
+        this.searchData.sex = sex;
+        this.searchData.ageGroup = age;
+        this.dSum = this.activeDBList.length;
       },
       mapZoomSet(val) {
         if (this.amap) {

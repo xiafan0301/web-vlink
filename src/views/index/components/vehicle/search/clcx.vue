@@ -334,7 +334,7 @@ export default {
       }
       let d = JSON.stringify(this.oldParams)
       d = JSON.parse(d)
-      d.plateNo = this.select + this.ruleForm.plateNo;
+      d.plateNo = this.select ? this.select : '?' + this.ruleForm.plateNo;
       if(!d.plateNo){
         d.include=null
       }
@@ -411,7 +411,7 @@ export default {
       this.oldParams = Object.assign(this.ruleForm, {selectedIds: []})
       let d = JSON.stringify(this.ruleForm)
       d = JSON.parse(d)
-      d.plateNo = this.select + this.ruleForm.plateNo;
+      d.plateNo = this.select ? this.select : '?' + this.ruleForm.plateNo;
       d.pageNum = this.pagination.pageNum;
       d.pageSize = this.pagination.pageSize;
       if(!d.plateNo){

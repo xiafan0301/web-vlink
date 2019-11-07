@@ -144,7 +144,6 @@
 // import listSelect from './components/listSelect.vue';
 // import mapSelect from './components/mapSelect.vue';
 import mapSelector from '@/components/common/mapSelector.vue';
-// import { testData } from './components/testData.js';
 // import { dataList } from '@/utils/data.js';
 // import { getDiciData } from '@/views/index/api/api.js';
 // import { getUserList, getDepartmentList, getCusGroup, getAllDevices } from '@/views/index/api/api.manage.js';

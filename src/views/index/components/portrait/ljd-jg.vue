@@ -67,7 +67,7 @@
             </span>
           </div>
           <div class="update_task">
-            <el-button type="primary" @click="showNewTask = true;">修改任务</el-button>
+            <el-button type="primary" @click="initParams">修改任务</el-button>
           </div>
         </template>
       </div>
@@ -224,6 +224,16 @@
       }
     },
     methods: {
+      initParams () {
+        this.showNewTask = true;
+        let {startTime, endTime, faceUrl} = this.taskDetail;
+        this.ruleForm.data1 = new Date(startTime).getTime();
+        this.ruleForm.data2 = new Date(endTime).getTime();
+//        this.curImageUrl = faceUrl;
+        this.imgData = {
+          path: faceUrl
+        }
+      },
       // 获取离线任务详情
       getDetail () {
         const id = this.$route.query.uid
