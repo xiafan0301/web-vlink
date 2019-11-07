@@ -179,6 +179,8 @@
         <el-button @click="skipIsCreateControl" class="btn_100">新建布控</el-button>
       </div>
     </el-dialog>
+    <div is="delDialog" ref="delDialog" :controlId="controlId" @getControlList="getControlList"></div>
+    <div is="stopDialog" ref="stopDialog" :controlId="controlId" @getControlList="getControlList"></div>
   </div>
 </template>
 <script>
@@ -188,8 +190,10 @@ import {getControlNameBySelect, getControlEventBySelect, getControlObjBySelect, 
 import {dataList} from '@/utils/data.js';
 import {mapXupuxian} from '@/config/config.js';
 import { Promise } from 'q';
+import delDialog from './components/delDialog.vue';
+import stopDialog from './components/stopDialog.vue';
 export default {
-  components: {flvplayer},
+  components: {flvplayer, delDialog, stopDialog},
   data () {
     return {
       hideleft: false,
@@ -288,7 +292,9 @@ export default {
       controlObjList: [],
       isShowFullScreen: false, // 是否显示全屏播放页面
       domId: null,
-      bResize: {}
+      bResize: {},
+      controlId: null,//当前点击的布控id
+      deviceObj: null
     }
   },
   mounted () {
@@ -306,6 +312,23 @@ export default {
     this.getAlarmListByDev();
   },
   methods: {
+    // 显示弹出框
+    showDialog (formName) {
+      if (this.$refs[formName]) {
+        this.$refs[formName].reset();
+      }
+    },
+    // 终止布控/删除布控后执行的操作
+    getControlList () {
+      let surveillanceIds = this.deviceObj.surveillanceIds;
+      if (surveillanceIds.includes(this.controlId + ',')) {
+        surveillanceIds = surveillanceIds.replace(this.controlId + ',', '');
+      } else if (surveillanceIds.includes(this.controlId)) {
+        surveillanceIds = surveillanceIds.replace(this.controlId, '');
+      }
+      this.deviceObj.surveillanceIds = surveillanceIds;
+      this.getControlMapByDevice(this.deviceObj);
+    },
     // 跳转到告警详情页
     skipIsalarmDel (item) {
       this.$router.push({name: 'alarm_default', query: {uid: item.uid, objType: item.objType, type: 'today'}});
@@ -364,7 +387,7 @@ export default {
         }
       })
     },
-    // 切换布控状态后，重新获取布控名称列表、事件列表、布控对象列表数据
+    // 切换布控状态后，重新获取布控名称列表、事件列表、布控对象列表数据 
     changeControlState (resolve) {
       this.controlNameList = [];
       this.eventList = [];
@@ -494,6 +517,7 @@ export default {
     },
     // 获取设备下布控列表
     getControlMapByDevice (obj) {
+      this.deviceObj = obj;
       this.$_showLoading();
       const data = {
         deviceName: obj.deviceName,
@@ -508,6 +532,11 @@ export default {
           $('.control_map').append($('#controlVideo'));_this.isShowVideo = false; _this.isShowV = false;
 
           _this.controlObjList = res.data;
+
+          // _this.controlObjList.list = [_this.controlObjList.list[0], _this.controlObjList.list[0],_this.controlObjList.list[0],_this.controlObjList.list[0],_this.controlObjList.list[0],_this.controlObjList.list[0],_this.controlObjList.list[0],_this.controlObjList.list[0],_this.controlObjList.list[0],_this.controlObjList.list[0],_this.controlObjList.list[0]];
+          // console.log( _this.controlObjList.list, ' _this.controlObjList.list')
+          // _this.controlObjList.num = 10;
+
           let sContent = '', clickWindow = null, vlMapVideo = '', vlMapObj = '', vlMapObjList = '';
           _this.domId = obj.uid + '_' + random14()
           if (_this.mapForm.state === 1) {
@@ -525,7 +554,17 @@ export default {
           if (_this.controlObjList.num === 1) {
             vlMapObj = `
               <div class="vl_map_info">
-                <div class="vl_map_name" id="${_this.controlObjList.list[0].uid}"><span title="${_this.controlObjList.list[0].surveillanceName}">${_this.controlObjList.list[0].surveillanceName}</span></div>`;
+                <div class="vl_map_name">
+                  <div class="vl_map_control_name" id="${_this.controlObjList.list[0].uid}">
+                    <span>布控名称：</span><span title="${_this.controlObjList.list[0].surveillanceName}">${_this.controlObjList.list[0].surveillanceName}</span>
+                  </div>`;
+                if (_this.mapForm.state === 1) {
+                    vlMapObj += `<i class="vl_map_stop" title="终止布控"></i>
+                  </div>`;
+                } else {
+                    vlMapObj += `<i class="el-icon-delete vl_map_delete" title="删除布控"></i>
+                  </div>`;
+                }
               if (_this.controlObjList.list[0].surveillanceType === 1) {
                 vlMapObj += `<div><span>布控日期：</span><span>${_this.controlObjList.list[0].surveillanceDateStart}至${_this.controlObjList.list[0].surveillanceDateEnd}</span></div>`;
               }
@@ -561,13 +600,24 @@ export default {
           if (_this.controlObjList.num > 1) {
             for (let i = 0; i < _this.controlObjList.list.length ; i++) {
               if (i === 10) {
-                vlMapObjList += `<div class="control_more"><span>查看更多</span></div>`
+                // vlMapObjList += `<div class="vl_map_btn vl_map_add" style="margin-right: 10px;">新增布控</div>`;
+                // vlMapObjList += `<div class="control_more"><span>查看更多</span></div>`;
                 break; 
               }
               let item = _this.controlObjList.list[i];
               vlMapObjList += 
               `<div class="vl_map_info">
-                <div class="vl_map_name" id="${item.uid}"><span title="${item.surveillanceName}">${item.surveillanceName}</span></div>`;
+                <div class="vl_map_name">
+                  <div class="vl_map_control_name" id="${item.uid}">
+                    <span>布控名称：</span><span title="${item.surveillanceName}">${item.surveillanceName}</span>
+                  </div>`;
+                if (_this.mapForm.state === 1) {
+                    vlMapObjList += `<i class="vl_map_stop" title="终止布控"></i>
+                  </div>`;
+                } else {
+                    vlMapObjList += `<i class="el-icon-delete vl_map_delete" title="删除布控"></i>
+                  </div>`;
+                }
                 if (item.surveillanceType === 1) {
                   vlMapObjList += `<div><span>布控日期：</span><span>${item.surveillanceDateStart}至${item.surveillanceDateEnd}</span></div>`;
                 }
@@ -589,7 +639,8 @@ export default {
                 <div class="vl_map_click">`;
                   sContent += vlMapVideo;
                   sContent += vlMapObj;
-                  sContent += `<div class="vl_map_btn">视频回放</div>
+                  sContent += `<div class="vl_map_btn vl_map_add" style="margin-right: 10px;">新增布控</div>`;
+                  sContent += `<div class="control_more vl_map_playback">视频回放</div>
                   </div>
                   <div class="vl_map_triangle"></div>
                 </div>
@@ -600,7 +651,11 @@ export default {
                 `<div class="vl_map_click">`;
                   sContent += vlMapVideo;
                   sContent += vlMapObjList;
-                  sContent += `<div class="vl_map_btn">视频回放</div>`;
+                  sContent += `<div class="vl_map_btn vl_map_add" style="margin-right: 10px;">新增布控</div>`;
+                  sContent += `<div class="control_more vl_map_playback" style="margin-right: 10px;">视频回放</div>`;
+                  if (_this.controlObjList.num >= 10) {
+                    sContent += `<div class="control_more"><span>查看更多</span></div>`;
+                  }
                 sContent +=  `</div>
                   <div class="vl_map_triangle"></div>
                 </div>`;
@@ -619,7 +674,7 @@ export default {
                       <span>${obj.deviceName}</span>
                     </div>`;
                   sContent += vlMapObj;
-                  sContent += `</div>
+                  sContent += `<div class="vl_map_btn vl_map_add">新增布控</div></div>
                   <div class="vl_map_triangle"></div>
                 </div>
                 `;
@@ -634,8 +689,11 @@ export default {
                       <span>${obj.deviceName}</span>
                     </div>`;
                 sContent += vlMapObjList;
-                sContent += `</div>
-                  <div class="vl_map_triangle"></div>
+                sContent +=  `<div class="vl_map_btn vl_map_add" style="margin-right: 10px;">新增布控</div>`;
+                if (_this.controlObjList.num >= 10) {
+                  sContent += `<div class="control_more"><span>查看更多</span></div>`;
+                }
+                sContent +=  `</div><div class="vl_map_triangle"></div>
                 </div>`;
             }
           }
@@ -652,7 +710,7 @@ export default {
                       <span>${obj.deviceName}</span>
                     </div>`;
                    sContent += vlMapObj;
-                  sContent += `</div>
+                  sContent += `<div class="vl_map_btn vl_map_add">新增布控</div></div>
                   <div class="vl_map_triangle"></div>
                 </div>
                 `;
@@ -667,8 +725,11 @@ export default {
                       <span>${obj.deviceName}</span>
                     </div>`;
                 sContent += vlMapObjList;
-                sContent += `</div>
-                  <div class="vl_map_triangle"></div>
+                sContent += `<div class="vl_map_btn vl_map_add" style="margin-right: 10px;">新增布控</div>`;
+                if (_this.controlObjList.num >= 10) {
+                  sContent += `<div class="control_more"><span>查看更多</span></div>`;
+                }
+                sContent += `</div><div class="vl_map_triangle"></div>
                 </div>`;
             }
           }
@@ -690,16 +751,18 @@ export default {
           })
           this.clickWindow = clickWindow;
           // 跳转至布控详情页
-          $('#mapBox').on('click', '.vl_map_name', function (e) {
+          $('#mapBox').on('click', '.vl_map_control_name', function (e) {
             // const { href } = _this.$router.resolve({
             //   name: 'control_manage',
             //   query: {pageType: 2, state: this.mapForm.state, controlId: e.currentTarget.id }
             // })
             // window.open(href, '_blank', 'toolbar=no,location=no,width=1300,height=900')
+            console.log(e.currentTarget, 'e.currentTarget');
+            
             _this.$router.push({name: 'control_manage', query: {pageType: 2, state: _this.mapForm.state, controlId: e.currentTarget.id }});
           })
           // 跳转至视频回放页面
-          $('#mapBox').on('click', '.vl_map_btn', function () {
+          $('#mapBox').on('click', '.vl_map_playback', function () {
             _this.skipIsVideo(obj.uid, obj.deviceName);
           })
           // 向右滑动
@@ -758,6 +821,20 @@ export default {
           // 当布控列表数据超过10条时，点击查看更多跳转到布控列表
           $('#mapBox').on('click', '.control_more', function () {
             _this.$router.push({ name: 'control_manage', query: {state: _this.mapForm.state} })
+          })
+          // 跳转到新增布控页面
+          $('#mapBox').on('click', '.vl_map_add', function () {
+            _this.$router.push({ name: 'control_add', query: {deviceId: obj.uid, model: 9} })
+          })
+          // 终止布控
+          $('#mapBox').on('click', '.vl_map_stop', function (e) {
+            _this.controlId = e.currentTarget.previousElementSibling.id;
+            _this.showDialog('stopDialog');
+          })
+          // 删除布控
+          $('#mapBox').on('click', '.vl_map_delete', function (e) {
+            _this.controlId = e.currentTarget.previousElementSibling.id;
+            _this.showDialog('delDialog');
           })
           this.$_hideLoading();
         }
@@ -829,6 +906,7 @@ export default {
               $('#' + marker.getExtData().uid).addClass("vl_icon_control_03");
             }
             _this.getControlMapByDevice(marker.getExtData());
+            // _this.markerData = marker.getExtData();
           })
           _this.markerList.push(marker);
         }
@@ -1184,9 +1262,8 @@ export default {
           }
           & > div:nth-child(1){
             font-size: 16px;
-            color: #0567E1;
+            color: #333333;
             line-height:24px;
-            cursor: pointer;
           }
           & > div:not(:nth-child(1)){
             font-size: 12px;
@@ -1202,17 +1279,49 @@ export default {
           }
           .vl_map_name{
             width: 100%;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis; 
+            display: flex;
+            justify-content: space-between;
+            > div{
+              width: 90%;
+              overflow: hidden;
+              white-space: nowrap;
+              text-overflow: ellipsis; 
+              cursor: pointer;
+              &:hover{
+                span{
+                  color: #0567E1;
+                }
+              }
+            }
+            i{
+              margin-top: 4px;
+              cursor: pointer;
+            }
+            .vl_map_stop{
+              width: 16px;
+              height: 16px;
+              background: url('../../../../assets/img/control_stop.png');
+              background-repeat: no-repeat;
+            }
           }
         }
         .control_more{
-          padding-top: 10px;
+          width: 80px;
+          height: 30px;
+          display: inline-block;
+          background: #ffffff;
+          border: 1px solid #D3D3D3;
+          border-radius: 5px;
+          margin-top: 10px;
+          line-height: 30px;
           text-align: center;
+          cursor: pointer;
           > span{
-            color: #0567E1;
+            color: #666666;
             cursor: pointer;
+          }
+          &:hover{
+            background: #F2F2F2;
           }
         }
         .vl_map_obj{
@@ -1284,7 +1393,8 @@ export default {
         .vl_map_btn{
           width: 80px;
           height: 30px;
-          background: #3a8ee6;
+          display: inline-block;
+          background: #0C70F8;
           border-radius: 5px;
           margin-top: 10px;
           line-height: 30px;

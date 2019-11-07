@@ -1,519 +1,476 @@
 <template>
-  <div class="control_manage_d">
-    <!-- 面包屑 -->
-    <div class="breadcrumb_heaer">
-      <el-breadcrumb separator=">">
-        <el-breadcrumb-item>布控</el-breadcrumb-item>
-        <el-breadcrumb-item @click.native="skip(1)" class="con_back">布控管理</el-breadcrumb-item>
-        <el-breadcrumb-item>布控详情</el-breadcrumb-item>
-      </el-breadcrumb>
-    </div>
-    <!-- 详情 -->
-    <div class="manage_d_box">
-      <div class="manage_d_title">
-        <div class="vl_f_16 vl_f_333">基本信息</div>
-        <div class="vl_f_12 vl_f_666">创建于{{controlDetail.createTime}} ；更新于{{controlDetail.updateTime}}</div>
+  <div>
+    <div class="control_manage_d" v-if="!isShowVideoRelay">
+      <!-- 面包屑 -->
+      <div class="breadcrumb_heaer">
+        <el-breadcrumb separator=">">
+          <el-breadcrumb-item>布控</el-breadcrumb-item>
+          <el-breadcrumb-item @click.native="skip(1)" class="con_back">布控管理</el-breadcrumb-item>
+          <el-breadcrumb-item>布控详情</el-breadcrumb-item>
+        </el-breadcrumb>
       </div>
-      <div class="manage_d_content" :style="{'margin-bottom': controlState === 2 ? '80px' : '20px'}">
-        <!-- 布控信息 -->
-        <ul>
-          <li style="width: 34%;">
-            <div><span class="vl_f_666">布控名称：</span><span class="vl_f_333">{{controlDetail.surveillanceName}}</span></div>
-            <div><span class="vl_f_666">有效期限：</span><span class="vl_f_333">{{controlDetail.surveillanceDateStart}} 至 {{controlDetail.surveillanceDateEnd}}</span></div>
-            <div>
-              <span class="vl_f_666">短信联动：</span>
-              <template v-if="controlDetail.contactList.length > 0">
-                <span class="vl_f_333" v-for="(item, index) in controlDetail.contactList" :key="index">{{item.contact}}&nbsp;&nbsp;{{item.mobile}}<span v-if="index + 1 < controlDetail.contactList.length">&nbsp;&nbsp;|&nbsp;&nbsp;</span></span>
-              </template>
-              <span v-else>无</span>
-            </div>
-          </li>
-          <li style="width: 34%;">
-            <div><span class="vl_f_666">关联事件：</span><span class="vl_f_333">{{controlDetail.eventCode || '无'}}</span></div>
-            <div class="control_time"><span class="vl_f_666">布控时间段：</span><span class="vl_f_333">{{controlDetail.time}}</span></div>
-          </li>
-          <li style="width: 34%;">
-            <div><span class="vl_f_666">告警级别：</span><span class="vl_f_333" v-if="controlDetail.alarmLevel">{{controlDetail.alarmLevel}}</span></div>
-          </li>
-        </ul>
-        <ul style="padding-top: 14px;">
-          <li style="width: 34%;"><span class="vl_f_666">是否级联：</span><span class="vl_f_333">{{controlDetail.cascadePlatform ? '是' : '无'}}</span></li>
-          <li style="width: 34%;" v-if="controlDetail.cascadePlatform"><span class="vl_f_666">级联对象：</span><span class="vl_f_333">{{controlDetail.cascadePlatform}}</span></li>
-        </ul>
-        <ul>
-          <li style="width: 34%;"><div><span class="vl_f_666">共享布控：</span><span class="vl_f_333">{{controlDetail.shareDept ? '是' : '无'}}</span></div></li>
-          <li style="width: 34%;" v-if="controlDetail.shareDept"><div><span class="vl_f_666">共享对象：</span><span class="vl_f_333">{{controlDetail.shareDept}}</span></div></li>
-        </ul>
-        <ul>
-          <li><div><span class="vl_f_666">布控原因：</span><span class="vl_f_333">{{controlDetail.surveillanceReason || '无'}}</span></div></li>
-        </ul>
-        <!-- <div class="manage_d_c_e" v-if="controlDetail.eventDetail">
-          <div class="vl_f_666">事件内容：</div>
-          <div class="vl_f_333">{{controlDetail.eventDetail}}<span @click="getEventDetail">详情</span></div>
-        </div> -->
-        <!-- <div class="manage_d_c_o">
-          <div><span class="vl_f_333">布控对象</span><span class="vl_f_333">（{{controlDetail.objectNum}}个）</span></div>
-          <div>
-            <div class="manage_d_c_o_i" v-for="item in controlDetail.objectList" :key="item.id">
-              <img :src="item.photoUrl" alt="" v-if="item.photoUrl">
-              <div v-else class="manage_not_img">
-                <i class="vl_icon vl_icon_control_33"></i>
-                <p>暂无相关图片</p>
+      <!-- 详情 -->
+      <div class="manage_d_box">
+        <div class="manage_d_title">
+          <div class="vl_f_16 vl_f_333">基本信息</div>
+          <div class="vl_f_12 vl_f_666">创建于{{controlDetail.createTime}} ；更新于{{controlDetail.updateTime}}</div>
+        </div>
+        <div class="manage_d_content" :style="{'margin-bottom': controlState === 2 ? '80px' : '20px'}">
+          <!-- 布控信息 -->
+          <ul>
+            <li style="width: 34%;">
+              <div><span class="vl_f_666">布控名称：</span><span class="vl_f_333">{{controlDetail.surveillanceName}}</span></div>
+              <div><span class="vl_f_666">有效期限：</span><span class="vl_f_333">{{controlDetail.surveillanceDateStart}} 至 {{controlDetail.surveillanceDateEnd}}</span></div>
+              <div>
+                <span class="vl_f_666">短信联动：</span>
+                <template v-if="controlDetail.contactList.length > 0">
+                  <span class="vl_f_333" v-for="(item, index) in controlDetail.contactList" :key="index">{{item.contact}}&nbsp;&nbsp;{{item.mobile}}<span v-if="index + 1 < controlDetail.contactList.length">&nbsp;&nbsp;|&nbsp;&nbsp;</span></span>
+                </template>
+                <span v-else>无</span>
               </div>
-              <p><i class="vl_icon vl_icon_control_40"></i><span class="vl_f_333">{{item.name}}</span></p>
+            </li>
+            <li style="width: 34%;">
+              <div><span class="vl_f_666">关联事件：</span><span class="vl_f_333">{{controlDetail.eventCode || '无'}}</span></div>
+              <div class="control_time"><span class="vl_f_666">布控时间段：</span><span class="vl_f_333">{{controlDetail.time}}</span></div>
+            </li>
+            <li style="width: 34%;">
+              <div><span class="vl_f_666">告警级别：</span><span class="vl_f_333" v-if="controlDetail.alarmLevel">{{controlDetail.alarmLevel}}</span></div>
+            </li>
+          </ul>
+          <ul style="padding-top: 14px;">
+            <li style="width: 34%;"><span class="vl_f_666">是否级联：</span><span class="vl_f_333">{{controlDetail.cascadePlatform ? '是' : '无'}}</span></li>
+            <li style="width: 34%;" v-if="controlDetail.cascadePlatform"><span class="vl_f_666">级联对象：</span><span class="vl_f_333">{{controlDetail.cascadePlatform}}</span></li>
+          </ul>
+          <ul>
+            <li style="width: 34%;"><div><span class="vl_f_666">共享布控：</span><span class="vl_f_333">{{controlDetail.shareDept ? '是' : '无'}}</span></div></li>
+            <li style="width: 34%;" v-if="controlDetail.shareDept"><div><span class="vl_f_666">共享对象：</span><span class="vl_f_333">{{controlDetail.shareDept}}</span></div></li>
+          </ul>
+          <ul>
+            <li><div><span class="vl_f_666">布控原因：</span><span class="vl_f_333">{{controlDetail.surveillanceReason || '无'}}</span></div></li>
+          </ul>
+          <div :class="['vl_icon con_state', controlState === 2 ? 'vl_control_s' : controlState === 1 ? 'vl_control_o' : 'vl_control_e']"></div>
+          <h1>分析模型：</h1>
+          <div class="manage_model">
+            <div class="model_name" @click="dpOne = !dpOne">
+              <div>{{transcoding(controlDetail.modelType)}}</div>
+              <i class="el-icon-arrow-up" v-show="dpOne"></i>
+              <i class="el-icon-arrow-down" v-show="!dpOne"></i>
             </div>
-          </div>
-          <el-pagination
-            class="cum_pagination"
-            style="align-self: flex-start;"
-            @current-change="handleCurrentChangeObj"
-            :current-page="currentPage"
-            :page-sizes="[100, 200, 300, 400]"
-            :page-size="18"
-            layout="total, prev, pager, next, jumper"
-            :total="controlDetail.objectNum">
-          </el-pagination>
-        </div> -->
-        <div :class="['vl_icon con_state', controlState === 2 ? 'vl_control_s' : controlState === 1 ? 'vl_control_o' : 'vl_control_e']"></div>
-        <h1>分析模型：</h1>
-        <div class="manage_model">
-          <div class="model_name" @click="dpOne = !dpOne">
-            <div>{{transcoding(controlDetail.modelType)}}</div>
-            <i class="el-icon-arrow-up" v-show="dpOne"></i>
-            <i class="el-icon-arrow-down" v-show="!dpOne"></i>
-          </div>
-          <el-collapse-transition>
-            <div v-show="dpOne">
-              <ul class="model_info" v-if="controlDetail.modelType === 1">
-                <li>失踪人员信息：</li>
-                <li>
-                  <span>人脸照片：</span><img class="bigImg" :src="controlDetail.missingUrl" alt="">
-                </li>
-                <li><span>人员姓名：</span><span>{{controlDetail.name}}</span></li>
-                <li><span>人员性别：</span><span>{{controlDetail.sex}}</span></li>
-                <li><span>失踪时间：</span><span>{{controlDetail.lostTime}}</span></li>
-                <li><span>失踪地址：</span><span>{{controlDetail.lostAddress}}</span></li>
-                <li><span>家庭地址：</span><span>{{controlDetail.homeAddress || '无'}}</span></li>
-              
-                <li class="img_list">
-                  <span style="padding-left: 0;">嫌疑人照片：</span>
-                  <div v-if="getBigImgList().length > 0">
-                    <img v-for="(item, index) in getBigImgList()" :key="index" class="bigImg" :src="item.path" alt="">
-                  </div>
-                  <div v-else>无</div>
-                </li>
-                <li>
-                  <span>嫌疑车辆：</span>
-                  <template v-if="filterObj(controlDetail.objectList, 2, 4).length > 0">
-                    <template v-for="(item, index) in filterObj(controlDetail.objectList, 2, 4)">
-                      <span style="flex: none;" :key="index">{{item.name}}<span v-if="index < filterObj(controlDetail.objectList, 2, 4).length - 1">&nbsp;|&nbsp;</span></span>
-                    </template>
-                  </template>
-                  <span v-else>无</span>
-                </li>
-              </ul>
-              <ul class="model_info" v-if="controlDetail.modelType === 2">
-                <li>布防信息：</li>
-                <li><span>布防地址：</span><span>{{controlDetail.address}}</span></li>
-                <li><span>布防范围：</span><span>{{controlDetail.radius}}千米</span></li>
-                <li>
-                  <span>禁入人员：</span>
-                  <div v-if="filterObj(controlDetail.objectList, 1).length > 0">
-                    <img class="bigImg" v-for="(item, index) in filterObj(controlDetail.objectList, 1)" :key="index" :src="item.path" alt="">
-                  </div>
-                  <div v-else>无</div>
-                </li>
-                <li>
-                  <span>禁入车辆：</span>
-                  <div v-if="filterObj(controlDetail.objectList, 2).length > 0">
-                    <img class="bigImg" v-for="(item, index) in filterObj(controlDetail.objectList, 2)" :key="index" :src="item.path" alt="">
-                  </div>
-                  <div v-else>无</div>
-                </li>
-              </ul>
-              <ul class="model_info" v-if="controlDetail.modelType === 3">
-                <li>
-                  <span>上访人员照片：</span>
-                  <div v-if="filterObj(controlDetail.objectList, 1, 3).length > 0">
-                    <img class="bigImg" v-for="(item, index) in filterObj(controlDetail.objectList, 1, 3)" :key="index" :src="item.path" alt="">
-                  </div>
-                  <div v-else>无</div>
-                </li>
-                <li>
-                  <span>上访车辆：</span>
-                  <template v-if="filterObj(controlDetail.objectList, 2, 4).length > 0">
-                    <template v-for="(item, index) in filterObj(controlDetail.objectList, 2, 4)">
-                      <span style="flex: none;" :key="index">{{item.name}}<span v-if="index < filterObj(controlDetail.objectList, 2, 4).length - 1">&nbsp;|&nbsp;</span></span>
-                    </template>
-                  </template>
-                  <span v-else>无</span>
-                </li>
-              </ul>
-              <ul class="model_info" v-if="controlDetail.modelType === 4">
-                <li>
-                  <span>禁入人员：</span>
-                  <div v-if="filterObj(controlDetail.objectList, 1).length > 0">
-                    <img class="bigImg" v-for="(item, index) in filterObj(controlDetail.objectList, 1)" :key="index" :src="item.path" alt="">
-                  </div>
-                  <div v-else>无</div>
-                </li>
-                <li>
-                  <span>禁入车辆：</span>
-                  <div v-if="filterObj(controlDetail.objectList, 2).length > 0">
-                    <img class="bigImg" v-for="(item, index) in filterObj(controlDetail.objectList, 2)" :key="index" :src="item.path" alt="">
-                  </div>
-                  <div v-else>无</div>
-                </li>
-              </ul>
-              <ul class="model_info" v-if="controlDetail.modelType === 5">
-                <li>
-                  <span>布防场所：</span><span>{{controlDetail.locations && controlDetail.locations.join(',')}}</span>
-                </li>
-                <li>
-                  <span>停留时长：</span><span>{{controlDetail.stayTime}}分钟</span>
-                </li>
-                <li>
-                  <span>布控车辆：</span>
-                  <div>
-                    <img class="bigImg" v-for="(item, index) in filterObj(controlDetail.objectList, 2)" :key="index" :src="item.path" alt="">
-                  </div>
-                </li>
-              </ul>
-              <ul class="model_info" v-if="controlDetail.modelType === 9">
-                <li>
-                  <span>布控人员信息：</span>
-                  <div v-if="filterObj(controlDetail.objectList, 1, 3).length > 0">
-                    <img class="bigImg" v-for="(item, index) in filterObj(controlDetail.objectList, 1, 3)" :key="index" :src="item.path" alt="">
-                  </div>
-                  <div v-else>无</div>
-                </li>
-                <li>
-                  <span>布控车辆：</span>
-                  <template v-if="filterObj(controlDetail.objectList, 2, 4).length > 0">
-                    <template v-for="(item, index) in filterObj(controlDetail.objectList, 2, 4)">
-                      <span style="flex: none;" :key="index">{{item.name}}<span v-if="index < filterObj(controlDetail.objectList, 2, 4).length - 1">&nbsp;|&nbsp;</span></span>
-                    </template>
-                  </template>
-                  <span v-else>无</span>
-                </li>
-              </ul>
-              <!-- 布控设备 -->
-              <div class="dev_box">
-                <div class="tab">
-                  <span>布控设备</span>
-                </div>
-                <div class="sel_dev">
-                  <div class="title">
-                    <span>已选设备（{{devNum + bayonetNum}}）</span>
-                    <i class="el-icon-arrow-up" v-show="isShowTree" @click="isShowTree = false"></i>
-                    <i class="el-icon-arrow-down" v-show="!isShowTree" @click="isShowTree = true"></i>
-                  </div>
-                  <div :class="{'active': isShowTree}">
-                    <div class="sel_tab">
-                      <div @click="bayOrdev = 1" :class="{'active': bayOrdev === 1}">摄像头</div>
-                      <div @click="bayOrdev = 2" :class="{'active': bayOrdev === 2}">卡口</div>
+            <el-collapse-transition>
+              <div v-show="dpOne">
+                <ul class="model_info" v-if="controlDetail.modelType === 1">
+                  <li>失踪人员信息：</li>
+                  <li>
+                    <span>人脸照片：</span><img class="bigImg" :src="controlDetail.missingUrl" alt="">
+                  </li>
+                  <li><span>人员姓名：</span><span>{{controlDetail.name}}</span></li>
+                  <li><span>人员性别：</span><span>{{controlDetail.sex}}</span></li>
+                  <li><span>失踪时间：</span><span>{{controlDetail.lostTime}}</span></li>
+                  <li><span>失踪地址：</span><span>{{controlDetail.lostAddress}}</span></li>
+                  <li><span>家庭地址：</span><span>{{controlDetail.homeAddress || '无'}}</span></li>
+                
+                  <li class="img_list">
+                    <span style="padding-left: 0;">嫌疑人照片：</span>
+                    <div v-if="getBigImgList().length > 0">
+                      <img v-for="(item, index) in getBigImgList()" :key="index" class="bigImg" :src="item.path" alt="">
                     </div>
-                    <vue-scroll style="height: 352px;">
-                      <div class="tree_box">
-                        <el-tree
-                          v-show="bayOrdev === 1"
-                          ref="to-tree1" 
-                          icon-class="el-icon-arrow-right"
-                          :data="toLeftDevList"
-                          :node-key="node_key"
-                          :props="defaultProps"
-                        >
-                        </el-tree>
-                        <el-tree
-                          v-show="bayOrdev === 2"
-                          ref="to-tree2" 
-                          icon-class="el-icon-arrow-right"
-                          :data="toLeftBayList"
-                          :node-key="node_key"
-                          :props="defaultProps"
-                        >
-                        </el-tree>
+                    <div v-else>无</div>
+                  </li>
+                  <li>
+                    <span>嫌疑车辆：</span>
+                    <template v-if="filterObj(controlDetail.objectList, 2, 4).length > 0">
+                      <template v-for="(item, index) in filterObj(controlDetail.objectList, 2, 4)">
+                        <span style="flex: none;" :key="index">{{item.name}}<span v-if="index < filterObj(controlDetail.objectList, 2, 4).length - 1">&nbsp;|&nbsp;</span></span>
+                      </template>
+                    </template>
+                    <span v-else>无</span>
+                  </li>
+                </ul>
+                <ul class="model_info" v-if="controlDetail.modelType === 2">
+                  <li>布防信息：</li>
+                  <li><span>布防地址：</span><span>{{controlDetail.address}}</span></li>
+                  <li><span>布防范围：</span><span>{{controlDetail.radius}}千米</span></li>
+                  <li>
+                    <span>禁入人员：</span>
+                    <div v-if="filterObj(controlDetail.objectList, 1).length > 0">
+                      <img class="bigImg" v-for="(item, index) in filterObj(controlDetail.objectList, 1)" :key="index" :src="item.path" alt="">
+                    </div>
+                    <div v-else>无</div>
+                  </li>
+                  <li>
+                    <span>禁入车辆：</span>
+                    <div v-if="filterObj(controlDetail.objectList, 2).length > 0">
+                      <img class="bigImg" v-for="(item, index) in filterObj(controlDetail.objectList, 2)" :key="index" :src="item.path" alt="">
+                    </div>
+                    <div v-else>无</div>
+                  </li>
+                </ul>
+                <ul class="model_info" v-if="controlDetail.modelType === 3">
+                  <li>
+                    <span>上访人员照片：</span>
+                    <div v-if="filterObj(controlDetail.objectList, 1, 3).length > 0">
+                      <img class="bigImg" v-for="(item, index) in filterObj(controlDetail.objectList, 1, 3)" :key="index" :src="item.path" alt="">
+                    </div>
+                    <div v-else>无</div>
+                  </li>
+                  <li>
+                    <span>上访车辆：</span>
+                    <template v-if="filterObj(controlDetail.objectList, 2, 4).length > 0">
+                      <template v-for="(item, index) in filterObj(controlDetail.objectList, 2, 4)">
+                        <span style="flex: none;" :key="index">{{item.name}}<span v-if="index < filterObj(controlDetail.objectList, 2, 4).length - 1">&nbsp;|&nbsp;</span></span>
+                      </template>
+                    </template>
+                    <span v-else>无</span>
+                  </li>
+                </ul>
+                <ul class="model_info" v-if="controlDetail.modelType === 4">
+                  <li>
+                    <span>禁入人员：</span>
+                    <div v-if="filterObj(controlDetail.objectList, 1).length > 0">
+                      <img class="bigImg" v-for="(item, index) in filterObj(controlDetail.objectList, 1)" :key="index" :src="item.path" alt="">
+                    </div>
+                    <div v-else>无</div>
+                  </li>
+                  <li>
+                    <span>禁入车辆：</span>
+                    <div v-if="filterObj(controlDetail.objectList, 2).length > 0">
+                      <img class="bigImg" v-for="(item, index) in filterObj(controlDetail.objectList, 2)" :key="index" :src="item.path" alt="">
+                    </div>
+                    <div v-else>无</div>
+                  </li>
+                </ul>
+                <ul class="model_info" v-if="controlDetail.modelType === 5">
+                  <li>
+                    <span>布防场所：</span><span>{{controlDetail.locations && controlDetail.locations.join(',')}}</span>
+                  </li>
+                  <li>
+                    <span>停留时长：</span><span>{{controlDetail.stayTime}}分钟</span>
+                  </li>
+                  <li>
+                    <span>布控车辆：</span>
+                    <div>
+                      <img class="bigImg" v-for="(item, index) in filterObj(controlDetail.objectList, 2)" :key="index" :src="item.path" alt="">
+                    </div>
+                  </li>
+                </ul>
+                <ul class="model_info" v-if="controlDetail.modelType === 9">
+                  <li>
+                    <span>布控人员信息：</span>
+                    <div v-if="filterObj(controlDetail.objectList, 1, 3).length > 0">
+                      <img class="bigImg" v-for="(item, index) in filterObj(controlDetail.objectList, 1, 3)" :key="index" :src="item.path" alt="">
+                    </div>
+                    <div v-else>无</div>
+                  </li>
+                  <li>
+                    <span>布控车辆：</span>
+                    <template v-if="filterObj(controlDetail.objectList, 2, 4).length > 0">
+                      <template v-for="(item, index) in filterObj(controlDetail.objectList, 2, 4)">
+                        <span style="flex: none;" :key="index">{{item.name}}<span v-if="index < filterObj(controlDetail.objectList, 2, 4).length - 1">&nbsp;|&nbsp;</span></span>
+                      </template>
+                    </template>
+                    <span v-else>无</span>
+                  </li>
+                </ul>
+                <!-- 布控设备 -->
+                <div class="dev_box">
+                  <div class="tab">
+                    <span>布控设备</span>
+                  </div>
+                  <div class="sel_dev">
+                    <div class="title">
+                      <span>已选设备（{{devNum + bayonetNum}}）</span>
+                      <i class="el-icon-arrow-up" v-show="isShowTree" @click="isShowTree = false"></i>
+                      <i class="el-icon-arrow-down" v-show="!isShowTree" @click="isShowTree = true"></i>
+                    </div>
+                    <div :class="{'active': isShowTree}">
+                      <div class="sel_tab">
+                        <div @click="bayOrdev = 1" :class="{'active': bayOrdev === 1}">摄像头</div>
+                        <div @click="bayOrdev = 2" :class="{'active': bayOrdev === 2}">卡口</div>
                       </div>
-                    </vue-scroll>
-                  </div>
-                </div>
-                <div class="dev_map" id="devMap"></div>
-                <div class="map_zoom">
-                  <div class="top"><i class="el-icon-aim" @click="resetZoom()"></i></div>
-                  <ul class="bottom">
-                    <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
-                    <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </el-collapse-transition>
-        </div>
-      </div>
-      <!-- 运行情况 -->
-      <div class="manage_d_c_situ" v-if="controlState !== 2">
-        <div class="situ_title">运行情况</div>
-        <div class="situ_time">
-          <div><span>开始时间：</span><span>{{controlDetail.runningStartTime}}</span></div>
-          <div v-if="controlState === 3"><span>结束时间：</span><span>{{controlDetail.runningEndTime}}</span></div>
-          <div><span>持续时间：</span><span>{{controlDetail.duration}}</span></div>
-          <div v-if="controlDetail.terminationReason" class="termination_reason"><span>终止原因：</span><span>{{controlDetail.terminationReason}}</span></div>
-        </div>
-        <div class="situ_box" v-if="controlState === 1">
-          <div class="situ_top" @click="controlArea(2)">
-            <div>实时监控</div>
-            <i class="el-icon-arrow-down" v-show="!dpTwo"></i>
-            <i class="el-icon-arrow-up" v-show="dpTwo"></i>
-          </div>
-          <el-collapse-transition>
-            <div class="situ_content" v-show="dpTwo">
-                <div class="situ_left">
-                  <div style="padding-left: 20px;">布控设备</div>
-                  <div class="equ_m">
-                    <div @click="tabTypeBySituation = '0'" :class="{'active': tabTypeBySituation === '0'}">摄像头（{{devNum}}）</div>
-                    <div @click="tabTypeBySituation = '1'" :class="{'active': tabTypeBySituation === '1'}">卡口（{{bayonetNum}}）</div>
-                  </div>
-                  <!-- 摄像头 -->
-                  <el-collapse-transition>
-                    <ul v-if="tabTypeBySituation === '0' && situList.length > 0">
-                      <vue-scroll>
-                        <li
-                          v-for="(item, index) in situList"
-                          :key="item.uid"
-                          @dragstart="dragstart($event, index, item)"
-                          @dragover="dragover"
-                          :draggable="true"
-                        >
-                          <span :title="item.deviceName">{{item.deviceName | strCutWithLen(25)}}</span><i class="vl_icon vl_icon_control_05"></i>
-                        </li>
-                      </vue-scroll>
-                    </ul>
-                    <ul v-if="tabTypeBySituation === '0' && situList.length === 0">
-                      <li>范围内无设备</li>
-                    </ul>
-                  </el-collapse-transition>
-                  <!-- 卡口 -->
-                  <el-collapse-transition>
-                    <div v-if="tabTypeBySituation === '1' && bayList.length > 0" class="bayone_list">
-                      <vue-scroll>
-                        <div v-for="bay in bayList" :key="bay.uid">
-                          <div class="bayone_name" :class="{'active': bay.isDropdown}" @click="dropdownBay(bay)">
-                            <i class="el-icon-arrow-down" v-show="bay.isDropdown"></i><i class="el-icon-arrow-right" v-show="!bay.isDropdown"></i><span :title="bay.bayonetName">{{bay.bayonetName | strCutWithLen(25)}}</span>
-                          </div>
-                          <el-collapse-transition>
-                            <ul style="max-height: 346px;" v-if="bay.isDropdown && bay.devList.length > 0">
-                              <li
-                                v-for="(dev, index) in bay.devList"
-                                :key="dev.uid"
-                                @dragstart="dragstart($event, index, dev)"
-                                @dragover="dragover"
-                                :draggable="true"
-                              >
-                                <span :title="dev.deviceName">{{dev.deviceName | strCutWithLen(25)}}</span><i class="vl_icon vl_icon_control_05"></i>
-                              </li>
-                            </ul>
-                            <ul v-if="bay.isDropdown && bay.devList.length === 0">
-                              <li>卡口内无设备</li>
-                            </ul>
-                          </el-collapse-transition>
+                      <vue-scroll style="height: 352px;">
+                        <div class="tree_box">
+                          <el-tree
+                            v-show="bayOrdev === 1"
+                            ref="to-tree1" 
+                            icon-class="el-icon-arrow-right"
+                            :data="toLeftDevList"
+                            :node-key="node_key"
+                            :props="defaultProps"
+                          >
+                          </el-tree>
+                          <el-tree
+                            v-show="bayOrdev === 2"
+                            ref="to-tree2" 
+                            icon-class="el-icon-arrow-right"
+                            :data="toLeftBayList"
+                            :node-key="node_key"
+                            :props="defaultProps"
+                          >
+                          </el-tree>
                         </div>
                       </vue-scroll>
                     </div>
-                    <div v-if="tabTypeBySituation === '1' && bayList.length === 0" class="bayone_list">
-                      <ul>
-                        <li>范围内无卡口</li>
-                      </ul>
-                    </div>
-                  </el-collapse-transition>
-                </div>
-              <div class="situ_right">
-                <div class="situ_r_video" v-for="(item, index) in rightVideoList" :key="item.uid"
-                  @dragend="dragend"
-                  @dragover="dragover"
-                  @drop="drop($event, index)"
-                  >
-                  <div class="situ_r_box" v-if="!item.isShowVideo">
-                    <img src="../../../../../assets/img/video/vi_101.png" alt="">
-                    <div>拖拽设备列表图标至此</div>
                   </div>
-                  <div v-if="item.isShowVideo" is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" :bResize="bResize"
-                    :oConfig="{sign: true}">
+                  <div class="dev_map" id="devMap"></div>
+                  <div class="map_zoom">
+                    <div class="top"><i class="el-icon-aim" @click="resetZoom()"></i></div>
+                    <ul class="bottom">
+                      <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
+                      <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
+                    </ul>
                   </div>
                 </div>
               </div>
-            </div>
-          </el-collapse-transition>
-        </div>
-      </div>
-      <!-- 布控结果 -->
-      <div class="manage_d_c_result" v-if="controlState !== 2 ">
-        <div class="result_title">
-          <div>布控结果（{{controlResList && controlResList.total}}个）</div>
-          <div>
-            <el-date-picker
-              style="width: 230px;margin: 6px 10px 0 0;"
-              @change="getAlarmSnap"
-              placeholder="请选择起止时间"
-              v-model="controlTimeIsKey"
-              type="daterange"
-              size="small"
-              range-separator="-"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              value-format="yyyy-MM-dd"
-              :default-time="['00:00:00', '23:59:59']">
-            </el-date-picker>
-            <el-select
-              class="select_box"
-              value-key="value"
-              v-model="devNameIsKey"
-              filterable
-              remote
-              placeholder="请输入设备名搜索"
-              size="small"
-              clearable
-              @clear="devListIsKey = []"
-              @change="getAlarmSnap"
-              :remote-method="getControlDevice"
-              :loading="loading">
-              <el-option
-                v-for="item in devListIsKey"
-                :key="item.value"
-                :label="item.label"
-                :value="item.label">
-              </el-option>
-            </el-select>
+            </el-collapse-transition>
           </div>
         </div>
-        <div class="result_content" v-if="controlResList">
-          <div>
-            <div class="result_img_box" v-for="(item, index) in controlResList.list" :key="index">
-              <div @mouseenter="item.curVideoTool = true;" @mouseleave="item.curVideoTool = false;">
-                <img :src="item.path" alt="" v-show="!item.isShowCurImg" class="bigImg">
-                <video  v-show="item.isShowCurImg" :id='"controlResult" + index' :src="item.snapVideo" style="object-fit: fill;" width="100%" height="239px" @click="showLargeVideo(item, 1)"></video>
-                <div class="result_tool" v-show="item.curVideoTool">
-                  <div>{{item.deviceName}}</div>
-                  <div>
-                    <i class="vl_icon vl_icon_judge_01" v-if="item.curVideoPlay" @click="pauseVideo(item, index)"></i>
-                    <i class="vl_icon vl_icon_control_09" v-else @click="playVideo(item, index)"></i>
-                    <a download="视频" :href="item.snapVideo" class="el-icon-download download"></a>
+        <!-- 运行情况 -->
+        <div class="manage_d_c_situ" v-if="controlState !== 2">
+          <div class="situ_title">运行情况</div>
+          <div class="situ_time">
+            <div><span>开始时间：</span><span>{{controlDetail.runningStartTime}}</span></div>
+            <div v-if="controlState === 3"><span>结束时间：</span><span>{{controlDetail.runningEndTime}}</span></div>
+            <div><span>持续时间：</span><span>{{controlDetail.duration}}</span></div>
+            <div v-if="controlDetail.terminationReason" class="termination_reason"><span>终止原因：</span><span>{{controlDetail.terminationReason}}</span></div>
+          </div>
+          <div class="situ_box" v-if="controlState === 1">
+            <div class="situ_top" @click="controlArea(2)">
+              <div>实时监控</div>
+              <i class="el-icon-arrow-down" v-show="!dpTwo"></i>
+              <i class="el-icon-arrow-up" v-show="dpTwo"></i>
+            </div>
+            <el-collapse-transition>
+              <div class="situ_content" v-show="dpTwo">
+                  <div class="situ_left">
+                    <div style="padding-left: 20px;">布控设备</div>
+                    <div class="equ_m">
+                      <div @click="tabTypeBySituation = '0'" :class="{'active': tabTypeBySituation === '0'}">摄像头（{{devNum}}）</div>
+                      <div @click="tabTypeBySituation = '1'" :class="{'active': tabTypeBySituation === '1'}">卡口（{{bayonetNum}}）</div>
+                    </div>
+                    <!-- 摄像头 -->
+                    <el-collapse-transition>
+                      <ul v-if="tabTypeBySituation === '0' && situList.length > 0">
+                        <vue-scroll>
+                          <li
+                            v-for="(item, index) in situList"
+                            :key="item.uid"
+                            @dragstart="dragstart($event, index, item)"
+                            @dragover="dragover"
+                            :draggable="true"
+                          >
+                            <span :title="item.deviceName">{{item.deviceName | strCutWithLen(25)}}</span><i class="vl_icon vl_icon_control_05"></i>
+                          </li>
+                        </vue-scroll>
+                      </ul>
+                      <ul v-if="tabTypeBySituation === '0' && situList.length === 0">
+                        <li>范围内无设备</li>
+                      </ul>
+                    </el-collapse-transition>
+                    <!-- 卡口 -->
+                    <el-collapse-transition>
+                      <div v-if="tabTypeBySituation === '1' && bayList.length > 0" class="bayone_list">
+                        <vue-scroll>
+                          <div v-for="bay in bayList" :key="bay.uid">
+                            <div class="bayone_name" :class="{'active': bay.isDropdown}" @click="dropdownBay(bay)">
+                              <i class="el-icon-arrow-down" v-show="bay.isDropdown"></i><i class="el-icon-arrow-right" v-show="!bay.isDropdown"></i><span :title="bay.bayonetName">{{bay.bayonetName | strCutWithLen(25)}}</span>
+                            </div>
+                            <el-collapse-transition>
+                              <ul style="max-height: 346px;" v-if="bay.isDropdown && bay.devList.length > 0">
+                                <li
+                                  v-for="(dev, index) in bay.devList"
+                                  :key="dev.uid"
+                                  @dragstart="dragstart($event, index, dev)"
+                                  @dragover="dragover"
+                                  :draggable="true"
+                                >
+                                  <span :title="dev.deviceName">{{dev.deviceName | strCutWithLen(25)}}</span><i class="vl_icon vl_icon_control_05"></i>
+                                </li>
+                              </ul>
+                              <ul v-if="bay.isDropdown && bay.devList.length === 0">
+                                <li>卡口内无设备</li>
+                              </ul>
+                            </el-collapse-transition>
+                          </div>
+                        </vue-scroll>
+                      </div>
+                      <div v-if="tabTypeBySituation === '1' && bayList.length === 0" class="bayone_list">
+                        <ul>
+                          <li>范围内无卡口</li>
+                        </ul>
+                      </div>
+                    </el-collapse-transition>
+                  </div>
+                <div class="situ_right">
+                  <div class="situ_r_video" v-for="(item, index) in rightVideoList" :key="item.uid"
+                    @dragend="dragend"
+                    @dragover="dragover"
+                    @drop="drop($event, index)"
+                    >
+                    <div class="situ_r_box" v-if="!item.isShowVideo">
+                      <img src="../../../../../assets/img/video/vi_101.png" alt="">
+                      <div>拖拽设备列表图标至此</div>
+                    </div>
+                    <div v-if="item.isShowVideo" is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" :bResize="bResize"
+                      :oConfig="{sign: true}">
+                    </div>
                   </div>
                 </div>
+              </div>
+            </el-collapse-transition>
+          </div>
+        </div>
+        <!-- 布控结果 -->
+        <div class="manage_d_c_result" v-if="controlState !== 2 ">
+          <div class="result_title">
+            <div>布控结果（{{controlResList && controlResList.total}}个）</div>
+            <div>
+              <el-date-picker
+                style="width: 230px;margin: 6px 10px 0 0;"
+                @change="getAlarmSnap"
+                placeholder="请选择起止时间"
+                v-model="controlTimeIsKey"
+                type="daterange"
+                size="small"
+                range-separator="-"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+                value-format="yyyy-MM-dd"
+                :default-time="['00:00:00', '23:59:59']">
+              </el-date-picker>
+              <el-select
+                class="select_box"
+                value-key="value"
+                v-model="devNameIsKey"
+                filterable
+                remote
+                placeholder="请输入设备名搜索"
+                size="small"
+                clearable
+                @clear="devListIsKey = []"
+                @change="getAlarmSnap"
+                :remote-method="getControlDevice"
+                :loading="loading">
+                <el-option
+                  v-for="item in devListIsKey"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.label">
+                </el-option>
+              </el-select>
+            </div>
+          </div>
+          <div class="result_content_box" v-if="controlResList">
+            <div class="result_content">
+              <div>
+                <h1>布控对象列表</h1>
+                <vue-scroll>
+                  <ul>
+                    <li class="img" :class="{'active': controlObjId === 1}" v-show="false">
+                      <div>
+                        <img src="" alt="">
+                      </div>
+                    </li>
+                    <li class="plate" :class="{'active': controlObjId === 1}" v-for="item in '123456'" :key="item.uid">
+                      <div>
+                        <h1>车牌号码</h1>
+                        <span>湘N12485</span>
+                      </div>
+                    </li>
+                  </ul>
+                </vue-scroll>
               </div>
               <div>
-                <p><i class="vl_icon vl_icon_control_26" style="margin-top: -4px;"></i><span class="vl_f_333">疑似目标：{{item.objName}}</span></p>
-                <p><i class="vl_icon vl_icon_control_27" style="margin-top: -4px;"></i><span class="vl_f_999">{{item.snapTime}}</span></p>
-              </div>
-            </div>
-          </div>
-          <el-pagination
-            class="cum_pagination"
-            style="align-self: flex-start;"
-            @current-change="handleCurrentChangeRes"
-            :current-page="currentPage"
-            :page-sizes="[100, 200, 300, 400]"
-            :page-size="controlResList.pageSize"
-            layout="total, prev, pager, next, jumper"
-            :total="controlResList.total">
-          </el-pagination>
-        </div>
-      </div>
-    </div>
-    <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
-      <video id="controlResultLarge" style="object-fit: fill;" :src="videoObj.snapVideo"></video>
-      <div @click="closeLargeVideo" class="close_btn el-icon-error"></div>
-      <div class="control_bottom">
-        <div>{{videoObj.deviceName}}</div>
-        <div>
-          <span @click="pauseLargeVideo" class="vl_icon vl_icon_judge_01" v-if="largeVideoPlay"></span>
-          <span @click="playLargeVideo" class="vl_icon vl_icon_control_09" v-else></span>
-          <span><a download="视频" :href="videoObj.snapVideo" class="el-icon-download"></a></span>
-          <span @click="cutScreen" class="vl_icon vl_icon_control_07"></span>
-        </div>
-      </div>
-    </div>
-    <div style="width: 0; height: 0;" v-show="showCut"  :class="{vl_j_cutscreen: showCut}">
-      <img :src="demoImg" alt="">
-      <i @click="showCut = false" class="close_btn el-icon-error"></i>
-      <a download="截图" :href="demoImg" id="controlResultCutImg" ></a>
-    </div>
-    <!-- 底部操作按钮 -->
-    <!-- 待开始 -->
-    <div class="manage_f_box" v-if="controlState === 2">
-      <el-button class="btn_100" type="primary" @click="skip(3)">编辑</el-button>
-      <el-button class="btn_100" @click="showDialog('delDialog')">删除</el-button>
-    </div>
-    <!-- 进行中 -->
-    <div class="manage_f_box" v-if="controlState === 1">
-      <el-button class="btn_100" type="primary" @click="showDialog('stopDialog')">终止</el-button>
-    </div>
-    <!-- 已结束 -->
-    <div class="manage_f_box" v-if="controlState === 3">
-      <el-button class="btn_100" type="primary" @click="skipIsCreate">复用</el-button>
-      <el-button class="btn_100" @click="showDialog('delDialog')">删除</el-button>
-    </div>
-    <!-- <div class="event_detail_dialog" v-if="eventDetail">
-      <el-dialog
-        :visible.sync="eventDetailDialog"
-        :close-on-click-modal="false"
-        width="800px"
-        title="事件详情"
-        top="20vh">
-        <div class="detail_list">
-          <div>
-            <div><span class="vl_f_666">事件编号：</span><span class="vl_f_333">{{eventDetail.eventCode}}</span></div>
-            <div style="padding-left: 14px;"><span class="vl_f_666">报案人：</span><span class="vl_f_333">{{eventDetail.reporterPhone}}</span></div>
-          </div>
-          <div>
-            <div><span class="vl_f_666">事件状态：</span><span class="vl_f_333">{{eventDetail.eventStatusName}}</span></div>
-            <div><span class="vl_f_666">报案时间：</span><span class="vl_f_333">{{eventDetail.reportTime}}</span></div>
-          </div>
-          <div>
-            <div><span class="vl_f_666">事件类型：</span><span class="vl_f_333">{{eventDetail.eventTypeName}}</span></div>
-            <div><span class="vl_f_666">事件等级：</span><span class="vl_f_333">{{eventDetail.eventLevelName}}</span></div>
-          </div>
-        </div>
-        <div class="detail_list">
-          <span class="vl_f_666">人员伤亡：</span><span class="vl_f_333">{{eventDetail.casualties === -1 ? '不确定' : eventDetail.casualties === 0 ? '无' : eventDetail.casualties > 0 ? eventDetail.casualties : ''}}</span>
-        </div>
-        <div class="detail_list">
-          <span class="vl_f_666">事发地点：</span><span class="vl_f_333">{{eventDetail.eventAddress}}</span>
-        </div>
-        <div class="detail_list">
-          <span class="vl_f_666">事件情况：</span><span class="vl_f_333">{{eventDetail.eventDetail}}</span>
-        </div>
-        <vue-scroll>
-          <div class="detail_img_box">
-            <div v-for="(item, index) in eventDetail.attachmentList" :key="item.id">
-              <img v-if="item.fileType === 1" class="bigImg" :src="item.path" alt="">
-              <div v-else @mouseenter="eventVideoTool = true;" @mouseleave="eventVideoTool = false;">
-                <video id="eventVideo" :src="item.path" width="117px" height="117px" style="object-fit: fill;" @click="showLargeVideo(item, 2)"></video>
-                <div class="result_tool" v-show="eventVideoTool">
+                <div class="result_img_box" v-for="(item, index) in controlResList.list" :key="index">
+                  <div @mouseenter="item.curVideoTool = true;" @mouseleave="item.curVideoTool = false;">
+                    <img :src="item.path" alt="" v-show="!item.isShowCurImg" class="bigImg">
+                    <video  v-show="item.isShowCurImg" :id='"controlResult" + index' :src="item.snapVideo" style="object-fit: fill;" width="100%" height="239px" @click="showLargeVideo(item, 1)"></video>
+                    <div class="result_tool" v-show="item.curVideoTool">
+                      <div>{{item.deviceName}}</div>
+                      <div>
+                        <i class="vl_icon vl_icon_judge_01" v-if="item.curVideoPlay" @click="pauseVideo(item, index)"></i>
+                        <i class="vl_icon vl_icon_control_09" v-else @click="playVideo(item, index)"></i>
+                        <a download="视频" :href="item.snapVideo" class="el-icon-download download"></a>
+                      </div>
+                    </div>
+                  </div>
                   <div>
-                    <i class="vl_icon vl_icon_judge_01" v-if="item.curVideoPlay" @click="_pauseVideo(item)"></i>
-                    <i class="vl_icon vl_icon_control_09" v-else @click="_playVideo(item)"></i>
+                    <p><i class="vl_icon vl_icon_control_26" style="margin-top: -4px;"></i><span class="vl_f_333">疑似目标：{{item.objName}}</span></p>
+                    <p><i class="vl_icon vl_icon_control_27" style="margin-top: -4px;"></i><span class="vl_f_999">{{item.snapTime}}</span></p>
                   </div>
                 </div>
               </div>
             </div>
+            <div class="pagination_box">
+              <div>
+                <el-button type="primary" style="width: 124px;padding-left: 6px;">查看全部布控结果</el-button>
+                <el-button class="btn_100" type="primary" @click="checkVideoRelay">视频接力</el-button>
+              </div>
+              <el-pagination
+                class="cum_pagination"
+                style="align-self: flex-start;padding-top: 0;"
+                @current-change="handleCurrentChangeRes"
+                :current-page="currentPage"
+                :page-sizes="[100, 200, 300, 400]"
+                :page-size="controlResList.pageSize"
+                layout="total, prev, pager, next, jumper"
+                :total="controlResList.total">
+              </el-pagination>
+            </div>
           </div>
-        </vue-scroll>
-      </el-dialog>
-    </div> -->
-    <div is="delDialog" ref="delDialog" :controlId="controlId" @getControlList="getControlList"></div>
-    <div is="stopDialog" ref="stopDialog" :controlId="controlId" @getControlList="getControlList"></div>
+        </div>
+      </div>
+      <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
+        <video id="controlResultLarge" style="object-fit: fill;" :src="videoObj.snapVideo"></video>
+        <div @click="closeLargeVideo" class="close_btn el-icon-error"></div>
+        <div class="control_bottom">
+          <div>{{videoObj.deviceName}}</div>
+          <div>
+            <span @click="pauseLargeVideo" class="vl_icon vl_icon_judge_01" v-if="largeVideoPlay"></span>
+            <span @click="playLargeVideo" class="vl_icon vl_icon_control_09" v-else></span>
+            <span><a download="视频" :href="videoObj.snapVideo" class="el-icon-download"></a></span>
+            <span @click="cutScreen" class="vl_icon vl_icon_control_07"></span>
+          </div>
+        </div>
+      </div>
+      <div style="width: 0; height: 0;" v-show="showCut"  :class="{vl_j_cutscreen: showCut}">
+        <img :src="demoImg" alt="">
+        <i @click="showCut = false" class="close_btn el-icon-error"></i>
+        <a download="截图" :href="demoImg" id="controlResultCutImg" ></a>
+      </div>
+      <!-- 底部操作按钮 -->
+      <!-- 待开始 -->
+      <div class="manage_f_box" v-if="controlState === 2">
+        <el-button class="btn_100" type="primary" @click="skip(3)">编辑</el-button>
+        <el-button class="btn_100" @click="showDialog('delDialog')">删除</el-button>
+      </div>
+      <!-- 进行中 -->
+      <div class="manage_f_box" v-if="controlState === 1">
+        <el-button class="btn_100" type="primary" @click="showDialog('stopDialog')">终止</el-button>
+      </div>
+      <!-- 已结束 -->
+      <div class="manage_f_box" v-if="controlState === 3">
+        <el-button class="btn_100" type="primary" @click="skipIsCreate">复用</el-button>
+        <el-button class="btn_100" @click="showDialog('delDialog')">删除</el-button>
+      </div>
+      <div is="delDialog" ref="delDialog" :controlId="controlId" @getControlList="getControlList"></div>
+      <div is="stopDialog" ref="stopDialog" :controlId="controlId" @getControlList="getControlList"></div>
+    </div>
+    <!-- 视频接力 -->
+    <div is="flvplayer" class="video_relay" v-if="isShowVideoRelay" @playerClose="playerCloseRelay" :oData="videoRelayObj" 
+        :oConfig="{fit: false, sign: false, tape: false, download: false}"></div>
   </div>
 </template>
 <script>
 import {unique, addCluster} from '@/utils/util.js';
 import delDialog from './delDialog.vue';
-import {dataList} from '@/utils/data.js';
 import stopDialog from './stopDialog.vue';
+import {dataList} from '@/utils/data.js';
 import {conDetail} from '../testData.js';
 import flvplayer from '@/components/common/flvplayer.vue';
 import {getControlDetail, getControlObjList, controlArea, getControlDevice, getAlarmSnap} from '@/views/index/api/api.control.js';
 // import {getEventDetail} from '@/views/index/api/api.event.js';
 import {getAllMonitorList, getAllBayonetList} from '@/views/index/api/api.base.js';
+import {selectVideoContinue} from '@/views/index/api/api.judge.js'
 import {mapXupuxian} from '@/config/config.js';
 export default {
   components: {delDialog, stopDialog, flvplayer},
@@ -577,13 +534,64 @@ export default {
       largeVideoPlay: false,
       videoObj: {},
       curVideoUrl: null,
-      dataList_: dataList
+      dataList_: dataList,
+      // 2.0参数
+      controlObjId: null,//当前点击的布控对象id
+      isShowVideoRelay: false,
+      videoRelayObj: {},
+      relayList: []
     }
   },
   mounted () {
     this.getControlDetail();
   },
   methods: {
+    getRelayList () {
+      let params = {
+        beginTime: "2019-11-05 00:00:00",
+        endTime: "2019-11-07 23:59:59",
+        isFinished: 0,
+        type: "0"
+      }
+      selectVideoContinue(params).then((res) => {
+        if (res && res.data) {
+          this.relayList = res.data;
+          this.isShowVideoRelay = true;
+          this.videoRelayObj = {
+            type: 5,
+            title: ' ',
+            record: false,
+            video: Object.assign({}, this.relayList[0])
+          }
+          // 播放中的视频处理
+          // this.relayPlayingHandler();
+        }
+      }).catch((() => {
+
+      }));
+    },
+    // 查看视频接力
+    checkVideoRelay () {
+      this.getRelayList();
+      
+    },
+    // 关闭视频接力
+    playerCloseRelay (iIndex, oData) {
+      // console.log(iIndex);
+      // console.log(oData);
+      this.$confirm('确定结束该接力任务吗?', '提示', {  
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.isShowVideoRelay = false;
+        // this.videoList.splice(iIndex, 1, {});
+        // this.relayModify(oData.video.uid, oData.video.type, 1, 1);
+      }).catch(() => {
+        this.isShowVideoRelay = false;
+        // this.videoList.splice(iIndex, 1, {});
+      });
+    },
     // 获取嫌疑人像列表
     getBigImgList () {
       return this.controlDetail.objectList.filter(f => f.photoUrl !== this.controlDetail.missingUrl && (f.type === 1 || f.type === 3)).map(m => {return {path: m.photoUrl}}) || [];
@@ -681,12 +689,12 @@ export default {
     skipIsCreate () {
       this.$router.push({ name: 'control_create', query: {controlId: this.controlId, createType: 3} });
     },
-    // 显示弹出框
-    showDialog (formName) {
-      if (this.$refs[formName]) {
-        this.$refs[formName].reset();
-      }
-    },
+      // 显示弹出框
+      showDialog (formName) {
+        if (this.$refs[formName]) {
+          this.$refs[formName].reset();
+        }
+      },
     getControlList () {
       this.$emit('getControlList');
     },
@@ -1044,6 +1052,7 @@ export default {
   width: 100%;
   min-height: 100vh;
   position: absolute;
+  animation: fadeIn .4s ease-out both;
   .manage_d_box{
     width: calc(100% - 40px);
     // min-height: 783px;
@@ -1517,76 +1526,134 @@ export default {
           }
         }
       }
-      .result_content{
+      .result_content_box{
         width: 100%;
         height: 100%;
-        > div:nth-child(1){
-          width: 100%;
-          height: 100%;
+        > .result_content{
           display: flex;
-          flex-flow: row wrap;
-          align-content: flex-start;
-          padding-top: 20px;
-          padding-right: 1%;
-          .result_img_box{
-            flex: 0 0 24%;
-            height: 100%;
-            margin-left: 1%;
-            margin-bottom: 20px;
-            position: relative;
-            overflow: hidden;
-            background:rgba(255,255,255,1);
-            border-radius:4px;
-            border:1px solid rgba(211,211,211,1);
-            img{
-              width: 100%;
-              height: 239px;
+          flex-wrap: nowrap;
+          > div:nth-child(1){
+            width: 140px;
+            padding-bottom: 40px;
+            border-right: 1px solid #F2F2F2;
+            border-bottom: 1px solid #F2F2F2;
+            > h1{
+              padding: 10px 0;
+              text-align: center;
+              border-bottom: 1px solid #F2F2F2;
             }
-            video{
-              object-fit: fill;
-            }
-            .result_tool{
-              width: 100%;
-              height: 36px;
-              line-height: 36px;
-              background: rgba(0,0,0,.4);
-              display: flex;
-              justify-content: space-between;
-              padding-left: 15px;
-              position: absolute;
-              bottom: 48px;
-              left: 0;
-              > div{
-                color: #fff;
-              }
-              i{
-                margin-top: 6px;
-                margin-right: 5px;
+            ul{
+              padding: 10px 0;
+              > li{
+                width: 100%;
+                height: 120px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
                 cursor: pointer;
               }
-              .download{
-                margin-top: 6px;
-                margin-right: 10px;
-                text-decoration: none;
-                color: #fff;
-                font-size: 20px;
-                vertical-align: top;
-              }
-            }
-            > div:nth-child(1){
-              width: 100%;
-              height: 239px;
-              cursor: pointer;
-              background: #000;
-            }
-            > div:nth-child(2){
-              p{
-                padding-left: 10px;
-                line-height: 24px;
-                i{
-                  vertical-align: middle;
+              > li.plate{
+                &:hover, &.active{
+                  background: #E0F2FF;
+                }
+                > div{
+                  width: 100px;
+                  height: 100px;
+                  display: flex;
+                  flex-direction: column;
+                  justify-content: center;
+                  align-items: center;
+                  background:rgba(242,242,242,1);
+                  border-radius:4px;
+                  border:1px solid rgba(211,211,211,1);
                 }
               }
+              > li.img{
+                &:hover, &.active{
+                  background: #E0F2FF;
+                }
+              }
+            }
+          }
+          > div:nth-child(2){
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-flow: row wrap;
+            align-content: flex-start;
+            padding-top: 20px;
+            padding-right: 1%;
+            .result_img_box{
+              flex: 0 0 24%;
+              height: 100%;
+              margin-left: 1%;
+              margin-bottom: 20px;
+              position: relative;
+              overflow: hidden;
+              background:rgba(255,255,255,1);
+              border-radius:4px;
+              border:1px solid rgba(211,211,211,1);
+              img{
+                width: 100%;
+                height: 239px;
+              }
+              video{
+                object-fit: fill;
+              }
+              .result_tool{
+                width: 100%;
+                height: 36px;
+                line-height: 36px;
+                background: rgba(0,0,0,.4);
+                display: flex;
+                justify-content: space-between;
+                padding-left: 15px;
+                position: absolute;
+                bottom: 48px;
+                left: 0;
+                > div{
+                  color: #fff;
+                }
+                i{
+                  margin-top: 6px;
+                  margin-right: 5px;
+                  cursor: pointer;
+                }
+                .download{
+                  margin-top: 6px;
+                  margin-right: 10px;
+                  text-decoration: none;
+                  color: #fff;
+                  font-size: 20px;
+                  vertical-align: top;
+                }
+              }
+              > div:nth-child(1){
+                width: 100%;
+                height: 239px;
+                cursor: pointer;
+                background: #000;
+              }
+              > div:nth-child(2){
+                p{
+                  padding-left: 10px;
+                  line-height: 24px;
+                  i{
+                    vertical-align: middle;
+                  }
+                }
+              }
+            }
+          }
+        }
+        .pagination_box{
+          display: flex;
+          justify-content: space-between;
+          > div:nth-child(1){
+            padding-left: 8px;
+            > .el-button{
+              height: 32px;
+              line-height: 7px;
             }
           }
         }
@@ -1681,6 +1748,21 @@ export default {
     transition: none;
   }
 }
+.video_relay{
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 999;
+}
+@media (min-width: 1400px) {
+  .control_manage_d{
+    .result_content_box .result_content{
+      > div:nth-child(1){
+        height: 618px!important;
+      }
+    }
+  }
+} 
 @media (max-width: 1400px) {
   .control_manage_d{
     .situ_content{
@@ -1701,8 +1783,14 @@ export default {
         }
       }
     }
-  } 
-}
+    .result_content_box .result_content{
+      > div:nth-child(1){
+        height: 456px!important;
+      }
+    }
+  }
+} 
+
 </style>
 <style lang="scss">
 .control_manage_d{

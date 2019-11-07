@@ -67,7 +67,7 @@ export default {
     },
     skipIsList () {
       this.stopManageDialog = false;
-      this.$emit('getControlList');
+      // this.$emit('getControlList');
     }
   }
 }

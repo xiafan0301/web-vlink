@@ -166,12 +166,12 @@
                   <el-radio :label="9">自定义</el-radio>
                 </el-radio-group>
               </div>
-              <div is="modelOne" v-if="modelType === 1" ref="model" @getModel="getModel" :modelList="modelList"></div>
-              <div is="modelTwo" v-if="modelType === 2" ref="model" @getModel="getModel" :modelList="modelList"></div>
-              <div is="modelThree" v-if="modelType === 3" ref="model" @getModel="getModel" :modelList="modelList"></div>
-              <div is="modelFour" v-if="modelType === 4" ref="model" @getModel="getModel" :modelList="modelList"></div>
-              <div is="modelFive" v-if="modelType === 5" ref="model" @getModel="getModel" :modelList="modelList"></div>
-              <div is="modelSix" v-if="modelType === 9" ref="model" @getModel="getModel" :modelList="modelList"></div>
+              <div class="model_item" is="modelOne" v-if="modelType === 1" ref="model" @getModel="getModel" :modelList="modelList"></div>
+              <div class="model_item" is="modelTwo" v-if="modelType === 2" ref="model" @getModel="getModel" :modelList="modelList"></div>
+              <div class="model_item" is="modelThree" v-if="modelType === 3" ref="model" @getModel="getModel" :modelList="modelList"></div>
+              <div class="model_item" is="modelFour" v-if="modelType === 4" ref="model" @getModel="getModel" :modelList="modelList"></div>
+              <div class="model_item" is="modelFive" v-if="modelType === 5" ref="model" @getModel="getModel" :modelList="modelList"></div>
+              <div class="model_item" is="modelSix" v-if="modelType === 9" ref="model" @getModel="getModel" :modelList="modelList" :deviceId="deviceId"></div>
             </div>
           </div>
         </el-form>
@@ -285,7 +285,9 @@ export default {
       isShowOperateBtn: true,
       // 关联事件下拉列表分页
       pageNum: 1,
-      pageSize: 50
+      pageSize: 50,
+      // 布控地图跳转过来新增布控的设备id
+      deviceId: null
     }
   },
   created () {
@@ -302,8 +304,8 @@ export default {
     // 新增页-1
     } else {
       this.pageType = 1;
-      this.modelType = 1;
-      this.modelType_ = 1;
+      this.modelType = 9;
+      this.modelType_ = 9;
       // 从车辆侦查或者人像侦查跳转过来新建布控
       // const {imgurl, modelName, plateNo} = this.$route.query;
       // this.imgurl = imgurl;
@@ -311,6 +313,13 @@ export default {
       // 事件管理模块通过路由跳转过来新增布控时
       if (this.$route.query.eventId) {
         this.getEventDetail(this.$route.query.eventId);
+      }
+      // 从布控地图跳过来新增布控
+      const {deviceId, model} = this.$route.query;
+      if (model) {
+        this.modelType = parseInt(model);
+        this.modelType_ = parseInt(model);
+        this.deviceId = deviceId;
       }
     }
   },
@@ -502,6 +511,8 @@ export default {
               modelList: [this.modelData]
             }
             this.loadingBtn = true;
+            console.log(JSON.stringify(data));
+            
             addControl(data).then(res => {
               if (res) {
                 this.$message.success(this.pageType === 3 ? '复用成功' : '新增成功');
@@ -687,6 +698,9 @@ export default {
         .model_height{
           height: 0!important;
           overflow: hidden;
+        }
+        .model_item{
+          animation: fadeIn .4s ease-out both;
         }
       }
     }

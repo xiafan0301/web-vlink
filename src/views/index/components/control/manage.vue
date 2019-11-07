@@ -214,12 +214,12 @@ export default {
   created () {
     const data = this.$route.query;
     // 外部跳转到详情页
-    if (data.pageType && data.controlId) {
+    // if (data.pageType && data.controlId) {
       this.$nextTick(() => {
-        this.pageType = parseInt(data.pageType);
-        this.controlId = data.controlId;
+        this.pageType = 2 || parseInt(data.pageType);
+        this.controlId = '7tL3dNwW0ocJAmSVd6acnb' || data.controlId;
       })
-    }
+    // }
     // 外部跳转到列表页
     if (!data.pageType && data.state) {
       this.$nextTick(() => {
@@ -360,6 +360,7 @@ export default {
   width: 100%;
   height: 100%;
   padding: 20px;
+  animation: fadeIn .4s ease-out both;
   .control_manage_box{
     width: 100%;
     // height: 100%;
