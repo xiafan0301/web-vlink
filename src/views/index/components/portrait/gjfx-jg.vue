@@ -74,7 +74,7 @@
         </span>
         </div>
         <div class="update_task">
-          <el-button type="primary" @click="showNewTask = true;">修改任务</el-button>
+          <el-button type="primary" @click="initParams">修改任务</el-button>
         </div>
       </template>
       <div class="insetLeft2 vl_icon vl_icon_vehicle_03" v-show="hideleft" @click="showResult"></div>
@@ -323,7 +323,6 @@
           data1: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)),
           data2: new Date(),
           input3: '',
-          value1: null,
         },
         pricecode:cityCode,
         options: [],
@@ -375,15 +374,6 @@
                   this.$set(res.data, 'taskWebParam', JSON.parse(res.data.taskWebParam));
                   res.data.taskWebParam.deviceNames = res.data.taskWebParam.deviceNames ? res.data.taskWebParam.deviceNames.split(',') : '';
                   this.taskDetail = res.data.taskWebParam;
-                  let {startTime, endTime} = res.data.taskWebParam;
-                  this.ruleForm.data1 = new Date(startTime).getTime();
-                  this.ruleForm.data2 = new Date(endTime).getTime();
-                  console.log(res.data)
-                  this.imgData = {
-                    cname: '带图' + Math.random(),
-                    filePathName: '带图' + Math.random(),
-                    path: this.taskDetail.uploadImgUrls
-                  }
                   this.reselt = true;
                   this.evData = res.data.taskResult;
                   this.evData.forEach(x => {
@@ -403,7 +393,17 @@
               })
         }
       },
-
+      initParams () {
+        this.showNewTask = true;
+        let {startTime, endTime, uploadImgUrls} = this.taskDetail;
+        this.ruleForm.data1 = new Date(startTime).getTime();
+        this.ruleForm.data2 = new Date(endTime).getTime();
+        this.imgData = {
+          cname: '带图' + Math.random(),
+          filePathName: '带图' + Math.random(),
+          path: uploadImgUrls
+        }
+      },
       uploadEmit (data) {
         console.log('uploadEmit data', data);
         if (data && data.path) {
@@ -443,10 +443,10 @@
           if (!this.loading && !this.noMore) {
             this.loading = true;
             setTimeout(() => {
-              this.count += 2;
+              this.count += 4;
               this.operData();
               this.loading = false;
-            }, 2000)
+            }, 800)
           }
         }
       },
@@ -478,11 +478,8 @@
         }
       },
       resetForm(){
-        this.setDTime();
         this.ruleForm.input3 = '';
-        this.ruleForm.value1 = [];
         this.uploadClear = {};
-        this.setDTime ();
         this.showNewTask = false;
       },
       renderMap() {

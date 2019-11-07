@@ -172,7 +172,7 @@
 </template>
 <script>
 import {getBayonetDetail, delBayonet} from '@/views/index/api/api.base.js';
-import {bayonetDetail} from '@/views/index/components/control/testData.js';
+import {bayonetDetail} from '../../../control/testData.js';
 import {dataList} from '@/utils/data.js';
 export default {
   data () {
