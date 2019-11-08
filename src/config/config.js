@@ -39,6 +39,7 @@ const oDomains = {
     event: {
       dev: 'https://apidev.aorise.org/vlink-event',
       // dev: 'http://10.116.64.142:8081',
+      // dev: 'http://10.116.65.64:8088/',
       test: 'https://apirel.aorise.org/vlink-event',
       prod: 'https://apiprod.aorise.org/vlink-event'
     },
@@ -61,6 +62,7 @@ const oDomains = {
       dev: 'https://apidev.aorise.org/vlink-dispatching/api/vlink',
       // dev: 'http://10.116.64.142:8083/api/vlink',
       // dev: 'http://10.116.64.127:8081/api/vlink',
+      // dev: 'http://10.116.65.64:8081/api/vlink',
       test: 'https://apirel.aorise.org/vlink-dispatching/api/vlink',
       prod: 'https://apiprod.aorise.org/vlink-dispatching/api/vlink'
     },

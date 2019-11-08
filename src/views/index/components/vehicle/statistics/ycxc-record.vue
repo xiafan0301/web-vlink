@@ -2,9 +2,7 @@
   <div class="th-ycxc-record">
     <div class="vc_gcck_bd">
       <div is="vlBreadcrumb" :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle'},
-        {name: '夜间行车分析', routerName: 'vehicle_search_ycxc', query: {
-          ... this.queryObj
-        }}, {name: '抓拍记录'}]"></div>
+        {name: '夜间行车分析', routerName: 'vehicle_search_ycxc'}, {name: '抓拍记录'}]"></div>
     </div>
     <div class="th-ycxc-record-list">
       <template v-if="dataList && dataList.length > 0">
@@ -87,20 +85,12 @@ export default {
     }
   },
   created () {
-    // console.log('aaa', this.$route.params)
-    this.queryObj = {
-      bayonetIds: this.$route.query.bayonetIds,
-      cameraIds: this.$route.query.cameraIds,
-      endDate: this.$route.query.endDate,
-      endhour: this.$route.query.endhour,
-      startDate: this.$route.query.startDate,
-      startHour: this.$route.query.startHour,
-      minShotTimes: this.$route.query.minShotTimes,
-      vehicleTypes: this.$route.query.vehicleTypes,
-      surveillanceIds: this.$route.query.surveillanceIds,
-      isNextDay: this.$route.query.isNextDay,
-      pageSize: this.$route.query.pageSize,
-      pageNum: this.$route.query.pageNum,
+    let params = window.sessionStorage.getItem('ycxcParam');
+    
+    if (params) {
+      this.queryObj = {
+        ...JSON.parse(params),
+      }
     }
   },
   mounted () {
@@ -121,8 +111,6 @@ export default {
     },
     // 获取所有的抓拍记录
     getAllList () {
-    
-      this.queryObj['vehicleNumber'] = this.$route.query.vehicleNumber;
       this.queryObj['order'] = this.pagination.order;
       this.queryObj['orderBy'] = this.pagination.orderBy;
 
@@ -140,7 +128,6 @@ export default {
     },
     // 获取抓拍记录
     getList () {
-      this.queryObj['vehicleNumber'] = this.$route.query.vehicleNumber;
       this.queryObj['pageNum'] = this.pagination.pageNum;
       this.queryObj['order'] = this.pagination.order;
       this.queryObj['orderBy'] = this.pagination.orderBy;
@@ -170,7 +157,6 @@ export default {
       } else if (this.sortType === 2) {
         this.sortType = 1;
       }
-      // this.pagination.order = type;
       this.pagination.orderBy = 'shotTime';
 
       this.$nextTick(() => {
@@ -190,7 +176,6 @@ export default {
         this.sortType = 2;
       }
 
-      // this.pagination.order = type;
       this.pagination.orderBy = 'deviceName';
 
       this.$nextTick(() => {

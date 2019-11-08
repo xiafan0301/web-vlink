@@ -163,7 +163,8 @@ export default {
     sureSelectCut () {
       this.$emit('emitImgData', {
         open: false,
-        imgBDataList: this.imgBDataList
+        imgBDataList: this.imgBDataList,
+        secondImgUrl: this.secondImgUrl
       })
       // this.dialogVisible = false;
     },

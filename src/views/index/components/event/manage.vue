@@ -304,7 +304,7 @@ export default {
     // 跳至新增布控页面
     skipAddControlPage (obj) {
       if (!obj.surveillanceId) {
-        this.$router.push({path: '/control/create', query: {eventId: obj.uid}});
+        this.$router.push({name: 'control_add', query: {eventId: obj.uid}});
       } 
       if (obj.surveillanceId) {
         this.$router.push({path: '/control/manage', query: {controlId: obj.surveillanceId, pageType: 2, state: 1}});

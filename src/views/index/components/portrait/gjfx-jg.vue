@@ -2,43 +2,46 @@
   <div class="point">
     <div class="">
       <div is="vlBreadcrumb"
-           :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
-            {name: '轨迹分析', routerName: 'portrait_gjfx'},
-            {name: '搜索结果'}]">
+        :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
+        {name: '轨迹分析', routerName: 'portrait_gjfx'},
+        {name: '分析结果'}]">
       </div>
     </div>
-
     <div class="vl_gjfx_jg_left">
       <template v-if="showNewTask">
-        <div class="plane" style="padding-top: 20px;">
+        <div class="plane">
           <el-form
-                  :model="ruleForm"
-                  status-icon
-                  ref="ruleForm"
-                  label-width="0px"
-                  class="demo-ruleForm"
-          >
-            <el-form-item class="" prop="data1">
+            :model="ruleForm"
+            status-icon
+            ref="ruleForm"
+            label-width="0px"
+            class="demo-ruleForm"
+            >
+            <p class="task_name">
+              <span>任务名称：</span>
+              <span>{{taskDetail.taskName}}</span>
+            </p>
+            <el-form-item prop="data1">
               <el-date-picker
-                      v-model="ruleForm.data1"
-                      style="width: 100%;"
-                      class="vl_date"
-                      :picker-options="pickerOptions"
-                      type="datetime"
-                      time-arrow-control
-                      placeholder="选择日期时间">
+                v-model="ruleForm.data1"
+                style="width: 100%;"
+                class="vl_date"
+                :picker-options="pickerOptions"
+                type="datetime"
+                time-arrow-control
+                placeholder="选择日期时间">
               </el-date-picker>
             </el-form-item>
             <el-form-item>
               <el-date-picker
-                      style="width: 100%;"
-                      class="vl_date vl_date_end"
-                      v-model="ruleForm.data2"
-                      :time-arrow-control="true"
-                      :picker-options="pickerOptions"
-                      @change="chooseEndTime"
-                      type="datetime"
-                      placeholder="选择日期时间">
+                style="width: 100%;"
+                class="vl_date vl_date_end"
+                v-model="ruleForm.data2"
+                :time-arrow-control="true"
+                :picker-options="pickerOptions"
+                @change="chooseEndTime"
+                type="datetime"
+                placeholder="选择日期时间">
               </el-date-picker>
             </el-form-item>
             <el-form-item>
@@ -48,7 +51,7 @@
                 </div>
               </div>
             </el-form-item>
-            <el-form-item>
+            <el-form-item style="margin-top: 20px;">
               <el-row :gutter="10">
                 <el-col :span="12">
                   <el-button @click="resetForm('ruleForm')" class="full">取消</el-button>
@@ -62,19 +65,24 @@
         </div>
       </template>
       <template v-else>
-        <img :src="taskDetail.uploadImgUrls" alt="">
-        <div class="vl_ytsr_left_line" v-show="taskDetail.taskName">
-          <span>任务名称：</span>{{taskDetail.taskName}}
-        </div>
-        <div class="vl_ytsr_left_line">
-          <span>抓拍时间：</span>
-          <span>
-          <p>{{taskDetail.startTime}}</p>
-          <p>{{taskDetail.endTime}}</p>
-        </span>
-        </div>
+        <ul>
+          <li v-if="taskDetail.uploadImgUrls">
+            <img :src="taskDetail.uploadImgUrls" alt="">
+          </li>
+          <li>
+            <span>任务名称：</span>
+            <span>{{taskDetail.taskName ? taskDetail.taskName : '无'}}</span>
+          </li>
+          <li>
+            <span>分析时间：</span>
+            <span>
+            <p>从{{taskDetail.startTime ? taskDetail.startTime : '无'}}</p>
+            <p>至{{taskDetail.endTime ? taskDetail.endTime : '无'}}</p>
+          </span>
+          </li>
+        </ul>
         <div class="update_task">
-          <el-button type="primary" @click="initParams">修改任务</el-button>
+          <el-button type="primary" @click="showNewTask = true;">修改任务</el-button>
         </div>
       </template>
       <div class="insetLeft2 vl_icon vl_icon_vehicle_03" v-show="hideleft" @click="showResult"></div>
@@ -126,12 +134,18 @@
       <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
       <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
     </ul>
+    <!-- 速度信息列表 -->
+    <ul class="speed_info_list">
+      <li>
+
+      </li>
+    </ul>
     <el-dialog
-            :visible.sync="strucDetailDialog"
-            class="struc_detail_dialog_gjfx"
-            :close-on-click-modal="false"
-            top="4vh"
-            :show-close="false">
+      :visible.sync="strucDetailDialog"
+      class="struc_detail_dialog_gjfx"
+      :close-on-click-modal="false"
+      top="4vh"
+      :show-close="false">
       <div class="struc_tab">
         <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">抓拍详情</span>
         <span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>
@@ -191,7 +205,7 @@
           </div>
           <div class="struc_c_d_box" style="float: left;" v-if="playerData">
             <div is="flvplayer" :oData="playerData"
-                 :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
+              :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
             </div>
           </div>
           <div class="struc_c_d_box struc_vid_empty" style="float: left;" v-else>
@@ -220,10 +234,10 @@
     <div id="capMap"></div>
     <!--人工筛选-->
     <el-dialog
-            title="人工筛选"
-            :visible.sync="filterDialog"
-            :close-on-click-modal="false"
-            width="900px">
+      title="人工筛选"
+      :visible.sync="filterDialog"
+      :close-on-click-modal="false"
+      width="900px">
       <div style="height: 350px;">
         <div style="height: 96%">
           <vue-scroll>
@@ -278,7 +292,6 @@
       return {
         showNewTask: false, // 展示修改任务
 
-
         taskDetail: {},
         imgData: null,
         uploadClear: {},
@@ -323,6 +336,7 @@
           data1: dateOrigin(false, new Date(new Date().getTime() - 24 * 3600000)),
           data2: new Date(),
           input3: '',
+          value1: null,
         },
         pricecode:cityCode,
         options: [],
@@ -368,42 +382,41 @@
         const id = this.$route.query.uid
         if (id) {
           getPeopleTaskDetail(id)
-              .then(res => {
-                if (res) {
-                  this.$set(res.data, 'taskResult', JSON.parse(res.data.taskResult));
-                  this.$set(res.data, 'taskWebParam', JSON.parse(res.data.taskWebParam));
-                  res.data.taskWebParam.deviceNames = res.data.taskWebParam.deviceNames ? res.data.taskWebParam.deviceNames.split(',') : '';
-                  this.taskDetail = res.data.taskWebParam;
-                  this.reselt = true;
-                  this.evData = res.data.taskResult;
-                  this.evData.forEach(x => {
-                    if (x.bayonetName) {
-                      x.DeviceID = x.bayonetName;
-                    }
-                  })
-                  this.evData.sort(this.compare("shotTime", this.timeOrder ? false : true));
-                  this.shotAddressAndTimes(this.evData)
-
-                  //  重组数据，给左边列表使用
-                  this.operData(true);
-                  if (this.evData.length) {
-                    this.filterDialog = true;
-                  }
+            .then(res => {
+              if (res) {
+                this.$set(res.data, 'taskResult', JSON.parse(res.data.taskResult));
+                this.$set(res.data, 'taskWebParam', JSON.parse(res.data.taskWebParam));
+                res.data.taskWebParam.deviceNames = res.data.taskWebParam.deviceNames ? res.data.taskWebParam.deviceNames.split(',') : '';
+                this.taskDetail = res.data.taskWebParam;
+                let {startTime, endTime} = res.data.taskWebParam;
+                this.ruleForm.data1 = new Date(startTime).getTime();
+                this.ruleForm.data2 = new Date(endTime).getTime();
+                console.log(res.data)
+                this.imgData = {
+                  cname: '带图' + Math.random(),
+                  filePathName: '带图' + Math.random(),
+                  path: this.taskDetail.uploadImgUrls
                 }
-              })
+                this.reselt = true;
+                this.evData = res.data.taskResult;
+                this.evData.forEach(x => {
+                  if (x.bayonetName) {
+                    x.DeviceID = x.bayonetName;
+                  }
+                })
+                this.evData.sort(this.compare("shotTime", this.timeOrder ? false : true));
+                this.shotAddressAndTimes(this.evData)
+
+                //  重组数据，给左边列表使用
+                this.operData(true);
+                if (this.evData.length) {
+                  this.filterDialog = true;
+                }
+              }
+            })
         }
       },
-      initParams () {
-        this.showNewTask = true;
-        let {startTime, endTime, uploadImgUrls} = this.taskDetail;
-        this.ruleForm.data1 = new Date(startTime).getTime();
-        this.ruleForm.data2 = new Date(endTime).getTime();
-        this.imgData = {
-          cname: '带图' + Math.random(),
-          filePathName: '带图' + Math.random(),
-          path: uploadImgUrls
-        }
-      },
+
       uploadEmit (data) {
         console.log('uploadEmit data', data);
         if (data && data.path) {
@@ -443,10 +456,10 @@
           if (!this.loading && !this.noMore) {
             this.loading = true;
             setTimeout(() => {
-              this.count += 4;
+              this.count += 2;
               this.operData();
               this.loading = false;
-            }, 800)
+            }, 2000)
           }
         }
       },
@@ -478,8 +491,11 @@
         }
       },
       resetForm(){
+        this.setDTime();
         this.ruleForm.input3 = '';
+        this.ruleForm.value1 = [];
         this.uploadClear = {};
+        this.setDTime ();
         this.showNewTask = false;
       },
       renderMap() {
@@ -524,10 +540,16 @@
       },
       getVehicleShot(d) {
         this.searchLoading = true;
-        PortraitPostPersonTrace(d).then(() => {
+        PortraitPostPersonTrace(d).then((res) => {
           this.searchLoading = false;
-          this.$message.info("修改成功")
-          this.$router.push({name: 'portrait_gjfx'})
+          if (res.data) {
+            this.$message({
+              type: 'success',
+              message: '修改成功',
+              customClass: 'request_tip'
+            });
+            this.$router.push({name: 'portrait_gjfx'});
+          }
         }).catch(() => {
           this.searchLoading = false;
         });
@@ -783,32 +805,69 @@
     box-shadow: 2px 3px 10px 0px rgba(131, 131, 131, 0.28);
     animation: fadeInLeft .4s ease-out .3s both;
     z-index: 9;
-    > img {
-      width: 232px;
-      height: 232px;
-      -webkit-border-radius: 4px;
-      -moz-border-radius: 4px;
-      border-radius: 4px;
-      margin-bottom: 30px;
-    }
-    .vl_ytsr_left_line {
-      color: #555555;
+    > ul {
+      width: 100%;
       margin-bottom: 20px;
-      display: flex;
-      span {
-        /*width: 70px;*/
-        text-align: right;
-        display: block;
-        color: #999999;
-        p {
-          color: #555555;
-          text-align: left;
+      // padding-left: 20px;
+      li:nth-child(1) {
+        img {
+          display: inline-block;
+          width: 232px;height: 232px;
+          border-radius: 10px;
         }
-        &:first-child {
-          width: 85px;
+      }
+      li {
+        padding-bottom: 10px;
+        span:nth-child(1) {
+          color: #999;
+          display: inline-block;
+          width: 75px;
+          vertical-align: top;
+        }
+        span:nth-child(2) {
+          display: inline-block;
+          width: calc(100% - 75px);
+          color: #555;
         }
       }
     }
+    .plane {
+      .task_name {
+        margin-bottom: 10px;
+        span:first-child {
+          color: #999999;
+        }
+        span:last-child {
+          color: #333333;
+        }
+      }
+    }
+    // > img {
+    //   width: 232px;
+    //   height: 232px;
+    //   -webkit-border-radius: 4px;
+    //   -moz-border-radius: 4px;
+    //   border-radius: 4px;
+    //   margin-bottom: 30px;
+    // }
+    // .vl_ytsr_left_line {
+    //   color: #555555;
+    //   margin-bottom: 20px;
+    //   display: flex;
+    //   span {
+    //     /*width: 70px;*/
+    //     text-align: right;
+    //     display: block;
+    //     color: #999999;
+    //     p {
+    //       color: #555555;
+    //       text-align: left;
+    //     }
+    //     &:first-child {
+    //       width: 85px;
+    //     }
+    //   }
+    // }
     .update_task {
       text-align: center;
     }
@@ -878,11 +937,6 @@
   .point {
     width: 100%;
     height: 100%;
-  }
-  .breadcrumb_heaer {
-    background: #ffffff;
-    border-bottom: 1px solid #D3D3D3;
-    padding: 19px 20px;
   }
   .full {
     width: 100%;
@@ -964,8 +1018,6 @@
     display: inline-block;
     cursor: pointer;
   }
-  .hide {
-  }
   .insetLeft2 {
     position: absolute;
     right: -28px;
@@ -987,7 +1039,7 @@
     overflow-x: hidden;
   }
   .plane_main {
-    min-height: 700px;
+    // min-height: 700px;
     .p_main_list {
       height: 40px;
       overflow: hidden;
@@ -1100,7 +1152,7 @@
         }
       }
       .p_main_dialog_item {
-        width: 33%;
+        width: 32%;
         display: inline-block;
         border: 1px solid #D3D3D3;
         margin: 5px;
@@ -1229,6 +1281,13 @@
   }
 </style>
 <style lang="scss">
+.vl_gjfx_jg_left {
+  .plane {
+    .el-form-item {
+      margin-bottom: 10px;
+    }
+  } 
+}
   #rightGjfxJgMap {
     .vl_icon {
       width: 47px;
@@ -1245,69 +1304,6 @@
           display: block;
         }
       }
-    }
-  }
-  .demo-ruleForm {
-    .quyu {
-      .el-form-item__label {
-        padding: 0;
-        white-space: nowrap;
-      }
-      .el-radio__label {
-        padding: 0;
-      }
-    }
-  }
-  .vl_jtc_upload_gjfx {
-    text-align: center;
-    .el-upload--picture-card {
-      width: 100%;
-      padding-top: 100%;
-      position: relative;
-      > i {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        margin: auto;
-      }
-      > img {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        -webkit-border-radius: 6px;
-        -moz-border-radius: 6px;
-        border-radius: 6px;
-      }
-    }
-    span {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      margin-top: 126px;
-      color: #999;
-    }
-    &:hover {
-      span {
-        color: #FFFFFF;
-      }
-    }
-  }
-  .gjfx_upload {
-    &:hover {
-      .el-upload--picture-card {
-        background: #0C70F8;
-      }
-    }
-  }
-  .data_range {
-    .el-range__close-icon {
-      display: none;
     }
   }
   .struc_detail_dialog_gjfx {
@@ -1744,87 +1740,6 @@
           }
         }
       }
-    }
-  }
-  .vl_jtc_mk {
-    width: 218px;
-    height: 122px;
-    position: relative;
-    display: none;
-    > img {
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      left: 0;
-      top: 0;
-    }
-    > p {
-      width: 100%;
-      position: absolute;
-      color: #FFFFFF;
-      bottom: 8px;
-      font-size: 12px;
-      padding: 0 6px;
-      line-height: 20px;
-      > i {
-        height: 20px;
-        float: right;
-        vertical-align: middle;
-      }
-    }
-  }
-  .vl_jig_mk_p {
-    width: 180px;
-    height: auto;
-    background: #ffffff;
-    padding: 10px;
-    border-radius: 5px;
-    text-align: center;
-    box-shadow: 4px 0px 10px 0px #838383;
-    box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);
-    .big {
-      font-size: 16px;
-      font-weight: bold;
-    }
-    &:after {
-      border-bottom-color: rgba(0, 0, 0, 1);
-      content: "";
-      display: inline-block;
-      position: absolute;
-      left: 50%;
-      margin-left: -10px;
-      bottom: -10px;
-      border-top: 10px solid #fff;
-      border-left: 10px solid transparent;
-      border-right: 10px solid transparent;
-    }
-    &.vl_jig_mk_img_hover {
-      &:after {
-        border-bottom-color: rgba(0, 0, 0, 1);
-        content: "";
-        display: inline-block;
-        position: absolute;
-        left: 50%;
-        margin-left: -10px;
-        bottom: -10px;
-        border-top: 10px solid #0c70f8;
-        border-left: 10px solid transparent;
-        border-right: 10px solid transparent;
-      }
-      background: rgba(12, 112, 248, 1);
-      position: relative;
-      border: 0.04rem solid #0c70f8;
-      > p {
-        color: #ffffff;
-      }
-    }
-  }
-  .map_select {
-    /deep/.el-dialog__body,.el-dialog__header {
-      padding: 0px;
-    }
-    .el-dialog__headerbtn {
-      z-index: 1;
     }
   }
 </style>

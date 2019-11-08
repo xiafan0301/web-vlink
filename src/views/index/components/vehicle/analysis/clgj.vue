@@ -71,11 +71,25 @@
       </div>
     </div>
     <div :class="['right',{hide:!hideleft}]" id="rightMap"></div>
+     <!--地图操作按钮-->
     <ul class="map_rrt_u2">
       <li @click="resetZoom"><i class="el-icon-aim"></i></li>
       <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
       <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
     </ul>
+    <!--左侧车牌-->
+    <!-- <div class="left_plate">
+      <div>
+        <p>湘A12345</p>
+        <ul>
+          <li><el-checkbox v-model="selectShow.speed">车速信息</el-checkbox></li>
+          <li><el-checkbox v-model="selectShow.snap">抓拍图片</el-checkbox></li>
+          <li><el-checkbox v-model="selectShow.video">视频接力</el-checkbox></li>
+        </ul>
+      </div>
+    </div> -->
+    <!--右侧已选区域列表-->
+
     <div is="vlDialog" :detailData="detailData"></div>
   </div>
 </template>
@@ -134,6 +148,12 @@
         playing: false, // 视频播放是否
         strucDetailDialog: false,
         videoUrl: '', // 弹窗视频回放里的视频
+
+        selectShow: {
+          speed: false,
+          snap: false,
+          video: false,
+        }
       };
     },
     mounted() {
@@ -814,6 +834,20 @@
           background-size: 80% 80%;
         }
       }
+    }
+  }
+  /* 左侧车牌 */
+  .left_plate {
+    position: absolute;
+    left: 302px;
+    top: 70px;
+    p {
+      height: 50px;
+      width: 120px;
+      text-align: center;
+      line-height: 50px;
+      color: #fff;
+      background: linear-gradient(90deg,rgba(8,106,234,1) 0%,rgba(4,102,222,1) 100%);
     }
   }
 </style>

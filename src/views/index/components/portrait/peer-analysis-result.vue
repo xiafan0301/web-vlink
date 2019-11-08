@@ -1,69 +1,81 @@
 <template>
   <div class="peer-analysis">
-    <div class="th-breadcrumb">
-      <el-breadcrumb separator-class="el-icon-arrow-right">
-        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像侦查</el-breadcrumb-item>
-        <el-breadcrumb-item :to="{ path: '/portrait/peer-analysis-list' }">同行分析</el-breadcrumb-item>
-        <el-breadcrumb-item>分析结果</el-breadcrumb-item>
-      </el-breadcrumb>
-      <!-- <el-button :loading="exportLoadingbtn" @click="onExport" class="th-button-export-color">导出</el-button> -->
+    <div class="vc_gcck_bd">
+      <div is="vlBreadcrumb" :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'}, 
+        {name: '同行分析', routerName: 'peer_analysis_list'}, {name: '分析结果'}]">
+      </div>
     </div>
     <div class="the-bottom">
       <div class="the-left-search">
         <template v-if="showNewTask">
-          <div class="vl_jtc_img_box">
-            <div style="padding: 0 25px; height: 210px;">
-              <div is="vlUpload" :clear="uploadClear" :imgData="imgData" @uploadEmit="uploadEmit"></div>
+          <vue-scroll>
+            <div class="task_name">
+              <span>任务名称：</span>
+              <span>{{editForm.taskName}}</span>
             </div>
-          </div>
-          <div class="per_semblance_ytsr"><span>同行次数：</span><el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100; if(value&&value <2)value = 2;" placeholder="填写同行次数" v-model="searchData.minSemblance"></el-input>(2-100)</div>
-          <!--查询范围-->
-          <div class="per_left_time">
-            <div class="left_time">
-              <el-date-picker
-                v-model="searchData.startTime"
-                style="width: 100%;margin-bottom: 10px;"
-                class="vl_date"
-                type="datetime"
-                :time-arrow-control="true"
-                @change="chooseStartTime"
-                value-format="timestamp"
-                placeholder="选择日期时间">
-              </el-date-picker>
-              <el-date-picker
-                style="width: 100%;"
-                class="vl_date vl_date_end"
-                v-model="searchData.endTime"
-                @change="chooseEndTime"
-                :time-arrow-control="true"
-                value-format="timestamp"
-                type="datetime"
-                placeholder="选择日期时间">
-              </el-date-picker>
+            <!--查询范围-->
+            <div class="per_left_time">
+              <div class="left_time">
+                <el-date-picker
+                  v-model="editForm.startTime"
+                  style="width: 100%;margin-bottom: 10px;"
+                  class="vl_date"
+                  type="datetime"
+                  :clearable="false"
+                  :time-arrow-control="true"
+                  @change="chooseStartTime"
+                  value-format="yyyy-MM-dd HH:mm:ss"
+                  format="yyyy-MM-dd HH:mm:ss"
+                  placeholder="选择日期时间">
+                </el-date-picker>
+                <el-date-picker
+                  style="width: 100%;"
+                  class="vl_date vl_date_end"
+                  v-model="editForm.endTime"
+                  @change="chooseEndTime"
+                  :clearable="false"
+                  :time-arrow-control="true"
+                  value-format="yyyy-MM-dd HH:mm:ss"
+                  format="yyyy-MM-dd HH:mm:ss"
+                  type="datetime"
+                  placeholder="选择日期时间">
+                </el-date-picker>
+              </div>
             </div>
-          </div>
-          <div class="peer_xzsb_s" @click="areaTypeChanged" v-if="chooseType === 1">
-            <span>选择设备</span>
-            <span class="el-icon-arrow-down"></span>
-          </div>
-          <div class="peer_dtxz_rst" v-else>
-            已选<span>{{dSum}}</span>个设备<a href="javascript: void(0);" @click="openMap={}">重选</a>
-          </div>
-          <div class="vl_jtc_search">
-            <div style="text-align: center;margin-bottom: 0px;">
-              <el-button @click="resetSearch">取消</el-button>
-              <el-button type="primary" :loading="searching" @click="tcDiscuss()">确定</el-button>
+            <div class="vl_jtc_img_box">
+              <div style="padding: 0 25px; height: 210px;">
+                <div is="vlUpload" :clear="uploadClear" :imgData="imgData" @uploadEmit="uploadEmit"></div>
+              </div>
             </div>
-          </div>
+            <div class="per_semblance_ytsr">
+              <span>同行次数≥：</span>
+              <el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100; if(value&&value <2)value = 2;" placeholder="填写同行次数" v-model="editForm.number">
+              </el-input>(2-100)
+            </div>
+            <div class="peer_xzsb_s" @click="areaTypeChanged" v-if="chooseType === 1">
+              <span>选择设备</span>
+              <span class="el-icon-arrow-down"></span>
+            </div>
+            <div class="peer_dtxz_rst" v-else>
+              已选<span>{{dSum}}</span>个设备<a href="javascript: void(0);" @click="openMap={}">重选</a>
+            </div>
+            <div class="vl_jtc_search">
+              <div style="text-align: center;margin-bottom: 0px;">
+                <el-button @click="resetSearch">取消</el-button>
+                <el-button type="primary" :loading="searching" @click="tcDiscuss()">确定</el-button>
+              </div>
+            </div>
+          </vue-scroll>
         </template>
+
         <template v-else>
           <ul>
             <li v-if="taskDetail.taskWebParam && taskDetail.taskWebParam.targetPicUrl">
               <img :src="taskDetail.taskWebParam.targetPicUrl" alt="">
             </li>
-            <li v-else>
+            <!-- <li v-else>
               <img src="../../../../assets/img/temp/vis-eg.png" alt="">
-            </li>
+            </li> -->
             <li>
               <span>任务名称：</span>
               <span>{{taskDetail.taskName ? taskDetail.taskName : '无'}}</span>
@@ -90,7 +102,7 @@
             </li>
           </ul>
           <div class="update_task">
-            <el-button type="primary" @click="showNewTask = true;">修改任务</el-button>
+            <el-button type="primary" @click="showNewTaskBox">修改任务</el-button>
           </div>
         </template>
       </div>
@@ -102,10 +114,10 @@
               <div class="list-box">
                 <ul class="rlcx_r_list clearfix">
                   <li v-for="(item, index) in boxList" :key="index + 'dd'">
-                    <div style="">
-                      <!-- <img src="../../../../assets/img/666.jpg" alt=""> -->
+                    <div>
+                      <!-- <img class="box_img" src="../../../../assets/img/666.jpg" alt=""> -->
                       <img class="bigImg" :src="item.subStoragePath" alt="">
-                      <div>
+                      <div class="box_right_detail">
                         <h4>检索资料</h4>
                         <div><i class="vl_icon rlcx_sj"></i>{{item.shotTime}}</div>
                         <p>
@@ -139,13 +151,13 @@
         </template>
       </div>
     </div>
-
     <!-- D设备 B卡口  这里是设备和卡口 -->
     <div
       is="mapSelector"
       :open="openMap"
       :clear="msClear"
       :showTypes="'DB'"
+      :activeDeviceList="activeSelectList"
       @mapSelectorEmit="mapSelectorEmit">
     </div>
   </div>
@@ -158,8 +170,9 @@ import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import { formatDate } from "@/utils/util.js";
 import vlUpload from "@/components/common/upload.vue";
 import mapSelector from '@/components/common/mapSelector.vue';
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 export default {
-  components: {vlUpload, mapSelector},
+  components: {vlUpload, mapSelector, vlBreadcrumb},
   data () {
     return {
       imgData:null,
@@ -172,32 +185,27 @@ export default {
       selectCameraArr: [],
       selectBayonetArr: [],
       showNewTask: false,
-      searchData: {
-        minSemblance: 5, // 最小相似度
-        portraitGroupId: [],
-        startTime: '',
-        endTime: ''
-      },
       searching: false,
-
 
       pagination: {
         total: 0,
-        pageSize: 12,
+        pageSize: 10,
         currentPage: 1
       },
       taskDetail: {},
       deviceStr: null,
       deviceList: [],
-      boxList: []
+      boxList: [],
+      editForm: {},
+      activeSelectList: [], // 选中的设备数据
     }
   },
  
   mounted() {
     this.getMonitorList().then(() => {
-      this.getDetail()
+      this.getDetail();
     })
-    this.setDTime();
+    // this.setDTime();
   },
   methods: {
     uploadEmit(data) {
@@ -208,12 +216,12 @@ export default {
       }
     },
     resetSearch () {
-      this.searchData.minSemblance = 5;
+      // this.searchData.minSemblance = 5;
       this.uploadClear = {}
       this.msClear = {};
       this.showNewTask = false;
       this.dSum = 0;
-      this.setDTime();
+      // this.setDTime();
     },
     tcDiscuss () {
       let params = {
@@ -226,16 +234,17 @@ export default {
       } else {
         params['targetPicUrl'] = this.imgList.path;
       }
-      if (this.searchData.minSemblance) {
-        params['number'] = this.searchData.minSemblance;
+      if (this.editForm.number) {
+        params['number'] = this.editForm.number;
       } else {
         params['number'] = 2;
       }
       params['deviceId'] = this.selectCameraArr.join(',');
       params['bayonetIds'] = this.selectBayonetArr.join(',');
-      params['startTime'] = formatDate(this.searchData.startTime, 'yyyy-MM-dd HH:mm:ss');
-      params['endTime'] = formatDate(this.searchData.endTime, 'yyyy-MM-dd HH:mm:ss');
+      params['startTime'] = formatDate(this.editForm.startTime, 'yyyy-MM-dd HH:mm:ss');
+      params['endTime'] = formatDate(this.editForm.endTime, 'yyyy-MM-dd HH:mm:ss');
       params['uid'] = this.$route.query.uid;
+      params['taskName'] = this.editForm.taskName;
       postPeopleTask(params).then(res => {
         this.searching = false;
         if (res && res.data) {
@@ -244,26 +253,26 @@ export default {
             message: '修改成功',
             customClass: 'request_tip'
           })
-          this.$router.push({name: "peer_analysis_list"})
+          this.$router.push({name: "peer_analysis_list"});
         }
       })
     },
-    setDTime() {
-      let date = new Date();
-      let curDate = date.getTime();
-      let curS = 1 * 24 * 3600 * 1000;
-      let _sDate = new Date(curDate - curS);
-      let _s = _sDate.getFullYear()+ '-' + (_sDate.getMonth() + 1) + '-' + _sDate.getDate() + ' 00:00:00' ;
-      this.searchData.startTime = new Date(_s).getTime();
-      this.searchData.endTime = curDate;
-    },
+    // setDTime() {
+    //   let date = new Date();
+    //   let curDate = date.getTime();
+    //   let curS = 1 * 24 * 3600 * 1000;
+    //   let _sDate = new Date(curDate - curS);
+    //   let _s = _sDate.getFullYear()+ '-' + (_sDate.getMonth() + 1) + '-' + _sDate.getDate() + ' 00:00:00' ;
+    //   this.searchData.startTime = new Date(_s).getTime();
+    //   this.searchData.endTime = curDate;
+    // },
     chooseEndTime (e) {
-      if (e < this.searchData.startTime) {
+      if (e < this.editForm.startTime) {
         this.$message.info('结束时间必须大于开始时间才会有结果')
       }
     },
     chooseStartTime (e) {
-      if (e > this.searchData.endTime) {
+      if (e > this.editForm.endTime) {
         this.$message.info('结束时间必须大于开始时间才会有结果')
       }
     },
@@ -273,6 +282,8 @@ export default {
     },
     mapSelectorEmit (result) {
       if (result) {
+        console.log('result', result);
+        
         // bayonetList deviceList
         this.dSum = 0;
         if (result.deviceList && result.deviceList.length > 0) {
@@ -293,46 +304,56 @@ export default {
         }
       }
     },
-
-
     // 获取离线任务详情
     getDetail () {
-      const id = this.$route.query.uid
+      const id = this.$route.query.uid;
       if (id) {
         getPeopleTaskDetail(id)
           .then(res => {
             if (res) {
-              this.$set(res.data, 'taskResult', JSON.parse(res.data.taskResult))
-              this.$set(res.data, 'taskWebParam', JSON.parse(res.data.taskWebParam))
-              let arr = res.data.taskWebParam.deviceId.split(',')
-              let arr1 = []
-              if (arr && arr.length > 0) {
-                arr.forEach(item => {
-                  let o = this.deviceList.find(x => {return item === x.uid})
+              this.$set(res.data, 'taskResult', JSON.parse(res.data.taskResult));
+              this.$set(res.data, 'taskWebParam', JSON.parse(res.data.taskWebParam));
+              console.log('aaa', res.data);
+              
+              let deviceArr = res.data.taskWebParam.deviceId.split(',');
+              let bayonetArr = res.data.taskWebParam.bayonetIds.split(',');
+              let arr1 = [];
+              if (deviceArr && deviceArr.length > 0) {
+                deviceArr.forEach(item => {
+                  let o = this.deviceList.find(x => {return item === x.uid});
                   if (o) {
-                    arr1.push(o.deviceName)
+                    arr1.push(o.deviceName);
+                  }
+                })
+              }
+              if (bayonetArr && bayonetArr.length > 0) {
+                bayonetArr.forEach(item => {
+                  let o = this.deviceList.find(x => {return item === x.uid});
+                  if (o) {
+                    arr1.push(o.bayonetName);
                   }
                 })
               }
               if (arr1.length > 1 && arr1.length < this.deviceList.length) {
-                this.deviceStr = `${arr1[0]}等${arr1.length - 1}个设备`
+                this.deviceStr = `${arr1[0]}等${arr1.length - 1}个设备`;
               } else if (arr1.length === 1) {
-                this.deviceStr = arr1[0]
+                this.deviceStr = arr1[0];
               } else if (arr1.length === 0) {
-                 this.deviceStr = null
+                 this.deviceStr = null;
               } else if (arr1.length === this.deviceList.length) {
-                this.deviceStr = '全部设备'
+                this.deviceStr = '全部设备';
               }
-              this.pagination.total = res.data.taskResult.length
-              this.boxList = [...res.data.taskResult.slice(0, 12)]
-              this.boxList.sort((a, b) => {return b.peerNumber - a.peerNumber})
+
+              this.pagination.total = res.data.taskResult.length;
+              this.boxList = [...res.data.taskResult.slice(0, 12)];
+              this.boxList.sort((a, b) => {return b.peerNumber - a.peerNumber});
 
               this.taskDetail = res.data;
               this.imgData = {
                 cname: '带图' + Math.random(),
                 filePathName: '带图' + Math.random(),
                 path: res.data.taskWebParam.targetPicUrl
-              }
+              };
             }
           })
       }
@@ -346,85 +367,192 @@ export default {
       };
       return MapGETmonitorList(params).then(res => {
         if (res && res.data) {
+          console.log('bbbb', res.data);
+          
           if (res.data.areaTreeList) {
-            let arr = res.data.areaTreeList
+            let arr = res.data.areaTreeList;
             arr.forEach(item => {
               if (item.deviceBasicList && item.deviceBasicList.length > 0) {
-                this.deviceList.push(...item.deviceBasicList)
+                this.deviceList.push(...item.deviceBasicList);
+              }
+              if (item.bayonetList && item.bayonetList.length > 0) {
+                this.deviceList.push(...item.bayonetList);
               }
             })
+            console.log('this.deviceList', this.deviceList);
+            
           }
         }
       });
     },
     goRecord (obj) {
-      this.$router.push({name: 'peer_analysis_record', query: {uid: this.$route.query.uid, id: obj.uid}})
+      this.$router.push({name: 'peer_analysis_record', query: {uid: this.$route.query.uid, id: obj.uid}});
     },
     onPageChange (page) {
-      this.boxList.splice(0, this.boxList.length)
-      this.boxList = [...this.taskDetail.taskResult.slice((page - 1) * 12, 12 + (page - 1) * 12)]
-      this.boxList.sort((a, b) => {return a.peerNumber - b.peerNumber})
+      this.boxList.splice(0, this.boxList.length);
+      this.boxList = [...this.taskDetail.taskResult.slice((page - 1) * 12, 12 + (page - 1) * 12)];
+      this.boxList.sort((a, b) => {return a.peerNumber - b.peerNumber});
+    },
+    // 点击修改任务按钮
+    showNewTaskBox () {
+      this.editForm = {
+        ...this.taskDetail.taskWebParam
+      };
+
+      let deviceArr = this.taskDetail.taskWebParam.deviceId.split(',');
+      let bayonetArr = this.taskDetail.taskWebParam.bayonetIds.split(',');
+      console.log(deviceArr);
+      console.log('mmmm', this.deviceList)
+      let arrIds = [];
+      if (deviceArr && deviceArr.length > 0) {
+        deviceArr.forEach(item => {
+          let o = this.deviceList.find(x => {return item === x.uid});
+          if (o) {
+            arrIds.push(o.uid);
+            // arr1.push(o.deviceName);
+          }
+        })
+      }
+      if (bayonetArr && bayonetArr.length > 0) {
+        bayonetArr.forEach(item => {
+          let o = this.deviceList.find(x => {return item === x.uid});
+          if (o) {
+            arrIds.push(o.uid);
+            // arr1.push(o.bayonetName);
+          }
+        })
+      }
+      console.log(arrIds);
+      
+      if (arrIds.length > 0) {
+        this.activeSelectList = arrIds;
+        this.chooseType = 2;
+        this.dSum = arrIds.length;
+      }
+      this.showNewTask = true;
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-  .peer_xzsb_s {
-    height: 40px;
-    line-height: 40px;
-    width: calc(100% - 40px);
-    border-radius: 4px;
-    border: 1px solid #DCDFE6;
-    cursor: pointer;
-    color: #999999;
-    padding: 0 6px;
-    margin-left: 20px;
-    > span {
-      display: inline-block;
-      width: 50%;
-      &:last-child {
-        text-align: right;
+
+@media screen and (max-width: 1439px) {
+  .list-box {
+    > .rlcx_r_list {
+      li {
+        width: 33%;
+        > div {
+          > img {
+            top: 30px;
+            width: 150px;
+            height: 150px;
+          }
+          > div {
+            margin-left: 160px;
+          }
+        }
       }
     }
   }
-  .peer_dtxz_rst {
-    width: calc(100% - 40px);
-    line-height: 40px;
-    padding: 0px 15px; margin-top: 5px;
-    margin-left: 20px;
-    background-color: #F5F7FA;
-    color: #C0C4CC;
-    border: 1px solid #DCDFE6;
-    border-radius: 4px;
-    > span {
-      display: inline-block;
-      padding: 0 3px;
-      color: #333;
-    }
-    > a {
-      display: inline-block;
-      padding-left: 5px;
-      color: #2580FC !important;
-      text-decoration: none !important;
-      /*font-style: italic;*/
-      cursor: pointer;
+}
+@media screen and (min-width: 1440px) {
+  .list-box {
+    > .rlcx_r_list {
+      li {
+        width: 24.5%;
+        > div {
+          > img {
+            top: 10px;
+            width: 190px;
+            height: 190px;
+            border: 1px solid #f2f2f2;
+          }
+          > div {
+            margin-left: 200px;
+          }
+        }
+      }
     }
   }
+}
+
+.peer_xzsb_s {
+  height: 40px;
+  line-height: 40px;
+  width: calc(100% - 40px);
+  border-radius: 4px;
+  border: 1px solid #DCDFE6;
+  cursor: pointer;
+  color: #999999;
+  padding: 0 6px;
+  margin-left: 20px;
+  > span {
+    display: inline-block;
+    width: 50%;
+    &:last-child {
+      text-align: right;
+    }
+  }
+}
+.peer_dtxz_rst {
+  width: calc(100% - 40px);
+  line-height: 40px;
+  padding: 0px 15px; margin-top: 5px;
+  margin-left: 20px;
+  background-color: #F5F7FA;
+  color: #C0C4CC;
+  border: 1px solid #DCDFE6;
+  border-radius: 4px;
+  > span {
+    display: inline-block;
+    padding: 0 3px;
+    color: #333;
+  }
+  > a {
+    display: inline-block;
+    padding-left: 5px;
+    color: #2580FC !important;
+    text-decoration: none !important;
+    /*font-style: italic;*/
+    cursor: pointer;
+  }
+}
 .peer-analysis {
   width: 100%; height: 100%;
+  overflow: hidden;
+  .vc_gcck_bd {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 50px; line-height: 50px;
+  }
   .the-bottom {
-    width: 100%;height: calc(100% - 60px);
+    width: 100%;
+    margin-top: 50px;
+    height: calc(100% - 50px);
     display: flex;
     position: relative;
+      // overflow: hidden;
     .the-left-search {
-      width: 272px;height: 100%;
-      min-height: 600px;
+      width: 272px;
+      height: 100%;
+      // min-height: 600px;
       background: #fff;
       box-shadow: 5px 0 10px #E5E7E7;
       animation: fadeInLeft .4s ease-out .3s both;
       padding-top: 20px;
       position: relative;
+      .task_name {
+        font-size: 14px;
+        height: 40px;
+        margin-left: 20px;
+        margin-bottom: -10px;
+        span:first-child {
+          color: #999999;
+        }
+        span:last-child {
+          color: #333333;
+        }
+      }
       > ul {
         width: 100%;
         margin-bottom: 20px;
@@ -588,7 +716,7 @@ export default {
         }
         .left_time {
           width: 100%;
-          margin: 10px 0;
+          margin: 0 0 10px 0;
           .el-date-editor {
             width: 100%;
           }
@@ -599,10 +727,11 @@ export default {
       }
     }
     .the-right-result {
-      width: calc(100% - 285px); height: 100%;
+      width: calc(100% - 285px);
+      height: 100%;
       margin-left: 13px;
       background: #F7F9F9;
-      padding: 15px 12px 25px 0;
+      padding: 15px 0 25px 0;
       overflow-y: hidden;
       .the-result-box-peer {
         width: 100%; height: 100%;
@@ -617,27 +746,26 @@ export default {
         .list-box {
           display: flex;
           flex-wrap: wrap;
-          // justify-content: space-between;
           flex-flow: row wrap;
-          // height: calc(100% - 45px);
           > .rlcx_r_list {
+            width: 100%;
             padding: 5px;
-            > li {
+            li {
+              // width: 33%;
               padding: 5px;
               float: left;
               > div {
                 position: relative;
-                width: 395px; height: 210px;
+                height: 210px;
                 padding: 10px;
                 background-color: #fff;
                 box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
                 > img {
-                  position: absolute; top: 10px; left: 10px;
-                  width: 190px; height: 190px;
+                  position: absolute;
+                  left: 10px;
                 }
                 > div {
                   height: 100%;
-                  margin-left: 210px; padding-right: 10px;
                   > h4 {
                     color: #999;
                     margin-bottom: 10px;
@@ -676,6 +804,7 @@ export default {
 <style lang="scss">
   .per_semblance_ytsr {
     position: relative;
+    margin-bottom: 10px;
     padding-left: 20px;
     >span {
       position: absolute;
@@ -685,7 +814,7 @@ export default {
       line-height: 40px;
       z-index: 9;
       color: #999999;
-      width: 82px;
+      width: 95px;
       padding-left: 12px;
     }
     >i {
@@ -697,7 +826,7 @@ export default {
       vertical-align: middle;
     }
     .el-input {
-      width: 185px;
+      width: 180px;
       margin-right: 10px;
       input{
         text-indent: 69px;
