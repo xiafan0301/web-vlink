@@ -15,7 +15,7 @@
     </div>
     <span slot="footer" class="dialog-footer">
       <el-button @click="cancelSave" size="small">取 消</el-button>
-      <el-button :loading="submitLoading" type="primary" @click="saveCutImg" size="small">确 定</el-button>
+      <el-button :loading="submitLoading" type="primary" @click="saveCutImg" :disabled="isDisabledSelectImg" size="small">确 定</el-button>
     </span>
   </el-dialog>
 </template>
@@ -35,7 +35,8 @@ export default {
         url: null,
         height: null,
         width: null
-      }
+      },
+      isDisabledSelectImg: true, // 是否选中了目标对象
     }
   },
   watch: {
@@ -54,6 +55,9 @@ export default {
       this.imgInfo = Object.assign({}, this.initImageInfo);
     }
   },
+  destroyed () {
+    $('.img_box div').remove(); // 删除添加的div元素
+  },
   methods: {
     // 默认选中第一个框体
     // checkFirstImgBox () {
@@ -69,7 +73,6 @@ export default {
     getImgScale () {
       let imgWidth = $('#imgBox').width();
       let scale = this.imgInfo.width / imgWidth; // 原图初始比例
-      console.log('asdasd', this.selectList);
       
       this.selectList.forEach((item, index) => {
 
@@ -124,6 +127,8 @@ export default {
           $(clickObj).addClass('active_select');
         }
 
+        _self.isDisabledSelectImg = false;
+        
         _self.createImgPath(x, y, width, height);
       })
     },
@@ -167,7 +172,7 @@ export default {
         thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
         // uid: '' //  附件标识
       };
-      // this.skipImgUrl = imgObj.path;
+      // this.selectImgUrl = imgObj.path;
       if (this.$store.state.loginUser && this.$store.state.loginUser.uid) {
         imgObj.contentUid = this.$store.state.loginUser.uid;
         JtcPOSTAppendixInfo(imgObj).then(jRes => {
@@ -205,8 +210,7 @@ export default {
     cancelSave () {
       $('.img_box div').remove(); // 删除添加的div元素
       this.$emit('emitImgData', {
-        open: false,
-        // uploadClear: {}
+        open: false
       })
     }
   }

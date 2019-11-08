@@ -572,9 +572,9 @@ export default {
       const webParam = obj.taskWebParam;
       if (obj.uid) {
         const params = {
-          uid: obj.uid,
           taskName: obj.taskName,
-          ...webParam
+          ...webParam,
+          uid: obj.uid,
         };
         getPersonFollowing(params)
           .then(res => {
