@@ -382,11 +382,11 @@
           <div class="struc_c_d_box">
             <div class="struc_c_d_img">
               <img class="bigImg" :src="showShotImg ? sturcDetail.subStoragePath : sturcDetail.storagePath" alt="">
-              <i @click="showShotImg = !showShotImg">{{showShotImg ? '全景图' : '抓拍图'}}</i>
+              <i @click="showShotImg = !showShotImg">{{showShotImg ? '切换全景图' : '切换抓拍图'}}</i>
               <span>{{showShotImg ? '抓拍图' : '全景图'}}</span>
             </div>
             <div class="struc_c_d_info">
-              <h2>分析结果<div class="vl_jfo_sim" ><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? (sturcDetail.semblance*1).toFixed(2) : '0.00'}}<span style="font-size: 12px;">%</span></div></h2>
+              <h2>分析结果<div class="vl_jfo_sim" ><span>相似度 </span>{{sturcDetail.semblance ? (sturcDetail.semblance*1).toFixed(2) : '0.00'}}<span style="font-size: 12px;">%</span></div></h2>
               <div class="struc_cd_info_main">
                 <vue-scroll>
                   <ul>
@@ -447,7 +447,7 @@
               <span>底库图</span>
             </div>
             <div class="struc_c_d_info">
-              <h2>{{sturcDetail.name}}<div class="vl_jfo_sim" ><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? (sturcDetail.semblance*1).toFixed(2) : '0.00'}}<span style="font-size: 12px;">%</span></div></h2>
+              <h2>{{sturcDetail.name}}<div class="vl_jfo_sim" >{{sturcDetail.semblance ? (sturcDetail.semblance*1).toFixed(2) : '0.00'}}<span style="font-size: 12px;">%</span></div> <span class="vl_jfo_s_name">相似度</span></h2>
               <div class="struc_cdi_line">
                 <span v-show="sturcDetail.sex">{{sturcDetail.sex}}</span>
                 <span v-show="sturcDetail.nation">{{sturcDetail.nation}}</span>
@@ -1862,14 +1862,14 @@
             i {
               display: block;
               position: absolute;
-              top: .1rem;
+              bottom: .1rem;
               right: .1rem;
               line-height: .26rem;
               height: .26rem;
-              background: rgba(255, 255, 255, .8);
+              background: #0C70F8;
               border-radius: .13rem;
               font-style: normal;
-              color: #0C70F8;
+              color: #ffffff;
               font-size: 12px;
               padding: 0 .1rem;
               cursor: pointer;
@@ -1927,17 +1927,28 @@
                 font-weight: bold;
                 line-height: .74rem;
                 padding-right: 1rem;
+                position: relative;
                 .vl_jfo_sim {
-                  color: #0C70F8;
+                  color: #ffffff;
                   font-weight: bold;
                   font-size: .24rem;
                   float: right;
+                  height: .34rem;
+                  line-height: .34rem;
+                  background: #50CC62;
+                  position: absolute;
+                  right: 0;
+                  top: .2rem;
+                  padding: 0 .2rem;
+                  text-align: center;
+                  border-radius: .17rem 0 0 .17rem;
                   i {
                     vertical-align: text-bottom;
                     margin-right: .1rem;
                   }
                   span {
                     font-weight: normal;
+                    font-size: 12px;
                   }
                 }
               }
@@ -2064,13 +2075,9 @@
               padding: 0px .15rem;
               text-decoration: none;
               margin-left: 10px;
-              background: rgba(246, 248, 249, 1);
-              border: 1px solid rgba(211, 211, 211, 1);
-              cursor: pointer;
-            }
-            a:hover {
               background: #0c70f8;
               border: solid 1px #0c70f8;
+              cursor: pointer;
               color: #ffffff;
             }
           }
@@ -2283,10 +2290,11 @@
                 line-height: .74rem;
                 padding-right: 1rem;
                 .vl_jfo_sim {
-                  color: #0C70F8;
+                  color: #FF7474;
                   font-weight: bold;
                   font-size: .24rem;
-                  float: right;
+                  display: inline-block;
+                  margin-left: 20px;
                   i {
                     vertical-align: text-bottom;
                     margin-right: .1rem;
@@ -2294,6 +2302,16 @@
                   span {
                     font-weight: normal;
                   }
+                }
+                .vl_jfo_s_name {
+                  margin-left: 10px;
+                  color: #999999;
+                  font-weight: normal;
+                  padding: 0 .1rem;
+                  border: 1px solid #F2F2F2;
+                  -webkit-border-radius: 10px;
+                  -moz-border-radius: 10px;
+                  border-radius: 10px;
                 }
               }
               .struc_cdi_line {

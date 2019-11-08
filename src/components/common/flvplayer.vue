@@ -253,7 +253,7 @@
           <div class="flv_sl_box">
             <div class="flv_sl_item" :class="{'active': snapActiveIndex === index}" @click="flvSnapTap(index, item.dtoType, item[item._key])" v-for="(item, index) in filterSnapList" :key="'fl_sl_item' + index">
               <div class="sl_item_left">
-                <img :src="item.vehicleDto ? item.vehicleDto.storagePath : ''" alt="">
+                <img :src="item[item._key] ? item[item._key].subStoragePath : ''" alt="">
               </div>
               <div class="sl_item_right">
                 <h5>检测目标：{{item.target}}</h5>
@@ -282,21 +282,25 @@
       </ul>
       <template v-if="snapSturcObj.type === '1'">
         <div class="struc_c_d_box">
+          <div class="struc_c_d_img struc_c_d_img_green">
+            <img :src="snapSturcObj.sturcDetail.subStoragePath" class="bigImg" title="点击放大图片" alt />
+            <span>抓拍图</span>
+          </div>
           <div class="struc_c_d_info">
             <h2>分析结果：</h2>
             <ul>
-              <li><span>性别</span><span>{{sturcDetail.sex ? sturcDetail.sex : '未识别'}}</span></li>
-              <li><span>年龄段</span><span>{{sturcDetail.age ? sturcDetail.age : '未识别'}}</span></li>
-              <li><span>发型</span><span>{{sturcDetail.hair ? sturcDetail.hair : '未识别'}}</span></li>
-              <li><span>戴眼镜</span><span>{{sturcDetail.glasses ? sturcDetail.glasses : '未识别'}}</span></li>
-              <li><span>戴帽子</span><span>{{sturcDetail.hat ? sturcDetail.hat : '未识别'}}</span></li>
-              <li><span>戴口罩</span><span>{{sturcDetail.mask ? sturcDetail.mask : '未识别'}}</span></li>
-              <li><span>抱小孩</span><span>{{sturcDetail.baby ? sturcDetail.baby : '未识别'}}</span></li>
-              <li><span>拎东西</span><span>{{sturcDetail.bag ? sturcDetail.bag : '未识别'}}</span></li>
-              <li><span>上身款式</span><span>{{sturcDetail.upperType ? sturcDetail.upperType : '未识别'}}</span></li>
-              <li><span>上身颜色</span><span>{{sturcDetail.upperColor ? sturcDetail.upperColor : '未识别'}}</span></li>
-              <li><span>下身款式</span><span>{{sturcDetail.bottomType ? sturcDetail.bottomType : '未识别'}}</span></li>
-              <li><span>下身颜色</span><span>{{sturcDetail.bottomColor ? sturcDetail.bottomColor : '未识别'}}</span></li>
+              <li><span>性别</span><span>{{snapSturcObj.sturcDetail.sex ? snapSturcObj.sturcDetail.sex : '未识别'}}</span></li>
+              <li><span>年龄段</span><span>{{snapSturcObj.sturcDetail.age ? snapSturcObj.sturcDetail.age : '未识别'}}</span></li>
+              <li><span>发型</span><span>{{snapSturcObj.sturcDetail.hair ? snapSturcObj.sturcDetail.hair : '未识别'}}</span></li>
+              <li><span>戴眼镜</span><span>{{snapSturcObj.sturcDetail.glasses ? snapSturcObj.sturcDetail.glasses : '未识别'}}</span></li>
+              <li><span>戴帽子</span><span>{{snapSturcObj.sturcDetail.hat ? snapSturcObj.sturcDetail.hat : '未识别'}}</span></li>
+              <li><span>戴口罩</span><span>{{snapSturcObj.sturcDetail.mask ? snapSturcObj.sturcDetail.mask : '未识别'}}</span></li>
+              <li><span>抱小孩</span><span>{{snapSturcObj.sturcDetail.baby ? snapSturcObj.sturcDetail.baby : '未识别'}}</span></li>
+              <li><span>拎东西</span><span>{{snapSturcObj.sturcDetail.bag ? snapSturcObj.sturcDetail.bag : '未识别'}}</span></li>
+              <li><span>上身款式</span><span>{{snapSturcObj.sturcDetail.upperType ? snapSturcObj.sturcDetail.upperType : '未识别'}}</span></li>
+              <li><span>上身颜色</span><span>{{snapSturcObj.sturcDetail.upperColor ? snapSturcObj.sturcDetail.upperColor : '未识别'}}</span></li>
+              <li><span>下身款式</span><span>{{snapSturcObj.sturcDetail.bottomType ? snapSturcObj.sturcDetail.bottomType : '未识别'}}</span></li>
+              <li><span>下身颜色</span><span>{{snapSturcObj.sturcDetail.bottomColor ? snapSturcObj.sturcDetail.bottomColor : '未识别'}}</span></li>
             </ul>
           </div>
         </div>
@@ -358,7 +362,7 @@
           <div class="flv_snap_bp_list">
             <div class="flv_sl_item" :class="{'active': snapBackActiveIndex === index}" @click="flvSnapTap(index, item.dtoType, item[item._key])" v-for="(item, index) in querySnapList" :key="'fl_sl_back_item' + index">
               <div class="sl_item_left">
-                <img :src="item.vehicleDto ? item.vehicleDto.storagePath : ''" alt="">
+                <img :src="item[item._key] ? item[item._key].subStoragePath : ''" alt="">
               </div>
               <div class="sl_item_right">
                 <h5>检测目标：{{item.target}}</h5>
@@ -393,21 +397,25 @@
           </ul>
           <template v-if="snapSturcObj.type === '1'">
             <div class="struc_c_d_box">
+              <div class="struc_c_d_img struc_c_d_img_green">
+                <img :src="snapSturcObj.sturcDetail.subStoragePath" class="bigImg" title="点击放大图片" alt />
+                <span>抓拍图</span>
+              </div>
               <div class="struc_c_d_info">
                 <h2>分析结果：</h2>
                 <ul>
-                  <li><span>性别</span><span>{{sturcDetail.sex ? sturcDetail.sex : '未识别'}}</span></li>
-                  <li><span>年龄段</span><span>{{sturcDetail.age ? sturcDetail.age : '未识别'}}</span></li>
-                  <li><span>发型</span><span>{{sturcDetail.hair ? sturcDetail.hair : '未识别'}}</span></li>
-                  <li><span>戴眼镜</span><span>{{sturcDetail.glasses ? sturcDetail.glasses : '未识别'}}</span></li>
-                  <li><span>戴帽子</span><span>{{sturcDetail.hat ? sturcDetail.hat : '未识别'}}</span></li>
-                  <li><span>戴口罩</span><span>{{sturcDetail.mask ? sturcDetail.mask : '未识别'}}</span></li>
-                  <li><span>抱小孩</span><span>{{sturcDetail.baby ? sturcDetail.baby : '未识别'}}</span></li>
-                  <li><span>拎东西</span><span>{{sturcDetail.bag ? sturcDetail.bag : '未识别'}}</span></li>
-                  <li><span>上身款式</span><span>{{sturcDetail.upperType ? sturcDetail.upperType : '未识别'}}</span></li>
-                  <li><span>上身颜色</span><span>{{sturcDetail.upperColor ? sturcDetail.upperColor : '未识别'}}</span></li>
-                  <li><span>下身款式</span><span>{{sturcDetail.bottomType ? sturcDetail.bottomType : '未识别'}}</span></li>
-                  <li><span>下身颜色</span><span>{{sturcDetail.bottomColor ? sturcDetail.bottomColor : '未识别'}}</span></li>
+                  <li><span>性别</span><span>{{snapSturcObj.sturcDetail.sex ? snapSturcObj.sturcDetail.sex : '未识别'}}</span></li>
+                  <li><span>年龄段</span><span>{{snapSturcObj.sturcDetail.age ? snapSturcObj.sturcDetail.age : '未识别'}}</span></li>
+                  <li><span>发型</span><span>{{snapSturcObj.sturcDetail.hair ? snapSturcObj.sturcDetail.hair : '未识别'}}</span></li>
+                  <li><span>戴眼镜</span><span>{{snapSturcObj.sturcDetail.glasses ? snapSturcObj.sturcDetail.glasses : '未识别'}}</span></li>
+                  <li><span>戴帽子</span><span>{{snapSturcObj.sturcDetail.hat ? snapSturcObj.sturcDetail.hat : '未识别'}}</span></li>
+                  <li><span>戴口罩</span><span>{{snapSturcObj.sturcDetail.mask ? snapSturcObj.sturcDetail.mask : '未识别'}}</span></li>
+                  <li><span>抱小孩</span><span>{{snapSturcObj.sturcDetail.baby ? snapSturcObj.sturcDetail.baby : '未识别'}}</span></li>
+                  <li><span>拎东西</span><span>{{snapSturcObj.sturcDetail.bag ? snapSturcObj.sturcDetail.bag : '未识别'}}</span></li>
+                  <li><span>上身款式</span><span>{{snapSturcObj.sturcDetail.upperType ? snapSturcObj.sturcDetail.upperType : '未识别'}}</span></li>
+                  <li><span>上身颜色</span><span>{{snapSturcObj.sturcDetail.upperColor ? snapSturcObj.sturcDetail.upperColor : '未识别'}}</span></li>
+                  <li><span>下身款式</span><span>{{snapSturcObj.sturcDetail.bottomType ? snapSturcObj.sturcDetail.bottomType : '未识别'}}</span></li>
+                  <li><span>下身颜色</span><span>{{snapSturcObj.sturcDetail.bottomColor ? snapSturcObj.sturcDetail.bottomColor : '未识别'}}</span></li>
                 </ul>
               </div>
             </div>
@@ -718,7 +726,7 @@ export default {
     // 过滤抓拍上墙数据，只剩8条
     filterSnapList () {
       let newSnapList = Object.assign(this.querySnapList, []);
-      return this.querySnapList.length >= 8 ? newSnapList.splice(0, 8) : this.querySnapList;
+      return this.querySnapList.length >= 8 ? newSnapList.slice(0, 8) : this.querySnapList;
     }
   },
   mounted () {
@@ -1101,6 +1109,7 @@ export default {
       }
     },
     flvSnapTap (index, type, item) {
+      console.log(index, type, item)
       if (this.snapBackDialog) {
         this.snapBackInnerDialog = true;
         this.snapBackActiveIndex = index;
@@ -1692,15 +1701,18 @@ export default {
         getMultiPicRecognize(params)
           .then(res => {
             if (res && res.data) {
-              res.data.map(item => {
-                if (item.plateNo) {
+              res.data.forEach(item => {
+                console.log(item)
+                if (item.plateNo && item.plateNo !== '未识别') {
+                  console.log(item.plateNo)
                   this.plateNoArr.push(item.plateNo);
                 }
               })
-              if (this.plateNoArr.length > 0) { // 目标图片识别出车辆信息
-                this.isDisabledPlateNo = false;
-              } else {
+              if (this.plateNoArr.length === 0) { // 目标图片识别出车辆信息
                 this.isDisabledPlateNo = true;
+                this.$MyMessage('图片未识别到车牌号码，不能做轨迹分析')
+              } else {
+                this.isDisabledPlateNo = false;
               }
             }
           })

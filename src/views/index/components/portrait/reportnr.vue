@@ -151,14 +151,14 @@
                   <el-collapse v-model="activeNames">
                     <el-collapse-item  v-for="(item, index) in struGroupResultDtoList" :key='index'  :title="item.groupName + '(' + item.totalNum + '次)'">
                       <div class="mes_cot">
-                        <div v-for = "(ite, index) in item.personDetailList" :key='index' @click="showStrucInfo(ite, data1.findIndex(function (u) {return u === ite}))">
+                        <div v-for = "(ite, index) in item.stayPointList" :key='index' @click="createInfoWindow(ite)">
                           <div class="cot_1">
                             <img :src="ite.subStoragePath">
                             <div style="padding-left: 10px">
                               <div style="background-color: #F6F6F6; padding: 0 8px"><i class="icon"></i>{{ite.shotTime}}</div>
                               <div class="subdata">
                                 <i class="vl_icon vl_icon_retrieval_03" style="height: 24px"></i>
-                                <b>{{ite.semblance}}</b>%
+                                <b>{{ite.semblance&&ite.semblance.substring(0,5)}}</b>%
                               </div>
                             </div>
                           </div>
@@ -182,19 +182,19 @@
               <vue-scroll>
                 <div class="mes">
                   <el-collapse v-model="activeNames">
-                    <el-collapse-item  v-for="(item, index) in struPersonDtoList" :key='index'  :title="item.shotTime + '(' + item.num + '次)'">
+                    <el-collapse-item  v-for="(item, index) in gat1400FaceExpDtoList" :key='index'  :title="item.shotTime + '(' + item.num + '次)'">
                       <div class="mes_cot">
                         <div v-for = "(ite, index) in item.list" :key='index' style="position: relative" @click="showStrucInfo(ite, data.findIndex(function (u) {return u === ite}))">
                           <div class="cot_1">
-                            <img :src="ite.subStoragePath" >
+                            <img :src="ite.subStoragePath">
                             <div style="padding-left: 10px">
                               <div style="background-color: #F6F6F6; padding: 0 8px"><i class="icon"></i>{{ite.shotTime}}</div>
                               <div class="subdata">
                                 <i class="vl_icon vl_icon_retrieval_03" style="height: 24px"></i>
-                                <b>{{ite.semblance}}</b>%
+                                <b>{{ite.semblance&&ite.semblance.substring(0,5)}}</b>%
                               </div>
                             </div>
-                            <div :title="ite.address" class="address"><i class="el-icon-location-outline"></i>{{ite.address ? ite.address : '无'}}</div>
+                            <div :title="ite.address" class="address" style="padding-right: 22px"><i class="el-icon-location-outline"></i>{{ite.address ? ite.address : '无'}}</div>
                             <div class="del_icon el-icon-delete" @click.stop="updateLine(ite, item.list)"></div>
                           </div>
                           <div style="margin: 15px 0; border-bottom: 1px solid #F2F2F2"></div>
@@ -254,78 +254,20 @@
               <!--</div>-->
               <div class="struc_cd_info_main">
                 <vue-scroll>
-                  <div class="struc_cdi_line" v-if="sturcDetail.sex">
-                    <p>
-                      <b>性别</b>
-                      <span>{{sturcDetail.sex}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.age">
-                    <p>
-                      <b>年龄段</b>
-                      <span>{{sturcDetail.age}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.glasses">
-                    <p>
-                      <b>眼镜</b>
-                      <span>{{sturcDetail.glasses}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.hat">
-                    <p>
-                      <b>帽子</b>
-                      <span>{{sturcDetail.hat}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.mask">
-                    <p>
-                      <b>口罩</b>
-                      <span>{{sturcDetail.mask}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.hair">
-                    <p>
-                      <b>发型</b>
-                      <span>{{sturcDetail.hair}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.upperType">
-                    <p>
-                      <b>上身款式</b>
-                      <span>{{sturcDetail.upperType}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.upperColor">
-                    <p>
-                      <b>上身颜色</b>
-                      <span>{{sturcDetail.upperColor}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.bottomType">
-                    <p>
-                      <b>下身款式</b>
-                      <span>{{sturcDetail.bottomType}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.bottomColor">
-                    <p>
-                      <b>下身颜色</b>
-                      <span>{{sturcDetail.bottomColor}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.baby">
-                    <p>
-                      <b>抱小孩</b>
-                      <span>{{sturcDetail.baby}}</span>
-                    </p>
-                  </div>
-                  <div class="struc_cdi_line" v-if="sturcDetail.bag">
-                    <p>
-                      <b>拎东西</b>
-                      <span>{{sturcDetail.bag}}</span>
-                    </p>
-                  </div>
+                  <ul>
+                    <li><span>性别</span><span>{{sturcDetail.gender ? sturcDetail.gender : '未识别'}}</span></li>
+                    <li><span>年龄段</span><span>{{sturcDetail.age ? sturcDetail.age : '未识别'}}</span></li>
+                    <li><span>发型</span><span>{{sturcDetail.hairStyleDesc ? sturcDetail.hairStyleDesc : '未识别'}}</span></li>
+                    <li><span>戴眼镜</span><span>{{sturcDetail.glasses ? sturcDetail.glasses : '未识别'}}</span></li>
+                    <li><span>戴帽子</span><span>{{sturcDetail.hat ? sturcDetail.hat : '未识别'}}</span></li>
+                    <li><span>戴口罩</span><span>{{sturcDetail.mask ? sturcDetail.mask : '未识别'}}</span></li>
+                    <li><span>抱小孩</span><span>{{sturcDetail.baby ? sturcDetail.baby : '未识别'}}</span></li>
+                    <li><span>拎东西</span><span>{{sturcDetail.bag ? sturcDetail.bag : '未识别'}}</span></li>
+                    <li><span>上身款式</span><span>{{sturcDetail.coatLengthDesc ? sturcDetail.coatLengthDesc : '未识别'}}</span></li>
+                    <li><span>上身颜色</span><span>{{sturcDetail.coatColorDesc ? sturcDetail.coatColorDesc : '未识别'}}</span></li>
+                    <li><span>下身款式</span><span>{{sturcDetail.trousersLenDesc ? sturcDetail.trousersLenDesc : '未识别'}}</span></li>
+                    <li><span>下身颜色</span><span>{{sturcDetail.trousersColorDesc ? sturcDetail.trousersColorDesc : '未识别'}}</span></li>
+                  </ul>
                 </vue-scroll>
               </div>
             </div>
@@ -372,6 +314,8 @@
       </div>
     </el-dialog>
     <div id="capMap"></div>
+    <!-- 视频播放 -->
+    <div is="mapVideoPlay" :oData="mapVideoData"></div>
   </div>
 </template>
 <script>
@@ -379,11 +323,12 @@ import vlUpload from '@/components/common/upload.vue';
 import vehicleBreadcrumb from './breadcrumb.vue';
 import reportnrsave from './reportnrsave.vue';
 import { mapXupuxian,ajaxCtx } from "@/config/config.js";
-import { objDeepCopy ,formatDate } from "@/utils/util.js";
+import { objDeepCopy ,formatDate ,transMinute} from "@/utils/util.js";
 import { getdetailbg, postdetailbg } from "../../api/api.analysis.js";
 import flvplayer from '@/components/common/flvplayer.vue';
+import mapVideoPlay from '@/components/common/mapVideoPlay.vue';
 export default {
-  components: {vehicleBreadcrumb, flvplayer,reportnrsave, vlUpload},
+  components: {vehicleBreadcrumb, flvplayer,reportnrsave, vlUpload,  mapVideoPlay},
   data () {
     return {
       formLabelAlign: {
@@ -461,11 +406,14 @@ export default {
       analysisTaskInfoWithBLOBsList: [],
       taskResult: [],
       struGroupResultDtoList: [{personDetailList: [{shotPlaceLongitude: 1,shotPlaceLatitude: 2 }]}],
-      struPersonDtoList: [],
+      gat1400FaceExpDtoList: [],
       data: [],
       taskWebParam: {},
       data1:[],
-      arr: []
+      arr: [],
+      curInfoWinVideoPath: '',
+      mapVideoData: null,
+      hoverWindow: null
     }
   },
   created() {
@@ -474,7 +422,10 @@ export default {
   mounted () {
     this.setDTime()
     this.getdetailbgg()
-    console.log(this.$route.query.uid,this.$route.query.targetUrl, this.$route.query.startTime)
+    // 监听地图信息窗体点击事件
+    $('body').on('click', '.vl_vehicle_ljd_mk_p', () => {
+      this.showVideo(this.curInfoWinVideoPath);
+    })
   },
   methods: {
     setDTime () {
@@ -549,41 +500,43 @@ export default {
           if (res.data.analysisTaskInfoWithBLOBsList[0].taskResult) {
             this.taskResult = JSON.parse(res.data.analysisTaskInfoWithBLOBsList[0].taskResult)
           }
+          if (res.data.analysisTaskInfoWithBLOBsList[0].taskWebParam) {
+            this.taskWebParam =JSON.parse(res.data.analysisTaskInfoWithBLOBsList[0].taskWebParam)
+          }
           if (res.data.struGroupResultDtoList) {
+            console.log(res.data.struGroupResultDtoList)
             this.struGroupResultDtoList = res.data.struGroupResultDtoList
             this.struGroupResultDtoList.forEach((item)=>{
-              item.personDetailList.forEach((ite)=>{
+              item.stayPointList.forEach((ite)=>{
                 this.data1.push(ite)
               })
             })
           }
-          if (res.data.analysisTaskInfoWithBLOBsList[0].taskWebParam) {
-            this.taskWebParam =JSON.parse(res.data.analysisTaskInfoWithBLOBsList[0].taskWebParam)
-          }
-          let list = []
-          res.data.struPersonDtoList.forEach((item)=>{
-            list.push(item.shotTime.substring(0,10))
-          })
-          list = Array.from(new Set(list))
-          for (let i =0; i<list.length; i++) {
-            let index = list[i]
-            this.struPersonDtoList[i] = {}
-            this.struPersonDtoList[i].shotTime= index
-            this.struPersonDtoList[i].list = []
-            for (let k =0; k<res.data.struPersonDtoList.length; k++) {
-              if (res.data.struPersonDtoList[k].shotTime.substring(0,10) === index) {
-                (this.struPersonDtoList[i].list).push(res.data.struPersonDtoList[k])
-              }
-            }
-            this.struPersonDtoList[i].num = this.struPersonDtoList[i].list.length
-          }
-          console.log(list)
-          console.log(this.struPersonDtoList)
-          this.struPersonDtoList.forEach((item)=>{
-            item.list.forEach((ite)=>{
-              this.data.push(ite)
+          if (res.data.gat1400FaceExpDtoList) {
+            let list = []
+            res.data.gat1400FaceExpDtoList.forEach((item)=>{
+              list.push(item.shotTime.substring(0,10))
             })
-          })
+            list = Array.from(new Set(list))
+            for (let i =0; i<list.length; i++) {
+              let index = list[i]
+              this.gat1400FaceExpDtoList[i] = {}
+              this.gat1400FaceExpDtoList[i].shotTime= index
+              this.gat1400FaceExpDtoList[i].list = []
+              for (let k =0; k<res.data.gat1400FaceExpDtoList.length; k++) {
+                if (res.data.gat1400FaceExpDtoList[k].shotTime.substring(0,10) === index) {
+                  (this.gat1400FaceExpDtoList[i].list).push(res.data.gat1400FaceExpDtoList[k])
+                }
+              }
+              this.gat1400FaceExpDtoList[i].num = this.gat1400FaceExpDtoList[i].list.length
+            }
+            this.gat1400FaceExpDtoList.forEach((item)=>{
+              item.list.forEach((ite)=>{
+                this.data.push(ite)
+              })
+            })
+            console.log(this.data)
+          }
           this.dataloading = false
           this.initMap()
           this.renderMap()
@@ -623,24 +576,50 @@ export default {
       });
       map.setMapStyle('amap://styles/whitesmoke');
       this.map = map;
-      for (let i= 0; i< this.struGroupResultDtoList.length; i++){
-        this.drawPoint(this.struGroupResultDtoList[i])
-      }
+      this.drawMarkers(this.data1)
     },
-    /**
-     * 地图描点
-     */
-    drawPoint (data) {
-      let _content = `<div class="vl_icon vl_icon_judge_02"></div><div class="cap_info_win"><p>${data.groupName}</p><p>${data.totalNum}次</p></div>`
-      this.markerPoint = new window.AMap.Marker({ // 添加自定义点标记
-        map: this.map,
-        position: [data.personDetailList[0].shotPlaceLongitude, data.personDetailList[0].shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-        offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
-        draggable: false, // 是否可拖动
-        // 自定义点标记覆盖物内容
-        content: _content
+    createInfoWindow (obj) {
+      let _sContent = `<div class="vl_vehicle_ljd_mk_p"><img class="igm" src="${obj.storagePath}"><p class='addres'>${obj.address} <i class='el-icon-caret-right'></i></p><p class='times'>${transMinute(obj.stopOverTime)}</p></div>`;
+      this.hoverWindow = new window.AMap.InfoWindow({
+        isCustom: true,
+        closeWhenClickMap: true,
+        offset: new window.AMap.Pixel(-2, -50), // 相对于基点的偏移位置
+        content: _sContent
       });
-      // this.map.setZoomAndCenter(16, [data.personDetailList[0].shotPlaceLongitude, data.personDetailList[0].shotPlaceLatitude]); // 自适应点位置
+      this.hoverWindow.open(this.map, new window.AMap.LngLat(obj.shotPlaceLongitude, obj.shotPlaceLatitude));
+      this.curInfoWinVideoPath = obj.videoPath;
+      this.map.setCenter([obj.shotPlaceLongitude, obj.shotPlaceLatitude])
+    },
+    drawMarkers(data) {
+      console.log(data)
+      let _this = this
+      for (let i = 0; i < data.length; i++) {
+        let obj = data[i];
+        // 摄像头
+        let _id = "vlPortraitLjdSxt" + i;
+        let _content =
+          "<div id=" +
+          _id +
+          ' class="vl_icon vl_jfo_sxt vl_icon_judge_04"></div>';
+        let marker = new window.AMap.Marker({
+          // 添加自定义点标记
+          map: this.map,
+          position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
+          offset: new window.AMap.Pixel(-28.5, -50), // 相对于基点的偏移位置
+          draggable: false, // 是否可拖动
+          extData: obj,
+          // 自定义点标记覆盖物内容
+          content: _content,
+          zIndex: 100
+        });
+        marker.on('mouseover', function () {
+          $("#" + _id).addClass("vl_icon_judge_02");
+          _this.createInfoWindow(obj)
+        })
+        marker.on('mouseout', function () {
+          $("#" + _id).removeClass("vl_icon_judge_02");
+        })
+      }
       this.map.setFitView();
     },
     updateLine (obj) {
@@ -655,23 +634,24 @@ export default {
         list1.push(item.shotTime.substring(0,10))
       })
       list1 = Array.from(new Set(list1))
-      this.struPersonDtoList =[]
+      this.gat1400FaceExpDtoList =[]
       for (let i =0; i<list1.length; i++) {
         let index = list1[i]
-        this.struPersonDtoList[i] = {}
-        this.struPersonDtoList[i].shotTime= index
-        this.struPersonDtoList[i].list = []
+        this.gat1400FaceExpDtoList[i] = {}
+        this.gat1400FaceExpDtoList[i].shotTime= index
+        this.gat1400FaceExpDtoList[i].list = []
         for (let k =0; k<this.data.length; k++) {
           if (this.data[k].shotTime.substring(0,10) === index) {
-            (this.struPersonDtoList[i].list).push(this.data[k])
+            (this.gat1400FaceExpDtoList[i].list).push(this.data[k])
           }
         }
-        this.struPersonDtoList[i].num = this.struPersonDtoList[i].list.length
+        this.gat1400FaceExpDtoList[i].num = this.gat1400FaceExpDtoList[i].list.length
       }
       this.drawMapMarker(this.data)
     }, // 更新画线
     drawMapMarker (oData) {
       let data = this.fitlerSXT(oData);
+      console.log(data)
       for (let  i = 0; i < data.length; i++) {
         let obj = data[i];
         if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
@@ -761,7 +741,7 @@ export default {
     fitlerSXT (oData) {
       let data = objDeepCopy(oData), _arr = [];
       data.forEach(x => {
-        let _i = _arr.findIndex(y => y.deviceID === x.deviceID);
+        let _i = _arr.findIndex(y => y.DeviceID === x.DeviceID);
         if (_i === -1) {
           _arr.push(x)
         } else {
@@ -803,6 +783,12 @@ export default {
       supMap.setMapStyle('amap://styles/whitesmoke');
       this.map1 = supMap;
     },
+    showVideo(path){
+      this.mapVideoData = {
+        name: Math.random(),
+        url: path
+      }
+    }
   }
 }
 </script>
@@ -1022,6 +1008,9 @@ export default {
                 .mes_cot{
                   padding: 10px;
                   .cot_1{
+                    &:hover{
+                      background-color: #E6F7FF;
+                    }
                     img{
                       width: 92px;
                       height: 92px;
@@ -1098,6 +1087,84 @@ export default {
   }
 </style>
 <style lang="scss">
+  .vl_vehicle_ljd_mk_p {
+    /*display: none;*/
+    position: relative;
+    width: 180px;
+    height: auto;
+    background: #ffffff;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    box-shadow: 4px 0px 10px 0px #838383;
+    box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);
+    .times{
+      position: absolute;
+      left: 10px;
+      top: 10px;
+      background: #50CC62;
+      padding: 0px 8px;
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
+      color: #ffffff;
+    }
+    .addres{
+      right: 10px;
+      text-align: left;
+      position: absolute;
+      left: 10px;
+      bottom: 10px;
+      color: #ffffff;
+      i{
+        float: right;
+        font-size: 24px;;
+      }
+    }
+    .igm{
+      width: 100%;
+      height: 100px;
+      background: #666666;
+    }
+    .big {
+      font-size: 16px;
+      font-weight: bold;
+    }
+    &:after {
+      border-bottom-color: rgba(0, 0, 0, 1);
+      content: "";
+      display: inline-block;
+      position: absolute;
+      left: 50%;
+      margin-left: -10px;
+      bottom: -10px;
+      border-top: 10px solid #fff;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+    }
+    &.vl_jig_mk_img_show{
+      display: block;
+    }
+    &.vl_jig_mk_img_hover {
+      &:after {
+        border-bottom-color: rgba(0, 0, 0, 1);
+        content: "";
+        display: inline-block;
+        position: absolute;
+        left: 50%;
+        margin-left: -10px;
+        bottom: -10px;
+        border-top: 10px solid #0c70f8;
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+      }
+      background: rgba(12, 112, 248, 1);
+      position: relative;
+      border: 0.04rem solid #0c70f8;
+      > p {
+        color: #ffffff;
+      }
+    }
+  }
   .cap_info_win {
     background: #FFFFFF;
     padding: 18px;
@@ -1319,6 +1386,41 @@ export default {
             }
             .struc_cd_info_main {
               height: 2.75rem;
+              ul {
+                overflow: hidden;
+                > li {
+                  float: left;
+                  width: 50%;
+                  overflow: hidden;
+                  margin-bottom: 15px;
+                  display: flex;
+                  > span {
+                    line-height: 26px; height: 28px;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    float: left;
+                    overflow: hidden;
+                    font-size: 14px;
+                    &:first-child {
+                      width: 68px;
+                      background-color: #FAFAFA;
+                      text-align: center;
+                      border: 1px solid #f2f2f2;
+                      border-radius: 4px 0 0 4px;
+                      color: #999;
+                    }
+                    &:last-child {
+                      max-width: 94px;
+                      border: 1px solid #f2f2f2;
+                      border-left: 0;
+                      background-color: #fff;
+                      padding: 0 9px 0 9px;
+                      border-radius: 0 4px 4px 0;
+                      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; word-break: break-all;
+                    }
+                  }
+                }
+              }
             }
             .struc_cdi_line {
               flex: none;

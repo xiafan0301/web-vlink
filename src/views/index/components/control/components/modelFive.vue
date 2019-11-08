@@ -27,7 +27,7 @@
     <el-form-item style="margin-top: 20px;" v-if="!isShowControlDev">
       <el-button type="primary" @click="selControl('modelFive')">一键布控</el-button>
     </el-form-item>
-    <div is="controlDev" ref="controlDev" v-if="isShowControlDev" :devs="devs" :bays="bays" @getChildModel="getChildModel" :devIdListFive="devIdList" :bayIdListFive="bayIdList"></div>
+    <div is="controlDev" ref="controlDev" v-if="isShowControlDev" :devs="devs" :bays="bays" @getChildModel="getChildModel" :devIdListFive="devIdList" :bayIdListFive="bayIdList" model="gwcl"></div>
     <div is="vehicleLib" ref="vehicleLibDialog" :fileList="vehicleList" @getVehicleData="getVehicleData" model="gwcl"></div>
   </el-form>
 </template>

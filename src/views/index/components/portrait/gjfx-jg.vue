@@ -375,6 +375,9 @@
                   this.$set(res.data, 'taskWebParam', JSON.parse(res.data.taskWebParam));
                   res.data.taskWebParam.deviceNames = res.data.taskWebParam.deviceNames ? res.data.taskWebParam.deviceNames.split(',') : '';
                   this.taskDetail = res.data.taskWebParam;
+                  let {startTime, endTime} = res.data.taskWebParam;
+                  this.ruleForm.data1 = new Date(startTime).getTime();
+                  this.ruleForm.data2 = new Date(endTime).getTime();
                   console.log(res.data)
                   this.imgData = {
                     cname: '带图' + Math.random(),

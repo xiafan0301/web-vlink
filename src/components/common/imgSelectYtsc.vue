@@ -88,8 +88,6 @@ export default {
       curCutBox: false,
       selectList: [],  
       secondImgUrl: null, // 第二步选择车体的图片地址
-      initImgWidth: 920, // 图片原width
-      initImgHeight: 419, // 图片原height
       fd: null,
       currentId: null, // 第一步选择车体标识
       currentX: 0, // 当前选择车体的x
@@ -165,7 +163,8 @@ export default {
     sureSelectCut () {
       this.$emit('emitImgData', {
         open: false,
-        imgBDataList: this.imgBDataList
+        imgBDataList: this.imgBDataList,
+        secondImgUrl: this.secondImgUrl
       })
       // this.dialogVisible = false;
     },
@@ -200,8 +199,9 @@ export default {
     // 获取图片缩放比例
     getImgScale () {
       let imgWidth = $('#imgBox').width(); // 获取图片的宽度
-      let scale = this.initImgWidth / imgWidth;
+      let scale = this.imgInfo.width / imgWidth;
 
+      console.log('ss', scale);
       
       this.selectList.forEach((item, index) => {
         // 在页面显示的图片大小计算宽和高的比例
@@ -216,6 +216,7 @@ export default {
         let $p = document.createElement('p');
 
         $p.setAttribute('class', 'title_p');
+        $p.style.whiteSpace = 'nowrap';
         $p.innerText = '目标';
         
 
@@ -733,7 +734,7 @@ export default {
           }
           .select_box {
             &:hover {
-              z-index: 1000;
+              z-index:999;
             }
             .title_p {
               width: 100%;

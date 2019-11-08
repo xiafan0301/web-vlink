@@ -480,7 +480,9 @@
                   this.taskDetail = res.data.taskWebParam;
                   let {portraitGroupId, minSemblance, startTime, endTime, origin} = res.data.taskWebParam;
                   this.radio = origin + '';
-                  this.searchData.portraitGroupId = portraitGroupId.split(',');
+                  this.$nextTick(() => {
+                    this.searchData.portraitGroupId = portraitGroupId.split(',');
+                  })
                   this.searchData.minSemblance = minSemblance;
                   this.searchData.startTime = startTime;
                   this.searchData.endTime = endTime;
@@ -1122,16 +1124,17 @@
             i {
               display: block;
               position: absolute;
-              top: .1rem;
+              bottom: .1rem;
               right: .1rem;
               line-height: .26rem;
               height: .26rem;
-              background: rgba(255, 255, 255, .8);
+              background: #0C70F8;
               border-radius: .13rem;
               font-style: normal;
-              color: #0C70F8;
+              color: #ffffff;
               font-size: 12px;
               padding: 0 .1rem;
+              cursor: pointer;
             }
             &:before {
               display: block;

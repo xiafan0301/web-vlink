@@ -1040,4 +1040,54 @@ export function deleteAd (data) {
   });
 }
 /* --------------广告位管理end------------------ */
-  
+
+/* --------------级联配置start------------------ */
+
+/**
+ * 查询所有级联配置
+ * @param {*} data
+ */
+export function ManageGetCascades (data) {
+  return request({
+    url: '/cascades',
+    method: 'get',
+    params: data,
+    mode: 'base'
+  });
+}
+/**
+ * 新增级联配置
+ * @param {*} data
+ */
+export function ManagePostCascades (data) {
+  return request({
+    url: '/cascades',
+    method: 'post',
+    data,
+    mode: 'base'
+  });
+}
+/**
+ * 修改级联配置
+ * @param {*} data
+ */
+export function ManagePutCascades (data) {
+  return request({
+    url: '/cascades',
+    method: 'put',
+    data,
+    mode: 'base'
+  });
+}
+/**
+ * 根据uid删除级联配置
+ * @param {*} data
+ */
+export function ManageDeleteCascades (data) {
+  return request({
+    url: '/cascades/' + data.uid,
+    method: 'delete',
+    mode: 'base'
+  });
+}
+/* --------------级联配置end------------------ */

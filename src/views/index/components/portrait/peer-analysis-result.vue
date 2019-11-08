@@ -6,22 +6,19 @@
         <el-breadcrumb-item :to="{ path: '/portrait/peer-analysis-list' }">同行分析</el-breadcrumb-item>
         <el-breadcrumb-item>分析结果</el-breadcrumb-item>
       </el-breadcrumb>
-      <!-- <el-button :loading="exportLoadingbtn" @click="onExport" class="th-button-export-color">导出</el-button> -->
     </div>
     <div class="the-bottom">
       <div class="the-left-search">
         <template v-if="showNewTask">
-          <div class="vl_jtc_img_box">
-            <div style="padding: 0 25px; height: 210px;">
-              <div is="vlUpload" :clear="uploadClear" :imgData="imgData" @uploadEmit="uploadEmit"></div>
-            </div>
+          <div class="task_name">
+            <span>任务名称：</span>
+            <span>{{editForm.taskName}}</span>
           </div>
-          <div class="per_semblance_ytsr"><span>同行次数：</span><el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100; if(value&&value <2)value = 2;" placeholder="填写同行次数" v-model="searchData.minSemblance"></el-input>(2-100)</div>
           <!--查询范围-->
           <div class="per_left_time">
             <div class="left_time">
               <el-date-picker
-                v-model="searchData.startTime"
+                v-model="editForm.startTime"
                 style="width: 100%;margin-bottom: 10px;"
                 class="vl_date"
                 type="datetime"
@@ -33,7 +30,7 @@
               <el-date-picker
                 style="width: 100%;"
                 class="vl_date vl_date_end"
-                v-model="searchData.endTime"
+                v-model="editForm.endTime"
                 @change="chooseEndTime"
                 :time-arrow-control="true"
                 value-format="timestamp"
@@ -41,6 +38,16 @@
                 placeholder="选择日期时间">
               </el-date-picker>
             </div>
+          </div>
+          <div class="vl_jtc_img_box">
+            <div style="padding: 0 25px; height: 210px;">
+              <div is="vlUpload" :clear="uploadClear" :imgData="imgData" @uploadEmit="uploadEmit"></div>
+            </div>
+          </div>
+          <div class="per_semblance_ytsr">
+            <span>同行次数：</span>
+            <el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100; if(value&&value <2)value = 2;" placeholder="填写同行次数" v-model="editForm.number">
+            </el-input>(2-100)
           </div>
           <div class="peer_xzsb_s" @click="areaTypeChanged" v-if="chooseType === 1">
             <span>选择设备</span>
@@ -61,9 +68,9 @@
             <li v-if="taskDetail.taskWebParam && taskDetail.taskWebParam.targetPicUrl">
               <img :src="taskDetail.taskWebParam.targetPicUrl" alt="">
             </li>
-            <li v-else>
+            <!-- <li v-else>
               <img src="../../../../assets/img/temp/vis-eg.png" alt="">
-            </li>
+            </li> -->
             <li>
               <span>任务名称：</span>
               <span>{{taskDetail.taskName ? taskDetail.taskName : '无'}}</span>
@@ -90,7 +97,7 @@
             </li>
           </ul>
           <div class="update_task">
-            <el-button type="primary" @click="showNewTask = true;">修改任务</el-button>
+            <el-button type="primary" @click="showNewTaskBox">修改任务</el-button>
           </div>
         </template>
       </div>
@@ -172,32 +179,32 @@ export default {
       selectCameraArr: [],
       selectBayonetArr: [],
       showNewTask: false,
-      searchData: {
-        minSemblance: 5, // 最小相似度
-        portraitGroupId: [],
-        startTime: '',
-        endTime: ''
-      },
+      // searchData: {
+      //   minSemblance: 5, // 最小相似度
+      //   portraitGroupId: [],
+      //   startTime: '',
+      //   endTime: ''
+      // },
       searching: false,
-
 
       pagination: {
         total: 0,
-        pageSize: 12,
+        pageSize: 10,
         currentPage: 1
       },
       taskDetail: {},
       deviceStr: null,
       deviceList: [],
-      boxList: []
+      boxList: [],
+      editForm: {}
     }
   },
  
   mounted() {
     this.getMonitorList().then(() => {
-      this.getDetail()
+      this.getDetail();
     })
-    this.setDTime();
+    // this.setDTime();
   },
   methods: {
     uploadEmit(data) {
@@ -208,12 +215,12 @@ export default {
       }
     },
     resetSearch () {
-      this.searchData.minSemblance = 5;
+      // this.searchData.minSemblance = 5;
       this.uploadClear = {}
       this.msClear = {};
       this.showNewTask = false;
       this.dSum = 0;
-      this.setDTime();
+      // this.setDTime();
     },
     tcDiscuss () {
       let params = {
@@ -226,15 +233,15 @@ export default {
       } else {
         params['targetPicUrl'] = this.imgList.path;
       }
-      if (this.searchData.minSemblance) {
-        params['number'] = this.searchData.minSemblance;
+      if (this.editForm.number) {
+        params['number'] = this.editForm.number;
       } else {
         params['number'] = 2;
       }
       params['deviceId'] = this.selectCameraArr.join(',');
       params['bayonetIds'] = this.selectBayonetArr.join(',');
-      params['startTime'] = formatDate(this.searchData.startTime, 'yyyy-MM-dd HH:mm:ss');
-      params['endTime'] = formatDate(this.searchData.endTime, 'yyyy-MM-dd HH:mm:ss');
+      params['startTime'] = formatDate(this.editForm.startTime, 'yyyy-MM-dd HH:mm:ss');
+      params['endTime'] = formatDate(this.editForm.endTime, 'yyyy-MM-dd HH:mm:ss');
       params['uid'] = this.$route.query.uid;
       postPeopleTask(params).then(res => {
         this.searching = false;
@@ -248,22 +255,22 @@ export default {
         }
       })
     },
-    setDTime() {
-      let date = new Date();
-      let curDate = date.getTime();
-      let curS = 1 * 24 * 3600 * 1000;
-      let _sDate = new Date(curDate - curS);
-      let _s = _sDate.getFullYear()+ '-' + (_sDate.getMonth() + 1) + '-' + _sDate.getDate() + ' 00:00:00' ;
-      this.searchData.startTime = new Date(_s).getTime();
-      this.searchData.endTime = curDate;
-    },
+    // setDTime() {
+    //   let date = new Date();
+    //   let curDate = date.getTime();
+    //   let curS = 1 * 24 * 3600 * 1000;
+    //   let _sDate = new Date(curDate - curS);
+    //   let _s = _sDate.getFullYear()+ '-' + (_sDate.getMonth() + 1) + '-' + _sDate.getDate() + ' 00:00:00' ;
+    //   this.searchData.startTime = new Date(_s).getTime();
+    //   this.searchData.endTime = curDate;
+    // },
     chooseEndTime (e) {
-      if (e < this.searchData.startTime) {
+      if (e < this.editForm.startTime) {
         this.$message.info('结束时间必须大于开始时间才会有结果')
       }
     },
     chooseStartTime (e) {
-      if (e > this.searchData.endTime) {
+      if (e > this.editForm.endTime) {
         this.$message.info('结束时间必须大于开始时间才会有结果')
       }
     },
@@ -293,17 +300,17 @@ export default {
         }
       }
     },
-
-
     // 获取离线任务详情
     getDetail () {
-      const id = this.$route.query.uid
+      const id = this.$route.query.uid;
       if (id) {
         getPeopleTaskDetail(id)
           .then(res => {
             if (res) {
-              this.$set(res.data, 'taskResult', JSON.parse(res.data.taskResult))
-              this.$set(res.data, 'taskWebParam', JSON.parse(res.data.taskWebParam))
+              this.$set(res.data, 'taskResult', JSON.parse(res.data.taskResult));
+              this.$set(res.data, 'taskWebParam', JSON.parse(res.data.taskWebParam));
+              console.log('aaa', res.data);
+              
               let arr = res.data.taskWebParam.deviceId.split(',')
               let arr1 = []
               if (arr && arr.length > 0) {
@@ -364,6 +371,15 @@ export default {
       this.boxList.splice(0, this.boxList.length)
       this.boxList = [...this.taskDetail.taskResult.slice((page - 1) * 12, 12 + (page - 1) * 12)]
       this.boxList.sort((a, b) => {return a.peerNumber - b.peerNumber})
+    },
+    // 点击修改任务按钮
+    showNewTaskBox () {
+      this.editForm = {
+        ...this.taskDetail.taskWebParam
+      };
+      this.showNewTask = true;
+      console.log('mmm', this.editForm);
+      
     }
   }
 }
@@ -425,6 +441,18 @@ export default {
       animation: fadeInLeft .4s ease-out .3s both;
       padding-top: 20px;
       position: relative;
+      .task_name {
+        font-size: 14px;
+        height: 40px;
+        margin-left: 20px;
+        margin-bottom: -10px;
+        span:first-child {
+          color: #999999;
+        }
+        span:last-child {
+          color: #333333;
+        }
+      }
       > ul {
         width: 100%;
         margin-bottom: 20px;
@@ -588,7 +616,7 @@ export default {
         }
         .left_time {
           width: 100%;
-          margin: 10px 0;
+          margin: 0 0 10px 0;
           .el-date-editor {
             width: 100%;
           }
@@ -676,6 +704,7 @@ export default {
 <style lang="scss">
   .per_semblance_ytsr {
     position: relative;
+    margin-bottom: 10px;
     padding-left: 20px;
     >span {
       position: absolute;
