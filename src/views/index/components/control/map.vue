@@ -824,7 +824,7 @@ export default {
           })
           // 跳转到新增布控页面
           $('#mapBox').on('click', '.vl_map_add', function () {
-            _this.$router.push({ name: 'control_add', query: {deviceId: obj.uid, model: 9} })
+            _this.$router.push({ name: 'control_add', query: {deviceId: obj.uid, modelName: 9} })
           })
           // 终止布控
           $('#mapBox').on('click', '.vl_map_stop', function (e) {

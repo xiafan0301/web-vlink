@@ -361,7 +361,7 @@
           </div>
           <div class="result_content_box" v-if="controlResList">
             <div class="result_content">
-              <div>
+              <div class="control_obj">
                 <h1>布控对象列表</h1>
                 <vue-scroll>
                   <ul>
@@ -379,7 +379,7 @@
                   </ul>
                 </vue-scroll>
               </div>
-              <div>
+              <div class="control_result" v-if="controlResList && controlResList.list && controlResList.list.length > 0" v-loading="loadingBox">
                 <div class="result_img_box" v-for="(item, index) in controlResList.list" :key="index">
                   <div @mouseenter="item.curVideoTool = true;" @mouseleave="item.curVideoTool = false;">
                     <img :src="item.path" alt="" v-show="!item.isShowCurImg" class="bigImg">
@@ -398,6 +398,10 @@
                     <p><i class="vl_icon vl_icon_control_27" style="margin-top: -4px;"></i><span class="vl_f_999">{{item.snapTime}}</span></p>
                   </div>
                 </div>
+              </div>
+              <div class="not_content" v-if="controlResList && controlResList.list && controlResList.list.length === 0">
+                <img src="../../../../../assets/img/not-content.png" alt="">
+                <p>暂无相关数据</p>
               </div>
             </div>
             <div class="pagination_box">
@@ -527,6 +531,7 @@ export default {
       devNameIsKey: null,//设备名称
       // 布控结果视频参数
       loading: false,
+      loadingBox: false,
       controlResList: null,//布控抓拍结果列表
       showLarge: false,
       showCut: false,
@@ -883,6 +888,7 @@ export default {
         'where.dateEnd': this.controlTimeIsKey && this.controlTimeIsKey[1]
       }
       this.devNameIsKey && (params['where.deviceName'] = this.devNameIsKey);
+      this.loadingBox = true;
       getAlarmSnap(params).then(res => {
         if (res && res.data) {
           this.controlResList = res.data;
@@ -894,6 +900,8 @@ export default {
             delete f.snapPhoto;
           })
         }
+      }).finally(() => {
+        this.loadingBox = false;
       })
     },
     // 布控结果列表分页
@@ -1052,7 +1060,6 @@ export default {
   width: 100%;
   min-height: 100vh;
   position: absolute;
-  animation: fadeIn .4s ease-out both;
   .manage_d_box{
     width: calc(100% - 40px);
     // min-height: 783px;
@@ -1532,7 +1539,7 @@ export default {
         > .result_content{
           display: flex;
           flex-wrap: nowrap;
-          > div:nth-child(1){
+          .control_obj{
             width: 140px;
             padding-bottom: 40px;
             border-right: 1px solid #F2F2F2;
@@ -1575,7 +1582,7 @@ export default {
               }
             }
           }
-          > div:nth-child(2){
+          .control_result{
             width: 100%;
             height: 100%;
             display: flex;

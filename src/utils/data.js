@@ -38,6 +38,7 @@ const dataList = {
   idType: 1060, // 证件类型
   bayonetUse: 1061, // 卡口用途
   isEnterPoint: 1062, // 出入场类型
+  sexType: 1018, // 性别类型
 }
 // 处理方式
 const handeMethods = {

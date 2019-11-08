@@ -360,7 +360,6 @@ export default {
   width: 100%;
   height: 100%;
   padding: 20px;
-  animation: fadeIn .4s ease-out both;
   .control_manage_box{
     width: 100%;
     // height: 100%;

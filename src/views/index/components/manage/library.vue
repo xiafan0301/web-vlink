@@ -78,9 +78,9 @@
             <el-select v-model="libPortraitForm.sex" placeholder="选择性别">
               <el-option
                 v-for="item in sexList"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
+                :key="item.enumField"
+                :label="item.enumValue"
+                :value="item.enumField">
               </el-option>
             </el-select>
           </el-form-item>
@@ -613,11 +613,7 @@ export default {
       pageType: '1',//页面类型，默认为组成员页，1-组成员页，2-组设置页
       groupId: null,//分组id
       lastGroupId: null,//用于记录之前的分组id
-      sexList: [
-        {label: '未知', value: 0},
-        {label: '男', value: 1},
-        {label: '女', value: 2}
-      ],//性别列表数据
+      sexList:this.dicFormater(dataList.sexType)[0].dictList,//性别列表数据
       nationalList: nationData,//民族列表数据
 
       vehicleColorList: this.dicFormater(dataList.carColor)[0].dictList,

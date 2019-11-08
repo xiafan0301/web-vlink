@@ -10,9 +10,9 @@
         <el-select value-key="value" v-model="libForm.sex" filterable placeholder="性别不限">
           <el-option
             v-for="item in sexList"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
+            :key="item.enumField"
+            :label="item.enumValue"
+            :value="item.enumField">
           </el-option>
         </el-select>
       </el-form-item>
@@ -35,56 +35,62 @@
       </el-form-item>
     </el-form>
     <div class="list_box" v-loading="loading">
-      <div class="list_info" v-for="item in protraitMemberList.list" :key="item.uid">
-        <div class="list_img"><img :src="item.photoUrl" alt="" style="width: 100%;height: 100%;"></div>
-        <div class="list_data">
-          <div class="data_title">
-            <span class="vl_f_999">详情资料</span>
-            <el-checkbox v-model="item.isChecked" :disabled="item.disabled" @change="operateRadio()"></el-checkbox>
-          </div>
-          <div class="data_list">
-            <span :title="item.name">{{item.name}}</span>
-            <span :title="item.sex">{{item.sex}}</span>
-            <span :title="item.nation">{{item.nation}}</span>
-          </div>
-          <div class="data_list">
-            <span>{{item.idNo}}<i class="vl_icon vl_icon_control_29"></i></span>
-          </div>
-          <div class="data_list" v-if="item.groupNames">
-            <template v-for="(gN, index) in item.groupNames.split(',')">
-              <span v-if="index <= 1" :title="gN" :key="index + gN">{{gN}}</span>
-            </template>
-            <div class="more" v-if="item.groupNames.split(',').length >= 3">
-              <el-popover
-                placement="top-start"
-                width="220"
-                popper-class="more_popover_box"
-                trigger="hover">
-                <vue-scroll>
-                  <template>
-                    <div class="more_popover">
-                      <span :title="gN" v-for="(gN, index) in item.groupNames.split(',')" :key="index + gN">{{gN}}</span>
-                    </div>
-                  </template>
-                </vue-scroll>
-                <span slot="reference" class="more_hover">更多组</span>
-              </el-popover>
+      <template v-if="protraitMemberList && protraitMemberList.list && protraitMemberList.list.length > 0">
+        <div class="list_info" v-for="item in protraitMemberList.list" :key="item.uid">
+          <div class="list_img"><img :src="item.photoUrl" alt="" style="width: 100%;height: 100%;"></div>
+          <div class="list_data">
+            <div class="data_title">
+              <span class="vl_f_999">详情资料</span>
+              <el-checkbox v-model="item.isChecked" :disabled="item.disabled" @change="operateRadio()"></el-checkbox>
+            </div>
+            <div class="data_list">
+              <span :title="item.name">{{item.name}}</span>
+              <span :title="item.sex">{{item.sex}}</span>
+              <span :title="item.nation">{{item.nation}}</span>
+            </div>
+            <div class="data_list">
+              <span>{{item.idNo}}<i class="vl_icon vl_icon_control_29"></i></span>
+            </div>
+            <div class="data_list" v-if="item.groupNames">
+              <template v-for="(gN, index) in item.groupNames.split(',')">
+                <span v-if="index <= 1" :title="gN" :key="index + gN">{{gN}}</span>
+              </template>
+              <div class="more" v-if="item.groupNames.split(',').length >= 3">
+                <el-popover
+                  placement="top-start"
+                  width="220"
+                  popper-class="more_popover_box"
+                  trigger="hover">
+                  <vue-scroll>
+                    <template>
+                      <div class="more_popover">
+                        <span :title="gN" v-for="(gN, index) in item.groupNames.split(',')" :key="index + gN">{{gN}}</span>
+                      </div>
+                    </template>
+                  </vue-scroll>
+                  <span slot="reference" class="more_hover">更多组</span>
+                </el-popover>
+              </div>
+            </div>
+            <div class="data_list" v-if="item.remarks">
+              <span>{{item.remarks}}</span>
             </div>
           </div>
-          <div class="data_list" v-if="item.remarks">
-            <span>{{item.remarks}}</span>
-          </div>
         </div>
+        <el-pagination
+          class="cum_pagination"
+          @current-change="handleCurrentChange"
+          :current-page="currentPage"
+          :page-sizes="[100, 200, 300, 400]"
+          :page-size="protraitMemberList.pageSize"
+          layout="total, prev, pager, next, jumper"
+          :total="protraitMemberList.total">
+        </el-pagination>
+      </template>
+      <div class="not_content" v-if="protraitMemberList && protraitMemberList.list && protraitMemberList.list.length === 0">
+        <img src="../../../../../assets/img/not-content.png" alt="">
+        <p>暂无相关数据</p>
       </div>
-      <el-pagination
-        class="cum_pagination"
-        @current-change="handleCurrentChange"
-        :current-page="currentPage"
-        :page-sizes="[100, 200, 300, 400]"
-        :page-size="protraitMemberList.pageSize"
-        layout="total, prev, pager, next, jumper"
-        :total="protraitMemberList.total">
-      </el-pagination>
     </div>
     <div slot="footer">
       <el-button @click="portraitLibDialog = false" class="btn_140">取消</el-button>
@@ -95,6 +101,7 @@
 <script>
 import {nationData} from '../testData.js';
 import {getPortraitList} from '@/views/index/api/api.control.js';
+import {dataList} from '@/utils/data.js';
 export default {
   props: ['fileListOne', 'fileListTwo', 'imgNum'],
   data () {
@@ -104,11 +111,7 @@ export default {
         nation: null,
         idNo: null
       },
-      sexList: [
-        {label: '未知', value: 0},
-        {label: '男', value: 1},
-        {label: '女', value: 2}
-      ],
+      sexList: this.dicFormater(dataList.sexType)[0].dictList,
       nationList: nationData,
       portraitLibDialog: false,
       loading: false,
@@ -248,6 +251,7 @@ export default {
     padding-bottom: 0!important;
     .list_box{
       margin: 0 0.5%;
+      height: 80vh;
       display: flex;
       flex-wrap: wrap;
       align-items: flex-start;

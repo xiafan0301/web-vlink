@@ -14,9 +14,9 @@
       <el-select value-key="uid" v-model="modelOneForm.sex" filterable placeholder="请选择">
         <el-option
           v-for="item in sexList"
-          :key="item.uid"
-          :label="item.label"
-          :value="item.value">
+          :key="item.enumField"
+          :label="item.enumValue"
+          :value="item.enumField">
         </el-option>
       </el-select>  
     </el-form-item>
@@ -92,6 +92,7 @@ import vehicleLib from './vehicleLib.vue';
 import portraitLib from './portraitLib.vue';
 import {objDeepCopy, imgUrls, unique, formatDate} from '@/utils/util.js';
 import {checkName, checkPlateNumber} from '@/utils/validator.js';
+import {dataList} from '@/utils/data.js';
 const validateDate_ = (rule, value, callback) => {
   if (value) {
     let timestamp = new Date().getTime()// 当前的时间戳
@@ -129,11 +130,7 @@ export default {
       validateDate: validateDate_,
       validPlateNumber: checkPlateNumber,
       validName: checkName,
-      sexList: [
-        {label: '未知', value: 0},
-        {label: '男', value: 1},
-        {label: '女', value: 2}
-      ],
+      sexList: this.dicFormater(dataList.sexType)[0].dictList,
       addressObj: [],
       addressObj_: [],
       fileListOne: [],//上传的失踪人员信息数据
@@ -196,13 +193,11 @@ export default {
     getPortraitDataOne (data) {
       this.fileListOne = data;
       // 从布控库中选择人像时，姓名、性别自动带入
-      const sexObj = {
-        '未知': 0,
-        '男': 1,
-        '女': 2
-      };
       this.modelOneForm.name = this.fileListOne[0].name;
-      this.modelOneForm.sex = sexObj[this.fileListOne[0].sex];
+      const strs = ['未知', '男', '女', '未说明'];
+      const nums = ['0', '1', '2' ,'9'];
+      const index = strs.findIndex(item => this.fileListOne[0].sex.includes(item));
+      this.modelOneForm.sex = nums[index];
     },
     // 从布控库中获取嫌疑人像
     getPortraitDataTwo (data) {

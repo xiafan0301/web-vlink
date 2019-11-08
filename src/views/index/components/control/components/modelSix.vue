@@ -109,7 +109,7 @@ import {unique, imgUrls} from '@/utils/util.js';
 import {dataList} from '@/utils/data.js';
 export default {
   components: {uploadPic, mapSelector, vehicleLib, portraitLib},
-  props: ['modelList', 'deviceId'],
+  props: ['modelList', 'deviceId', 'plateNo', 'imgurl'],
   data () {
     return {
       modelSixForm: {
@@ -159,21 +159,45 @@ export default {
         this.activeDeviceList = [this.deviceId];
       })
     }
+
+    if (this.imgurl) {
+      this.fileListOne.push({
+        photoUrl: this.imgurl,
+        name: random14(),
+        uid: random14(),//必须要文件uid，暂时用的随机数
+        objId: random14(),
+        objType: 1
+      });
+    }
+    
+    if (this.plateNo) {
+      this.fileListTwo.push({
+        vehicleNumber: this.plateNo,
+        photoUrl: null,
+        objType: 2,
+        objId: random14()
+      });
+    }
   },
   methods: {
     // 从布控库中获取布控人员信息
     getPortraitData (data) {
       this.fileListOne = this.fileListOne.concat(data);
       this.fileListOne = unique(this.fileListOne, 'objId');
+      console.log(this.fileListOne, 'this.fileListOne');
+      
     },
     // 从布控库中获取车辆
     getVehicleData (data) {
       this.fileListTwo = this.fileListTwo.concat(data);
       this.fileListTwo = unique(this.fileListTwo, 'objId');
+      console.log(this.fileListTwo, 'this.fileListTwo');
+      
     },
    // 布控人员信息的上传方法
     uploadPicDel (fileListOne) {
       this.fileListOne = fileListOne;
+      console.log(this.fileListOne, 'this.fileListOne');
     },
     // 布控人员信息的上传方法
     uploadPicFileList (fileList) {
