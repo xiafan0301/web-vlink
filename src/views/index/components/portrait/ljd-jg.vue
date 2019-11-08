@@ -84,7 +84,7 @@
             <div class="plane insetPadding">
               <h3 class="title">分析结果</h3>
               <el-table :data="chooseData" style="width: 100%;" :height="tableHeight" @row-click="createInfoWindow($event)">
-                <el-table-column  type="index" width="24px" label="序号"></el-table-column>
+                <el-table-column  type="index" width="38px" label="序号"></el-table-column>
                 <el-table-column  prop="address" :show-overflow-tooltip="true" label="落脚点位置"></el-table-column>
                 <el-table-column prop="stopOverTime" width="120px" sortable label="停留时长">
                   <template slot-scope="scope">
@@ -200,7 +200,6 @@
       };
     },
     mounted() {
-      this.tableHeight = $('#mapBox').height() - 41;
       let map = new window.AMap.Map("mapBox", {
         zoom: 10,
         center: mapXupuxian.center
@@ -283,6 +282,7 @@
           $('.vl_jig_right').append($('#mapBox'))
 //        this.amap.clearMap();
 //        this.drawMarkers(this.chooseData);
+          this.tableHeight = $('#mapBox').height() - 140;
         })
       },
       uploadEmit (data) {
