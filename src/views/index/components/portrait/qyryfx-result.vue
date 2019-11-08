@@ -793,16 +793,14 @@ export default {
           this.submitLoading = true; // 打开加载效果
           updateAreaPersonTask(queryParams)
             .then(res => {
+              this.submitLoading = false;
               if (res.data) {
                 this.$message({
                   type: 'success',
                   message: '修改成功',
                   customClass: 'request_tip'
                 });
-                this.submitLoading = false;
                 this.$router.push({name: 'portrait_qyryfx'});
-              } else {
-                this.submitLoading = false;
               }
             })
             .catch(() => {this.submitLoading = false;})

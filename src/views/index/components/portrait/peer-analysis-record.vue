@@ -198,7 +198,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@media screen and (min-width: 1200px) and (max-width: 1439px) {
+@media screen and (max-width: 1439px) {
   .peer_analsis_record {
     .rlcx_r_list {
       li {
