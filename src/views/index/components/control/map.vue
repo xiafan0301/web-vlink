@@ -460,7 +460,9 @@ export default {
           if (res.data.devList.length === 0) {
             this.devicesList = [];
             if (this.map) {
-              this.map.remove(this.markerList);
+              addCluster(this.map, []);//没搜索到设备时，清空点聚合
+              this.map.remove(this.markerList);//没搜索到设备时，清空设备点标记
+              this.snapTotal = 0;//没搜索到设备时，清空今日抓拍列表
             }
             // 第一次进入页面,无进行中的布控设备数据时，弹出新建布控的跳转弹窗
             if (flag === 1) {
@@ -473,14 +475,15 @@ export default {
                 message: '搜索无相关数据'
               }); 
             }
+            this.$_hideLoading();
             return;
           }
           this.devicesList = res.data.devList;
         }
       }).then(() => {
-        // 没有获取到布控设备时，清除之前保存的定时器，并return
+        // 没有获取到布控设备时，return
         if (this.devicesList.length === 0) {
-          clearTimeout(this.timer);
+          // clearTimeout(this.timer);
           return;
         }
         this.mapMark();

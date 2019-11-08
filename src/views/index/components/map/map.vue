@@ -121,6 +121,21 @@
         </div>
       </div>
     </div>
+    <!--地图搜索-->
+    <div class="vl_map_search_point">
+      <el-autocomplete
+              class="inline-input"
+              v-model="input3"
+              :fetch-suggestions="querySearch"
+              placeholder="请输入地名，快速定位地址"
+              value-key="name"
+              :trigger-on-focus="false"
+              @select="handleSelect"
+      ></el-autocomplete>
+      <!--<el-input placeholder="请输入地名，快速定位地址" v-model="input3" class="input-with-select">-->
+      <el-button slot="append" icon="el-icon-search" class="select_btn" @click="setCenter()"></el-button>
+      <!--</el-input>-->
+    </div>
     <!-- 右侧地图 -->
     <div class="map_r">
       <!-- 地图容器 -->
@@ -219,6 +234,9 @@
     components: {flvplayer},
     data () {
       return {
+        // 2.0相关
+        input3: null,
+
         showSearchList: false,
         curSearchedWord: '', // 当前用户最近搜索的词
         dbId: 'db_tree_' + random14(),
@@ -452,13 +470,63 @@
       this.getAlarmListByDev();
     },
     methods: {
-//      operClusterIO (bool, mark) {
-//        if (bool) {
-//          this.map.cluster.addMarker(mark)
-//        } else {
-//          this.map.cluster.removeMarker(mark)
-//        }
-//      },
+      // 2.0相关开始
+         // 地图搜索
+      querySearch(queryString, cb) {
+        //this.seacher(queryString)
+
+        this.$nextTick(() => {
+          this.seacher(queryString).then(v => {
+            //console.log(v);
+            var restaurants = v;
+            //  console.log(restaurants)
+            var results = queryString
+                ? restaurants.filter(this.createFilter(queryString))
+                : restaurants;
+            // console.log(results)
+            cb(results);
+            // 调用 callback 返回建议列表的数据
+            // clearTimeout(this.timeout);
+            //   this.timeout = setTimeout(() => {
+            //     cb(results);
+            //   }, 3000 * Math.random());
+            // cb(results);
+          });
+        });
+      },
+      handleSelect(item) {
+        let new_center = item.location;
+        this.map.setZoomAndCenter(16, new_center);
+      },
+      createFilter(queryString) {
+        return restaurant => {
+          // console.log(restaurant.name.toLowerCase().indexOf(queryString.toLowerCase()));
+          return (
+              restaurant.name.toLowerCase().indexOf(queryString.toLowerCase()) > -1
+          );
+        };
+      },
+      seacher(v) {
+        var placeSearch = new window.AMap.PlaceSearch({
+          // city 指定搜索所在城市，支持传入格式有：城市名、citycode和adcode
+          city: "湖南"
+        });
+        if (v) {
+          let _this = this;
+          return new Promise((resolve) => {
+            placeSearch.search(v, (status, result) => {
+              // 查询成功时，result即对应匹配的POI信息
+              let pois = result.poiList.pois;
+              _this.restaurants = pois;
+              resolve(pois);
+            });
+          });
+        }
+        //return pois
+      },
+
+      // 2.0结束
+
       // 获取标注列表
       getMarkHistory () {
         MapGETsignList().then(res => {
@@ -1848,6 +1916,26 @@
   }
 </script>
 <style lang="scss" scoped>
+  /*2.0相关*/
+  .vl_map_search_point {
+    position: absolute;
+    left: 3rem;
+    top: .3rem;
+    z-index: 2;
+    .inline-input {
+      width: 3.04rem;
+    }
+    .select_btn {
+      background-color: #0c70f8;
+      color: #ffffff;
+      width: .64rem;
+      position: absolute;
+      right: 0;
+      height: 40px;
+      padding: 0;
+    }
+  }
+
   .map_search_list{
     position: absolute;
     top: 0;

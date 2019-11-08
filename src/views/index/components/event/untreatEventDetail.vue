@@ -186,11 +186,11 @@ export default {
                         this.$router.push({path: '/control/manage', query: { pageType: 2, controlId: this.basicInfo.surveillanceId }});
                       } else {
                         // 跳至新增布控页面
-                        this.$router.push({path: '/control/create', query: { eventId: eventId }});
+                        this.$router.push({name: 'control_add', query: { eventId: eventId }});
                       }
                     } else {
                       // 跳至新增布控页面
-                      this.$router.push({path: '/control/create', query: { eventId: eventId }});
+                      this.$router.push({name: 'control_add', query: { eventId: eventId }});
                     }
                     
                   }

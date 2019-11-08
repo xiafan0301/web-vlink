@@ -715,7 +715,7 @@
              this.count += 4;
              this.operData();
              this.loading = false;
-           }, 2000)
+           }, 800)
          }
         }
       },
@@ -1662,22 +1662,9 @@
       }
     }
   }
-
-  .clgj_map_show_pic {
-    .vl_jtc_mk { display: block !important; }
-  }
   .demo-ruleForm {
     .operation_button {
       margin-top: 20px;
-    }
-    .quyu {
-      .el-form-item__label {
-        padding: 0;
-        white-space: nowrap;
-      }
-      .el-radio__label {
-        padding: 0;
-      }
     }
     .ytsr_left_radio {
       // margin-top: 10px;
@@ -1690,58 +1677,6 @@
           line-height: 40px;
         }
       }
-    }
-  }
-  .vl_jtc_upload_gjfx {
-    text-align: center;
-    .el-upload--picture-card {
-      width: 100%;
-      padding-top: 100%;
-      position: relative;
-      > i {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        margin: auto;
-      }
-      > img {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        -webkit-border-radius: 6px;
-        -moz-border-radius: 6px;
-        border-radius: 6px;
-      }
-    }
-    span {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      margin-top: 126px;
-      color: #999;
-    }
-    &:hover {
-      span {
-        color: #FFFFFF;
-      }
-    }
-  }
-  .gjfx_upload {
-    &:hover {
-      .el-upload--picture-card {
-        background: #0C70F8;
-      }
-    }
-  }
-  .data_range {
-    .el-range__close-icon {
-      display: none;
     }
   }
   .struc_detail_dialog_gjfx {
@@ -2178,87 +2113,6 @@
           }
         }
       }
-    }
-  }
-  .vl_jtc_mk {
-    width: 218px;
-    height: 122px;
-    position: relative;
-    display: none;
-    > img {
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      left: 0;
-      top: 0;
-    }
-    > p {
-      width: 100%;
-      position: absolute;
-      color: #FFFFFF;
-      bottom: 8px;
-      font-size: 12px;
-      padding: 0 6px;
-      line-height: 20px;
-      > i {
-        height: 20px;
-        float: right;
-        vertical-align: middle;
-      }
-    }
-  }
-  .vl_jig_mk_p {
-    width: 180px;
-    height: auto;
-    background: #ffffff;
-    padding: 10px;
-    border-radius: 5px;
-    text-align: center;
-    box-shadow: 4px 0px 10px 0px #838383;
-    box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);
-    .big {
-      font-size: 16px;
-      font-weight: bold;
-    }
-    &:after {
-      border-bottom-color: rgba(0, 0, 0, 1);
-      content: "";
-      display: inline-block;
-      position: absolute;
-      left: 50%;
-      margin-left: -10px;
-      bottom: -10px;
-      border-top: 10px solid #fff;
-      border-left: 10px solid transparent;
-      border-right: 10px solid transparent;
-    }
-    &.vl_jig_mk_img_hover {
-      &:after {
-        border-bottom-color: rgba(0, 0, 0, 1);
-        content: "";
-        display: inline-block;
-        position: absolute;
-        left: 50%;
-        margin-left: -10px;
-        bottom: -10px;
-        border-top: 10px solid #0c70f8;
-        border-left: 10px solid transparent;
-        border-right: 10px solid transparent;
-      }
-      background: rgba(12, 112, 248, 1);
-      position: relative;
-      border: 0.04rem solid #0c70f8;
-      > p {
-        color: #ffffff;
-      }
-    }
-  }
-  .map_select {
-    /deep/.el-dialog__body,.el-dialog__header {
-      padding: 0px;
-    }
-    .el-dialog__headerbtn {
-      z-index: 1;
     }
   }
 </style>

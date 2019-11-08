@@ -84,7 +84,7 @@
               <div class="plane insetPadding">
                 <h3 class="title">分析结果</h3>
                 <el-table :data="chooseData" style="width: 100%;" :height="tableHeight" @row-click="createInfoWindow($event)">
-                  <el-table-column  type="index" width="24px" label="序号"></el-table-column>
+                  <el-table-column  type="index" width="38px" label="序号"></el-table-column>
                   <el-table-column  prop="address" :show-overflow-tooltip="true" label="落脚点位置"></el-table-column>
                   <el-table-column prop="stopOverTime" width="120px" sortable label="停留时长">
                     <template slot-scope="scope">
@@ -133,9 +133,9 @@
             <div class="table_box">
               <el-table :data="list">
                 <el-table-column label="序号" type="index" width="50"></el-table-column>
-                <el-table-column label="任务名称" width="150" prop="taskName" show-overflow-tooltip></el-table-column>
-                <el-table-column label="创建时间" width="150" prop="createTime" show-overflow-tooltip></el-table-column>
-                <el-table-column label="分析时间范围" width="360" show-overflow-tooltip>
+                <el-table-column label="任务名称" min-width="150" prop="taskName" show-overflow-tooltip></el-table-column>
+                <el-table-column label="创建时间" min-width="150" prop="createTime" show-overflow-tooltip></el-table-column>
+                <el-table-column label="分析时间范围" min-width="360" show-overflow-tooltip>
                   <template slot-scope="scope">
                     {{scope.row.startTime}}至{{scope.row.endTime}}
                   </template>
@@ -363,8 +363,6 @@ export default {
       this.imgData = Object.assign({}, {path: a});
       this.curImageUrl= a;
     }
-    this.tableHeight = $('#mapBox').height() - 41;
-
     let map = new window.AMap.Map("mapBox", {
       zoom: 10,
       center: mapXupuxian.center
@@ -531,6 +529,7 @@ export default {
         $('.vl_jig_right').append($('#mapBox'))
 //        this.amap.clearMap();
 //        this.drawMarkers(this.chooseData);
+        this.tableHeight = $('#mapBox').height() - 160;
       })
     },
     uploadEmit (data) {

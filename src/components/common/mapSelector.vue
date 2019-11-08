@@ -393,8 +393,6 @@
         this.rightIsIndeterminate = false;
       },
       activeDeviceList (val) {
-        console.log('val', val);
-        
         this.activeDBList = val;
       },
       checkList (newValue, oldValue) {
@@ -423,6 +421,7 @@
             }, 100);
           });
         }
+        this.waitInitDB();
       },
       clear () {
         console.log('watch clear');
@@ -771,6 +770,7 @@
       },
       // 给选中的设备上色
       putSelectColor (mks) {
+        console.log(mks)
         mks.forEach(y => {
           let uContent = this.setMarkContent(y.getExtData(), 'error')
           y.setContent(uContent);

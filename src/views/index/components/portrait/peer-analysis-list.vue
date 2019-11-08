@@ -14,6 +14,7 @@
               style="width: 100%;margin-bottom: 10px;"
               class="vl_date"
               type="datetime"
+              :clearable="false"
               :time-arrow-control="true"
               @change="chooseStartTime"
               value-format="timestamp"
@@ -21,6 +22,7 @@
             </el-date-picker>
             <el-date-picker
               style="width: 100%;"
+              :clearable="false"
               class="vl_date vl_date_end"
               v-model="searchData.endTime"
               @change="chooseEndTime"
@@ -36,7 +38,13 @@
             <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit"></div>
           </div>
         </div>
-        <div class="per_semblance_ytsr"><span>同行次数：</span><el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100; if(value&&value <2)value = 2;" placeholder="填写同行次数" v-model="searchData.minSemblance"></el-input>(2-100)</div>
+        <div class="per_semblance_ytsr">
+          <span>同行次数≥：</span>
+          <el-input
+            oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100; if(value&&value <2)value = 2;"
+            placeholder="填写同行次数" v-model="searchData.minSemblance">
+          </el-input>(2-100)
+        </div>
         <div class="ytsr_left_radio">
           <!-- <span>任务名称：</span> -->
           <!-- <span style="padding-right: 20px"> -->
@@ -109,9 +117,14 @@
                     {{scope.row.taskWebParam.startTime}} - {{scope.row.taskWebParam.endTime}}
                   </template>
                 </el-table-column>
-                <el-table-column label="同行次数" prop="taskWebParam.number" show-overflow-tooltip></el-table-column>
-                <el-table-column label="状态" v-if="selectIndex === 0" prop="taskStatus" show-overflow-tooltip>
+                <el-table-column label="同行次数" prop="taskWebParam.number" show-overflow-tooltip>
                   <template slot-scope="scope">
+                    <span>{{scope.row.taskWebParam.number && scope.row.taskWebParam.number > 0 ? '≥' + scope.row.taskWebParam.number : scope.row.taskWebParam.number}}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="结果数" prop="resultNum" show-overflow-tooltip v-if="selectIndex === 1"></el-table-column>
+                <el-table-column label="状态" v-if="selectIndex === 0" prop="taskStatus" show-overflow-tooltip>
+                  <template slot-scope="scope" v-if="scope.row.taskStatus !== 2">
                     <span>{{scope.row.taskStatus && scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 3 ? '失败' : '已中断'}}</span>
                   </template>
                 </el-table-column>
@@ -168,7 +181,7 @@
         :close-on-click-modal="false"
         :close-on-press-escape="false"
         class="dialog_comp"
-      >
+        >
         <span style="color: #999999;">任务中断，任务的数据处理进程将中止，可以在列表中恢复任务的数据处理</span>
         <div slot="footer" class="dialog-footer">
           <el-button @click="interruptDialog = false">取消</el-button>
@@ -184,7 +197,7 @@
         :close-on-click-modal="false"
         :close-on-press-escape="false"
         class="dialog_comp"
-      >
+        >
         <span style="color: #999999;">任务删除，任务的数据处理进程将被清除，任务不再可以恢复</span>
         <div slot="footer" class="dialog-footer">
           <el-button @click="deleteDialog = false">取消</el-button>
@@ -203,7 +216,7 @@
   </vue-scroll>
 </template>
 <script>
-import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume, postPeopleTask } from '@/views/index/api/api.analysis.js';
+import { getTaskInfosPage, putAnalysisTask, postPeopleTask } from '@/views/index/api/api.analysis.js';
 import { formatDate } from "@/utils/util.js";
 import vlUpload from "@/components/common/upload.vue";
 import mapSelector from '@/components/common/mapSelector.vue';
@@ -321,13 +334,19 @@ export default {
     resetSearch () {
       this.taskName = '';
       this.searchData.minSemblance = 5;
-      this.uploadClear = {}
+      this.uploadClear = {};
       this.msClear = {};
       this.dSum = 0;
+      this.chooseType = 1;
       this.setDTime();
     },
     tcDiscuss (boolean) {
-      let params = {
+      let params = {};
+      if (this.dSum === 0) {
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('请先选择设备')
+        }
+        return false;
       }
       if (!this.imgList) {
         if (!document.querySelector('.el-message--info')) {
@@ -366,7 +385,7 @@ export default {
               message: '新建成功',
               customClass: 'request_tip'
             })
-            this.getDataList()
+            this.getDataList();
           }
         })
       }
@@ -399,6 +418,7 @@ export default {
     //tab切换
     selectTab (val) {
       this.selectIndex = val;
+      this.pagination.pageNum = 1;
       this.getDataList();
     },
     skipResultPage (obj) {
@@ -477,11 +497,21 @@ export default {
     },
     //恢复任务,重启任务
     recoveryOrRestart(obj) {
-      putTaskInfosResume(obj.uid).then(res => {
-        if(res) {
-          this.getDataList();
-        }
-      }).catch(() => {})
+      const webParam = obj.taskWebParam;
+      if (obj.uid) {
+        const params = {
+          taskName: obj.taskName,
+          ...webParam,
+          uid: obj.uid
+        };
+        postPeopleTask(params)
+          .then(res => {
+            if (res && res.code === '00000000') {
+              this.getDataList();
+            }
+          })
+          .catch(() =>{})
+      }
     },
     // 查询任务列表数据
     selectDataList () {
@@ -845,7 +875,7 @@ export default {
         line-height: 40px;
         z-index: 9;
         color: #999999;
-        width: 82px;
+        width: 95px;
         padding-left: 12px;
       }
       >i {
@@ -857,7 +887,7 @@ export default {
         vertical-align: middle;
       }
       .el-input {
-        width: 185px;
+        width: 180px;
         margin-right: 10px;
         input{
           text-indent: 69px;

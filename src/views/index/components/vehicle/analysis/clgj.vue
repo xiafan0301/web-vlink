@@ -65,17 +65,87 @@
         </el-form>
         <div class="insetLeft vl_icon vl_icon_vehicle_02" :class="{'vl_icon_vehicle_03': hideleft}" @click="hideLeft"></div>
         <!--车辆切换列表-->
-        <div class="clgj-s-list">
-          <div v-for="(item, index) in evData" :key="item.id" :class="{'active': index === activeList}" @click="plateTap(index)">{{item.plateNo}}</div>
-        </div>
+        <!-- <div class="clgj-s-list">
+          <div v-for="(item, index) in evData" :key="item.id" :class="{'active': index === activeList}" @click="plateTap(item,index)">{{item.plateNo}}</div>
+        </div> -->
       </div>
     </div>
     <div :class="['right',{hide:!hideleft}]" id="rightMap"></div>
-    <ul class="map_rrt_u2">
+     <!--地图操作按钮-->
+    <ul class="map_rrt_u2_clgj">
       <li @click="resetZoom"><i class="el-icon-aim"></i></li>
       <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
       <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
     </ul>
+    <!--左侧车牌-->
+    <div class="left_plate">
+      <div v-for="(item,index) in evData" :key="'plate_'+index" class="plate_box">
+        <template v-if="item.plateNo">
+          <p :class="{'is_highlight': index === activeList}" @click="plateTap(item,index)">{{item.plateNo}}</p>
+          <ul class="select_box" v-if="item.isShowBox">
+            <li><el-checkbox v-model="selectShow.speed">车速信息</el-checkbox></li>
+            <li><el-checkbox v-model="selectShow.snap">抓拍图片</el-checkbox></li>
+            <li class="video_select">
+              <div class="video_bg" :class="{'active': selectShow.video}" @click="slectVideo">
+                <i class="vl_icon vl_icon_clgj_video"></i><span class="video_icon">视频接力</span>
+              </div>
+            </li>
+          </ul>
+        </template>
+      </div>
+    </div>
+    <!--右侧区域列表-->
+    <!-- 车速信息 -->
+    <div class="speed_info" v-if="selectShow.speed">
+      <vue-scroll>
+        <div class="speed_box">
+          <ul class="simple_speed">
+            <li class="speed_title">
+              <p>2019-9-30 15:05:18</p>
+              <p>平均速度</p>
+            </li>
+            <li class="speed_addr">
+              <p class="addr_name">新姚南路与黑石铺路交叉路口</p>
+              <p class="num">35</p>
+            </li>
+            <li class="speed_distance">
+              <p class="dis_desc">两次抓拍距离: <span class="dis_num">0.7 KM</span></p>
+              <p>KM/H</p>
+            </li>
+          </ul>
+          <ul class="simple_speed">
+            <li class="speed_title">
+              <p>2019-9-30 15:05:18</p>
+              <p>平均速度</p>
+            </li>
+            <li class="speed_addr">
+              <p class="addr_name">新姚南路与黑石铺路交叉路口</p>
+              <p class="num">35</p>
+            </li>
+            <li class="speed_distance">
+              <p class="dis_desc">两次抓拍距离: <span class="dis_num">0.7 KM</span></p>
+              <p>KM/H</p>
+            </li>
+          </ul>
+          <ul class="simple_speed">
+            <li class="speed_title">
+              <p>2019-9-30 15:05:18</p>
+              <p>平均速度</p>
+            </li>
+            <li class="speed_addr">
+              <p class="addr_name">新姚南路与黑石铺路交叉路口</p>
+              <p class="num">35</p>
+            </li>
+            <li class="speed_distance">
+              <p class="dis_desc">两次抓拍距离: <span class="dis_num">0.7 KM</span></p>
+              <p>KM/H</p>
+            </li>
+          </ul>
+        </div>
+      </vue-scroll>
+    </div>
+    
+
     <div is="vlDialog" :detailData="detailData"></div>
   </div>
 </template>
@@ -134,6 +204,14 @@
         playing: false, // 视频播放是否
         strucDetailDialog: false,
         videoUrl: '', // 弹窗视频回放里的视频
+
+        selectShow: {
+          speed: false,
+          snap: false,
+          video: false,
+        },
+        plateList: [],
+        selectPlate: '',
       };
     },
     mounted() {
@@ -148,11 +226,27 @@
       this.setDTime();
     },
     methods: {
-      plateTap (index) {
+      //视频接力选中
+      slectVideo() {
+        this.selectShow.video = !this.selectShow.video
+      },
+      //车速列表展示
+      plateTap(item,index) {
         this.amap.clearMap();
         this.activeList = index;
-        this.filterData();
-        this.drawLine();
+        if(item.traceList && item.traceList.length > 0) {
+          this.filterData();
+          this.drawLine();
+        }
+        this.evData.forEach(key => {
+          this.$set(key, 'isShowBox', false)
+        })
+        this.$set(this.evData[index], 'isShowBox' , true)
+        this.selectShow.speed = false
+        this.selectShow.snap = false
+        this.selectShow.video = false
+        
+        console.log("this",this.evData)
       },
       addPlateNo () {
         if (!this.ruleForm.input5.replace(/\s+|\s+$/g, '')) {
@@ -252,6 +346,11 @@
           this.serarchLoading = true;
         }
         this.count = 10;
+        /* this.plateList = d.vehicleNumber.split(",").filter(v => v)
+        this.plateList = this.plateList.map(p => {
+          return {vehicleNumber: p, isShowBox: false}
+        })
+        console.log("1111111111111111",this.plateList) */
         InvestigateGetTrace(d).then(res => {
           this.serarchLoading = false;
           if (res) {
@@ -263,11 +362,13 @@
             }
 //            this.evData = res.data;
             res.data.forEach(x => {
-              x.traceList.forEach(y => {
-                if (y.bayonetName) {
-                  y.DeviceID = y.bayonetName;
-                }
-              })
+              if(x.traceList && x.traceList.length > 0) {
+                x.traceList.forEach(y => {
+                  if (y.bayonetName) {
+                    y.DeviceID = y.bayonetName;
+                  }
+                })
+              }
             })
             console.log(res.data)
             this.originEvData = objDeepCopy(res.data);
@@ -282,42 +383,46 @@
         let _arr = [];
         this.evData = objDeepCopy(this.originEvData);
         this.evData.forEach((z, index) => {
-          z.traceList.forEach(x => {
-            // 是否显示时间
-            if (index === this.activeList) {
-              x['showTime'] = true;
-            } else {
-              x['showTime'] = false;
-            }
-            // 判断是不是有卡口
-            if (x.bayonetName) {
-              x['dataType'] = 8;
-            } else {
-              x['dataType'] = 0;
-            }
-            let _i = _arr.findIndex(y => y.DeviceID === x.DeviceID);
-            if (_i === -1) {
-              _arr.push(x);
-            } else {
+          this.$set(z, 'isShowBox', false)
+          if(z.traceList && z.traceList.length > 0) {
+            z.traceList.forEach(x => {
+              // 是否显示时间
               if (index === this.activeList) {
-                // 判断出现的重复点是不是同一辆车的
-                if (x.plateNo === _arr[_i].plateNo) {
-                  _arr[_i]['shotTime'] += ',' + x.shotTime;
-                  console.log('_arr[_i]', _arr[_i]['shotTime'])
-                } else {
-                  x['simLength'] += 1;
-                  _arr.splice(_i, 1, x);
-                }
+                x['showTime'] = true;
               } else {
-                if (x.plateNo === _arr[_i].plateNo) {
-                  _arr[_i]['shotTime'] += ',' + x.shotTime;
+                x['showTime'] = false;
+              }
+              // 判断是不是有卡口
+              if (x.bayonetName) {
+                x['dataType'] = 8;
+              } else {
+                x['dataType'] = 0;
+              }
+              let _i = _arr.findIndex(y => y.DeviceID === x.DeviceID);
+              if (_i === -1) {
+                _arr.push(x);
+              } else {
+                if (index === this.activeList) {
+                  // 判断出现的重复点是不是同一辆车的
+                  if (x.plateNo === _arr[_i].plateNo) {
+                    _arr[_i]['shotTime'] += ',' + x.shotTime;
+                    console.log('_arr[_i]', _arr[_i]['shotTime'])
+                  } else {
+                    x['simLength'] += 1;
+                    _arr.splice(_i, 1, x);
+                  }
                 } else {
-                  _arr[_i]['simLength'] += 1;
+                  if (x.plateNo === _arr[_i].plateNo) {
+                    _arr[_i]['shotTime'] += ',' + x.shotTime;
+                  } else {
+                    _arr[_i]['simLength'] += 1;
+                  }
                 }
               }
-            }
-          })
+            })
+          }
         });
+        this.$set(this.evData[0], 'isShowBox' , true)
         _arr.forEach(x => {
           let b = true;
           this.evData.forEach(y => {
@@ -426,7 +531,7 @@
           polyline.on('click', ()=> {
             let aIndex = polyline.getExtData();
             if(aIndex !== this.activeList) {
-              this.plateTap(aIndex)
+              this.plateTap(x,aIndex)
             }
           })
           this.markerLine.push(polyline);
@@ -499,16 +604,16 @@
       }
     }
   }
-  .map_rrt_u2 {
-    position: absolute; right: 30px;
-    bottom: 30px;
+  .map_rrt_u2_clgj {
+    position: absolute; right: 20px;
+    bottom: 20px;
     margin-top: .2rem;
     font-size: 26px;
     background: #ffffff;
-    width: 78px;
-    padding: 0 10px;
+    width: 0.78rem;
+    padding: 0 .1rem;
     > li {
-      line-height: 70px;
+      line-height: .7rem;
       text-align: center;
       cursor: pointer;
       border-bottom: 1px solid #F2F2F2;
@@ -816,6 +921,140 @@
       }
     }
   }
+  /* 左侧车牌 */
+  .left_plate {
+    position: absolute;
+    left: 302px;
+    top: 70px;
+    color: #666;
+    overflow: hidden;
+    .plate_box {
+      float: left;
+      margin-right: 12px;
+    }
+    p {
+      height: 50px;
+      width: 120px;
+      text-align: center;
+      line-height: 50px;
+      background: #fff;
+      border: 1px solid #d3d3d3;
+      cursor: pointer;
+      &:hover {
+        border: 0;
+        color: #fff;
+        background: linear-gradient(90deg,rgba(8,106,234,1) 0%,rgba(4,102,222,1) 100%);
+      }
+    }
+    .is_highlight {
+      border: 0;
+      color: #fff;
+      background: linear-gradient(90deg,rgba(8,106,234,1) 0%,rgba(4,102,222,1) 100%);
+    }
+    .select_box {
+      width: 120px;
+      text-align: center;
+      margin-top: 12px;
+      background-color: #fff;
+      li {
+        height: 50px;
+        line-height: 50px;
+        border-bottom: 1px solid #F2F2F2;
+        margin: 0 16px;
+        cursor: pointer;
+        &:last-child {
+          border-bottom: 0;
+          margin: 0 13px;
+          padding: 10px 0;
+        }
+        .video_icon {
+          display: inline-block;
+          padding-left: 6px;
+          line-height: 19px;
+        }
+        .vl_icon_clgj_video { 
+          width: 14px;
+          height: 14px;
+          background-position: -1064px -1538px;
+          background-color: #666;
+          border-radius: 50%;
+          line-height: 1;
+          vertical-align: middle;
+          margin-bottom: 2px;
+        }
+      }
+      .video_select {
+        .video_bg {
+          height: 30px;
+          width: 96px;
+          border-radius: 4px;
+          line-height: 30px;
+        }
+        .active {
+          background-color: #0C70F8;
+          color: #fff;
+          .vl_icon_clgj_video { 
+            background-color: #0C70F8;
+          }
+        }
+      }
+    }
+  }
+  /* 车速信息 */
+  .speed_info {
+    position: absolute;
+    top: 70px;
+    right: 20px;
+    width: 380px;
+    background-color: #fff;
+    box-shadow:0px 3px 10px 0px rgba(99,99,99,0.39);
+    .speed_box {
+      max-height: 4.2rem;
+      .simple_speed {
+        padding: 12px 0;
+        margin: 0 20px;
+        border-bottom: 1px solid #f2f2f2;
+        li {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          padding: 0 2px 0 4px;
+        }
+        .speed_title {
+          color: #999;
+          font-size: 12px;
+        }
+        .speed_addr {
+          font-size: 16px;
+          color: #333;
+          .addr_name {
+            display: -webkit-box;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            word-wrap: break-word;
+            white-space: normal !important;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            padding-right: 20px;
+          }
+          .num {
+            font-size: 32px;
+            color: #0C70F8;
+          }
+        }
+        .speed_distance {
+          font-size: 14px;
+          color: #333;
+          .dis_desc {
+            color: #666;
+          }
+          .dis_num {
+            color: #0C70F8;
+          }
+        }
+      }
+    }
+  }
 </style>
 <style lang="scss">
   .cap_info_win {
@@ -953,6 +1192,17 @@
     >i {
       color: #D3D3D3;
       cursor: not-allowed;
+    }
+  }
+  /* 左侧车牌 */
+  .left_plate {
+    .select_box {
+      .el-checkbox__label {
+        padding-left: 6px;
+      }
+      .el-checkbox__input.is-checked+.el-checkbox__label {
+        color: #1264F8;
+      }
     }
   }
 </style>
