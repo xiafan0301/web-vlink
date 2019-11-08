@@ -130,7 +130,7 @@
             <!-- <span>抓拍信息</span> -->
           </div>
           <!-- <div class="operate_btn" @click="spinToRecog()">身份确认</div> -->
-          <div class="operate_btn" @click="spinToGJFX()">轨迹分析</div>
+          <div class="operate_btn" @click="spinToGJFX()" v-if="type === '频繁出没'">轨迹分析</div>
           <div class="operate_btn margin_btn" @click="spinToLJD()">落脚点分析</div>
           <div class="operate_btn margin_btn" @click="spinToControl()">新建布控</div>
         </div>
@@ -201,7 +201,7 @@ export default {
     snapObj: {
       type: Object,
       default: () => {}
-    }
+    },
   },
   data() {
     return {
@@ -229,13 +229,17 @@ export default {
       strucInfoList: [],
       videoUrl: "", // 弹窗视频回放里的视频
       playerData: null,
+      type: '',
     };
   },
   watch: {
     snapObj(val) {
       console.log("=====111111111111===", val);
+      this.type = val.type
+      this.curImgIndex = val.index
       if (val.personDetailList && val.personDetailList.length > 0) {
-        this.sturcDetail = val.personDetailList[0];
+        this.sturcDetail = val.personDetailList[val.index];
+        console.log("99999999999999",this.sturcDetail)
         this.strucInfoList = val.personDetailList;
         if (this.amap) {
           this.drawPoint(this.sturcDetail);
@@ -282,14 +286,15 @@ export default {
     },
     toogleVisiable(f) {
       this.strucDetailDialog = f;
+      this.type = this.snapObj.type
       if (
         this.snapObj.personDetailList &&
         this.snapObj.personDetailList.length > 0
       ) {
         console.log("99999999", this.snapObj);
-        this.curImgIndex = 0;
+        this.curImgIndex = this.snapObj.index;
         this.strucCurTab = 1;
-        this.sturcDetail = this.snapObj.personDetailList[0];
+        this.sturcDetail = this.snapObj.personDetailList[this.snapObj.index];
         this.strucInfoList = this.snapObj.personDetailList;
         if (this.amap) {
           this.drawPoint(this.sturcDetail);
