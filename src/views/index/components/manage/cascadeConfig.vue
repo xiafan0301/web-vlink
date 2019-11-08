@@ -125,7 +125,7 @@
                   <div class="vl_inline_block">
                     <p>设备区域代码</p>
                     <el-form-item prop="placeCode">
-                      <el-input v-model="item.placeCode" placeholder="请输入设备区域代码"></el-input>
+                      <el-input v-model="item.placeCode" maxlength="20" placeholder="请输入设备区域代码"></el-input>
                     </el-form-item>
                   </div>
                 </el-form>
@@ -153,7 +153,7 @@
                   <div class="vl_inline_block">
                     <p>设备区域代码</p>
                     <el-form-item prop="placeCode">
-                      <el-input v-model="item.placeCode" placeholder="请输入设备区域代码"></el-input>
+                      <el-input v-model="item.placeCode" maxlength="20" placeholder="请输入设备区域代码"></el-input>
                     </el-form-item>
                   </div>
                 </el-form>
@@ -194,7 +194,7 @@
                   <div class="vl_inline_block">
                     <p>设备区域代码</p>
                     <el-form-item prop="placeCode">
-                      <el-input v-model="item.placeCode" placeholder="请输入设备区域代码"></el-input>
+                      <el-input v-model="item.placeCode" maxlength="20" placeholder="请输入设备区域代码"></el-input>
                     </el-form-item>
                   </div>
                 </el-form>
@@ -255,6 +255,7 @@
       getCascadeList () {
         ManageGetCascades().then(res => {
           if (res && res.data) {
+            console.log(res.data)
             this.allCascadeList = res.data;
           }
         })
@@ -348,6 +349,7 @@
           this.searchLoading = false;
           this.showUpdate = false;
           this.getCascadeList();
+          this.ajaxNum = 0;
         }
       }
     }

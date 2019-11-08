@@ -10,9 +10,5 @@ export default {
     path: 'map',
     name: 'map_map',
     component: () => import('@/views/index/components/map/map.vue')
-  }, {
-    path: 'communication/:userId/:type',
-    name: 'map_communication',
-    component: () => import('@/views/index/components/map/communication.vue')
   }]
 }

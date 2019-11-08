@@ -113,7 +113,7 @@
         </span>
         </div>
         <div class="update_task">
-          <el-button type="primary" @click="showNewTask = true;">修改任务</el-button>
+          <el-button type="primary" @click="initParams">修改任务</el-button>
         </div>
       </template>
     </div>
@@ -218,7 +218,6 @@
             <a @click="gotoControl(sturcDetail.subStoragePath)">新建布控</a>
             <a @click="gotoLjd(sturcDetail.subStoragePath)">落脚点分析</a>
             <a @click="gotoGjfx(sturcDetail.subStoragePath)">轨迹分析</a>
-            <!--<a @click="gotoIden(sturcDetail.subStoragePath)">身份确认</a>-->
           </div>
         </div>
         <div v-show="strucCurTab === 2" class="struc_c_address"></div>
@@ -376,14 +375,10 @@
     methods: {
       // 修改任务相关
       resetSearch () {
-        this.taskName = '';
-        this.searchData.minSemblance = 85;
-        this.imgList = '';
-        this.radio = '1';
-        this.searchData.portraitGroupId= [];
         this.msClear = {};
-        this.uploadClear = {};
-        this.setDTime();
+        this.dSum = 0;
+        this.selectCameraArr = [];
+        this.selectBayonetArr = [];
         this.showNewTask = false;
       },
       tcDiscuss () {
@@ -514,9 +509,6 @@
       gotoGjfx (url) {
         this.$router.push({ name: 'portrait_gjfx', query: {imgurl: url} })
       },
-      gotoIden (url) {
-        this.$router.push({ name: 'portrait_ljd', query: {imgurl: url} })
-      },
       // 设置视频数据
       setPlayerData () {
         if (this.sturcDetail.videoPath) {
@@ -571,22 +563,25 @@
                   this.pagination1.total = this.strucInfoList.length;
                   this.changeOrder();
                   this.taskDetail = res.data.taskWebParam;
-                  let {minSemblance, startTime, endTime, deviceIds} = res.data.taskWebParam;
-                  this.searchData.minSemblance = minSemblance;
-                  this.activeDBList = deviceIds.split(',');
-                  this.searchData.startTime = new Date(startTime).getTime();
-                  this.searchData.endTime = new Date(endTime).getTime();
-                  this.dSum = this.activeDBList.length;
-                  console.log(res.data)
-                  this.imgData = {
-                    cname: '带图' + Math.random(),
-                    filePathName: '带图' + Math.random(),
-                    path: this.taskDetail.uploadImgUrls
-                  }
                 } else {
                   this.strucInfoList = [];
                 }
               })
+        }
+      },
+      initParams () {
+        this.showNewTask = true;
+        let {minSemblance, startTime, endTime, deviceIds, origin,uploadImgUrls} = this.taskDetail;
+        this.radio = origin + '';
+        this.searchData.minSemblance = minSemblance;
+        this.activeDBList = deviceIds.split(',');
+        this.searchData.startTime = new Date(startTime).getTime();
+        this.searchData.endTime = new Date(endTime).getTime();
+        this.dSum = this.activeDBList.length;
+        this.imgData = {
+          cname: '带图' + Math.random(),
+          filePathName: '带图' + Math.random(),
+          path: uploadImgUrls
         }
       },
       changeOrder () {

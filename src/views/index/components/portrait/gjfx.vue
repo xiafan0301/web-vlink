@@ -715,7 +715,7 @@
              this.count += 4;
              this.operData();
              this.loading = false;
-           }, 2000)
+           }, 800)
          }
         }
       },

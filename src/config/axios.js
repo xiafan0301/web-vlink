@@ -72,8 +72,9 @@ service.interceptors.response.use(function (response) {
       let msg = '网络繁忙，请稍后重试！';
       if (_data.viewMsg) {
         msg = _data.viewMsg;
+        ElementUI.Message({ message: msg, type: 'info', customClass: 'request_tip' });
       }
-      ElementUI.Message({ message: msg, type: 'error', customClass: 'request_tip' });
+      // ElementUI.Message({ message: msg, type: 'error', customClass: 'request_tip' });
       return null;
     }
   } else {

@@ -67,7 +67,7 @@
             <!-- 相似度搜索 -->
             <el-form-item prop="similarity">
               <div class="similarity">
-                <div class="per_semblance_ytsr"><span>相似度：≥</span><el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100" placeholder="填写相似度数字" v-model="searchData.similarity"></el-input>%</div>
+                <div class="per_semblance_pfcm"><span>相似度：≥</span><el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100" placeholder="填写相似度数字" v-model="searchData.similarity"></el-input>%</div>
                 <!-- <ul class="similarity-input">
                   <li class="input-name">
                     <el-input placeholder="相似度" readonly v-model="searchData.similarityName"></el-input>
@@ -977,7 +977,7 @@ export default {
   }
   //相似度搜索
   .similarity {
-    .per_semblance_ytsr {
+    .per_semblance_pfcm {
       color: #555;
       position: relative;
       >span {
