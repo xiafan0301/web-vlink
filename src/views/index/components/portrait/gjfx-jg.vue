@@ -139,7 +139,7 @@
     <div class="speed_info_box" :class="{'hide_speed': hideleft}" v-show="showLeft">
       <ul class="speed_info_list">
         <li :class="{'isCheck_li': isCheckedVideo}" @click="showVideoList">
-          <i class="vl_icon"></i>
+          <i class="vl_icon vl_icon_clgj_video"></i>
           <span>视频接力</span>
         </li>
         <li>
@@ -147,6 +147,57 @@
         </li>
       </ul>
     </div>
+    <!--右侧区域列表-->
+    <!-- 车速信息 -->
+    <div class="speed_info_right" v-if="isCheckedSpeed">
+      <vue-scroll>
+        <div class="speed_box">
+          <ul class="simple_speed">
+            <li class="speed_title">
+              <p>2019-9-30 15:05:18</p>
+              <p>平均速度</p>
+            </li>
+            <li class="speed_addr">
+              <p class="addr_name">新姚南路与黑石铺路交叉路口</p>
+              <p class="num">35</p>
+            </li>
+            <li class="speed_distance">
+              <p class="dis_desc">两次抓拍距离: <span class="dis_num">0.7 KM</span></p>
+              <p>KM/H</p>
+            </li>
+          </ul>
+          <ul class="simple_speed">
+            <li class="speed_title">
+              <p>2019-9-30 15:05:18</p>
+              <p>平均速度</p>
+            </li>
+            <li class="speed_addr">
+              <p class="addr_name">新姚南路与黑石铺路交叉路口</p>
+              <p class="num">35</p>
+            </li>
+            <li class="speed_distance">
+              <p class="dis_desc">两次抓拍距离: <span class="dis_num">0.7 KM</span></p>
+              <p>KM/H</p>
+            </li>
+          </ul>
+          <ul class="simple_speed">
+            <li class="speed_title">
+              <p>2019-9-30 15:05:18</p>
+              <p>平均速度</p>
+            </li>
+            <li class="speed_addr">
+              <p class="addr_name">新姚南路与黑石铺路交叉路口</p>
+              <p class="num">35</p>
+            </li>
+            <li class="speed_distance">
+              <p class="dis_desc">两次抓拍距离: <span class="dis_num">0.7 KM</span></p>
+              <p>KM/H</p>
+            </li>
+          </ul>
+        </div>
+      </vue-scroll>
+    </div>
+
     <!--人工筛选-->
     <el-dialog
       title="人工筛选"
@@ -198,14 +249,14 @@
   import vlUpload from '@/components/common/upload.vue';
   import vlBreadcrumb from '@/components/common/breadcrumb.vue';
   import snapDialog from './components/snapDetail';
-  import flvplayer from '@/components/common/flvplayer.vue';
-  import { mapXupuxian,ajaxCtx } from "@/config/config.js";
+  // import flvplayer from '@/components/common/flvplayer.vue';
+  import { mapXupuxian } from "@/config/config.js";
   import { objDeepCopy, formatDate, dateOrigin } from "@/utils/util.js";
   // import { cityCode } from "@/utils/data.js";
   import {PortraitPostPersonTrace} from "@/views/index/api/api.portrait.js";
   import { getPeopleTaskDetail } from '@/views/index/api/api.analysis.js';
   export default {
-    components: {vlBreadcrumb, flvplayer, vlUpload, snapDialog},
+    components: {vlBreadcrumb, vlUpload, snapDialog},
     data() {
       return {
         showNewTask: false, // 展示修改任务
@@ -326,12 +377,6 @@
         if (e < this.ruleForm.data1) {
           this.$message.info('结束时间必须大于开始时间才会有结果')
         }
-      },
-      gotoControl (url) {
-        this.$router.push({ name: 'control_create', query: {modelName: "人员追踪", imgurl: url} })
-      },
-      gotoLjd (url) {
-        this.$router.push({ name: 'portrait_ljd', query: {imgurl: url} })
       },
       scrollIt (e) {
         if(e.srcElement.scrollTop + e.srcElement.offsetHeight > e.srcElement.scrollHeight - 10){
@@ -605,6 +650,62 @@
   };
 </script>
 <style lang="scss" scoped>
+/* 车速信息 */
+.speed_info_right {
+  position: absolute;
+  top: 70px;
+  right: 20px;
+  width: 380px;
+  background-color: #fff;
+  box-shadow:0px 3px 10px 0px rgba(99,99,99,0.39);
+  .speed_box {
+    max-height: 4.2rem;
+    .simple_speed {
+      padding: 12px 0;
+      margin: 0 20px;
+      border-bottom: 1px solid #f2f2f2;
+      li {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 0 2px 0 4px;
+      }
+      .speed_title {
+        color: #999;
+        font-size: 12px;
+      }
+      .speed_addr {
+        font-size: 16px;
+        color: #333;
+        .addr_name {
+          display: -webkit-box;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          word-wrap: break-word;
+          white-space: normal !important;
+          -webkit-line-clamp: 1;
+          -webkit-box-orient: vertical;
+          padding-right: 20px;
+        }
+        .num {
+          font-size: 32px;
+          color: #0C70F8;
+        }
+      }
+      .speed_distance {
+        font-size: 14px;
+        color: #333;
+        .dis_desc {
+          color: #666;
+        }
+        .dis_num {
+          color: #0C70F8;
+        }
+      }
+    }
+  }
+}
+/* 视频接力--速度信息 tab * */
 .speed_info_box {
   z-index: 111;
   animation: fadeInLeft 0.7s ease-out 0.6s both;
@@ -631,11 +732,25 @@
       &:first-child {
         border-right: 1px solid #F2F2F2;
       }
+      .vl_icon_clgj_video {
+        margin-right: 5px;
+        width: 14px;
+        height: 14px;
+        background-position: -1064px -1538px;
+        background-color: #666;
+        border-radius: 50%;
+        line-height: 1;
+        vertical-align: middle;
+        margin-bottom: 2px;
+      }
     }
     .isCheck_li {
       background-color: #0C70F8;
       color: #ffffff;
       border-radius: 4px;
+      .vl_icon_clgj_video {
+        background-color: #0C70F8;
+      }
     }
   }
 }
