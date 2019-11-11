@@ -306,8 +306,8 @@ export default {
     // 新增页-1
     } else {
       this.pageType = 1;
-      this.modelType = 9;
-      this.modelType_ = 9;
+      this.modelType = 1;
+      this.modelType_ = 1;
    
       // 事件管理模块通过路由跳转过来新增布控时
       if (this.$route.query.eventId) {

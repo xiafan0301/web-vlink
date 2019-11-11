@@ -10,8 +10,8 @@
     <div class="control_tab">
       <h1>车辆布控信息：</h1>
       <ul>
-        <li :class="{'active': vehicleControlType === 1}" @click="vehicleControlType = 1">按车牌布控</li>
-        <li :class="{'active': vehicleControlType === 2}" @click="vehicleControlType = 2">按特征布控</li>
+        <li :class="{'active': vehicleControlType === 1}" @click="changeVehicleTab(1)">按车牌布控</li>
+        <li :class="{'active': vehicleControlType === 2}" @click="changeVehicleTab(2)">按特征布控</li>
         <span v-show="vehicleControlType === 2">（至少选择三种车辆特征）</span>
       </ul>
     </div>
@@ -76,15 +76,18 @@
           </el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="车辆年款：">
-        <el-select v-model="modelSixForm.feature.vehicleModel" placeholder="请选择">
+      <el-form-item label="车辆品牌：">
+        <el-select v-model="modelSixForm.feature.vehicleBrand" placeholder="请选择">
           <el-option
-            v-for="item in vehicleModelList"
+            v-for="item in vehicleBrandList"
             :key="item.enumField"
             :label="item.enumValue"
             :value="item.enumField">
           </el-option>
         </el-select>
+      </el-form-item>
+      <el-form-item label="车辆型号：">
+        <el-input v-model="modelSixForm.feature.vehicleModel" placeholder="请输入车辆型号"></el-input>
       </el-form-item>
     </div>
     <div 
@@ -119,6 +122,7 @@ export default {
           numberColor: null,
           vehicleType: null,
           vehicleColor: null,
+          vehicleBrand: null,
           vehicleModel: null
         }
       },
@@ -126,7 +130,7 @@ export default {
       vehicleTypeList: this.dicFormater(dataList.vehicleType)[0].dictList,
       numberTypeList: this.dicFormater(dataList.plateType)[0].dictList,
       numberColorList: this.dicFormater(dataList.plateColor)[0].dictList,
-      vehicleModelList: [],
+      vehicleBrandList: this.dicFormater(dataList.vehicleBrand)[0].dictList,
       fileListOne: [],
       fileListTwo: [],
       validPlateNumber: checkPlateNumber,
@@ -180,6 +184,22 @@ export default {
     }
   },
   methods: {
+    changeVehicleTab (type) {
+      this.vehicleControlType = type;
+      // 每次切换tab清空数据
+      this.fileListTwo = [];
+      this.modelSixForm = {
+        carNumberInfo: [{vehicleNumber: null}],
+        feature: {
+          numberType: null,
+          numberColor: null,
+          vehicleType: null,
+          vehicleColor: null,
+          vehicleBrand: null,
+          vehicleModel: null
+        }
+      };
+    },
     // 从布控库中获取布控人员信息
     getPortraitData (data) {
       this.fileListOne = this.fileListOne.concat(data);

@@ -214,12 +214,12 @@ export default {
   created () {
     const data = this.$route.query;
     // 外部跳转到详情页
-    // if (data.pageType && data.controlId) {
+    if (data.pageType && data.controlId) {
       this.$nextTick(() => {
-        this.pageType = 2 || parseInt(data.pageType);
-        this.controlId = '7tL3dNwW0ocJAmSVd6acnb' || data.controlId;
+        this.pageType = parseInt(data.pageType);
+        this.controlId = data.controlId;
       })
-    // }
+    }
     // 外部跳转到列表页
     if (!data.pageType && data.state) {
       this.$nextTick(() => {
