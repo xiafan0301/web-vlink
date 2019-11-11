@@ -220,7 +220,7 @@
     },
     created() {
       this.userInfo = this.$store.state.loginUser;
-      // $('body').css({'position':'fixed',"width":"100%"});
+      $('body').css({'position':'fixed',"width":"100%"});
     },
     mounted () {
       this.getdetailbgg()
@@ -334,6 +334,7 @@
               localStorage.removeItem('temp')
             }
             this.dataloading = false
+            $('body').css({'position':'relative'});
             setTimeout(()=>{
               this.$nextTick(() => {
                 this.$msgbox({
