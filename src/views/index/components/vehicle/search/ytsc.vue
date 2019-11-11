@@ -370,6 +370,9 @@
       },
       emitImgData (obj) {
         this.isOpenImgDialog = obj.open;
+        this.imgData = {
+          path: obj.secondImgUrl
+        }
         this.imgBDataList = obj.imgBDataList
         console.log(obj)
         if (obj.imgBDataList.length > 0) {

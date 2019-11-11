@@ -3,21 +3,6 @@
     <div class="vc_rep_bd" is="vehicleBreadcrumb" :oData="[{name: '人员侦察报告'}]"></div>
     <div style="height: 50px"></div>
     <div class="vehicle_content_box_left">
-      <div :class="['upload_pic',{'hidden': dialogImageUrl}]">
-        <el-upload
-            ref="uploadPic"
-            accept="image/*"
-            :action="uploadUrl"
-            :before-upload="befupload"
-            :on-success="uploadPicSuccess"
-            :limit="1"
-            :on-remove="handleRemove"
-            :data="{projectType: 2}"
-            list-type="picture-card">
-          <i class="vl_icon vl_icon_control_14"></i>
-        </el-upload>
-      </div>
-      <div style="color:rgba(153,153,153,1); margin-top: 10px; text-align: center">请上传全身照片</div>
       <div style="padding: 20px; padding-bottom: 0">
         <el-form :model="ruleForm" ref="ruleForm" class="demo-ruleForm" :rules="rules">
           <el-form-item prop="taskName">
@@ -42,6 +27,23 @@
                 :picker-options="pickerOptions"
                 placeholder="结束时间">
             </el-date-picker>
+          </el-form-item>
+          <el-form-item>
+            <div :class="['upload_pic',{'hidden': dialogImageUrl}]">
+              <el-upload
+                  ref="uploadPic"
+                  accept="image/*"
+                  :action="uploadUrl"
+                  :before-upload="befupload"
+                  :on-success="uploadPicSuccess"
+                  :limit="1"
+                  :on-remove="handleRemove"
+                  :data="{projectType: 2}"
+                  list-type="picture-card">
+                <i class="vl_icon vl_icon_control_14"></i>
+              </el-upload>
+            </div>
+            <div style="color:rgba(153,153,153,1); margin-top: 10px; text-align: center">请上传全身照片</div>
           </el-form-item>
           <el-form-item>
             <el-button class="reset_btn" style="width: 110px" @click="skipAddTaskPage('ruleForm')">重置</el-button>
@@ -381,6 +383,7 @@ export default {
       this.selectDataList();
     },
     skipAddTaskPage() {
+      this.ruleForm.taskName = ''
       this.dialogImageUrl = null
       this.settime()
       this.$nextTick(() => {
@@ -472,11 +475,10 @@ export default {
       width: 272px;
       height: calc(100% - 50px);
       float: left;
-      padding-top: 20px;
       background-color: white;
       box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);
       .el-form-item{
-        margin-bottom: 18px;
+        margin-bottom: 13px;
       }
       .select_btn,
       .reset_btn {

@@ -86,32 +86,26 @@
               padding: 20px;
               border-bottom: 1px solid #F2F2F2;
               font-size: 16px;">落脚点分析</div>
+<!--             struGroupResultDtoList-->
               <div class="cont2_map_box">
-                <vue-scroll>
-                  <div class="mes">
-                    <el-collapse v-model="activeNames">
-                      <el-collapse-item  v-for="(item, index) in struGroupResultDtoList" :key='index'  :title="item.groupName + '(' + item.totalNum + '次)'">
-                        <div class="mes_cot">
-                          <div v-for = "(ite, index) in item.personDetailList" :key='index'>
-                            <div class="cot_1">
-                              <img :src="ite.subStoragePath">
-                              <div style="padding-left: 10px">
-                                <div style="background-color: #F6F6F6; padding: 0 8px"><i class="icon"></i>{{ite.shotTime}}</div>
-                                <div class="subdata">
-                                  <i class="vl_icon vl_icon_retrieval_03" style="height: 24px"></i>
-                                  <b>{{ite.semblance}}</b>%
-                                </div>
-                              </div>
-                            </div>
-                            <div style="margin: 15px 0; border-bottom: 1px solid #F2F2F2"></div>
-                          </div>
-                        </div>
-                      </el-collapse-item>
-                    </el-collapse>
-                  </div>
-                </vue-scroll>
+                <el-table
+                    :data="tableData"
+                    style="width: 100%">
+                  <el-table-column
+                      type="index"
+                      label="序号"
+                      width="50">
+                  </el-table-column>
+                  <el-table-column
+                      label="落脚点位置"
+                      prop="address">
+                  </el-table-column>
+                  <el-table-column
+                      prop="stopOverTime"
+                      label="停留时间分钟">
+                  </el-table-column>
+                </el-table>
               </div>
-              <div id="container1"></div>
             </div>
             <div class="cont3 cont2">
               <div style="background-color: white; color: #333333;
@@ -120,33 +114,18 @@
               border-bottom: 1px solid #F2F2F2;
               font-size: 16px;">轨迹分析</div>
               <div class="cont2_map_box">
-                <vue-scroll>
-                  <div class="mes">
-                    <el-collapse v-model="activeNames">
-                      <el-collapse-item  v-for="(item, index) in struPersonDtoList" :key='index'  :title="item.shotTime + '(' + item.num + '次)'">
-                        <div class="mes_cot">
-                          <div v-for = "(ite, index) in item.list" :key='index' style="position: relative">
-                            <div class="cot_1">
-                              <img :src="ite.subStoragePath" >
-                              <div style="padding-left: 10px">
-                                <div style="background-color: #F6F6F6; padding: 0 8px"><i class="icon"></i>{{ite.shotTime}}</div>
-                                <div class="subdata">
-                                  <i class="vl_icon vl_icon_retrieval_03" style="height: 24px"></i>
-                                  <b>{{ite.semblance}}</b>%
-                                </div>
-                              </div>
-                              <div :title="ite.address" class="address"><i class="el-icon-location-outline"></i>{{ite.address ? ite.address : '无'}}</div>
-                              <div class="del_icon el-icon-delete" @click.stop="updateLine(ite, item.list)"></div>
-                            </div>
-                            <div style="margin: 15px 0; border-bottom: 1px solid #F2F2F2"></div>
-                          </div>
-                        </div>
-                      </el-collapse-item>
-                    </el-collapse>
+                <div style="display: flex; height: 40px; line-height: 40px;background-color: #F7F7F7">
+                  <div style="width: 50%; padding-left: 30px">时间</div>
+                  <div style="width: 50%;">抓拍地址</div>
+                </div>
+                <div v-for="(item, index) in gat1400FaceExpDtoList" :key="index">
+                  <div style="padding-bottom: 20px; padding-left: 30px">{{item.shotTime}}</div>
+                  <div style="display: flex" v-for="(ite, ind) in item.list" :key="ind">
+                    <div style="width: 50%; padding-bottom: 20px;padding-left: 30px">{{ite.shotTime&&ite.shotTime.substring(11,19)}}</div>
+                    <div style="width: 50%">{{ite.address}}</div>
                   </div>
-                </vue-scroll>
+                </div>
               </div>
-              <div id="rightMap1"></div>
             </div>
           </div>
         </div>
@@ -164,6 +143,7 @@
     components: {flvplayer},
     data () {
       return {
+        tableData: [],
         evData: [],
         dataloading: false,
         value1: '',
@@ -230,7 +210,7 @@
         analysisTaskInfoWithBLOBsList: [],
         taskResult: [],
         struGroupResultDtoList: [{personDetailList: [{shotPlaceLongitude: 1,shotPlaceLatitude: 2 }]}],
-        struPersonDtoList: [],
+        gat1400FaceExpDtoList: [],
         data: [],
         taskWebParam: {},
         time: [],
@@ -291,6 +271,12 @@
             this.analysisTaskInfoWithBLOBsList = res.data.analysisTaskInfoWithBLOBsList
             this.taskResult = JSON.parse(res.data.analysisTaskInfoWithBLOBsList[0].taskResult)
             this.struGroupResultDtoList = res.data.struGroupResultDtoList
+            this.struGroupResultDtoList.forEach((item)=>{
+              item.stayPointList.forEach((ite)=>{
+                this.tableData.push(ite)
+              })
+            })
+            console.log(this.tableData)
             this.taskWebParam =JSON.parse(res.data.analysisTaskInfoWithBLOBsList[0].taskWebParam)
             if(this.taskWebParam.targetPicUrl){
               this.getBase64(this.taskWebParam.targetPicUrl)
@@ -319,31 +305,28 @@
               })
             }
             let list = []
-            res.data.struPersonDtoList.forEach((item)=>{
+            res.data.gat1400FaceExpDtoList.forEach((item)=>{
               list.push(item.shotTime.substring(0,10))
             })
             list = Array.from(new Set(list))
             for (let i =0; i<list.length; i++) {
               let index = list[i]
-              this.struPersonDtoList[i] = {}
-              this.struPersonDtoList[i].shotTime= index
-              this.struPersonDtoList[i].list = []
-              for (let k =0; k<res.data.struPersonDtoList.length; k++) {
-                if (res.data.struPersonDtoList[k].shotTime.substring(0,10) === index) {
-                  (this.struPersonDtoList[i].list).push(res.data.struPersonDtoList[k])
+              this.gat1400FaceExpDtoList[i] = {}
+              this.gat1400FaceExpDtoList[i].shotTime= index
+              this.gat1400FaceExpDtoList[i].list = []
+              for (let k =0; k<res.data.gat1400FaceExpDtoList.length; k++) {
+                if (res.data.gat1400FaceExpDtoList[k].shotTime.substring(0,10) === index) {
+                  (this.gat1400FaceExpDtoList[i].list).push(res.data.gat1400FaceExpDtoList[k])
                 }
               }
-              this.struPersonDtoList[i].num = this.struPersonDtoList[i].list.length
+              this.gat1400FaceExpDtoList[i].num = this.gat1400FaceExpDtoList[i].list.length
             }
-            console.log(list)
-            console.log(this.struPersonDtoList)
-            this.struPersonDtoList.forEach((item)=>{
+            this.gat1400FaceExpDtoList.forEach((item)=>{
               item.list.forEach((ite)=>{
                 this.data.push(ite)
               })
             })
-            this.initMap()
-            this.renderMap()
+            console.log(this.gat1400FaceExpDtoList)
             if (localStorage.getItem("temp")) {
               JSON.parse(localStorage.getItem("temp")).forEach((item)=>{
                 this.updateLine(item)
@@ -351,6 +334,7 @@
               localStorage.removeItem('temp')
             }
             this.dataloading = false
+            $('body').css({'position':'relative'});
             setTimeout(()=>{
               this.$nextTick(() => {
                 this.$msgbox({
@@ -426,7 +410,7 @@
         let _content = `<div class="vl_icon vl_icon_judge_02"></div><div class="cap_info_win"><p>${data.groupName}</p><p>${data.totalNum}次</p></div>`
         this.markerPoint = new window.AMap.Marker({ // 添加自定义点标记
           map: this.map,
-          position: [data.personDetailList[0].shotPlaceLongitude, data.personDetailList[0].shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
+          position: [data.stayPointList[0].shotPlaceLongitude, data.stayPointList[0].shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
           offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
           draggable: false, // 是否可拖动
           // 自定义点标记覆盖物内容
@@ -445,18 +429,18 @@
           list1.push(item.shotTime.substring(0,10))
         })
         list1 = Array.from(new Set(list1))
-        this.struPersonDtoList =[]
+        this.gat1400FaceExpDtoList =[]
         for (let i =0; i<list1.length; i++) {
           let index = list1[i]
-          this.struPersonDtoList[i] = {}
-          this.struPersonDtoList[i].shotTime= index
-          this.struPersonDtoList[i].list = []
+          this.gat1400FaceExpDtoList[i] = {}
+          this.gat1400FaceExpDtoList[i].shotTime= index
+          this.gat1400FaceExpDtoList[i].list = []
           for (let k =0; k<this.data.length; k++) {
             if (this.data[k].shotTime.substring(0,10) === index) {
-              (this.struPersonDtoList[i].list).push(this.data[k])
+              (this.gat1400FaceExpDtoList[i].list).push(this.data[k])
             }
           }
-          this.struPersonDtoList[i].num = this.struPersonDtoList[i].list.length
+          this.gat1400FaceExpDtoList[i].num = this.gat1400FaceExpDtoList[i].list.length
         }
         this.drawMapMarker(this.data)
       }, // 更新画线
@@ -768,10 +752,7 @@
             }
             .cont2_map_box{
               height: calc(100% - 62px);
-              padding-top: 20px;
-              width: 340px;
               background-color: white;
-              position: absolute;
               z-index: 99;
               box-shadow:2px 3px 10px 0px rgba(131,131,131,0.28);
               .mes{
