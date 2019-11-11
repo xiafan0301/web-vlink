@@ -396,10 +396,10 @@ export default {
     //跳转到新建布控任务页面
     spinToControl() {
       this.$router.push({
-        name: "control_create",
+        name: "control_add",
         query: {
           imgurl: this.sturcDetail.subStoragePath,
-          modelName: "人员追踪"
+          modelName: 9 // 9---人员追踪
         }
       });
     },
