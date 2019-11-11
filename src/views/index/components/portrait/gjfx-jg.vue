@@ -1,6 +1,5 @@
 <template>
   <div class="point">
-    
     <!-- <div> -->
       <div is="vlBreadcrumb"
         :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
@@ -243,11 +242,14 @@
     </el-dialog>
 
     <snapDialog ref="snapDialogComp" :snapObj="snapObj"></snapDialog>
+    <!-- 视频接力弹窗 -->
+    <!-- <videoRelay ref="videoRelayzDialogComp"></videoRelay> -->
   </div>
 </template>
 <script>
   import vlUpload from '@/components/common/upload.vue';
   import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+  import videoRelay from '@/components/common/videoRelay.vue';
   import snapDialog from './components/snapDetail';
   // import flvplayer from '@/components/common/flvplayer.vue';
   import { mapXupuxian } from "@/config/config.js";
@@ -256,7 +258,7 @@
   import {PortraitPostPersonTrace} from "@/views/index/api/api.portrait.js";
   import { getPeopleTaskDetail } from '@/views/index/api/api.analysis.js';
   export default {
-    components: {vlBreadcrumb, vlUpload, snapDialog},
+    components: {vlBreadcrumb, vlUpload, snapDialog, videoRelay},
     data() {
       return {
         showNewTask: false, // 展示修改任务
@@ -295,7 +297,7 @@
         allLeftEvData: [],
         marks: [[], []],
         markerLine: [], // 地图线集合
-        markerPoint: [], // 地图点集合
+        markerPoint: [] // 地图点集合
       };
     },
     computed: {
@@ -349,13 +351,16 @@
                 }
                 this.reselt = true;
                 this.evData = res.data.taskResult;
+
+                this.pagination.total = this.evData.length;
+
                 this.evData.forEach(x => {
                   if (x.bayonetName) {
                     x.DeviceID = x.bayonetName;
                   }
                 })
                 this.evData.sort(this.compare("shotTime", this.timeOrder ? false : true));
-                this.shotAddressAndTimes(this.evData)
+                this.shotAddressAndTimes(this.evData);
 
                 //  重组数据，给左边列表使用
                 this.operData(true);
@@ -383,10 +388,10 @@
           if (!this.loading && !this.noMore) {
             this.loading = true;
             setTimeout(() => {
-              this.count += 2;
+              this.count += 4;
               this.operData();
               this.loading = false;
-            }, 2000)
+            }, 800)
           }
         }
       },
@@ -902,6 +907,7 @@
   .point {
     width: 100%;
     height: 100%;
+    // overflow: hidden;
   }
   .full {
     width: 100%;
@@ -1126,9 +1132,6 @@
     .is_open {
       height: auto;
     }
-    .th-center-pagination {
-      text-align: center;
-    }
   }
   .mapbox {
     width: 100%;
@@ -1291,7 +1294,10 @@
       //   }
       // }
       > .vl_map_mark_time {
-        position: absolute; top: 10px; left: 98%;
+        position: absolute;
+        // max-height: 200px;
+        // overflow: auto;
+        top: 10px; left: 98%;
         width: 130px;
         word-break:keep-all;
         font-size: 12px; color: #fff;

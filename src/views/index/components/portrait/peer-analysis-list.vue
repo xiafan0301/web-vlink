@@ -338,6 +338,7 @@ export default {
       this.msClear = {};
       this.dSum = 0;
       this.chooseType = 1;
+      this.imgList = '';
       this.setDTime();
     },
     tcDiscuss (boolean) {
@@ -375,7 +376,7 @@ export default {
           return false;
         }
       } else {
-        params.taskName = this.taskName;
+        params.taskName = this.taskName.trim();
         postPeopleTask(params).then(res => {
           this.searching = false;
           this.resetSearch();

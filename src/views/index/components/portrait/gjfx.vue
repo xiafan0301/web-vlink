@@ -573,7 +573,7 @@
         if (this.taskId) {
           const params = {
             uid: this.taskId,
-            taskType: 6, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
+            taskType: 12, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
             taskStatus: 4 // 1：处理中 2：处理成功 3：处理失败 4：处理中断
           };
           this.isInterruptLoading = true;

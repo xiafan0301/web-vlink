@@ -742,8 +742,6 @@ export default {
     // 过滤抓拍上墙数据，只剩8条
     filterSnapList () {
       let newSnapList = Object.assign(this.querySnapList, []);
-      console.log('newSnapList', newSnapList);
-      
       return this.querySnapList.length >= 8 ? newSnapList.slice(0, 8) : this.querySnapList;
     }
   },
