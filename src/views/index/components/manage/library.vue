@@ -78,9 +78,9 @@
             <el-select v-model="libPortraitForm.sex" placeholder="选择性别">
               <el-option
                 v-for="item in sexList"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
+                :key="item.enumField"
+                :label="item.enumValue"
+                :value="item.enumField">
               </el-option>
             </el-select>
           </el-form-item>
@@ -145,7 +145,7 @@
           <el-form-item style="width: 192px;" prop="vehicleColor">
             <el-select v-model="libVehicleForm.vehicleColor" placeholder="选择车身颜色">
               <el-option
-                v-for="item in carColorList"
+                v-for="item in vehicleColorList"
                 :key="item.enumField"
                 :label="item.enumValue"
                 :value="item.enumField">
@@ -155,7 +155,7 @@
           <el-form-item style="width: 192px;" prop="vehicleType">
             <el-select v-model="libVehicleForm.vehicleType" placeholder="选择车辆类型">
               <el-option
-                v-for="item in carTypeList"
+                v-for="item in vehicleTypeList"
                 :key="item.enumField"
                 :label="item.enumValue"
                 :value="item.enumField">
@@ -165,7 +165,7 @@
           <el-form-item style="width: 192px;" prop="numberType">
             <el-select v-model="libVehicleForm.numberType" placeholder="选择号牌类型">
               <el-option
-                v-for="item in numTypeList"
+                v-for="item in numberTypeList"
                 :key="item.enumField"
                 :label="item.enumValue"
                 :value="item.enumField">
@@ -440,7 +440,7 @@
                 <el-form-item label=" " style="width: 415px;" prop="vehicleColor">
                   <el-select v-model="carForm.vehicleColor" placeholder="选择车身颜色" style="width: 100%;" :disabled="isAddDisabled">
                     <el-option
-                      v-for="item in carColorList"
+                      v-for="item in vehicleColorList"
                       :key="item.enumField"
                       :label="item.enumValue"
                       :value="item.enumField">
@@ -450,7 +450,7 @@
                 <el-form-item label=" " style="width: 415px;" prop="vehicleType">
                   <el-select v-model="carForm.vehicleType" placeholder="选择车辆类型" style="width: 100%;" :disabled="isAddDisabled">
                     <el-option
-                      v-for="item in carTypeList"
+                      v-for="item in vehicleTypeList"
                       :key="item.enumField"
                       :label="item.enumValue"
                       :value="item.enumField">
@@ -460,7 +460,7 @@
                 <el-form-item label=" " style="width: 415px;" prop="numberType">
                   <el-select v-model="carForm.numberType" placeholder="选择号牌类型" style="width: 100%;" :disabled="isAddDisabled">
                     <el-option
-                      v-for="item in numTypeList"
+                      v-for="item in numberTypeList"
                       :key="item.enumField"
                       :label="item.enumValue"
                       :value="item.enumField">
@@ -470,7 +470,7 @@
                 <el-form-item label=" " style="width: 415px;" prop="numberColor">
                   <el-select v-model="carForm.numberColor" placeholder="选择号牌颜色" style="width: 100%;" :disabled="isAddDisabled">
                     <el-option
-                      v-for="item in numColorList"
+                      v-for="item in numberColorList"
                       :key="item.enumField"
                       :label="item.enumValue"
                       :value="item.enumField">
@@ -613,17 +613,13 @@ export default {
       pageType: '1',//页面类型，默认为组成员页，1-组成员页，2-组设置页
       groupId: null,//分组id
       lastGroupId: null,//用于记录之前的分组id
-      sexList: [
-        {label: '未知', value: 0},
-        {label: '男', value: 1},
-        {label: '女', value: 2}
-      ],//性别列表数据
+      sexList:this.dicFormater(dataList.sexType)[0].dictList,//性别列表数据
       nationalList: nationData,//民族列表数据
 
-      carColorList: this.dicFormater(dataList.carColor)[0].dictList,
-      carTypeList: this.dicFormater(dataList.vehicleType)[0].dictList,
-      numTypeList: this.dicFormater(dataList.plateType)[0].dictList,
-      numColorList: this.dicFormater(dataList.plateColor)[0].dictList,
+      vehicleColorList: this.dicFormater(dataList.carColor)[0].dictList,
+      vehicleTypeList: this.dicFormater(dataList.vehicleType)[0].dictList,
+      numberTypeList: this.dicFormater(dataList.plateType)[0].dictList,
+      numberColorList: this.dicFormater(dataList.plateColor)[0].dictList,
       // 翻页数据
       currentPage: 1,
       pageSize: 6,
