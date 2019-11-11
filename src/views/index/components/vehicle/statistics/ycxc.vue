@@ -366,16 +366,22 @@ export default {
       this.handleSubmitData();
     },
     areaTypeChanged () {
-      this.selectBayonetArr = [];
-      this.selectCameraArr = [];
+      // this.selectBayonetArr = [];
+      // this.selectCameraArr = [];
       this.selectAreaType = 2;
       this.openMap = !this.openMap;
     },
     openMapDialog () {
+      // this.selectBayonetArr = [];
+      // this.selectCameraArr = [];
      this.openMap = !this.openMap;
     },
     mapSelectorEmit (result) {
+      this.selectCameraArr = [];
+      this.selectBayonetArr = [];
       if (result) {
+        console.log('result', result);
+        
         // bayonetList deviceList
         this.dSum = 0;
         if (result.deviceList) {
@@ -530,9 +536,13 @@ export default {
       }
       if (this.selectCameraArr && this.selectCameraArr.length > 0) {
         this.queryForm.cameraIds = this.selectCameraArr.join(",");
+      } else {
+        this.queryForm.cameraIds = '';
       }
       if (this.selectBayonetArr && this.selectBayonetArr.length > 0) {
         this.queryForm.bayonetIds = this.selectBayonetArr.join(",");
+      } else {
+        this.queryForm.bayonetIds = '';
       }
       if (!this.validatorShotTimes(this.queryForm.minShotTimes)) {
         this.searchLoading = false;
@@ -572,10 +582,11 @@ export default {
           if (res && res.data) {
             if (!res.data.list || (res.data.list && res.data.list.length === 0)) {
               this.isInitPage = false;
+              this.dataList = [];
             } else {
               this.dataList = res.data.list;
-              this.pagination.total = res.data.total;
             }
+            this.pagination.total = res.data.total;
             this.searchLoading = false;
           } else {
             this.searchLoading = false;
