@@ -136,7 +136,7 @@ export default {
       validPlateNumber: checkPlateNumber,
       createSelDialog: false,
       activeDeviceList: null,
-      vehicleControlType: 2,//车辆布控类型
+      vehicleControlType: 1,//车辆布控类型
     }
   },
   mounted () {
