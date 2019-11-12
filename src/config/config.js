@@ -68,7 +68,7 @@ const oDomains = {
     },
     // 用户登录地址
     user: {
-      // dev: 'http://10.116.64.107:8082', // 熊日成
+      // test: 'http://10.116.64.82:8082', // 熊日成
       dev: 'https://apidev.aorise.org/vlink-user',
       test: 'https://apirel.aorise.org/vlink-user',
       prod: 'https://apiprod.aorise.org/vlink-user'
@@ -139,7 +139,7 @@ console.log('config.js env', ENV_API);
 // ajax default
 let ajaxCtx = {};
 for (let _key in oDomains) {
-    ajaxCtx[_key] = oDomains[_key][ENV_API]
+    ajaxCtx[_key] = oDomains[_key][ENV_API] + '/api/xl'
 }
 // console.log('*****oDomains*****', ajaxCtx);
 export {ajaxCtx};

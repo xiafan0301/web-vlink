@@ -34,7 +34,7 @@ export function userInfo(data) {
  */
 export function login(data) {
   return request({
-    url: '/user-service/login',
+    url: '/login',
     data,
     mode: 'user',
     method: 'post'

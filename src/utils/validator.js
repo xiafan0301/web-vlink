@@ -15,14 +15,14 @@ export const validatePhone = (rule, value, callback) => {
 };
 // 密码验证
 export const validatePwd = (rule, value, callback) => {
-  if (value) {
-      let reg = /^[a-zA-Z0-9]{6,16}$/;
-      if (!reg.test(value)) {
-          callback(new Error('密码为6-16个数字或英文字母组合'));
-      } else {
-          callback();
-      }
-  }
+  // if (value) {
+  //     let reg = /^[a-zA-Z0-9]{6,16}$/;
+  //     if (!reg.test(value)) {
+  //         callback(new Error('密码为8位，必须包含一个英文字母一个数字跟一个特殊字符'));
+  //     } else {
+  //         callback();
+  //     }
+  // }
   callback();
 }
 // 身份证号码验证 

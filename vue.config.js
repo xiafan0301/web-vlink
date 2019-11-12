@@ -27,7 +27,7 @@ module.exports = {
     filenameHashing: true,
     devServer: {
         contentBase: process.env.VUE_APP_PROJECTNAME,
-        host: 'localhost', // 10.116.64.69 localhost
+        // host: 'localhost', // 10.116.64.69 localhost
         disableHostCheck: true,
         port: 9101,
         hot: true,          // 开启热更新

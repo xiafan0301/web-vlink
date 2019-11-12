@@ -1139,13 +1139,15 @@ export default {
               return x;
             });
             this.snapLoading = false;
+          } else {
+            this.snapLoading = false;
           }
         })
       } else {
         params.where["startTime"] = formatDate(this.oData.startTime, 'yyyy-MM-dd HH:mm:ss');
         params.where["endTime"] = formatDate(this.oData.endTime, 'yyyy-MM-dd HH:mm:ss');
         VideoPostQueryBackSnap(params).then(res =>{
-          if (res) {
+          if (res.data && res.data.list ) {
             console.log(res);
             // 处理当前需要的key
             this.querySnapList = res.data.list.map(x => {
@@ -1163,6 +1165,8 @@ export default {
             console.log('ccccc', this.querySnapList)
             this.querySnapTotal = res.data.total;
             this.pagination.total = res.data.total;
+            this.snapLoading = false;
+          } else {
             this.snapLoading = false;
           }
         })

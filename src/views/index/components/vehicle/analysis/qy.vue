@@ -125,7 +125,7 @@
                   <template v-for="(sItem, dIndex) in item.curPointData">{{dIndex !== 0 ? ',' : ''}}{{sItem.deviceName}}</template>
                 </p>
                 <p v-else>
-                  {{item.curPointData[0].deviceName}},{{item.curPointData[1].deviceName}}等{{item.curPointData.length - 2}}个设备
+                  {{item.curPointData[0].deviceName}},{{item.curPointData[1].deviceName}}等{{item.curPointData.length}}个设备
                 </p>
               </div>
             </li>

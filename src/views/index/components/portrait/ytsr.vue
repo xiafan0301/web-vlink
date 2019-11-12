@@ -375,7 +375,7 @@
           let bList = this.selectBayonetArr.map(res => res.bayonetName);
           dNameList = dList.concat(bList);
           if (dNameList.length > 3) {
-            params['deviceNames'] = dNameList.splice(0, 2);
+            params['deviceNames'] = dNameList.slice(0, 2);
             params['deviceNames'].push('等' + dNameList.length + '个设备');
             params['deviceNames'] =  params['deviceNames'].join(',')
           } else {
