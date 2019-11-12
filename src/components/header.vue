@@ -327,7 +327,7 @@ export default {
       }
       this.loginoutLoading = true;
       const params = {
-        userMobile: this.userInfo.userMobile
+        uid: this.userInfo.uid
       }
       logout(params).then(res => {
         if (res) {
