@@ -397,6 +397,7 @@
         this.drawMarkers(this.chooseData);
       },
       drawMarkers(data) {
+        console.log(data)
         let _this = this
         for (let i = 0; i < data.length; i++) {
           let obj = data[i];

@@ -176,7 +176,7 @@ export default {
    goToPage(v){
       this.$router.push({
         name: v,
-        query: { imgurl: this.sturcDetail.subStoragePath, modelName: '人员追踪' }
+        query: { imgurl: this.sturcDetail.subStoragePath, modelName: 9 } // 9-- 人员追踪
       });
    },
     scrollData (v) {

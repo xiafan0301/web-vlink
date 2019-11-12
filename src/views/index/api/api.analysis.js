@@ -212,7 +212,7 @@ export function newTaskInfos(params) {
   return request({
     url: '/personinvestigation/addinvestigationtask',
     method: 'post',
-    mode: 'judge',
+    mode: 'portrait',
     params
   })
 }

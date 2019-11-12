@@ -45,59 +45,65 @@
       </el-form-item>
     </el-form>
     <div class="list_box" v-loading="loading">
-      <div class="list_info" v-for="item in carMemberList.list" :key="item.uid">
-        <div class="list_img"><img :src="item.photoUrl" alt="" style="width: 100%;height: 100%;"></div>
-        <div class="list_data">
-          <div class="data_title">
-            <span class="vl_f_999">详情资料</span>
-            <el-checkbox v-model="item.isChecked" @change="operateRadio()"></el-checkbox>
-          </div>
-          <div class="data_list">
-            <span :title="item.vehicleNumber">{{item.vehicleNumber}}</span>
-            <span :title="item.numberType" v-if="item.numberType">{{item.numberType}}</span>
-          </div>
-          <div class="data_list">
-            <span :title="item.vehicleType" v-if="item.vehicleType">{{item.vehicleType}}</span>
-            <span :title="item.vehicleColor" v-if="item.vehicleColor">{{item.vehicleColor}}</span>
-          </div>
-          <div class="data_list">
-            <span :title="item.numberColor" v-if="item.numberColor">{{item.numberColor}}</span>
-            <template v-if="item.groupNames">
-              <template v-for="(gN, index) in item.groupNames.split(',')">
-                <span v-if="index === 0" :title="gN" :key="index + gN">{{gN}}</span>
+      <template v-if="carMemberList && carMemberList.list && carMemberList.list.length > 0">
+        <div class="list_info" v-for="item in carMemberList.list" :key="item.uid">
+          <div class="list_img"><img :src="item.photoUrl" alt="" style="width: 100%;height: 100%;"></div>
+          <div class="list_data">
+            <div class="data_title">
+              <span class="vl_f_999">详情资料</span>
+              <el-checkbox v-model="item.isChecked" @change="operateRadio()"></el-checkbox>
+            </div>
+            <div class="data_list">
+              <span :title="item.vehicleNumber">{{item.vehicleNumber}}</span>
+              <span :title="item.numberType" v-if="item.numberType">{{item.numberType}}</span>
+            </div>
+            <div class="data_list">
+              <span :title="item.vehicleType" v-if="item.vehicleType">{{item.vehicleType}}</span>
+              <span :title="item.vehicleColor" v-if="item.vehicleColor">{{item.vehicleColor}}</span>
+            </div>
+            <div class="data_list">
+              <span :title="item.numberColor" v-if="item.numberColor">{{item.numberColor}}</span>
+              <template v-if="item.groupNames">
+                <template v-for="(gN, index) in item.groupNames.split(',')">
+                  <span v-if="index === 0" :title="gN" :key="index + gN">{{gN}}</span>
+                </template>
+                <div class="more" v-if="item.groupNames.split(',').length > 1">
+                  <el-popover
+                    placement="top-start"
+                    width="220"
+                    popper-class="more_popover_box"
+                    trigger="hover">
+                    <vue-scroll>
+                      <template>
+                        <div class="more_popover">
+                          <span :title="gN" v-for="(gN, index) in item.groupNames.split(',')" :key="index + gN">{{gN}}</span>
+                        </div>
+                      </template>
+                    </vue-scroll>
+                    <span slot="reference" class="more_hover">更多组</span>
+                  </el-popover>
+                </div>
               </template>
-              <div class="more" v-if="item.groupNames.split(',').length > 1">
-                <el-popover
-                  placement="top-start"
-                  width="220"
-                  popper-class="more_popover_box"
-                  trigger="hover">
-                  <vue-scroll>
-                    <template>
-                      <div class="more_popover">
-                        <span :title="gN" v-for="(gN, index) in item.groupNames.split(',')" :key="index + gN">{{gN}}</span>
-                      </div>
-                    </template>
-                  </vue-scroll>
-                  <span slot="reference" class="more_hover">更多组</span>
-                </el-popover>
-              </div>
-            </template>
-          </div>
-          <div class="data_list" v-if="item.desci">
-            <span>{{item.desci}}</span>
+            </div>
+            <div class="data_list" v-if="item.desci">
+              <span>{{item.desci}}</span>
+            </div>
           </div>
         </div>
+        <el-pagination
+          class="cum_pagination"
+          @current-change="handleCurrentChange"
+          :current-page="currentPage"
+          :page-sizes="[100, 200, 300, 400]"
+          :page-size="carMemberList.pageSize"
+          layout="total, prev, pager, next, jumper"
+          :total="carMemberList.total">
+        </el-pagination>
+      </template>
+      <div class="not_content" v-if="carMemberList && carMemberList.list && carMemberList.list.length === 0">
+        <img src="../../../../../assets/img/not-content.png" alt="">
+        <p>暂无相关数据</p>
       </div>
-      <el-pagination
-        class="cum_pagination"
-        @current-change="handleCurrentChange"
-        :current-page="currentPage"
-        :page-sizes="[100, 200, 300, 400]"
-        :page-size="carMemberList.pageSize"
-        layout="total, prev, pager, next, jumper"
-        :total="carMemberList.total">
-      </el-pagination>
     </div>
     <div slot="footer">
       <el-button @click="vehicleLibDialog = false" class="btn_140">取消</el-button>
@@ -305,6 +311,7 @@ export default {
     padding-bottom: 0!important;
     .list_box{
       margin: 0 0.5%;
+      height: 80vh;
       display: flex;
       flex-wrap: wrap;
       align-items: flex-start;

@@ -3,7 +3,7 @@
    <div class="special_csmanage_cot">
      <div class="special_csmanage_right">
        <div style="padding: 20px; padding-bottom: 0">
-         <el-input size="small" suffix-icon="el-icon-search"></el-input>
+         <el-input size="small" type="text" v-model="value"><i slot="suffix" class="el-input__icon el-icon-search" style="cursor: pointer" @click="serchone"></i></el-input>
        </div>
        <div class="add_zu" @click="addzu('新增')">
          <i class="vl_icon vl_icon_manage_4"></i>
@@ -18,9 +18,9 @@
      </div>
      <div class="special_csmanage_right_r special_csmanage_right" :class="{'hideResult': Result}">
        <vue-scroll>
-         <div v-for="(item, index) in item1" :key ="index" :class="['special_csmanage_right_r_tree', 'special_csmanage_right_r_tree_'+ index]">
-           <div class="special_csmanage_right_r_tree_hd" @click="oo(item,index)" :class="{'opencolor': item.isopen }"><i :class="[{'el-icon-arrow-right': !item.isopen},{'el-icon-arrow-down':item.isopen}]"></i>{{item.deviceList[0]&&item.deviceList[0].address}}</div>
-           <div class="special_csmanage_right_r_tree_i_tal" style="height: 0; overflow: hidden">
+         <div v-for="(item, index) in czdatalist" :key ="index" :class="['special_csmanage_right_r_tree', 'special_csmanage_right_r_tree_'+ index]">
+           <div class="special_csmanage_right_r_tree_hd" @click="oo(item,index)" :class="{'opencolor': item.isopen }"><i :class="[{'el-icon-arrow-right': !item.isopen},{'el-icon-arrow-down':item.isopen}]"></i>{{item.areaName}}</div>
+           <div :class="['special_csmanage_right_r_tree_i_tal_'+ index, 'special_csmanage_right_r_tree_i_tal']" style="height: 0; overflow: hidden">
              <div class="special_csmanage_right_r_tree_i" v-for="(ite, inde) in item.deviceList" :key ="inde">
                <div>{{ite.deviceName}}</div>
              </div>
@@ -61,9 +61,10 @@ export default {
       fenzulist: [],
       deleteDialog: false,
       item: {},
-      item1: [],
       showind: 0,
-      zidi: []
+      zidi: [],
+      czdatalist: [],
+      value: ''
     }
   },
   created () {
@@ -80,14 +81,24 @@ export default {
   },
   methods: {
     qieh (val, i) {
-      this.item1 = []
       this.showind = i
-      this.item1.push(val)
+      // this.item1.push(val)
+      this.czdatalist = []
+      this.zidi = val.deviceList
+      this.zcdata()
       $('.special_csmanage_right_r_tree_i_tal').height(0)
       val.isopen = false
     },
+    serchone () {
+      this.getlist ()
+      console.log(this.$data)
+      this.$data = Object.assign(this.$data, this.$options.data())
+    },
     getlist () {
-      Jtcgettsc()
+      let params = {
+        keyword: this.value
+      }
+      Jtcgettsc(params)
         .then(res => {
           if (res) {
             this.fenzulist = res.data
@@ -95,13 +106,32 @@ export default {
               this.$set(item, 'isopen', false)
               return item
             })
-            this.item1.push(res.data[0])
-            this.zidi = res.data[1].deviceList
-            // let __arr = this.zidi.map((item)=>{
-            //   return item.areaName
-            // })
+            this.zidi = res.data[0].deviceList
+            this.czdatalist = []
+            this.zcdata ()
           }
         })
+    },
+    zcdata () {
+      let _arr = this.zidi.map((item)=>{
+        return item.areaName
+      })
+      let _arr1 = []
+      for (let i= 0; i<_arr.length; i++){
+        if (_arr1.indexOf(_arr[i]) === -1){
+          _arr1.push(_arr[i])
+        }
+      }
+      for (let i =0; i<_arr1.length; i++) {
+        let flg = _arr1[i]
+        let obj = {areaName: _arr1[i], deviceList: [], isopen: false}
+        for (let k =0 ; k< this.zidi.length; k++) {
+          if (this.zidi[k].areaName === flg ) {
+            obj.deviceList.push(this.zidi[k])
+          }
+        }
+        this.czdatalist.push(obj)
+      }
     },
     delfenzu (val) {
       this.deleteDialog = true
@@ -146,9 +176,9 @@ export default {
       val.isopen = !val.isopen
       let _heght = val.deviceList.length * 34
       if (val.isopen) {
-        $('.special_csmanage_right_r_tree_i_tal').animate({height:_heght}, 300, "linear")
+        $('.special_csmanage_right_r_tree_i_tal_' + index).animate({height:_heght}, 300, "linear")
       } else {
-        $('.special_csmanage_right_r_tree_i_tal').animate({height:0}, 300, "linear")
+        $('.special_csmanage_right_r_tree_i_tal_' + index).animate({height:0}, 300, "linear")
       }
     }
   }

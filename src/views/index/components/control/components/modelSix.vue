@@ -7,24 +7,89 @@
       </div>
       <div is="uploadPic" :fileList="fileListOne" @uploadPicDel="uploadPicDel" @uploadPicFileList="uploadPicFileList"></div>
     </el-form-item>
-    <el-form-item style="margin-bottom: 10px;">
-      <div class="sel_car"><span>布控车辆信息：</span><span @click="popSel(2)">从布控库中选择</span></div>
-    </el-form-item>
-    <el-form-item class="plate_num_box">
-      <div class="plate_num" v-for="(item, index) in fileListTwo" :key="item.uid">
-        <el-input v-model="item.vehicleNumber" :disabled="true"></el-input>
-        <i class="el-icon-remove" @click="removeVehicleNumber(index)"></i>
-      </div>
-      <div v-for="(item, index) in modelSixForm.carNumberInfo" :key="index" style="position: relative;" class="plate_num">
-        <el-form-item :prop="'carNumberInfo.' + index + '.vehicleNumber'" :rules="{validator: validPlateNumber, trigger: 'blur'}">
-          <el-input v-model="item.vehicleNumber" placeholder="请输入车辆车牌号"></el-input>
-          <i class="el-icon-remove" @click="removeLicensePlateNum(index)"></i>
-        </el-form-item>
-      </div>
-      <el-form-item class="plate_num_btn_box">
-        <div class="period_time_btn" @click="addLicensePlateNum()"><i class="vl_icon vl_icon_control_22"></i><span>添加车牌号码</span></div>
+    <div class="control_tab">
+      <h1>车辆布控信息：</h1>
+      <ul>
+        <li :class="{'active': vehicleControlType === 1}" @click="changeVehicleTab(1)">按车牌布控</li>
+        <li :class="{'active': vehicleControlType === 2}" @click="changeVehicleTab(2)">按特征布控</li>
+        <span v-show="vehicleControlType === 2">（至少选择三种车辆特征）</span>
+      </ul>
+    </div>
+    <div v-if="vehicleControlType === 1" class="plate_box">
+      <el-form-item style="margin-bottom: 10px;">
+        <div class="sel_car"><span>布控车辆信息：</span><span @click="popSel(2)">从布控库中选择</span></div>
       </el-form-item>
-    </el-form-item>
+      <el-form-item class="plate_num_box">
+        <div class="plate_num" v-for="(item, index) in fileListTwo" :key="item.uid">
+          <el-input v-model="item.vehicleNumber" :disabled="true"></el-input>
+          <i class="el-icon-remove" @click="removeVehicleNumber(index)"></i>
+        </div>
+        <div v-for="(item, index) in modelSixForm.carNumberInfo" :key="index" style="position: relative;" class="plate_num">
+          <el-form-item :prop="'carNumberInfo.' + index + '.vehicleNumber'" :rules="{validator: validPlateNumber, trigger: 'blur'}">
+            <el-input v-model="item.vehicleNumber" placeholder="请输入车辆车牌号"></el-input>
+            <i class="el-icon-remove" @click="removeLicensePlateNum(index)"></i>
+          </el-form-item>
+        </div>
+        <el-form-item class="plate_num_btn_box">
+          <div class="period_time_btn" @click="addLicensePlateNum()"><i class="vl_icon vl_icon_control_22"></i><span>添加车牌号码</span></div>
+        </el-form-item>
+      </el-form-item>
+    </div>
+    <div v-if="vehicleControlType === 2" class="feature_box">
+      <el-form-item label="号牌类型：">
+        <el-select value-key="uid" v-model="modelSixForm.feature.numberType" placeholder="请选择">
+          <el-option
+            v-for="item in numberTypeList"
+            :key="item.enumField"
+            :label="item.enumValue"
+            :value="item.enumField">
+          </el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="号牌颜色：">
+        <el-select v-model="modelSixForm.feature.numberColor" placeholder="请选择">
+          <el-option
+            v-for="item in numberColorList"
+            :key="item.enumField"
+            :label="item.enumValue"
+            :value="item.enumField">
+          </el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="车辆类型：">
+        <el-select v-model="modelSixForm.feature.vehicleType" placeholder="请选择">
+          <el-option
+            v-for="item in vehicleTypeList"
+            :key="item.enumField"
+            :label="item.enumValue"
+            :value="item.enumField">
+          </el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="车辆颜色：">
+        <el-select v-model="modelSixForm.feature.vehicleColor" placeholder="请选择">
+          <el-option
+            v-for="item in vehicleColorList"
+            :key="item.enumField"
+            :label="item.enumValue"
+            :value="item.enumField">
+          </el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="车辆品牌：">
+        <el-select v-model="modelSixForm.feature.vehicleBrand" placeholder="请选择">
+          <el-option
+            v-for="item in vehicleBrandList"
+            :key="item.enumField"
+            :label="item.enumValue"
+            :value="item.enumField">
+          </el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="车辆型号：">
+        <el-input v-model="modelSixForm.feature.vehicleModel" placeholder="请输入车辆型号"></el-input>
+      </el-form-item>
+    </div>
     <div 
       is="mapSelector" 
       ref="mapSelector" 
@@ -44,19 +109,34 @@ import portraitLib from './portraitLib.vue';
 import mapSelector from '@/components/common/mapSelector.vue';
 import {checkPlateNumber} from '@/utils/validator.js';
 import {unique, imgUrls} from '@/utils/util.js';
+import {dataList} from '@/utils/data.js';
 export default {
   components: {uploadPic, mapSelector, vehicleLib, portraitLib},
-  props: ['modelList'],
+  props: ['modelList', 'deviceId', 'plateNo', 'imgurl'],
   data () {
     return {
       modelSixForm: {
-        carNumberInfo: [{vehicleNumber: null}]
+        carNumberInfo: [{vehicleNumber: null}],
+        feature: {
+          numberType: null,
+          numberColor: null,
+          vehicleType: null,
+          vehicleColor: null,
+          vehicleBrand: null,
+          vehicleModel: null
+        }
       },
+      vehicleColorList: this.dicFormater(dataList.carColor)[0].dictList,
+      vehicleTypeList: this.dicFormater(dataList.vehicleType)[0].dictList,
+      numberTypeList: this.dicFormater(dataList.plateType)[0].dictList,
+      numberColorList: this.dicFormater(dataList.plateColor)[0].dictList,
+      vehicleBrandList: this.dicFormater(dataList.vehicleBrand)[0].dictList,
       fileListOne: [],
       fileListTwo: [],
       validPlateNumber: checkPlateNumber,
       createSelDialog: false,
-      activeDeviceList: null
+      activeDeviceList: null,
+      vehicleControlType: 1,//车辆布控类型
     }
   },
   mounted () {
@@ -77,21 +157,67 @@ export default {
         this.activeDeviceList = [...devList.map(m => m.deviceId), ...bayonetList.map(m => m.bayonetId)];
       })
     }
+    // 布控地图新增布控传入设备
+    if (this.deviceId) {
+      this.$nextTick(() => {
+        this.activeDeviceList = [this.deviceId];
+      })
+    }
+
+    if (this.imgurl) {
+      this.fileListOne.push({
+        photoUrl: this.imgurl,
+        name: random14(),
+        uid: random14(),//必须要文件uid，暂时用的随机数
+        objId: random14(),
+        objType: 1
+      });
+    }
+    
+    if (this.plateNo) {
+      this.fileListTwo.push({
+        vehicleNumber: this.plateNo,
+        photoUrl: null,
+        objType: 2,
+        objId: random14()
+      });
+    }
   },
   methods: {
+    changeVehicleTab (type) {
+      this.vehicleControlType = type;
+      // 每次切换tab清空数据
+      this.fileListTwo = [];
+      this.modelSixForm = {
+        carNumberInfo: [{vehicleNumber: null}],
+        feature: {
+          numberType: null,
+          numberColor: null,
+          vehicleType: null,
+          vehicleColor: null,
+          vehicleBrand: null,
+          vehicleModel: null
+        }
+      };
+    },
     // 从布控库中获取布控人员信息
     getPortraitData (data) {
       this.fileListOne = this.fileListOne.concat(data);
       this.fileListOne = unique(this.fileListOne, 'objId');
+      console.log(this.fileListOne, 'this.fileListOne');
+      
     },
     // 从布控库中获取车辆
     getVehicleData (data) {
       this.fileListTwo = this.fileListTwo.concat(data);
       this.fileListTwo = unique(this.fileListTwo, 'objId');
+      console.log(this.fileListTwo, 'this.fileListTwo');
+      
     },
    // 布控人员信息的上传方法
     uploadPicDel (fileListOne) {
       this.fileListOne = fileListOne;
+      console.log(this.fileListOne, 'this.fileListOne');
     },
     // 布控人员信息的上传方法
     uploadPicFileList (fileList) {
@@ -226,6 +352,59 @@ export default {
           }
         }
       }
+    }
+  }
+  .control_tab{
+    padding-bottom: 10px;
+    > h1{
+      margin-bottom: 6px;
+    }
+    > ul{
+      display: flex;
+      > li{
+        width: 102px;
+        height:32px;
+        line-height: 32px;
+        text-align: center;
+        border:1px solid #D3D3D3;
+        color: #666666;
+        cursor: pointer;
+        &:hover{
+          background:#E0F2FF;
+          color: #0C70F8;
+        }
+        &:nth-child(1){
+          border-radius:4px 0px 0px 4px;
+        }
+        &:nth-child(2){
+          border-left: none;
+          border-radius:0px 4px 4px 0px;
+        }
+      }
+      .active{
+        background:#E0F2FF;
+        color: #0C70F8;
+      }
+      > span{
+        padding-top: 6px;
+        color: #999999;
+      }
+    }
+  }
+  .plate_box{
+    animation: fadeIn .4s ease-out both;
+  }
+  .feature_box{
+    display: flex;
+    flex-wrap: wrap;
+    padding-bottom: 20px;
+    animation: fadeIn .4s ease-out both;
+    .el-form-item{
+      width: 25%;
+      margin-bottom: 0;
+    }
+    .el-form-item:not(:nth-child(4)){
+      padding-right: 10px;
     }
   }
 }

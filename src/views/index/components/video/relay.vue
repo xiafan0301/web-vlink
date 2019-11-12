@@ -253,7 +253,7 @@ import videoEmpty from './videoEmpty.vue';
 import relayNew from './relay-new.vue';
 import {formatDate} from '@/utils/util.js';
 import flvplayer from '@/components/common/flvplayer.vue';
-import {selectVideoContinue, updVideoContinue} from '@/views/index/api/api.judge.js'
+  import {selectVideoContinue, updVideoContinue} from '@/views/index/api/api.judge.js'
 export default {
   components: {videoEmpty, flvplayer, relayNew},
   data () {

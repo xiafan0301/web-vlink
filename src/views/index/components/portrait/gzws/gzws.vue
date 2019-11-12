@@ -67,7 +67,7 @@
               <span class="span_tips" v-show="isShowDeviceTip">该人像在该时间内无抓拍设备</span>
             </el-form-item>
             <el-form-item prop="taskName" :rules="[{ required: true, message: '该项内容不能为空', trigger: 'blur' }]">
-              <el-input placeholder="请输入任务名称，最多20字" maxlength="20" v-model="addForm.taskName"></el-input>
+              <el-input placeholder="请输入任务名称，最多20字" maxlength="20" v-model="addForm.taskName" @change="changeTaskName"></el-input>
             </el-form-item>
             <el-form-item prop="interval">
               <el-select placeholder="请选择尾随时间间隔" style="width: 100%" v-model="addForm.interval">
@@ -310,6 +310,9 @@ export default {
     this.getDataList();
   },
   methods: {
+    changeTaskName (val) {
+      this.addForm.taskName = val.trim();
+    },
     uploadEmit (data) {
       if (data && data.path) {
         this.dialogImageUrl = data.path;

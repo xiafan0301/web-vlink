@@ -1,12 +1,12 @@
 <template>
   <div class="point">
-    <div class="">
+    <!-- <div> -->
       <div is="vlBreadcrumb"
         :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
         {name: '轨迹分析', routerName: 'portrait_gjfx'},
         {name: '分析结果'}]">
       </div>
-    </div>
+    <!-- </div> -->
     <div class="vl_gjfx_jg_left">
       <template v-if="showNewTask">
         <div class="plane">
@@ -103,7 +103,7 @@
               <ul>
                 <li class="p_main_list" :class="{'is_open': item.isOpen}" v-for="item in leftEvData" :key="item.id">
                   <div class="p_main_head" @click="item.isOpen = !item.isOpen"><i :class="{'el-icon-caret-right': !item.isOpen, 'el-icon-caret-bottom': item.isOpen}"></i>{{item.label}}({{item.times}}次)</div>
-                  <div class="p_main_item" v-for="sItem in item.list" :key="sItem.id" @click="showStrucInfo(sItem, evData.findIndex(function (u) {return u === sItem}))">
+                  <div class="p_main_item" v-for="sItem in item.list" :key="sItem.id" @click="toSnapDetail(evData.findIndex(function (u) {return u === sItem}))">
                     <div class="info">
                       <div class="info_left">
                         <img :src="sItem.subStoragePath" alt="">
@@ -134,104 +134,69 @@
       <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
       <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
     </ul>
-    <!-- 速度信息列表 -->
-    <ul class="speed_info_list">
-      <li>
+    <!-- 视频接力---速度信息tab选择 -->
+    <div class="speed_info_box" :class="{'hide_speed': hideleft}" v-show="showLeft">
+      <ul class="speed_info_list">
+        <li :class="{'isCheck_li': isCheckedVideo}" @click="showVideoList">
+          <i class="vl_icon vl_icon_clgj_video"></i>
+          <span>视频接力</span>
+        </li>
+        <li>
+          <el-checkbox v-model="isCheckedSpeed">速度信息</el-checkbox>
+        </li>
+      </ul>
+    </div>
+    <!--右侧区域列表-->
+    <!-- 车速信息 -->
+    <div class="speed_info_right" v-if="isCheckedSpeed">
+      <vue-scroll>
+        <div class="speed_box">
+          <ul class="simple_speed">
+            <li class="speed_title">
+              <p>2019-9-30 15:05:18</p>
+              <p>平均速度</p>
+            </li>
+            <li class="speed_addr">
+              <p class="addr_name">新姚南路与黑石铺路交叉路口</p>
+              <p class="num">35</p>
+            </li>
+            <li class="speed_distance">
+              <p class="dis_desc">两次抓拍距离: <span class="dis_num">0.7 KM</span></p>
+              <p>KM/H</p>
+            </li>
+          </ul>
+          <ul class="simple_speed">
+            <li class="speed_title">
+              <p>2019-9-30 15:05:18</p>
+              <p>平均速度</p>
+            </li>
+            <li class="speed_addr">
+              <p class="addr_name">新姚南路与黑石铺路交叉路口</p>
+              <p class="num">35</p>
+            </li>
+            <li class="speed_distance">
+              <p class="dis_desc">两次抓拍距离: <span class="dis_num">0.7 KM</span></p>
+              <p>KM/H</p>
+            </li>
+          </ul>
+          <ul class="simple_speed">
+            <li class="speed_title">
+              <p>2019-9-30 15:05:18</p>
+              <p>平均速度</p>
+            </li>
+            <li class="speed_addr">
+              <p class="addr_name">新姚南路与黑石铺路交叉路口</p>
+              <p class="num">35</p>
+            </li>
+            <li class="speed_distance">
+              <p class="dis_desc">两次抓拍距离: <span class="dis_num">0.7 KM</span></p>
+              <p>KM/H</p>
+            </li>
+          </ul>
+        </div>
+      </vue-scroll>
+    </div>
 
-      </li>
-    </ul>
-    <el-dialog
-      :visible.sync="strucDetailDialog"
-      class="struc_detail_dialog_gjfx"
-      :close-on-click-modal="false"
-      top="4vh"
-      :show-close="false">
-      <div class="struc_tab">
-        <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">抓拍详情</span>
-        <span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>
-        <span :class="{'active': strucCurTab === 3}" @click="strucCurTab = 3">视频回放</span>
-        <i class="el-icon-close" @click="strucDetailDialog = false"></i>
-      </div>
-      <div class="struc_main">
-        <ul v-show="strucCurTab === 1">
-          <!-- <li><span>抓拍设备：{{sturcDetail.deviceName}}</span></li> -->
-          <li><span style="line-height: 0.24rem;">抓拍地址：{{sturcDetail.address}}</span></li>
-          <li style="color: #999;line-height: 0.24rem;">{{sturcDetail.shotTime}}</li>
-        </ul>
-        <div v-show="strucCurTab === 1" class="struc_c_detail">
-          <div class="struc_c_d_qj struc_c_d_img">
-            <img class="bigImg" :src="sturcDetail.subStoragePath" alt="">
-            <span>抓拍图</span>
-          </div>
-          <div class="struc_c_d_box">
-            <div class="struc_c_d_img">
-              <img class="bigImg" :src="sturcDetail.storagePath" alt="">
-              <span>全景图</span>
-            </div>
-            <div class="struc_c_d_info">
-              <h2>分析结果</h2>
-              <div class="struc_cd_info_main">
-                <vue-scroll>
-                  <ul>
-                    <li><span>性别</span><span>{{sturcDetail.sex ? sturcDetail.sex : '未识别'}}</span></li>
-                    <li><span>年龄段</span><span>{{sturcDetail.age ? sturcDetail.age : '未识别'}}</span></li>
-                    <li><span>发型</span><span>{{sturcDetail.hair ? sturcDetail.hair : '未识别'}}</span></li>
-                    <li><span>戴眼镜</span><span>{{sturcDetail.glasses ? sturcDetail.glasses : '未识别'}}</span></li>
-                    <li><span>戴帽子</span><span>{{sturcDetail.hat ? sturcDetail.hat : '未识别'}}</span></li>
-                    <li><span>戴口罩</span><span>{{sturcDetail.mask ? sturcDetail.mask : '未识别'}}</span></li>
-                    <li><span>抱小孩</span><span>{{sturcDetail.baby ? sturcDetail.baby : '未识别'}}</span></li>
-                    <li><span>拎东西</span><span>{{sturcDetail.bag ? sturcDetail.bag : '未识别'}}</span></li>
-                    <li><span>上身款式</span><span>{{sturcDetail.upperType ? sturcDetail.upperType : '未识别'}}</span></li>
-                    <li><span>上身颜色</span><span>{{sturcDetail.upperColor ? sturcDetail.upperColor : '未识别'}}</span></li>
-                    <li><span>下身款式</span><span>{{sturcDetail.bottomType ? sturcDetail.bottomType : '未识别'}}</span></li>
-                    <li><span>下身颜色</span><span>{{sturcDetail.bottomColor ? sturcDetail.bottomColor : '未识别'}}</span></li>
-                  </ul>
-                </vue-scroll>
-              </div>
-            </div>
-            <!--<span>抓拍信息</span>-->
-          </div>
-          <!--跳转按钮-->
-          <div class="struc_t_btn">
-            <a @click="gotoControl(sturcDetail.subStoragePath)">新建布控</a>
-            <a @click="gotoLjd(sturcDetail.subStoragePath)">落脚点分析</a>
-          </div>
-        </div>
-        <div v-show="strucCurTab === 2" class="struc_c_address"></div>
-        <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
-          <div class="struc_c_d_qj struc_c_d_img">
-            <img class="bigImg" :src="sturcDetail.subStoragePath" alt="">
-            <span>抓拍图</span>
-          </div>
-          <div class="struc_c_d_box" style="float: left;" v-if="playerData">
-            <div is="flvplayer" :oData="playerData"
-              :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
-            </div>
-          </div>
-          <div class="struc_c_d_box struc_vid_empty" style="float: left;" v-else>
-            <div class="struc_vid_empty_c com_trans50_lt">
-              <div></div>
-              <p>暂无视频</p>
-            </div>
-          </div>
-          <p class="download_tips" v-show="sturcDetail.videoPath">下载提示：右键点击视频选择“另存视频为”即可下载视频。</p>
-        </div>
-      </div>
-      <div class="struc-list">
-        <swiper :options="swiperOption" ref="mySwiper">
-          <!-- slides -->
-          <swiper-slide v-for="(item, index) in evData" :key="item.id">
-            <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
-              <img style="width: 100%; height: .88rem;" :src="item.subStoragePath" alt="">
-              <!--<div class="vl_jfo_sim" ><i class="vl_icon vl_icon_retrieval_05" :class="{'vl_icon_retrieval_06':  index === curImgIndex}"></i>{{item.semblance ? item.semblance : 92}}<span style="font-size: 12px;">%</span></div>-->
-            </div>
-          </swiper-slide>
-          <div class="swiper-button-prev" slot="button-prev"></div>
-          <div class="swiper-button-next" slot="button-next"></div>
-        </swiper>
-      </div>
-    </el-dialog>
-    <div id="capMap"></div>
     <!--人工筛选-->
     <el-dialog
       title="人工筛选"
@@ -275,27 +240,36 @@
         <el-button type="primary" @click="chooseOk">确 定</el-button>
       </span>
     </el-dialog>
+
+    <snapDialog ref="snapDialogComp" :snapObj="snapObj"></snapDialog>
+    <!-- 视频接力弹窗 -->
+    <!-- <videoRelay ref="videoRelayzDialogComp"></videoRelay> -->
   </div>
 </template>
 <script>
   import vlUpload from '@/components/common/upload.vue';
   import vlBreadcrumb from '@/components/common/breadcrumb.vue';
-  import flvplayer from '@/components/common/flvplayer.vue';
-  import { mapXupuxian,ajaxCtx } from "@/config/config.js";
+  import videoRelay from '@/components/common/videoRelay.vue';
+  import snapDialog from './components/snapDetail';
+  // import flvplayer from '@/components/common/flvplayer.vue';
+  import { mapXupuxian } from "@/config/config.js";
   import { objDeepCopy, formatDate, dateOrigin } from "@/utils/util.js";
-  import { cityCode } from "@/utils/data.js";
+  // import { cityCode } from "@/utils/data.js";
   import {PortraitPostPersonTrace} from "@/views/index/api/api.portrait.js";
   import { getPeopleTaskDetail } from '@/views/index/api/api.analysis.js';
   export default {
-    components: {vlBreadcrumb, flvplayer, vlUpload},
+    components: {vlBreadcrumb, vlUpload, snapDialog, videoRelay},
     data() {
       return {
         showNewTask: false, // 展示修改任务
 
+        isCheckedSpeed: false, // 是否勾选了速度信息
+        isCheckedVideo: false, // 是否选择了视频接力
+        snapObj: {}, // 弹框抓拍详情内容
+
         taskDetail: {},
         imgData: null,
         uploadClear: {},
-        playerData: null,
         filterDialog: false,
         showLeft: false,
         loading: false,
@@ -303,32 +277,7 @@
         totalAddressNum: 0,
         totalMapNum: 4,
         searchLoading: false,
-        curChooseNum: '已选择0个设备',
-        uploadAcion: ajaxCtx.base + '/new',
-        uploading: false,
-        hover:null,
-        input3: null,
-        mouseTool: null,
-        drawArea: null,
-        swiperOption: {
-          slidesPerView: 10,
-          spaceBetween: 10,
-          slidesPerGroup: 9,
-          loop: false,
-          slideToClickedSlide: true,
-          loopFillGroupWithBlank: true,
-          navigation: {
-            nextEl: '.swiper-button-next',
-            prevEl: '.swiper-button-prev',
-          },
-        },
-        dialogVisible: false,
         amap: null,
-        map: null,
-        pointData: {
-          deviceList: [],
-          bayonetList: []
-        },
         reselt: false,
         hideleft: false,
         timeOrder: false,
@@ -338,8 +287,6 @@
           input3: '',
           value1: null,
         },
-        pricecode:cityCode,
-        options: [],
         pickerOptions: {
           disabledDate (time) {
             return time > new Date();
@@ -350,15 +297,7 @@
         allLeftEvData: [],
         marks: [[], []],
         markerLine: [], // 地图线集合
-        markerPoint: [], // 地图点集合
-        supMarkerPoint: null,
-        curStrucList: [],
-        strucCurTab: 1,
-        curImgIndex: 0,
-        sturcDetail: {},
-        playing: false, // 视频播放是否
-        strucDetailDialog: false,
-        videoUrl: '' // 弹窗视频回放里的视频
+        markerPoint: [] // 地图点集合
       };
     },
     computed: {
@@ -377,6 +316,19 @@
       }
     },
     methods: {
+      //详情弹窗
+      toSnapDetail(i) {
+        this.snapObj = {
+          personDetailList: this.evData,
+          index: i,
+          type: '轨迹分析'
+        };
+        this.$refs["snapDialogComp"].toogleVisiable(true);
+      },
+      // 视频接力
+      showVideoList () {
+        this.isCheckedVideo = !this.isCheckedVideo;
+      },
       // 获取离线任务详情
       getDetail () {
         const id = this.$route.query.uid
@@ -399,13 +351,16 @@
                 }
                 this.reselt = true;
                 this.evData = res.data.taskResult;
+
+                this.pagination.total = this.evData.length;
+
                 this.evData.forEach(x => {
                   if (x.bayonetName) {
                     x.DeviceID = x.bayonetName;
                   }
                 })
                 this.evData.sort(this.compare("shotTime", this.timeOrder ? false : true));
-                this.shotAddressAndTimes(this.evData)
+                this.shotAddressAndTimes(this.evData);
 
                 //  重组数据，给左边列表使用
                 this.operData(true);
@@ -416,28 +371,11 @@
             })
         }
       },
-
       uploadEmit (data) {
-        console.log('uploadEmit data', data);
         if (data && data.path) {
           this.ruleForm.input3 = data.path;
         } else {
           this.ruleForm.input3 = '';
-        }
-      },
-      // 设置视频数据
-      setPlayerData () {
-        if (this.sturcDetail.videoPath) {
-          this.playerData = {
-            type: 3,
-            title: this.sturcDetail.deviceName,
-            video: {
-              uid: new Date().getTime() + '',
-              downUrl: this.sturcDetail.videoPath
-            }
-          }
-        } else {
-          this.playerData = null;
         }
       },
       chooseEndTime (e) {
@@ -445,21 +383,15 @@
           this.$message.info('结束时间必须大于开始时间才会有结果')
         }
       },
-      gotoControl (url) {
-        this.$router.push({ name: 'control_create', query: {modelName: "人员追踪", imgurl: url} })
-      },
-      gotoLjd (url) {
-        this.$router.push({ name: 'portrait_ljd', query: {imgurl: url} })
-      },
       scrollIt (e) {
         if(e.srcElement.scrollTop + e.srcElement.offsetHeight > e.srcElement.scrollHeight - 10){
           if (!this.loading && !this.noMore) {
             this.loading = true;
             setTimeout(() => {
-              this.count += 2;
+              this.count += 4;
               this.operData();
               this.loading = false;
-            }, 2000)
+            }, 800)
           }
         }
       },
@@ -504,14 +436,7 @@
           center: mapXupuxian.center
         });
         map.setMapStyle("amap://styles/whitesmoke");
-        this.amap = map;
-        // 弹窗地图
-        let supMap = new window.AMap.Map('capMap', {
-          center: mapXupuxian.center,
-          zoom: 16
-        });
-        supMap.setMapStyle('amap://styles/whitesmoke');
-        this.map = supMap;
+        this.amap = map; 
       },
       compare  (prop, bool) {
         return function (obj1, obj2) {
@@ -644,36 +569,22 @@
         this.timeOrder = !this.timeOrder;
         this.getVehicleShot(this.storeParam)
       },
-      // 地图标记
-      mapHoverInfo (data) {
-        let str = '<div class="vl_map_hover_main"><ul>';
-        if (data.dataType === 0) {
-          str += '<li><span>设备名称：</span><p>' + data.infoName + '</p></li>';
-          str += '<li><span>设备地址：</span><p>' + data.address + '</p></li>';
-          str += '</ul></div>'
-        } else if (data.dataType === 1) {
-          str += '<li><span>卡口名称：</span><p>' + data.infoName + '</p></li>';
-          str += '<li><span>卡口编号：</span><p>' + data.bayonetNo + '</p></li>';
-          str += '<li><span>地理位置：</span><p>' + data.bayonetAddress + '</p></li>';
-//          str += '<li><span>设备数量：</span><p>' + data.devNum + '</p></li>';
-          str += '</ul></div>'
-        }
-        return str;
-      },
       drawMapMarker (oData) {
         let data = this.fitlerSXT(oData);
         for (let  i = 0; i < data.length; i++) {
           let obj = data[i];
           if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
+            // 抓拍时间
             let _time = '';
             _time = '<p class="vl_map_mark_time">';
             obj.shotTime.split(',').forEach(j => {
               _time += `<span>${j}</span>`
             })
             _time += '</p>';
+
             let sClass = 'vl_icon_map_mark0';
             if (obj.bayonetName) {
-              sClass = 'vl_icon_map_mark1'
+              sClass = 'vl_icon_map_mark1';
             }
             let _content = `<div class="vl_icon ` + sClass + `">` + _time + `</div>`
             let point = new window.AMap.Marker({ // 添加自定义点标记
@@ -685,14 +596,12 @@
               content: _content
             });
             point.on('click', () => {
-              let newObj = objDeepCopy(obj);
-              newObj.shotTime = newObj.shotTime.split(',')[0];
-              this.showStrucInfo(newObj, i)
+              this.toSnapDetail(i);
             })
             this.markerPoint[i] = [point];
           }
         }
-        this.amap.setFitView()
+        this.amap.setFitView();
         this.drawLine(oData);
       }, // 覆盖物（窗体和checkbox
       fitlerSXT (oData) {
@@ -732,52 +641,6 @@
         this.operData();
         this.drawMapMarker(this.evData)
       }, // 更新画线
-      showStrucInfo (data, index) {
-        this.amap.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude])
-        this.curImgIndex = index;
-        this.strucDetailDialog = true;
-        this.sturcDetail = data;
-        this.strucCurTab = 1;
-        this.drawPoint(data);
-        this.setPlayerData();
-      },
-      drawPoint (data) {
-        this.$nextTick(() => {
-          $('.struc_c_address').append($('#capMap'))
-        })
-        if (this.supMarkerPoint) {
-          this.map.remove(this.supMarkerPoint)
-        }
-        let sClass = 'vl_icon_map_hover_mark0';
-        if (data.bayonetName) {
-          sClass = 'vl_icon_map_hover_mark1'
-        }
-        let _content = '<div class="vl_icon ' + sClass + '"></div>'
-        this.supMarkerPoint = new window.AMap.Marker({ // 添加自定义点标记
-          map: this.map,
-          position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-          offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
-          draggable: false, // 是否可拖动
-          // 自定义点标记覆盖物内容
-          content: _content
-        });
-        this.map.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
-        let sConent = `<div class="cap_info_win"><p>设备名称：${data.bayonetName ? data.bayonetName : data.deviceName}</p><p>抓拍地址：${data.bayonetAddress ? data.bayonetAddress : data.address}</p></div>`
-        new window.AMap.InfoWindow({
-          map: this.map,
-          isCustom: true,
-          closeWhenClickMap: false,
-          position: [data.shotPlaceLongitude, data.shotPlaceLatitude],
-          offset: new window.AMap.Pixel(0, -70),
-          content: sConent
-        })
-      },
-      imgListTap (data, index) {
-        this.curImgIndex = index;
-        this.sturcDetail = data;
-        this.drawPoint(data);
-        this.setPlayerData();
-      },
       mapZoomSet (val) {
         if (this.amap) {
           this.amap.setZoom(this.amap.getZoom() + val);
@@ -787,11 +650,118 @@
         if (this.amap) {
           this.amap.setZoomAndCenter(14, mapXupuxian.center);
         }
-      },
+      }
     }
   };
 </script>
 <style lang="scss" scoped>
+/* 车速信息 */
+.speed_info_right {
+  position: absolute;
+  top: 70px;
+  right: 20px;
+  width: 380px;
+  background-color: #fff;
+  box-shadow:0px 3px 10px 0px rgba(99,99,99,0.39);
+  .speed_box {
+    max-height: 4.2rem;
+    .simple_speed {
+      padding: 12px 0;
+      margin: 0 20px;
+      border-bottom: 1px solid #f2f2f2;
+      li {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 0 2px 0 4px;
+      }
+      .speed_title {
+        color: #999;
+        font-size: 12px;
+      }
+      .speed_addr {
+        font-size: 16px;
+        color: #333;
+        .addr_name {
+          display: -webkit-box;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          word-wrap: break-word;
+          white-space: normal !important;
+          -webkit-line-clamp: 1;
+          -webkit-box-orient: vertical;
+          padding-right: 20px;
+        }
+        .num {
+          font-size: 32px;
+          color: #0C70F8;
+        }
+      }
+      .speed_distance {
+        font-size: 14px;
+        color: #333;
+        .dis_desc {
+          color: #666;
+        }
+        .dis_num {
+          color: #0C70F8;
+        }
+      }
+    }
+  }
+}
+/* 视频接力--速度信息 tab * */
+.speed_info_box {
+  z-index: 111;
+  animation: fadeInLeft 0.7s ease-out 0.6s both;
+  background-color: #ffffff;
+  box-shadow:0px 3px 10px 0px rgba(99,99,99,0.39);
+  width: 238px;
+  position: absolute;
+  top: 74px;
+  left: 593px;
+  height: 50px;
+  line-height: 50px;
+  .speed_info_list {
+    width: 220px;
+    margin-left: 16px;
+    margin-top: 10px;
+    >li {
+      width: 50%;
+      float: left;
+      color: #666666;
+      height: 30px;
+      line-height: 30px;
+      text-align: center;
+      cursor: pointer;
+      &:first-child {
+        border-right: 1px solid #F2F2F2;
+      }
+      .vl_icon_clgj_video {
+        margin-right: 5px;
+        width: 14px;
+        height: 14px;
+        background-position: -1064px -1538px;
+        background-color: #666;
+        border-radius: 50%;
+        line-height: 1;
+        vertical-align: middle;
+        margin-bottom: 2px;
+      }
+    }
+    .isCheck_li {
+      background-color: #0C70F8;
+      color: #ffffff;
+      border-radius: 4px;
+      .vl_icon_clgj_video {
+        background-color: #0C70F8;
+      }
+    }
+  }
+}
+.hide_speed {
+  left: 300px !important;
+}
   .vl_gjfx_jg_left {
     position: absolute;
     left: 0;
@@ -937,6 +907,7 @@
   .point {
     width: 100%;
     height: 100%;
+    // overflow: hidden;
   }
   .full {
     width: 100%;
@@ -1161,9 +1132,6 @@
     .is_open {
       height: auto;
     }
-    .th-center-pagination {
-      text-align: center;
-    }
   }
   .mapbox {
     width: 100%;
@@ -1281,6 +1249,11 @@
   }
 </style>
 <style lang="scss">
+.speed_info_box {
+  .el-checkbox__input.is-checked+.el-checkbox__label {
+    color: #0C70F8;
+  }
+}
 .vl_gjfx_jg_left {
   .plane {
     .el-form-item {
@@ -1292,8 +1265,39 @@
     .vl_icon {
       width: 47px;
       position: relative;
+      // >.video_list_info {
+      //   background: red;
+      //   position: absolute;
+      //   top: 10px;
+      //   left: 98%;
+      //   width: 218px;
+      //   height: 122px;
+      //   border-radius: 3px;
+      //   font-size: 12px;
+      //   color: #fff;
+      //   >img {
+      //     width: 100%;
+      //     height: 100%;
+      //   }
+      //   >p {
+      //     width:218px;
+      //     height:26px;
+      //     background:rgba(0,0,0,1);
+      //     opacity:0.7;
+      //     position: absolute;
+      //     bottom: 0;
+      //     line-height: 26px;
+      //     >span {
+      //       display: inline-block;
+      //       height:26px;
+      //     }
+      //   }
+      // }
       > .vl_map_mark_time {
-        position: absolute; top: 10px; left: 98%;
+        position: absolute;
+        // max-height: 200px;
+        // overflow: auto;
+        top: 10px; left: 98%;
         width: 130px;
         word-break:keep-all;
         font-size: 12px; color: #fff;
@@ -1584,13 +1588,13 @@
           }
         }
       }
-      .struc_c_address {
-        height: 100%;
-        #capMap {
-          width:  100%;
-          height: 100%;
-        }
-      }
+      // .struc_c_address {
+      //   height: 100%;
+      //   #capMap {
+      //     width:  100%;
+      //     height: 100%;
+      //   }
+      // }
       .struc_c_video {
         .download_tips {
           float: left;

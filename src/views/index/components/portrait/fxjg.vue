@@ -507,7 +507,11 @@ export default {
     //详情弹窗
     toSnapDetail(obj) {
       console.log("obj",obj)
-      this.snapObj = obj;
+      this.snapObj = {
+        personDetailList: obj.personDetailList,
+        index: 0,
+        type: '频繁出没'
+      };
       this.$refs["snapDialogComp"].toogleVisiable(true);
     },
   }

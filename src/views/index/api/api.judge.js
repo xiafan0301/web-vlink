@@ -354,7 +354,7 @@ export function getArchives(params) {
     url: '/vehicle/archives',
     method: 'get',
     params,
-    mode: 'judge'
+    mode: 'vehicle'
   });
 }
 /**
@@ -366,7 +366,7 @@ export function getViolationInfo(params) {
     url: '/vehicle/violation',
     method: 'get',
     params,
-    mode: 'judge'
+    mode: 'vehicle'
   });
 }
 /**

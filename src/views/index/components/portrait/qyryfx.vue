@@ -123,7 +123,7 @@
                 </ul>
               </div>
               <el-form-item prop="taskName" v-if="selectType === 2" :rules="[{ required: true, message: '该项内容不能为空', trigger: 'blur' }]">
-                <el-input placeholder="请设置任务名称" maxlength="20" v-model="qyryfxFrom.taskName"></el-input>
+                <el-input placeholder="请设置任务名称" maxlength="20" v-model="qyryfxFrom.taskName" @change="changeTaskName"></el-input>
               </el-form-item>
               <el-form-item class="function_form_btn">
                 <el-button style="width: 110px;" @click="resetLeftMenu('qyryfxFrom')">重置</el-button>
@@ -550,6 +550,9 @@ export default {
   mounted() {
   },
   methods: {
+    changeTaskName (val) {
+      this.qyryfxFrom.taskName = val.trim();
+    },
     // 查询方式change
     handleRadioSelectType (val) {
       this.selectType = val;
@@ -865,25 +868,32 @@ export default {
         if (valid) {
           this.resultDataList = [];
           let deviceAndTimeList = [];
-          this.selectAreaDataList.map((item, index) => {
-            if (item.deviceList.length <= 0 && item.bayonetList.length <= 0) {
-               this.$message.warning(
-                `您在第${index + 1}个选择区域未选中设备，请您重新选择`
-              );
-              return;
-            } else {
-              deviceAndTimeList = [
-                ...deviceAndTimeList,
-                {
-                  deviceIds: item.deviceList.map(item => item.uid).join(),
-                  bayonetIds: item.bayonetList.map(item => item.uid).join(),
-                  deviceNames: item.allDeviceNameList.join('、'),
-                  startTime: item.startTime,
-                  endTime: item.endTime
-                }
-              ];
-            }
-          });
+          
+          if (this.selectAreaDataList.length > 0) {
+            this.selectAreaDataList.map((item, index) => {
+              if (item.deviceList.length <= 0 && item.bayonetList.length <= 0) {
+                 this.$message.warning(
+                  `您在第${index + 1}个选择区域未选中设备，请您重新选择`
+                );
+                return false;
+              } else {
+                deviceAndTimeList = [
+                  ...deviceAndTimeList,
+                  {
+                    deviceIds: item.deviceList.map(item => item.uid).join(),
+                    bayonetIds: item.bayonetList.map(item => item.uid).join(),
+                    deviceNames: item.allDeviceNameList.join('、'),
+                    startTime: item.startTime,
+                    endTime: item.endTime
+                  }
+                ];
+              }
+            });
+            
+          } else {
+            this.$message.info('请先框选抓拍区域');
+            return false;
+          }
           const queryParams = {
             sex: this.qyryfxFrom.sex,
             age: this.qyryfxFrom.age !== "" ? this.qyryfxFrom.age.join() : "",
