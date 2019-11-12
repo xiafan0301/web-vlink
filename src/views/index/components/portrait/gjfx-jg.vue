@@ -243,7 +243,7 @@
 
     <snapDialog ref="snapDialogComp" :snapObj="snapObj"></snapDialog>
     <!-- 视频接力弹窗 -->
-    <!-- <videoRelay ref="videoRelayzDialogComp"></videoRelay> -->
+    <videoRelay ref="videoRelayDialogComp" :videReplayList="videReplayList" @closeDialog="closeDialog"></videoRelay>
   </div>
 </template>
 <script>
@@ -297,7 +297,9 @@
         allLeftEvData: [],
         marks: [[], []],
         markerLine: [], // 地图线集合
-        markerPoint: [] // 地图点集合
+        markerPoint: [], // 地图点集合
+
+        videReplayList: [], // 视频接力数据
       };
     },
     computed: {
@@ -325,9 +327,31 @@
         };
         this.$refs["snapDialogComp"].toogleVisiable(true);
       },
+      // 关闭视频接力弹框
+      closeDialog (bool) {
+        this.isCheckedVideo = bool;
+        this.videReplayList = [];
+      },
       // 视频接力
       showVideoList () {
-        this.isCheckedVideo = !this.isCheckedVideo;
+        this.isCheckedVideo = true;
+        if (this.isCheckedVideo) {
+          this.evData.map(item => {
+            const params = {
+              type: 3,
+              video: {
+                uid: Math.random(),
+                downUrl: item.videoPath
+                // downUrl: require('../../assets/video/demo.mp4')
+              },
+              address: item.address,
+              deviceName: item.deviceName,
+              shotTime: item.shotTime,
+            };
+            this.videReplayList.push(params);
+          })
+        }
+        this.$refs["videoRelayDialogComp"].toogleVisiable(this.isCheckedVideo);
       },
       // 获取离线任务详情
       getDetail () {
@@ -351,8 +375,8 @@
                 }
                 this.reselt = true;
                 this.evData = res.data.taskResult;
-
-                this.pagination.total = this.evData.length;
+                console.log('aaaa', this.evData);
+                
 
                 this.evData.forEach(x => {
                   if (x.bayonetName) {
