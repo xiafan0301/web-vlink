@@ -317,8 +317,8 @@ export default {
               this.$set(res.data, 'taskWebParam', JSON.parse(res.data.taskWebParam));
               console.log('aaa', res.data);
               
-              let deviceArr = res.data.taskWebParam.deviceId.split(',');
-              let bayonetArr = res.data.taskWebParam.bayonetIds.split(',');
+              let deviceArr = res.data.taskWebParam && res.data.taskWebParam.deviceId.split(',');
+              let bayonetArr = res.data.taskWebParam.bayonetIds && res.data.taskWebParam.bayonetIds.split(',');
               let arr1 = [];
               if (deviceArr && deviceArr.length > 0) {
                 deviceArr.forEach(item => {

@@ -123,7 +123,7 @@ export default {
       order: 1, // 1desc 2asc
       pagination: {
         total: 0,
-        pageSize: 12,
+        pageSize: 8,
         currentPage: 1
       },
       compairDialog: false,
@@ -134,7 +134,7 @@ export default {
     }
   },
   mounted () {
-    this.getDetail()
+    this.getDetail();
   },
   methods: {
     // 获取离线任务详情
@@ -190,8 +190,10 @@ export default {
       this.compairDialog = true
     },
     onPageChange (page) {
+      console.log(page);
+      
       this.list.splice(0, this.list.length)
-      this.list = [...this.listbox.slice((page - 1) * 12, 12 + (page - 1) * 12)]
+      this.list = [...this.listbox.slice((page - 1) * 8, 8 + (page - 1) * 8)]
     },
   }
 }
@@ -253,7 +255,8 @@ export default {
     margin-top: 50px;
     position: relative;
     height: calc(100% - 50px);
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
     .rlcx_r_list {
       width: 100%;
       margin: 10px 0 10px 20px;
