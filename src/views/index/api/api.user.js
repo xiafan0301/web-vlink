@@ -46,7 +46,7 @@ export function login(data) {
  */
 export function logout(data) {
   return request({
-    url: '/user-service/logout/' + data.userMobile,
+    url: '/api/xl/logout' + data.uid,
     params: data,
     mode: 'user',
     method: 'get'

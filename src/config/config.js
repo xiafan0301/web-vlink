@@ -135,11 +135,16 @@ const oDomains = {
 let ENV_API = process.env.VUE_APP_API;
 console.log(ENV_API)
 if (!ENV_API) { ENV_API = 'dev'; }
+// 权限未发到测试环境之前预留
+let authPrefix = ''
+if (ENV_API === 'dev') {
+  authPrefix = '/api/xl'
+}
 console.log('config.js env', ENV_API);
 // ajax default
 let ajaxCtx = {};
 for (let _key in oDomains) {
-    ajaxCtx[_key] = oDomains[_key][ENV_API] + '/api/xl'
+    ajaxCtx[_key] = oDomains[_key][ENV_API] + authPrefix
 }
 // console.log('*****oDomains*****', ajaxCtx);
 export {ajaxCtx};
