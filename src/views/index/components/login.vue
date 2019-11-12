@@ -9,12 +9,12 @@
               <!--<p class="lg_logo_title">公共安全视频监控联网应用系统</p>-->
             </div>
             <el-form :inline="false" ref="loginForm" :model="loginForm" :rules="loginFormRules" class="lg_form">
-              <el-form-item prop="userMobile" class="login_form_item">
-                <el-input v-model="loginForm.userMobile" placeholder="请输入手机号"></el-input>
+              <el-form-item prop="identifier" class="login_form_item">
+                <el-input v-model="loginForm.identifier" placeholder="请输入手机号"></el-input>
                 <i class="vl_icon vl_icon_lg_01"></i>
               </el-form-item>
-              <el-form-item prop="userPassword" class="login_form_item">
-                <el-input v-model="loginForm.userPassword" :type="pwdShow ? 'text' : 'password'" placeholder="密码由6-16位字母、数字组成，区分大小写"></el-input>
+              <el-form-item prop="password" class="login_form_item">
+                <el-input v-model="loginForm.password" :type="pwdShow ? 'text' : 'password'" placeholder="密码由6-16位字母、数字组成，区分大小写"></el-input>
                 <i class="vl_icon vl_icon_lg_02"></i>
                 <i class="vl_icon vl_icon_lg_03" @click="pwdShow = !pwdShow" :class="{'vl_icon_sed': !pwdShow}"></i>
               </el-form-item>
@@ -24,7 +24,7 @@
                 <!-- <span>没有账号？<router-link :to="{name: 'register'}">注册账号&gt;</router-link></span> -->
             </div>
             <div class="lg_btn">
-              <el-button :class="[!loginForm.userMobile || !loginForm.userPassword ? 'disabled_btn' : 'default_btn']" @click="loginSubmit('loginForm')" :loading="loginBtnLoading" :disabled="!loginForm.userMobile || !loginForm.userPassword" >登&nbsp;&nbsp;录</el-button>
+              <el-button :class="[!loginForm.identifier || !loginForm.password ? 'disabled_btn' : 'default_btn']" @click="loginSubmit('loginForm')" :loading="loginBtnLoading" :disabled="!loginForm.identifier || !loginForm.password" >登&nbsp;&nbsp;录</el-button>
             </div>
           </div>
           <div class="lg_vc" @click="downloadHandler = !downloadHandler">
@@ -55,17 +55,17 @@ export default {
       downloadHandler: false,
       dlQRcode: null,
       loginForm: {
-        userMobile: '',
-        userPassword: ''
+        identifier: '',
+        password: ''
       },
       loginBtnLoading: false,
       isRemember: false, // 是否记住用户名
       loginFormRules: {
-        userMobile: [
+        identifier: [
           { required: true, message: '请输入手机号', trigger: 'blur' },
           { validator: validatePhone, trigger: 'blur' }
         ],
-        userPassword: [
+        password: [
           { required: true, message: '请输入密码', trigger: 'blur' },
           { validator: validatePwd, trigger: 'blur' }
         ]
@@ -77,11 +77,11 @@ export default {
     const userName = getCookie('AS.VLINK.USERNAME');
     const pwd = getCookie('AS.VLINK.PASSWORD');
     if (userName && pwd) {
-      this.loginForm.userMobile = userName;
-      this.loginForm.userPassword = pwd;
+      this.loginForm.identifier = userName;
+      this.loginForm.password = pwd;
     } else {
-      this.loginForm.userMobile = '';
-      this.loginForm.userPassword = '';
+      this.loginForm.identifier = '';
+      this.loginForm.password = '';
     }
 
     this.downloadQRcode();
@@ -93,14 +93,15 @@ export default {
         if (valid) {
           // 登陆中 登录按钮不可用
           this.loginBtnLoading = true;
-          login(this.loginForm)
+          let params = Object.assign(this.loginForm, {identifierType: 3})
+          login(params)
             .then(res => {
               if (res) {
                 setCookie(cookieUserId, res.data.uid, cookieTime, '/');
                 // 保存用户姓名到cookie
-                setCookie(cookieUserName, res.data.userMobile, cookieTime, '/');
+                setCookie(cookieUserName, res.data.identifier, cookieTime, '/');
 
-                setCookie(cookiePassword, this.loginForm.userPassword, cookieTime, '/');
+                setCookie(cookiePassword, this.loginForm.password, cookieTime, '/');
 
                 localStorage.setItem('as_vlink_user_info', JSON.stringify(res.data));
                 // console.log('item', localStorage.getItem('as_vlink_user_info'))

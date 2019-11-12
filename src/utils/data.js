@@ -40,6 +40,9 @@ const dataList = {
   bayonetUse: 1061, // 卡口用途
   isEnterPoint: 1062, // 出入场类型
   sexType: 1018, // 性别类型
+  // 日志
+  opsModule: 1064, // 操作模板
+  opsType: 1065, // 操作类型
 }
 // 处理方式
 const handeMethods = {
