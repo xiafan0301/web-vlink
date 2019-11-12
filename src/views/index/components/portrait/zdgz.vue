@@ -155,10 +155,10 @@
           <div class="content-box">
             <div class="table_box">
               <el-table :data="list">
-                <el-table-column label="序号" type="index" width="100"></el-table-column>
+                <el-table-column label="序号" type="index" width="50"></el-table-column>
                 <el-table-column label="任务名称" prop="taskName" show-overflow-tooltip></el-table-column>
                 <el-table-column label="创建时间" prop="createTime" show-overflow-tooltip></el-table-column>
-                <el-table-column label="分析时间范围" show-overflow-tooltip>
+                <el-table-column label="分析时间范围" min-width="120" show-overflow-tooltip>
                   <template slot-scope="scope">
                     {{scope.row.taskWebParam.startTime}}-{{scope.row.taskWebParam.endTime}}
                   </template>
@@ -188,23 +188,13 @@
                     <span>{{scope.row.taskStatus && scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 3 ? '失败' : '已中断'}}</span>
                   </template>
                 </el-table-column>
-                <el-table-column label="操作" fixed="right">
+                <el-table-column label="操作" min-width="140" fixed="right">
                   <template slot-scope="scope">
                   <span
                           class="operation_btn"
                           @click="skipResultPage(scope.row)"
                           v-if="selectIndex === 1"
                   >查看</span>
-                    <span
-                            class="operation_btn"
-                            @click="showInterruptDialog(scope.row)"
-                            v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 1"
-                    >中断任务</span>
-                    <span
-                            class="operation_btn"
-                            @click="recoveryOrRestart(scope.row)"
-                            v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 4"
-                    >恢复任务</span>
                     <span
                             class="operation_btn"
                             @click="restartTask(scope.row)"
@@ -239,21 +229,6 @@
   <!-- 地图选择 -->
    <!-- D设备 B卡口  这里是设备和卡口 -->
     <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" :clear="clearMapSelect" @mapSelectorEmit="mapPoint"></div>
-    <!--中断任务弹出框-->
-    <el-dialog
-            title="中断任务确认"
-            :visible.sync="interruptDialog"
-            width="482px"
-            :close-on-click-modal="false"
-            :close-on-press-escape="false"
-            class="dialog_comp"
-    >
-      <span style="color: #999999;">任务中断，任务的数据处理进程将中止，可以在列表中恢复任务的数据处理</span>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="interruptDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="sureInterruptTask">确认</el-button>
-      </div>
-    </el-dialog>
 
     <!--删除任务弹出框-->
     <el-dialog
@@ -277,7 +252,7 @@ let AMap = window.AMap;
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import {PortraitPostFocusRealTime, PortraitPostFocusTask } from "@/views/index/api/api.judge.js";
 import {getGroupListIsPortrait} from '../../api/api.control.js';
-import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
+import { getTaskInfosPage, putAnalysisTask } from '@/views/index/api/api.analysis.js';
 import {FocusPostReloadtask} from '@/views/index/api/api.portrait.js';
 import mapSelector from '@/components/common/mapSelector.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
@@ -366,7 +341,6 @@ export default {
       taskId: null, // 任务id
       deleteDialog: false,
       isDeleteLoading: false,
-      interruptDialog: false, //中断任务
     }
   },
   mounted () {
@@ -438,42 +412,10 @@ export default {
     skipResultPage (obj) {
       this.$router.push({name: 'portrait_zdgz_jg', query: {uid: obj.uid}})
     },
-    // 显示中断任务弹出框
-    showInterruptDialog (obj) {
-      this.interruptDialog = true;
-      this.taskId = obj.uid;
-    },
     // 显示删除任务弹出框
     showDeleteDialog (obj) {
       this.deleteDialog = true;
       this.taskId = obj.uid;
-    },
-    // 确认中断任务
-    sureInterruptTask () {
-      if (this.taskId) {
-        const params = {
-          uid: this.taskId,
-          taskType: 6, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
-          taskStatus: 4 // 1：处理中 2：处理成功 3：处理失败 4：处理中断
-        };
-        this.isInterruptLoading = true;
-        putAnalysisTask(params)
-            .then(res => {
-              if (res) {
-                this.$message({
-                  type: 'success',
-                  message: '中断任务成功',
-                  customClass: 'request_tip'
-                });
-                this.interruptDialog = false;
-                this.isInterruptLoading = false;
-                this.getDataList();
-              } else {
-                this.isInterruptLoading = false;
-              }
-            })
-            .catch(() => {this.isInterruptLoading = false;})
-      }
     },
     // 确认删除任务
     sureDeleteTask () {
@@ -501,15 +443,6 @@ export default {
             })
             .catch(() => {this.isDeleteLoading = false;})
       }
-    },
-    //恢复任务,
-    recoveryOrRestart(obj) {
-      putTaskInfosResume(obj.uid).then(res => {
-        console.log(res)
-        if(res) {
-          this.getDataList();
-        }
-      }).catch(() => {})
     },
     // 重启任务
     restartTask (obj) {
@@ -615,7 +548,7 @@ export default {
       dNameList = dList.concat(bList);
       console.log(dNameList, this.selectDevice)
       if (dNameList.length > 3) {
-        params['deviceNames'] = dNameList.splice(0, 2);
+        params['deviceNames'] = dNameList.slice(0, 2);
         params['deviceNames'].push('等' + dNameList.length + '个设备');
         params['deviceNames'] =  params['deviceNames'].join(',')
       } else {

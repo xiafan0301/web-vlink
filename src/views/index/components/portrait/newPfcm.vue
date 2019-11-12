@@ -183,16 +183,16 @@
                     @click="skipDetailPage(scope.row)"
                     v-if="selectIndex === 1"
                   >查看</span>
-                  <span
-                    class="operation_btn"
-                    @click="interrupt(scope.row)"
-                    v-if="selectIndex === 0 && scope.row.taskStatus === 1"
-                  >中断任务</span>
-                  <span
-                    class="operation_btn"
-                    @click="recoveryOrRestart(scope.row,'recovery')"
-                    v-if="selectIndex === 0 && scope.row.taskStatus === 4"
-                  >恢复任务</span>
+                  <!--<span-->
+                    <!--class="operation_btn"-->
+                    <!--@click="interrupt(scope.row)"-->
+                    <!--v-if="selectIndex === 0 && scope.row.taskStatus === 1"-->
+                  <!--&gt;中断任务</span>-->
+                  <!--<span-->
+                    <!--class="operation_btn"-->
+                    <!--@click="recoveryOrRestart(scope.row,'recovery')"-->
+                    <!--v-if="selectIndex === 0 && scope.row.taskStatus === 4"-->
+                  <!--&gt;恢复任务</span>-->
                   <span
                     class="operation_btn"
                     @click="recoveryOrRestart(scope.row,'restart')"

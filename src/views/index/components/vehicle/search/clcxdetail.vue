@@ -275,8 +275,8 @@ export default {
       }else{
         this.$router.push({name:v ,query:{
            plateNo:this.detailData.plateno,
-           imgurl:this.snapObj.storagePath,
-           modelName:'车辆追踪'
+//           imgurl:this.snapObj.storagePath,
+           modelName: 9
         }});
       }
         
