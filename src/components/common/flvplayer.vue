@@ -519,10 +519,13 @@ export default {
    * },
    * optDis: 是否隐藏所有的操作按钮
    * bResize: 播放容器尺寸变化
+   * 
+   * isVideoReplay：是否是人像-车辆轨迹分析模块视频接力功能调用
    */
-  props: ['index', 'oData', 'oConfig', 'optDis', 'bResize', 'showFullScreen'],
+  props: ['index', 'oData', 'oConfig', 'optDis', 'bResize', 'showFullScreen', 'isVideoReplay'],
   data () {
     return {
+      // 抓拍上墙
       tabIndex: '行人', // 行人 车辆 骑行
       tabDatalist: ['行人', '车辆', '骑行'],
 
@@ -798,6 +801,8 @@ export default {
       } else if (this.oData.type === 3) {
         // 普通视频(mp4)、 抓拍视频(flv)
         let sUrl = this.oData.video.downUrl;
+        console.log('this.oData.video.downUrl', this.oData.video.downUrl);
+        
         if (sUrl) {
           if (sUrl.endsWith('.flv') || sUrl.endsWith('.FLV')) {
             /* sUrl 需要 替换token 适用抓拍视频*/
@@ -949,6 +954,8 @@ export default {
     },
     // 普通播放（mp4、录像）
     initPlayerDoForNormal (url) {
+      console.log('qeqweqweqweqwe', url);
+      
       this.videoLoading = true;
       var videoElement = document.getElementById(this.flvplayerId);
       videoElement.src = url;
@@ -964,8 +971,17 @@ export default {
       };
       videoElement.onended = () => {
         console.log('播放结束');
-        this.playActive = false;
         // videoElement.pause();
+
+        // 不是人像-车辆轨迹分析模块中的视频接力，若是的话需要自动播放下一个视频，所以不需要设为false
+        if (!this.isVideoReplay) {
+          this.playActive = false;
+        }
+        // 人像-车辆轨迹分析模块中的视频接力，视频播放结束后传给父组件，轮播下一个视频
+        this.$emit('playEnded',{
+          isEnded: true
+        });
+
         if (this.oData.type === 5) {
           this.videoRelayEmpty = true;
         }
