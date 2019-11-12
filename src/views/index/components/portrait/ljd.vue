@@ -157,16 +157,16 @@
                           @click="skipResultPage(scope.row)"
                           v-if="selectIndex === 1"
                   >查看</span>
-                    <span
-                            class="operation_btn"
-                            @click="showInterruptDialog(scope.row)"
-                            v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 1"
-                    >中断任务</span>
-                    <span
-                            class="operation_btn"
-                            @click="recoveryOrRestart(scope.row)"
-                            v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 4"
-                    >恢复任务</span>
+                    <!--<span-->
+                            <!--class="operation_btn"-->
+                            <!--@click="showInterruptDialog(scope.row)"-->
+                            <!--v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 1"-->
+                    <!--&gt;中断任务</span>-->
+                    <!--<span-->
+                            <!--class="operation_btn"-->
+                            <!--@click="recoveryOrRestart(scope.row)"-->
+                            <!--v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 4"-->
+                    <!--&gt;恢复任务</span>-->
                     <span
                             class="operation_btn"
                             @click="recoveryOrRestart(scope.row)"
@@ -425,7 +425,7 @@ export default {
       if (this.taskId) {
         const params = {
           uid: this.taskId,
-          taskType: 6, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
+          taskType: 11, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
           taskStatus: 4 // 1：处理中 2：处理成功 3：处理失败 4：处理中断
         };
         this.isInterruptLoading = true;
@@ -452,7 +452,7 @@ export default {
       if (this.taskId) {
         const params = {
           uid: this.taskId,
-          taskType: 6, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
+          taskType: 11, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
           delFlag: true
         };
         this.isDeleteLoading = true;

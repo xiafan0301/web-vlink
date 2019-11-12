@@ -187,16 +187,16 @@
                     @click="skipResultPage(scope.row)"
                     v-if="selectIndex === 1"
                   >查看</span>
-                    <span
-                      class="operation_btn"
-                      @click="showInterruptDialog(scope.row)"
-                      v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 1"
-                    >中断任务</span>
-                    <span
-                      class="operation_btn"
-                      @click="recoveryOrRestart(scope.row)"
-                      v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 4"
-                    >恢复任务</span>
+                    <!--<span-->
+                      <!--class="operation_btn"-->
+                      <!--@click="showInterruptDialog(scope.row)"-->
+                      <!--v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 1"-->
+                    <!--&gt;中断任务</span>-->
+                    <!--<span-->
+                      <!--class="operation_btn"-->
+                      <!--@click="recoveryOrRestart(scope.row)"-->
+                      <!--v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 4"-->
+                    <!--&gt;恢复任务</span>-->
                     <span
                       class="operation_btn"
                       @click="recoveryOrRestart(scope.row)"

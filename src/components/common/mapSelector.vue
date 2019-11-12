@@ -11,8 +11,8 @@
         class="public_map_selector_dialog">
       <div class="map_sd_content" :class="{'map_sd_edit_false': !bEdit}" :id="sid">
         <div class="sd_type_tab" v-if="showDeviceList">
-          <span :class="{'active': curTabType === 0}" @click="curTabType = 0">地图选择</span>
           <span :class="{'active': curTabType === 1}" @click="curTabType = 1">列表选择</span>
+          <span :class="{'active': curTabType === 0}" @click="curTabType = 0">地图选择</span>
         </div>
         <div class="sd_type_tab" v-else>
           <span>选择设备</span>
@@ -67,21 +67,6 @@
         <div style="width: 100%; height: 100%;" :id="sid + '_container'"></div>
         <!--列表选择-->
         <div class="sd_list_choose" v-show="curTabType === 1">
-          <div class="sd_list_l">
-            <div class="sd_list_lt">
-              <p>已选设备（{{dbNum}}）</p>
-              <el-checkbox :indeterminate="leftIsIndeterminate" v-model="DBleftAll" v-show="dbNum > 0">全选</el-checkbox>
-            </div>
-            <div class="sd_list_lc">
-              <vue-scroll>
-                <div v-show="dbNum > 0" :DBleftAll="DBleftAll" :inIndeterKey="'leftIsIndeterminate'" class="sd_list_l_tree" showCheckBox is="dbTreeS" :treeList="treeList" @changeAll="changeLeftAll" :showTypes="showTypes"></div>
-              </vue-scroll>
-            </div>
-          </div>
-          <div class="sd_list_m">
-            <span @click="addDB"><i class="el-icon-arrow-left"></i>添加</span>
-            <span @click="removeDB">移出<i class="el-icon-arrow-right"></i></span>
-          </div>
           <div class="sd_list_r sd_list_l">
             <div class="sd_list_lt">
               <p>可选设备（{{curNum}}）</p>
@@ -98,6 +83,25 @@
               <vue-scroll>
                 <div v-show="curNum > 0" :DBrightAll="DBrightAll" :filterable="isFilterData" :inIndeterKey="'rightIsIndeterminate'" class="sd_list_l_tree" showCheckBox is="dbTreeS" :treeList="remainTreeList" @changeAll="changeRightAll" :showTypes="showTypes"></div>
               </vue-scroll>
+            </div>
+          </div>
+          <div class="sd_list_m">
+            <span @click="addDB">添加<i class="el-icon-arrow-right"></i></span>
+            <span @click="removeDB"><i class="el-icon-arrow-left"></i>移出</span>
+          </div>
+          <div class="sd_list_l">
+            <div class="sd_list_lt">
+              <p>已选设备（{{dbNum}}）</p>
+              <el-checkbox :indeterminate="leftIsIndeterminate" v-model="DBleftAll" v-show="dbNum > 0">全选</el-checkbox>
+            </div>
+            <div class="sd_list_lc" v-if="dbNum > 0">
+              <vue-scroll>
+                <div :DBleftAll="DBleftAll" :inIndeterKey="'leftIsIndeterminate'" class="sd_list_l_tree" showCheckBox is="dbTreeS" :treeList="treeList" @changeAll="changeLeftAll" :showTypes="showTypes"></div>
+              </vue-scroll>
+            </div>
+            <div class="sd_list_lc_empty" v-else>
+              <img src="../../assets/img/not-content.png" alt="">
+              <p>暂无已选设备</p>
             </div>
           </div>
         </div>
@@ -121,8 +125,8 @@
     <div class="public_map_selector_dialog" v-else>
       <div class="map_sd_content" :class="{'map_sd_edit_false': !bEdit, 'map_sd_has_slot': hasFilter}" :id="sid">
         <div class="sd_type_tab" v-if="showDeviceList">
-          <span :class="{'active': curTabType === 0}" @click="curTabType = 0">地图选择</span>
           <span :class="{'active': curTabType === 1}" @click="curTabType = 1">列表选择</span>
+          <span :class="{'active': curTabType === 0}" @click="curTabType = 0">地图选择</span>
         </div>
         <div class="sd_type_tab" v-else>
           <span>选择设备</span>
@@ -219,21 +223,6 @@
         <div style="width: 100%; height: 100%;" :id="sid + '_container'"></div>
         <!--列表选择-->
         <div class="sd_list_choose" v-show="curTabType === 1">
-          <div class="sd_list_l">
-            <div class="sd_list_lt">
-              <p>已选设备（{{dbNum}}）</p>
-              <el-checkbox :indeterminate="leftIsIndeterminate" v-model="DBleftAll" v-show="dbNum > 0">全选</el-checkbox>
-            </div>
-            <div class="sd_list_lc">
-              <vue-scroll>
-                <div v-show="dbNum > 0" :DBleftAll="DBleftAll" :inIndeterKey="'leftIsIndeterminate'" class="sd_list_l_tree" showCheckBox is="dbTreeS" :treeList="treeList" @changeAll="changeLeftAll" :showTypes="showTypes"></div>
-              </vue-scroll>
-            </div>
-          </div>
-          <div class="sd_list_m">
-            <span @click="addDB"><i class="el-icon-arrow-left"></i>添加</span>
-            <span @click="removeDB">移出<i class="el-icon-arrow-right"></i></span>
-          </div>
           <div class="sd_list_r sd_list_l">
             <div class="sd_list_lt">
               <p>可选设备（{{curNum}}）</p>
@@ -249,6 +238,21 @@
             <div class="sd_list_lc">
               <vue-scroll>
                 <div v-show="curNum > 0" :DBrightAll="DBrightAll" :filterable="isFilterData" :inIndeterKey="'rightIsIndeterminate'" class="sd_list_l_tree" showCheckBox is="dbTreeS" :treeList="remainTreeList" @changeAll="changeRightAll" :showTypes="showTypes"></div>
+              </vue-scroll>
+            </div>
+          </div>
+          <div class="sd_list_m">
+            <span @click="addDB">添加<i class="el-icon-arrow-right"></i></span>
+            <span @click="removeDB"><i class="el-icon-arrow-left"></i>移出</span>
+          </div>
+          <div class="sd_list_l">
+            <div class="sd_list_lt">
+              <p>已选设备（{{dbNum}}）</p>
+              <el-checkbox :indeterminate="leftIsIndeterminate" v-model="DBleftAll" v-show="dbNum > 0">全选</el-checkbox>
+            </div>
+            <div class="sd_list_lc">
+              <vue-scroll>
+                <div v-show="dbNum > 0" :DBleftAll="DBleftAll" :inIndeterKey="'leftIsIndeterminate'" class="sd_list_l_tree" showCheckBox is="dbTreeS" :treeList="treeList" @changeAll="changeLeftAll" :showTypes="showTypes"></div>
               </vue-scroll>
             </div>
           </div>
@@ -429,13 +433,12 @@
       },
       oConfig () {
         // console.log('oConfig', this.oConfig)
-        setTimeout(() => {
-          // this.setMap(this.oConfig);
-        }, 300)
+//        setTimeout(() => {
+//         this.setMap(this.oConfig);
+//        }, 300)
       },
     },
     mounted () {
-      
       this.showDeviceList = this.hideDBlist === undefined ? true : false;
       this.sArea = this.singleArea === undefined ? false : true;
       this.pointC = this.singleArea === undefined ? true : false;
@@ -764,7 +767,7 @@
           draggable: false, // 是否可拖动
           zIndex: 200,
           bubble: false,
-          content: '<div  class="vl_map_area_confirm"><span class="vl_area_cancel"><i class="el-icon-close"></i></span><span class="vl_area_complete el-icon-check">完成</span></div>'
+          content: '<div  class="vl_map_area_confirm"><span class="vl_area_cancel"><i class="el-icon-close"></i></span><span class="vl_area_complete el-icon-check vl_no_complete">完成</span></div>'
         })
         this.confirmIcon = m;
       },
@@ -950,7 +953,7 @@
           if (e.target.classList.contains('el-icon-close')) {
             that.cancelAddArea();
           }
-          if (e.target.classList.contains('vl_area_complete')) {
+          if (e.target.classList.contains('vl_no_complete')) {
             if (that.curAddSearch.curPointData.length) {
               let addObj = {};
               addObj.area = that.curAddSearch.area;
@@ -958,6 +961,7 @@
               addObj.curMarks = that.curAddSearch.curMarks;
               that.addCompleteData(addObj);
               that.amap.remove(that.confirmIcon);
+              that.slideClose = false;
             } else {
               that.showInfoMes('所选区域没有设备信息或者所选区域设备全都已选了')
             }
@@ -1089,7 +1093,7 @@
         })
         // 返回当前选中设备集合的缩略名称；
         if (dNames.length > 3) {
-          deviceNames = dNames.splice(0, 2);
+          deviceNames = dNames.slice(0, 2);
           deviceNames.push('等' + dNames.length + '个设备');
           deviceNames =  deviceNames.join(',')
         } else {
@@ -1651,6 +1655,7 @@
           width: 260px;
           height: 100%;
           border-right: 1px solid #f2f2f2;
+          border-left: 1px solid #f2f2f2;
           .sd_list_lt {
             height: 86px;
             display: flex;
@@ -1672,6 +1677,16 @@
             .sd_list_l_tree {
               width: 258px;
               padding: 0 20px;
+            }
+          }
+          .sd_list_lc_empty {
+            text-align: center;
+            margin-top: 100px;
+            img {
+              width: 120px;
+            }
+            p {
+              color: #999999;
             }
           }
         }
