@@ -20,14 +20,6 @@
           label-width="0px"
           class="demo-ruleForm"
           >
-          <el-form-item prop="taskName" v-show="taskType === '2'">
-            <div  class="ytsr_left_radio">
-              <span>任务名称：</span>
-              <span>
-                <el-input v-model="taskName" placeholder="请输入任务名称" maxlength="20"></el-input>
-              </span>
-            </div>
-          </el-form-item>
           <el-form-item class="" prop="data1">
             <el-date-picker
               v-model="ruleForm.data1"
@@ -60,13 +52,16 @@
               </div>
             </div>
           </el-form-item>
+          <el-form-item prop="taskName" v-show="taskType === '2'">
+            <el-input v-model="taskName" placeholder="请输入任务名称,最多20字" maxlength="20"></el-input>
+          </el-form-item>
           <el-form-item class="operation_button">
             <el-row :gutter="10">
               <el-col :span="12">
                 <el-button @click="resetForm('ruleForm')" class="full">重置</el-button>
               </el-col>
               <el-col :span="12">
-                <el-button type="primary" :loading="searchLoading" @click="submitForm()" class="select_btn full">分析</el-button>
+                <el-button type="primary" :loading="searchLoading" @click="submitForm" class="select_btn full">分析</el-button>
               </el-col>
             </el-row>
           </el-form-item>
@@ -101,7 +96,7 @@
                       <ul>
                         <li class="p_main_list" :class="{'is_open': item.isOpen}" v-for="item in leftEvData" :key="item.id">
                           <div class="p_main_head" @click="item.isOpen = !item.isOpen"><i :class="{'el-icon-caret-right': !item.isOpen, 'el-icon-caret-bottom': item.isOpen}"></i>{{item.label}}({{item.times}}次)</div>
-                          <div class="p_main_item" v-for="sItem in item.list" :key="sItem.id" @click="showStrucInfo(sItem, evData.findIndex(function (u) {return u === sItem}))">
+                          <div class="p_main_item" v-for="sItem in item.list" :key="sItem.id" @click="toSnapDetail(evData.findIndex(function (u) {return u === sItem}))">
                             <div class="info">
                               <div class="info_left">
                                 <img :src="sItem.subStoragePath" alt="">
@@ -127,6 +122,68 @@
               </div>
             </div>
             <div class="insetLeft vl_icon vl_icon_vehicle_03" v-show="hideleft" @click="showResult"></div>
+            <!-- 视频接力---速度信息tab选择 -->
+            <!-- <div class="speed_info_box" :class="{'hide_speed': hideleft}" v-show="showLeft">
+              <ul class="speed_info_list">
+                <li :class="{'isCheck_li': isCheckedVideo}" @click="showVideoList">
+                  <i class="vl_icon vl_icon_clgj_video"></i>
+                  <span>视频接力</span>
+                </li>
+                <li>
+                  <el-checkbox v-model="isCheckedSpeed">速度信息</el-checkbox>
+                </li>
+              </ul>
+            </div> -->
+            <!--右侧区域列表-->
+            <!-- 车速信息 -->
+            <!-- <div class="speed_info_right" v-if="isCheckedSpeed">
+              <vue-scroll>
+                <div class="speed_box">
+                  <ul class="simple_speed">
+                    <li class="speed_title">
+                      <p>2019-9-30 15:05:18</p>
+                      <p>平均速度</p>
+                    </li>
+                    <li class="speed_addr">
+                      <p class="addr_name">新姚南路与黑石铺路交叉路口</p>
+                      <p class="num">35</p>
+                    </li>
+                    <li class="speed_distance">
+                      <p class="dis_desc">两次抓拍距离: <span class="dis_num">0.7 KM</span></p>
+                      <p>KM/H</p>
+                    </li>
+                  </ul>
+                  <ul class="simple_speed">
+                    <li class="speed_title">
+                      <p>2019-9-30 15:05:18</p>
+                      <p>平均速度</p>
+                    </li>
+                    <li class="speed_addr">
+                      <p class="addr_name">新姚南路与黑石铺路交叉路口</p>
+                      <p class="num">35</p>
+                    </li>
+                    <li class="speed_distance">
+                      <p class="dis_desc">两次抓拍距离: <span class="dis_num">0.7 KM</span></p>
+                      <p>KM/H</p>
+                    </li>
+                  </ul>
+                  <ul class="simple_speed">
+                    <li class="speed_title">
+                      <p>2019-9-30 15:05:18</p>
+                      <p>平均速度</p>
+                    </li>
+                    <li class="speed_addr">
+                      <p class="addr_name">新姚南路与黑石铺路交叉路口</p>
+                      <p class="num">35</p>
+                    </li>
+                    <li class="speed_distance">
+                      <p class="dis_desc">两次抓拍距离: <span class="dis_num">0.7 KM</span></p>
+                      <p>KM/H</p>
+                    </li>
+                  </ul>
+                </div>
+              </vue-scroll>
+            </div> -->
           </div>
         </template>
         <template v-else>
@@ -227,99 +284,7 @@
       </div>
     </div>
 
-    <el-dialog
-        :visible.sync="strucDetailDialog"
-        class="struc_detail_dialog_gjfx"
-        :close-on-click-modal="false"
-        top="4vh"
-        :show-close="false">
-      <div class="struc_tab">
-        <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">抓拍详情</span>
-        <span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>
-        <span :class="{'active': strucCurTab === 3}" @click="strucCurTab = 3">视频回放</span>
-        <i class="el-icon-close" @click="strucDetailDialog = false"></i>
-      </div>
-      <div class="struc_main">
-        <ul v-show="strucCurTab === 1">
-          <!-- <li><span>抓拍设备：{{sturcDetail.deviceName}}</span></li> -->
-          <li><span style="line-height: 0.24rem;">抓拍地址：{{sturcDetail.address}}</span></li>
-          <li style="color: #999;line-height: 0.24rem;">{{sturcDetail.shotTime}}</li>
-        </ul>
-        <div v-show="strucCurTab === 1" class="struc_c_detail">
-          <div class="struc_c_d_qj struc_c_d_img">
-            <img class="bigImg" :src="sturcDetail.subStoragePath" alt="">
-            <span>抓拍图</span>
-          </div>
-          <div class="struc_c_d_box">
-            <div class="struc_c_d_img">
-              <img class="bigImg" :src="sturcDetail.storagePath" alt="">
-              <span>全景图</span>
-            </div>
-            <div class="struc_c_d_info">
-              <h2>分析结果</h2>
-              <div class="struc_cd_info_main">
-                <vue-scroll>
-                  <ul>
-                    <li><span>性别</span><span>{{sturcDetail.gender ? sturcDetail.gender : '未识别'}}</span></li>
-                    <li><span>年龄段</span><span>{{sturcDetail.age ? sturcDetail.age : '未识别'}}</span></li>
-                    <li><span>发型</span><span>{{sturcDetail.hairStyleDesc ? sturcDetail.hairStyleDesc : '未识别'}}</span></li>
-                    <li><span>戴眼镜</span><span>{{sturcDetail.glasses ? sturcDetail.glasses : '未识别'}}</span></li>
-                    <li><span>戴帽子</span><span>{{sturcDetail.hat ? sturcDetail.hat : '未识别'}}</span></li>
-                    <li><span>戴口罩</span><span>{{sturcDetail.mask ? sturcDetail.mask : '未识别'}}</span></li>
-                    <li><span>抱小孩</span><span>{{sturcDetail.baby ? sturcDetail.baby : '未识别'}}</span></li>
-                    <li><span>拎东西</span><span>{{sturcDetail.bag ? sturcDetail.bag : '未识别'}}</span></li>
-                    <li><span>上身款式</span><span>{{sturcDetail.coatLengthDesc ? sturcDetail.coatLengthDesc : '未识别'}}</span></li>
-                    <li><span>上身颜色</span><span>{{sturcDetail.coatColorDesc ? sturcDetail.coatColorDesc : '未识别'}}</span></li>
-                    <li><span>下身款式</span><span>{{sturcDetail.trousersLenDesc ? sturcDetail.trousersLenDesc : '未识别'}}</span></li>
-                    <li><span>下身颜色</span><span>{{sturcDetail.trousersColorDesc ? sturcDetail.trousersColorDesc : '未识别'}}</span></li>
-                  </ul>
-                </vue-scroll>
-              </div>
-            </div>
-            <!--<span>抓拍信息</span>-->
-          </div>
-          <!--跳转按钮-->
-          <div class="struc_t_btn">
-            <a @click="gotoControl(sturcDetail.subStoragePath)">新建布控</a>
-            <a @click="gotoLjd(sturcDetail.subStoragePath)">落脚点分析</a>
-          </div>
-        </div>
-        <div v-show="strucCurTab === 2" class="struc_c_address"></div>
-        <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
-          <div class="struc_c_d_qj struc_c_d_img">
-            <img class="bigImg" :src="sturcDetail.subStoragePath" alt="">
-            <span>抓拍图</span>
-          </div>
-          <div class="struc_c_d_box" style="float: left;" v-if="playerData">
-            <div is="flvplayer" :oData="playerData"
-                 :oConfig="{fit: false, sign: false, pause: true, close: false, tape: false, download: false}">
-            </div>
-          </div>
-          <div class="struc_c_d_box struc_vid_empty" style="float: left;" v-else>
-            <div class="struc_vid_empty_c com_trans50_lt">
-              <div></div>
-              <p>暂无视频</p>
-            </div>
-          </div>
-          <p class="download_tips" v-show="sturcDetail.videoPath">下载提示：右键点击视频选择“另存视频为”即可下载视频。</p>
-        </div>
-      </div>
-      <div class="struc-list">
-        <swiper :options="swiperOption" ref="mySwiper">
-          <!-- slides -->
-          <swiper-slide v-for="(item, index) in evData" :key="item.id">
-            <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
-              <img style="width: 100%; height: .88rem;" :src="item.subStoragePath" alt="">
-              <!--<div class="vl_jfo_sim" ><i class="vl_icon vl_icon_retrieval_05" :class="{'vl_icon_retrieval_06':  index === curImgIndex}"></i>{{item.semblance ? item.semblance : 92}}<span style="font-size: 12px;">%</span></div>-->
-            </div>
-          </swiper-slide>
-          <div class="swiper-button-prev" slot="button-prev"></div>
-          <div class="swiper-button-next" slot="button-next"></div>
-        </swiper>
-      </div>
-    </el-dialog>
     <div id="rightGjfxMap"></div>
-    <div id="capMap"></div>
     <!--人工筛选-->
     <el-dialog
       title="人工筛选"
@@ -364,22 +329,6 @@
       </span>
     </el-dialog>
 
-    <!--中断任务弹出框-->
-    <el-dialog
-      title="中断任务确认"
-      :visible.sync="interruptDialog"
-      width="482px"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-      class="dialog_comp"
-    >
-      <span style="color: #999999;">任务中断，任务的数据处理进程将中止，可以在列表中恢复任务的数据处理</span>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="interruptDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="sureInterruptTask">确认</el-button>
-      </div>
-    </el-dialog>
-
     <!--删除任务弹出框-->
     <el-dialog
       title="删除任务确认"
@@ -395,24 +344,40 @@
         <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="sureDeleteTask">确认</el-button>
       </div>
     </el-dialog>
+
+    <snapDialog ref="snapDialogComp" :snapObj="snapObj"></snapDialog>
+    <!-- 视频接力弹窗 -->
+    <!-- <videoRelay ref="videoRelayDialogComp" :videReplayList="videReplayList" @closeDialog="closeDialog"></videoRelay> -->
+
   </div>
 </template>
 <script>
   import vlUpload from '@/components/common/upload.vue';
   import vlBreadcrumb from '@/components/common/breadcrumb.vue';
   import flvplayer from '@/components/common/flvplayer.vue';
+  import videoRelay from '@/components/common/videoRelay.vue';
+  import snapDialog from './components/snapDetail';
   import { mapXupuxian,ajaxCtx } from "@/config/config.js";
   import { objDeepCopy, formatDate, dateOrigin } from "@/utils/util.js";
   import { cityCode } from "@/utils/data.js";
   import {PortraitPostPersonTrace, PersonTracePostRealTime} from "@/views/index/api/api.portrait.js";
   import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
   export default {
-    components: {vlBreadcrumb, flvplayer, vlUpload},
+    components: {vlBreadcrumb, flvplayer, vlUpload, videoRelay, snapDialog },
     data() {
       return {
+        isCheckedSpeed: false, // 是否勾选了速度信息
+        isCheckedVideo: false, // 是否选择了视频接力
+        snapObj: {}, // 弹框抓拍详情内容
+        videReplayList: [], // 视频接力数据
+
         isCut: false, // 是否为截屏跳转.
         // 任务
         tabList: [
+          {
+            label: "查询结果",
+            value: 2
+          },
           {
             label: "已完成任务",
             value: 1
@@ -420,10 +385,6 @@
           {
             label: "未完成任务",
             value: 0
-          },
-          {
-            label: "查询结果",
-            value: 2
           }
         ],
         selectIndex: 1, // 默认已完成的任务
@@ -436,9 +397,9 @@
         taskId: null, // 任务id
         deleteDialog: false,
         isDeleteLoading: false,
-        interruptDialog: false, //中断任务
+        // interruptDialog: false, //中断任务
         taskName: '', // 左侧输入任务名称
-        taskType: "1", // 左侧任务类型，1 实时，2离线
+        taskType: "2", // 左侧任务类型，1 实时，2离线
 
 
         imgData: null,
@@ -451,32 +412,32 @@
         totalAddressNum: 0,
         totalMapNum: 4,
         searchLoading: false,
-        curChooseNum: '已选择0个设备',
-        uploadAcion: ajaxCtx.base + '/new',
-        uploading: false,
-        hover:null,
-        input3: null,
-        mouseTool: null,
-        drawArea: null,
-        swiperOption: {
-          slidesPerView: 10,
-          spaceBetween: 10,
-          slidesPerGroup: 9,
-          loop: false,
-          slideToClickedSlide: true,
-          loopFillGroupWithBlank: true,
-          navigation: {
-            nextEl: '.swiper-button-next',
-            prevEl: '.swiper-button-prev',
-          },
-        },
-        dialogVisible: false,
+        // curChooseNum: '已选择0个设备',
+        // uploadAcion: ajaxCtx.base + '/new',
+        // uploading: false,
+        // hover:null,
+        // input3: null,
+        // mouseTool: null,
+        // drawArea: null,
+        // swiperOption: {
+        //   slidesPerView: 10,
+        //   spaceBetween: 10,
+        //   slidesPerGroup: 9,
+        //   loop: false,
+        //   slideToClickedSlide: true,
+        //   loopFillGroupWithBlank: true,
+        //   navigation: {
+        //     nextEl: '.swiper-button-next',
+        //     prevEl: '.swiper-button-prev',
+        //   },
+        // },
+        // dialogVisible: false,
         amap: null,
-        map: null,
-        pointData: {
-          deviceList: [],
-          bayonetList: []
-        },
+        // map: null,
+        // pointData: {
+        //   deviceList: [],
+        //   bayonetList: []
+        // },
         reselt: false,
         hideleft: false,
         timeOrder: false,
@@ -488,7 +449,7 @@
         },
         pricecode:cityCode,
         storeParam: {}, // 暂存上一次搜索的入参
-        options: [],
+        // options: [],
         pickerOptions: {
           disabledDate (time) {
             return time > new Date();
@@ -500,14 +461,14 @@
         marks: [[], []],
         markerLine: [], // 地图线集合
         markerPoint: [], // 地图点集合
-        supMarkerPoint: null,
-        curStrucList: [],
-        strucCurTab: 1,
-        curImgIndex: 0,
-        sturcDetail: {},
-        playing: false, // 视频播放是否
-        strucDetailDialog: false,
-        videoUrl: '' // 弹窗视频回放里的视频
+        // supMarkerPoint: null,
+        // curStrucList: [],
+        // strucCurTab: 1,
+        // curImgIndex: 0,
+        // sturcDetail: {},
+        // playing: false, // 视频播放是否
+        // strucDetailDialog: false,
+        // videoUrl: '' // 弹窗视频回放里的视频
       };
     },
     computed: {
@@ -530,12 +491,12 @@
       map.setMapStyle("amap://styles/whitesmoke");
       this.amap = map;
       // 弹窗地图
-      let supMap = new window.AMap.Map('capMap', {
-        center: mapXupuxian.center,
-        zoom: 16
-      });
-      supMap.setMapStyle('amap://styles/whitesmoke');
-      this.map = supMap;
+      // let supMap = new window.AMap.Map('capMap', {
+      //   center: mapXupuxian.center,
+      //   zoom: 16
+      // });
+      // supMap.setMapStyle('amap://styles/whitesmoke');
+      // this.map = supMap;
       if (this.$route.query.imgurl) {
         this.ruleForm.input3 = this.$route.query.imgurl;
         this.imgData = {path: this.$route.query.imgurl}
@@ -547,9 +508,93 @@
         if (e === 2) {
           this.randerMap();
         }
+      },
+      isCheckedSpeed (val) {
+        if (val) {
+          this.computeDisAndSpeed(this.evData);
+        }
       }
     },
     methods: {
+      // 计算两个点之间的距离和速度
+      computeDisAndSpeed (data) {
+        if (data) {
+          data.forEach((item, index) => { // 第一条数据的速度和距离为0，第二条的数据是拿第一条比，即n和n-1比
+            if (index === 0) {
+              item.distance = 0;
+              item.speed = 0;
+            }
+            if (data[index - 1]) {
+              // 计算距离
+              let p1 = [item.shotPlaceLongitude, item.shotPlaceLatitude];
+              let p2 = [data[index - 1].shotPlaceLongitude, data[index - 1].shotPlaceLatitude];
+              let dis = AMap.GeometryUtil.distance(p1, p2); // 计算两点之间的距离 单位米
+              let distance = dis / 1000;
+              if (distance === 0) {
+                item.distance = distance;
+              } else {
+                item.distance = distance.toFixed(4);
+              }
+
+              // 计算时间
+              let time1 = new Date(item.shotTime).getTime();  // 获取时间戳--毫秒
+              let time2 = new Date(data[index - 1].shotTime).getTime();
+              
+              // 换算成小时
+              let hour1 = time1 / (1000 * 60 * 60);
+              let hour2 = time2 / (1000 * 60 * 60);
+              let time = hour1 - hour2;
+
+              // 计算速度
+              if (time === 0) { //同一时刻抓拍的两条数据
+                item.speed = 0;
+              } else {
+                let speed = distance / time;
+                if ( speed === 0 ) {
+                  item.speed = speed;
+                } else {
+                  item.speed = speed.toFixed(4);
+                }
+              }
+            }
+          });
+        }
+      },
+      //详情弹窗
+      toSnapDetail(i) {
+        this.snapObj = {
+          personDetailList: this.evData,
+          index: i,
+          type: '轨迹分析'
+        };
+        this.$refs["snapDialogComp"].toogleVisiable(true);
+      },
+      // 关闭视频接力弹框
+      closeDialog (bool) {
+        this.isCheckedVideo = bool;
+        this.videReplayList = [];
+      },
+      // 视频接力
+      showVideoList () {
+        this.isCheckedVideo = true;
+        if (this.isCheckedVideo) {
+          this.evData.map(item => {
+            const params = {
+              type: 3,
+              video: {
+                uid: Math.random(),
+                downUrl: item.videoPath
+                // downUrl: require('../../assets/video/demo.mp4')
+              },
+              address: item.address,
+              deviceName: item.deviceName,
+              shotTime: item.shotTime,
+            };
+            this.videReplayList.push(params);
+          })
+        }
+        this.$refs["videoRelayDialogComp"].toogleVisiable(this.isCheckedVideo);
+      },
       skipResultPage (obj) {
         this.$router.push({name: 'portrait_gjfx_jg', query: {uid: obj.uid}})
       },
@@ -559,42 +604,42 @@
         this.getDataList();
       },
       // 显示中断任务弹出框
-      showInterruptDialog (obj) {
-        this.interruptDialog = true;
-        this.taskId = obj.uid;
-      },
+      // showInterruptDialog (obj) {
+      //   this.interruptDialog = true;
+      //   this.taskId = obj.uid;
+      // },
       // 显示删除任务弹出框
       showDeleteDialog (obj) {
         this.deleteDialog = true;
         this.taskId = obj.uid;
       },
       // 确认中断任务
-      sureInterruptTask () {
-        if (this.taskId) {
-          const params = {
-            uid: this.taskId,
-            taskType: 12, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
-            taskStatus: 4 // 1：处理中 2：处理成功 3：处理失败 4：处理中断
-          };
-          this.isInterruptLoading = true;
-          putAnalysisTask(params)
-              .then(res => {
-                if (res) {
-                  this.$message({
-                    type: 'success',
-                    message: '中断任务成功',
-                    customClass: 'request_tip'
-                  });
-                  this.interruptDialog = false;
-                  this.isInterruptLoading = false;
-                  this.getDataList();
-                } else {
-                  this.isInterruptLoading = false;
-                }
-              })
-              .catch(() => {this.isInterruptLoading = false;})
-        }
-      },
+      // sureInterruptTask () {
+      //   if (this.taskId) {
+      //     const params = {
+      //       uid: this.taskId,
+      //       taskType: 12, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
+      //       taskStatus: 4 // 1：处理中 2：处理成功 3：处理失败 4：处理中断
+      //     };
+      //     this.isInterruptLoading = true;
+      //     putAnalysisTask(params)
+      //         .then(res => {
+      //           if (res) {
+      //             this.$message({
+      //               type: 'success',
+      //               message: '中断任务成功',
+      //               customClass: 'request_tip'
+      //             });
+      //             this.interruptDialog = false;
+      //             this.isInterruptLoading = false;
+      //             this.getDataList();
+      //           } else {
+      //             this.isInterruptLoading = false;
+      //           }
+      //         })
+      //         .catch(() => {this.isInterruptLoading = false;})
+      //   }
+      // },
       // 确认删除任务
       sureDeleteTask () {
         if (this.taskId) {
@@ -671,8 +716,6 @@
           this.getDataList();
         }
       },
-
-
       uploadEmit (data) {
         console.log('uploadEmit data', data);
         if (data && data.path) {
@@ -682,31 +725,31 @@
         }
       },
       // 设置视频数据
-      setPlayerData () {
-        if (this.sturcDetail.videoPath) {
-          this.playerData = {
-            type: 3,
-            title: this.sturcDetail.deviceName,
-            video: {
-              uid: new Date().getTime() + '',
-              downUrl: this.sturcDetail.videoPath
-            }
-          }
-        } else {
-          this.playerData = null;
-        }
-      },
+      // setPlayerData () {
+      //   if (this.sturcDetail.videoPath) {
+      //     this.playerData = {
+      //       type: 3,
+      //       title: this.sturcDetail.deviceName,
+      //       video: {
+      //         uid: new Date().getTime() + '',
+      //         downUrl: this.sturcDetail.videoPath
+      //       }
+      //     }
+      //   } else {
+      //     this.playerData = null;
+      //   }
+      // },
       chooseEndTime (e) {
         if (e < this.ruleForm.data1) {
           this.$message.info('结束时间必须大于开始时间才会有结果')
         }
       },
-      gotoControl (url) {
-        this.$router.push({ name: 'control_create', query: {modelName: "人员追踪", imgurl: url} })
-      },
-      gotoLjd (url) {
-        this.$router.push({ name: 'portrait_ljd', query: {imgurl: url} })
-      },
+      // gotoControl (url) {
+      //   this.$router.push({ name: 'control_create', query: {modelName: "人员追踪", imgurl: url} })
+      // },
+      // gotoLjd (url) {
+      //   this.$router.push({ name: 'portrait_ljd', query: {imgurl: url} })
+      // },
       scrollIt (e) {
         if(e.srcElement.scrollTop + e.srcElement.offsetHeight > e.srcElement.scrollHeight - 10){
          if (!this.loading && !this.noMore) {
@@ -934,21 +977,21 @@
         this.getVehicleShot(this.storeParam)
       },
       // 地图标记
-      mapHoverInfo (data) {
-        let str = '<div class="vl_map_hover_main"><ul>';
-        if (data.dataType === 0) {
-          str += '<li><span>设备名称：</span><p>' + data.infoName + '</p></li>';
-          str += '<li><span>设备地址：</span><p>' + data.address + '</p></li>';
-          str += '</ul></div>'
-        } else if (data.dataType === 1) {
-          str += '<li><span>卡口名称：</span><p>' + data.infoName + '</p></li>';
-          str += '<li><span>卡口编号：</span><p>' + data.bayonetNo + '</p></li>';
-          str += '<li><span>地理位置：</span><p>' + data.bayonetAddress + '</p></li>';
-//          str += '<li><span>设备数量：</span><p>' + data.devNum + '</p></li>';
-          str += '</ul></div>'
-        }
-        return str;
-      },
+//       mapHoverInfo (data) {
+//         let str = '<div class="vl_map_hover_main"><ul>';
+//         if (data.dataType === 0) {
+//           str += '<li><span>设备名称：</span><p>' + data.infoName + '</p></li>';
+//           str += '<li><span>设备地址：</span><p>' + data.address + '</p></li>';
+//           str += '</ul></div>'
+//         } else if (data.dataType === 1) {
+//           str += '<li><span>卡口名称：</span><p>' + data.infoName + '</p></li>';
+//           str += '<li><span>卡口编号：</span><p>' + data.bayonetNo + '</p></li>';
+//           str += '<li><span>地理位置：</span><p>' + data.bayonetAddress + '</p></li>';
+// //          str += '<li><span>设备数量：</span><p>' + data.devNum + '</p></li>';
+//           str += '</ul></div>'
+//         }
+//         return str;
+//       },
       drawMapMarker (oData) {
         let data = this.fitlerSXT(oData);
         for (let  i = 0; i < data.length; i++) {
@@ -974,9 +1017,10 @@
               content: _content
             });
             point.on('click', () => {
-              let newObj = objDeepCopy(obj);
-              newObj.shotTime = newObj.shotTime.split(',')[0];
-              this.showStrucInfo(newObj, i)
+              this.toSnapDetail(i);
+              // let newObj = objDeepCopy(obj);
+              // newObj.shotTime = newObj.shotTime.split(',')[0];
+              // this.showStrucInfo(newObj, i)
             })
             this.markerPoint[i] = [point];
           }
@@ -1020,53 +1064,54 @@
         this.shotAddressAndTimes(this.evData);
         this.operData();
         this.drawMapMarker(this.evData)
+        this.computeDisAndSpeed(this.evData);
       }, // 更新画线
-      showStrucInfo (data, index) {
-        this.amap.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude])
-        this.curImgIndex = index;
-        this.strucDetailDialog = true;
-        this.sturcDetail = data;
-        this.strucCurTab = 1;
-        this.drawPoint(data);
-        this.setPlayerData();
-      },
-      drawPoint (data) {
-        this.$nextTick(() => {
-          $('.struc_c_address').append($('#capMap'))
-        })
-        if (this.supMarkerPoint) {
-          this.map.remove(this.supMarkerPoint)
-        }
-        let sClass = 'vl_icon_map_hover_mark0';
-        if (data.bayonetName) {
-          sClass = 'vl_icon_map_hover_mark1'
-        }
-        let _content = '<div class="vl_icon ' + sClass + '"></div>'
-        this.supMarkerPoint = new window.AMap.Marker({ // 添加自定义点标记
-          map: this.map,
-          position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-          offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
-          draggable: false, // 是否可拖动
-          // 自定义点标记覆盖物内容
-          content: _content
-        });
-        this.map.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
-        let sConent = `<div class="cap_info_win"><p>设备名称：${data.bayonetName ? data.bayonetName : data.deviceName}</p><p>抓拍地址：${data.bayonetAddress ? data.bayonetAddress : data.address}</p></div>`
-        new window.AMap.InfoWindow({
-          map: this.map,
-          isCustom: true,
-          closeWhenClickMap: false,
-          position: [data.shotPlaceLongitude, data.shotPlaceLatitude],
-          offset: new window.AMap.Pixel(0, -70),
-          content: sConent
-        })
-      },
-      imgListTap (data, index) {
-        this.curImgIndex = index;
-        this.sturcDetail = data;
-        this.drawPoint(data);
-        this.setPlayerData();
-      },
+      // showStrucInfo (data, index) {
+      //   this.amap.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude])
+      //   this.curImgIndex = index;
+      //   this.strucDetailDialog = true;
+      //   this.sturcDetail = data;
+      //   this.strucCurTab = 1;
+      //   this.drawPoint(data);
+      //   this.setPlayerData();
+      // },
+      // drawPoint (data) {
+      //   this.$nextTick(() => {
+      //     $('.struc_c_address').append($('#capMap'))
+      //   })
+      //   if (this.supMarkerPoint) {
+      //     this.map.remove(this.supMarkerPoint)
+      //   }
+      //   let sClass = 'vl_icon_map_hover_mark0';
+      //   if (data.bayonetName) {
+      //     sClass = 'vl_icon_map_hover_mark1'
+      //   }
+      //   let _content = '<div class="vl_icon ' + sClass + '"></div>'
+      //   this.supMarkerPoint = new window.AMap.Marker({ // 添加自定义点标记
+      //     map: this.map,
+      //     position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
+      //     offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+      //     draggable: false, // 是否可拖动
+      //     // 自定义点标记覆盖物内容
+      //     content: _content
+      //   });
+      //   this.map.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
+      //   let sConent = `<div class="cap_info_win"><p>设备名称：${data.bayonetName ? data.bayonetName : data.deviceName}</p><p>抓拍地址：${data.bayonetAddress ? data.bayonetAddress : data.address}</p></div>`
+      //   new window.AMap.InfoWindow({
+      //     map: this.map,
+      //     isCustom: true,
+      //     closeWhenClickMap: false,
+      //     position: [data.shotPlaceLongitude, data.shotPlaceLatitude],
+      //     offset: new window.AMap.Pixel(0, -70),
+      //     content: sConent
+      //   })
+      // },
+      // imgListTap (data, index) {
+      //   this.curImgIndex = index;
+      //   this.sturcDetail = data;
+      //   this.drawPoint(data);
+      //   this.setPlayerData();
+      // },
       mapZoomSet (val) {
         if (this.amap) {
           this.amap.setZoom(this.amap.getZoom() + val);
@@ -1076,7 +1121,7 @@
         if (this.amap) {
           this.amap.setZoomAndCenter(14, mapXupuxian.center);
         }
-      },
+      }
     }
   };
 </script>
