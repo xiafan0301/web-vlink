@@ -14,7 +14,7 @@
         </div>
         <div class="add_sty">
           选择方式：
-          <div is="mapSele" isNotDialog  :showTypes="'DB'" filter ref="myseb" :activeDeviceList="deviceList"></div>
+          <div is="mapSele" isNotDialog  :showTypes="'D'" filter ref="myseb" :activeDeviceList="deviceList"></div>
         </div>
         <el-button @click="back">取消</el-button>
         <el-button type="primary" @click="baocun" :loading="addloading">保存</el-button>
@@ -56,9 +56,7 @@ export default {
   },
   methods: {
     back () {
-      let deviceList = this.$refs['myseb'].getCheckedIds()
-      console.log(deviceList)
-      // this.$router.go(-1)
+      this.$router.go(-1)
     },
     baocun () {
       this.addloading = true
@@ -70,12 +68,9 @@ export default {
       let deviceList = this.$refs['myseb'].getCheckedIds().deviceList.map((item)=> {
         return item.uid
       })
-      let bayonetList = this.$refs['myseb'].getCheckedIds().bayonetList.map((item)=> {
-        return item.uid
-      })
       if (parseInt(this.$route.query.isadd) === 0) {
         let params ={
-          addIdList: deviceList.join() + bayonetList.join(),
+          addIdList: deviceList.join(),
           groupId: this.$route.query.uid,
           groupName: this.value1
         }
@@ -91,7 +86,7 @@ export default {
         })
       }else {
         let params = {
-          deviceIds: deviceList.join() + bayonetList.join() ,
+          deviceIds: deviceList.join(),
           groupName: this.value1
         }
         postfezu (params)
@@ -124,6 +119,7 @@ export default {
       padding: 0 10px;
     }
     .spec_m_add_cot{
+      margin-bottom: 20px;
       background-color: white;
       padding: 20px;
       box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
@@ -133,7 +129,9 @@ export default {
         }
       }
       .add_sty{
-        padding-bottom: 10px;
+        /deep/ .map_sd_content{
+          height: 5.5rem;
+        }
       }
       div{
         padding: 5px 0;

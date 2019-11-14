@@ -446,6 +446,12 @@
 .vl_icon_vehicle_gcsj_02{width: 83px;height: 83px;background-position: -1070px -938px;}
 .vl_icon_vehicle_gcsj_03{width: 83px;height: 83px;background-position: -1172px -937px;}
 .vl_icon_vehicle_gcsj_04{width: 83px;height: 83px;background-position: -1274px -931px;}
+.vl_icon_vehicle_gcsj_05{width: 83px;height: 83px; display: inline-block;
+  background-repeat: no-repeat;
+  background-image: url(../img/icons/icons_gcsjx.png);}
+.vl_icon_vehicle_gcsj_06{width: 83px;height: 83px; display: inline-block;
+  background-repeat: no-repeat;
+  background-image: url(../img/icons/icons_gcsjf.png);}
 
 /* 人脸检索  --人脸数据分析 */
 .vl_icon_portrait_rlsjfx_01{width: 70px;height: 70px;background-position: -924px -1036px;}

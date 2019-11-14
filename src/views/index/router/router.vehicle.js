@@ -160,7 +160,7 @@ export default {
     }, {
       path: 'gcsj', // 过车数据统计
       name: 'vehicle_search_gcsj',
-      component: () => import('@/views/index/components/vehicle/statistics/gcsj.vue')
+      component: () => import('@/views/index/components/vehicle/statistics/gcsjx.vue')
     }, {
       path: 'ycxc', // 夜车行车统计
       name: 'vehicle_search_ycxc',

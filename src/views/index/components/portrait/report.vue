@@ -5,9 +5,6 @@
     <div class="vehicle_content_box_left">
       <div style="padding: 20px; padding-bottom: 0">
         <el-form :model="ruleForm" ref="ruleForm" class="demo-ruleForm" :rules="rules">
-          <el-form-item prop="taskName">
-            <el-input v-model="ruleForm.taskName"  placeholder="请输入任务名称"></el-input>
-          </el-form-item>
           <el-form-item prop="value1">
             <el-date-picker
                 v-model="ruleForm.value1"
@@ -28,8 +25,11 @@
                 placeholder="结束时间">
             </el-date-picker>
           </el-form-item>
+          <el-form-item prop="taskName">
+            <el-input v-model="ruleForm.taskName"  placeholder="请输入任务名称" maxlength="20"></el-input>
+          </el-form-item>
           <el-form-item>
-            <div :class="['upload_pic',{'hidden': dialogImageUrl}]">
+            <div :class="['upload_pic',{'hidden': dialogImageUrl}]" style="margin-top: 15px">
               <el-upload
                   ref="uploadPic"
                   accept="image/*"
@@ -43,7 +43,7 @@
                 <i class="vl_icon vl_icon_control_14"></i>
               </el-upload>
             </div>
-            <div style="color:rgba(153,153,153,1); margin-top: 10px; text-align: center">请上传全身照片</div>
+            <div style="color:rgba(153,153,153,1); margin-top: 10px; text-align: center">请上传人脸照片</div>
           </el-form-item>
           <el-form-item>
             <el-button class="reset_btn" style="width: 110px" @click="skipAddTaskPage('ruleForm')">重置</el-button>
@@ -116,23 +116,23 @@
                   {{scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 2 ? '成功' : scope.row.taskStatus === 3 ? '失败' : scope.row.taskStatus === 4 ? '已中断' : ''}}
                 </template>
               </el-table-column>
-              <el-table-column label="操作" fixed="right">
+              <el-table-column label="操作" fixed="right" width="170">
                 <template slot-scope="scope">
                   <span
                       class="operation_btn"
                       @click="skipDetailPage(scope.row)"
                       v-if="selectIndex === 1"
                   >查看</span>
-                  <span
-                      class="operation_btn"
-                      @click="interrupt(scope.row)"
-                      v-if="selectIndex === 0 && scope.row.taskStatus === 1"
-                  >中断任务</span>
-                  <span
-                      class="operation_btn"
-                      @click="recoveryOrRestart(scope.row)"
-                      v-if="selectIndex === 0 && scope.row.taskStatus === 4"
-                  >恢复任务</span>
+<!--                  <span-->
+<!--                      class="operation_btn"-->
+<!--                      @click="interrupt(scope.row)"-->
+<!--                      v-if="selectIndex === 0 && scope.row.taskStatus === 1"-->
+<!--                  >中断任务</span>-->
+<!--                  <span-->
+<!--                      class="operation_btn"-->
+<!--                      @click="recoveryOrRestart(scope.row)"-->
+<!--                      v-if="selectIndex === 0 && scope.row.taskStatus === 4"-->
+<!--                  >恢复任务</span>-->
                   <span
                       class="operation_btn"
                       @click="recoveryOrRestart(scope.row)"
@@ -245,7 +245,7 @@
 </template>
 <script>
 import vehicleBreadcrumb from './breadcrumb.vue';
-import { postTaskInfosPage, putAnalysisTask, putTaskInfosResume, newTaskInfos} from "../../api/api.analysis.js";
+import { postTaskInfosPage, putAnalysisTask, putTaskInfosResume, newTaskInfos, postdetailbg} from "../../api/api.analysis.js";
 import { formatDate, dateOrigin} from '@/utils/util.js';
 import { ajaxCtx } from '@/config/config.js';
 // import {mapXupuxian} from '@/config/config.js';
@@ -458,7 +458,22 @@ export default {
     },
     //恢复任务,重启任务
     recoveryOrRestart(obj) {
-      putTaskInfosResume(obj.uid).then(res => {
+      console.log(obj)
+      let _data = JSON.parse(obj.taskWebParam)
+      console.log(_data)
+      let data = {
+        uid: obj.uid,
+        taskName: _data.taskName,
+        startTime: _data.startTime,
+        endTime: _data.endTime,
+        targetPicUrl: _data.targetPicUrl,
+        interval: _data.interval,
+        number: _data.number,
+        deviceName: _data.deviceName,
+        deviceId: _data.deviceId,
+        bayonetIds: _data.bayonetIds
+      }
+      postdetailbg(data).then(res => {
         console.log(res)
         if(res) {
           this.selectDataList();

@@ -22,9 +22,6 @@
           </div>
           <div v-show="!showpost">
             <el-form label-position="left" :model="formLabelAlign">
-              <el-form-item>
-                <el-input v-model="formLabelAlign.name" placeholder="请输入任务名称"></el-input>
-              </el-form-item>
               <el-form-item >
                 <el-date-picker
                     v-model="formLabelAlign.value1"
@@ -48,6 +45,9 @@
                     default-time="23:59:59"
                     placeholder="请选择结束时间">
                 </el-date-picker>
+              </el-form-item>
+              <el-form-item>
+                <el-input v-model="formLabelAlign.name" placeholder="请输入任务名称"></el-input>
               </el-form-item>
             </el-form>
             <div is="vlUpload" :clear="uploadClear" @uploadEmit="uploadEmit" style="width: 232px; height: 232px"></div>
@@ -452,6 +452,12 @@ export default {
       this.searchLoading = true
       if (this.formLabelAlign.name == '') {
         this.$message.info("请输入任务名称");
+        this.searchLoading = false
+        return false
+      }
+      if (this.formLabelAlign.name.length > 20) {
+        this.$message.info("任务名称最长20字");
+        this.searchLoading = false
         return false
       }
       let params = {

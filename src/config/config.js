@@ -92,6 +92,7 @@ const oDomains = {
       // dev: 'http://10.116.65.64:8081',
       // test: 'http://10.116.64.82:8082',
       dev: 'https://apidev.aorise.org/vlink-portrait',
+      // test: 'http://10.116.64.94:8081/api/xl',
       test: 'https://apirel.aorise.org/vlink-portrait',
       prod: 'https://apiprod.aorise.org/vlink-portrait'
     },
