@@ -174,7 +174,7 @@
         </div>
       </div>
       <!--中断任务弹出框-->
-      <el-dialog
+      <!-- <el-dialog
         title="中断任务确认"
         :visible.sync="interruptDialog"
         width="482px"
@@ -187,7 +187,7 @@
           <el-button @click="interruptDialog = false">取消</el-button>
           <el-button class="operation_btn function_btn" @click="sureInterruptTask">确认</el-button>
         </div>
-      </el-dialog>
+      </el-dialog> -->
 
       <!--删除任务弹出框-->
       <el-dialog
@@ -271,7 +271,7 @@ export default {
       taskId: null, // 任务id
       deleteDialog: false,
       isDeleteLoading: false,
-      interruptDialog: false, //中断任务
+      // interruptDialog: false, //中断任务
     };
   },
   computed: {
@@ -433,42 +433,42 @@ export default {
       }
     },
     // 显示中断任务弹出框
-    showInterruptDialog (obj) {
-      this.interruptDialog = true;
-      this.taskId = obj.uid;
-    },
+    // showInterruptDialog (obj) {
+    //   this.interruptDialog = true;
+    //   this.taskId = obj.uid;
+    // },
     // 显示删除任务弹出框
     showDeleteDialog (obj) {
       this.deleteDialog = true;
       this.taskId = obj.uid;
     },
     // 确认中断任务
-    sureInterruptTask () {
-      if (this.taskId) {
-        const params = {
-          uid: this.taskId,
-          taskType: 2, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
-          taskStatus: 4 // 1：处理中 2：处理成功 3：处理失败 4：处理中断
-        };
-        this.isInterruptLoading = true;
-        putAnalysisTask(params)
-          .then(res => {
-            if (res) {
-              this.$message({
-                type: 'success',
-                message: '中断任务成功',
-                customClass: 'request_tip'
-              });
-              this.interruptDialog = false;
-              this.isInterruptLoading = false;
-              this.getDataList();
-            } else {
-              this.isInterruptLoading = false;
-            }
-          })
-          .catch(() => {this.isInterruptLoading = false;})
-      }
-    },
+    // sureInterruptTask () {
+    //   if (this.taskId) {
+    //     const params = {
+    //       uid: this.taskId,
+    //       taskType: 2, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
+    //       taskStatus: 4 // 1：处理中 2：处理成功 3：处理失败 4：处理中断
+    //     };
+    //     this.isInterruptLoading = true;
+    //     putAnalysisTask(params)
+    //       .then(res => {
+    //         if (res) {
+    //           this.$message({
+    //             type: 'success',
+    //             message: '中断任务成功',
+    //             customClass: 'request_tip'
+    //           });
+    //           this.interruptDialog = false;
+    //           this.isInterruptLoading = false;
+    //           this.getDataList();
+    //         } else {
+    //           this.isInterruptLoading = false;
+    //         }
+    //       })
+    //       .catch(() => {this.isInterruptLoading = false;})
+    //   }
+    // },
     // 确认删除任务
     sureDeleteTask () {
       if (this.taskId) {
@@ -496,7 +496,7 @@ export default {
           .catch(() => {this.isDeleteLoading = false;})
       }
     },
-    //恢复任务,重启任务
+    //重启任务
     recoveryOrRestart(obj) {
       const webParam = obj.taskWebParam;
       if (obj.uid) {

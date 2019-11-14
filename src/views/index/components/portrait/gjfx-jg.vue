@@ -151,45 +151,17 @@
     <div class="speed_info_right" v-if="isCheckedSpeed">
       <vue-scroll>
         <div class="speed_box">
-          <ul class="simple_speed">
+          <ul class="simple_speed" v-for="(item, index) in evData" :key="index + 'eve'">
             <li class="speed_title">
-              <p>2019-9-30 15:05:18</p>
+              <p>{{item.shotTime}}</p>
               <p>平均速度</p>
             </li>
             <li class="speed_addr">
-              <p class="addr_name">新姚南路与黑石铺路交叉路口</p>
-              <p class="num">35</p>
+              <p class="addr_name" :title="item.address">{{item.address}}</p>
+              <p class="num">{{item.speed}}</p>
             </li>
             <li class="speed_distance">
-              <p class="dis_desc">两次抓拍距离: <span class="dis_num">0.7 KM</span></p>
-              <p>KM/H</p>
-            </li>
-          </ul>
-          <ul class="simple_speed">
-            <li class="speed_title">
-              <p>2019-9-30 15:05:18</p>
-              <p>平均速度</p>
-            </li>
-            <li class="speed_addr">
-              <p class="addr_name">新姚南路与黑石铺路交叉路口</p>
-              <p class="num">35</p>
-            </li>
-            <li class="speed_distance">
-              <p class="dis_desc">两次抓拍距离: <span class="dis_num">0.7 KM</span></p>
-              <p>KM/H</p>
-            </li>
-          </ul>
-          <ul class="simple_speed">
-            <li class="speed_title">
-              <p>2019-9-30 15:05:18</p>
-              <p>平均速度</p>
-            </li>
-            <li class="speed_addr">
-              <p class="addr_name">新姚南路与黑石铺路交叉路口</p>
-              <p class="num">35</p>
-            </li>
-            <li class="speed_distance">
-              <p class="dis_desc">两次抓拍距离: <span class="dis_num">0.7 KM</span></p>
+              <p class="dis_desc">两次抓拍距离: <span class="dis_num">{{item.distance}} KM</span></p>
               <p>KM/H</p>
             </li>
           </ul>
@@ -311,6 +283,13 @@
         return this.allLeftEvData.filter(x => x.list.length)
       }
     },
+    watch: {
+      isCheckedSpeed (val) {
+        if (val) {
+          this.computeDisAndSpeed(this.evData);
+        }
+      }
+    },
     mounted() {
       this.renderMap();
       if (this.$route.query.uid) {
@@ -318,6 +297,50 @@
       }
     },
     methods: {
+      // 计算两个点之间的距离和速度
+      computeDisAndSpeed (data) {
+        if (data) {
+          data.forEach((item, index) => { // 第一条数据的速度和距离为0，第二条的数据是拿第一条比，即n和n-1比
+            if (index === 0) {
+              item.distance = 0;
+              item.speed = 0;
+            }
+            if (data[index - 1]) {
+              // 计算距离
+              let p1 = [item.shotPlaceLongitude, item.shotPlaceLatitude];
+              let p2 = [data[index - 1].shotPlaceLongitude, data[index - 1].shotPlaceLatitude];
+              let dis = AMap.GeometryUtil.distance(p1, p2); // 计算两点之间的距离 单位米
+              let distance = dis / 1000;
+              if (distance === 0) {
+                item.distance = distance;
+              } else {
+                item.distance = distance.toFixed(4);
+              }
+
+              // 计算时间
+              let time1 = new Date(item.shotTime).getTime();  // 获取时间戳--毫秒
+              let time2 = new Date(data[index - 1].shotTime).getTime();
+              
+              // 换算成小时
+              let hour1 = time1 / (1000 * 60 * 60);
+              let hour2 = time2 / (1000 * 60 * 60);
+              let time = hour1 - hour2;
+
+              // 计算速度
+              if (time === 0) { //同一时刻抓拍的两条数据
+                item.speed = 0;
+              } else {
+                let speed = distance / time;
+                if ( speed === 0 ) {
+                  item.speed = speed;
+                } else {
+                  item.speed = speed.toFixed(4);
+                }
+              }
+            }
+          });
+        }
+      },
       //详情弹窗
       toSnapDetail(i) {
         this.snapObj = {
@@ -342,7 +365,6 @@
               video: {
                 uid: Math.random(),
                 downUrl: item.videoPath
-                // downUrl: require('../../assets/video/demo.mp4')
               },
               address: item.address,
               deviceName: item.deviceName,
@@ -367,7 +389,6 @@
                 let {startTime, endTime} = res.data.taskWebParam;
                 this.ruleForm.data1 = new Date(startTime).getTime();
                 this.ruleForm.data2 = new Date(endTime).getTime();
-                console.log(res.data)
                 this.imgData = {
                   cname: '带图' + Math.random(),
                   filePathName: '带图' + Math.random(),
@@ -377,8 +398,9 @@
                 this.evData = res.data.taskResult;
                 console.log('aaaa', this.evData);
                 
-
                 this.evData.forEach(x => {
+                  x.distance = null; // 距离
+                  x.speed = null; // 速度
                   if (x.bayonetName) {
                     x.DeviceID = x.bayonetName;
                   }
@@ -663,7 +685,8 @@
         this.evData.splice(_i, 1);
         this.shotAddressAndTimes(this.evData);
         this.operData();
-        this.drawMapMarker(this.evData)
+        this.drawMapMarker(this.evData);
+        this.computeDisAndSpeed(this.evData);
       }, // 更新画线
       mapZoomSet (val) {
         if (this.amap) {

@@ -412,7 +412,7 @@ export default {
       isMultiplePerson: true, // 全部人像是否多选
       deleteDialog: false, // 删除任务弹出框
       isDeleteLoading: false, // 删除任务弹出框
-      isInterruptLoading: false, // 中断任务弹出框
+      // isInterruptLoading: false, // 中断任务弹出框
       selectMapType: 0, // 选择的第几个地图区域
       isInitPage: true,
       initPageMessage: '选择分析区域，查询所选时间内布控人群在指定区域的出没情况',
@@ -636,7 +636,7 @@ export default {
           .catch(() => {this.isDeleteLoading = false;})
       }
     },
-    // 恢复任务 --- 重启任务
+    // 重启任务
     recoveryTask (obj) {
       if (obj.uid) {
         restartAreaTask(obj.uid)

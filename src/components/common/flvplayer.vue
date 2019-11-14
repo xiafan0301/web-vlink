@@ -265,14 +265,16 @@
               v-for="(item, index) in filterSnapList"
               :key="'fl_sl_item' + index"
             >
-              <div class="sl_item_left">
-                <img :src="item[item._key] ? item[item._key].subStoragePath : ''" alt="">
-              </div>
-              <div class="sl_item_right">
-                <h5>检测目标：{{item.target}}</h5>
-                <p>{{item._info}}</p>
-                <p>{{item[item._key].shotTime}}</p>
-              </div>
+              <template v-if="tabIndex === item.target">
+                <div class="sl_item_left">
+                  <img :src="item[item._key] ? item[item._key].subStoragePath : ''" alt="">
+                </div>
+                <div class="sl_item_right">
+                  <h5>检测目标：{{item.target}}</h5>
+                  <p>{{item._info}}</p>
+                  <p>{{item[item._key].shotTime}}</p>
+                </div>
+              </template>
             </div>
           </div>
         </vue-scroll>
@@ -318,7 +320,7 @@
           </div>
         </div>
       </template>
-      <template v-else>
+      <template v-else-if="snapSturcObj.type === '2'">
         <div class="struc_c_d_box">
           <div class="struc_c_d_img struc_c_d_img_green">
             <img :src="snapSturcObj.sturcDetail.subStoragePath" class="bigImg" title="点击放大图片" alt />
@@ -357,6 +359,27 @@
               <!--<li v-if="type === 5"><span>套牌依据</span><span :title="snapSturcObj.sturcDetail.fakeReason">{{snapSturcObj.sturcDetail.fakeReason}}</span></li>-->
             </ul>
             <!--  <span class='tz' v-if="snapSturcObj.sturcDetail.features"><b>特征码：</b>{{snapSturcObj.sturcDetail.features}}</span> -->
+          </div>
+        </div>
+      </template>
+      <template v-else>
+        <div class="struc_c_d_box">
+          <div class="struc_c_d_img struc_c_d_img_green">
+            <img :src="snapSturcObj.sturcDetail.subStoragePath" class="bigImg" title="点击放大图片" alt />
+            <span>抓拍图</span>
+          </div>
+          <div class="struc_c_d_info">
+            <h2>分析结果</h2>
+            <ul>
+              <li>
+                <span>目标</span>
+                <span>非机动车</span>
+              </li>
+              <!-- <li>
+                <span>有无车牌</span>
+                <span :title="snapSturcObj.sturcDetail.hasPlate">{{snapSturcObj.sturcDetail.hasPlate ? snapSturcObj.sturcDetail.hasPlate : '未识别'}}</span>
+              </li> -->
+            </ul>
           </div>
         </div>
       </template>
@@ -1102,11 +1125,15 @@ export default {
                 x['target'] = '行人';
                 x['_info'] = '性别：'+ (x.personDto.gender ? x.personDto.gender : '未识别');
                 // x.personDto.gender ? x.personDto.gender : '未识别';
-              } else {
+              } else if (x.dtoType === "2") {
                 x['_key'] = 'vehicleDto';
                 x['target'] = '车辆';
                 x['_info'] = '车牌：' + (x.vehicleDto.plateNo ? x.vehicleDto.plateNo : '未识别');
                 // x.vehicleDto.plateNo ? x.vehicleDto.plateNo : '未识别';
+              } else {
+                x['_key'] = 'rideDto';
+                x['target'] = '骑行';
+                x['_info'] = '车牌：' + (x.vehicleDto.plateNo ? x.vehicleDto.plateNo : '未识别');
               }
               console.log(x)
               return x;
