@@ -46,7 +46,7 @@ export function login(data) {
  */
 export function logout(data) {
   return request({
-    url: '/api/xl/logout' + data.uid,
+    url: '/logout',
     params: data,
     mode: 'user',
     method: 'get'
@@ -58,7 +58,7 @@ export function logout(data) {
  */
 export function getCode(data) {
   return request({
-    url: '/user-service/sms/code',
+    url: '/verify-code',
     data,
     mode: 'user',
     method: 'post'
@@ -70,7 +70,7 @@ export function getCode(data) {
  */
 export function checkCode(data) {
   return request({
-    url: '/user-service/sms/code',
+    url: '/check-code/' + data.verifyCode,
     params: data,
     mode: 'user',
     method: 'get'
@@ -82,7 +82,7 @@ export function checkCode(data) {
  */
 export function resetPassword(data) {
   return request({
-    url: '/user-service/forget-pwd',
+    url: '/forget-password',
     data,
     mode: 'user',
     method: 'put'
@@ -94,7 +94,7 @@ export function resetPassword(data) {
  */
 export function isRegister(data) {
   return request({
-    url: '/user-service/check-user-mobile/' + data.userMobile,
+    url: '/check-mobile/' + data.userMobile,
     params: data,
     mode: 'user',
     method: 'get'
@@ -106,7 +106,7 @@ export function isRegister(data) {
  */
 export function updatePwd(data) {
   return request({
-    url: '/user-service/user-password',
+    url: '/update-password',
     data,
     mode: 'user',
     method: 'put'

@@ -51,26 +51,11 @@
 </template>
 <script>
 import headerNormal from "@/components/headerNormal.vue";
-import { validatePhone } from "@/utils/validator.js";
+import { validatePhone, validatePwd } from "@/utils/validator.js";
 import { smsCode, userInfo } from "../api/api.user.js";
 export default {
   components: { headerNormal },
   data() {
-    var validatePass = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error("请输入密码"));
-      } else {
-        let reg = /^[a-zA-Z0-9]{6,16}$/;
-        if (!reg.test(value)) {
-          callback(new Error("密码为6-16个数字或英文字母组合"));
-        } else {
-          if (this.regForm.checkPass !== "") {
-            this.$refs.regForm.validateField("checkPass");
-          }
-          callback();
-        }
-      }
-    };
     var validatePass2 = (rule, value, callback) => {
       if (!value) {
         callback(new Error("请再次输入密码"));
@@ -97,7 +82,7 @@ export default {
           { required: true, message: "请输入手机号", trigger: "blur" },
           { validator: validatePhone, trigger: "blur" }
         ],
-        pass: [{ validator: validatePass, trigger: "blur" }],
+        pass: [{ validator: validatePwd, trigger: "blur" }],
         checkPass: [{ validator: validatePass2, trigger: "blur" }],
         code: [{ required: true, message: "请输入验证码", trigger: "blur" }]
       }

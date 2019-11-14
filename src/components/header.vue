@@ -205,7 +205,7 @@
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="cancelUpdate('updateForm')">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="updatePassword('updateForm')">确认</el-button>
+        <el-button class="operation_btn function_btn" :loading="updateLoading" @click="updatePassword('updateForm')">确认</el-button>
       </div>
     </el-dialog>
   </div>
@@ -216,19 +216,9 @@ import { getAlarmList, getACount } from "@/views/index/api/api.control.js";
 import { getTasks, markTask, getCount } from '@/views/index/api/api.event.js';
 import {formatDate} from '@/utils/util';
 import { dataList } from '@/utils/data.js';
+import {validatePwd} from '@/utils/validator.js';
 export default {
   data () {
-    var validatePass = (rule, value, callback) => {
-      let reg = /^[a-zA-Z0-9]{6,16}$/;
-      if (!reg.test(value)) {
-        callback(new Error('密码为6-16个数字或英文字母组合'));
-      } else {
-        if (this.updateForm.sureNewPwd !== '') {
-          this.$refs.updateForm.validateField('sureNewPwd');
-        }
-        callback();
-      }
-    };
     var validatePass2 = (rule, value, callback) => {
      if (value !== this.updateForm.newPwd) {
         callback(new Error('两次密码不一致'));
@@ -252,7 +242,7 @@ export default {
         ],
         newPwd: [
           { required: true, message: '请输入新密码', trigger: 'blur' },
-          { validator: validatePass, trigger: 'blur' }
+          { validator: validatePwd, trigger: 'blur' }
         ],
         sureNewPwd: [
           { required: true, message: '请确认密码', trigger: 'blur' },
@@ -263,6 +253,7 @@ export default {
       loginoutDialog: false, // 退出登录弹出框
       loginoutLoading: false,
       updatePwdDialog: false, // 修改密码弹出框
+      updateLoading: false, // 修改密码弹窗loading
       pageNum: 1,
       pageSize: 10,
       alarmList: [],
@@ -326,10 +317,7 @@ export default {
         return false;
       }
       this.loginoutLoading = true;
-      const params = {
-        uid: this.userInfo.uid
-      }
-      logout(params).then(res => {
+      logout().then(res => {
         if (res) {
           this.loginoutDialog = false;
           this.$router.push({name: 'login'});
@@ -358,11 +346,12 @@ export default {
     },
     // 修改密码
     updatePassword (form) {
+      this.updateLoading = true;
       this.$refs[form].validate(valid => {
         if (valid) {
           const params = {
-            newPwd: this.updateForm.newPwd,
-            oldPwd: this.updateForm.oldPwd
+            newPassword: this.updateForm.newPwd,
+            oldPassword: this.updateForm.oldPwd
           };
           updatePwd(params)
             .then(res => {
@@ -374,6 +363,7 @@ export default {
                 })
                 this.updatePwdDialog = false;
                 this.$router.push({name: 'login'});
+                this.updateLoading = false;
               }
             })
             .catch(() => {})

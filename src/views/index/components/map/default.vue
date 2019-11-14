@@ -1,12 +1,34 @@
 <template>
   <div class="vl_map_main">
+    <!--侧边栏-->
+    <div is="sideNav" :sideList="sideList"></div>
     <router-view></router-view>
   </div>
 </template>
 <script>
+  import sideNav from '@/components/common/sideNav.vue';
 export default {
+  components: {sideNav},
   data () {
     return {
+      sideList: [
+        {
+          path: '/map/map',
+          routerName: '电子地图'
+        },
+        {
+          path: '/map/etc',
+          routerName: '智能围堵'
+        },
+        {
+          path: '/map/video',
+          routerName: '视频N+1'
+        },
+        {
+          path: '/map/trace',
+          routerName: '线性追踪'
+        },
+      ]
     }
   },
   mounted () {
@@ -16,19 +38,23 @@ export default {
 }
 </script>
 <style lang="scss">
-.vl_map_main { height: 100%; overflow: hidden; }
+.vl_map_main {
+  height: 100%; overflow: hidden;
+  display: flex; }
 .vl_map {
   position: relative;
   height: 100%;
+  width: calc(100% - 2rem);
   .vl_map_hover_main {
     left: -96px;
     bottom: 28px;
   }
   > .map_l {
-    position: absolute; top: 0; left: 0; z-index: 2;
-    padding: .2rem 0 .2rem .2rem;
+    z-index: 2;
     width: 2.8rem; height: 100%;
     animation: fadeInLeft .4s ease-out .4s both;
+    float: left;
+    padding-left: .2rem;
     > div {
       position: relative;
       width: 2.6rem; height: 100%;
@@ -212,12 +238,13 @@ export default {
   > .map_r {
     position: relative; z-index: 1;
     height: 100%;
+    float: left;
+    width: calc(100% - 2.8rem);
     > .map_rm {
       width: 100%; height: 100%;
     }
     > .map_rt {
-      position: absolute; top: .2rem; left: 50%;
-      margin-left: -2.22rem;
+      position: absolute; top: .2rem; left: 5.94rem;
       overflow: hidden;
       padding: .15rem .3rem;
       background:rgba(255,255,255,1);
@@ -462,6 +489,68 @@ export default {
         }
       }
     }
+  }
+  /*2.0相关*/
+  .vl_map_search_point {
+    position: absolute;
+    left: 3rem;
+    top: .3rem;
+    z-index: 2;
+    .inline-input {
+      width: 3.04rem;
+    }
+    .select_btn {
+      background-color: #0c70f8;
+      color: #ffffff;
+      width: .64rem;
+      position: absolute;
+      right: 0;
+      height: 40px;
+      padding: 0;
+    }
+    .vl_res_btn {
+      display: flex;
+      width: 102px;
+      height: 40px;
+      position: absolute;
+      right: -112px;
+      top: 0px;
+      background: #ffffff;
+      box-shadow:0px 3px 10px 0px rgba(99,99,99,0.39);
+      cursor: pointer;
+      color: #333333;
+      align-items: center;
+      justify-content: center;
+      p {
+        height: 20px;
+        line-height: 20px;
+        margin-left: 5px;
+        vertical-align: middle;
+      }
+      .vl_res_list {
+        position: absolute;
+        top: 50px;
+        left: 0px;
+        width: 192px;
+        height: 200px;
+        -webkit-transition: height .1s ease-in;
+        -moz-transition: height .1s ease-in;
+        -ms-transition: height .1s ease-in;
+        -o-transition: height .1s ease-in;
+        transition: height .1s ease-in;
+        background: #ffffff;
+        border:1px solid #D3D3D3;
+        -webkit-border-radius: 4px;
+        -moz-border-radius: 4px;
+        border-radius: 4px;
+      }
+    }
+    .vl_res_show {
+      p {
+        color: #0C70F8;
+      }
+    }
+
   }
 }
 .map_rt_ck_num {
