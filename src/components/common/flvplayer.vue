@@ -265,14 +265,16 @@
               v-for="(item, index) in filterSnapList"
               :key="'fl_sl_item' + index"
             >
-              <div class="sl_item_left">
-                <img :src="item[item._key] ? item[item._key].subStoragePath : ''" alt="">
-              </div>
-              <div class="sl_item_right">
-                <h5>检测目标：{{item.target}}</h5>
-                <p>{{item._info}}</p>
-                <p>{{item[item._key].shotTime}}</p>
-              </div>
+              <template v-if="tabIndex === item.target">
+                <div class="sl_item_left">
+                  <img :src="item[item._key] ? item[item._key].subStoragePath : ''" alt="">
+                </div>
+                <div class="sl_item_right">
+                  <h5>检测目标：{{item.target}}</h5>
+                  <p>{{item._info}}</p>
+                  <p>{{item[item._key].shotTime}}</p>
+                </div>
+              </template>
             </div>
           </div>
         </vue-scroll>
@@ -318,7 +320,7 @@
           </div>
         </div>
       </template>
-      <template v-else>
+      <template v-else-if="snapSturcObj.type === '2'">
         <div class="struc_c_d_box">
           <div class="struc_c_d_img struc_c_d_img_green">
             <img :src="snapSturcObj.sturcDetail.subStoragePath" class="bigImg" title="点击放大图片" alt />
@@ -357,6 +359,27 @@
               <!--<li v-if="type === 5"><span>套牌依据</span><span :title="snapSturcObj.sturcDetail.fakeReason">{{snapSturcObj.sturcDetail.fakeReason}}</span></li>-->
             </ul>
             <!--  <span class='tz' v-if="snapSturcObj.sturcDetail.features"><b>特征码：</b>{{snapSturcObj.sturcDetail.features}}</span> -->
+          </div>
+        </div>
+      </template>
+      <template v-else>
+        <div class="struc_c_d_box">
+          <div class="struc_c_d_img struc_c_d_img_green">
+            <img :src="snapSturcObj.sturcDetail.subStoragePath" class="bigImg" title="点击放大图片" alt />
+            <span>抓拍图</span>
+          </div>
+          <div class="struc_c_d_info">
+            <h2>分析结果</h2>
+            <ul>
+              <li>
+                <span>目标</span>
+                <span>非机动车</span>
+              </li>
+              <!-- <li>
+                <span>有无车牌</span>
+                <span :title="snapSturcObj.sturcDetail.hasPlate">{{snapSturcObj.sturcDetail.hasPlate ? snapSturcObj.sturcDetail.hasPlate : '未识别'}}</span>
+              </li> -->
+            </ul>
           </div>
         </div>
       </template>
@@ -519,10 +542,13 @@ export default {
    * },
    * optDis: 是否隐藏所有的操作按钮
    * bResize: 播放容器尺寸变化
+   * 
+   * isVideoReplay：是否是人像-车辆轨迹分析模块视频接力功能调用
    */
-  props: ['index', 'oData', 'oConfig', 'optDis', 'bResize', 'showFullScreen'],
+  props: ['index', 'oData', 'oConfig', 'optDis', 'bResize', 'showFullScreen', 'isVideoReplay'],
   data () {
     return {
+      // 抓拍上墙
       tabIndex: '行人', // 行人 车辆 骑行
       tabDatalist: ['行人', '车辆', '骑行'],
 
@@ -798,6 +824,8 @@ export default {
       } else if (this.oData.type === 3) {
         // 普通视频(mp4)、 抓拍视频(flv)
         let sUrl = this.oData.video.downUrl;
+        console.log('this.oData.video.downUrl', this.oData.video.downUrl);
+        
         if (sUrl) {
           if (sUrl.endsWith('.flv') || sUrl.endsWith('.FLV')) {
             /* sUrl 需要 替换token 适用抓拍视频*/
@@ -949,6 +977,8 @@ export default {
     },
     // 普通播放（mp4、录像）
     initPlayerDoForNormal (url) {
+      console.log('qeqweqweqweqwe', url);
+      
       this.videoLoading = true;
       var videoElement = document.getElementById(this.flvplayerId);
       videoElement.src = url;
@@ -964,8 +994,17 @@ export default {
       };
       videoElement.onended = () => {
         console.log('播放结束');
-        this.playActive = false;
         // videoElement.pause();
+
+        // 不是人像-车辆轨迹分析模块中的视频接力，若是的话需要自动播放下一个视频，所以不需要设为false
+        if (!this.isVideoReplay) {
+          this.playActive = false;
+        }
+        // 人像-车辆轨迹分析模块中的视频接力，视频播放结束后传给父组件，轮播下一个视频
+        this.$emit('playEnded',{
+          isEnded: true
+        });
+
         if (this.oData.type === 5) {
           this.videoRelayEmpty = true;
         }
@@ -1086,15 +1125,21 @@ export default {
                 x['target'] = '行人';
                 x['_info'] = '性别：'+ (x.personDto.gender ? x.personDto.gender : '未识别');
                 // x.personDto.gender ? x.personDto.gender : '未识别';
-              } else {
+              } else if (x.dtoType === "2") {
                 x['_key'] = 'vehicleDto';
                 x['target'] = '车辆';
                 x['_info'] = '车牌：' + (x.vehicleDto.plateNo ? x.vehicleDto.plateNo : '未识别');
                 // x.vehicleDto.plateNo ? x.vehicleDto.plateNo : '未识别';
+              } else {
+                x['_key'] = 'rideDto';
+                x['target'] = '骑行';
+                x['_info'] = '车牌：' + (x.vehicleDto.plateNo ? x.vehicleDto.plateNo : '未识别');
               }
               console.log(x)
               return x;
             });
+            this.snapLoading = false;
+          } else {
             this.snapLoading = false;
           }
         })
@@ -1102,7 +1147,7 @@ export default {
         params.where["startTime"] = formatDate(this.oData.startTime, 'yyyy-MM-dd HH:mm:ss');
         params.where["endTime"] = formatDate(this.oData.endTime, 'yyyy-MM-dd HH:mm:ss');
         VideoPostQueryBackSnap(params).then(res =>{
-          if (res) {
+          if (res.data && res.data.list ) {
             console.log(res);
             // 处理当前需要的key
             this.querySnapList = res.data.list.map(x => {
@@ -1120,6 +1165,8 @@ export default {
             console.log('ccccc', this.querySnapList)
             this.querySnapTotal = res.data.total;
             this.pagination.total = res.data.total;
+            this.snapLoading = false;
+          } else {
             this.snapLoading = false;
           }
         })

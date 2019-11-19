@@ -281,6 +281,8 @@ export default {
       this.openMap = {};
     },
     mapSelectorEmit (result) {
+      this.selectBayonetArr = [];
+      this.selectCameraArr = [];
       if (result) {
         console.log('result', result);
         
@@ -315,8 +317,8 @@ export default {
               this.$set(res.data, 'taskWebParam', JSON.parse(res.data.taskWebParam));
               console.log('aaa', res.data);
               
-              let deviceArr = res.data.taskWebParam.deviceId.split(',');
-              let bayonetArr = res.data.taskWebParam.bayonetIds.split(',');
+              let deviceArr = res.data.taskWebParam && res.data.taskWebParam.deviceId.split(',');
+              let bayonetArr = res.data.taskWebParam.bayonetIds && res.data.taskWebParam.bayonetIds.split(',');
               let arr1 = [];
               if (deviceArr && deviceArr.length > 0) {
                 deviceArr.forEach(item => {
@@ -401,11 +403,13 @@ export default {
 
       let deviceArr = this.taskDetail.taskWebParam.deviceId.split(',');
       let bayonetArr = this.taskDetail.taskWebParam.bayonetIds.split(',');
-      console.log(deviceArr);
-      console.log('mmmm', this.deviceList)
+
+      // console.log(deviceArr);
+      // console.log('mmmm', this.deviceList)
       let arrIds = [];
       if (deviceArr && deviceArr.length > 0) {
         deviceArr.forEach(item => {
+          this.selectCameraArr.push(item);
           let o = this.deviceList.find(x => {return item === x.uid});
           if (o) {
             arrIds.push(o.uid);
@@ -415,6 +419,7 @@ export default {
       }
       if (bayonetArr && bayonetArr.length > 0) {
         bayonetArr.forEach(item => {
+          this.selectBayonetArr.push(item);
           let o = this.deviceList.find(x => {return item === x.uid});
           if (o) {
             arrIds.push(o.uid);
@@ -425,10 +430,14 @@ export default {
       console.log(arrIds);
       
       if (arrIds.length > 0) {
+        console.log('aaaaaaaaaaaa');
+        console.log(arrIds);
+        
         this.activeSelectList = arrIds;
         this.chooseType = 2;
         this.dSum = arrIds.length;
       }
+
       this.showNewTask = true;
     }
   }

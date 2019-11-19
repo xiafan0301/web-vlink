@@ -41,9 +41,9 @@ if (loginInfo) {
   store.commit('setLoginToken', {
     loginToken: true
   });
-  store.commit('setCurrentOrgan', {
-    currentOrganObj: JSON.parse(loginInfo).organList[0]
-  });
+  // store.commit('setCurrentOrgan', {
+  //   currentOrganObj: JSON.parse(loginInfo).organList[0]
+  // });
 } else {
   store.commit('setLoginToken', {
     loginToken: false

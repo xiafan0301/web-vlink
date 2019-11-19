@@ -132,9 +132,23 @@
               :trigger-on-focus="false"
               @select="handleSelect"
       ></el-autocomplete>
-      <!--<el-input placeholder="请输入地名，快速定位地址" v-model="input3" class="input-with-select">-->
       <el-button slot="append" icon="el-icon-search" class="select_btn" @click="setCenter()"></el-button>
-      <!--</el-input>-->
+      <!--资源显示-->
+      <div class="vl_res_btn" :class="{'vl_res_show': showRes}" @click.prevent="showRes = !showRes">
+        <i class="vl_icon vl_icon_046" :class="{'vl_icon_047': showRes}"></i>
+        <p>资源显示</p>
+        <!--资源列表-->
+        <div class="vl_res_list" v-show="showRes">
+          <el-tree
+            :data="constObj"
+            ref="resTree"
+            show-checkbox
+            node-key="name"
+            @check="resChanged"
+            :props="defaultProps">
+          </el-tree>
+        </div>
+      </div>
     </div>
     <!-- 右侧地图 -->
     <div class="map_r">
@@ -236,7 +250,12 @@
       return {
         // 2.0相关
         input3: null,
-
+        showRes: false, // 显示资源
+        defaultProps: {
+          children: 'supOptions',
+          label: 'name'
+        },
+        // 2.0结束
         showSearchList: false,
         curSearchedWord: '', // 当前用户最近搜索的词
         dbId: 'db_tree_' + random14(),
@@ -260,10 +279,10 @@
         bResize: null,
         timer: null,
         constObj: [
-          {name:'摄像头', _key: 'deviceBasicListNum', supOptions: [], isIndeterminate: false, checkAll: true, supTypeList: [0, 1], supTypeListAll: [0, 1]},
-          {name:'卡口', _key: 'bayonetListNum', supOptions: [], isIndeterminate: false, checkAll: true, supTypeList: [], supTypeListAll: [0, 1]},
-          {name: '车辆', _key: 'carListNum', supOptions: [{name: '公交车'},{name: '出租车'}, {name: '客运车'}, {name: '校车'}, {name: '危化车'}], isIndeterminate: false, checkAll: true, supTypeList: [0, 1, 2, 3, 4], supTypeListAll: [0, 1, 2, 3, 4]},
-          {name: '人员', _key: 'sysUserExtendListNum', supOptions: [{name: '部门成员'},{name: '普通民众'}], isIndeterminate: false, checkAll: true, supTypeList: [0, 1], supTypeListAll: [0, 1]}
+          {name:'摄像头', _node: 'one', _key: 'deviceBasicListNum', supOptions: [], isIndeterminate: false, checkAll: true, supTypeList: [0, 1], supTypeListAll: [0, 1]},
+          {name:'卡口', _node: 'one', _key: 'bayonetListNum', supOptions: [], isIndeterminate: false, checkAll: true, supTypeList: [], supTypeListAll: [0, 1]},
+          {name: '车辆', _node: 'one', _key: 'carListNum', supOptions: [{name: '公交车', _node: 'two', type: 0},{name: '出租车', _node: 'two', type: 1}, {name: '客运车', _node: 'two', type: 2}, {name: '校车', _node: 'two', type: 3}, {name: '危化车', _node: 'two', type: 4}], isIndeterminate: false, checkAll: true, supTypeList: [0, 1, 2, 3, 4], supTypeListAll: [0, 1, 2, 3, 4]},
+          {name: '人员', _node: 'one', _key: 'sysUserExtendListNum', supOptions: [{name: '部门成员', _node: 'two', type: 0},{name: '普通民众', _node: 'two', type: 1}], isIndeterminate: false, checkAll: true, supTypeList: [0, 1], supTypeListAll: [0, 1]}
         ],
         car2Name: {
           1: '公交车',
@@ -468,6 +487,9 @@
       // map click event
       _this.mapMarkerEvents();
       this.getAlarmListByDev();
+
+      // 2.0相关
+      this.$refs.resTree.setCheckedKeys(['摄像头','卡口','人员','车辆']);
     },
     methods: {
       // 2.0相关开始
@@ -523,6 +545,14 @@
           });
         }
         //return pois
+      },
+      resChanged (item, item1) {
+        console.log(item, item1);
+        if (item._node === 'two') { // 点的是二级，修改二级的父级的checkAll和本级的supTypeList
+
+        } else { // 点的是一级
+
+        }
       },
 
       // 2.0结束
@@ -1916,25 +1946,6 @@
   }
 </script>
 <style lang="scss" scoped>
-  /*2.0相关*/
-  .vl_map_search_point {
-    position: absolute;
-    left: 3rem;
-    top: .3rem;
-    z-index: 2;
-    .inline-input {
-      width: 3.04rem;
-    }
-    .select_btn {
-      background-color: #0c70f8;
-      color: #ffffff;
-      width: .64rem;
-      position: absolute;
-      right: 0;
-      height: 40px;
-      padding: 0;
-    }
-  }
 
   .map_search_list{
     position: absolute;
@@ -2145,6 +2156,7 @@
     width: 100%;
     height: 100%;
     top: 0!important;
+    left: 0 !important;
     z-index: 9;
   }
   .map_warning_snap {

@@ -16,9 +16,9 @@ export const validatePhone = (rule, value, callback) => {
 // 密码验证
 export const validatePwd = (rule, value, callback) => {
   if (value) {
-      let reg = /^[a-zA-Z0-9]{6,16}$/;
+      let reg = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/;
       if (!reg.test(value)) {
-          callback(new Error('密码为6-16个数字或英文字母组合'));
+          callback(new Error('密码至少8位，必须包含一个英文字母一个数字跟一个特殊字符'));
       } else {
           callback();
       }

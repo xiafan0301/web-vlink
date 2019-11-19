@@ -758,15 +758,17 @@ export default {
         }
       });
 
-      // let geocoder;
-      // window.AMap.service('AMap.Geocoder',function(){ //回调函数
-      //   //实例化Geocoder   
-      //   let geocoder = new window.AMap.Geocoder({
-      //     city: "全国", //城市，默认：“全国”
-      //     radius: 500 //范围，默认：500
-      //   })
-      //   //TODO: 使用geocoder 对象完成相关功能
-      // })
+      let geocoder;
+      window.AMap.service('AMap.Geocoder',function(){ //回调函数
+        //实例化Geocoder   
+        geocoder = new window.AMap.Geocoder({
+          city: "全国", //城市，默认：“全国”
+          radius: 500 //范围，默认：500
+        })
+        //TODO: 使用geocoder 对象完成相关功能
+      })
+      _this.geocoderInfo = geocoder;
+
       map.setMapStyle("amap://styles/whitesmoke");
       _this.map = map;
 

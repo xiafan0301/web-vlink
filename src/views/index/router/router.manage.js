@@ -292,5 +292,11 @@ export default {
       name: 'advertisement',
       component: () => import('@/views/index/components/manage/appManage/advertisement.vue')
     },
+    //操作日志
+    {
+      path: 'operationLog',
+      name: 'operationLog',
+      component: () => import('@/views/index/components/manage/operationLog.vue')
+    },
   ]
 }

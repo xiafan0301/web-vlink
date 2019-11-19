@@ -123,7 +123,7 @@
                 </ul>
               </div>
               <el-form-item prop="taskName" v-if="selectType === 2" :rules="[{ required: true, message: '该项内容不能为空', trigger: 'blur' }]">
-                <el-input placeholder="请设置任务名称" maxlength="20" v-model="qyryfxFrom.taskName"></el-input>
+                <el-input placeholder="请设置任务名称" maxlength="20" v-model="qyryfxFrom.taskName" @change="changeTaskName"></el-input>
               </el-form-item>
               <el-form-item class="function_form_btn">
                 <el-button style="width: 110px;" @click="resetLeftMenu('qyryfxFrom')">重置</el-button>
@@ -338,16 +338,6 @@
                       >查看</span>
                       <span
                         class="operation_btn"
-                        @click="showInterruptDialog(scope.row)"
-                        v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 1"
-                      >中断任务</span>
-                      <span
-                        class="operation_btn"
-                        @click="recoveryTask(scope.row)"
-                        v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 4"
-                      >恢复任务</span>
-                      <span
-                        class="operation_btn"
                         @click="recoveryTask(scope.row)" 
                         v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 3"
                       >重启任务</span>
@@ -392,21 +382,6 @@
         <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="sureDeleteTask">确认</el-button>
       </div>
     </el-dialog>
-    <!--中断任务弹出框-->
-    <el-dialog
-      title="中断任务确认"
-      :visible.sync="interruptDialog"
-      width="482px"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-      class="dialog_comp"
-      >
-      <span style="color: #999999;">任务中断，任务的数据处理进程将中止，可以在列表中恢复任务的数据处理</span>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="interruptDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" :loading="isInterruptLoading" @click="sureInterruptTask">确认</el-button>
-      </div>
-    </el-dialog>
     <div is="mapSelector" :hideDBlist='false' :singleArea="true" :editAble="isEditMap" v-show="selectMapType === 1 && (isShowMapAreaDialog === true)" :open="mapDialogVisible1" :showTypes="'DB'" :clear="clearMapSelect1" @mapSelectorEmit="mapPoint"></div>
     <div is="mapSelector" :hideDBlist='false' :singleArea="true" :editAble="isEditMap" v-show="selectMapType === 2 && (isShowMapAreaDialog === true)" :open="mapDialogVisible2" :showTypes="'DB'" :clear="clearMapSelect2" @mapSelectorEmit="mapPoint"></div>
     <div is="mapSelector" :hideDBlist='false' :singleArea="true" :editAble="isEditMap" v-show="selectMapType === 3 && (isShowMapAreaDialog === true)" :open="mapDialogVisible3" :showTypes="'DB'" :clear="clearMapSelect3" @mapSelectorEmit="mapPoint"></div>
@@ -436,9 +411,8 @@ export default {
       isEditMap: true, // 地图区域选择是否可以编辑
       isMultiplePerson: true, // 全部人像是否多选
       deleteDialog: false, // 删除任务弹出框
-      interruptDialog: false, // 中断任务弹出框
       isDeleteLoading: false, // 删除任务弹出框
-      isInterruptLoading: false, // 中断任务弹出框
+      // isInterruptLoading: false, // 中断任务弹出框
       selectMapType: 0, // 选择的第几个地图区域
       isInitPage: true,
       initPageMessage: '选择分析区域，查询所选时间内布控人群在指定区域的出没情况',
@@ -576,6 +550,9 @@ export default {
   mounted() {
   },
   methods: {
+    changeTaskName (val) {
+      this.qyryfxFrom.taskName = val.trim();
+    },
     // 查询方式change
     handleRadioSelectType (val) {
       this.selectType = val;
@@ -627,42 +604,10 @@ export default {
         })
         .catch(() => {})
     },
-    // 显示中断任务弹出框
-    showInterruptDialog (obj) {
-      this.interruptDialog = true;
-      this.taskId = obj.uid;
-    },
     // 显示删除任务弹出框
     showDeleteDialog (obj) {
       this.deleteDialog = true;
       this.taskId = obj.uid;
-    },
-    // 确认中断任务
-    sureInterruptTask () {
-      if (this.taskId) {
-        const params = {
-          uid: this.taskId,
-          taskType: 7, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析 7：区域人员分析
-          taskStatus: 4 // 1：处理中 2：处理成功 3：处理失败 4：处理中断
-        };
-        this.isInterruptLoading = true;
-        putAnalysisTask(params)
-          .then(res => {
-            if (res) {
-              this.$message({
-                type: 'success',
-                message: '中断任务成功',
-                customClass: 'request_tip'
-              });
-              this.interruptDialog = false;
-              this.isInterruptLoading = false;
-              this.getTaskList();
-            } else {
-              this.isInterruptLoading = false;
-            }
-          })
-          .catch(() => {this.isInterruptLoading = false;})
-      }
     },
     // 确认删除任务
     sureDeleteTask () {
@@ -691,7 +636,7 @@ export default {
           .catch(() => {this.isDeleteLoading = false;})
       }
     },
-    // 恢复任务 --- 重启任务
+    // 重启任务
     recoveryTask (obj) {
       if (obj.uid) {
         restartAreaTask(obj.uid)
@@ -923,25 +868,32 @@ export default {
         if (valid) {
           this.resultDataList = [];
           let deviceAndTimeList = [];
-          this.selectAreaDataList.map((item, index) => {
-            if (item.deviceList.length <= 0 && item.bayonetList.length <= 0) {
-               this.$message.warning(
-                `您在第${index + 1}个选择区域未选中设备，请您重新选择`
-              );
-              return;
-            } else {
-              deviceAndTimeList = [
-                ...deviceAndTimeList,
-                {
-                  deviceIds: item.deviceList.map(item => item.uid).join(),
-                  bayonetIds: item.bayonetList.map(item => item.uid).join(),
-                  deviceNames: item.allDeviceNameList.join('、'),
-                  startTime: item.startTime,
-                  endTime: item.endTime
-                }
-              ];
-            }
-          });
+          
+          if (this.selectAreaDataList.length > 0) {
+            this.selectAreaDataList.map((item, index) => {
+              if (item.deviceList.length <= 0 && item.bayonetList.length <= 0) {
+                 this.$message.warning(
+                  `您在第${index + 1}个选择区域未选中设备，请您重新选择`
+                );
+                return false;
+              } else {
+                deviceAndTimeList = [
+                  ...deviceAndTimeList,
+                  {
+                    deviceIds: item.deviceList.map(item => item.uid).join(),
+                    bayonetIds: item.bayonetList.map(item => item.uid).join(),
+                    deviceNames: item.allDeviceNameList.join('、'),
+                    startTime: item.startTime,
+                    endTime: item.endTime
+                  }
+                ];
+              }
+            });
+            
+          } else {
+            this.$message.info('请先框选抓拍区域');
+            return false;
+          }
           const queryParams = {
             sex: this.qyryfxFrom.sex,
             age: this.qyryfxFrom.age !== "" ? this.qyryfxFrom.age.join() : "",

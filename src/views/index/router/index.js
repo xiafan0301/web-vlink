@@ -132,6 +132,7 @@ const router = new VueRouter({
 })
 router.beforeEach((to, from, next) => {
   // 判断该路由是否不需要登录权限
+  console.log(to, from)
   if (to.meta && to.meta.unrequireLogin) {
     // 不需要登陆，直接走
     next()

@@ -67,7 +67,7 @@
               <span class="span_tips" v-show="isShowDeviceTip">该人像在该时间内无抓拍设备</span>
             </el-form-item>
             <el-form-item prop="taskName" :rules="[{ required: true, message: '该项内容不能为空', trigger: 'blur' }]">
-              <el-input placeholder="请输入任务名称，最多20字" maxlength="20" v-model="addForm.taskName"></el-input>
+              <el-input placeholder="请输入任务名称，最多20字" maxlength="20" v-model="addForm.taskName" @change="changeTaskName"></el-input>
             </el-form-item>
             <el-form-item prop="interval">
               <el-select placeholder="请选择尾随时间间隔" style="width: 100%" v-model="addForm.interval">
@@ -157,16 +157,16 @@
                       @click="skipResultPage(scope.row)"
                       v-if="selectIndex === 1"
                     >查看</span>
-                    <span
-                      class="operation_btn"
-                      @click="showInterruptDialog(scope.row)"
-                      v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 1"
-                    >中断任务</span>
-                    <span
-                      class="operation_btn"
-                      @click="recoveryTask(scope.row)"
-                      v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 4"
-                    >恢复任务</span>
+                    <!--<span-->
+                      <!--class="operation_btn"-->
+                      <!--@click="showInterruptDialog(scope.row)"-->
+                      <!--v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 1"-->
+                    <!--&gt;中断任务</span>-->
+                    <!--<span-->
+                      <!--class="operation_btn"-->
+                      <!--@click="recoveryTask(scope.row)"-->
+                      <!--v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 4"-->
+                    <!--&gt;恢复任务</span>-->
                     <span
                       class="operation_btn"
                       @click="recoveryTask(scope.row)"  
@@ -211,7 +211,7 @@
       </div>
     </el-dialog>
     <!--中断任务弹出框-->
-    <el-dialog
+    <!-- <el-dialog
       title="中断任务确认"
       :visible.sync="interruptDialog"
       width="482px"
@@ -224,7 +224,7 @@
         <el-button @click="interruptDialog = false">取消</el-button>
         <el-button class="operation_btn function_btn" :loading="isInterruptLoading" @click="sureInterruptTask">确认</el-button>
       </div>
-    </el-dialog>
+    </el-dialog> -->
   </div>
 </template>
 <script>
@@ -259,9 +259,9 @@ export default {
       deleteDialog: false, // 删除任务弹出框
       interruptDialog: false, // 中断任务弹出框
       addTaskDialog: false, // 新建任务弹出框
-      isAddLoading: false, // 新建-恢复任务加载中
+      isAddLoading: false, // 新建任务加载中
       isDeleteLoading: false, // 删除任务弹出框
-      isInterruptLoading: false, // 中断任务弹出框
+      // isInterruptLoading: false, // 中断任务弹出框
       // fileList: [], // 图片上传列表
       dialogImageUrl: null,
       // uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
@@ -310,6 +310,9 @@ export default {
     this.getDataList();
   },
   methods: {
+    changeTaskName (val) {
+      this.addForm.taskName = val.trim();
+    },
     uploadEmit (data) {
       if (data && data.path) {
         this.dialogImageUrl = data.path;
@@ -503,42 +506,42 @@ export default {
       
     },
     // 显示中断任务弹出框
-    showInterruptDialog (obj) {
-      this.interruptDialog = true;
-      this.taskId = obj.uid;
-    },
+    // showInterruptDialog (obj) {
+    //   this.interruptDialog = true;
+    //   this.taskId = obj.uid;
+    // },
     // 显示删除任务弹出框
     showDeleteDialog (obj) {
       this.deleteDialog = true;
       this.taskId = obj.uid;
     },
     // 确认中断任务
-    sureInterruptTask () {
-      if (this.taskId) {
-        const params = {
-          uid: this.taskId,
-          taskType: 3, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
-          taskStatus: 4 // 1：处理中 2：处理成功 3：处理失败 4：处理中断
-        };
-        this.isInterruptLoading = true;
-        putAnalysisTask(params)
-          .then(res => {
-            if (res) {
-              this.$message({
-                type: 'success',
-                message: '中断任务成功',
-                customClass: 'request_tip'
-              });
-              this.interruptDialog = false;
-              this.isInterruptLoading = false;
-              this.getDataList();
-            } else {
-              this.isInterruptLoading = false;
-            }
-          })
-          .catch(() => {this.isInterruptLoading = false;})
-      }
-    },
+    // sureInterruptTask () {
+    //   if (this.taskId) {
+    //     const params = {
+    //       uid: this.taskId,
+    //       taskType: 3, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
+    //       taskStatus: 4 // 1：处理中 2：处理成功 3：处理失败 4：处理中断
+    //     };
+    //     this.isInterruptLoading = true;
+    //     putAnalysisTask(params)
+    //       .then(res => {
+    //         if (res) {
+    //           this.$message({
+    //             type: 'success',
+    //             message: '中断任务成功',
+    //             customClass: 'request_tip'
+    //           });
+    //           this.interruptDialog = false;
+    //           this.isInterruptLoading = false;
+    //           this.getDataList();
+    //         } else {
+    //           this.isInterruptLoading = false;
+    //         }
+    //       })
+    //       .catch(() => {this.isInterruptLoading = false;})
+    //   }
+    // },
     // 确认删除任务
     sureDeleteTask () {
       if (this.taskId) {
@@ -566,7 +569,7 @@ export default {
           .catch(() => {this.isDeleteLoading = false;})
       }
     },
-    // 恢复任务 --- 重启任务
+    // 重启任务
     recoveryTask (obj) {
       // console.log('obj', obj);
       const webParam = obj.taskWebParam;

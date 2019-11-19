@@ -83,6 +83,15 @@
             <router-link :to="{name: 'advertisement'}">APP广告位管理</router-link>
           </li>
         </div>
+        <div class="title"  @click="open(5)" :class="{'active': isOpen5}">
+          系统日志
+          <i :class="[{'el-icon-arrow-down': !isOpen5}, {'el-icon-arrow-up': isOpen5}]"></i>
+        </div>
+        <div class="title_6 title_all">
+          <li>
+            <router-link :to="{name: 'operationLog'}">操作日志</router-link>
+          </li>
+        </div>
       </vue-scroll>
     </ul>
     <div class="manage_content">
@@ -98,7 +107,8 @@ export default {
       isOpen1: false,
       isOpen2: false,
       isOpen3: false,
-      isOpen4: false
+      isOpen4: false,
+      isOpen5: false
     }
   },
   methods: {
@@ -131,12 +141,19 @@ export default {
         } else {
           $('.title_4').animate({height:0}, 300, "linear")
         }
-      }else {
+      }else if(val === 4) {
         this.isOpen4 = !this.isOpen4
         if (this.isOpen4) {
           $('.title_5').animate({height:180}, 300, "linear")
         } else {
           $('.title_5').animate({height:0}, 300, "linear")
+        }
+      }else{
+        this.isOpen5 = !this.isOpen5
+        if (this.isOpen5) {
+          $('.title_6').animate({height:60}, 300, "linear")
+        } else {
+          $('.title_6').animate({height:0}, 300, "linear")
         }
       }
     },

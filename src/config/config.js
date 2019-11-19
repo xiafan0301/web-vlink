@@ -22,7 +22,7 @@ const oDomains = {
     // 布控部分地址
     control: {
         dev: 'https://apidev.aorise.org/vlink-control',
-        // test: 'http://10.116.64.127:8081',//龙志海
+        // test: 'http://10.116.64.127:8081/api/xl',//龙志海
         test: 'https://apirel.aorise.org/vlink-control',
         prod: 'https://apiprod.aorise.org/vlink-control'
     },
@@ -68,7 +68,7 @@ const oDomains = {
     },
     // 用户登录地址
     user: {
-      // dev: 'http://10.116.64.107:8082', // 熊日成
+      // test: 'http://10.116.64.82:8082', // 熊日成
       dev: 'https://apidev.aorise.org/vlink-user',
       test: 'https://apirel.aorise.org/vlink-user',
       prod: 'https://apiprod.aorise.org/vlink-user'
@@ -136,11 +136,12 @@ const oDomains = {
 let ENV_API = process.env.VUE_APP_API;
 console.log(ENV_API)
 if (!ENV_API) { ENV_API = 'dev'; }
+let authPrefix = '/api/xl'
 console.log('config.js env', ENV_API);
 // ajax default
 let ajaxCtx = {};
 for (let _key in oDomains) {
-    ajaxCtx[_key] = oDomains[_key][ENV_API]
+    ajaxCtx[_key] = oDomains[_key][ENV_API] + authPrefix
 }
 // console.log('*****oDomains*****', ajaxCtx);
 export {ajaxCtx};

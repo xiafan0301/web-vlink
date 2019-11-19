@@ -295,6 +295,17 @@ export function delfezu (data) {
   });
 }
 /**
+ * 操作日志
+ */
+export function operationPostlog (params) {
+  return request({
+    url: '/logs',
+    params,
+    method: 'post',
+    mode: baseModeName
+  });
+}
+/**
  * 导出
  */
 export function exportService (data) {

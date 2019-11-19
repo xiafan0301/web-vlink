@@ -90,7 +90,7 @@
             </el-select>
           </el-form-item>
           <el-form-item prop="taskName" :rules="[{ required: true, message: '该项内容不可为空', trigger: 'blur' }]">
-            <el-input placeholder="请输入任务名称" v-model="addForm.taskName" maxlength="20"></el-input>
+            <el-input placeholder="请输入任务名称" v-model="addForm.taskName" maxlength="20" @change="changeTaskName"></el-input>
           </el-form-item>
           <el-form-item class="operation_button">
             <el-button class="reset_btn" @click="resetData('addForm')">重置</el-button>
@@ -284,6 +284,9 @@ export default {
     this.getDataList();
   },
   methods: {
+    changeTaskName (val) {
+      this.addForm.taskName = val.trim();
+    },
     //查询行政区域
     getMapGETmonitorList () {
       let d = {

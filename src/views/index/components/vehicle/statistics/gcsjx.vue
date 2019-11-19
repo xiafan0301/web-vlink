@@ -126,12 +126,12 @@
               <ul class="gcsj_box_cot_1_toop_bot">
                 <li><div></div><div>3501以上</div></li>
                 <li><div style="background-color: #AB88E0"></div><div>3001-3500</div></li>
-                <li><div style="background-color: #A09AF3"></div><div>3501以上</div></li>
-                <li><div style="background-color: #A0AEFF"></div><div>3501以上</div></li>
-                <li><div style="background-color: #AEC8FF"></div><div>3501以上</div></li>
-                <li><div style="background-color: #C3DEFF"></div><div>3501以上</div></li>
-                <li><div style="background-color: #D4F1FF"></div><div>3501以上</div></li>
-                <li><div style="background-color: #EFFAFF"></div><div>3501以上</div></li>
+                <li><div style="background-color: #A09AF3"></div><div>2501-3000</div></li>
+                <li><div style="background-color: #A0AEFF"></div><div>2001-2500</div></li>
+                <li><div style="background-color: #AEC8FF"></div><div>1501-2000</div></li>
+                <li><div style="background-color: #C3DEFF"></div><div>1001-1500</div></li>
+                <li><div style="background-color: #D4F1FF"></div><div>501-1000</div></li>
+                <li><div style="background-color: #EFFAFF"></div><div>0-500</div></li>
               </ul>
             </div>
           </div>
@@ -142,9 +142,7 @@
                 <div id="mountNode1" style="min-height: 450px; width: 50%;"></div>
                 <div class="gcsj_box_cot_1_toop_b">
                   <ul class="gcsj_box_cot_1_toop_b_r">
-                    <li v-for="(item, index) in 15" :key="index"><span></span><span>SUV/MPv</span><span>2217辆</span></li>
-<!--                    <li><span></span><span>SUV/MPv</span><span>2217辆</span></li>-->
-<!--                    <li><span></span><span>SUV/MPv</span><span>2217辆</span></li>-->
+                    <li v-for="(item, index) in item1" :key="index"><span :style="'background'+ ':' + item.color"></span><span>{{item.text}}</span><span>2217辆</span></li>
                   </ul>
                 </div>
               </div>
@@ -154,9 +152,14 @@
         <div class="gcsj_box_cot_2">
           <div>
             <h1>各时间段的过车数</h1>
+            <p>过车次数 (万次)</p>
             <div id="mountNode2" style="height: 300px; width: 100%; padding-left: 36px"></div>
           </div>
-          <div></div>
+          <div>
+            <h1>车辆品牌排名 (Top5)</h1>
+            <p>数量 (辆)</p>
+            <div id="mountNode3" style="height: 300px; width: 100%; padding-left: 36px"></div>
+          </div>
           <div></div>
         </div>
       </div>
@@ -177,6 +180,24 @@
           colors:["#FFF", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"],
           currentAreaNode: void 0,
         },
+        item1: [
+          {color: '#AC76DA', text: 'SUV/MPv'},
+          {color: '#A8D8FF', text: '其他类型'},
+          {color: '#ECAFFE', text: '面包车'},
+          {color: '#91F3D3', text: '消防车'},
+          {color: '#94E6F0', text: '客车'},
+          {color: '#8EEF98', text: '大型货车'},
+          {color: '#A6A9FF', text: '小轿车'},
+          {color: '#62C2FF', text: '小货车'},
+          {color: '#DAAFFE', text: '货车'},
+          {color: '#83AEFE', text: '救护车'},
+          {color: '#C9AFFE', text: '中型客车'},
+          {color: '#81F1EF', text: '渣土车'},
+          {color: '#83AEFE', text: '小型客车'},
+          {color: '#81D8F1', text: '摩托车'},
+          {color: '#83C2FE', text: '中型货车'},
+          {color: '#62C2FF', text: '非机动车'},
+          ],
         data1:[{
           item: '事例一',
           count: 40,
@@ -234,6 +255,22 @@
         }, {
           month: 'Dec',
           value: 56
+        }],
+        data2:[{
+          time: '本田',
+          value: 30
+        }, {
+          time: '10:00-11:00',
+          value: 90
+        }, {
+          time: '11:00-12:00',
+          value: 50
+        }, {
+          time: '12:00-13:00',
+          value: 30
+        }, {
+          time: '13:00-14:00',
+          value: 70
         }]
       }
     },
@@ -308,6 +345,7 @@
       });
       this.mountNode1()
       this.mountNode2 ()
+      this.mountNode3()
     },
     methods: {
       renderG2Map(areaNode) {
@@ -322,19 +360,6 @@
           return;
         }
         var dv = this.processData(geoJSON);
-        // start: 计算地图的最佳宽高
-        var longitudeRange = dv.range('longitude');
-        var lantitudeRange = dv.range('latitude');
-        var ratio = (longitudeRange[1] - longitudeRange[0]) / (lantitudeRange[1] - lantitudeRange[0]);
-        var width = void 0;
-        var height = void 0;
-        if (ratio > 1) {
-          width = $('#province').width();
-          height = width / ratio;
-        } else {
-          width = 300 * ratio;
-          height = $('#province').height();
-        }
         let temp = document.getElementById('province');
         // end: 计算地图的最佳宽高
         provinceChart = new G2.Chart({
@@ -351,17 +376,37 @@
         });
         provinceChart.polygon().position('longitude*latitude').style({
           stroke: '#fff',
-          lineWidth: 1
-        }).color('value', '#BAE7FF-#1890FF-#0050B3');
-        // provinceChart.guide().text({
-        //   position: ['min', 'max'],
-        //   offsetY: 20,
-        //   content: name,
-        //   style: {
-        //     fontSize: 14,
-        //     fontWeight: 'bold'
-        //   }
-        // });
+          lineWidth: 1,
+      }).color('value*name', (value, name) => {
+          if (name === "内蒙古自治区") {
+            return '#04E38A';
+          }
+          if (value >=  3501){
+            return '#AC76DA';
+          }else if(value <  3501&& value >=  3001){
+            return '#AB88E0';
+          }else if (value <  3000&& value >=  2501) {
+            return '#A09AF3';
+          }else if(value <  2500&& value >=  2001) {
+            return '#A0AEFF';
+          }else if (value <  2000&& value >=  1501){
+            return '#AEC8FF';
+          }else if (value <  1500&& value >=  1001){
+            return '#C3DEFF';
+          }else if (value <  1000&& value >=  500){
+            return '#D4F1FF';
+          }else {
+            return '#EFFAFF';
+          }
+        }).label('name*value', (name, value)=>{
+          if (name === '内蒙古自治区') {
+            return {
+              htmlTemplate: () => {
+                return `<div class="cap_info_win"><p style="color: #999999; font-size: 14px">${name}</p><p>${value}辆</p></div>`;
+              }
+            }
+          }
+        })
         provinceChart.render();
       },
       processData(geoJSON) {
@@ -376,7 +421,7 @@
           var name = geoJSON[i].properties.name;
           userData.push({
             name: name,
-            value: Math.round(Math.random() * 1000)
+            value: Math.round(Math.random() * 10000)
           });
         }
         var ds = new DataSet();
@@ -413,7 +458,7 @@
           }
         });
         chart.coord('theta', {
-          radius: 0.75,
+          radius: 0.65,
           innerRadius: 0.4
         });
         chart.tooltip({
@@ -428,7 +473,7 @@
           alignY: 'middle'
         });
         chart.legend(false);
-        var interval = chart.intervalStack().position('percent').color('item',["#FFF", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6"]).label('percent', {
+        var interval = chart.intervalStack().position('percent').color('item',["red", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6"]).label('percent', {
           formatter: function formatter(val) {
             return val;
           }
@@ -461,6 +506,49 @@
         });
         chart.area().position('month*value');
         chart.line().position('month*value').shape('hv');
+        chart.render();
+      },
+      mountNode3 () {
+        let temp = document.getElementById('mountNode3');
+        var chart = new G2.Chart({
+          container: 'mountNode3',
+          forceFit: true,
+          height: G2.DomUtil.getHeight(temp),
+          width: G2.DomUtil.getWidth(temp),
+          padding: [ 20, 80, 50, 30 ]
+        });
+        chart.tooltip({
+          showTitle: false
+        });
+        chart.source(this.data2);
+        chart.scale('value', {
+          alias: '销售额(万)'
+        });
+        chart.legend(false);
+        chart.axis('time', {
+          label: {
+            textStyle: {
+              fill: '#666666'
+            }
+          },
+          tickLine: {
+            alignWithLabel: false,
+            length: 0
+          }
+        });
+
+        chart.axis('value', {
+          label: {
+            textStyle: {
+              fill: '#666666'
+            }
+          },
+        });
+
+        chart.tooltip({
+          share: true
+        });
+        chart.interval().position('time*value').shape('cylinder').size(20).color('time', ['#3751FE','#43A2FF', '#5F73FE','#9D74FD','#04E38A']);
         chart.render();
       }
     }
@@ -615,11 +703,12 @@
                 width: 48%;
                 display: flex;
                 align-items: center;
-                justify-content: center;
+                text-align: left;
                 background:rgba(255,255,255,1);
                 box-shadow:0px 3px 8px 0px rgba(169,169,169,0.2);
                 margin-bottom: 10px;
                 padding: 15px 0;
+                padding-left: 5px;
                 span:nth-of-type(1){
                   width: 8px;
                   height: 8px;
@@ -678,9 +767,52 @@
               font-size: 16px;
               padding: 15px;
             }
+            p{
+              color: #A9A9A9;
+              padding-left: 15px;
+              font-size: 14px;
+            }
           }
         }
       }
+    }
+  }
+</style>
+<style lang="scss">
+  .cap_info_win {
+    background: #FFFFFF;
+    padding: 10px;
+    font-size: 14px;
+    color: #666666;
+    position: relative;
+    white-space: nowrap;
+    left: 55px;
+    top: 44px;
+    z-index: 0;
+    box-shadow:0px 3px 4px 0px rgba(114,114,114,0.12);
+    border-radius:2px;
+    p{
+      text-align: left;
+    }
+    p:last-child{
+      text-align: left;
+      padding-top: 10px;
+      color: #333333;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    &:after {
+      display: block;
+      content: '';
+      border: .1rem solid red;
+      border-color: transparent #04E38A transparent transparent;
+      position: absolute;
+      top: .2rem;
+      left:  -.2rem;
+    }
+    &:hover{
+      background-color: #0C70F8;
+      color: white;
     }
   }
 </style>

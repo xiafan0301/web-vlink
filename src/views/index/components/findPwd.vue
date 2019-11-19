@@ -88,24 +88,10 @@
 import headerNormal from '@/components/headerNormal.vue';
 import {validatePhone} from '@/utils/validator.js';
 import { isRegister, getCode, checkCode, resetPassword } from '@/views/index/api/api.user.js';
+import {validatePwd} from '@/utils/validator.js';
 export default {
   components: {headerNormal},
   data () {
-    var validatePass = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入新密码'));
-      } else {
-        let reg = /^[a-zA-Z0-9]{6,16}$/;
-        if (!reg.test(value)) {
-          callback(new Error('密码为6-16个数字或英文字母组合'));
-        } else {
-          if (this.pwdForm3.checkPass !== '') {
-            this.$refs.pwdForm3.validateField('checkPass');
-          }
-          callback();
-        }
-      }
-    };
     var validatePass2 = (rule, value, callback) => {
       if (!value) {
         callback(new Error('请再次输入新密码'));
@@ -147,7 +133,7 @@ export default {
       },
       pwdForm3Rules: {
         pass: [
-          { validator: validatePass, trigger: 'blur' }
+          { validator: validatePwd, trigger: 'blur' }
         ],
         checkPass: [
           { validator: validatePass2, trigger: 'blur' }
@@ -228,9 +214,7 @@ export default {
         if (valid) {
           this.pwdForm2Loading = true;
           const params = {
-            userMobile: this.pwdForm1.mobile,
-            validateCode: this.pwdForm2.code,
-            msgType: 2 // 1--注册账号  2---找回密码
+            verifyCode: this.pwdForm2.code,
           }
           checkCode(params)
             .then(res => {
@@ -251,8 +235,9 @@ export default {
     getRegCode () {
       this.regCodeDis = true;
       const params = {
-        msgType: 2,
-        userMobile: this.pwdForm1.mobile
+        verifyType: 10,
+        identifier: this.pwdForm1.mobile,
+        identifierType: 3
       };
       getCode(params)
         .then(res => {
@@ -286,7 +271,6 @@ export default {
         if (valid) {
           this.pwdForm3Loading = true;
           const params = {
-            code: this.pwdForm2.code,
             userMobile: this.pwdForm1.mobile,
             newPassword: this.pwdForm3.pass
           };
