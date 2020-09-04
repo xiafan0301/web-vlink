@@ -21,7 +21,7 @@
     "element-ui": "2.9.2",
     "less": "^3.9.0",
     "less-loader": "^4.1.0",
-    "node-sass": "^4.10.0",
+    "node-sass": "^4.13.1",
     "qrcodejs2": "0.0.2",
     "sass-loader": "^7.1.0",
     "uglifyjs-webpack-plugin": "^2.1.2",
